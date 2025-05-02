@@ -1,0 +1,98 @@
+/* Nel tuo file styles.css */
+
+header {
+    background-color: hsla(0, 80%, 45%, 0.5);
+    padding: 20px;
+    border: 10px solid hsla(0, 100%, 50%, 0.5);
+    /* Rimuovi text-align: center; se vuoi controllo separato */
+    /* text-align: center; */
+    color: white;
+
+    /* --- NUOVE REGOLE FLEXBOX --- */
+    display: flex;         /* Attiva Flexbox */
+    align-items: center;   /* Allinea verticalmente avatar e testo/nav al centro */
+    gap: 20px;             /* Aggiunge spazio tra l'avatar e il contenuto a destra */
+    /* justify-content: space-between; */ /* Opzione per spaziare gli elementi */
+    /* -------------------------- */
+}
+
+/* Stile per il contenitore dell'avatar nell'header */
+header .avatar {
+    flex-shrink: 0; /* Impedisce all'avatar di restringersi se non c'è spazio */
+}
+
+/* Stile per l'immagine (avatar) */
+img { /* O meglio: header .avatar img { per essere più specifici */
+    /* Mantieni le dimensioni e il bordo */
+    /* width: auto; */ /* Potresti voler dare una larghezza fissa, es. 60px */
+    width: 70px;
+    height: 70px; /* Imposta anche l'altezza se imposti la larghezza */
+    border-radius: 50%; /* Rende l'avatar rotondo (opzionale) */
+    border: 3px solid hsla(0, 100%, 70%, 0.8); /* Bordo più sottile magari? */
+    box-shadow: 0 0 10px hsla(0, 100%, 50%, 0.5);
+    display: block; /* O vertical-align: middle; se non metti align-items su header */
+}
+
+/* Contenitore per H1 e Nav */
+header .header-content {
+    display: flex;
+    flex-direction: column; /* Mette H1 sopra Nav */
+    align-items: flex-start; /* Allinea testo e nav a sinistra */
+    /* flex-grow: 1; */ /* Opzionale: fa occupare il resto dello spazio */
+}
+
+/* Stile per H1 nell'header */
+header h1 {
+   font-size: 35px; /* Mantieni la dimensione */
+   margin: 0; /* Rimuovi margini predefiniti se necessario */
+   /* text-align: left; */ /* Se non vuoi che sia centrato */
+}
+
+/* Stile per la Nav nell'header */
+header nav ul {
+    list-style-type: none; /* Rimuove i punti elenco */
+    padding: 0;            /* Rimuove padding predefinito */
+    margin: 10px 0 0 0;    /* Aggiunge un po' di spazio sopra la nav */
+    display: flex;         /* Mette gli li in riga */
+    gap: 15px;             /* Spazio tra gli li */
+}
+
+header nav li {
+   /* Rimuovi gli stili precedenti che non servono più qui */
+   /* list-style-type: none; */
+   /* padding: 10px; */
+   /* margin: 5px auto; */
+   /* width: 40%; */
+   /* position: relative; */ /* Rimuovi se non serve */
+   /* background-color: hsla(0, 80%, 45%, 0.5); */ /* Probabilmente non vuoi lo sfondo qui */
+   /* border-radius: 5px; */
+}
+
+header nav a {
+    color: white; /* Colore link */
+    text-decoration: none; /* Rimuove sottolineatura */
+    font-size: 0.8em; /* Dimensione testo link (aggiusta) */
+}
+
+header nav a:hover {
+    text-decoration: underline; /* Sottolinea al passaggio del mouse */
+}
+
+
+/* Mantieni gli stili per gli LI fuori dall'header se ti servono ancora */
+/* Se questi stili erano per le sezioni Skills/Projects/Contact */
+main ul li {
+    list-style-type: none;
+    padding: 10px;
+    margin: 5px auto;
+    width: 80%; /* Magari più largo nel main? */
+    position: relative; /* Se serve ancora */
+    background-color: hsla(0, 80%, 45%, 0.5);
+    border-radius: 5px;
+    color: white; /* Testo bianco anche qui? */
+}
+
+/* Assicurati che i link nel main siano leggibili */
+main ul li a {
+    color: lightblue; /* Esempio */
+}
