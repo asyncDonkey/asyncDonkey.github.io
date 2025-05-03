@@ -7,20 +7,18 @@
 
 body {
     font-family: "Source Code Pro", monospace;
-    line-height: 1.6; /* Migliora leggibilità */
-    background-color: #f8f8f8; /* Sfondo generale molto chiaro */
-    color: #333; /* Colore testo predefinito scuro */
+    line-height: 1.6;
+    background-color: #1c1c1c; /* Sfondo Grigio Molto Scuro / Quasi Nero */
+    color: #39ff14; /* Testo Verde Neon Brillante come default */
 }
 
 /* ===== Header Styles ===== */
 header {
-    /* Toni Ghiaccio: Blu/Ciano chiaro semi-trasparente */
-    background-color: hsla(195, 53%, 79%, 0.7); /* Esempio: Light Steel Blue trasparente */
+    background-color: #2a2a2a; /* Sfondo leggermente diverso per l'header */
     padding: 20px;
-    /* Toni Ghiaccio: Bordo Ciano/Blu più scuro semi-trasparente */
-    border: 10px solid hsla(200, 60%, 50%, 0.6);
-    border-radius: 5px;
-    color: white; /* Testo bianco sull'header */
+    border-bottom: 3px solid #39ff14; /* Bordo solo sotto verde */
+    border-radius: 0; /* Angoli retti per look retro */
+    color: #39ff14; /* Testo verde nell'header */
 
     display: flex;
     align-items: center;
@@ -36,12 +34,10 @@ header .avatar {
 header .avatar img {
     width: 70px;
     height: 70px;
-    border-radius: 50%; /* Avatar rotondo */
-    /* Toni Ghiaccio: Bordo azzurro/argento chiaro */
-    border: 3px solid hsla(190, 80%, 90%, 0.9);
-    /* Toni Ghiaccio: Ombra bluastra */
-    box-shadow: 0 0 10px hsla(210, 50%, 60%, 0.5);
-    display: block; /* Mantiene l'immagine come blocco per evitare spazi extra */
+    border-radius: 5px;
+    border: 2px solid #39ff14; /* Bordo verde */
+    box-shadow: 0 0 8px hsla(128, 100%, 58%, 0.5); /* Ombra verde brillante */
+    display: block;
 }
 
 /* Container for H1 and Nav in Header */
@@ -49,14 +45,14 @@ header .header-content {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    flex-grow: 1; /* Fa sì che occupi lo spazio rimanente */
+    flex-grow: 1;
 }
 
 /* H1 in Header */
 header h1 {
    font-size: 35px;
    margin: 0;
-   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Aggiunge leggibilità */
+   text-shadow: 0 0 5px #39ff14; /* Effetto glow verde leggero */
 }
 
 /* Navigation in Header */
@@ -65,109 +61,103 @@ header nav ul {
     padding: 0;
     margin: 10px 0 0 0;
     display: flex;
-    flex-wrap: wrap; /* Permette ai link di andare a capo su schermi piccoli */
+    flex-wrap: wrap;
     gap: 15px;
 }
 
 header nav li {
-   /* Nessuno stile specifico necessario qui ora */
+   /* No style needed */
 }
 
 header nav a {
-    color: white;
+    color: #39ff14; /* Link verdi */
     text-decoration: none;
-    font-size: 0.9em; /* Leggermente più grande */
-    padding: 5px 0; /* Aggiunge un po' di area cliccabile */
+    font-size: 0.9em;
+    padding: 5px 0;
 }
 
 header nav a:hover {
-    text-decoration: underline;
+    /* Sfondo verde all'hover mantenuto */
+    background-color: #39ff14;
+    color: #1c1c1c;
+    text-decoration: none;
 }
 
 /* ===== Main Content Styles ===== */
 main {
-    padding: 20px 0; /* Aggiunge spazio verticale nel main */
+    padding: 20px 0;
 }
 
 /* Section Styling (generale per tutte le sezioni nel main) */
 main section {
-    width: 85%; /* Larghezza comune per le sezioni */
-    max-width: 800px; /* Larghezza massima per leggibilità */
-    margin: 30px auto; /* Centra le sezioni e aggiunge spazio verticale */
-    padding: 20px; /* Padding interno alle sezioni */
-    background-color: white; /* Sfondo bianco per le sezioni */
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Ombra leggera */
+    width: 85%;
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    border: 1px solid #39ff14; /* Bordo verde sottile */
+    border-radius: 0;
 }
 
 /* Stile specifico per il paragrafo introduttivo */
 section#intro p {
    font-size: 1.1em;
-   text-align: center; /* Centra il testo introduttivo */
-   margin-top: 15px; /* Spazio dopo l'avatar (se l'avatar fosse qui) */
-   /* Rimossi bordo, width, margin da qui - gestiti dalla section */
+   text-align: center;
+   margin-top: 15px;
+   color: #C0C0C0; /* Grigio chiaro per il testo descrittivo */
 }
 
 /* H2 Titles within Main */
 main h2 {
-    font-size: 28px; /* Dimensione titolo sezione */
-    margin-bottom: 15px; /* Margine sotto il titolo */
-    color: hsl(210, 50%, 35%); /* Toni Ghiaccio: Blu scuro per i titoli */
+    font-size: 28px;
+    margin-bottom: 15px;
+    color: #39ff14; /* Titoli sezione VERDE BRILLANTE (prima era Ambra) */
     text-align: center;
-    border-bottom: 2px solid hsl(195, 53%, 79%, 0.5); /* Sottolineatura leggera */
+    border-bottom: 1px solid #39ff14; /* Sottolineatura VERDE (prima era Ambra) */
     padding-bottom: 5px;
+    text-shadow: 0 0 3px #39ff14; /* Glow VERDE leggero (prima era Ambra) */
 }
-
-/* Intro Section Specifics (if avatar was still here, we'd style centering) */
-/* section#intro { */
-   /* display: flex; */
-   /* flex-direction: column; */
-   /* align-items: center; */
-/* } */
 
 /* List Items within Main (Skills, Projects, Contact) */
 main ul {
-    list-style-type: none; /* Spostato qui da 'main ul li' */
-    padding-left: 0; /* Rimuove indentazione predefinita */
+    list-style-type: none;
+    padding-left: 0;
 }
 
 main ul li {
-    padding: 12px 15px; /* Padding leggermente aggiustato */
-    margin: 8px auto; /* Margine aggiustato */
-    width: 90%; /* Larghezza relativa al contenitore (section) */
-    /* Toni Ghiaccio: Sfondo azzurro chiaro per le liste */
-    background-color: hsla(200, 60%, 85%, 0.6);
-    border-radius: 5px;
-    color: #333; /* Testo scuro su sfondo chiaro */
-    /* position: relative; */ /* Rimosso se non strettamente necessario */
+    padding: 12px 15px;
+    margin: 8px auto;
+    width: 90%;
+    background-color: #2a2a2a; /* Sfondo scuro leggermente diverso */
+    border-left: 4px solid #39ff14; /* Bordo laterale verde */
+    border-radius: 0;
+    color: #C0C0C0; /* Testo grigio chiaro nelle liste */
 }
 
 /* Links within Main List Items */
 main ul li a {
-    /* Toni Ghiaccio: Link blu più scuro */
-    color: hsl(210, 80%, 45%);
-    font-weight: bold;
-    text-decoration: none;
+    color: #4CAF50; /* Link VERDE SCURO / DIVERSO (prima era Ambra) */
+    /* Oppure usa lo stesso verde brillante? color: #39ff14; */
+    font-weight: normal;
+    text-decoration: underline;
 }
 main ul li a:hover {
-    text-decoration: underline;
+    color: #66ff66; /* Verde più chiaro/brillante all'hover (prima era Ambra chiaro) */
+    background-color: rgba(57, 255, 20, 0.1); /* Sfondo verde leggerissimo */
 }
 
 /* ===== Footer Styles ===== */
 footer {
-    /* Toni Ghiaccio: Stesso stile dell'header per coerenza */
-    background-color: hsla(195, 53%, 79%, 0.7);
+    background-color: #2a2a2a; /* Come header */
     padding: 20px;
-    border: 10px solid hsla(200, 60%, 50%, 0.6);
-    border-radius: 5px;
-    color: white;
+    border-top: 3px solid #39ff14; /* Bordo solo sopra verde */
+    border-radius: 0;
+    color: #C0C0C0; /* Testo grigio chiaro */
     text-align: center;
-    margin-top: 40px; /* Aumentato spazio sopra il footer */
+    margin-top: 40px;
     font-size: 0.9em;
 }
 
-/* ===== Specific Element Adjustments (if needed) ===== */
-/* Esempio: Se vuoi un bordo diverso per la sezione contact */
-/* section#contact { */
-/* border-left: 5px solid hsl(210, 80%, 45%); */
-/* } */
+/* ===== Specific Element Adjustments ===== */
+footer a {
+    color: #39ff14; /* Link verdi nel footer */
+}
