@@ -1,163 +1,172 @@
 /* ===== General Reset & Base Styles ===== */
 * {
+    /* Apply border-box sizing to all elements */
     box-sizing: border-box;
+    /* Remove default margin and padding */
     margin: 0;
     padding: 0;
 }
 
 body {
+    /* Set base font, line height, background, and text color */
     font-family: "Source Code Pro", monospace;
     line-height: 1.6;
-    background-color: #1c1c1c; /* Sfondo Grigio Molto Scuro / Quasi Nero */
-    color: #39ff14; /* Testo Verde Neon Brillante come default */
+    background-color: #1c1c1c; /* Very Dark Gray background */
+    color: #39ff14; /* Bright Green text */
 }
 
 /* ===== Header Styles ===== */
 header {
-    background-color: #2a2a2a; /* Sfondo leggermente diverso per l'header */
+    /* Header background, padding, bottom border */
+    background-color: #2a2a2a;
     padding: 20px;
-    border-bottom: 3px solid #39ff14; /* Bordo solo sotto verde */
-    border-radius: 0; /* Angoli retti per look retro */
-    color: #39ff14; /* Testo verde nell'header */
-
+    border-bottom: 3px solid #39ff14;
+    border-radius: 0; /* Sharp corners */
+    color: #39ff14; /* Green text in header */
+    /* Flex layout for header items */
     display: flex;
-    align-items: center;
-    gap: 20px;
+    align-items: center; /* Vertically align items */
+    gap: 20px; /* Space between flex items (avatar and content) */
 }
 
-/* Avatar within Header */
+/* Avatar container div within Header */
 header .avatar {
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent avatar container from shrinking */
+    background-color: #C0C0C0; /* Light Gray background behind image */
+    border-radius: 50%; /* Make container round */
+    padding: 4px; /* Space between container edge and image */
+    box-shadow: none; /* No shadow on container */
+    display: inline-flex; /* Align properly as flex item */
+    vertical-align: middle; /* Vertical alignment helper */
 }
 
-/* Avatar Image specific style */
+/* Avatar image itself within the container */
 header .avatar img {
-    width: 70px;
-    height: 70px;
-    border-radius: 5px;
-    border: 2px solid #39ff14; /* Bordo verde */
-    box-shadow: 0 0 8px hsla(128, 100%, 58%, 0.5); /* Ombra verde brillante */
-    display: block;
+    width: 85px; /* Avatar width */
+    height: 85px; /* Avatar height */
+    border-radius: 50%; /* Make image round */
+    border: 3px solid #39ff14; /* Bright Green border */
+    box-shadow: 0 0 8px hsla(128, 100%, 58%, 0.5); /* Green glow effect */
+    display: block; /* Prevent extra space below image */
 }
 
 /* Container for H1 and Nav in Header */
 header .header-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    flex-grow: 1;
+    display: flex; /* Use flexbox for H1 and Nav */
+    flex-direction: column; /* Stack H1 above Nav */
+    align-items: flex-start; /* Align items to the left */
+    flex-grow: 1; /* Allow this container to take remaining space */
 }
 
 /* H1 in Header */
 header h1 {
-   font-size: 35px;
-   margin: 0;
-   text-shadow: 0 0 5px #39ff14; /* Effetto glow verde leggero */
+   font-size: 35px; /* Main title size */
+   margin: 0; /* Remove default margin */
+   text-shadow: 0 0 5px #39ff14; /* Subtle green glow */
 }
 
-/* Navigation in Header */
+/* Navigation list in Header */
 header nav ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 10px 0 0 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Remove default padding */
+    margin: 10px 0 0 0; /* Top margin */
+    display: flex; /* Arrange list items in a row */
+    flex-wrap: wrap; /* Allow items to wrap on small screens */
+    gap: 15px; /* Space between navigation items */
 }
 
-header nav li {
-   /* No style needed */
-}
-
+/* Navigation links in Header */
 header nav a {
-    color: #39ff14; /* Link verdi */
-    text-decoration: none;
+    color: #39ff14; /* Green link text */
+    text-decoration: none; /* Remove underline */
     font-size: 0.9em;
     padding: 5px 0;
 }
 
+/* Navigation link hover state */
 header nav a:hover {
-    /* Sfondo verde all'hover mantenuto */
-    background-color: #39ff14;
-    color: #1c1c1c;
+    background-color: #39ff14; /* Green background on hover */
+    color: #1c1c1c; /* Dark text on hover */
     text-decoration: none;
 }
 
 /* ===== Main Content Styles ===== */
 main {
-    padding: 20px 0;
+    padding: 20px 0; /* Vertical padding for main content area */
 }
 
-/* Section Styling (generale per tutte le sezioni nel main) */
+/* General style for sections within Main */
 main section {
-    width: 85%;
-    max-width: 800px;
-    margin: 30px auto;
-    padding: 20px;
-    border: 1px solid #39ff14; /* Bordo verde sottile */
-    border-radius: 0;
+    width: 85%; /* Section width */
+    max-width: 800px; /* Maximum width for readability */
+    margin: 30px auto; /* Center sections and add vertical space */
+    padding: 20px; /* Internal padding */
+    border: 1px solid #39ff14; /* Thin green border */
+    border-radius: 0; /* Sharp corners */
 }
 
-/* Stile specifico per il paragrafo introduttivo */
+/* Specific style for intro paragraph */
 section#intro p {
    font-size: 1.1em;
    text-align: center;
    margin-top: 15px;
-   color: #C0C0C0; /* Grigio chiaro per il testo descrittivo */
+   color: #C0C0C0; /* Light Gray text */
 }
 
-/* H2 Titles within Main */
+/* H2 titles within Main */
 main h2 {
-    font-size: 28px;
-    margin-bottom: 15px;
-    color: #39ff14; /* Titoli sezione VERDE BRILLANTE (prima era Ambra) */
+    font-size: 28px; /* Section title size */
+    margin-bottom: 15px; /* Space below title */
+    color: #39ff14; /* Bright Green title text */
     text-align: center;
-    border-bottom: 1px solid #39ff14; /* Sottolineatura VERDE (prima era Ambra) */
+    border-bottom: 1px solid #39ff14; /* Green underline */
     padding-bottom: 5px;
-    text-shadow: 0 0 3px #39ff14; /* Glow VERDE leggero (prima era Ambra) */
+    text-shadow: 0 0 3px #39ff14; /* Subtle green glow */
 }
 
-/* List Items within Main (Skills, Projects, Contact) */
+/* Unordered lists within Main */
 main ul {
-    list-style-type: none;
-    padding-left: 0;
+    list-style-type: none; /* Remove bullet points */
+    padding-left: 0; /* Remove default indentation */
 }
 
+/* List items within Main */
 main ul li {
     padding: 12px 15px;
-    margin: 8px auto;
-    width: 90%;
-    background-color: #2a2a2a; /* Sfondo scuro leggermente diverso */
-    border-left: 4px solid #39ff14; /* Bordo laterale verde */
-    border-radius: 0;
-    color: #C0C0C0; /* Testo grigio chiaro nelle liste */
+    margin: 8px auto; /* Center list items (if parent width allows) */
+    width: 90%; /* Width relative to section */
+    background-color: #2a2a2a; /* Dark background for list items */
+    border-left: 4px solid #39ff14; /* Green accent border */
+    border-radius: 0; /* Sharp corners */
+    color: #C0C0C0; /* Light Gray text */
 }
 
-/* Links within Main List Items */
+/* Links within Main list items */
 main ul li a {
-    color: #4CAF50; /* Link VERDE SCURO / DIVERSO (prima era Ambra) */
-    /* Oppure usa lo stesso verde brillante? color: #39ff14; */
+    color: #4CAF50; /* Darker Green for links */
     font-weight: normal;
     text-decoration: underline;
 }
+
+/* Hover state for links within Main list items */
 main ul li a:hover {
-    color: #66ff66; /* Verde più chiaro/brillante all'hover (prima era Ambra chiaro) */
-    background-color: rgba(57, 255, 20, 0.1); /* Sfondo verde leggerissimo */
+    color: #66ff66; /* Lighter Green on hover */
+    background-color: rgba(57, 255, 20, 0.1); /* Very subtle green background */
 }
 
 /* ===== Footer Styles ===== */
 footer {
-    background-color: #2a2a2a; /* Come header */
+    background-color: #2a2a2a; /* Dark background */
     padding: 20px;
-    border-top: 3px solid #39ff14; /* Bordo solo sopra verde */
-    border-radius: 0;
-    color: #C0C0C0; /* Testo grigio chiaro */
+    border-top: 3px solid #39ff14; /* Green top border */
+    border-radius: 0; /* Sharp corners */
+    color: #C0C0C0; /* Light Gray text */
     text-align: center;
-    margin-top: 40px;
+    margin-top: 40px; /* Space above footer */
     font-size: 0.9em;
 }
 
-/* ===== Specific Element Adjustments ===== */
+/* Links within Footer */
 footer a {
-    color: #39ff14; /* Link verdi nel footer */
+    color: #39ff14; /* Green link text */
 }
