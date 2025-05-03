@@ -6,30 +6,30 @@
 }
 
 body {
-    font-family: "Space Grotesk", sans-serif; /* Modern font */
+    font-family: "Space Grotesk", sans-serif;
     line-height: 1.6;
-    background-color: #f8f9fa; /* Light gray background */
-    color: #343a40; /* Dark gray text */
+    background-color: #f8f9fa;
+    color: #343a40;
     font-size: 16px;
 }
 
 /* ===== Link Styles ===== */
 a {
-    color: #007bff; /* Modern blue link */
+    color: #007bff;
     text-decoration: none;
 }
 
 a:hover {
-    color: #0056b3; /* Darker blue on hover */
+    color: #0056b3;
     text-decoration: underline;
 }
 
 /* ===== Header Styles ===== */
 header {
-    background-color: #ffffff; /* White background */
+    background-color: #ffffff;
     padding: 15px 5%;
-    border-bottom: 1px solid #dee2e6; /* Subtle bottom border */
-    color: #343a40; /* Dark text */
+    border-bottom: 1px solid #dee2e6;
+    color: #343a40;
     display: flex;
     align-items: center;
     gap: 20px;
@@ -38,19 +38,14 @@ header {
 
 header .avatar {
     flex-shrink: 0;
-    background-color: transparent; /* Removed light gray background */
-    padding: 0; /* Removed padding */
-    box-shadow: none;
-    display: inline-flex;
-    vertical-align: middle;
 }
 
 header .avatar img {
-    width: 60px; /* Adjusted size */
+    width: 60px;
     height: 60px;
-    border-radius: 50%; /* Round avatar */
-    border: 2px solid #dee2e6; /* Light gray border */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    border-radius: 50%;
+    border: 2px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: block;
 }
 
@@ -64,8 +59,8 @@ header .header-content {
 header h1 {
    font-size: 1.8em;
    margin: 0 0 5px 0;
-   color: #2c3e50; /* Dark blue/gray heading */
-   text-shadow: none; /* No glow */
+   color: #2c3e50;
+   text-shadow: none;
 }
 
 header nav ul {
@@ -78,14 +73,14 @@ header nav ul {
 }
 
 header nav a {
-    color: #495057; /* Dark gray nav links */
+    color: #495057;
     font-size: 1em;
     font-weight: 500;
     padding: 5px 0;
 }
 
 header nav a:hover {
-    color: #007bff; /* Blue hover */
+    color: #007bff;
     text-decoration: none;
     background-color: transparent;
 }
@@ -95,25 +90,21 @@ main {
     padding: 30px 0;
 }
 
-/* General style for sections within Main (card-like) */
+/* General style for sections within Main */
 main section {
     width: 90%;
     max-width: 960px;
     margin: 40px auto;
     padding: 25px 30px;
-    background-color: #ffffff; /* White background */
-    border: 1px solid #e9ecef; /* Light border */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Subtle shadow */
-    color: #495057; /* Default text color for sections */
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* Intro section specific style */
+/* Specific style for intro section */
 section#intro {
     text-align: center;
-    background-color: transparent; /* Maybe no distinct background for intro? */
-    border: none; /* No border */
-    box-shadow: none; /* No shadow */
 }
 section#intro p {
    font-size: 1.15em;
@@ -124,15 +115,15 @@ section#intro p {
    margin-right: auto;
 }
 
-/* H2 titles within Main sections */
+/* H2 titles within Main */
 main h2 {
     font-size: 1.8em;
     margin-bottom: 20px;
-    color: #2c3e50; /* Dark heading color */
+    color: #2c3e50;
     text-align: center;
-    border-bottom: 1px solid #dee2e6; /* Subtle underline */
+    border-bottom: 1px solid #dee2e6;
     padding-bottom: 10px;
-    text-shadow: none; /* No glow */
+    text-shadow: none;
 }
 
 /* Portfolio Section Header */
@@ -141,7 +132,7 @@ main h2 {
     margin-bottom: 30px;
 }
 .portfolio-header h2 {
-    display: inline-block; /* Keep border fitted */
+    display: inline-block; /* To fit border bottom */
 }
 .portfolio-header p {
     color: #6c757d;
@@ -161,19 +152,19 @@ main h2 {
 
 /* Individual project card styling */
 .project {
-    background-color: #ffffff; /* White card background */
+    background-color: #ffffff;
     border: 1px solid #dee2e6;
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
     text-align: left;
     color: #495057;
-    flex: 1 1 300px;
+    flex: 1 1 300px; /* Flex sizing */
     min-width: 280px;
     max-width: 350px;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Hover effect */
 }
 .project:hover {
     transform: translateY(-5px);
@@ -202,75 +193,17 @@ main h2 {
 .project p {
     font-size: 0.95em;
     color: #6c757d;
-    flex-grow: 1;
+    flex-grow: 1; /* Allow paragraph to take remaining space */
     width: auto;
     margin: 0;
     text-align: left;
     border: none;
 }
 
-/* ===== Skills Section Styles ===== */
-
-/* Stile per il contenitore della lista (UL) */
-section#skills ul {
-    list-style-type: none; /* Già presente, ma confermiamo */
-    padding: 0;            /* Già presente, ma confermiamo */
-    margin-top: 20px;      /* Spazio dopo il paragrafo introduttivo */
-
-    /* --- Flexbox Layout for Badges --- */
-    display: flex;         /* Attiva Flexbox */
-    flex-wrap: wrap;       /* Permette ai badge di andare a capo */
-    justify-content: center; /* Centra i badge orizzontalmente */
-    gap: 10px;             /* Spazio tra i singoli badge */
-}
-
-/* Stile per i singoli elementi della lista (LI) - I Badge */
-section#skills ul li {
-    /* Override/Remove previous general 'main ul li' styles if they conflict */
-    width: auto;           /* La larghezza si adatta al contenuto */
-    margin: 0;             /* Rimuovi margini auto, il gap gestisce lo spazio */
-    position: static;      /* Rimuovi position relative se non serve */
-    border: none;          /* Rimuovi bordo laterale verde (se ereditato) */
-    border-left: none;     /* Assicurati sia rimosso */
-
-    /* --- Badge Styling --- */
-    background-color: #e9ecef; /* Sfondo grigio chiaro per il badge */
-    color: #495057;            /* Testo scuro sul badge */
-    padding: 6px 14px;         /* Padding interno per creare il badge */
-    border-radius: 15px;       /* Angoli molto arrotondati (forma a pillola) */
-    font-size: 0.9em;          /* Testo leggermente più piccolo */
-    font-weight: 500;          /* Testo leggermente più bold */
-    white-space: nowrap;       /* Evita che il testo del badge vada a capo */
-    transition: all 0.2s ease-in-out; /* Transizione per l'hover */
-}
-
-/* Effetto Hover per i badge */
-section#skills ul li:hover {
-    background-color: #007bff; /* Cambia sfondo in blu all'hover */
-    color: #ffffff;            /* Testo bianco all'hover */
-    transform: translateY(-2px); /* Solleva leggermente il badge */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Aggiunge un'ombra */
-    cursor: default;           /* Mantiene il cursore standard (o pointer se sono link) */
-}
-
-/* Rimuoviamo stili specifici per link DENTRO i badge, se non ci sono link */
-section#skills ul li a {
-   /* Se le tue LI contengono link, puoi stilizzarli qui, */
-   /* altrimenti questa regola non è necessaria se sono solo testo */
-   /* Esempio se fossero link: */
-   /* color: inherit; */ /* Eredita colore da LI */
-   /* text-decoration: none; */
-   /* font-weight: inherit; */
-}
-section#skills ul li a:hover {
-    /* text-decoration: none; */
-    /* background-color: transparent; */ /* Nessuno sfondo sull'hover del link */
-}
-
 /* Team Section Specifics */
 section.team {
-    /* Inherits modern style from 'main section' */
-    /* background-color: #ffffff; */ /* Already set by main section */
+    background-color: #ffffff;
+    /* Inherits other styles from 'main section' */
 }
 
 .teammates {
@@ -282,15 +215,15 @@ section.team {
 }
 
 .team-member {
-    background-color: #f8f9fa; /* Light gray background for team cards */
+    background-color: #f8f9fa;
     border: 1px solid #dee2e6;
     border-radius: 8px;
     padding: 20px;
     text-align: center;
     color: #495057;
-    flex: 1 1 250px;
+    flex: 1 1 250px; /* Flex sizing */
     min-width: 200px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 .team-member:hover {
@@ -312,8 +245,8 @@ section.team {
 .team-member img {
     width: 80px;
     height: 80px;
-    border-radius: 50%; /* Round member avatars */
-    border: 2px solid #adb5bd; /* Gray border */
+    border-radius: 50%;
+    border: 2px solid #adb5bd;
     margin: 0 auto 15px auto;
     display: block;
 }
@@ -327,7 +260,7 @@ section#contact ul {
 }
 section#contact li {
     margin-bottom: 10px;
-    background-color: transparent; /* No card styling */
+    background-color: transparent; /* Ensure no card styling */
     border: none;
     width: auto;
     color: inherit;
@@ -335,16 +268,15 @@ section#contact li {
 }
 section#contact li a {
     font-weight: normal;
-    /* Color inherited from base link style */
 }
 
 /* ===== Footer Styles ===== */
 footer {
-    background-color: #e9ecef; /* Light gray footer */
+    background-color: #e9ecef;
     padding: 25px;
-    border-top: 1px solid #dee2e6; /* Subtle top border */
+    border-top: 1px solid #dee2e6;
     border-radius: 0;
-    color: #6c757d; /* Gray text */
+    color: #6c757d;
     text-align: center;
     margin-top: 40px;
     font-size: 0.9em;
@@ -352,11 +284,10 @@ footer {
 
 /* Links within Footer */
 footer a {
-    color: #007bff; /* Standard link blue */
+    color: #007bff;
 }
 
 /* ===== Responsive Design - Media Queries ===== */
-/* (Kept the same as previous version, should adapt well to modern theme) */
 
 /* Tablet & Smaller Screens */
 @media (max-width: 768px) {
