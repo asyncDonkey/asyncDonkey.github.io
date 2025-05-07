@@ -1,609 +1,881 @@
 /* styles.css - Refactored with CSS Variables for Theme Switching */
 
 :root {
-    /* Palette Colori Tema Chiaro (Default) */
-    --bg-color: #f8f9fa;
-    --text-color-primary: #343a40;
-    --text-color-secondary: #495057;
-    --text-color-muted: #6c757d;
-  
-    --surface-bg-primary: #ffffff; /* Es. header, card progetti */
-    --surface-bg-secondary: #e9ecef; /* Es. footer, badge skills */
-  
-    --border-color-primary: #dee2e6; /* Bordi principali */
-    --border-color-secondary: #e9ecef; /* Bordi secondari (come skill details) */
-    --border-color-avatar: #dee2e6;
-    --border-color-teammate-avatar: #adb5bd;
-  
-    --heading-color: #2c3e50; /* Colore per h1, h2 */
-  
-    --link-color: #007bff;
-    --link-hover-color: #0056b3;
-  
-    --button-bg-primary: #007bff; /* Per bottoni primari come lo scroll to top */
-    --button-text-primary: #ffffff;
-    --button-hover-bg-primary: #0056b3;
-  
-    /* Colori specifici per componenti (basati sulle variabili sopra) */
-    --skill-badge-bg: var(--surface-bg-secondary);
-    --skill-badge-text: var(--text-color-secondary);
-    --skill-badge-hover-bg: var(--link-color);
-    --skill-badge-hover-text: var(--button-text-primary);
-    --skill-badge-active-bg: var(--link-hover-color);
-    --skill-badge-active-text: var(--button-text-primary);
-  
-    --skill-details-bg: var(--bg-color);
-    --skill-details-border: var(--border-color-secondary);
-    --skill-details-text: var(--text-color-secondary);
-    --skill-details-heading: var(--link-color);
-  
-    /* Aggiungi qui altre variabili se necessario */
-  }
-  
-  body.dark-mode {
-    /* Palette Colori Tema Scuro */
-    --bg-color: #121212;
-    --text-color-primary: #e0e0e0;
-    --text-color-secondary: #b0b0b0;
-    --text-color-muted: #888888;
-  
-    --surface-bg-primary: #1e1e1e;
-    --surface-bg-secondary: #2a2a2a;
-  
-    --border-color-primary: #333333;
-    --border-color-secondary: #444444;
-    --border-color-avatar: #555555;
-    --border-color-teammate-avatar: #666666;
-  
-    --heading-color: #d4d4d4;
-  
-    --link-color: #64b5f6; /* Blu più chiaro per buona visibilità su scuro */
-    --link-hover-color: #90caf9;
-  
-    --button-bg-primary: var(--link-color); /* Usa il colore dei link per i bottoni */
-    --button-text-primary: #121212; /* Testo scuro su bottone chiaro */
-    --button-hover-bg-primary: var(--link-hover-color);
-  
-    --skill-badge-bg: #3a3a3a;
-    /* --skill-badge-text eredita (--text-color-secondary) */
-    /* --skill-badge-hover-bg eredita (--link-color) */
-    /* --skill-badge-hover-text eredita (--button-text-primary) */
-    /* --skill-badge-active-bg eredita (--link-hover-color) */
-    /* --skill-badge-active-text eredita (--button-text-primary) */
-  
-    --skill-details-bg: #232323;
-    /* --skill-details-border eredita (--border-color-secondary) */
-    /* --skill-details-text eredita (--text-color-secondary) */
-    /* --skill-details-heading eredita (--link-color) */
-  }
-  
-  /* ===== General Reset & Base Styles ===== */
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  
-  body {
-    font-family: "Space Grotesk", sans-serif;
-    line-height: 1.6;
-    background-color: var(--bg-color); /* Usa variabile */
-    color: var(--text-color-primary); /* Usa variabile */
-    font-size: 16px;
-    transition: background-color 0.3s, color 0.3s; /* Aggiunge transizione per cambio tema */
-  }
-  
-  /* ===== Link Styles ===== */
-  a {
-    color: var(--link-color); /* Usa variabile */
-    text-decoration: none;
-  }
-  
-  a:hover {
-    color: var(--link-hover-color); /* Usa variabile */
-    text-decoration: underline;
-  }
-  
-  /* ===== Header Styles ===== */
-  header {
-    background-color: var(--surface-bg-primary); /* Usa variabile */
-    padding: 15px 5%;
-    border-bottom: 1px solid var(--border-color-primary); /* Usa variabile */
-    color: var(--text-color-primary); /* Usa variabile */
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    transition: background-color 0.3s, border-color 0.3s;
-  }
-  
-  header .avatar {
-    flex-shrink: 0;
-    background-color: transparent;
-    padding: 0;
-    box-shadow: none;
-    display: inline-flex;
-    vertical-align: middle;
-  }
-  
-  header .avatar img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 2px solid var(--border-color-avatar); /* Usa variabile */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    display: block;
-    transition: border-color 0.3s;
-  }
-  
-  header .header-content {
-    display: flex;
-    /* flex-direction: column; Rimosso per permettere al bottone di stare a fianco */
-    align-items: center; /* Centra verticalmente nome e nav/bottone */
-    justify-content: space-between; /* Spinge nav/bottone a destra */
-    flex-grow: 1;
-    flex-wrap: wrap; /* Permette di andare a capo su schermi piccoli */
-  }
-  
-  header .header-text { /* Nuovo wrapper per H1 se serve separarlo dalla nav/bottone */
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-  }
-  
-  
-  header h1 {
-   font-size: 1.8em;
-   margin: 0 0 5px 0;
-   color: var(--heading-color); /* Usa variabile */
-   text-shadow: none;
-  }
-  
-  header nav {
-      /* Stili esistenti per nav possono rimanere, o aggiustati per coesistere col bottone */
-      margin-left: auto; /* Spinge la nav a destra se non c'è il bottone (o se sono wrappati) */
-  }
-  
-  header .header-controls { /* Wrapper per nav e bottone tema */
-      display: flex;
-      align-items: center;
-      gap: 20px; /* Spazio tra nav e bottone */
-  }
-  
-  
-  header nav ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  
-  header nav a {
-    color: var(--text-color-secondary); /* Usa variabile */
-    font-size: 1em;
-    font-weight: 500;
-    padding: 5px 0;
-  }
-  
-  header nav a:hover {
-    color: var(--link-color); /* Usa variabile */
-    text-decoration: none;
-    background-color: transparent;
-  }
-  
-  /* ===== Main Content Styles ===== */
-  main {
-    padding: 30px 0;
-  }
-  
-  /* General style for sections within Main (card-like) */
-  main section {
-    width: 90%;
-    max-width: 960px;
-    margin: 40px auto;
-    padding: 25px 30px;
-    background-color: var(--surface-bg-primary); /* Usa variabile */
-    border: 1px solid var(--border-color-secondary); /* Usa variabile */
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    color: var(--text-color-secondary); /* Usa variabile */
-    transition: background-color 0.3s, border-color 0.3s;
-  }
-  
-  /* Intro section specific style */
-  section#intro {
-    text-align: center;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-  }
-  section#intro p {
-   font-size: 1.15em;
-   color: var(--text-color-secondary); /* Usa variabile */
-   margin-top: 0;
-   max-width: 700px;
-   margin-left: auto;
-   margin-right: auto;
-  }
-  
-  /* H2 titles within Main sections */
-  main h2 {
-    font-size: 1.8em;
-    margin-bottom: 20px;
-    color: var(--heading-color); /* Usa variabile */
-    text-align: center;
-    border-bottom: 1px solid var(--border-color-primary); /* Usa variabile */
-    padding-bottom: 10px;
-    text-shadow: none;
-    transition: color 0.3s, border-color 0.3s;
-  }
-  
-  /* Portfolio Section Header */
-  .portfolio-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .portfolio-header h2 {
-    display: inline-block;
-  }
-  .portfolio-header p {
-    color: var(--text-color-muted); /* Usa variabile */
-    font-size: 1em;
-    max-width: 600px;
-    margin: 10px auto 0 auto;
-  }
-  
-  /* Portfolio Grid container */
-  .portfolio-grid {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 25px;
-    margin-top: 20px;
-  }
-  
-  /* Individual project card styling */
-  .project {
-    background-color: var(--surface-bg-primary); /* Usa variabile */
-    border: 1px solid var(--border-color-primary); /* Usa variabile */
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-    text-align: left;
-    color: var(--text-color-secondary); /* Usa variabile */
-    flex: 1 1 300px;
-    min-width: 280px;
-    max-width: 350px;
+  /* Palette Colori Tema Chiaro (Default) */
+  --bg-color: #f8f9fa;
+  --text-color-primary: #343a40;
+  --text-color-secondary: #495057;
+  --text-color-muted: #6c757d;
+
+  --surface-bg-primary: #ffffff; /* Es. header, card progetti */
+  --surface-bg-secondary: #e9ecef; /* Es. footer, badge skills */
+
+  --border-color-primary: #dee2e6; /* Bordi principali */
+  --border-color-secondary: #e9ecef; /* Bordi secondari (come skill details) */
+  --border-color-avatar: #dee2e6;
+  --border-color-teammate-avatar: #adb5bd;
+
+  --heading-color: #2c3e50; /* Colore per h1, h2 */
+
+  --link-color: #007bff;
+  --link-hover-color: #0056b3;
+
+  --button-bg-primary: #007bff; /* Per bottoni primari come lo scroll to top */
+  --button-text-primary: #ffffff;
+  --button-hover-bg-primary: #0056b3;
+
+  /* Colori specifici per componenti (basati sulle variabili sopra) */
+  --skill-badge-bg: var(--surface-bg-secondary);
+  --skill-badge-text: var(--text-color-secondary);
+  --skill-badge-hover-bg: var(--link-color);
+  --skill-badge-hover-text: var(--button-text-primary);
+  --skill-badge-active-bg: var(--link-hover-color);
+  --skill-badge-active-text: var(--button-text-primary);
+
+  --skill-details-bg: var(--bg-color);
+  --skill-details-border: var(--border-color-secondary);
+  --skill-details-text: var(--text-color-secondary);
+  --skill-details-heading: var(--link-color);
+
+  /* Aggiungi qui altre variabili se necessario */
+}
+
+body.dark-mode {
+  /* Palette Colori Tema Scuro */
+  --bg-color: #121212;
+  --text-color-primary: #e0e0e0;
+  --text-color-secondary: #b0b0b0;
+  --text-color-muted: #888888;
+
+  --surface-bg-primary: #1e1e1e;
+  --surface-bg-secondary: #2a2a2a;
+
+  --border-color-primary: #333333;
+  --border-color-secondary: #444444;
+  --border-color-avatar: #555555;
+  --border-color-teammate-avatar: #666666;
+
+  --heading-color: #d4d4d4;
+
+  --link-color: #64b5f6; /* Blu più chiaro per buona visibilità su scuro */
+  --link-hover-color: #90caf9;
+
+  --button-bg-primary: var(--link-color); /* Usa il colore dei link per i bottoni */
+  --button-text-primary: #121212; /* Testo scuro su bottone chiaro */
+  --button-hover-bg-primary: var(--link-hover-color);
+
+  --skill-badge-bg: #3a3a3a;
+  /* --skill-badge-text eredita (--text-color-secondary) */
+  /* --skill-badge-hover-bg eredita (--link-color) */
+  /* --skill-badge-hover-text eredita (--button-text-primary) */
+  /* --skill-badge-active-bg eredita (--link-hover-color) */
+  /* --skill-badge-active-text eredita (--button-text-primary) */
+
+  --skill-details-bg: #232323;
+  /* --skill-details-border eredita (--border-color-secondary) */
+  /* --skill-details-text eredita (--text-color-secondary) */
+  /* --skill-details-heading eredita (--link-color) */
+}
+
+/* ===== General Reset & Base Styles ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Space Grotesk", sans-serif; /* Considera se vuoi usare "Source Code Pro" anche qui come nel tuo HTML */
+  line-height: 1.6;
+  background-color: var(--bg-color); /* Usa variabile */
+  color: var(--text-color-primary); /* Usa variabile */
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s; /* Aggiunge transizione per cambio tema */
+}
+
+/* ===== Link Styles ===== */
+a {
+  color: var(--link-color); /* Usa variabile */
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--link-hover-color); /* Usa variabile */
+  text-decoration: underline;
+}
+
+/* ===== Header Styles ===== */
+header {
+  background-color: var(--surface-bg-primary); /* Usa variabile */
+  padding: 15px 5%;
+  border-bottom: 1px solid var(--border-color-primary); /* Usa variabile */
+  color: var(--text-color-primary); /* Usa variabile */
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+header .avatar {
+  flex-shrink: 0;
+  background-color: transparent;
+  padding: 0;
+  box-shadow: none;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+header .avatar img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color-avatar); /* Usa variabile */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: block;
+  transition: border-color 0.3s;
+}
+
+header .header-content {
+  display: flex;
+  align-items: center; /* Centra verticalmente nome e nav/bottone */
+  justify-content: space-between; /* Spinge nav/bottone a destra */
+  flex-grow: 1;
+  flex-wrap: wrap; /* Permette di andare a capo su schermi piccoli */
+}
+
+header .header-text { /* Nuovo wrapper per H1 se serve separarlo dalla nav/bottone */
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
-  }
-  .project:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  }
+    align-items: flex-start;
+}
   
-  /* Elements inside project card */
-  .project img {
-    width: 100%;
-    height: auto;
-    max-height: 180px;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 15px;
-    border: none;
-    box-shadow: none;
-  }
-  .project h3 {
-    color: var(--text-color-primary); /* Usa variabile */
-    margin-bottom: 10px;
-    font-size: 1.2em;
-    border: none;
-    padding: 0;
-    text-align: left;
-  }
-  .project p {
-    font-size: 0.95em;
-    color: var(--text-color-muted); /* Usa variabile */
-    flex-grow: 1;
-    width: auto;
-    margin: 0;
-    text-align: left;
-    border: none;
-  }
-  
-  /* ===== Skills Section Styles ===== */
-  
-  /* Stile per il contenitore della lista (UL) */
-  section#skills ul {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-  
-  /* Stile per i singoli elementi della lista (LI) - I Badge */
-  section#skills ul li {
-    width: auto;
-    margin: 0;
-    position: static;
-    border: none;
-    border-left: none;
-    background-color: var(--skill-badge-bg); /* Usa variabile */
-    color: var(--skill-badge-text); /* Usa variabile */
-    padding: 6px 14px;
-    border-radius: 15px;
-    font-size: 0.9em;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer; /* Aggiunto per interattività JS */
-  }
-  
-  /* Effetto Hover per i badge */
-  section#skills ul li:hover {
-    background-color: var(--skill-badge-hover-bg); /* Usa variabile */
-    color: var(--skill-badge-hover-text); /* Usa variabile */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* cursor: default; Rimosso, manteniamo pointer */
-  }
-  
-  /* Stile per il badge della skill attiva/selezionata */
-  section#skills ul li.active-skill {
-    background-color: var(--skill-badge-active-bg); /* Usa variabile */
-    color: var(--skill-badge-active-text); /* Usa variabile */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  }
-  
-  /* Stile per il contenitore dei dettagli della skill */
-  .skill-details-container {
-    margin-top: 25px;
-    padding: 20px;
-    background-color: var(--skill-details-bg); /* Usa variabile */
-    border: 1px solid var(--skill-details-border); /* Usa variabile */
-    border-radius: 6px;
-    min-height: 70px;
-    text-align: left;
-    color: var(--skill-details-text); /* Usa variabile */
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-    transition: all 0.3s ease-in-out;
-  }
-  
-  .skill-details-container h3 {
-    color: var(--skill-details-heading); /* Usa variabile */
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1.2em;
-  }
-  
-  .skill-details-container p {
-    margin-bottom: 0;
-    font-size: 1em;
-    line-height: 1.6;
-  }
-  
+header h1 {
+ font-size: 1.8em;
+ margin: 0 0 5px 0;
+ color: var(--heading-color); /* Usa variabile */
+ text-shadow: none;
+}
 
-  
-  .teammates {
+header nav {
+    margin-left: auto; 
+}
+
+header .header-controls { 
     display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 25px;
-    margin-top: 20px;
-  }
+    align-items: center;
+    gap: 20px; 
+}
   
-  .team-member {
-    background-color: var(--surface-bg-secondary); /* Usa variabile */
-    border: 1px solid var(--border-color-primary); /* Usa variabile */
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    color: var(--text-color-secondary); /* Usa variabile */
-    flex: 1 1 250px;
-    min-width: 200px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
-  }
-  .team-member:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  }
+header nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+header nav a {
+  color: var(--text-color-secondary); 
+  font-size: 1em;
+  font-weight: 500;
+  padding: 5px 0;
+}
+
+header nav a:hover {
+  color: var(--link-color); 
+  text-decoration: none;
+  background-color: transparent;
+}
+
+/* ===== Main Content Styles ===== */
+main {
+  padding: 30px 0;
+}
+
+main section {
+  width: 90%;
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 25px 30px;
+  background-color: var(--surface-bg-primary); 
+  border: 1px solid var(--border-color-secondary); 
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  color: var(--text-color-secondary); 
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+section#intro {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+section#intro p {
+ font-size: 1.15em;
+ color: var(--text-color-secondary); 
+ margin-top: 0;
+ max-width: 700px;
+ margin-left: auto;
+ margin-right: auto;
+}
+
+main h2 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  color: var(--heading-color); 
+  text-align: center;
+  border-bottom: 1px solid var(--border-color-primary); 
+  padding-bottom: 10px;
+  text-shadow: none;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.portfolio-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.portfolio-header h2 {
+  display: inline-block;
+}
+.portfolio-header p {
+  color: var(--text-color-muted); 
+  font-size: 1em;
+  max-width: 600px;
+  margin: 10px auto 0 auto;
+}
+
+.portfolio-grid {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.project {
+  background-color: var(--surface-bg-primary); 
+  border: 1px solid var(--border-color-primary); 
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  color: var(--text-color-secondary); 
+  flex: 1 1 300px;
+  min-width: 280px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
+}
+.project:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.project img {
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border: none;
+  box-shadow: none;
+}
+.project h3 {
+  color: var(--text-color-primary); 
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  border: none;
+  padding: 0;
+  text-align: left;
+}
+.project p {
+  font-size: 0.95em;
+  color: var(--text-color-muted); 
+  flex-grow: 1;
+  width: auto;
+  margin: 0;
+  text-align: left;
+  border: none;
+}
+
+/* ===== Skills Section Styles ===== */
+section#skills ul {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+section#skills ul li {
+  width: auto;
+  margin: 0;
+  position: static;
+  border: none;
+  border-left: none;
+  background-color: var(--skill-badge-bg); 
+  color: var(--skill-badge-text); 
+  padding: 6px 14px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer; 
+}
+
+section#skills ul li:hover {
+  background-color: var(--skill-badge-hover-bg); 
+  color: var(--skill-badge-hover-text); 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+section#skills ul li.active-skill {
+  background-color: var(--skill-badge-active-bg); 
+  color: var(--skill-badge-active-text); 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.skill-details-container {
+  margin-top: 25px;
+  padding: 20px;
+  background-color: var(--skill-details-bg); 
+  border: 1px solid var(--skill-details-border); 
+  border-radius: 6px;
+  min-height: 70px;
+  text-align: left;
+  color: var(--skill-details-text); 
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.3s ease-in-out;
+}
+
+.skill-details-container h3 {
+  color: var(--skill-details-heading); 
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+}
+
+.skill-details-container p {
+  margin-bottom: 0;
+  font-size: 1em;
+  line-height: 1.6;
+}
+
+.teammates {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.team-member {
+  background-color: var(--surface-bg-secondary); 
+  border: 1px solid var(--border-color-primary); 
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  color: var(--text-color-secondary); 
+  flex: 1 1 250px;
+  min-width: 200px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
+}
+.team-member:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.team-member h3 {
+  color: var(--text-color-primary); 
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  border: none;
+  padding: 0;
+}
+.team-member p {
+  font-size: 0.9em;
+}
+.team-member img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color-teammate-avatar); 
+  margin: 0 auto 15px auto;
+  display: block;
+  transition: border-color 0.3s;
+}
+
+/* ===== Snake Game Section Styles ===== */
+#snake-game-section {
+  width: 90%;
+  max-width: 960px; 
+  margin: 40px auto;
+  padding: 25px 30px;
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  color: var(--text-color-secondary);
+  transition: background-color 0.3s, border-color 0.3s;
+  text-align: center; 
+}
+
+#snake-game-section h2 {
+  font-size: 1.8em;
+  margin-bottom: 25px;
+  color: var(--heading-color);
+  text-align: center;
+  border-bottom: 1px solid var(--border-color-primary);
+  padding-bottom: 10px;
+  text-shadow: none;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.game-ui-container {
+  display: inline-block; 
+  margin-top: 15px;
+}
+
+.game-details {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  padding: 10px 5px; 
+  margin-bottom: 15px;
+  font-size: 1em; 
+  color: var(--text-color-secondary);
+}
+
+.score-label, .highscore-label {
+  font-weight: 500;
+}
+
+#currentScore, #highScore {
+  font-weight: bold;
+  color: var(--link-color); 
+  padding-left: 5px; 
+}
+
+#snakeCanvas {
+  display: block; 
+  margin: 0 auto 15px auto; 
+  border: 2px solid var(--text-color-muted); 
+  background-color: #2c3e50; 
+}
+
+body.dark-mode #snakeCanvas {
+    background-color: #222738; 
+    border-color: var(--border-color-secondary);
+}
+
+.game-button { 
+  background-color: var(--button-bg-primary);
+  color: var(--button-text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.game-button:hover {
+  background-color: var(--button-hover-bg-primary);
+  transform: translateY(-1px); 
+}
+
+.game-button:active {
+  transform: translateY(0px); 
+}
+
+.game-instructions {
+  margin-top: 20px;
+  font-size: 0.9em;
+  color: var(--text-color-muted);
+}
+
+/* Stile per il contenitore del form di input highscore */
+#highscore-input-container {
+  margin-top: 25px;
+  padding: 20px;
+  background-color: var(--surface-bg-secondary); 
+  border: 1px solid var(--border-color-primary);
+  border-radius: 6px;
+  text-align: center;
+  max-width: 400px; 
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#highscore-input-container h3 {
+  color: var(--heading-color);
+  margin-bottom: 10px;
+  font-size: 1.3em;
+}
+
+#highscore-input-container p {
+  margin-bottom: 15px;
+  font-size: 0.95em;
+  color: var(--text-color-secondary);
+}
+
+#highscore-input-container input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color-primary);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color-primary);
+  font-size: 1em;
+  text-align: center;
+  text-transform: uppercase; 
+  width: 150px; 
+  margin-bottom: 15px;
+  display: block; 
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#highscore-input-container input[type="text"]:focus {
+  outline: none;
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Fallback per box-shadow */
+}
+
+/* Stile per il contenitore della classifica */
+.leaderboard-container {
+  margin-top: 30px;
+  padding: 20px;
+  text-align: center;
+}
+
+.leaderboard-container h3 {
+  color: var(--heading-color);
+  margin-bottom: 15px;
+  font-size: 1.4em; 
+  border-bottom: 1px solid var(--border-color-secondary);
+  padding-bottom: 8px;
+  display: inline-block; 
+}
+
+#leaderboard-list {
+  list-style-type: decimal; 
+  padding-left: 20px; 
+  max-width: 350px; 
+  margin: 0 auto; 
+  text-align: left; 
+}
+
+#leaderboard-list li {
+  padding: 8px 0;
+  font-size: 1em;
+  color: var(--text-color-secondary);
+  border-bottom: 1px dashed var(--border-color-secondary); 
+  display: flex; 
+  justify-content: space-between; 
+}
+
+#leaderboard-list li:last-child {
+  border-bottom: none; 
+}
+
+#leaderboard-list li .player-name {
+  font-weight: 500;
+  color: var(--text-color-primary);
+  margin-right: 10px; 
+}
+
+#leaderboard-list li .player-score {
+  font-weight: bold;
+  color: var(--link-color);
+}
+
+/* ===== Snake Game Section Styles - Touch Controls ===== */
+#touch-controls-container {
+  display: none; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 5px; 
+  margin-top: 20px;
+}
+
+.touch-control-btn {
+  background-color: var(--button-bg-primary);
+  color: var(--button-text-primary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: 8px; 
+  width: 60px;  
+  height: 60px;
+  font-size: 1.8em; 
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px; 
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  -webkit-user-select: none; 
+  -ms-user-select: none; 
+  user-select: none; 
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-control-btn:hover { 
+  background-color: var(--button-hover-bg-primary);
+}
+
+.touch-control-btn:active { 
+  transform: scale(0.95); 
+  background-color: var(--link-hover-color); 
+}
+
+.touch-controls-middle-row {
+  display: flex; 
+  justify-content: center; 
+  gap: 5px; 
+}
+
+/* Contact Section List Styling */
+section#contact ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 15px;
+  text-align: center;
+}
+section#contact li {
+  margin-bottom: 10px;
+  background-color: transparent;
+  border: none;
+  width: auto;
+  color: inherit; 
+  padding: 0;
+}
+section#contact li a {
+  font-weight: normal;
+  color: var(--link-color); 
+}
+
+/* ===== Footer Styles ===== */
+footer {
+  background-color: var(--surface-bg-secondary); 
+  padding: 25px;
+  border-top: 1px solid var(--border-color-primary); 
+  border-radius: 0;
+  color: var(--text-color-muted); 
+  text-align: center;
+  margin-top: 40px;
+  font-size: 0.9em;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+footer a {
+  color: var(--link-color); 
+}
+
+/* ===== Scroll to Top Button Styles (Updated) ===== */
+#scrollToTopBtn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 30px;
+  z-index: 99;
+  border: none;
+  outline: none;
+  background-color: var(--button-bg-primary); 
+  color: var(--button-text-primary); 
+  cursor: pointer;
+  width: 45px;
+  height: 45px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 45px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
+}
+
+#scrollToTopBtn:hover {
+  background-color: var(--button-hover-bg-primary); 
+}
+
+#scrollToTopBtn.show {
+  display: block;
+}
+
+/* Stile per il bottone di cambio tema */
+#themeToggleBtn {
+  background: none;
+  border: 1px solid var(--border-color-primary);
+  color: var(--text-color-secondary);
+  padding: 8px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1.2em;
+  line-height: 1;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  margin-left: 15px; 
+}
+
+#themeToggleBtn:hover {
+  background-color: var(--surface-bg-secondary);
+  border-color: var(--link-color);
+  color: var(--link-color);
+}
   
-  .team-member h3 {
-    color: var(--text-color-primary); /* Usa variabile */
-    margin-bottom: 10px;
-    font-size: 1.1em;
-    border: none;
-    padding: 0;
+/* ===== Responsive Design - Media Queries ===== */
+
+/* Tablet & Smaller Screens */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 5%;
   }
-  .team-member p {
-    font-size: 0.9em;
+  header .header-content {
+     justify-content: center; 
   }
-  .team-member img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 2px solid var(--border-color-teammate-avatar); /* Usa variabile */
-    margin: 0 auto 15px auto;
-    display: block;
-    transition: border-color 0.3s;
+  header .header-controls {
+      justify-content: center; 
+      width: 100%; 
   }
-  /* Fine Team Section */
-  
-  /* Contact Section List Styling */
-  section#contact ul {
-    list-style-type: none;
-    padding-left: 0;
-    margin-top: 15px;
-    text-align: center;
+  header nav {
+      margin-left: 0; 
   }
-  section#contact li {
-    margin-bottom: 10px;
-    background-color: transparent;
-    border: none;
-    width: auto;
-    color: inherit; /* Eredita colore dal parent (section) */
-    padding: 0;
+  main section { /* Stile generale per le sezioni su tablet */
+    width: 95%; /* Più larghezza su schermi più piccoli */
+    padding: 20px 15px; /* Riduci padding laterale */
   }
-  section#contact li a {
-    font-weight: normal;
-    color: var(--link-color); /* Usa variabile per il link */
+  .portfolio-grid, .teammates {
+    gap: 20px;
   }
-  
-  /* ===== Footer Styles ===== */
-  footer {
-    background-color: var(--surface-bg-secondary); /* Usa variabile */
-    padding: 25px;
-    border-top: 1px solid var(--border-color-primary); /* Usa variabile */
-    border-radius: 0;
-    color: var(--text-color-muted); /* Usa variabile */
-    text-align: center;
-    margin-top: 40px;
-    font-size: 0.9em;
-    transition: background-color 0.3s, border-color 0.3s;
+  .project, .team-member {
+    flex-basis: 45%;
+    min-width: 250px;
   }
-  
-  /* Links within Footer */
-  footer a {
-    color: var(--link-color); /* Usa variabile */
+  h1, header h1 { font-size: 1.6em; }
+  main h2 { font-size: 1.5em; }
+
+  /* Snake Game Responsive Adjustments for Tablet */
+  #snake-game-section h2 {
+    font-size: 1.6em; 
   }
-  
-  /* ===== Scroll to Top Button Styles (Updated) ===== */
-  #scrollToTopBtn {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 30px;
-    z-index: 99;
-    border: none;
-    outline: none;
-    background-color: var(--button-bg-primary); /* Usa variabile */
-    color: var(--button-text-primary); /* Usa variabile */
-    cursor: pointer;
-    width: 45px;
-    height: 45px;
-    padding: 0;
-    border-radius: 50%;
-    font-size: 20px;
-    line-height: 45px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
+  #highscore-input-container {
+    max-width: 90%; 
   }
-  
-  #scrollToTopBtn:hover {
-    background-color: var(--button-hover-bg-primary); /* Usa variabile */
+  .leaderboard-container h3 {
+    font-size: 1.3em;
   }
-  
-  #scrollToTopBtn.show {
-    display: block;
+  #leaderboard-list {
+    max-width: 90%;
   }
-  
-  /* Stile per il bottone di cambio tema */
+  /* Mostra i controlli touch */
+  #touch-controls-container { 
+    display: flex; 
+  }
+  /* .game-instructions { display: none; } /* Opzionale: nascondi istruzioni tastiera */
+}
+
+/* Mobile Screens */
+@media (max-width: 576px) {
+  body { font-size: 15px; }
+
+  header nav ul { gap: 10px; justify-content: center;}
+  header nav a { font-size: 0.95em; }
+  header .header-controls {
+      gap: 15px; 
+  }
   #themeToggleBtn {
-    background: none;
-    border: 1px solid var(--border-color-primary);
-    color: var(--text-color-secondary);
-    padding: 8px 12px;
-    border-radius: 20px;
-    cursor: pointer;
+      padding: 6px 10px;
+      font-size: 1.1em;
+      margin-left: 10px;
+  }
+
+  main section { /* Stile generale per le sezioni su mobile */
+    width: 95%;
+    padding: 15px;
+    margin: 25px auto;
+  }
+  .portfolio-grid, .teammates {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .project, .team-member {
+    flex-basis: 90%;
+    width: 90%;
+    max-width: 400px;
+    min-width: unset;
+  }
+  h1, header h1 { font-size: 1.5em; }
+  main h2 { font-size: 1.4em; }
+  footer { font-size: 0.85em; }
+
+  /* Snake Game Responsive Adjustments for Mobile */
+  #snake-game-section h2 {
+    font-size: 1.4em;
+  }
+  .game-details {
+    font-size: 0.9em; 
+    padding: 8px 3px;
+    margin-bottom: 10px;
+  }
+  #highscore-input-container {
+    padding: 15px;
+  }
+  #highscore-input-container h3 {
     font-size: 1.2em;
-    line-height: 1;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    margin-left: 15px; /* Spazio a sinistra del bottone */
   }
-  
-  #themeToggleBtn:hover {
-    background-color: var(--surface-bg-secondary);
-    border-color: var(--link-color);
-    color: var(--link-color);
+  #highscore-input-container input[type="text"] {
+    width: 120px; 
+    font-size: 0.9em;
   }
-  
-  /* Stili specifici per il bottone in dark mode, se necessario */
-  /* Non sono necessari override specifici qui perché usa già le variabili */
-  /*
-  body.dark-mode #themeToggleBtn { }
-  body.dark-mode #themeToggleBtn:hover { }
-  */
-  
-  
-  /* ===== Responsive Design - Media Queries ===== */
-  /* (Mantenuti invariati, dovrebbero funzionare con le variabili) */
-  
-  /* Tablet & Smaller Screens */
-  @media (max-width: 768px) {
-    header {
-      flex-direction: column;
-      gap: 15px;
-      padding: 15px 5%;
-    }
-    header .header-content {
-       /* Potrebbe essere necessario aggiustare il layout del header-content per il bottone */
-       /* Esempio: flex-direction: column; align-items: center; */
-       /* O lasciare che flex-wrap gestisca l'andare a capo */
-       justify-content: center; /* Centra i controlli se vanno a capo */
-    }
-    header .header-controls {
-        justify-content: center; /* Centra nav e bottone se sono sulla stessa riga */
-        width: 100%; /* Occupa tutta la larghezza se vanno a capo */
-    }
-    header nav {
-        margin-left: 0; /* Rimuovi margine se centrato */
-    }
-    main section {
-      width: 90%;
-      padding: 20px;
-    }
-    .portfolio-grid, .teammates {
-      gap: 20px;
-    }
-    .project, .team-member {
-      flex-basis: 45%;
-      min-width: 250px;
-    }
-    h1, header h1 { font-size: 1.6em; }
-    main h2 { font-size: 1.5em; }
+  .game-button { 
+    padding: 8px 15px;
+    font-size: 0.9em;
   }
-  
-  /* Mobile Screens */
-  @media (max-width: 576px) {
-    body { font-size: 15px; }
-  
-    header nav ul { gap: 10px; justify-content: center;}
-    header nav a { font-size: 0.95em; }
-    header .header-controls {
-        gap: 15px; /* Riduci gap su mobile */
-    }
-    #themeToggleBtn {
-        padding: 6px 10px;
-        font-size: 1.1em;
-        margin-left: 10px;
-    }
-  
-    main section {
-      width: 95%;
-      padding: 15px;
-      margin: 25px auto;
-    }
-    .portfolio-grid, .teammates {
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-    .project, .team-member {
-      flex-basis: 90%;
-      width: 90%;
-      max-width: 400px;
-      min-width: unset;
-    }
-    h1, header h1 { font-size: 1.5em; }
-    main h2 { font-size: 1.4em; }
-    footer { font-size: 0.85em; }
+  .leaderboard-container {
+    margin-top: 20px;
+    padding: 15px 10px;
   }
+  .leaderboard-container h3 {
+    font-size: 1.2em;
+  }
+  #leaderboard-list li {
+    font-size: 0.9em;
+    padding: 6px 0;
+  }
+  .game-instructions {
+    font-size: 0.8em;
+    margin-top: 15px;
+  }
+}
+
+/* Ulteriori aggiustamenti per schermi molto piccoli, se necessario (per controlli touch) */
+@media (max-width: 480px) {
+  .touch-control-btn {
+    width: 50px; 
+    height: 50px;
+    font-size: 1.5em; 
+    margin: 3px;
+  }
+  #touch-controls-container {
+    gap: 3px; 
+  }
+  .touch-controls-middle-row {
+    gap: 3px; 
+  }
+}
