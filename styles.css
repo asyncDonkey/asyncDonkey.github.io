@@ -389,11 +389,7 @@
     line-height: 1.6;
   }
   
-  /* Team Section Specifics - DA VERIFICARE SE ESISTE NEL TUO HTML */
-  /* Se non esiste, puoi rimuovere questa parte */
-  section.team {
-    /* Stili ereditati */
-  }
+
   
   .teammates {
     display: flex;
