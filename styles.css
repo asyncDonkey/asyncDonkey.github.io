@@ -1,187 +1,292 @@
-/* ===== General Reset & Base Styles ===== */
-* {
+/* styles.css - Refactored with CSS Variables for Theme Switching */
+
+:root {
+    /* Palette Colori Tema Chiaro (Default) */
+    --bg-color: #f8f9fa;
+    --text-color-primary: #343a40;
+    --text-color-secondary: #495057;
+    --text-color-muted: #6c757d;
+  
+    --surface-bg-primary: #ffffff; /* Es. header, card progetti */
+    --surface-bg-secondary: #e9ecef; /* Es. footer, badge skills */
+  
+    --border-color-primary: #dee2e6; /* Bordi principali */
+    --border-color-secondary: #e9ecef; /* Bordi secondari (come skill details) */
+    --border-color-avatar: #dee2e6;
+    --border-color-teammate-avatar: #adb5bd;
+  
+    --heading-color: #2c3e50; /* Colore per h1, h2 */
+  
+    --link-color: #007bff;
+    --link-hover-color: #0056b3;
+  
+    --button-bg-primary: #007bff; /* Per bottoni primari come lo scroll to top */
+    --button-text-primary: #ffffff;
+    --button-hover-bg-primary: #0056b3;
+  
+    /* Colori specifici per componenti (basati sulle variabili sopra) */
+    --skill-badge-bg: var(--surface-bg-secondary);
+    --skill-badge-text: var(--text-color-secondary);
+    --skill-badge-hover-bg: var(--link-color);
+    --skill-badge-hover-text: var(--button-text-primary);
+    --skill-badge-active-bg: var(--link-hover-color);
+    --skill-badge-active-text: var(--button-text-primary);
+  
+    --skill-details-bg: var(--bg-color);
+    --skill-details-border: var(--border-color-secondary);
+    --skill-details-text: var(--text-color-secondary);
+    --skill-details-heading: var(--link-color);
+  
+    /* Aggiungi qui altre variabili se necessario */
+  }
+  
+  body.dark-mode {
+    /* Palette Colori Tema Scuro */
+    --bg-color: #121212;
+    --text-color-primary: #e0e0e0;
+    --text-color-secondary: #b0b0b0;
+    --text-color-muted: #888888;
+  
+    --surface-bg-primary: #1e1e1e;
+    --surface-bg-secondary: #2a2a2a;
+  
+    --border-color-primary: #333333;
+    --border-color-secondary: #444444;
+    --border-color-avatar: #555555;
+    --border-color-teammate-avatar: #666666;
+  
+    --heading-color: #d4d4d4;
+  
+    --link-color: #64b5f6; /* Blu più chiaro per buona visibilità su scuro */
+    --link-hover-color: #90caf9;
+  
+    --button-bg-primary: var(--link-color); /* Usa il colore dei link per i bottoni */
+    --button-text-primary: #121212; /* Testo scuro su bottone chiaro */
+    --button-hover-bg-primary: var(--link-hover-color);
+  
+    --skill-badge-bg: #3a3a3a;
+    /* --skill-badge-text eredita (--text-color-secondary) */
+    /* --skill-badge-hover-bg eredita (--link-color) */
+    /* --skill-badge-hover-text eredita (--button-text-primary) */
+    /* --skill-badge-active-bg eredita (--link-hover-color) */
+    /* --skill-badge-active-text eredita (--button-text-primary) */
+  
+    --skill-details-bg: #232323;
+    /* --skill-details-border eredita (--border-color-secondary) */
+    /* --skill-details-text eredita (--text-color-secondary) */
+    /* --skill-details-heading eredita (--link-color) */
+  }
+  
+  /* ===== General Reset & Base Styles ===== */
+  * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-}
-
-body {
-    font-family: "Space Grotesk", sans-serif; /* Modern font */
+  }
+  
+  body {
+    font-family: "Space Grotesk", sans-serif;
     line-height: 1.6;
-    background-color: #f8f9fa; /* Light gray background */
-    color: #343a40; /* Dark gray text */
+    background-color: var(--bg-color); /* Usa variabile */
+    color: var(--text-color-primary); /* Usa variabile */
     font-size: 16px;
-}
-
-/* ===== Link Styles ===== */
-a {
-    color: #007bff; /* Modern blue link */
+    transition: background-color 0.3s, color 0.3s; /* Aggiunge transizione per cambio tema */
+  }
+  
+  /* ===== Link Styles ===== */
+  a {
+    color: var(--link-color); /* Usa variabile */
     text-decoration: none;
-}
-
-a:hover {
-    color: #0056b3; /* Darker blue on hover */
+  }
+  
+  a:hover {
+    color: var(--link-hover-color); /* Usa variabile */
     text-decoration: underline;
-}
-
-/* ===== Header Styles ===== */
-header {
-    background-color: #ffffff; /* White background */
+  }
+  
+  /* ===== Header Styles ===== */
+  header {
+    background-color: var(--surface-bg-primary); /* Usa variabile */
     padding: 15px 5%;
-    border-bottom: 1px solid #dee2e6; /* Subtle bottom border */
-    color: #343a40; /* Dark text */
+    border-bottom: 1px solid var(--border-color-primary); /* Usa variabile */
+    color: var(--text-color-primary); /* Usa variabile */
     display: flex;
     align-items: center;
     gap: 20px;
     flex-wrap: wrap;
-}
-
-header .avatar {
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  
+  header .avatar {
     flex-shrink: 0;
-    background-color: transparent; /* Removed light gray background */
-    padding: 0; /* Removed padding */
+    background-color: transparent;
+    padding: 0;
     box-shadow: none;
     display: inline-flex;
     vertical-align: middle;
-}
-
-header .avatar img {
-    width: 60px; /* Adjusted size */
+  }
+  
+  header .avatar img {
+    width: 60px;
     height: 60px;
-    border-radius: 50%; /* Round avatar */
-    border: 2px solid #dee2e6; /* Light gray border */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    border-radius: 50%;
+    border: 2px solid var(--border-color-avatar); /* Usa variabile */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: block;
-}
-
-header .header-content {
+    transition: border-color 0.3s;
+  }
+  
+  header .header-content {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    /* flex-direction: column; Rimosso per permettere al bottone di stare a fianco */
+    align-items: center; /* Centra verticalmente nome e nav/bottone */
+    justify-content: space-between; /* Spinge nav/bottone a destra */
     flex-grow: 1;
-}
-
-header h1 {
+    flex-wrap: wrap; /* Permette di andare a capo su schermi piccoli */
+  }
+  
+  header .header-text { /* Nuovo wrapper per H1 se serve separarlo dalla nav/bottone */
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+  }
+  
+  
+  header h1 {
    font-size: 1.8em;
    margin: 0 0 5px 0;
-   color: #2c3e50; /* Dark blue/gray heading */
-   text-shadow: none; /* No glow */
-}
-
-header nav ul {
+   color: var(--heading-color); /* Usa variabile */
+   text-shadow: none;
+  }
+  
+  header nav {
+      /* Stili esistenti per nav possono rimanere, o aggiustati per coesistere col bottone */
+      margin-left: auto; /* Spinge la nav a destra se non c'è il bottone (o se sono wrappati) */
+  }
+  
+  header .header-controls { /* Wrapper per nav e bottone tema */
+      display: flex;
+      align-items: center;
+      gap: 20px; /* Spazio tra nav e bottone */
+  }
+  
+  
+  header nav ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-}
-
-header nav a {
-    color: #495057; /* Dark gray nav links */
+  }
+  
+  header nav a {
+    color: var(--text-color-secondary); /* Usa variabile */
     font-size: 1em;
     font-weight: 500;
     padding: 5px 0;
-}
-
-header nav a:hover {
-    color: #007bff; /* Blue hover */
+  }
+  
+  header nav a:hover {
+    color: var(--link-color); /* Usa variabile */
     text-decoration: none;
     background-color: transparent;
-}
-
-/* ===== Main Content Styles ===== */
-main {
+  }
+  
+  /* ===== Main Content Styles ===== */
+  main {
     padding: 30px 0;
-}
-
-/* General style for sections within Main (card-like) */
-main section {
+  }
+  
+  /* General style for sections within Main (card-like) */
+  main section {
     width: 90%;
     max-width: 960px;
     margin: 40px auto;
     padding: 25px 30px;
-    background-color: #ffffff; /* White background */
-    border: 1px solid #e9ecef; /* Light border */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Subtle shadow */
-    color: #495057; /* Default text color for sections */
-}
-
-/* Intro section specific style */
-section#intro {
+    background-color: var(--surface-bg-primary); /* Usa variabile */
+    border: 1px solid var(--border-color-secondary); /* Usa variabile */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    color: var(--text-color-secondary); /* Usa variabile */
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  
+  /* Intro section specific style */
+  section#intro {
     text-align: center;
-    background-color: transparent; /* Maybe no distinct background for intro? */
-    border: none; /* No border */
-    box-shadow: none; /* No shadow */
-}
-section#intro p {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  section#intro p {
    font-size: 1.15em;
-   color: #495057;
+   color: var(--text-color-secondary); /* Usa variabile */
    margin-top: 0;
    max-width: 700px;
    margin-left: auto;
    margin-right: auto;
-}
-
-/* H2 titles within Main sections */
-main h2 {
+  }
+  
+  /* H2 titles within Main sections */
+  main h2 {
     font-size: 1.8em;
     margin-bottom: 20px;
-    color: #2c3e50; /* Dark heading color */
+    color: var(--heading-color); /* Usa variabile */
     text-align: center;
-    border-bottom: 1px solid #dee2e6; /* Subtle underline */
+    border-bottom: 1px solid var(--border-color-primary); /* Usa variabile */
     padding-bottom: 10px;
-    text-shadow: none; /* No glow */
-}
-
-/* Portfolio Section Header */
-.portfolio-header {
+    text-shadow: none;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  
+  /* Portfolio Section Header */
+  .portfolio-header {
     text-align: center;
     margin-bottom: 30px;
-}
-.portfolio-header h2 {
-    display: inline-block; /* Keep border fitted */
-}
-.portfolio-header p {
-    color: #6c757d;
+  }
+  .portfolio-header h2 {
+    display: inline-block;
+  }
+  .portfolio-header p {
+    color: var(--text-color-muted); /* Usa variabile */
     font-size: 1em;
     max-width: 600px;
     margin: 10px auto 0 auto;
-}
-
-/* Portfolio Grid container */
-.portfolio-grid {
+  }
+  
+  /* Portfolio Grid container */
+  .portfolio-grid {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
     gap: 25px;
     margin-top: 20px;
-}
-
-/* Individual project card styling */
-.project {
-    background-color: #ffffff; /* White card background */
-    border: 1px solid #dee2e6;
+  }
+  
+  /* Individual project card styling */
+  .project {
+    background-color: var(--surface-bg-primary); /* Usa variabile */
+    border: 1px solid var(--border-color-primary); /* Usa variabile */
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
     text-align: left;
-    color: #495057;
+    color: var(--text-color-secondary); /* Usa variabile */
     flex: 1 1 300px;
     min-width: 280px;
     max-width: 350px;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-.project:hover {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
+  }
+  .project:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Elements inside project card */
-.project img {
+  }
+  
+  /* Elements inside project card */
+  .project img {
     width: 100%;
     height: auto;
     max-height: 180px;
@@ -190,226 +295,319 @@ main h2 {
     margin-bottom: 15px;
     border: none;
     box-shadow: none;
-}
-.project h3 {
-    color: #343a40;
+  }
+  .project h3 {
+    color: var(--text-color-primary); /* Usa variabile */
     margin-bottom: 10px;
     font-size: 1.2em;
     border: none;
     padding: 0;
     text-align: left;
-}
-.project p {
+  }
+  .project p {
     font-size: 0.95em;
-    color: #6c757d;
+    color: var(--text-color-muted); /* Usa variabile */
     flex-grow: 1;
     width: auto;
     margin: 0;
     text-align: left;
     border: none;
-}
-
-/* ===== Skills Section Styles ===== */
-
-/* Stile per il contenitore della lista (UL) */
-section#skills ul {
-    list-style-type: none; /* Già presente, ma confermiamo */
-    padding: 0;            /* Già presente, ma confermiamo */
-    margin-top: 20px;      /* Spazio dopo il paragrafo introduttivo */
-
-    /* --- Flexbox Layout for Badges --- */
-    display: flex;         /* Attiva Flexbox */
-    flex-wrap: wrap;       /* Permette ai badge di andare a capo */
-    justify-content: center; /* Centra i badge orizzontalmente */
-    gap: 10px;             /* Spazio tra i singoli badge */
-}
-
-/* Stile per i singoli elementi della lista (LI) - I Badge */
-section#skills ul li {
-    /* Override/Remove previous general 'main ul li' styles if they conflict */
-    width: auto;           /* La larghezza si adatta al contenuto */
-    margin: 0;             /* Rimuovi margini auto, il gap gestisce lo spazio */
-    position: static;      /* Rimuovi position relative se non serve */
-    border: none;          /* Rimuovi bordo laterale verde (se ereditato) */
-    border-left: none;     /* Assicurati sia rimosso */
-
-    /* --- Badge Styling --- */
-    background-color: #e9ecef; /* Sfondo grigio chiaro per il badge */
-    color: #495057;            /* Testo scuro sul badge */
-    padding: 6px 14px;         /* Padding interno per creare il badge */
-    border-radius: 15px;       /* Angoli molto arrotondati (forma a pillola) */
-    font-size: 0.9em;          /* Testo leggermente più piccolo */
-    font-weight: 500;          /* Testo leggermente più bold */
-    white-space: nowrap;       /* Evita che il testo del badge vada a capo */
-    transition: all 0.2s ease-in-out; /* Transizione per l'hover */
-}
-
-/* Effetto Hover per i badge */
-section#skills ul li:hover {
-    background-color: #007bff; /* Cambia sfondo in blu all'hover */
-    color: #ffffff;            /* Testo bianco all'hover */
-    transform: translateY(-2px); /* Solleva leggermente il badge */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Aggiunge un'ombra */
-    cursor: default;           /* Mantiene il cursore standard (o pointer se sono link) */
-}
-
-/* Rimuoviamo stili specifici per link DENTRO i badge, se non ci sono link */
-section#skills ul li a {
-   /* Se le tue LI contengono link, puoi stilizzarli qui, */
-   /* altrimenti questa regola non è necessaria se sono solo testo */
-   /* Esempio se fossero link: */
-   /* color: inherit; */ /* Eredita colore da LI */
-   /* text-decoration: none; */
-   /* font-weight: inherit; */
-}
-section#skills ul li a:hover {
-    /* text-decoration: none; */
-    /* background-color: transparent; */ /* Nessuno sfondo sull'hover del link */
-}
-
-/* Team Section Specifics */
-section.team {
-    /* Inherits modern style from 'main section' */
-    /* background-color: #ffffff; */ /* Already set by main section */
-}
-
-.teammates {
+  }
+  
+  /* ===== Skills Section Styles ===== */
+  
+  /* Stile per il contenitore della lista (UL) */
+  section#skills ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  /* Stile per i singoli elementi della lista (LI) - I Badge */
+  section#skills ul li {
+    width: auto;
+    margin: 0;
+    position: static;
+    border: none;
+    border-left: none;
+    background-color: var(--skill-badge-bg); /* Usa variabile */
+    color: var(--skill-badge-text); /* Usa variabile */
+    padding: 6px 14px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer; /* Aggiunto per interattività JS */
+  }
+  
+  /* Effetto Hover per i badge */
+  section#skills ul li:hover {
+    background-color: var(--skill-badge-hover-bg); /* Usa variabile */
+    color: var(--skill-badge-hover-text); /* Usa variabile */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* cursor: default; Rimosso, manteniamo pointer */
+  }
+  
+  /* Stile per il badge della skill attiva/selezionata */
+  section#skills ul li.active-skill {
+    background-color: var(--skill-badge-active-bg); /* Usa variabile */
+    color: var(--skill-badge-active-text); /* Usa variabile */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Stile per il contenitore dei dettagli della skill */
+  .skill-details-container {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: var(--skill-details-bg); /* Usa variabile */
+    border: 1px solid var(--skill-details-border); /* Usa variabile */
+    border-radius: 6px;
+    min-height: 70px;
+    text-align: left;
+    color: var(--skill-details-text); /* Usa variabile */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .skill-details-container h3 {
+    color: var(--skill-details-heading); /* Usa variabile */
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+  }
+  
+  .skill-details-container p {
+    margin-bottom: 0;
+    font-size: 1em;
+    line-height: 1.6;
+  }
+  
+  /* Team Section Specifics - DA VERIFICARE SE ESISTE NEL TUO HTML */
+  /* Se non esiste, puoi rimuovere questa parte */
+  section.team {
+    /* Stili ereditati */
+  }
+  
+  .teammates {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
     gap: 25px;
     margin-top: 20px;
-}
-
-.team-member {
-    background-color: #f8f9fa; /* Light gray background for team cards */
-    border: 1px solid #dee2e6;
+  }
+  
+  .team-member {
+    background-color: var(--surface-bg-secondary); /* Usa variabile */
+    border: 1px solid var(--border-color-primary); /* Usa variabile */
     border-radius: 8px;
     padding: 20px;
     text-align: center;
-    color: #495057;
+    color: var(--text-color-secondary); /* Usa variabile */
     flex: 1 1 250px;
     min-width: 200px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Lighter shadow */
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-.team-member:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
+  }
+  .team-member:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-}
-
-/* Elements inside team member card */
-.team-member h3 {
-    color: #343a40;
+  }
+  
+  .team-member h3 {
+    color: var(--text-color-primary); /* Usa variabile */
     margin-bottom: 10px;
     font-size: 1.1em;
     border: none;
     padding: 0;
-}
-.team-member p {
+  }
+  .team-member p {
     font-size: 0.9em;
-}
-.team-member img {
+  }
+  .team-member img {
     width: 80px;
     height: 80px;
-    border-radius: 50%; /* Round member avatars */
-    border: 2px solid #adb5bd; /* Gray border */
+    border-radius: 50%;
+    border: 2px solid var(--border-color-teammate-avatar); /* Usa variabile */
     margin: 0 auto 15px auto;
     display: block;
-}
-
-/* Contact Section List Styling */
-section#contact ul {
+    transition: border-color 0.3s;
+  }
+  /* Fine Team Section */
+  
+  /* Contact Section List Styling */
+  section#contact ul {
     list-style-type: none;
     padding-left: 0;
     margin-top: 15px;
     text-align: center;
-}
-section#contact li {
+  }
+  section#contact li {
     margin-bottom: 10px;
-    background-color: transparent; /* No card styling */
+    background-color: transparent;
     border: none;
     width: auto;
-    color: inherit;
+    color: inherit; /* Eredita colore dal parent (section) */
     padding: 0;
-}
-section#contact li a {
+  }
+  section#contact li a {
     font-weight: normal;
-    /* Color inherited from base link style */
-}
-
-/* ===== Footer Styles ===== */
-footer {
-    background-color: #e9ecef; /* Light gray footer */
+    color: var(--link-color); /* Usa variabile per il link */
+  }
+  
+  /* ===== Footer Styles ===== */
+  footer {
+    background-color: var(--surface-bg-secondary); /* Usa variabile */
     padding: 25px;
-    border-top: 1px solid #dee2e6; /* Subtle top border */
+    border-top: 1px solid var(--border-color-primary); /* Usa variabile */
     border-radius: 0;
-    color: #6c757d; /* Gray text */
+    color: var(--text-color-muted); /* Usa variabile */
     text-align: center;
     margin-top: 40px;
     font-size: 0.9em;
-}
-
-/* Links within Footer */
-footer a {
-    color: #007bff; /* Standard link blue */
-}
-
-/* ===== Responsive Design - Media Queries ===== */
-/* (Kept the same as previous version, should adapt well to modern theme) */
-
-/* Tablet & Smaller Screens */
-@media (max-width: 768px) {
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  
+  /* Links within Footer */
+  footer a {
+    color: var(--link-color); /* Usa variabile */
+  }
+  
+  /* ===== Scroll to Top Button Styles (Updated) ===== */
+  #scrollToTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    border: none;
+    outline: none;
+    background-color: var(--button-bg-primary); /* Usa variabile */
+    color: var(--button-text-primary); /* Usa variabile */
+    cursor: pointer;
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 45px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
+  }
+  
+  #scrollToTopBtn:hover {
+    background-color: var(--button-hover-bg-primary); /* Usa variabile */
+  }
+  
+  #scrollToTopBtn.show {
+    display: block;
+  }
+  
+  /* Stile per il bottone di cambio tema */
+  #themeToggleBtn {
+    background: none;
+    border: 1px solid var(--border-color-primary);
+    color: var(--text-color-secondary);
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1.2em;
+    line-height: 1;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    margin-left: 15px; /* Spazio a sinistra del bottone */
+  }
+  
+  #themeToggleBtn:hover {
+    background-color: var(--surface-bg-secondary);
+    border-color: var(--link-color);
+    color: var(--link-color);
+  }
+  
+  /* Stili specifici per il bottone in dark mode, se necessario */
+  /* Non sono necessari override specifici qui perché usa già le variabili */
+  /*
+  body.dark-mode #themeToggleBtn { }
+  body.dark-mode #themeToggleBtn:hover { }
+  */
+  
+  
+  /* ===== Responsive Design - Media Queries ===== */
+  /* (Mantenuti invariati, dovrebbero funzionare con le variabili) */
+  
+  /* Tablet & Smaller Screens */
+  @media (max-width: 768px) {
     header {
-        flex-direction: column;
-        gap: 15px;
-        padding: 15px 5%;
+      flex-direction: column;
+      gap: 15px;
+      padding: 15px 5%;
     }
     header .header-content {
-        align-items: center;
+       /* Potrebbe essere necessario aggiustare il layout del header-content per il bottone */
+       /* Esempio: flex-direction: column; align-items: center; */
+       /* O lasciare che flex-wrap gestisca l'andare a capo */
+       justify-content: center; /* Centra i controlli se vanno a capo */
     }
-    header nav ul {
-        justify-content: center;
+    header .header-controls {
+        justify-content: center; /* Centra nav e bottone se sono sulla stessa riga */
+        width: 100%; /* Occupa tutta la larghezza se vanno a capo */
+    }
+    header nav {
+        margin-left: 0; /* Rimuovi margine se centrato */
     }
     main section {
-        width: 90%;
-        padding: 20px;
+      width: 90%;
+      padding: 20px;
     }
     .portfolio-grid, .teammates {
-        gap: 20px;
+      gap: 20px;
     }
     .project, .team-member {
-        flex-basis: 45%;
-        min-width: 250px;
+      flex-basis: 45%;
+      min-width: 250px;
     }
     h1, header h1 { font-size: 1.6em; }
     main h2 { font-size: 1.5em; }
-}
-
-/* Mobile Screens */
-@media (max-width: 576px) {
+  }
+  
+  /* Mobile Screens */
+  @media (max-width: 576px) {
     body { font-size: 15px; }
-
-    header nav ul { gap: 10px; }
+  
+    header nav ul { gap: 10px; justify-content: center;}
     header nav a { font-size: 0.95em; }
-
+    header .header-controls {
+        gap: 15px; /* Riduci gap su mobile */
+    }
+    #themeToggleBtn {
+        padding: 6px 10px;
+        font-size: 1.1em;
+        margin-left: 10px;
+    }
+  
     main section {
-        width: 95%;
-        padding: 15px;
-        margin: 25px auto;
+      width: 95%;
+      padding: 15px;
+      margin: 25px auto;
     }
     .portfolio-grid, .teammates {
-        flex-direction: column; /* Stack items vertically */
-        align-items: center;
-        gap: 20px;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
     }
     .project, .team-member {
-        flex-basis: 90%; /* Take up most width when stacked */
-        width: 90%;
-        max-width: 400px;
-        min-width: unset;
+      flex-basis: 90%;
+      width: 90%;
+      max-width: 400px;
+      min-width: unset;
     }
     h1, header h1 { font-size: 1.5em; }
     main h2 { font-size: 1.4em; }
     footer { font-size: 0.85em; }
-}
+  }
