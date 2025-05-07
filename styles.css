@@ -190,7 +190,7 @@ main h2 {
   text-align: center;
   margin-bottom: 30px;
 }
-.portfolio-header h2 { /* Should inherit from main h2 */
+.portfolio-header h2 { 
   display: inline-block; 
 }
 .portfolio-header p {
@@ -201,7 +201,7 @@ main h2 {
 }
 .portfolio-grid {
   display: flex;
-  justify-content: space-around; /* Or space-between, or flex-start with gap */
+  justify-content: space-around; 
   flex-wrap: wrap;
   gap: 25px;
   margin-top: 20px;
@@ -214,9 +214,9 @@ main h2 {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
   text-align: left;
   color: var(--text-color-secondary); 
-  flex: 1 1 300px; /* Grow, shrink, basis */
-  min-width: 280px; /* Don't get too small */
-  max-width: 350px; /* Don't get too large */
+  flex: 1 1 300px; 
+  min-width: 280px; 
+  max-width: 350px; 
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
@@ -225,29 +225,27 @@ main h2 {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
-.project img { /* Assuming you have images in projects */
+.project img { 
   width: 100%;
   height: auto;
-  max-height: 180px; /* Example max height */
+  max-height: 180px; 
   object-fit: cover;
-  border-radius: 4px; /* Slightly rounded corners for the image */
+  border-radius: 4px; 
   margin-bottom: 15px;
 }
 .project h3 {
   color: var(--text-color-primary); 
   margin-bottom: 10px;
   font-size: 1.2em;
-  border: none; /* Remove any inherited borders */
-  padding: 0; /* Remove any inherited padding */
-  text-align: left; /* Ensure it's left-aligned */
+  border: none; 
+  padding: 0; 
+  text-align: left; 
 }
 .project p {
   font-size: 0.95em;
   color: var(--text-color-muted); 
-  flex-grow: 1; /* Allows p to take up remaining space if project is flex-column */
-  /* Remove width, margin, text-align, border from here if they are for general p tags */
+  flex-grow: 1; 
 }
-
 
 /* ===== Skills Section Styles ===== */
 section#skills ul {
@@ -282,7 +280,7 @@ section#skills ul li.active-skill {
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
-.skill-details-container { /* Tied to <div id="skillDetails" class="skill-details-container"> */
+.skill-details-container { 
   margin-top: 25px;
   padding: 20px;
   background-color: var(--skill-details-bg); 
@@ -334,12 +332,11 @@ section#skills ul li.active-skill {
   color: var(--text-color-primary); 
   margin-bottom: 10px;
   font-size: 1.1em;
-  border: none; /* Reset from general h3 if needed */
+  border: none; 
   padding: 0;
 }
 .team-member p {
   font-size: 0.9em;
-  /* Reset from general p if needed */
 }
 .team-member img {
   width: 80px;
@@ -350,7 +347,6 @@ section#skills ul li.active-skill {
   display: block;
   transition: border-color 0.3s;
 }
-
 
 /* ===== Snake Game Section Styles ===== */
 #snake-game-section {
@@ -380,17 +376,24 @@ section#skills ul li.active-skill {
   color: var(--link-color); 
   padding-left: 5px; 
 }
+
 #snakeCanvas {
   display: block; 
   margin: 0 auto 15px auto; 
-  border: 2px solid var(--text-color-muted); 
+  border: 5px solid var(--surface-bg-secondary); 
+  border-radius: 10px; 
+  box-shadow: 0 0 15px rgba(0,0,0,0.2), 
+              inset 0 0 5px rgba(0,0,0,0.1); 
   background-color: #2c3e50; 
   max-width: 100%; 
 }
 body.dark-mode #snakeCanvas {
-    background-color: #222738; 
-    border-color: var(--border-color-secondary);
+  background-color: #222738; 
+  border-color: var(--surface-bg-primary); 
+  box-shadow: 0 0 15px rgba(0,0,0,0.5),
+              inset 0 0 8px rgba(0,0,0,0.3);
 }
+
 .game-button { 
   background-color: var(--button-bg-primary);
   color: var(--button-text-primary);
@@ -626,7 +629,7 @@ footer a { color: var(--link-color); }
   #themeToggleBtn { padding: 6px 10px; font-size: 1.1em; margin-left: 10px; }
   main section { padding: 15px; margin: 25px auto; }
   .project, .team-member { flex-basis: 90%; width: 90%; max-width: 400px; min-width: unset; } 
-  .portfolio-grid, .teammates { flex-direction: column; align-items: center; } /* Stack items on mobile */
+  .portfolio-grid, .teammates { flex-direction: column; align-items: center; } 
   h1, header h1 { font-size: 1.5em; }
   main h2 { font-size: 1.4em; }
   footer { font-size: 0.85em; }
