@@ -156,8 +156,10 @@ async function handleSaveScore() {
                 initials: initials, score: currentScore, timestamp: serverTimestamp() 
             });
             console.log("Score saved with ID: ", docRef.id);
+            // Nascondi input e assicurati che restart sia visibile
             highscoreInputContainer.style.display = 'none';
-            playerInitialsInput.value = ''; restartBtn.style.display = 'block'; 
+            playerInitialsInput.value = ''; 
+            restartBtn.style.display = 'block'; 
             await loadLeaderboard(); 
         } catch (error) {
             console.error("Error saving score: ", error);
@@ -172,12 +174,13 @@ async function handleSaveScore() {
 }
 
 function shouldShowHighscoreInput(currentScore) {
+    // Mostra input solo se il punteggio è maggiore di 0
+    // Potresti aggiungere logica più complessa qui se necessario
+    // (es. confrontare con il punteggio più basso nella leaderboard globale)
     return currentScore > 0;
 }
 
 // --- Funzioni di Disegno e Utility ---
-
-// !!!!! QUESTA FUNZIONE E' STATA RIPRISTINATA !!!!!
 function clearCanvasAndDrawBackground() {
     const canvasBgColor = getComputedStyle(canvas).backgroundColor; 
     ctx.fillStyle = canvasBgColor;
@@ -194,7 +197,6 @@ function drawFood() {
     ctx.beginPath(); ctx.arc(foodX, foodY, foodRadius, 0, Math.PI * 2); ctx.stroke();
 }
 
-// !!!!! QUESTA FUNZIONE E' STATA RIPRISTINATA !!!!!
 function getRandomFoodPosition() {
     let newPosition;
     do {
@@ -213,7 +215,6 @@ function drawSnakeSegment(tileX, tileY, segmentWidth, segmentHeight, cornerRadiu
     if (typeof ctx.roundRect === 'function') {
         ctx.roundRect(x, y, segmentWidth, segmentHeight, cornerRadius);
     } else {
-        // Fallback (opzionale: implementare manualmente o lasciare rettangolo semplice)
         console.warn("ctx.roundRect not available, drawing simple rectangle.");
         ctx.rect(x, y, segmentWidth, segmentHeight);
     }
@@ -228,7 +229,7 @@ function drawSnake() {
     const segmentSize = gridSize - (segmentPadding * 2); 
     const cornerRadius = gridSize * 0.25; 
 
-    if (!snake || !Array.isArray(snake)) return; // Controllo di sicurezza
+    if (!snake || !Array.isArray(snake)) return; 
 
     snake.forEach((segment, index) => {
         const isHead = (index === 0);
@@ -285,13 +286,46 @@ function updateGameState() {
     }
 }
 
+// --- MODIFICATA ---
 function handleGameOverLogic() { 
-    clearInterval(gameIntervalId); gameRunning = false; 
+    clearInterval(gameIntervalId); 
+    gameRunning = false; 
+    console.log("[DEBUG] Game Over Logic - Score:", score); // Log di debug
+
+    // Mostra SEMPRE il pulsante Restart alla fine del gioco
+    if (restartBtn) { // Aggiungi controllo null
+         restartBtn.style.display = 'block';
+         console.log("[DEBUG] Restart button displayed.");
+    } else {
+         console.warn("[DEBUG] Restart button not found!");
+    }
+
+    // Controlla se mostrare il form per il punteggio
     if (shouldShowHighscoreInput(score)) { 
-        highscoreInputContainer.style.display = 'block';
-        playerInitialsInput.focus(); restartBtn.style.display = 'none'; 
-    } else { restartBtn.style.display = 'block'; }
+        console.log("[DEBUG] Showing highscore input..."); 
+        if (highscoreInputContainer) { // Aggiungi controllo null
+            highscoreInputContainer.style.display = 'block';
+            // Tenta di dare il focus, ma preparati a fallire su alcuni dispositivi touch
+            try {
+                if (playerInitialsInput) playerInitialsInput.focus(); // Aggiungi controllo null
+                console.log("[DEBUG] Focus requested on input.");
+            } catch (e) {
+                console.warn("[DEBUG] Could not focus on input automatically:", e);
+            }
+             // Assicurati che il bottone Salva sia abilitato e con testo corretto
+             if(saveScoreBtn) { // Aggiungi controllo null
+                 saveScoreBtn.disabled = false; 
+                 saveScoreBtn.textContent = "Save Score";
+             }
+        } else {
+            console.warn("[DEBUG] Highscore input container not found!");
+        }
+    } else {
+        console.log("[DEBUG] Score doesn't qualify for input.");
+        // Il pulsante Restart è già visibile (mostrato sopra)
+    }
 }
+
 
 function processInput(newVelocityX, newVelocityY) { 
     if (isGameOver && !gameRunning) {} else if (isGameOver) return;
@@ -305,8 +339,13 @@ function processInput(newVelocityX, newVelocityY) {
     if (directionChanged && !gameRunning && !isGameOver) { startGameLoop(); }
 }
 function handleKeyPress(event) { 
-    if (highscoreInputContainer.style.display === 'block') { if (event.key === 'Enter') handleSaveScore(); return; }
-    if (isGameOver && event.key === 'Enter' && restartBtn.style.display === 'block') { initializeGame(); return; }
+    if (highscoreInputContainer && highscoreInputContainer.style.display === 'block') { // Aggiunto controllo null
+        if (event.key === 'Enter') handleSaveScore(); 
+        return; 
+    }
+    if (isGameOver && event.key === 'Enter' && restartBtn && restartBtn.style.display === 'block') { // Aggiunto controllo null
+        initializeGame(); return; 
+    }
     if (isGameOver && gameRunning) return;
     switch (event.key) {
         case 'ArrowUp': case 'w': case 'W': processInput(0, -1); event.preventDefault(); break;
@@ -317,18 +356,17 @@ function handleKeyPress(event) {
  }
 
 function setupNewGame() { 
-    // Inizializza snake prima di chiamare getRandomFoodPosition
     snake = [{ x: Math.floor(tileCountX / 2), y: Math.floor(tileCountY / 2) }];
-    food = getRandomFoodPosition(); // Ora snake esiste quando questa viene chiamata
+    food = getRandomFoodPosition(); 
     velocityX = 0; velocityY = 0; score = 0;
     currentScoreDisplay.textContent = score;
     isGameOver = false; gameRunning = false; 
-    restartBtn.style.display = 'none';
-    highscoreInputContainer.style.display = 'none';
-    playerInitialsInput.value = '';
+    if(restartBtn) restartBtn.style.display = 'none'; // Aggiunto controllo null
+    if(highscoreInputContainer) highscoreInputContainer.style.display = 'none'; // Aggiunto controllo null
+    if(playerInitialsInput) playerInitialsInput.value = ''; // Aggiunto controllo null
 }
 function drawInitialState() { 
-    clearCanvasAndDrawBackground(); // Chiamata a funzione ripristinata
+    clearCanvasAndDrawBackground(); 
     drawSnake();
     drawFood();
 }
@@ -336,7 +374,8 @@ function startGameLoop() {
     if (gameRunning) return; 
     gameRunning = true; isGameOver = false; 
     clearInterval(gameIntervalId); 
-    restartBtn.style.display = 'none'; highscoreInputContainer.style.display = 'none';
+    if(restartBtn) restartBtn.style.display = 'none'; // Aggiunto controllo null
+    if(highscoreInputContainer) highscoreInputContainer.style.display = 'none'; // Aggiunto controllo null
     gameIntervalId = setInterval(() => {
         updateGameState();
         if (isGameOver) { handleGameOverLogic(); } 
@@ -345,20 +384,32 @@ function startGameLoop() {
 }
 
 async function initializeGame() { 
+    // Aggiunto Log di Debug per initializeGame
+    console.log("[DEBUG] Initialize Game Called - Current highscore input display:", highscoreInputContainer ? highscoreInputContainer.style.display : 'N/A'); 
+    
     console.log("Snake Game Initialized!");
     adjustCanvasSize(); 
-    clearInterval(gameIntervalId); 
-    await loadLeaderboard(); // Carica classifica globale
+    clearInterval(gameIntervalId); // Stoppa loop esistente
+    gameRunning = false; // Assicura che il gioco sia considerato non in corso
+    isGameOver = false; // Resetta stato game over
+    
+    await loadLeaderboard(); 
     setupNewGame(); 
     drawInitialState(); 
+    
     personalHighScore = localStorage.getItem('snakePersonalHighScore') ? parseInt(localStorage.getItem('snakePersonalHighScore')) : 0;
     highScoreDisplay.textContent = personalHighScore; 
+
+     // Assicurati che gli elementi UI siano nello stato iniziale corretto
+    if(highscoreInputContainer) highscoreInputContainer.style.display = 'none';
+    if(restartBtn) restartBtn.style.display = 'none'; // Il bottone restart appare solo alla fine del gioco (se non si inserisce highscore)
 }
 
 // Event Listeners
 document.addEventListener('keydown', handleKeyPress);
-restartBtn.addEventListener('click', initializeGame);
-saveScoreBtn.addEventListener('click', handleSaveScore); 
+// Aggiungi controlli null anche qui per sicurezza
+if(restartBtn) restartBtn.addEventListener('click', initializeGame); 
+if(saveScoreBtn) saveScoreBtn.addEventListener('click', handleSaveScore); 
 
 if (touchUpBtn) touchUpBtn.addEventListener('click', () => processInput(0, -1));
 if (touchDownBtn) touchDownBtn.addEventListener('click', () => processInput(0, 1));
@@ -369,9 +420,10 @@ let resizeTimeout;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
+        console.log("[DEBUG] Window resized, re-initializing game..."); // Log resize
         const oldCanvasWidth = canvas.width;
         initializeGame(); 
-        if(gameRunning && canvas.width !== oldCanvasWidth){
+        if(gameRunning && canvas.width !== oldCanvasWidth){ // gameRunning sarà false dopo initializeGame
              console.warn("Canvas resized during gameplay. Game has been reset.");
         }
     }, 250); 
