@@ -1,30 +1,30 @@
 /* styles.css - Refactored with CSS Variables for Theme Switching */
 
 :root {
-  /* Palette Colori Tema Chiaro (Default) */
+  /* Light Theme Palette (Default) */
   --bg-color: #f8f9fa;
   --text-color-primary: #343a40;
   --text-color-secondary: #495057;
   --text-color-muted: #6c757d;
 
-  --surface-bg-primary: #ffffff; /* Es. header, card progetti */
-  --surface-bg-secondary: #e9ecef; /* Es. footer, badge skills */
+  --surface-bg-primary: #ffffff; /* e.g., header, project cards */
+  --surface-bg-secondary: #e9ecef; /* e.g., footer, skill badges */
 
-  --border-color-primary: #dee2e6; /* Bordi principali */
-  --border-color-secondary: #e9ecef; /* Bordi secondari (come skill details) */
+  --border-color-primary: #dee2e6; /* Main borders */
+  --border-color-secondary: #e9ecef; /* Secondary borders (like skill details) */
   --border-color-avatar: #dee2e6;
   --border-color-teammate-avatar: #adb5bd;
 
-  --heading-color: #2c3e50; /* Colore per h1, h2 */
+  --heading-color: #2c3e50; /* Color for h1, h2 */
 
   --link-color: #007bff;
   --link-hover-color: #0056b3;
 
-  --button-bg-primary: #007bff; /* Per bottoni primari come lo scroll to top */
+  --button-bg-primary: #007bff; /* For primary buttons like scroll to top */
   --button-text-primary: #ffffff;
   --button-hover-bg-primary: #0056b3;
 
-  /* Colori specifici per componenti (basati sulle variabili sopra) */
+  /* Component-specific colors (based on variables above) */
   --skill-badge-bg: var(--surface-bg-secondary);
   --skill-badge-text: var(--text-color-secondary);
   --skill-badge-hover-bg: var(--link-color);
@@ -36,12 +36,10 @@
   --skill-details-border: var(--border-color-secondary);
   --skill-details-text: var(--text-color-secondary);
   --skill-details-heading: var(--link-color);
-
-  /* Aggiungi qui altre variabili se necessario */
 }
 
 body.dark-mode {
-  /* Palette Colori Tema Scuro */
+  /* Dark Theme Palette */
   --bg-color: #121212;
   --text-color-primary: #e0e0e0;
   --text-color-secondary: #b0b0b0;
@@ -57,24 +55,15 @@ body.dark-mode {
 
   --heading-color: #d4d4d4;
 
-  --link-color: #64b5f6; /* Blu più chiaro per buona visibilità su scuro */
+  --link-color: #64b5f6; /* Lighter blue for good visibility on dark */
   --link-hover-color: #90caf9;
 
-  --button-bg-primary: var(--link-color); /* Usa il colore dei link per i bottoni */
-  --button-text-primary: #121212; /* Testo scuro su bottone chiaro */
+  --button-bg-primary: var(--link-color); /* Use link color for buttons */
+  --button-text-primary: #121212; /* Dark text on light button */
   --button-hover-bg-primary: var(--link-hover-color);
 
   --skill-badge-bg: #3a3a3a;
-  /* --skill-badge-text eredita (--text-color-secondary) */
-  /* --skill-badge-hover-bg eredita (--link-color) */
-  /* --skill-badge-hover-text eredita (--button-text-primary) */
-  /* --skill-badge-active-bg eredita (--link-hover-color) */
-  /* --skill-badge-active-text eredita (--button-text-primary) */
-
   --skill-details-bg: #232323;
-  /* --skill-details-border eredita (--border-color-secondary) */
-  /* --skill-details-text eredita (--text-color-secondary) */
-  /* --skill-details-heading eredita (--link-color) */
 }
 
 /* ===== General Reset & Base Styles ===== */
@@ -85,115 +74,82 @@ body.dark-mode {
 }
 
 body {
-  font-family: "Space Grotesk", sans-serif; /* Considera se vuoi usare "Source Code Pro" anche qui come nel tuo HTML */
+  font-family: "Space Grotesk", sans-serif;
   line-height: 1.6;
-  background-color: var(--bg-color); /* Usa variabile */
-  color: var(--text-color-primary); /* Usa variabile */
+  background-color: var(--bg-color);
+  color: var(--text-color-primary);
   font-size: 16px;
-  transition: background-color 0.3s, color 0.3s; /* Aggiunge transizione per cambio tema */
+  transition: background-color 0.3s, color 0.3s;
 }
 
 /* ===== Link Styles ===== */
 a {
-  color: var(--link-color); /* Usa variabile */
+  color: var(--link-color);
   text-decoration: none;
 }
-
 a:hover {
-  color: var(--link-hover-color); /* Usa variabile */
+  color: var(--link-hover-color);
   text-decoration: underline;
 }
 
 /* ===== Header Styles ===== */
 header {
-  background-color: var(--surface-bg-primary); /* Usa variabile */
+  background-color: var(--surface-bg-primary);
   padding: 15px 5%;
-  border-bottom: 1px solid var(--border-color-primary); /* Usa variabile */
-  color: var(--text-color-primary); /* Usa variabile */
+  border-bottom: 1px solid var(--border-color-primary);
   display: flex;
   align-items: center;
   gap: 20px;
   flex-wrap: wrap;
   transition: background-color 0.3s, border-color 0.3s;
 }
-
-header .avatar {
-  flex-shrink: 0;
-  background-color: transparent;
-  padding: 0;
-  box-shadow: none;
-  display: inline-flex;
-  vertical-align: middle;
-}
-
 header .avatar img {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  border: 2px solid var(--border-color-avatar); /* Usa variabile */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 2px solid var(--border-color-avatar);
   display: block;
   transition: border-color 0.3s;
 }
-
 header .header-content {
   display: flex;
-  align-items: center; /* Centra verticalmente nome e nav/bottone */
-  justify-content: space-between; /* Spinge nav/bottone a destra */
+  align-items: center;
+  justify-content: space-between;
   flex-grow: 1;
-  flex-wrap: wrap; /* Permette di andare a capo su schermi piccoli */
+  flex-wrap: wrap;
 }
-
-header .header-text { /* Nuovo wrapper per H1 se serve separarlo dalla nav/bottone */
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-  
 header h1 {
  font-size: 1.8em;
  margin: 0 0 5px 0;
- color: var(--heading-color); /* Usa variabile */
- text-shadow: none;
+ color: var(--heading-color);
 }
-
-header nav {
-    margin-left: auto; 
-}
-
 header .header-controls { 
     display: flex;
     align-items: center;
     gap: 20px; 
 }
-  
+header nav {
+    margin-left: auto; 
+}
 header nav ul {
   list-style-type: none;
-  padding: 0;
-  margin: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
-
 header nav a {
   color: var(--text-color-secondary); 
-  font-size: 1em;
   font-weight: 500;
-  padding: 5px 0;
 }
-
 header nav a:hover {
   color: var(--link-color); 
   text-decoration: none;
-  background-color: transparent;
 }
 
 /* ===== Main Content Styles ===== */
 main {
   padding: 30px 0;
 }
-
 main section {
   width: 90%;
   max-width: 960px;
@@ -206,7 +162,6 @@ main section {
   color: var(--text-color-secondary); 
   transition: background-color 0.3s, border-color 0.3s;
 }
-
 section#intro {
   text-align: center;
   background-color: transparent;
@@ -216,12 +171,10 @@ section#intro {
 section#intro p {
  font-size: 1.15em;
  color: var(--text-color-secondary); 
- margin-top: 0;
  max-width: 700px;
  margin-left: auto;
  margin-right: auto;
 }
-
 main h2 {
   font-size: 1.8em;
   margin-bottom: 20px;
@@ -229,16 +182,16 @@ main h2 {
   text-align: center;
   border-bottom: 1px solid var(--border-color-primary); 
   padding-bottom: 10px;
-  text-shadow: none;
   transition: color 0.3s, border-color 0.3s;
 }
 
+/* ===== Portfolio Section Styles (If you have one) ===== */
 .portfolio-header {
   text-align: center;
   margin-bottom: 30px;
 }
-.portfolio-header h2 {
-  display: inline-block;
+.portfolio-header h2 { /* Should inherit from main h2 */
+  display: inline-block; 
 }
 .portfolio-header p {
   color: var(--text-color-muted); 
@@ -246,15 +199,13 @@ main h2 {
   max-width: 600px;
   margin: 10px auto 0 auto;
 }
-
 .portfolio-grid {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-around; /* Or space-between, or flex-start with gap */
   flex-wrap: wrap;
   gap: 25px;
   margin-top: 20px;
 }
-
 .project {
   background-color: var(--surface-bg-primary); 
   border: 1px solid var(--border-color-primary); 
@@ -263,9 +214,9 @@ main h2 {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
   text-align: left;
   color: var(--text-color-secondary); 
-  flex: 1 1 300px;
-  min-width: 280px;
-  max-width: 350px;
+  flex: 1 1 300px; /* Grow, shrink, basis */
+  min-width: 280px; /* Don't get too small */
+  max-width: 350px; /* Don't get too large */
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
@@ -274,34 +225,29 @@ main h2 {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
-
-.project img {
+.project img { /* Assuming you have images in projects */
   width: 100%;
   height: auto;
-  max-height: 180px;
+  max-height: 180px; /* Example max height */
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 4px; /* Slightly rounded corners for the image */
   margin-bottom: 15px;
-  border: none;
-  box-shadow: none;
 }
 .project h3 {
   color: var(--text-color-primary); 
   margin-bottom: 10px;
   font-size: 1.2em;
-  border: none;
-  padding: 0;
-  text-align: left;
+  border: none; /* Remove any inherited borders */
+  padding: 0; /* Remove any inherited padding */
+  text-align: left; /* Ensure it's left-aligned */
 }
 .project p {
   font-size: 0.95em;
   color: var(--text-color-muted); 
-  flex-grow: 1;
-  width: auto;
-  margin: 0;
-  text-align: left;
-  border: none;
+  flex-grow: 1; /* Allows p to take up remaining space if project is flex-column */
+  /* Remove width, margin, text-align, border from here if they are for general p tags */
 }
+
 
 /* ===== Skills Section Styles ===== */
 section#skills ul {
@@ -313,13 +259,7 @@ section#skills ul {
   justify-content: center;
   gap: 10px;
 }
-
 section#skills ul li {
-  width: auto;
-  margin: 0;
-  position: static;
-  border: none;
-  border-left: none;
   background-color: var(--skill-badge-bg); 
   color: var(--skill-badge-text); 
   padding: 6px 14px;
@@ -330,47 +270,43 @@ section#skills ul li {
   transition: all 0.2s ease-in-out;
   cursor: pointer; 
 }
-
 section#skills ul li:hover {
   background-color: var(--skill-badge-hover-bg); 
   color: var(--skill-badge-hover-text); 
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
 section#skills ul li.active-skill {
   background-color: var(--skill-badge-active-bg); 
   color: var(--skill-badge-active-text); 
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
-
-.skill-details-container {
+.skill-details-container { /* Tied to <div id="skillDetails" class="skill-details-container"> */
   margin-top: 25px;
   padding: 20px;
   background-color: var(--skill-details-bg); 
   border: 1px solid var(--skill-details-border); 
   border-radius: 6px;
-  min-height: 70px;
+  min-height: 70px; 
   text-align: left;
   color: var(--skill-details-text); 
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
   transition: all 0.3s ease-in-out;
 }
-
 .skill-details-container h3 {
   color: var(--skill-details-heading); 
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1.2em;
 }
-
 .skill-details-container p {
   margin-bottom: 0;
   font-size: 1em;
   line-height: 1.6;
 }
 
+/* ===== Teammates Section Styles (If you have one) ===== */
 .teammates {
   display: flex;
   justify-content: space-around;
@@ -378,7 +314,6 @@ section#skills ul li.active-skill {
   gap: 25px;
   margin-top: 20px;
 }
-
 .team-member {
   background-color: var(--surface-bg-secondary); 
   border: 1px solid var(--border-color-primary); 
@@ -395,16 +330,16 @@ section#skills ul li.active-skill {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
-
 .team-member h3 {
   color: var(--text-color-primary); 
   margin-bottom: 10px;
   font-size: 1.1em;
-  border: none;
+  border: none; /* Reset from general h3 if needed */
   padding: 0;
 }
 .team-member p {
   font-size: 0.9em;
+  /* Reset from general p if needed */
 }
 .team-member img {
   width: 80px;
@@ -416,69 +351,46 @@ section#skills ul li.active-skill {
   transition: border-color 0.3s;
 }
 
+
 /* ===== Snake Game Section Styles ===== */
 #snake-game-section {
-  width: 90%;
-  max-width: 960px; 
-  margin: 40px auto;
-  padding: 25px 30px;
-  background-color: var(--surface-bg-primary);
-  border: 1px solid var(--border-color-secondary);
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  color: var(--text-color-secondary);
-  transition: background-color 0.3s, border-color 0.3s;
   text-align: center; 
 }
-
-#snake-game-section h2 {
-  font-size: 1.8em;
-  margin-bottom: 25px;
-  color: var(--heading-color);
-  text-align: center;
-  border-bottom: 1px solid var(--border-color-primary);
-  padding-bottom: 10px;
-  text-shadow: none;
-  transition: color 0.3s, border-color 0.3s;
-}
-
 .game-ui-container {
-  display: inline-block; 
-  margin-top: 15px;
+  display: block; 
+  margin: 15px auto 0 auto; 
+  max-width: 100%; 
+  padding: 0 10px; 
 }
-
 .game-details {
   display: flex;
   justify-content: space-between; 
   align-items: center;
-  padding: 10px 5px; 
+  padding: 10px 0; 
   margin-bottom: 15px;
   font-size: 1em; 
   color: var(--text-color-secondary);
+  max-width: 400px; 
+  margin-left: auto;
+  margin-right: auto;
 }
-
-.score-label, .highscore-label {
-  font-weight: 500;
-}
-
+.score-label, .highscore-label { font-weight: 500; }
 #currentScore, #highScore {
   font-weight: bold;
   color: var(--link-color); 
   padding-left: 5px; 
 }
-
 #snakeCanvas {
   display: block; 
   margin: 0 auto 15px auto; 
   border: 2px solid var(--text-color-muted); 
   background-color: #2c3e50; 
+  max-width: 100%; 
 }
-
 body.dark-mode #snakeCanvas {
     background-color: #222738; 
     border-color: var(--border-color-secondary);
 }
-
 .game-button { 
   background-color: var(--button-bg-primary);
   color: var(--button-text-primary);
@@ -491,24 +403,18 @@ body.dark-mode #snakeCanvas {
   transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-top: 10px; 
 }
-
 .game-button:hover {
   background-color: var(--button-hover-bg-primary);
   transform: translateY(-1px); 
 }
-
-.game-button:active {
-  transform: translateY(0px); 
-}
-
+.game-button:active { transform: translateY(0px); }
 .game-instructions {
   margin-top: 20px;
   font-size: 0.9em;
   color: var(--text-color-muted);
 }
-
-/* Stile per il contenitore del form di input highscore */
 #highscore-input-container {
   margin-top: 25px;
   padding: 20px;
@@ -520,19 +426,16 @@ body.dark-mode #snakeCanvas {
   margin-left: auto;
   margin-right: auto;
 }
-
 #highscore-input-container h3 {
   color: var(--heading-color);
   margin-bottom: 10px;
   font-size: 1.3em;
 }
-
 #highscore-input-container p {
   margin-bottom: 15px;
   font-size: 0.95em;
   color: var(--text-color-secondary);
 }
-
 #highscore-input-container input[type="text"] {
   padding: 8px 12px;
   border: 1px solid var(--border-color-primary);
@@ -548,20 +451,16 @@ body.dark-mode #snakeCanvas {
   margin-left: auto;
   margin-right: auto;
 }
-
 #highscore-input-container input[type="text"]:focus {
   outline: none;
   border-color: var(--link-color);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Fallback per box-shadow */
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); 
 }
-
-/* Stile per il contenitore della classifica */
 .leaderboard-container {
   margin-top: 30px;
   padding: 20px;
   text-align: center;
 }
-
 .leaderboard-container h3 {
   color: var(--heading-color);
   margin-bottom: 15px;
@@ -570,7 +469,6 @@ body.dark-mode #snakeCanvas {
   padding-bottom: 8px;
   display: inline-block; 
 }
-
 #leaderboard-list {
   list-style-type: decimal; 
   padding-left: 20px; 
@@ -578,7 +476,6 @@ body.dark-mode #snakeCanvas {
   margin: 0 auto; 
   text-align: left; 
 }
-
 #leaderboard-list li {
   padding: 8px 0;
   font-size: 1em;
@@ -587,31 +484,28 @@ body.dark-mode #snakeCanvas {
   display: flex; 
   justify-content: space-between; 
 }
-
-#leaderboard-list li:last-child {
-  border-bottom: none; 
-}
-
+#leaderboard-list li:last-child { border-bottom: none; }
 #leaderboard-list li .player-name {
   font-weight: 500;
   color: var(--text-color-primary);
   margin-right: 10px; 
 }
-
 #leaderboard-list li .player-score {
   font-weight: bold;
   color: var(--link-color);
 }
 
-/* ===== Snake Game Section Styles - Touch Controls ===== */
+/* Touch Controls for Snake Game */
 #touch-controls-container {
   display: none; 
   flex-direction: column; 
   align-items: center; 
   gap: 5px; 
   margin-top: 20px;
+  user-select: none; 
+  -webkit-user-select: none; 
+  -ms-user-select: none; 
 }
-
 .touch-control-btn {
   background-color: var(--button-bg-primary);
   color: var(--button-text-primary);
@@ -627,25 +521,23 @@ body.dark-mode #snakeCanvas {
   display: flex; 
   align-items: center;
   justify-content: center;
-  -webkit-user-select: none; 
-  -ms-user-select: none; 
-  user-select: none; 
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent; 
 }
-
 .touch-control-btn:hover { 
   background-color: var(--button-hover-bg-primary);
 }
-
 .touch-control-btn:active { 
   transform: scale(0.95); 
   background-color: var(--link-hover-color); 
 }
-
 .touch-controls-middle-row {
   display: flex; 
   justify-content: center; 
   gap: 5px; 
+}
+body.touch-enabled .game-instructions {
+   font-size: 0.8em;
+   color: var(--text-color-muted);
 }
 
 /* Contact Section List Styling */
@@ -655,68 +547,44 @@ section#contact ul {
   margin-top: 15px;
   text-align: center;
 }
-section#contact li {
-  margin-bottom: 10px;
-  background-color: transparent;
-  border: none;
-  width: auto;
-  color: inherit; 
-  padding: 0;
-}
-section#contact li a {
-  font-weight: normal;
-  color: var(--link-color); 
-}
+section#contact li { margin-bottom: 10px; }
 
 /* ===== Footer Styles ===== */
 footer {
   background-color: var(--surface-bg-secondary); 
   padding: 25px;
   border-top: 1px solid var(--border-color-primary); 
-  border-radius: 0;
   color: var(--text-color-muted); 
   text-align: center;
   margin-top: 40px;
   font-size: 0.9em;
   transition: background-color 0.3s, border-color 0.3s;
 }
+footer a { color: var(--link-color); }
 
-footer a {
-  color: var(--link-color); 
-}
-
-/* ===== Scroll to Top Button Styles (Updated) ===== */
+/* ===== Scroll to Top & Theme Toggle Button Styles ===== */
 #scrollToTopBtn {
-  display: none;
+  display: none; 
   position: fixed;
   bottom: 20px;
   right: 30px;
   z-index: 99;
   border: none;
-  outline: none;
   background-color: var(--button-bg-primary); 
   color: var(--button-text-primary); 
   cursor: pointer;
   width: 45px;
   height: 45px;
-  padding: 0;
   border-radius: 50%;
   font-size: 20px;
-  line-height: 45px;
+  line-height: 45px; 
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
 }
+#scrollToTopBtn:hover { background-color: var(--button-hover-bg-primary); }
+#scrollToTopBtn.show { display: block; } 
 
-#scrollToTopBtn:hover {
-  background-color: var(--button-hover-bg-primary); 
-}
-
-#scrollToTopBtn.show {
-  display: block;
-}
-
-/* Stile per il bottone di cambio tema */
 #themeToggleBtn {
   background: none;
   border: 1px solid var(--border-color-primary);
@@ -724,12 +592,11 @@ footer a {
   padding: 8px 12px;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 1.2em;
-  line-height: 1;
+  font-size: 1.2em; 
+  line-height: 1; 
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
   margin-left: 15px; 
 }
-
 #themeToggleBtn:hover {
   background-color: var(--surface-bg-secondary);
   border-color: var(--link-color);
@@ -737,145 +604,52 @@ footer a {
 }
   
 /* ===== Responsive Design - Media Queries ===== */
-
-/* Tablet & Smaller Screens */
-@media (max-width: 768px) {
-  header {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px 5%;
-  }
-  header .header-content {
-     justify-content: center; 
-  }
-  header .header-controls {
-      justify-content: center; 
-      width: 100%; 
-  }
-  header nav {
-      margin-left: 0; 
-  }
-  main section { /* Stile generale per le sezioni su tablet */
-    width: 95%; /* Più larghezza su schermi più piccoli */
-    padding: 20px 15px; /* Riduci padding laterale */
-  }
-  .portfolio-grid, .teammates {
-    gap: 20px;
-  }
-  .project, .team-member {
-    flex-basis: 45%;
-    min-width: 250px;
-  }
+@media (max-width: 768px) { 
+  header { flex-direction: column; gap: 15px; padding: 15px 3%; }
+  header .header-content, header .header-controls { justify-content: center; width: 100%; }
+  header nav { margin-left: 0; }
+  main section { width: 95%; padding: 20px 15px; }
+  .project, .team-member { flex-basis: 45%; min-width: 250px; } 
   h1, header h1 { font-size: 1.6em; }
   main h2 { font-size: 1.5em; }
-
-  /* Snake Game Responsive Adjustments for Tablet */
-  #snake-game-section h2 {
-    font-size: 1.6em; 
-  }
-  #highscore-input-container {
-    max-width: 90%; 
-  }
-  .leaderboard-container h3 {
-    font-size: 1.3em;
-  }
-  #leaderboard-list {
-    max-width: 90%;
-  }
-  /* Mostra i controlli touch */
-  #touch-controls-container { 
-    display: flex; 
-  }
-  /* .game-instructions { display: none; } /* Opzionale: nascondi istruzioni tastiera */
+  #snake-game-section h2 { font-size: 1.6em; }
+  #highscore-input-container { max-width: 90%; }
+  .leaderboard-container h3 { font-size: 1.3em; }
+  #leaderboard-list { max-width: 90%; }
 }
 
-/* Mobile Screens */
-@media (max-width: 576px) {
+@media (max-width: 576px) { 
   body { font-size: 15px; }
-
-  header nav ul { gap: 10px; justify-content: center;}
+  header nav ul { gap: 10px; justify-content: center; }
   header nav a { font-size: 0.95em; }
-  header .header-controls {
-      gap: 15px; 
-  }
-  #themeToggleBtn {
-      padding: 6px 10px;
-      font-size: 1.1em;
-      margin-left: 10px;
-  }
-
-  main section { /* Stile generale per le sezioni su mobile */
-    width: 95%;
-    padding: 15px;
-    margin: 25px auto;
-  }
-  .portfolio-grid, .teammates {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-  .project, .team-member {
-    flex-basis: 90%;
-    width: 90%;
-    max-width: 400px;
-    min-width: unset;
-  }
+  header .header-controls { gap: 15px; }
+  #themeToggleBtn { padding: 6px 10px; font-size: 1.1em; margin-left: 10px; }
+  main section { padding: 15px; margin: 25px auto; }
+  .project, .team-member { flex-basis: 90%; width: 90%; max-width: 400px; min-width: unset; } 
+  .portfolio-grid, .teammates { flex-direction: column; align-items: center; } /* Stack items on mobile */
   h1, header h1 { font-size: 1.5em; }
   main h2 { font-size: 1.4em; }
   footer { font-size: 0.85em; }
-
-  /* Snake Game Responsive Adjustments for Mobile */
-  #snake-game-section h2 {
-    font-size: 1.4em;
-  }
-  .game-details {
-    font-size: 0.9em; 
-    padding: 8px 3px;
-    margin-bottom: 10px;
-  }
-  #highscore-input-container {
-    padding: 15px;
-  }
-  #highscore-input-container h3 {
-    font-size: 1.2em;
-  }
-  #highscore-input-container input[type="text"] {
-    width: 120px; 
-    font-size: 0.9em;
-  }
-  .game-button { 
-    padding: 8px 15px;
-    font-size: 0.9em;
-  }
-  .leaderboard-container {
-    margin-top: 20px;
-    padding: 15px 10px;
-  }
-  .leaderboard-container h3 {
-    font-size: 1.2em;
-  }
-  #leaderboard-list li {
-    font-size: 0.9em;
-    padding: 6px 0;
-  }
-  .game-instructions {
-    font-size: 0.8em;
-    margin-top: 15px;
-  }
+  #snake-game-section h2 { font-size: 1.4em; }
+  .game-details { font-size: 0.9em; padding: 8px 0; margin-bottom: 10px; }
+  .game-ui-container { padding: 0 5px; }
+  #highscore-input-container { padding: 15px; }
+  #highscore-input-container h3 { font-size: 1.2em; }
+  #highscore-input-container input[type="text"] { width: 120px; font-size: 0.9em; }
+  .game-button { padding: 8px 15px; font-size: 0.9em; }
+  .leaderboard-container { margin-top: 20px; padding: 15px 10px; }
+  .leaderboard-container h3 { font-size: 1.2em; }
+  #leaderboard-list li { font-size: 0.9em; padding: 6px 0; }
+  .game-instructions { font-size: 0.8em; margin-top: 15px; }
 }
 
-/* Ulteriori aggiustamenti per schermi molto piccoli, se necessario (per controlli touch) */
-@media (max-width: 480px) {
+@media (max-width: 480px) { 
   .touch-control-btn {
     width: 50px; 
     height: 50px;
     font-size: 1.5em; 
-    margin: 3px;
+    margin: 3px; 
   }
-  #touch-controls-container {
-    gap: 3px; 
-  }
-  .touch-controls-middle-row {
-    gap: 3px; 
-  }
+  #touch-controls-container { gap: 3px; }
+  .touch-controls-middle-row { gap: 3px; }
 }

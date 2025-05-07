@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-    </head>
+</head>
 
 <body>
 
@@ -83,36 +83,37 @@
     
         <div class="game-ui-container">
             <div class="game-details">
-                <span class="score-label">Punteggio: <span id="currentScore">0</span></span>
-                <span class="highscore-label">Massimo: <span id="highScore">0</span></span>
+                <span class="score-label">Score: <span id="currentScore">0</span></span>
+                <span class="highscore-label">High Score: <span id="highScore">0</span></span>
             </div>
             <canvas id="snakeCanvas" width="400" height="400">
-                Il tuo browser non supporta l'elemento HTML5 canvas.
+                Your browser does not support the HTML5 canvas element.
             </canvas>
-            <button id="restartGameBtn" class="game-button" style="display: none;">Ricomincia</button>
-            <p class="game-instructions">Usa i tasti freccia (↑ ← ↓ →) per muovere il serpente.</p>
-            <div id="touch-controls-container" class="touch-controls">
-                <button id="touchUpBtn" class="touch-control-btn" aria-label="Muovi Su">↑</button>
+            <button id="restartGameBtn" class="game-button" style="display: none;">Restart</button>
+            <p class="game-instructions">Use the arrow keys (↑ ← ↓ →) or WASD to move the snake.</p>
+            
+            <div id="touch-controls-container"> <button id="touchUpBtn" class="touch-control-btn" aria-label="Move Up">↑</button>
                 <div class="touch-controls-middle-row">
-                    <button id="touchLeftBtn" class="touch-control-btn" aria-label="Muovi Sinistra">←</button>
-                    <button id="touchDownBtn" class="touch-control-btn" aria-label="Muovi Giù">↓</button>
-                    <button id="touchRightBtn" class="touch-control-btn" aria-label="Muovi Destra">→</button>
+                    <button id="touchLeftBtn" class="touch-control-btn" aria-label="Move Left">←</button>
+                    <button id="touchDownBtn" class="touch-control-btn" aria-label="Move Down">↓</button>
+                    <button id="touchRightBtn" class="touch-control-btn" aria-label="Move Right">→</button>
                 </div>
-        </div> <div id="highscore-input-container" class="highscore-form" style="display: none;">
-            <h3>Nuovo Punteggio Massimo!</h3>
-            <p>Inserisci le tue iniziali (max 5 caratteri):</p>
-            <input type="text" id="playerInitials" maxlength="5" placeholder="ABCDE">
-            <button id="saveScoreBtn" class="game-button">Salva Punteggio</button>
-        </div>
+            </div> 
+            
+            <div id="highscore-input-container" style="display: none;"> <h3>New High Score!</h3>
+                <p>Enter your initials (max 5 characters):</p>
+                <input type="text" id="playerInitials" maxlength="5" placeholder="ABCDE">
+                <button id="saveScoreBtn" class="game-button">Save Score</button>
+            </div>
     
-        <div class="leaderboard-container">
-            <h3>Top 5 Giocatori</h3>
-            <ol id="leaderboard-list">
-                <li>Nessun punteggio ancora</li>
-            </ol>
+            <div class="leaderboard-container">
+                <h3>Top 5 Players</h3>
+                <ol id="leaderboard-list">
+                    <li>No scores yet</li> 
+                </ol>
+            </div>
         </div>
     </section>
-    <section id="contact">
 
     <section id="contact">
         <h2>Contact</h2>
