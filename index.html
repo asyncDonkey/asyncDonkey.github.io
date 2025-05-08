@@ -26,12 +26,31 @@
                 <ul>
                     <li><a href="#about">About</a></li>
                     <li><a href="#skills">Skills</a></li>
+<<<<<<< Updated upstream
                     <li><a href="#contact">Contact</a></li>
+=======
+                    <li><a href="#play-snake-game">Game</a></li>
+                    <li><a href="#guestbook">Guestbook</a></li>
+                    <li id="profileNav" style="display: none;"><a href="#profile">Profilo</a></li> {/* ++ Aggiunto Link Profilo ++ */}
+>>>>>>> Stashed changes
                 </ul>
             </nav>
             <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">
                 🌙
             </button>
+
+            {/* ++ Sezione Autenticazione & Profilo Utente ++ */}
+            <div id="authSection" style="margin-left: 15px; display: flex; align-items: center;">
+                <div id="authContainer">
+                    <button id="showLoginBtn" class="auth-button">Login</button>
+                    <button id="showSignupBtn" class="auth-button">Registrati</button>
+                </div>
+                <div id="userProfileContainer" style="display: none;">
+                    <span id="userDisplayName" style="margin-right: 10px;"></span>
+                    <button id="logoutButton" class="auth-button">Logout</button>
+                </div>
+            </div>
+            {/* ++ Fine Sezione Autenticazione & Profilo Utente ++ */}
         </div>
     </div>
 </header>
@@ -77,6 +96,54 @@
         </div>
     </section>
 
+<<<<<<< Updated upstream
+=======
+    <section id="play-snake-game">
+        <h2>Snake Game</h2>
+        <div style="text-align: center; padding: 20px;">
+
+            <div style="width: 300px; height: 200px; background-color: #ccc; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border: 1px solid #aaa;">
+                <p style="color: #333;"><img src="images/snake_game_preview.gif" alt="Animated preview of Snake Game" style="width:300px; height:200px; border:1px solid #aaa; margin-bottom:20px;"></p>
+            </div>
+            <a href="snake.html" target="_blank" class="game-button" style="text-decoration: none;">Play Snake!</a>
+            <p style="margin-top: 15px; font-size: 0.9em; color: var(--text-color-muted);">Click the button to open the game in a new tab.</p>
+        </div>
+    </section>
+
+    <section id="guestbook">
+        <h2>Guestbook</h2>
+        <p>Leave a comment or a greeting!</p>
+
+        <form id="commentForm">
+            {/* Verranno modificati per usare i dati del profilo utente */}
+            <div id="commentNameSection">
+                <label for="commentName">Name:</label>
+                <input type="text" id="commentName" name="commentName" required maxlength="50">
+            </div>
+            <div>
+                <label for="commentMessage">Message:</label>
+                <textarea id="commentMessage" name="commentMessage" rows="4" required maxlength="500"></textarea>
+            </div>
+            <button type="submit" id="submitCommentBtn" class="game-button">Submit Comment</button>
+        </form>
+
+        <div id="commentsListContainer">
+            <h3>Comments:</h3>
+            <div id="commentsList">
+                <p>Loading comments...</p>
+                </div>
+        </div>
+    </section>
+>>>>>>> Stashed changes
+
+    {/* ++ Aggiungeremo la sezione Profilo qui quando la implementeremo ++ */}
+    {/*
+    <section id="profile" style="display: none;">
+        <h2>Il Mio Profilo</h2>
+        </div>
+    </section>
+    */}
+
 
     <section id="contact">
         <h2>Contact</h2>
@@ -96,7 +163,50 @@
 
 <button id="scrollToTopBtn" title="Scroll back to top">↑</button>
 
+<<<<<<< Updated upstream
 <script src="js/main.js"></script>
+=======
+{/* ++ Modali per Login/Signup ++ */}
+<div id="loginModal" class="modal">
+  <div class="modal-content">
+    <span class="closeLoginBtn">&times;</span>
+    <h3>Login</h3>
+    <form id="loginForm">
+      <div>
+        <label for="loginEmail">Email:</label>
+        <input type="email" id="loginEmail" name="loginEmail" required>
+      </div>
+      <div>
+        <label for="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" name="loginPassword" required>
+      </div>
+      <button type="submit" class="game-button">Login</button>
+    </form>
+  </div>
+</div>
+
+<div id="signupModal" class="modal">
+  <div class="modal-content">
+    <span class="closeSignupBtn">&times;</span>
+    <h3>Registrati</h3>
+    <form id="signupForm">
+      <div>
+        <label for="signupEmail">Email:</label>
+        <input type="email" id="signupEmail" name="signupEmail" required>
+      </div>
+      <div>
+        <label for="signupPassword">Password (min. 6 caratteri):</label>
+        <input type="password" id="signupPassword" name="signupPassword" required minlength="6">
+      </div>
+      <button type="submit" class="game-button">Registrati</button>
+    </form>
+  </div>
+</div>
+{/* ++ Fine Modali ++ */}
+
+<script src="js/main.js" type="module"></script>
+<script src="js/comments.js" type="module"></script>
+>>>>>>> Stashed changes
 
 </body>
 </html>

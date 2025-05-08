@@ -390,6 +390,7 @@
   }
   
 
+<<<<<<< Updated upstream
   
   .teammates {
     display: flex;
@@ -607,3 +608,260 @@
     main h2 { font-size: 1.4em; }
     footer { font-size: 0.85em; }
   }
+=======
+/* ===== Guestbook Section Styles ===== */
+section#guestbook {
+  text-align: left; /* O center se preferisci */
+}
+
+#commentForm {
+  background-color: var(--surface-bg-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  max-width: 600px; /* Limita la larghezza del form */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#commentForm div {
+  margin-bottom: 15px;
+}
+
+#commentForm label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+#commentForm input[type="text"],
+#commentForm textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color-primary);
+  border-radius: 4px;
+  background-color: var(--bg-color); /* Sfondo input coerente con il tema */
+  color: var(--text-color-primary); /* Testo input coerente */
+  font-size: 1em;
+  font-family: inherit;
+}
+
+#commentForm input[type="text"]:focus,
+#commentForm textarea:focus {
+  outline: none;
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Simile al focus del gioco */
+}
+
+#commentForm button[type="submit"] {
+  /* Usa la classe .game-button se vuoi lo stesso stile dei bottoni del gioco */
+  /* Altrimenti definisci uno stile specifico qui */
+  display: block; /* Rende il bottone a larghezza piena se necessario */
+  margin-top: 10px;
+}
+
+#commentsListContainer h3 {
+  color: var(--heading-color);
+  margin-bottom: 15px;
+  text-align: center; /* O left */
+}
+
+#commentsList {
+  max-width: 700px; /* Limita larghezza lista commenti */
+  margin: 0 auto;
+}
+
+.comment-item {
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-secondary);
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.comment-item strong {
+  color: var(--text-color-primary);
+  font-size: 1.05em;
+}
+
+.comment-item .comment-date {
+  color: var(--text-color-muted);
+  font-size: 0.85em;
+  margin-left: 5px;
+}
+
+.comment-item p {
+  margin-top: 8px;
+  margin-bottom: 0;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+  word-wrap: break-word; /* Per evitare overflow di parole lunghe */
+}
+
+.likes-container {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.like-btn {
+  background-color: transparent;
+  border: 1px solid var(--link-color);
+  color: var(--link-color);
+  padding: 5px 8px;
+  border-radius: 20px; /* Più arrotondato */
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s, color 0.2s;
+  margin-right: 8px;
+}
+
+.like-btn:hover {
+  background-color: var(--link-color);
+  color: var(--button-text-primary); /* Testo bianco su sfondo colorato */
+}
+
+.like-btn.liked { /* Stile per quando è già piaciuto */
+  background-color: var(--link-hover-color); /* Un colore che indica "piaciuto" */
+  color: var(--button-text-primary);
+  border-color: var(--link-hover-color);
+  cursor: default;
+}
+
+.like-btn:disabled { /* Stile generale per disabilitato, inclusi i liked */
+  opacity: 0.7;
+  cursor: default;
+}
+
+
+.like-count {
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+}
+
+/* ===== Stili per Autenticazione (Modali e bottoni Header) ===== */
+.modal {
+  display: none; /* Nascosto di default */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background-color: var(--surface-bg-primary);
+  margin: 10% auto;
+  padding: 25px;
+  border: 1px solid var(--border-color-secondary);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--heading-color);
+  text-align: center;
+}
+
+.modal-content div {
+  margin-bottom: 15px;
+}
+
+.modal-content label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+
+.modal-content input[type="email"],
+.modal-content input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color-primary);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color-primary);
+  font-size: 1em;
+  font-family: inherit;
+}
+
+.modal-content input[type="email"]:focus,
+.modal-content input[type="password"]:focus {
+  outline: none;
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 2px rgba(var(--link-color-rgb, 0, 123, 255), 0.25); /* Fallback per rgb se non definito */
+}
+/* Aggiungi questa variabile se non l'hai per il box-shadow focus */
+:root {
+    --link-color-rgb: 0, 123, 255; /* Valori RGB di #007bff */
+}
+body.dark-mode {
+    --link-color-rgb: 100, 181, 246; /* Valori RGB di #64b5f6 */
+}
+
+
+.modal-content button.game-button[type="submit"] { /* Specificità per i bottoni nei modali */
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.closeLoginBtn, .closeSignupBtn {
+  color: var(--text-color-muted);
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+}
+.closeLoginBtn:hover, .closeSignupBtn:hover {
+  color: var(--text-color-primary);
+}
+
+/* Bottoni Auth nell'Header */
+.auth-button {
+  background-color: transparent;
+  border: 1px solid var(--text-color-muted);
+  color: var(--text-color-secondary);
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-left: 8px; /* Spazio tra i bottoni */
+  transition: all 0.2s ease;
+}
+.auth-button:hover {
+  border-color: var(--link-color);
+  color: var(--link-color);
+}
+
+#userProfileContainer span {
+  color: var(--text-color-primary);
+  font-size: 0.9em;
+}
+
+/* Responsive per i controlli auth nell'header */
+@media (max-width: 768px) {
+    header .header-controls {
+        flex-direction: column; /* Stack controls vertically */
+        align-items: center; /* Center items in the column */
+    }
+    #authSection {
+        margin-left: 0; /* Rimuovi margine sinistro */
+        margin-top: 10px; /* Aggiungi spazio sopra */
+    }
+}
+>>>>>>> Stashed changes
