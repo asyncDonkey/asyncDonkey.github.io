@@ -1,11 +1,6 @@
 // js/comments.js
 
-import { db, auth } from './main.js'; // Importa istanze centralizzate
-
-console.log("comments.js: db instance imported:", db ? 'OK' : 'FAIL', db);
-console.log("comments.js: auth instance imported:", auth ? 'OK' : 'FAIL', auth);
-
-// Import necessari da Firestore (inclusi doc e getDoc)
+import { db, auth } from './main.js';
 import {
     collection, addDoc, query, orderBy, limit, getDocs,
     serverTimestamp, Timestamp, doc, updateDoc, increment,
@@ -15,12 +10,11 @@ import {
 let guestbookCollection;
 if (db) {
     guestbookCollection = collection(db, "guestbookEntries");
-    console.log("comments.js: guestbookCollection initialized with db:", guestbookCollection ? 'OK' : 'FAIL');
 } else {
-    console.error("comments.js: Istanza DB non valida! Impossibile inizializzare guestbookCollection.");
+    console.error("comments.js: DB instance not valid!");
 }
 
-// Riferimenti agli elementi DOM
+// DOM Elements
 const commentForm = document.getElementById('commentForm');
 const commentNameInput = document.getElementById('commentName');
 const commentMessageInput = document.getElementById('commentMessage');
@@ -29,225 +23,196 @@ const commentsListDiv = document.getElementById('commentsList');
 const commentNameSection = document.getElementById('commentNameSection');
 const MAX_COMMENTS_DISPLAYED = 20;
 
-// Funzione per formattare il timestamp
+/** Formats Firestore Timestamp */
 function formatFirebaseTimestamp(firebaseTimestamp) {
-    if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
-        try {
-            const date = firebaseTimestamp.toDate();
-            return date.toLocaleString('it-IT', {
-                year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            });
-        } catch (e) { return 'Data non formattabile'; }
-    } else if (typeof firebaseTimestamp === 'string' && firebaseTimestamp.length > 0) {
-        try {
-            const date = new Date(firebaseTimestamp);
-            if (!isNaN(date.getTime())) {
-                return date.toLocaleString('it-IT', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + " (convertita)";
-            } else { return firebaseTimestamp + ' (formato non riconosciuto)'; }
-        } catch (e) { return firebaseTimestamp + ' (errore di parsing)'; }
-    } else { return 'Data non disponibile'; }
+    if (!firebaseTimestamp?.toDate) return 'Date unavailable';
+    try {
+        return firebaseTimestamp.toDate().toLocaleString('it-IT', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return 'Date format error'; }
 }
 
-// Funzione per caricare i commenti
+/** Loads and displays comments */
 async function loadComments() {
-    if (!commentsListDiv) { console.warn("Elemento commentsListDiv non trovato."); return; }
+    if (!commentsListDiv) return;
     if (!guestbookCollection) {
-        console.error("comments.js - loadComments: guestbookCollection non è inizializzata.");
-        commentsListDiv.innerHTML = '<p>Errore: Connessione al database fallita.</p>';
+        commentsListDiv.innerHTML = '<p>Error: Database connection failed.</p>';
         return;
     }
-    commentsListDiv.innerHTML = '<p>Caricamento commenti...</p>';
-    console.log("comments.js - loadComments: Inizio caricamento..."); // Log 1
+    commentsListDiv.innerHTML = '<p>Loading comments...</p>';
+    // console.log("comments.js - loadComments: Starting...");
     try {
         const q = query(guestbookCollection, orderBy("timestamp", "desc"), limit(MAX_COMMENTS_DISPLAYED));
         const querySnapshot = await getDocs(q);
-        console.log(`comments.js - loadComments: Trovati ${querySnapshot.size} documenti.`); // Log 2
+        // console.log(`comments.js - loadComments: Found ${querySnapshot.size} documents.`);
         if (querySnapshot.empty) {
-            commentsListDiv.innerHTML = '<p>Nessun commento ancora. Sii il primo!</p>';
-            console.log("comments.js - loadComments: Query vuota, HTML aggiornato."); // Log 3
+            commentsListDiv.innerHTML = '<p>No comments yet. Be the first!</p>';
             return;
         }
-        commentsListDiv.innerHTML = ''; // Pulisci prima di aggiungere
-        let count = 0;
+        commentsListDiv.innerHTML = '';
         querySnapshot.forEach((docSnapshot) => {
-            count++;
             const commentData = docSnapshot.data();
             const commentId = docSnapshot.id;
             const commentElement = document.createElement('div');
             commentElement.classList.add('comment-item');
 
-            // --- Creazione HTML per il singolo commento ---
-            const nameEl = document.createElement('strong');
-            nameEl.textContent = commentData.userName || commentData.name || 'Anonimo';
+            // Avatar Image using DiceBear (incl. Anonymous)
+            const avatarImg = document.createElement('img');
+            avatarImg.width = 40; avatarImg.height = 40;
+            avatarImg.style.borderRadius = '4px'; avatarImg.style.imageRendering = 'pixelated';
+            avatarImg.style.backgroundColor = '#eee'; avatarImg.style.flexShrink = '0';
+            avatarImg.alt = 'Avatar'; avatarImg.classList.add('comment-avatar-img');
 
+            const avatarStyle = 'identicon';
+            let seed = commentData.userId || commentData.name || `anon-${commentId}`; // Use userId, fallback to name, fallback to unique ID
+            let altText = commentData.userName || commentData.name || 'Anonymous';
+
+            const avatarUrl = `https://api.dicebear.com/8.x/${avatarStyle}/svg?seed=${encodeURIComponent(seed)}`;
+            avatarImg.src = avatarUrl;
+            avatarImg.alt = `${altText}'s Avatar`;
+            avatarImg.onload = () => { avatarImg.style.backgroundColor = 'transparent'; };
+            avatarImg.onerror = () => { avatarImg.style.backgroundColor = '#ddd'; avatarImg.alt = '!'; };
+
+            commentElement.appendChild(avatarImg);
+
+            // Comment Content (Name, Date, Message, Likes)
+            const commentContent = document.createElement('div');
+            commentContent.classList.add('comment-content');
+            const nameEl = document.createElement('strong');
+            nameEl.textContent = altText; // Use the same name determined for alt text
             const dateEl = document.createElement('small');
             dateEl.classList.add('comment-date');
             dateEl.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
-
             const messageEl = document.createElement('p');
             messageEl.textContent = commentData.message ? String(commentData.message).replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+            commentContent.appendChild(nameEl); commentContent.appendChild(dateEl); commentContent.appendChild(messageEl);
 
-            commentElement.appendChild(nameEl);
-            commentElement.appendChild(dateEl);
-            commentElement.appendChild(messageEl);
-
-            // Likes
+            // Likes Section
             const likesContainer = document.createElement('div');
             likesContainer.classList.add('likes-container');
             const likeButton = document.createElement('button');
-            likeButton.innerHTML = '👍';
-            likeButton.classList.add('like-btn');
-            likeButton.setAttribute('data-comment-id', commentId);
-            likeButton.title = "Metti 'Mi piace'";
+            likeButton.innerHTML = '👍'; likeButton.classList.add('like-btn');
+            likeButton.setAttribute('data-comment-id', commentId); likeButton.title = "Like this comment";
             const likeCountSpan = document.createElement('span');
-            likeCountSpan.classList.add('like-count');
-            likeCountSpan.textContent = `${commentData.likes || 0}`;
+            likeCountSpan.classList.add('like-count'); likeCountSpan.textContent = `${commentData.likes || 0}`;
             const likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
-            if (likedComments.includes(commentId)) {
-                likeButton.disabled = true;
-                likeButton.classList.add('liked');
-                likeButton.innerHTML = '❤️';
-            }
+            if (likedComments.includes(commentId)) { likeButton.disabled = true; likeButton.classList.add('liked'); likeButton.innerHTML = '❤️'; }
             likeButton.addEventListener('click', handleLikeComment);
-            likesContainer.appendChild(likeButton);
-            likesContainer.appendChild(likeCountSpan);
-            commentElement.appendChild(likesContainer);
-            // --- Fine Creazione HTML ---
+            likesContainer.appendChild(likeButton); likesContainer.appendChild(likeCountSpan);
+            commentContent.appendChild(likesContainer);
 
+            commentElement.appendChild(commentContent);
             commentsListDiv.appendChild(commentElement);
         });
-        console.log(`comments.js - loadComments: Loop forEach completato (${count} iterazioni), HTML aggiornato.`); // Log 4
+        // console.log(`comments.js - loadComments: Loop complete.`);
     } catch (error) {
-        console.error("comments.js - Errore durante loadComments: ", error); // Log 5
-        commentsListDiv.innerHTML = '<p>Errore nel caricare i commenti. Riprova più tardi.</p>';
+        console.error("comments.js - Error loading comments: ", error);
+        commentsListDiv.innerHTML = '<p>Error loading comments. Please try again later.</p>';
     }
 }
 
-// Funzione per gestire i "Mi piace"
+/** Handles the like button click */
 async function handleLikeComment(event) {
     const likeButton = event.currentTarget;
     const commentId = likeButton.getAttribute('data-comment-id');
-    if (!commentId) { console.error("ID commento mancante per 'like'."); return; }
+    if (!commentId) return;
     const user = auth.currentUser;
-    if (!user) { alert("Devi effettuare il login per mettere 'Mi piace'."); return; }
-    if (!guestbookCollection) { alert("Errore di connessione al database."); return; }
+    if (!user) { alert("You must be logged in to like comments."); return; }
+    if (!guestbookCollection) { alert("Database connection error."); return; }
     likeButton.disabled = true;
     try {
         const commentDocRef = doc(db, "guestbookEntries", commentId);
         await updateDoc(commentDocRef, { likes: increment(1) });
         const likeCountSpan = likeButton.nextElementSibling;
-        if (likeCountSpan?.classList.contains('like-count')) { // Optional chaining
+        if (likeCountSpan?.classList.contains('like-count')) {
             likeCountSpan.textContent = `${parseInt(likeCountSpan.textContent) + 1}`;
         }
-        likeButton.classList.add('liked');
-        likeButton.innerHTML = '❤️';
+        likeButton.classList.add('liked'); likeButton.innerHTML = '❤️';
         let likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
         if (!likedComments.includes(commentId)) {
             likedComments.push(commentId);
             localStorage.setItem('likedGuestbookComments', JSON.stringify(likedComments));
         }
     } catch (error) {
-        console.error("comments.js - Errore aggiornamento 'likes':", error);
-        alert("Impossibile registrare il 'Mi piace'.");
+        console.error("comments.js - Like update error:", error); alert("Failed to register like.");
         const likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
-        if (!likedComments.includes(commentId)) {
-            likeButton.disabled = false;
-            likeButton.classList.remove('liked');
-            likeButton.innerHTML = '👍';
+        if (!likedComments.includes(commentId)) { // Only re-enable if not already liked locally
+             likeButton.disabled = false; likeButton.classList.remove('liked'); likeButton.innerHTML = '👍';
         }
     }
 }
 
-// Funzione per inviare un commento
+/** Handles comment form submission */
 async function handleCommentSubmit(event) {
     event.preventDefault();
-    console.log("comments.js - handleCommentSubmit avviato.");
-    if (!guestbookCollection) { alert("Errore: Connessione db fallita."); return; }
-
-    const message = commentMessageInput?.value.trim(); // Optional chaining
-    if (!message) { alert("Per favore, inserisci un messaggio."); return; }
+    if (!guestbookCollection) { alert("Error: DB connection failed."); return; }
+    const message = commentMessageInput?.value.trim();
+    if (!message) { alert("Please enter a message."); return; }
 
     const user = auth.currentUser;
     let userIdToSave = null;
-    let userNameForComment = 'Anonimo';
+    let nameIdentifier = 'Anonymous'; // Used for display and potentially saving
 
-    if (user) { // Utente Loggato
+    if (user) { // Logged In
         userIdToSave = user.uid;
         const userProfileRef = doc(db, "userProfiles", user.uid);
         try {
-            const docSnap = await getDoc(userProfileRef); // Usa getDoc importato
-            if (docSnap.exists() && docSnap.data().nickname) {
-                userNameForComment = docSnap.data().nickname;
-            } else {
-                userNameForComment = user.email.split('@')[0];
-            }
-            console.log("comments.js - Nome utente per commento:", userNameForComment);
+            const docSnap = await getDoc(userProfileRef);
+            nameIdentifier = docSnap.exists() && docSnap.data().nickname ? docSnap.data().nickname : user.email.split('@')[0];
         } catch (profileError) {
-            console.error("comments.js - Errore caricamento profilo per commento:", profileError);
-            userNameForComment = user.email.split('@')[0]; // Fallback
+            console.error("comments.js - Error loading profile for comment:", profileError);
+            nameIdentifier = user.email.split('@')[0]; // Fallback
         }
-    } else { // Utente Anonimo
-        const nameFromInput = commentNameInput?.value.trim(); // Optional chaining
-        if (!nameFromInput) { alert("Per favore, inserisci il tuo nome o effettua il login."); return; }
-        userNameForComment = nameFromInput;
+    } else { // Anonymous
+        const nameFromInput = commentNameInput?.value.trim();
+        if (!nameFromInput) { alert("Please enter your name or log in."); return; }
+        nameIdentifier = nameFromInput;
     }
 
-    if (!submitCommentBtn) { alert("Errore interno: bottone invio mancante."); return; }
-    submitCommentBtn.disabled = true;
-    submitCommentBtn.textContent = "Invio...";
+    if (!submitCommentBtn) { alert("Error: Submit button missing."); return; }
+    submitCommentBtn.disabled = true; submitCommentBtn.textContent = "Submitting...";
 
     try {
-        const commentData = {
-            message: message,
-            timestamp: serverTimestamp(), // Usa serverTimestamp importato
-            likes: 0
-        };
+        const commentData = { message: message, timestamp: serverTimestamp(), likes: 0 };
         if (userIdToSave) {
             commentData.userId = userIdToSave;
-            commentData.userName = userNameForComment;
+            commentData.userName = nameIdentifier; // Use determined name/nickname
         } else {
-            commentData.name = userNameForComment; // Per anonimi, il campo è 'name'
+            commentData.name = nameIdentifier; // Use 'name' field for anonymous
         }
-        console.log("comments.js - Dati commento da inviare:", commentData);
-        const docRef = await addDoc(guestbookCollection, commentData);
-        console.log("comments.js - Commento inviato con ID:", docRef.id);
+        // console.log("comments.js - Submitting comment data:", commentData);
+        await addDoc(guestbookCollection, commentData);
+        // console.log("comments.js - Comment submitted.");
 
         if (commentMessageInput) commentMessageInput.value = '';
-        if (commentNameInput && !user) commentNameInput.value = ''; // Pulisci nome solo se anonimo
-        alert("Commento inviato con successo!");
-        await loadComments(); // Ricarica i commenti
-
+        if (commentNameInput && !user) commentNameInput.value = ''; // Clear name only if anonymous
+        await loadComments(); // Refresh comments list
     } catch (error) {
-        console.error("comments.js - Errore invio commento a Firestore: ", error);
-        alert("Si è verificato un errore durante l'invio del commento. Riprova.");
+        console.error("comments.js - Error submitting comment:", error);
+        alert("Error submitting comment. Please try again.");
     } finally {
-        if (submitCommentBtn) {
-            submitCommentBtn.disabled = false;
-            submitCommentBtn.textContent = "Invia Commento";
-        }
+        if (submitCommentBtn) { submitCommentBtn.disabled = false; submitCommentBtn.textContent = "Submit Comment"; }
     }
 }
 
-// EventListener DOMContentLoaded
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Imposta stato iniziale campo nome (required o no)
-    if (auth.currentUser && commentNameSection) {
+    // Set initial state of name input based on auth status
+    const user = auth.currentUser; // Check initial state
+    if (user && commentNameSection) {
          commentNameSection.style.display = 'none';
          if (commentNameInput) commentNameInput.required = false;
     } else if (commentNameSection) {
          commentNameSection.style.display = 'block';
          if (commentNameInput) commentNameInput.required = true;
     }
-    // Aggiungi listener al form
+    // Attach form listener
     if (commentForm) {
         commentForm.addEventListener('submit', handleCommentSubmit);
     }
-    // Carica commenti iniziali
+    // Load initial comments
     if (commentsListDiv && db) {
         loadComments();
     } else if (!db) {
-        console.warn("comments.js - DOMContentLoaded: Istanza DB non valida. Non carico i commenti.");
-        if(commentsListDiv) commentsListDiv.innerHTML = "<p>Errore di connessione al database per i commenti.</p>";
+        if(commentsListDiv) commentsListDiv.innerHTML = "<p>Error: Cannot connect to database.</p>";
     }
 });

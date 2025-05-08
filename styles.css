@@ -6,36 +6,28 @@
   --text-color-primary: #343a40;
   --text-color-secondary: #495057;
   --text-color-muted: #6c757d;
-
-  --surface-bg-primary: #ffffff; /* e.g., header, project cards */
-  --surface-bg-secondary: #e9ecef; /* e.g., footer, skill badges */
-
-  --border-color-primary: #dee2e6; /* Main borders */
-  --border-color-secondary: #e9ecef; /* Secondary borders (like skill details) */
+  --surface-bg-primary: #ffffff;
+  --surface-bg-secondary: #e9ecef;
+  --border-color-primary: #dee2e6;
+  --border-color-secondary: #e9ecef;
   --border-color-avatar: #dee2e6;
-  --border-color-teammate-avatar: #adb5bd;
-
-  --heading-color: #2c3e50; /* Color for h1, h2 */
-
+  --heading-color: #2c3e50;
   --link-color: #007bff;
   --link-hover-color: #0056b3;
-
-  --button-bg-primary: #007bff; /* For primary buttons like scroll to top */
+  --button-bg-primary: #007bff;
   --button-text-primary: #ffffff;
   --button-hover-bg-primary: #0056b3;
-
-  /* Component-specific colors (based on variables above) */
   --skill-badge-bg: var(--surface-bg-secondary);
   --skill-badge-text: var(--text-color-secondary);
   --skill-badge-hover-bg: var(--link-color);
   --skill-badge-hover-text: var(--button-text-primary);
   --skill-badge-active-bg: var(--link-hover-color);
   --skill-badge-active-text: var(--button-text-primary);
-
   --skill-details-bg: var(--bg-color);
   --skill-details-border: var(--border-color-secondary);
   --skill-details-text: var(--text-color-secondary);
   --skill-details-heading: var(--link-color);
+  --link-color-rgb: 0, 123, 255; /* For focus ring */
 }
 
 body.dark-mode {
@@ -44,58 +36,34 @@ body.dark-mode {
   --text-color-primary: #e0e0e0;
   --text-color-secondary: #b0b0b0;
   --text-color-muted: #888888;
-
   --surface-bg-primary: #1e1e1e;
   --surface-bg-secondary: #2a2a2a;
-
   --border-color-primary: #333333;
   --border-color-secondary: #444444;
   --border-color-avatar: #555555;
-  --border-color-teammate-avatar: #666666;
-
   --heading-color: #d4d4d4;
-
-  --link-color: #64b5f6; /* Lighter blue for good visibility on dark */
+  --link-color: #64b5f6;
   --link-hover-color: #90caf9;
-
-  --button-bg-primary: var(--link-color); /* Use link color for buttons */
-  --button-text-primary: #121212; /* Dark text on light button */
+  --button-bg-primary: var(--link-color);
+  --button-text-primary: #121212;
   --button-hover-bg-primary: var(--link-hover-color);
-
   --skill-badge-bg: #3a3a3a;
   --skill-details-bg: #232323;
+  --link-color-rgb: 100, 181, 246; /* For focus ring */
 }
 
 /* ===== General Reset & Base Styles ===== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Space Grotesk", sans-serif; line-height: 1.6; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 16px; transition: background-color 0.3s, color 0.3s; }
+a { color: var(--link-color); text-decoration: none; }
+a:hover { color: var(--link-hover-color); text-decoration: underline; }
 
-body {
-  font-family: "Space Grotesk", sans-serif;
-  line-height: 1.6;
-  background-color: var(--bg-color);
-  color: var(--text-color-primary);
-  font-size: 16px;
-  transition: background-color 0.3s, color 0.3s;
-}
 
-/* ===== Link Styles ===== */
-a {
-  color: var(--link-color);
-  text-decoration: none;
-}
-a:hover {
-  color: var(--link-hover-color);
-  text-decoration: underline;
-}
 
-/* ===== Header Styles ===== */
+/* ===== Header Styles MODIFIED ===== */
 header {
   background-color: var(--surface-bg-primary);
-  padding: 15px 5%;
+  padding: 10px 5%; /* Reduced padding */
   border-bottom: 1px solid var(--border-color-primary);
   display: flex;
   align-items: center;
@@ -103,47 +71,67 @@ header {
   flex-wrap: wrap;
   transition: background-color 0.3s, border-color 0.3s;
 }
-header .avatar img {
-  width: 60px;
-  height: 60px;
+header .avatar img { /* Main site avatar */
+  width: 50px; /* Slightly smaller */
+  height: 50px;
   border-radius: 50%;
   border: 2px solid var(--border-color-avatar);
   display: block;
-  transition: border-color 0.3s;
 }
 header .header-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-grow: 1;
+  justify-content: space-between; /* Pushes items apart */
+  flex-grow: 1; /* Takes remaining space */
   flex-wrap: wrap;
+  gap: 20px;
 }
 header h1 {
- font-size: 1.8em;
- margin: 0 0 5px 0;
- color: var(--heading-color);
+  font-size: 1.6em;
+  margin: 0;
+  color: var(--heading-color);
+  white-space: nowrap; /* Prevent title wrapping if possible */
 }
-header .header-controls { 
-    display: flex;
-    align-items: center;
-    gap: 20px; 
+header .header-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Space between nav, theme, auth */
+  flex-wrap: wrap;
+  margin-left: auto; /* Push the whole controls block right (alternative to space-between on parent) */
 }
 header nav {
-    margin-left: auto; 
+  margin-left: 0; /* Reset margin */
 }
 header nav ul {
   list-style-type: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 15px;
 }
-header nav a {
-  color: var(--text-color-secondary); 
-  font-weight: 500;
+header nav a { color: var(--text-color-secondary); font-weight: 500; }
+header nav a:hover { color: var(--link-color); text-decoration: none; }
+
+#themeToggleBtn { /* Theme button styles unchanged */
+  background: none; border: 1px solid var(--border-color-primary); color: var(--text-color-secondary); padding: 6px 10px; /* Slightly smaller */ border-radius: 20px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: all 0.3s;
 }
-header nav a:hover {
-  color: var(--link-color); 
-  text-decoration: none;
+#themeToggleBtn:hover { background-color: var(--surface-bg-secondary); border-color: var(--link-color); color: var(--link-color); }
+
+#authSection { /* Wrapper for login/signup or user profile */
+  display: flex;
+  align-items: center;
+}
+#authContainer { display: flex; gap: 8px; } /* Shown when logged out */
+#userProfileContainer { display: none; align-items: center; } /* Shown when logged in */
+
+.auth-button { /* Style for Login/Register/Logout buttons */
+  background-color: transparent; border: 1px solid var(--text-color-muted); color: var(--text-color-secondary); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: all 0.2s ease; white-space: nowrap;
+}
+.auth-button:hover { border-color: var(--link-color); color: var(--link-color); }
+#userProfileContainer span { /* User nickname display */
+  color: var(--text-color-primary); font-size: 0.9em; margin-right: 10px; white-space: nowrap;
+}
+#headerUserAvatar { /* Avatar shown in header */
+  width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; background-color: #eee; display: none; /* Hidden initially */ vertical-align: middle; object-fit: cover; border: 1px solid var(--border-color-secondary);
 }
 
 /* ===== Main Content Styles ===== */
@@ -658,9 +646,7 @@ footer a { color: var(--link-color); }
 }
 
 /* ===== Guestbook Section Styles ===== */
-section#guestbook {
-  text-align: left; /* O center se preferisci */
-}
+section#guestbook { text-align: left; }
 
 #commentForm {
   background-color: var(--surface-bg-secondary);
@@ -715,44 +701,58 @@ section#guestbook {
   text-align: center; /* O left */
 }
 
-#commentsList {
-  max-width: 700px; /* Limita larghezza lista commenti */
-  margin: 0 auto;
-}
+#commentsList { max-width: 700px; margin: 0 auto; }
 
 .comment-item {
+  display: flex;
+  align-items: flex-start; /* Align avatar top */
+  gap: 12px; /* Slightly more gap */
   background-color: var(--surface-bg-primary);
   border: 1px solid var(--border-color-secondary);
   padding: 15px;
   border-radius: 6px;
   margin-bottom: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+img.comment-avatar-img { /* Style for DiceBear <img> */
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 4px; /* For identicon style */
+  overflow: hidden;
+  background-color: #eee; /* Placeholder bg */
+  image-rendering: pixelated; /* Crisp pixels */
+  border: 1px solid var(--border-color-primary); /* Optional subtle border */
 }
 
-.comment-item strong {
-  color: var(--text-color-primary);
-  font-size: 1.05em;
-}
-
-.comment-item .comment-date {
-  color: var(--text-color-muted);
-  font-size: 0.85em;
-  margin-left: 5px;
-}
-
-.comment-item p {
-  margin-top: 8px;
-  margin-bottom: 0;
-  color: var(--text-color-secondary);
-  line-height: 1.5;
-  word-wrap: break-word; /* Per evitare overflow di parole lunghe */
-}
-
-.likes-container {
-  margin-top: 10px;
-  display: flex;
+.comment-avatar { /* Stile per il DIV contenitore del canvas */
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 4px; /* Optional */
+  overflow: hidden; /* Importante per contenere il canvas */
+  background-color: #eee; /* Sfondo placeholder */
+  display: flex; /* Per centrare placeholder '?' se necessario */
   align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #aaa;
 }
+
+.comment-avatar canvas { /* Stile per il canvas generato */
+  display: block; /* Rimuove spazio extra sotto il canvas */
+  width: 100%; /* Adatta il canvas al contenitore */
+  height: 100%;
+  /* image-rendering: pixelated; */ /* Potrebbe non essere necessario o applicabile direttamente qui */
+}
+
+.comment-content { flex-grow: 1; }
+
+
+.comment-item strong { color: var(--text-color-primary); font-size: 1.05em; }
+.comment-item .comment-date { color: var(--text-color-muted); font-size: 0.85em; margin-left: 5px; }
+.comment-item p { margin-top: 5px; margin-bottom: 8px; color: var(--text-color-secondary); line-height: 1.5; word-wrap: break-word; }
+.likes-container { margin-top: 8px; display: flex; align-items: center; }
 
 .like-btn {
   background-color: transparent;
@@ -903,12 +903,61 @@ body.dark-mode {
 
 /* Responsive per i controlli auth nell'header */
 @media (max-width: 768px) {
-    header .header-controls {
-        flex-direction: column; /* Stack controls vertically */
-        align-items: center; /* Center items in the column */
-    }
-    #authSection {
-        margin-left: 0; /* Rimuovi margine sinistro */
-        margin-top: 10px; /* Aggiungi spazio sopra */
-    }
+  header { flex-direction: column; gap: 10px; }
+  header .header-content { width: 100%; justify-content: center;}
+  header .header-controls { width: 100%; flex-direction: column; gap: 10px; margin-top: 10px;}
+  #authSection { margin-top: 10px; }
+  main section { width: 95%; padding: 20px 15px; }
+  h1, header h1 { font-size: 1.6em; }
+  main h2 { font-size: 1.5em; }
+}
+
+@media (max-width: 576px) {
+  body { font-size: 15px; }
+  header nav ul { gap: 10px; justify-content: center; }
+  header nav a { font-size: 0.95em; }
+  h1, header h1 { font-size: 1.5em; }
+  main h2 { font-size: 1.4em; }
+  footer { font-size: 0.85em; }
+  /* ... (other mobile styles remain) ... */
+}
+
+section#profile { max-width: 600px; margin: 40px auto; padding: 25px 30px; background-color: var(--surface-bg-primary); border: 1px solid var(--border-color-secondary); border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); color: var(--text-color-secondary); }
+section#profile h2, section#profile h3 { text-align: center; color: var(--heading-color); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color-primary); }
+section#profile h3 { margin-top: 30px; font-size: 1.5em; }
+#profileDetailsDisplay p { margin-bottom: 10px; font-size: 1.05em; }
+#profileDetailsDisplay strong { color: var(--text-color-primary); }
+#profileUpdateForm div { margin-bottom: 20px; }
+#profileUpdateForm label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-color-primary); }
+#profileUpdateForm input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; }
+#profileUpdateForm input[type="text"]:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25); }
+#profileUpdateForm button[type="submit"].game-button { display: block; width: 100%; margin-top: 10px; }
+#profileMessage { text-align: center; font-weight: bold; margin-top: 20px; }
+#profileAvatar { /* Style for profile page avatar */ image-rendering: pixelated; }
+
+/* Styles for future Avatar Selection */
+.avatar-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; /* Slightly more gap */
+  margin-top: 10px;
+  justify-content: center; /* Center avatars */
+}
+.avatar-option {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid transparent; /* Thicker border */
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  object-fit: cover; /* Ensure avatar images fit well */
+}
+.avatar-option:hover {
+  border-color: var(--text-color-muted);
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+.avatar-option.selected {
+  border-color: var(--link-color);
+  box-shadow: 0 0 8px rgba(var(--link-color-rgb, 0, 123, 255), 0.5); /* Glow effect */
+  transform: scale(1.1);
 }

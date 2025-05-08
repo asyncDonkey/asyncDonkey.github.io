@@ -581,3 +581,4 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameUIContainer) gameUIContainer.innerHTML = "<p style='color:red; text-align:center;'>Errore di connessione al database. Il gioco non può caricare la leaderboard o salvare i punteggi.</p>";
     }
 }); // Fine DOMContentLoaded
+

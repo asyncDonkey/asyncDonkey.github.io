@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-    </head>
+</head>
 
 <body>
 
@@ -17,7 +17,6 @@
     <div class="avatar">
         <img src="images/asyncDonkey.png" alt="a cute PixelArt donkey" />
     </div>
-
     <div class="header-content">
         <h1>Umberto Trombetta</h1>
 
@@ -28,27 +27,26 @@
                     <li><a href="#skills">Skills</a></li>
                     <li><a href="#play-snake-game">Game</a></li>
                     <li><a href="#guestbook">Guestbook</a></li>
-                    <li id="profileNav" style="display: none;"><a href="#profile">Profilo</a></li> {/* ++ Aggiunto Link Profilo ++ */}
+                    <li id="profileNav" style="display: none;"><a href="profile.html">Profile</a></li>
                 </ul>
             </nav>
-            <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">
-                🌙
-            </button>
+            <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
 
-            {/* ++ Sezione Autenticazione & Profilo Utente ++ */}
-            <div id="authSection" style="margin-left: 15px; display: flex; align-items: center;">
+            <div id="authSection">
+                
                 <div id="authContainer">
                     <button id="showLoginBtn" class="auth-button">Login</button>
-                    <button id="showSignupBtn" class="auth-button">Registrati</button>
+                    <button id="showSignupBtn" class="auth-button">Register</button>
                 </div>
+                
                 <div id="userProfileContainer" style="display: none;">
-                    <span id="userDisplayName" style="margin-right: 10px;"></span>
+                    <img id="headerUserAvatar" src="" alt="Avatar" width="32" height="32">
+                    <span id="userDisplayName"></span>
                     <button id="logoutButton" class="auth-button">Logout</button>
                 </div>
             </div>
-            {/* ++ Fine Sezione Autenticazione & Profilo Utente ++ */}
+            </div>
         </div>
-    </div>
 </header>
 
 <main>
@@ -58,21 +56,11 @@
 
     <section id="about">
         <h2>About Me</h2>
-        <p>
-            While pursuing a Bachelor's degree (L-7) in Civil Engineering in Italy, foundational skills in Full-Stack Engineering are concurrently being developed. This path aims to bridge the analytical problem-solving inherent in engineering with the creative and practical applications of web technology.
-        </p>
-        <p>
-            An initial interest in software development was sparked by an Information Processing Systems course utilizing C during engineering studies. This quickly evolved into a broader exploration of programming, revealing particular engagement with automating processes, designing interfaces, managing data, and resolving complex logical challenges. A background in structured thinking, akin to language learning, provides a useful perspective for approaching programming languages.
-        </p>
-        <p>
-            Although early in this journey, the current focus is on mastering core web fundamentals – HTML, CSS, and JavaScript – primarily through hands-on learning via platforms like Codecademy and freeCodeCamp.
-        </p>
-        <p>
-            Key future goals include contributing to impactful open-source projects and collaborating within dynamic, proactive team settings. Opportunities for international work are also actively sought to gain diverse professional experiences and perspectives. Furthermore, there is a strong interest in identifying synergies between Civil Engineering knowledge and software development, potentially through creating tools for structural analysis, project visualization, or infrastructure data management.
-        </p>
-        <p>
-            Continuous learning and skill development in software engineering remain a core commitment.
-        </p>
+        <p>While pursuing a Bachelor's degree (L-7) in Civil Engineering in Italy, foundational skills in Full-Stack Engineering are concurrently being developed. This path aims to bridge the analytical problem-solving inherent in engineering with the creative and practical applications of web technology.</p>
+        <p>An initial interest in software development was sparked by an Information Processing Systems course utilizing C during engineering studies. This quickly evolved into a broader exploration of programming, revealing particular engagement with automating processes, designing interfaces, managing data, and resolving complex logical challenges. A background in structured thinking, akin to language learning, provides a useful perspective for approaching programming languages.</p>
+        <p>Although early in this journey, the current focus is on mastering core web fundamentals – HTML, CSS, and JavaScript – primarily through hands-on learning via platforms like Codecademy and freeCodeCamp.</p>
+        <p>Key future goals include contributing to impactful open-source projects and collaborating within dynamic, proactive team settings. Opportunities for international work are also actively sought to gain diverse professional experiences and perspectives. Furthermore, there is a strong interest in identifying synergies between Civil Engineering knowledge and software development, potentially through creating tools for structural analysis, project visualization, or infrastructure data management.</p>
+        <p>Continuous learning and skill development in software engineering remain a core commitment.</p>
     </section>
 
     <section id="skills">
@@ -95,7 +83,6 @@
     <section id="play-snake-game">
         <h2>Snake Game</h2>
         <div style="text-align: center; padding: 20px;">
-
             <div style="width: 300px; height: 200px; background-color: #ccc; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border: 1px solid #aaa;">
                 <p style="color: #333;"><img src="images/snake_game_preview.gif" alt="Animated preview of Snake Game" style="width:300px; height:200px; border:1px solid #aaa; margin-bottom:20px;"></p>
             </div>
@@ -107,9 +94,7 @@
     <section id="guestbook">
         <h2>Guestbook</h2>
         <p>Leave a comment or a greeting!</p>
-
-        <form id="commentForm">
-            {/* Verranno modificati per usare i dati del profilo utente */}
+         <form id="commentForm">
             <div id="commentNameSection">
                 <label for="commentName">Name:</label>
                 <input type="text" id="commentName" name="commentName" required maxlength="50">
@@ -120,23 +105,13 @@
             </div>
             <button type="submit" id="submitCommentBtn" class="game-button">Submit Comment</button>
         </form>
-
         <div id="commentsListContainer">
             <h3>Comments:</h3>
             <div id="commentsList">
                 <p>Loading comments...</p>
-                </div>
+            </div>
         </div>
     </section>
-
-    {/* ++ Aggiungeremo la sezione Profilo qui quando la implementeremo ++ */}
-    {/*
-    <section id="profile" style="display: none;">
-        <h2>Il Mio Profilo</h2>
-        </div>
-    </section>
-    */}
-
 
     <section id="contact">
         <h2>Contact</h2>
@@ -152,11 +127,11 @@
 
 <footer>
     <p>&copy; 2025 Developed by Umberto Trombetta.</p>
+    <p style="font-size: 0.8em; margin-top: 5px;">Avatars generated using <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
 </footer>
 
 <button id="scrollToTopBtn" title="Scroll back to top">↑</button>
 
-{/* ++ Modali per Login/Signup ++ */}
 <div id="loginModal" class="modal">
   <div class="modal-content">
     <span class="closeLoginBtn">&times;</span>
@@ -178,22 +153,20 @@
 <div id="signupModal" class="modal">
   <div class="modal-content">
     <span class="closeSignupBtn">&times;</span>
-    <h3>Registrati</h3>
+    <h3>Register</h3>
     <form id="signupForm">
       <div>
         <label for="signupEmail">Email:</label>
         <input type="email" id="signupEmail" name="signupEmail" required>
       </div>
       <div>
-        <label for="signupPassword">Password (min. 6 caratteri):</label>
+        <label for="signupPassword">Password (min. 6 characters):</label>
         <input type="password" id="signupPassword" name="signupPassword" required minlength="6">
       </div>
-      <button type="submit" class="game-button">Registrati</button>
+      <button type="submit" class="game-button">Register</button>
     </form>
   </div>
 </div>
-{/* ++ Fine Modali ++ */}
-
 <script src="js/main.js" type="module"></script>
 <script src="js/comments.js" type="module"></script>
 
