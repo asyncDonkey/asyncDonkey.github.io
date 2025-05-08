@@ -4,24 +4,21 @@ import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serve
 
 // --- Configurazione Firebase ---
 const firebaseConfig = {
-    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk", // Verifica!
+    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk",
     authDomain: "asyncdonkey.firebaseapp.com",
     projectId: "asyncdonkey",
-    storageBucket: "asyncdonkey.appspot.com", // Verifica!
+    storageBucket: "asyncdonkey.appspot.com",
     messagingSenderId: "939854468396",
     appId: "1:939854468396:web:9646d4f51737add7704889",
     measurementId: "G-EQDBKQM3YE"
 };
 
-// Inizializza Firebase (UNA SOLA VOLTA, a livello di modulo)
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const leaderboardCollection = collection(db, "leaderboardScores");
 
-// --- ASPETTA CHE IL DOM SIA PRONTO PRIMA DI ESEGUIRE IL RESTO ---
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Setup Elementi DOM e Variabili Core ---
     const canvas = document.getElementById('snakeCanvas');
     if (!canvas) { console.error("Canvas element not found!"); return; }
     const ctx = canvas.getContext('2d');
@@ -36,13 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveScoreBtn = document.getElementById('saveScoreBtn');
     const leaderboardList = document.getElementById('leaderboard-list');
     const touchControlsContainer = document.getElementById('touch-controls-container');
-    // const gameInstructions = document.querySelector('.game-instructions'); // Non usato direttamente nello script se non per la classe CSS
     const touchUpBtn = document.getElementById('touchUpBtn');
     const touchDownBtn = document.getElementById('touchDownBtn');
     const touchLeftBtn = document.getElementById('touchLeftBtn');
     const touchRightBtn = document.getElementById('touchRightBtn');
 
-    // --- Touch Device Detection & Controls Setup ---
     const isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0);
     if (isTouchDevice) {
         document.body.classList.add('touch-enabled');
@@ -57,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Variabili di Stato e Configurazione Gioco ---
     const initialCanvasWidth = 400;
     const gridSize = 20;
     let tileCountX = initialCanvasWidth / gridSize;
@@ -75,18 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameRunning;
     const MAX_LEADERBOARD_ENTRIES = 5;
 
-    // --- Colors ---
     const foodColor = '#f0f0e0';
     const foodBorderColor = '#adb5bd';
     const snakeBodyColor = '#3498db';
     const snakeHeadColor = '#5dade2';
     const snakeStrokeColor = '#21618C';
 
-    // --- Effetto Particelle ---
     let particleEffect = { active: false, particles: [], x: 0, y: 0, framesLeft: 0 };
     const PARTICLE_COUNT = 8; const PARTICLE_LIFESPAN = 10; const PARTICLE_SPEED = 2;
-
-    // --- Funzioni ---
 
     function calculateTargetCanvasWidth() {
         let targetWidth = initialCanvasWidth;
@@ -98,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const containerPaddingRight = parseFloat(containerStyle.paddingRight) || 0;
             const availableWidth = gameUIContainer.clientWidth - containerPaddingLeft - containerPaddingRight;
             let newTileCount = Math.floor(availableWidth / gridSize);
-            if (newTileCount < 10) newTileCount = 10; // Minimo 10 tile
+            if (newTileCount < 10) newTileCount = 10;
             targetWidth = newTileCount * gridSize;
         }
         return targetWidth;
@@ -106,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadLeaderboard() {
         if (leaderboardList) {
-            leaderboardList.innerHTML = '<li>Loading...</li>';
+            leaderboardList.innerHTML = '<li>Loading scores...</li>'; // Translated
         } else {
             console.error("Leaderboard list element not found!");
             return;
@@ -119,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             displayLeaderboard(fetchedLeaderboard);
         } catch (error) {
             console.error("Error loading leaderboard: ", error);
-            if (leaderboardList) leaderboardList.innerHTML = '<li>Error loading scores</li>';
+            if (leaderboardList) leaderboardList.innerHTML = '<li>Error loading scores</li>'; // Translated
         }
     }
 
@@ -127,13 +117,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!leaderboardList) return;
         leaderboardList.innerHTML = '';
         if (!leaderboardData || leaderboardData.length === 0) {
-            leaderboardList.innerHTML = '<li>No scores yet</li>';
+            leaderboardList.innerHTML = '<li>No scores yet</li>'; // Translated
             return;
         }
         leaderboardData.forEach(entry => {
             const li = document.createElement('li');
             const nameSpan = document.createElement('span'); nameSpan.className = 'player-name';
-            nameSpan.textContent = entry.initials || 'N/A';
+            nameSpan.textContent = entry.initials || 'N/A'; // Translated (N/A is common)
             const scoreSpan = document.createElement('span'); scoreSpan.className = 'player-score';
             scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
             li.appendChild(nameSpan); li.appendChild(scoreSpan);
@@ -147,9 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const initials = playerInitialsInput.value.trim().toUpperCase();
-        const currentScoreVal = score; // Usa una variabile diversa per evitare confusione con la variabile globale 'score'
+        const currentScoreVal = score;
         if (initials.length > 0 && initials.length <= 5) {
-            saveScoreBtn.disabled = true; saveScoreBtn.textContent = "Saving...";
+            saveScoreBtn.disabled = true; saveScoreBtn.textContent = "Saving..."; // Translated
             try {
                 await addDoc(leaderboardCollection, { initials: initials, score: currentScoreVal, timestamp: serverTimestamp() });
                 highscoreInputContainer.style.display = 'none';
@@ -158,12 +148,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 await loadLeaderboard();
             } catch (error) {
                 console.error("Error saving score: ", error);
-                alert("Error saving score. Please try again.");
+                alert("Error saving score. Please try again."); // Translated
             } finally {
-                saveScoreBtn.disabled = false; saveScoreBtn.textContent = "Save Score";
+                saveScoreBtn.disabled = false; saveScoreBtn.textContent = "Save Score"; // Translated
             }
         } else {
-            alert('Please enter 1 to 5 characters for your initials.');
+            alert('Please enter 1 to 5 characters for your initials.'); // Translated
             playerInitialsInput.focus();
         }
     }
@@ -199,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let newPosition;
         if (tileCountX <= 0 || tileCountY <= 0) {
             console.warn("Cannot get random food position, invalid tile count:", tileCountX, tileCountY);
-            return { x: 0, y: 0 }; // Fallback
+            return { x: 0, y: 0 };
         }
         do {
             newPosition = {
@@ -218,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof ctx.roundRect === 'function') {
             ctx.roundRect(x, y, segmentWidth, segmentHeight, cornerRadius);
         } else {
-            // Fallback per browser che non supportano roundRect (raro per canvas 2D moderno)
             console.warn("ctx.roundRect not available, drawing simple rectangle.");
             ctx.rect(x, y, segmentWidth, segmentHeight);
         }
@@ -266,12 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const head = { x: snake[0].x + velocityX, y: snake[0].y + velocityY };
 
-        // Controllo collisione con i muri
         if (head.x < 0 || head.x >= tileCountX || head.y < 0 || head.y >= tileCountY) {
             isGameOver = true;
             return;
         }
-        // Controllo collisione con se stesso
         for (let i = 1; i < snake.length; i++) {
             if (head.x === snake[i].x && head.y === snake[i].y) {
                 isGameOver = true;
@@ -285,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
             score++;
             if (currentScoreDisplay) currentScoreDisplay.textContent = score;
 
-            // Attiva effetto particelle
             particleEffect.active = true;
             particleEffect.x = food.x * gridSize + gridSize / 2;
             particleEffect.y = food.y * gridSize + gridSize / 2;
@@ -307,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('snakePersonalHighScore', personalHighScore.toString());
             }
         } else {
-            if (snake.length > 1) { // Non rimuovere l'ultimo pezzo se è l'unico (inizialmente è lungo 1)
+            if (snake.length > 1) {
                  snake.pop();
             }
         }
@@ -325,10 +311,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (shouldShowHighscoreInput(score)) {
             if (highscoreInputContainer) {
                 highscoreInputContainer.style.display = 'block';
-                // playerInitialsInput.focus(); // Rimosso il focus automatico per evitare problemi su mobile/resize
                 if (saveScoreBtn) {
                     saveScoreBtn.disabled = false;
-                    saveScoreBtn.textContent = "Save Score";
+                    saveScoreBtn.textContent = "Save Score"; // Translated
                 }
             } else {
                 console.warn("Highscore input container not found!");
@@ -337,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function processInput(newVelocityX, newVelocityY) {
-        if (isGameOver) return; // Non processare input se il gioco è finito
+        if (isGameOver) return;
 
         const goingUp = velocityY === -1;
         const goingDown = velocityY === 1;
@@ -345,18 +330,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const goingRight = velocityX === 1;
         let directionChanged = false;
 
-        if (newVelocityX === 0 && newVelocityY === -1 && !goingDown) { // Su
+        if (newVelocityX === 0 && newVelocityY === -1 && !goingDown) { // Up
             velocityX = 0; velocityY = -1; directionChanged = true;
-        } else if (newVelocityX === 0 && newVelocityY === 1 && !goingUp) { // Giù
+        } else if (newVelocityX === 0 && newVelocityY === 1 && !goingUp) { // Down
             velocityX = 0; velocityY = 1; directionChanged = true;
-        } else if (newVelocityX === -1 && newVelocityY === 0 && !goingRight) { // Sinistra
+        } else if (newVelocityX === -1 && newVelocityY === 0 && !goingRight) { // Left
             velocityX = -1; velocityY = 0; directionChanged = true;
-        } else if (newVelocityX === 1 && newVelocityY === 0 && !goingLeft) { // Destra
+        } else if (newVelocityX === 1 && newVelocityY === 0 && !goingLeft) { // Right
             velocityX = 1; velocityY = 0; directionChanged = true;
         }
 
         if (directionChanged && !gameRunning) {
-            // Avvia il gioco al primo input valido se non è già in esecuzione
             startGameLoop();
         }
     }
@@ -365,9 +349,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (highscoreInputContainer && highscoreInputContainer.style.display === 'block') {
             if (event.key === 'Enter') {
                 handleSaveScore();
-                event.preventDefault(); // Evita submit di form se presente
+                event.preventDefault();
             }
-            return; // Non processare tasti di gioco se l'input del punteggio è attivo
+            return;
         }
 
         if (isGameOver && event.key === 'Enter' && restartBtn && restartBtn.style.display === 'block') {
@@ -376,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (isGameOver) return; // Non processare input di gioco se il gioco è finito e non è per riavviare
+        if (isGameOver) return;
 
         let processed = false;
         switch (event.key) {
@@ -387,18 +371,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (processed && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-            event.preventDefault(); // Previene lo scroll della pagina con i tasti freccia
+            event.preventDefault();
         }
     }
 
     function setupNewGame() {
         snake = [{ x: Math.floor(tileCountX / 2), y: Math.floor(tileCountY / 2) }];
         food = getRandomFoodPosition();
-        velocityX = 0; velocityY = 0; // Il serpente parte fermo, si muove al primo input
+        velocityX = 0; velocityY = 0;
         score = 0;
         if (currentScoreDisplay) currentScoreDisplay.textContent = score;
         isGameOver = false;
-        gameRunning = false; // Il loop di gioco parte con il primo input valido
+        gameRunning = false;
 
         if (restartBtn) restartBtn.style.display = 'none';
         if (highscoreInputContainer) highscoreInputContainer.style.display = 'none';
@@ -412,11 +396,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startGameLoop() {
-        if (gameRunning) return; // Evita di avviare più loop
+        if (gameRunning) return;
         gameRunning = true;
-        isGameOver = false; // Assicura che non sia game over all'inizio del loop
+        isGameOver = false;
 
-        clearInterval(gameIntervalId); // Pulisce intervalli precedenti
+        clearInterval(gameIntervalId);
         if (restartBtn) restartBtn.style.display = 'none';
         if (highscoreInputContainer) highscoreInputContainer.style.display = 'none';
 
@@ -434,43 +418,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function initializeGame() {
-        // Calcola e imposta dimensioni canvas e tile count
         const targetWidth = calculateTargetCanvasWidth();
         canvas.width = targetWidth;
-        canvas.height = targetWidth; // Canvas quadrato
-        tileCountX = Math.floor(canvas.width / gridSize); // Usa Math.floor per evitare problemi con frazioni
+        canvas.height = targetWidth;
+        tileCountX = Math.floor(canvas.width / gridSize);
         tileCountY = Math.floor(canvas.height / gridSize);
 
-        // Stoppa loop esistente e resetta stati logici
         clearInterval(gameIntervalId);
         gameRunning = false;
         isGameOver = false;
 
-        await loadLeaderboard(); // Carica la classifica all'inizio
-        setupNewGame();      // Imposta le variabili di gioco
-        drawInitialState();  // Disegna lo stato iniziale
+        await loadLeaderboard();
+        setupNewGame();
+        drawInitialState();
 
-        // Aggiorna il punteggio personale massimo visualizzato
         personalHighScore = localStorage.getItem('snakePersonalHighScore') ? parseInt(localStorage.getItem('snakePersonalHighScore')) : 0;
         if (highScoreDisplay) highScoreDisplay.textContent = personalHighScore;
 
-        // Nascondi elementi UI non necessari all'inizio
         if (highscoreInputContainer) highscoreInputContainer.style.display = 'none';
         if (restartBtn) restartBtn.style.display = 'none';
     }
 
-    // --- Event Listeners ---
     document.addEventListener('keydown', handleKeyPress);
     if (restartBtn) restartBtn.addEventListener('click', initializeGame);
     if (saveScoreBtn) saveScoreBtn.addEventListener('click', handleSaveScore);
 
-    // Listener Touch
     if (touchUpBtn) touchUpBtn.addEventListener('click', () => processInput(0, -1));
     if (touchDownBtn) touchDownBtn.addEventListener('click', () => processInput(0, 1));
     if (touchLeftBtn) touchLeftBtn.addEventListener('click', () => processInput(-1, 0));
     if (touchRightBtn) touchRightBtn.addEventListener('click', () => processInput(1, 0));
 
-    // Resize Listener
     let resizeTimeout;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
@@ -481,37 +458,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (targetCanvasWidth !== currentCanvasWidth) {
                 if (!isInputCurrentlyVisible && !gameRunning) {
-                    // Se il gioco non è in esecuzione e l'input non è visibile, re-inizializza completamente
                     initializeGame();
                 } else if (!isInputCurrentlyVisible && gameRunning) {
-                    // Se il gioco è in esecuzione ma l'input non è visibile,
-                    // prova a re-inizializzare per adattare la dimensione.
-                    // Questo resetterà il progresso attuale.
-                    // Potresti voler gestire questo diversamente (es. pausare e ridisegnare)
                     initializeGame();
                 } else {
-                    // Se l'input è visibile o c'è una situazione non gestita,
-                    // aggiorna solo le dimensioni della canvas senza resettare il gioco
-                    // per evitare di perdere l'input dell'utente o lo stato di game over.
                     canvas.width = targetCanvasWidth;
                     canvas.height = targetCanvasWidth;
                     tileCountX = Math.floor(canvas.width / gridSize);
                     tileCountY = Math.floor(canvas.height / gridSize);
-                    // Ridisegna lo stato corrente se il gioco è finito e l'input è visibile
                     if (isGameOver) {
                         clearCanvasAndDrawBackground();
-                        drawSnake(); // Disegna il serpente nello stato di game over
-                        drawFood();  // Disegna il cibo
+                        drawSnake();
+                        drawFood();
                     } else if (!gameRunning) {
-                        drawInitialState(); // Se il gioco non era ancora partito, ridisegna lo stato iniziale
+                        drawInitialState();
                     }
-                     // Se il gioco era in corso (gameRunning = true), il loop se ne occuperà.
                 }
             }
         }, 250);
     });
 
-    // Avvia l'inizializzazione del gioco la prima volta
     initializeGame();
 
-}); // Fine DOMContentLoaded
+});

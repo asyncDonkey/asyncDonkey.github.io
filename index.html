@@ -26,8 +26,8 @@
                 <ul>
                     <li><a href="#about">About</a></li>
                     <li><a href="#skills">Skills</a></li>
-                    <li><a href="#snake-game-section">Game</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#play-snake-game">Game</a></li> 
+                    <li><a href="#guestbook">Guestbook</a></li> 
                 </ul>
             </nav>
             <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">
@@ -78,65 +78,38 @@
         </div>
     </section>
 
-    <section id="snake-game-section">
+    <section id="play-snake-game"> 
         <h2>Snake Game</h2>
-    
-        <div class="game-ui-container">
-            <div class="game-details">
-                <span class="score-label">Score: <span id="currentScore">0</span></span>
-                <span class="highscore-label">High Score: <span id="highScore">0</span></span>
-            </div>
-            <canvas id="snakeCanvas" width="400" height="400">
-                Your browser does not support the HTML5 canvas element.
-            </canvas>
-            <button id="restartGameBtn" class="game-button" style="display: none;">Restart</button>
-            <p class="game-instructions">Use the arrow keys (↑ ← ↓ →) or WASD to move the snake.</p>
+        <div style="text-align: center; padding: 20px;">
             
-            <div id="touch-controls-container"> 
-                <button id="touchUpBtn" class="touch-control-btn" aria-label="Move Up">↑</button>
-                <div class="touch-controls-middle-row">
-                    <button id="touchLeftBtn" class="touch-control-btn" aria-label="Move Left">←</button>
-                    <button id="touchDownBtn" class="touch-control-btn" aria-label="Move Down">↓</button>
-                    <button id="touchRightBtn" class="touch-control-btn" aria-label="Move Right">→</button>
-                </div>
-            </div> 
-            
-            <div id="highscore-input-container" style="display: none;"> 
-                <h3>New High Score!</h3>
-                <p>Enter your initials (max 5 characters):</p>
-                <input type="text" id="playerInitials" maxlength="5" placeholder="ABCDE">
-                <button id="saveScoreBtn" class="game-button">Save Score</button>
+            <div style="width: 300px; height: 200px; background-color: #ccc; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border: 1px solid #aaa;">
+                <p style="color: #333;"><img src="images/snake_game_preview.gif" alt="Animated preview of Snake Game" style="width:300px; height:200px; border:1px solid #aaa; margin-bottom:20px;"></p>
             </div>
-    
-            <div class="leaderboard-container">
-                <h3>Top 5 Players</h3>
-                <ol id="leaderboard-list">
-                    <li>No scores yet</li> 
-                </ol>
-            </div>
+            <a href="snake.html" target="_blank" class="game-button" style="text-decoration: none;">Play Snake!</a>
+            <p style="margin-top: 15px; font-size: 0.9em; color: var(--text-color-muted);">Click the button to open the game in a new tab.</p>
         </div>
     </section>
 
     <section id="guestbook">
         <h2>Guestbook</h2>
-        <p>Lascia un commento o un saluto!</p>
+        <p>Leave a comment or a greeting!</p> 
     
         <form id="commentForm">
             <div>
-                <label for="commentName">Nome:</label>
+                <label for="commentName">Name:</label> 
                 <input type="text" id="commentName" name="commentName" required maxlength="50">
             </div>
             <div>
-                <label for="commentMessage">Messaggio:</label>
+                <label for="commentMessage">Message:</label> 
                 <textarea id="commentMessage" name="commentMessage" rows="4" required maxlength="500"></textarea>
             </div>
-            <button type="submit" id="submitCommentBtn" class="game-button">Invia Commento</button>
+            <button type="submit" id="submitCommentBtn" class="game-button">Submit Comment</button> 
         </form>
     
         <div id="commentsListContainer">
-            <h3>Commenti:</h3>
+            <h3>Comments:</h3> 
             <div id="commentsList">
-                <p>Caricamento commenti...</p>
+                <p>Loading comments...</p> 
                 </div>
         </div>
     </section>
@@ -160,7 +133,7 @@
 <button id="scrollToTopBtn" title="Scroll back to top">↑</button>
 
 <script src="js/main.js" type="module"></script>
-<script src="js/snake_game.js" type="module"></script>
+{/* snake_game.js is no longer needed directly on index.html */}
 <script src="js/comments.js" type="module"></script>
 
 </body>

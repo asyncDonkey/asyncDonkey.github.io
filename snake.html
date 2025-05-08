@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game - Umberto Trombetta</title>
+    <link rel="stylesheet" href="styles.css"> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    <style>
+        /* Basic styles to center the game, can be moved to styles.css */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color); /* Uses theme from styles.css */
+            font-family: "Source Code Pro", monospace; /* Consistent font */
+        }
+        header { /* Minimal header for the game page */
+            background-color: var(--surface-bg-primary);
+            padding: 15px 5%;
+            border-bottom: 1px solid var(--border-color-primary);
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        header h1 {
+            font-size: 1.8em;
+            margin: 0;
+            color: var(--heading-color);
+        }
+        main {
+            width: 90%;
+            max-width: 960px; /* Consistent with main page sections */
+        }
+        /* Ensure game section specific styles from styles.css apply correctly */
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Snake Game</h1>
+</header>
+
+<main>
+    <section id="snake-game-section">
+        <h2>Snake Game</h2>
+    
+        <div class="game-ui-container">
+            <div class="game-details">
+                <span class="score-label">Score: <span id="currentScore">0</span></span>
+                <span class="highscore-label">High Score: <span id="highScore">0</span></span>
+            </div>
+            <canvas id="snakeCanvas" width="400" height="400">
+                Your browser does not support the HTML5 canvas element.
+            </canvas>
+            <button id="restartGameBtn" class="game-button" style="display: none;">Restart</button>
+            <p class="game-instructions">Use the arrow keys (↑ ← ↓ →) or WASD to move the snake.</p>
+            
+            <div id="touch-controls-container"> 
+                <button id="touchUpBtn" class="touch-control-btn" aria-label="Move Up">↑</button>
+                <div class="touch-controls-middle-row">
+                    <button id="touchLeftBtn" class="touch-control-btn" aria-label="Move Left">←</button>
+                    <button id="touchDownBtn" class="touch-control-btn" aria-label="Move Down">↓</button>
+                    <button id="touchRightBtn" class="touch-control-btn" aria-label="Move Right">→</button>
+                </div>
+            </div> 
+            
+            <div id="highscore-input-container" style="display: none;"> 
+                <h3>New High Score!</h3>
+                <p>Enter your initials (max 5 characters):</p>
+                <input type="text" id="playerInitials" maxlength="5" placeholder="ABCDE">
+                <button id="saveScoreBtn" class="game-button">Save Score</button>
+            </div>
+    
+            <div class="leaderboard-container">
+                <h3>Top 5 Players</h3>
+                <ol id="leaderboard-list">
+                    <li>Loading scores...</li> 
+                </ol>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p><a href="index.html" style="color: var(--link-color); text-decoration: underline;">&larr; Back to Main Page</a></p>
+    <p>&copy; 2025 Developed by Umberto Trombetta.</p>
+</footer>
+
+<script src="js/snake_game.js" type="module"></script>
+{/* Include main.js if theme switcher or other shared functionality is desired on this page too */}
+{/* <script src="js/main.js" type="module"></script> */}
+</body>
+</html>
