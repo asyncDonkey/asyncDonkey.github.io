@@ -117,6 +117,30 @@
         </div>
     </section>
 
+    <section id="guestbook">
+        <h2>Guestbook</h2>
+        <p>Lascia un commento o un saluto!</p>
+    
+        <form id="commentForm">
+            <div>
+                <label for="commentName">Nome:</label>
+                <input type="text" id="commentName" name="commentName" required maxlength="50">
+            </div>
+            <div>
+                <label for="commentMessage">Messaggio:</label>
+                <textarea id="commentMessage" name="commentMessage" rows="4" required maxlength="500"></textarea>
+            </div>
+            <button type="submit" id="submitCommentBtn" class="game-button">Invia Commento</button>
+        </form>
+    
+        <div id="commentsListContainer">
+            <h3>Commenti:</h3>
+            <div id="commentsList">
+                <p>Caricamento commenti...</p>
+                </div>
+        </div>
+    </section>
+
     <section id="contact">
         <h2>Contact</h2>
         <p>Feel free to reach out:</p>
@@ -135,8 +159,9 @@
 
 <button id="scrollToTopBtn" title="Scroll back to top">↑</button>
 
-<script src="js/main.js" type="module"></script> 
+<script src="js/main.js" type="module"></script>
 <script src="js/snake_game.js" type="module"></script>
+<script src="js/comments.js" type="module"></script>
 
 </body>
 </html>
