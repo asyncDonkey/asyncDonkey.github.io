@@ -11,7 +11,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 450;
 const groundHeight = 70;
-const gravity = 0.15;
+const gravity = 0.3; // User's value
 let gameSpeed = 220;
 const lineWidth = 2;
 const GLOBAL_SPRITE_SCALE_FACTOR = 1.5;
@@ -19,8 +19,8 @@ const GLOBAL_SPRITE_SCALE_FACTOR = 1.5;
 // --- IMPOSTAZIONI INDICATORE AVVERTIMENTO SPARO ---
 const WARNING_EXCLAMATION_COLOR = 'red';
 const WARNING_EXCLAMATION_FONT = 'bold 28px "Courier New", monospace';
-const WARNING_EXCLAMATION_OFFSET_Y = -20; 
-const WARNING_DURATION = 0.4; 
+const WARNING_EXCLAMATION_OFFSET_Y = -20;
+const WARNING_DURATION = 0.4;
 
 // --- PERCORSI E SPECIFICHE SPRITE ---
 const PLAYER_SPRITESHEET_SRC = 'images/asyncDonkey_walk.png';
@@ -96,7 +96,7 @@ const ENEMY_SIX_PROJECTILE_NUM_FRAMES = 4;
 const ENEMY_SIX_PROJECTILE_TARGET_WIDTH = ENEMY_SIX_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
 const ENEMY_SIX_PROJECTILE_TARGET_HEIGHT = ENEMY_SIX_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 
-const ENEMY_SEVEN_BASE_SRC = 'images/enemySevenPlaceholder.png';
+const ENEMY_SEVEN_BASE_SRC = 'images/enemySeven.png';
 const ENEMY_SEVEN_DMG1_SRC = 'images/enemySevenDmg1.png';
 const ENEMY_SEVEN_ACTUAL_FRAME_WIDTH = 48; const ENEMY_SEVEN_ACTUAL_FRAME_HEIGHT = 64;
 const ENEMY_SEVEN_NUM_FRAMES = 4;
@@ -104,7 +104,7 @@ const ENEMY_SEVEN_TARGET_WIDTH = ENEMY_SEVEN_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_
 const ENEMY_SEVEN_TARGET_HEIGHT = ENEMY_SEVEN_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const TOUGH_BASIC_ENEMY_HEALTH = 2;
 
-const DANGEROUS_FLYING_ENEMY_SRC = 'images/dangerousFlyingEnemyPlaceholder.png';
+const DANGEROUS_FLYING_ENEMY_SRC = 'images/dangerousFlyingEnemy.png';
 const DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_WIDTH = 40;
 const DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_HEIGHT = 40;
 const DANGEROUS_FLYING_ENEMY_NUM_FRAMES = 4;
@@ -112,17 +112,17 @@ const DANGEROUS_FLYING_ENEMY_TARGET_WIDTH = DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_
 const DANGEROUS_FLYING_ENEMY_TARGET_HEIGHT = DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const DANGEROUS_FLYING_ENEMY_HEALTH = 1;
 
-const GLITCHZILLA_BASE_SRC = 'images/glitchzilla_sprite.png';
+const GLITCHZILLA_BASE_SRC = 'images/glitchzilla_sprite.png'; // Corretto
 const GLITCHZILLA_DMG1_SRC = 'images/glitchzillaDmg1.png';
 const GLITCHZILLA_DMG2_SRC = 'images/glitchzillaDmg2.png';
 const GLITCHZILLA_DMG3_SRC = 'images/glitchzillaDmg3.png';
-const GLITCHZILLA_ACTUAL_FRAME_WIDTH = 96; const GLITCHZILLA_ACTUAL_FRAME_HEIGHT = 96;
+const GLITCHZILLA_ACTUAL_FRAME_WIDTH = 96; const GLITCHZILLA_ACTUAL_FRAME_HEIGHT = 96; // Corretto
 const GLITCHZILLA_NUM_FRAMES = 4;
 const GLITCHZILLA_TARGET_WIDTH = GLITCHZILLA_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
 const GLITCHZILLA_TARGET_HEIGHT = GLITCHZILLA_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
 const GLITCHZILLA_HEALTH = 30;
 const GLITCHZILLA_SCORE_VALUE = 500;
-const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 2500; // Modify for tests
+const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 2500;
 
 const GLITCHZILLA_PROJECTILE_SPRITE_SRC = 'images/glitchzillaProjectile.png';
 const GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_WIDTH = 24; const GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_HEIGHT = 24;
@@ -552,7 +552,7 @@ class BaseEnemy{
         this.frameHeight = frameH;
         this.scoreValue = scoreValue;
         this.animations = {};
-        this.isWarning = false; 
+        this.isWarning = false;
         this.warningTimer = 0;
 
         this.loadAnimation(this.baseSpriteName, frameW, frameH, numFrames, 'base');
@@ -564,7 +564,7 @@ class BaseEnemy{
             this.animations[animationKey] = new Animation(spriteInstance, frameW, frameH, numFrames);
             if (animationKey === 'base') {
                 this.animation = this.animations.base;
-                this.sprite = spriteInstance; 
+                this.sprite = spriteInstance;
             }
         } else {
             console.warn(`BaseEnemy.loadAnimation FALLITO per sprite key '${spriteNameKeyToLoad}' (anim key: ${animationKey}). Sprite obj: ${spriteInstance}, complete: ${spriteInstance ? spriteInstance.complete : 'N/A'}, naturalWidth: ${spriteInstance ? spriteInstance.naturalWidth : 'N/A'}, numFrames: ${numFrames}`);
@@ -652,12 +652,12 @@ class ShootingEnemy extends BaseEnemy { // EnemyFour
                 this.warningTimer = 0;
                 enemyProjectiles.push(new EnemyProjectile(
                     this.x - this.projectileTargetWidth,
-                    this.y + this.height / 2 - this.projectileTargetHeight / 2, // Shoots from center
+                    this.y + this.height / 2 - this.projectileTargetHeight / 2, 
                     this.projectileSpriteName,
                     this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames,
                     this.projectileTargetWidth, this.projectileTargetHeight
                 ));
-                AudioManager.playSound(SHOOTING_ENEMY_PROJECTILE_SOUND.split('.')[0]);
+                AudioManager.playSound('enemyShootLight'); // CORRETTO
                 this.shootTimer = 0; 
             }
         } else {
@@ -746,8 +746,7 @@ class ArmoredShootingEnemy extends BaseEnemy { // EnemySix
             if (this.warningTimer >= WARNING_DURATION) {
                 this.isWarning = false;
                 this.warningTimer = 0;
-                // Spara proiettile raso terra
-                const projectileY = this.y + this.height - this.projectileTargetHeight - 5; // Vicino ai piedi
+                const projectileY = this.y + this.height - this.projectileTargetHeight - 5; 
                 enemyProjectiles.push(new EnemyProjectile(
                     this.x - this.projectileTargetWidth,
                     projectileY,
@@ -755,7 +754,7 @@ class ArmoredShootingEnemy extends BaseEnemy { // EnemySix
                     this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames,
                     this.projectileTargetWidth, this.projectileTargetHeight
                 ));
-                AudioManager.playSound(ARMORED_SHOOTING_ENEMY_PROJECTILE_SOUND.split('.')[0]);
+                AudioManager.playSound('enemyShootHeavy'); // CORRETTO
                 this.shootTimer = 0;
             }
         } else {
@@ -823,7 +822,6 @@ class Glitchzilla extends BaseEnemy {
 
         this.pauseShortDuration = 0.75;
         this.pauseLongDuration = 2.0;
-        // WARNING_DURATION is global
 
         this.projectileSpriteName = 'glitchzillaProjectile';
         this.projectileFrameWidth = GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_WIDTH;
@@ -833,6 +831,7 @@ class Glitchzilla extends BaseEnemy {
         this.projectileTargetHeight = GLITCHZILLA_PROJECTILE_TARGET_HEIGHT;
 
         AudioManager.playSound('glitchzillaSpawn');
+        console.log("GLITCHZILLA SPAWNED! HP: " + this.health);
     }
 
     updateCurrentAnimation() {
@@ -848,12 +847,13 @@ class Glitchzilla extends BaseEnemy {
 
     takeDamage(dmg = 1) {
         super.takeDamage(dmg); 
+        console.log(`Glitchzilla took ${dmg} damage, HP: ${this.health}`);
         this.updateCurrentAnimation(); 
         AudioManager.playSound('glitchzillaHit');
         if (this.health <= 0) {
-            console.log("Glitchzilla SCONFITTO!");
+            console.log("Glitchzilla SCONFITTO! Assegno punteggio: " + this.scoreValue);
             AudioManager.playSound('glitchzillaDefeat');
-            score += this.scoreValue; // Assegna punteggio qui
+            score += this.scoreValue; 
             activeMiniboss = null; 
             hasGlitchzillaSpawnedThisGame = true;
         }
@@ -883,7 +883,7 @@ class Glitchzilla extends BaseEnemy {
                 if (!this.shotFiredInPhase) {
                     let projectileY;
                     if (currentPhase === 'high') projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
-                    else if (currentPhase === 'medium') projectileY = this.y + this.height * 0.65 - this.projectileTargetHeight / 2; // Abbassato
+                    else if (currentPhase === 'medium') projectileY = this.y + this.height * 0.65 - this.projectileTargetHeight / 2; 
                     else projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
 
                     enemyProjectiles.push(new EnemyProjectile(
@@ -894,7 +894,7 @@ class Glitchzilla extends BaseEnemy {
                     AudioManager.playSound('glitchzillaAttack');
                     this.shotFiredInPhase = true;
                 }
-                phaseComplete = true; // Lo sparo è istantaneo, passa alla pausa
+                phaseComplete = true;
                 break;
 
             case 'pause_short':
@@ -950,8 +950,6 @@ function spawnDangerousFlyingEnemyIfNeeded(dt) { if (activeMiniboss || score < S
 function spawnGlitchzillaIfNeeded() {
     if (!activeMiniboss && !hasGlitchzillaSpawnedThisGame && score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD) {
         activeMiniboss = new Glitchzilla(canvas.width, canvas.height - groundHeight - GLITCHZILLA_TARGET_HEIGHT);
-        // console.log("GLITCHZILLA SPAWNED!"); // Log spostato dentro costruttore Glitchzilla
-        // hasGlitchzillaSpawnedThisGame = true; // Impostato dentro takeDamage o quando sconfitto
     }
 }
 
@@ -1074,11 +1072,11 @@ function checkCollisions(){
             if(indexInArray<0||indexInArray>=enemyList.length)return false;
             const e=enemyList[indexInArray];
             if(e&&p.x<e.x+e.width&&p.x+p.width>e.x&&p.y<e.y+e.height&&p.y+p.height>e.y){
-                e.takeDamage(p.damage); // takeDamage in enemy class handles score if health <= 0 (for Glitchzilla)
+                e.takeDamage(p.damage); 
                 AudioManager.playSound('enemyHit'); projectileConsumedThisHit=true;
                 if(e.health<=0){
                     AudioManager.playSound('enemyExplode');
-                    if (!(e instanceof Glitchzilla)) { // Glitchzilla score is handled in its own takeDamage
+                    if (!(e instanceof Glitchzilla)) { 
                        score+= e.scoreValue;
                     }
                     enemyList.splice(indexInArray,1);
@@ -1097,7 +1095,7 @@ function checkCollisions(){
                             powerUpItems.push(new PowerUpItem(e.x,e.y,randomType,images,() => gameSpeed));
                         }
                     }
-                }else if(e instanceof ArmoredEnemy || e instanceof ArmoredShootingEnemy || e instanceof ToughBasicEnemy || (e instanceof Glitchzilla && e.health > 0) ){score+=5;} // Only add hit score if not defeated
+                }else if(e instanceof ArmoredEnemy || e instanceof ArmoredShootingEnemy || e instanceof ToughBasicEnemy || (e instanceof Glitchzilla && e.health > 0) ){score+=5;} 
                 return true;
             }return false;
         };
