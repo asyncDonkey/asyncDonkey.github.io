@@ -26,7 +26,7 @@ export { db, auth };
 
 // --- FUNZIONE HELPER PER AVATAR BLOCKIES ---
 // (Può stare fuori da DOMContentLoaded se non accede direttamente al DOM all'avvio)
-function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
+export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
     // Verifica se createIcon è stata importata correttamente
     if (typeof createIcon !== 'function') {
         console.error("Funzione createIcon da Blockies non definita o non importata!");
