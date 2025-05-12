@@ -3,130 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>asyncDonkey Runner</title>
-    <link rel="icon" href="images/favicon.svg" type="image/svg">
+    <title>asyncDonkey Runner - Il Gioco</title>
+    <link rel="stylesheet" href="styles.css">
+
+   
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml"> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"> 
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+
+
     <style>
-        body {
-            margin: 0;
-            background-color: #000;
+        /* Stili specifici minimi che potrebbero rimanere qui o essere spostati */
+        /* La maggior parte degli stili ora verrà da styles.css con la classe .donkey-runner-page */
+        body.donkey-runner-page { /* Assicurati che il font base sia leggibile per il gioco */
+            font-family: "Source Code Pro", monospace; /* O il font che preferisci per la pagina del gioco */
+            background-color: var(--bg-color);
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Courier New', Courier, monospace; /* Added for button text consistency */
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Già presente nel tuo body originale */
         }
 
-        #gameContainer {
-            position: relative; /* For positioning controls */
+        .donkey-runner-page #gameContainer {
+            position: relative;
             width: 100%;
-            max-width: 800px; /* Max width of the game */
+            max-width: 800px; /* Max larghezza del gioco */
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-top: 20px; /* Spazio dall'header */
+            margin-bottom: 20px; /* Spazio dal footer */
         }
 
-        canvas#gameCanvas {
-            border: 2px solid #0f0;
+        .donkey-runner-page canvas#gameCanvas {
             display: block;
             image-rendering: -moz-crisp-edges;
             image-rendering: -webkit-crisp-edges;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            width: 100%; /* Make canvas responsive within its container */
-            height: auto; /* Maintain aspect ratio */
-            max-height: calc(100vh - 120px); /* Max height considering controls */
+            width: 100%; 
+            height: auto; 
+            max-height: calc(100vh - 220px); /* Aumentato leggermente lo spazio per header/footer/controlli */
+            border: 3px solid var(--game-border-color, #00b9be); 
+            border-radius: 8px; 
+            box-shadow: 0 0 15px rgba(var(--game-shadow-rgb, 0, 185, 190), 0.5); /* Usa variabile per ombra */
         }
 
-        /* Mobile Controls Styling */
-        #mobileControls {
-            display: none; /* Hidden by default, shown via JS for touch devices */
+        .donkey-runner-page #mobileControls {
+            display: none; 
             width: 100%;
             padding: 10px 0;
             box-sizing: border-box;
-            user-select: none; /* Prevent text selection */
+            user-select: none;
             -webkit-user-select: none;
-            position: absolute; /* Position relative to gameContainer */
-            bottom: 10px; /* Position at the bottom */
+            position: absolute; 
+            bottom: 10px; 
             left: 0;
-            z-index: 10; /* Ensure controls are on top */
+            z-index: 10; 
         }
 
-        #mobileControlsInternal {
+        .donkey-runner-page #mobileControlsInternal {
             display: flex;
-            justify-content: space-between; /* Space out buttons */
+            justify-content: space-around; 
             align-items: center;
-            width: 95%;
+            width: 90%; 
+            max-width: 400px; 
             margin: 0 auto;
         }
 
-        .control-button {
-            background-color: rgba(50, 50, 50, 0.7);
-            color: #0f0;
-            border: 2px solid #0f0;
+        .donkey-runner-page .control-button {
+            background-color: var(--game-button-bg, rgba(0, 50, 80, 0.7));
+            color: var(--game-button-text, #c4f0c2);
+            border: 2px solid var(--game-button-border, #5ab9a8);
             border-radius: 10px;
             padding: 15px 20px;
-            font-size: 1.5em; /* Larger for touch */
+            font-size: 1.3em; 
             font-weight: bold;
+            font-family: "Source Code Pro", monospace; 
             cursor: pointer;
             outline: none;
-            flex-grow: 1; /* Make buttons take available space */
-            margin: 0 5px; /* Spacing between buttons */
+            flex-grow: 0; 
+            flex-basis: 45%; 
+            margin: 0 5px;
             text-align: center;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
         }
-        .control-button:active {
-            background-color: rgba(70, 70, 70, 0.9);
+        .donkey-runner-page .control-button:active {
+            background-color: var(--game-button-active-bg, rgba(0, 70, 100, 0.9));
+            transform: scale(0.95);
         }
 
-        /* Fullscreen Button Styling */
-        #fullscreenButton {
-            background-color: rgba(50, 50, 50, 0.7);
-            color: #0f0;
-            border: 2px solid #0f0;
-            border-radius: 5px;
+        .donkey-runner-page #fullscreenButton {
+            background-color: var(--surface-bg-secondary); 
+            color: var(--text-color-secondary);
+            border: 1px solid var(--border-color-primary);
+            border-radius: 20px; 
             padding: 8px 12px;
             font-size: 0.9em;
+            font-family: "Source Code Pro", monospace;
             cursor: pointer;
             position: absolute;
             top: 10px;
             right: 10px;
-            z-index: 20; /* Ensure it's above other elements */
-            display: none; /* Hidden by default, shown via JS for touch devices */
+            z-index: 20;
+            display: none; /* Gestito da JS */
+            transition: background-color 0.2s, color 0.2s;
         }
-         #fullscreenButton:active {
-            background-color: rgba(70, 70, 70, 0.9);
+         .donkey-runner-page #fullscreenButton:hover {
+            background-color: var(--link-hover-color);
+            color: var(--button-text-primary);
         }
 
-        /* Media query for better layout on very small screens or landscape */
-        @media (max-width: 400px), (max-height: 400px) and (orientation: landscape) {
-            .control-button {
-                padding: 10px 15px;
-                font-size: 1.2em;
+        /* Aggiunta per media query, se i pulsanti diventano troppo grandi su schermi piccoli */
+        @media (max-width: 480px), (max-height: 480px) and (orientation: landscape) {
+            .donkey-runner-page .control-button {
+                padding: 10px 12px;
+                font-size: 1.1em;
             }
-            #mobileControls {
-                bottom: 5px;
-            }
-             #fullscreenButton {
+            .donkey-runner-page #fullscreenButton {
                 font-size: 0.8em;
                 padding: 6px 10px;
-                top: 5px;
-                right: 5px;
+            }
+             .donkey-runner-page canvas#gameCanvas {
+                max-height: calc(100vh - 180px); /* Adatta per schermi più piccoli */
             }
         }
-
     </style>
 </head>
-<body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-        <div id="mobileControls">
-            <div id="mobileControlsInternal">
-                <button id="jumpButton" class="control-button">SALTA</button>
-                <button id="shootButton" class="control-button">SPARA</button>
+<body class="donkey-runner-page">
+
+    <header>
+        <div class="header-content" style="justify-content: space-between; padding: 10px 5%; align-items: center;">
+            <h1>asyncDonkey Runner</h1>
+            <div style="display: flex; align-items: center;">
+                <a href="index.html" class="auth-button" style="margin-right: 15px; text-decoration: none; padding: 8px 15px;">Homepage</a>
+                 <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme" style="background: none; border: 1px solid var(--border-color-primary); color: var(--text-color-secondary); padding: 6px 10px; border-radius: 20px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: all 0.3s;">🌙</button>
             </div>
         </div>
-        <button id="fullscreenButton">FULLSCREEN</button>
-    </div>
+    </header>
+
+    <main>
+        <div id="gameContainer">
+            <canvas id="gameCanvas"></canvas> 
+            <div id="mobileControls">
+                <div id="mobileControlsInternal">
+                    <button id="jumpButton" class="control-button">SALTA</button>
+                    <button id="shootButton" class="control-button">SPARA</button>
+                </div>
+            </div>
+            <button id="fullscreenButton">FULLSCREEN</button>
+        </div>
+        <div style="text-align: center; margin-top: 15px; color: var(--text-color-muted); font-size: 0.9em;">
+            <p>Desktop: SPAZIO/FRECCIA SU = Salta | CTRL/X = Spara</p>
+            <p>Mobile: Usa i pulsanti su schermo.</p>
+        </div>
+    </main>
+
+    <footer style="margin-top: auto;">
+        <p>&copy; 2025 Sviluppato da Umberto Trombetta.</p>
+        <p style="font-size: 0.8em; margin-top: 5px;">Avatars generati usando <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
+    </footer>
+
+    <script src="js/main.js" type="module"></script>
     <script type="module" src="js/donkeyRunner.js"></script>
 </body>
 </html>

@@ -953,7 +953,15 @@ class Glitchzilla extends BaseEnemy {
 }
 
 
-function drawGround(){ctx.strokeStyle='#0f0';ctx.lineWidth=lineWidth;ctx.beginPath();ctx.moveTo(0,canvas.height-groundHeight);ctx.lineTo(canvas.width,canvas.height-groundHeight);ctx.stroke();}
+function drawGround() {
+    // ctx.strokeStyle = '#0f0'; // Vecchio colore
+    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--game-ground-line-color').trim() || '#00b9be'; // Nuovo colore da variabile CSS, con fallback
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - groundHeight);
+    ctx.lineTo(canvas.width, canvas.height - groundHeight);
+    ctx.stroke();
+}
 function calculateNextObstacleSpawnTime(){const minT=6.0;const maxT=10.0;return minT+Math.random()*(maxT-minT);}
 function spawnObstacleIfNeeded(dt){if(activeMiniboss) return; obstacleSpawnTimer+=dt;if(obstacleSpawnTimer>=nextObstacleSpawnTime){obstacleSpawnTimer=0;nextObstacleSpawnTime=calculateNextObstacleSpawnTime();obstacles.push(new Obstacle(canvas.width,canvas.height-groundHeight-OBSTACLE_TARGET_HEIGHT));}}
 function updateObstacles(dt){for(let i=obstacles.length-1;i>=0;i--){obstacles[i].update(dt);if(obstacles[i].x+obstacles[i].width<0){obstacles.splice(i,1);score+=5;}}}
@@ -1203,22 +1211,36 @@ function updatePlaying(dt){
     checkCollisions();
 }
 
-function drawPlayingScreen(){
-    ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
+function drawPlayingScreen() {
+    ctx.fillStyle = '#000'; // Sfondo
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawGround();
-    if (!activeMiniboss) { 
+
+    if (!activeMiniboss) {
         drawObstacles();
     }
-    drawAllEnemyTypes(); 
-    drawPowerUpItems();drawProjectiles();
-    if(asyncDonkey)asyncDonkey.draw();
-    ctx.fillStyle='#0f0';ctx.font='24px "Courier New",Courier,monospace';ctx.textAlign='left';ctx.fillText("Score: "+score,20,40);
-    if(asyncDonkey&&asyncDonkey.activePowerUp&&asyncDonkey.powerUpTimer>0){
+    drawAllEnemyTypes();
+    drawPowerUpItems();
+    drawProjectiles();
+
+    if (asyncDonkey) asyncDonkey.draw();
+
+    // Disegna Punteggio
+    ctx.fillStyle = '#0f0'; // Colore per il testo del punteggio (verde)
+    ctx.font = '24px "Courier New", Courier, monospace';
+    ctx.textAlign = 'left'; // Allinea a sinistra per il punteggio
+    ctx.fillText("Score: " + score, 20, 40); // Posizione Punteggio (x, y)
+
+    // Disegna Timer Power-Up (MODIFICATO QUI)
+    if (asyncDonkey && asyncDonkey.activePowerUp && asyncDonkey.powerUpTimer > 0) {
         const powerUpColor = (POWERUP_COLORS && POWERUP_COLORS[asyncDonkey.activePowerUp]) ? POWERUP_COLORS[asyncDonkey.activePowerUp] : '#FFD700';
         ctx.fillStyle = powerUpColor;
-        ctx.font='18px "Courier New",Courier,monospace';ctx.textAlign='right';
+        ctx.font = '18px "Courier New", Courier, monospace'; // Puoi aggiustare la dimensione del font se necessario
+        ctx.textAlign = 'left'; // Allinea a sinistra anche il timer del power-up
         let powerUpDisplayName = POWERUP_THEMATIC_NAMES[asyncDonkey.activePowerUp] || asyncDonkey.activePowerUp.replace(/_/g, ' ');
-        ctx.fillText(`${powerUpDisplayName}: ${asyncDonkey.powerUpTimer.toFixed(1)}s`,canvas.width-20,40);
+        
+        // Nuova posizione per il timer del power-up: sotto il punteggio
+        ctx.fillText(`${powerUpDisplayName}: ${asyncDonkey.powerUpTimer.toFixed(1)}s`, 20, 70); // (x: 20, y: 70)
     }
 }
 function drawGameOverScreen(){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#f00';ctx.font='52px "Courier New",Courier,monospace';ctx.textAlign='center';ctx.fillText("G A M E   O V E R",canvas.width/2,canvas.height/2-60);ctx.fillStyle='#ff0';ctx.font='32px "Courier New",Courier,monospace';ctx.fillText("Final Score: "+finalScore,canvas.width/2,canvas.height/2);ctx.fillStyle='#fff';ctx.font='22px "Courier New",Courier,monospace';ctx.fillText(isTouchDevice ? "TAP TO RESTART" : "PRESS ENTER TO RESTART",canvas.width/2,canvas.height/2+60);}

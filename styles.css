@@ -961,3 +961,98 @@ section#profile h3 { margin-top: 30px; font-size: 1.5em; }
   box-shadow: 0 0 8px rgba(var(--link-color-rgb, 0, 123, 255), 0.5); /* Glow effect */
   transform: scale(1.1);
 }
+
+/* ===== Donkey Runner Game Page Styles ===== */
+body.donkey-runner-page {
+    --game-border-color: #00b9be; /* Blu elettronico primario */
+    --game-ground-line-color: #00b9be; /* Stesso colore per la linea di terra */
+    --game-button-bg: rgba(0, 50, 80, 0.6); /* Sfondo pulsanti più scuro e trasparente */
+    --game-button-text: #c4f0c2; /* Testo verde chiaro per contrasto */
+    --game-button-border: #5ab9a8; /* Bordo verde acqua/bluastro */
+    --game-button-active-bg: rgba(0, 70, 100, 0.8);
+
+    /* Sovrascrive lo sfondo del body per la pagina del gioco se necessario,
+       altrimenti eredita da :root o body.dark-mode */
+    background-color: var(--bg-color); /* Eredita lo sfondo del tema */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Assicura che il footer stia in basso */
+}
+
+.donkey-runner-page header .header-content h1 {
+    font-size: 1.8em; /* Dimensione titolo specifica per la pagina gioco */
+    color: var(--heading-color);
+}
+
+/* Rende il main flessibile per spingere il footer in basso */
+.donkey-runner-page main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra il gameContainer verticalmente se c'è spazio */
+    align-items: center;
+    padding: 20px 5%; /* Padding laterale */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.donkey-runner-page #gameContainer {
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Max larghezza del gioco */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px; 
+    margin-bottom: 20px; 
+}
+
+
+.donkey-runner-page canvas#gameCanvas {
+    /* ... */
+    width: 100%; 
+    height: auto; 
+    max-height: calc(100vh - 200px); 
+    /* ... */
+}
+
+
+/* Stili per i controlli già in donkeyRunner.html, qui per centralizzazione o override */
+/* .donkey-runner-page #mobileControls { ... } */
+/* .donkey-runner-page .control-button { ... } */
+/* .donkey-runner-page #fullscreenButton { ... } */
+
+
+/* Assicurati che il tema scuro influenzi anche i nuovi colori del gioco se necessario */
+body.dark-mode.donkey-runner-page {
+    --game-border-color: #5ab9a8; /* Un blu/verde più brillante per il tema scuro */
+    --game-ground-line-color: #5ab9a8;
+    --game-button-bg: rgba(20, 70, 100, 0.7);
+    --game-button-text: #c4f0c2;
+    --game-button-border: #00b9be;
+    --game-button-active-bg: rgba(30, 90, 120, 0.9);
+}
+
+/* Stili aggiuntivi per i pulsanti del gioco se vuoi differenziarli
+   dai .auth-button o .game-button generici di styles.css */
+.donkey-runner-page .control-button {
+    font-family: "Source Code Pro", monospace; /* Assicura il font corretto */
+    /* ... altri stili specifici se quelli inline non bastano ... */
+}
+
+.donkey-runner-page #fullscreenButton {
+     font-family: "Source Code Pro", monospace;
+     /* Eredita molto da .auth-button o stili simili, ma con posizionamento specifico */
+}
+
+/* Stili per il footer specifici per la pagina del gioco, se necessario */
+.donkey-runner-page footer {
+    background-color: var(--surface-bg-secondary);
+    border-top: 1px solid var(--border-color-primary);
+    color: var(--text-color-muted);
+    text-align: center;
+    padding: 20px;
+    font-size: 0.9em;
+    width: 100%;
+    box-sizing: border-box;
+}
