@@ -261,6 +261,28 @@
         </div>
     </main>
 
+    <section id="guestbook" style="margin-top: 30px; max-width: 700px; margin-left: auto; margin-right:auto;"> 
+            <h2>Guestbook del Gioco</h2>
+            <p>Lascia un commento, un saluto o un feedback sul gioco!</p>
+             <form id="commentForm">
+                <div id="commentNameSection">
+                    <label for="commentName">Nome:</label>
+                    <input type="text" id="commentName" name="commentName" required maxlength="50">
+                </div>
+                <div>
+                    <label for="commentMessage">Messaggio:</label>
+                    <textarea id="commentMessage" name="commentMessage" rows="4" required maxlength="500"></textarea>
+                </div>
+                <button type="submit" id="submitCommentBtn" class="game-button">Invia Commento</button> 
+            </form>
+            <div id="commentsListContainer" data-page-id="donkeyRunnerGame" style="margin-top: 30px;">
+                <h3>Commenti Recenti:</h3>
+                <div id="commentsList">
+                <p>Caricamento commenti...</p>
+                </div>
+            </div>
+        </section>
+
     <footer style="margin-top: auto;">
         <p>&copy; 2025 Sviluppato da Umberto Trombetta.</p>
         <p style="font-size: 0.8em; margin-top: 5px;">Avatars generati usando <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
@@ -304,6 +326,7 @@
     </div>
 
     <script src="js/main.js" type="module"></script>
+    <script src="js/comments.js" type="module"></script>
     <script type="module" src="js/donkeyRunner.js"></script>
 </body>
 </html>
