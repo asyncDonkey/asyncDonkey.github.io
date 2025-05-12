@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="it"> 
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Sono - Umberto Trombetta | Ingegneria & Sviluppo Full-Stack</title> 
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header>
+    <div class="avatar">
+        <img src="images/asyncDonkey.png" alt="Un simpatico asino in PixelArt" /> 
+    </div>
+    <div class="header-content">
+        <h1>Umberto Trombetta</h1>
+
+        <div class="header-controls">
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li> 
+                    <li><a href="#about">Chi Sono</a></li>
+                    <li><a href="#skills">Competenze</a></li> 
+                    <li><a href="donkeyRunner.html">Giochi</a></li> 
+                    <li><a href="#guestbook">Guestbook</a></li>
+                    <li id="profileNav" style="display: none;"><a href="profile.html">Profilo</a></li>
+                </ul>
+            </nav>
+            <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+
+            <div id="authSection">
+                <div id="authContainer">
+                    <button id="showLoginBtn" class="auth-button">Login</button>
+                    <button id="showSignupBtn" class="auth-button">Register</button>
+                </div>
+                <div id="userProfileContainer" style="display: none;">
+                    <img id="headerUserAvatar" src="" alt="Avatar" width="32" height="32">
+                    <span id="userDisplayName"></span>
+                    <button id="logoutButton" class="auth-button">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section id="intro">
+        <p>Benvenuto! Sono Umberto, uno studente di Ingegneria Civile (L-7) con sede in Italia, e sto espandendo le mie competenze per diventare uno Sviluppatore Full-Stack. Questo sito documenta il mio percorso e i miei progetti.</p>
+    </section>
+
+    <section id="about"> 
+        <h2>Chi Sono</h2>
+        <p>Durante il mio percorso di Laurea Triennale (L-7) in Ingegneria Civile, sto contemporaneamente sviluppando competenze fondamentali come Sviluppatore Full-Stack. Questo percorso mira a unire il problem-solving analitico, intrinseco dell'ingegneria, con le applicazioni creative e pratiche della tecnologia web.</p>
+        <p>L'interesse iniziale per lo sviluppo software è nato da un corso universitario di Sistemi di Elaborazione delle Informazioni che utilizzava il linguaggio C. Questa scintilla si è rapidamente evoluta in un'esplorazione più ampia della programmazione, rivelando un particolare coinvolgimento nell'automazione dei processi, nella progettazione di interfacce, nella gestione dei dati e nella risoluzione di complesse sfide logiche. Un background nel pensiero strutturato, simile all'apprendimento delle lingue, fornisce una prospettiva utile per approcciare i linguaggi di programmazione.</p>
+        <p>Sebbene sia all'inizio di questo viaggio, l'attenzione attuale è rivolta alla padronanza dei fondamentali del web – HTML, CSS e JavaScript – principalmente attraverso l'apprendimento pratico su piattaforme come Codecademy e freeCodeCamp, e la realizzazione di progetti personali come questo sito e i giochi inclusi.</p>
+        <p>Tra i miei obiettivi futuri principali ci sono il contributo a progetti open-source di impatto e la collaborazione all'interno di team dinamici e proattivi. Cerco attivamente anche opportunità di lavoro a livello internazionale per acquisire esperienze professionali e prospettive diversificate. Inoltre, nutro un forte interesse nell'identificare sinergie tra le conoscenze dell'Ingegneria Civile e lo sviluppo software, potenzialmente attraverso la creazione di strumenti per l'analisi strutturale, la visualizzazione di progetti o la gestione dei dati infrastrutturali.</p>
+        <p>L'apprendimento continuo e lo sviluppo delle competenze nell'ingegneria del software rimangono un impegno fondamentale.</p>
+    </section>
+
+    <section id="skills">
+        <h2>Competenze</h2>
+        <p>Queste sono alcune delle tecnologie e competenze su cui sto lavorando (clicca su una card per dettagli):</p>
+        <ul class="skills-grid">
+            <li class="skill-card" data-skill-name="HTML" data-description="Costruzione di pagine web strutturate e semantiche, utilizzando tag moderni e best practice per l'accessibilità e SEO.">HTML</li>
+            <li class="skill-card" data-skill-name="CSS" data-description="Styling di pagine web per un look moderno e responsive. Esperienza con Flexbox, Grid, variabili CSS e metodologie come BEM per creare interfacce utente accattivanti.">CSS</li>
+            <li class="skill-card" data-skill-name="JavaScript" data-description="Aggiunta di interattività e comportamento dinamico ai siti web. Focus su manipolazione del DOM, eventi, programmazione asincrona (Promise, async/await) e concetti di ES6+. (In apprendimento)">JavaScript</li>
+            <li class="skill-card" data-skill-name="Linguaggio C" data-description="Solide basi di programmazione procedurale, gestione della memoria (allocazione dinamica, puntatori) e algoritmi fondamentali acquisite durante gli studi universitari. Utile per comprendere il funzionamento a basso livello dei sistemi.">Linguaggio C</li>
+            <li class="skill-card" data-skill-name="Firebase Platform" data-description="Utilizzo della piattaforma Firebase per backend-as-a-service: Firestore Database (NoSQL) per la gestione dei dati, Authentication per l'autenticazione utenti (email/password, social), Hosting per il deployment di web app e Security Rules per la protezione granulare dei dati.">Firebase Platform</li>
+            <li class="skill-card" data-skill-name="Backend (Concettuale)" data-description="Comprensione dei principi di funzionamento delle applicazioni server-side, progettazione di API RESTful e interazione con database. Interesse futuro per l'approfondimento di Python (con framework come Django o Flask) o Node.js (con Express).">[Python / Node.js]</li>
+            <li class="skill-card" data-skill-name="Frontend Frameworks (Studio Futuro)" data-description="Pianificazione dello studio di librerie/framework moderni come React, Vue.js o Svelte per costruire Single Page Applications (SPA) complesse, reattive e performanti.">[React / Vue / Svelte]</li>
+            <li class="skill-card" data-skill-name="Databases (Studio Futuro)" data-description="Interesse nell'apprendimento di database relazionali (SQL) come PostgreSQL per la gestione strutturata dei dati, e ulteriore approfondimento dei database NoSQL (come MongoDB o Firestore) per scenari flessibili e scalabili.">[SQL / NoSQL DBs]</li>
+            <li class="skill-card" data-skill-name="Da Ingegneria Civile" data-description="Problem-solving analitico per scomporre problemi complessi, project management per la pianificazione e l'esecuzione di compiti, spiccata attenzione ai dettagli e pensiero strutturato derivati dalla formazione in Ingegneria Civile, altamente trasferibili allo sviluppo software.">PS & PM</li>
+        </ul>
+        <div id="skillDetails" class="skill-details-container">
+            <p>Clicca su una competenza qui sopra per vedere più dettagli.</p>
+        </div>
+    </section>
+
+   
+
+    <section id="guestbook">
+        <h2>Guestbook Generale</h2>
+        <p>Lascia un commento o un saluto!</p>
+         <form id="commentForm">
+            <div id="commentNameSection">
+                <label for="commentName">Nome:</label>
+                <input type="text" id="commentName" name="commentName" required maxlength="50">
+            </div>
+            <div>
+                <label for="commentMessage">Messaggio:</label>
+                <textarea id="commentMessage" name="commentMessage" rows="4" required maxlength="500"></textarea>
+            </div>
+            <button type="submit" id="submitCommentBtn" class="game-button">Invia Commento</button>
+        </form>
+        <div id="commentsListContainer" data-page-id="mainGuestbook">
+            <h3>Commenti Recenti:</h3>
+            <div id="commentsList">
+                <p>Caricamento commenti...</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2>Contatti</h2>
+        <p>Non esitare a contattarmi:</p>
+        <ul>
+            <li>Email: asyncdonkey@proton.me</li>
+            <li>LinkedIn: <a href="https://www.linkedin.com/in/umberto-trombetta" target="_blank" rel="noopener noreferrer">Umberto Trombetta</a></li>
+            <li>GitHub: <a href="https://github.com/asyncDonkey" target="_blank" rel="noopener noreferrer">asyncDonkey</a></li>
+        </ul>
+    </section>
+
+</main>
+
+<footer>
+    <p>&copy; 2025 Sviluppato da Umberto Trombetta.</p>
+    <p style="font-size: 0.8em; margin-top: 5px;">Avatars generati usando <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
+</footer>
+
+<button id="scrollToTopBtn" title="Torna in cima">↑</button>
+
+
+<div id="loginModal" class="modal">
+  <div class="modal-content">
+    <span class="closeLoginBtn">&times;</span>
+    <h3>Login</h3>
+    <form id="loginForm">
+      <div><label for="loginEmail">Email:</label><input type="email" id="loginEmail" name="loginEmail" required></div>
+      <div><label for="loginPassword">Password:</label><input type="password" id="loginPassword" name="loginPassword" required></div>
+      <button type="submit" class="game-button">Login</button>
+    </form>
+  </div>
+</div>
+
+<div id="signupModal" class="modal">
+  <div class="modal-content">
+    <span class="closeSignupBtn">&times;</span>
+    <h3>Register</h3>
+    <form id="signupForm">
+      <div><label for="signupEmail">Email:</label><input type="email" id="signupEmail" name="signupEmail" required></div>
+      <div><label for="signupPassword">Password (min. 6 caratteri):</label><input type="password" id="signupPassword" name="signupPassword" required minlength="6"></div>
+      <button type="submit" class="game-button">Register</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/main.js" type="module"></script>
+<script src="js/comments.js" type="module"></script>
+
+</body>
+</html>

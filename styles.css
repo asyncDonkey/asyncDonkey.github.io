@@ -1099,3 +1099,168 @@ body.dark-mode.donkey-runner-page {
     width: 100%;
     box-sizing: border-box;
 }
+
+/* === Stili per la Pagina Portale (Nuovo Index.html) === */
+.portal-header {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--surface-bg-secondary);
+    border-bottom: 1px solid var(--border-color-primary);
+    margin-bottom: 30px; /* Aggiunge spazio prima della griglia */
+}
+.portal-header h1 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 2.8em;
+    color: var(--heading-color);
+    margin-bottom: 10px;
+}
+.portal-header p {
+    font-size: 1.2em;
+    color: var(--text-color-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.portal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 0 5% 30px 5%; /* Padding aggiornato */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.portal-card {
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex; /* Per allineare il bottone in basso */
+    flex-direction: column; /* Per allineare il bottone in basso */
+    justify-content: space-between; /* Per allineare il bottone in basso */
+}
+.portal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+.portal-card img.card-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 15px;
+    /* object-fit: contain; se le icone hanno dimensioni diverse */
+}
+.portal-card h3 {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.5em;
+    color: var(--heading-color);
+    margin-bottom: 10px;
+    border-bottom: none; /* Rimuovi eventuale bordo ereditato */
+    padding-bottom: 0; /* Rimuovi eventuale padding ereditato */
+}
+.portal-card p {
+    color: var(--text-color-secondary);
+    font-size: 1em;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Fa sì che il paragrafo occupi spazio spingendo il bottone in basso */
+}
+.portal-card .btn-portal {
+    display: inline-block;
+    background-color: var(--link-color);
+    color: var(--button-text-primary);
+    padding: 10px 25px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    border: none; /* Assicura che non ci siano bordi da altri stili .button */
+    cursor: pointer;
+}
+.portal-card .btn-portal:hover {
+    background-color: var(--link-hover-color);
+}
+
+/* Assicurati che l'header del portale e quello delle altre pagine
+   abbiano un aspetto coerente o deliberatamente diverso come preferisci */
+header .header-content h1 { /* Potrebbe essere necessario specificare di più se ci sono conflitti */
+    color: var(--heading-color); /* Assicura che il colore sia quello del tema */
+}
+
+section#skills ul.skills-grid {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 25px;
+  display: grid;
+  /* MODIFICA: Aumentata la larghezza minima delle card */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Era 150px, proviamo con 180px. Puoi aumentarlo a 200px se necessario. */
+  gap: 15px;
+  justify-content: center;
+}
+
+section#skills li.skill-card {
+  background-color: var(--surface-bg-secondary); 
+  color: var(--text-color-secondary); 
+  /* MODIFICA: Leggermente ridotto il padding per dare più spazio al testo */
+  padding: 12px; 
+  border-radius: 6px;
+  /* MODIFICA: Leggermente ridotta la dimensione del font se necessario */
+  font-size: 0.9em; /* Era 0.95em, puoi provare anche 0.85em se il testo è ancora troppo grande */
+  font-weight: 500;
+  text-align: center; 
+  border: 1px solid var(--border-color-secondary);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer; 
+  /* MODIFICA: Aumentata leggermente l'altezza minima per accomodare testo su più righe */
+  min-height: 70px; /* Era 60px */
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  /* AGGIUNTA: Per una migliore gestione del testo lungo e a capo */
+  overflow-wrap: break-word; /* Standard moderno */
+  word-wrap: break-word;     /* Fallback per browser più vecchi (uguale a overflow-wrap) */
+  /* hyphens: auto; */       /* Opzionale: permette la sillabazione automatica se supportata e configurata la lingua */
+}
+
+section#skills li.skill-card:hover {
+  background-color: var(--skill-badge-hover-bg); /* Puoi riutilizzare questi colori o definirne di nuovi */
+  color: var(--skill-badge-hover-text); 
+  transform: translateY(-3px); /* Leggero sollevamento */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+section#skills li.skill-card.active-skill {
+  background-color: var(--skill-badge-active-bg); 
+  color: var(--skill-badge-active-text); 
+  border-color: var(--link-color); 
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15), 0 0 0 2px var(--link-color);
+}
+
+/* Il contenitore per i dettagli della skill rimane stilizzato come prima, 
+   ma assicurati che si adatti bene sotto la nuova griglia di card. */
+.skill-details-container { 
+  margin-top: 30px; /* Più spazio dopo le card */
+  padding: 20px;
+  background-color: var(--surface-bg-primary); /* Sfondo leggermente diverso dalle card */
+  border: 1px solid var(--border-color-primary);
+  border-radius: 6px;
+  min-height: 70px; 
+  text-align: left;
+  color: var(--skill-details-text); 
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.3s ease-in-out;
+}
+.skill-details-container h3 {
+  color: var(--heading-color); /* Usa il colore principale per i titoli */
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.3em; /* Titolo più grande per i dettagli */
+}
+.skill-details-container p {
+  margin-bottom: 0;
+  font-size: 1.05em; /* Testo dettagli leggermente più grande */
+  line-height: 1.7;
+}

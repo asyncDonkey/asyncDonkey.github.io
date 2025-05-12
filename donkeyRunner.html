@@ -283,6 +283,42 @@
             </div>
         </section>
 
+        <section id="bugReportSection" style="margin-top: 30px; max-width: 700px; margin-left: auto; margin-right:auto;">
+            <h2>Segnala un Bug</h2>
+            <p>Hai riscontrato un problema o un comportamento anomalo nel gioco? Faccelo sapere!</p>
+            <form id="bugReportForm">
+                <div>
+                    <label for="bugDescription">Descrizione del Bug (più dettagli fornisci, meglio è):</label>
+                    <textarea id="bugDescription" name="bugDescription" rows="5" required maxlength="2000" style="width: 100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;"></textarea>
+                </div>
+                <div id="bugReportUserEmailSection"> 
+                    <label for="userEmailBug">La tua Email (opzionale, se vuoi essere ricontattato):</label>
+                    <input type="email" id="userEmailBug" name="userEmailBug" maxlength="100" style="width: 100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;">
+                </div>
+                
+                <button type="submit" id="submitBugReportBtn" class="game-button" style="margin-top:15px;">Invia Segnalazione Bug</button>
+            </form>
+            <div id="bugReportMessage" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
+        </section>
+
+        <section id="featureRequestSection" style="margin-top: 30px; max-width: 700px; margin-left: auto; margin-right:auto;">
+            <h2>Suggerisci una Funzionalità</h2>
+            <p>Hai un'idea per migliorare il gioco o aggiungere qualcosa di nuovo? Condividila!</p>
+            <form id="featureRequestForm">
+                <div>
+                    <label for="featureTitle">Titolo del Suggerimento (opzionale, ma utile):</label>
+                    <input type="text" id="featureTitle" name="featureTitle" maxlength="150" style="width: 100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit; margin-bottom: 10px;">
+                </div>
+                <div>
+                    <label for="featureDescription">Descrivi la tua idea:</label>
+                    <textarea id="featureDescription" name="featureDescription" rows="5" required maxlength="2000" style="width: 100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;"></textarea>
+                </div>
+                
+                <button type="submit" id="submitFeatureRequestBtn" class="game-button" style="margin-top:15px;">Invia Suggerimento</button>
+            </form>
+            <div id="featureRequestMessage" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
+        </section>
+
     <footer style="margin-top: auto;">
         <p>&copy; 2025 Sviluppato da Umberto Trombetta.</p>
         <p style="font-size: 0.8em; margin-top: 5px;">Avatars generati usando <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
@@ -327,6 +363,8 @@
 
     <script src="js/main.js" type="module"></script>
     <script src="js/comments.js" type="module"></script>
+    <script src="js/bugReports.js" type="module"></script> 
+    <script src="js/featureRequests.js" type="module"></script>
     <script type="module" src="js/donkeyRunner.js"></script>
 </body>
 </html>
