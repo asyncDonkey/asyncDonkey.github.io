@@ -15,11 +15,13 @@ if (db) {
 }
 
 // DOM Elements
+
 const commentForm = document.getElementById('commentForm');
 const commentNameInput = document.getElementById('commentName');
 const commentMessageInput = document.getElementById('commentMessage');
 const submitCommentBtn = document.getElementById('submitCommentBtn');
 const commentsListDiv = document.getElementById('commentsList');
+
 const commentNameSection = document.getElementById('commentNameSection');
 const commentsListContainer = document.getElementById('commentsListContainer'); // <<< NUOVO RIFERIMENTO DOM
 
@@ -167,10 +169,12 @@ async function handleLikeComment(event) {
         likeButton.classList.add('liked'); 
         likeButton.innerHTML = '❤️'; 
         
+
         if (!likedComments.includes(commentId)) {
             likedComments.push(commentId);
             localStorage.setItem('likedGuestbookComments', JSON.stringify(likedComments));
         }
+
     } catch (error) {
         console.error("comments.js - Like update error:", error); 
         alert("Failed to register like.");
@@ -264,4 +268,5 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (!currentPageId && commentsListDiv) {
          commentsListDiv.innerHTML = "<p>Error: Page context for comments not defined.</p>";
     }
+
 });

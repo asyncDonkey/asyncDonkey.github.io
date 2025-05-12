@@ -125,6 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
     /** Setup Theme Switcher */
     function setupThemeSwitcher() {
         const themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -189,7 +190,10 @@ async function loadUserProfile(user) {
     if (!user || !userProfileContainer) {
         console.warn("loadUserProfile chiamato ma utente o userProfileContainer non disponibile");
         return;
+
     }
+  });
+
 
     if (userDisplayName) userDisplayName.textContent = `Loading...`;
     if (headerUserAvatar) {
@@ -286,7 +290,12 @@ async function loadUserProfile(user) {
     // Authentication State Change Listener
     onAuthStateChanged(auth, (user) => {
         updateAuthUI(user);
+
     });
+  });
+  
+  // --- Interactive Skills Section ---
+  console.log('Initializing interactive skills section...'); 
 
     // Login Form Submission
     if (loginForm) {
@@ -356,3 +365,4 @@ async function loadUserProfile(user) {
     }
 
 }); // End DOMContentLoaded
+
