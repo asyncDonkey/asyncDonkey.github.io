@@ -1,140 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Umberto Trombetta - Civil Engineering & Full-Stack Development</title>
+    <title>Hello World! by asyncDonkey!</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-</head>
 
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Stili aggiuntivi per la pagina portale (index.html) */
+        .portal-header {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: var(--surface-bg-secondary); /* Un colore di sfondo leggero */
+            border-bottom: 1px solid var(--border-color-primary);
+        }
+        .portal-header h1 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 2.8em;
+            color: var(--heading-color);
+            margin-bottom: 10px;
+        }
+        .portal-header p {
+            font-size: 1.2em;
+            color: var(--text-color-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Layout a griglia responsive */
+            gap: 25px;
+            padding: 30px 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .portal-card {
+            background-color: var(--surface-bg-primary);
+            border: 1px solid var(--border-color-primary);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .portal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+        .portal-card img.card-icon { /* Stile per eventuali icone nelle card */
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            /* Aggiungi qui l'URL di un'icona generica o specifica per sezione se vuoi */
+            /* Esempio: background-image: url('path/to/icon.svg'); background-size: cover; */
+        }
+        .portal-card h3 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.5em;
+            color: var(--heading-color);
+            margin-bottom: 10px;
+        }
+        .portal-card p {
+            color: var(--text-color-secondary);
+            font-size: 1em;
+            margin-bottom: 20px;
+            min-height: 60px; /* Per allineare le card con descrizioni di diversa lunghezza */
+        }
+        .portal-card .btn-portal { /* Stile per i pulsanti nelle card */
+            display: inline-block;
+            background-color: var(--link-color);
+            color: var(--button-text-primary); /* Spesso bianco */
+            padding: 10px 25px;
+            border-radius: 25px; /* Pulsanti più arrotondati */
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .portal-card .btn-portal:hover {
+            background-color: var(--link-hover-color);
+        }
+    </style>
+</head>
 <body>
 
-<header>
-    <div class="avatar">
-        <img src="images/asyncDonkey.png" alt="a cute PixelArt donkey" />
-    </div>
-
-    <div class="header-content">
-        <h1>Umberto Trombetta</h1>
-
-        <div class="header-controls">
+    <header>
+       
+        <div class="header-content" style="padding: 10px 5%; align-items: center; display: flex; justify-content: space-between; flex-wrap: wrap;">
+            <a href="index.html" style="text-decoration: none;">
+                <h1 style="font-size: 1.8em; margin:0;">asyncDonkey Projects</h1> 
+            </a>
             <nav>
-                <ul>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#skills">Skills</a></li>
-                    <li><a href="#play-snake-game">Game</a></li> 
-                    <li><a href="#guestbook">Guestbook</a></li> 
+
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 20px;">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Me</a></li>
+                    <li><a href="donkeyRunner.html">Giochi</a></li>
+                    
+
                 </ul>
             </nav>
-            <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">
-                🌙
-            </button>
-        </div>
-    </div>
-</header>
-
-<main>
-    <section id="intro">
-        <p>Welcome! I'm Umberto, a Civil Engineering student (L-7) based in Italy, currently expanding my skills to become a Full-Stack Engineer. This website documents my journey and showcases my projects.</p>
-    </section>
-
-    <section id="about">
-        <h2>About Me</h2>
-        <p>
-            While pursuing a Bachelor's degree (L-7) in Civil Engineering in Italy, foundational skills in Full-Stack Engineering are concurrently being developed. This path aims to bridge the analytical problem-solving inherent in engineering with the creative and practical applications of web technology.
-        </p>
-        <p>
-            An initial interest in software development was sparked by an Information Processing Systems course utilizing C during engineering studies. This quickly evolved into a broader exploration of programming, revealing particular engagement with automating processes, designing interfaces, managing data, and resolving complex logical challenges. A background in structured thinking, akin to language learning, provides a useful perspective for approaching programming languages.
-        </p>
-        <p>
-            Although early in this journey, the current focus is on mastering core web fundamentals – HTML, CSS, and JavaScript – primarily through hands-on learning via platforms like Codecademy and freeCodeCamp.
-        </p>
-        <p>
-            Key future goals include contributing to impactful open-source projects and collaborating within dynamic, proactive team settings. Opportunities for international work are also actively sought to gain diverse professional experiences and perspectives. Furthermore, there is a strong interest in identifying synergies between Civil Engineering knowledge and software development, potentially through creating tools for structural analysis, project visualization, or infrastructure data management.
-        </p>
-        <p>
-            Continuous learning and skill development in software engineering remain a core commitment.
-        </p>
-    </section>
-
-    <section id="skills">
-        <h2>Skills</h2>
-        <p>Here are some of the technologies I'm working with (click a skill for more details):</p>
-        <ul>
-            <li data-skill-name="HTML" data-description="Building structured and semantic web pages. Using modern tags and best practices for accessibility.">HTML</li>
-            <li data-skill-name="CSS" data-description="Styling web pages for a modern and responsive look. Experience with Flexbox, Grid, and methodologies like BEM.">CSS</li>
-            <li data-skill-name="JavaScript" data-description="Currently learning to add interactivity and dynamic behavior to websites. Focusing on DOM manipulation, events, and core concepts. (Learning)">JavaScript (Learning)</li>
-            <li data-skill-name="Backend Development (Conceptual)" data-description="Conceptual understanding of server-side operations, APIs, and databases. Interested in Python (Django/Flask) or Node.js (Express) for future development.">[Python / Node.js / Java]</li>
-            <li data-skill-name="Frontend Frameworks (Future Study)" data-description="Planning to study modern frameworks like React, Angular, or Vue.js to build complex Single Page Applications.">[Frameworks like React / Angular / Vue]</li>
-            <li data-skill-name="Databases (Future Study)" data-description="Interested in learning both SQL (e.g., PostgreSQL) and NoSQL (e.g., MongoDB) databases for data management.">[Databases like SQL / NoSQL]</li>
-            <li data-skill-name="Skills from Civil Engineering" data-description="Analytical problem-solving, project management, attention to detail, and structured thinking derived from Civil Engineering training, applicable to software development.">[Civil Engineering Software/Skills]</li>
-        </ul>
-        <div id="skillDetails" class="skill-details-container">
-            <p>Click on a skill badge above to see more details here.</p>
-        </div>
-    </section>
-
-    <section id="play-snake-game"> 
-        <h2>Snake Game</h2>
-        <div style="text-align: center; padding: 20px;">
-            
-            <div style="width: 300px; height: 200px; background-color: #ccc; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; border: 1px solid #aaa;">
-                <p style="color: #333;"><img src="images/snake_game_preview.gif" alt="Animated preview of Snake Game" style="width:300px; height:200px; border:1px solid #aaa; margin-bottom:20px;"></p>
-            </div>
-            <a href="snake.html" target="_blank" class="game-button" style="text-decoration: none;">Play Snake!</a>
-            <p style="margin-top: 15px; font-size: 0.9em; color: var(--text-color-muted);">Click the button to open the game in a new tab.</p>
-        </div>
-    </section>
-
-    <section id="guestbook">
-        <h2>Guestbook</h2>
-        <p>Leave a comment or a greeting!</p> 
-    
-        <form id="commentForm">
-            <div>
-                <label for="commentName">Name:</label> 
-                <input type="text" id="commentName" name="commentName" required maxlength="50">
-            </div>
-            <div>
-                <label for="commentMessage">Message:</label> 
-                <textarea id="commentMessage" name="commentMessage" rows="4" required maxlength="500"></textarea>
-            </div>
-            <button type="submit" id="submitCommentBtn" class="game-button">Submit Comment</button> 
-        </form>
-    
-        <div id="commentsListContainer">
-            <h3>Comments:</h3> 
-            <div id="commentsList">
-                <p>Loading comments...</p> 
+            <div class="header-controls" style="display: flex; align-items: center; gap: 10px;">
+                <div id="authContainer">
+                    <button id="showLoginBtn" class="auth-button">Login</button>
+                    <button id="showSignupBtn" class="auth-button">Register</button>
                 </div>
+                <div id="userProfileContainer" style="display: none; align-items: center;">
+                    <img id="headerUserAvatar" src="" alt="Avatar">
+                    <span id="userDisplayName"></span>
+                    <button id="logoutButton" class="auth-button">Logout</button>
+                </div>
+                <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+            </div>
         </div>
-    </section>
+    </header>
 
-    <section id="contact">
-        <h2>Contact</h2>
-        <p>Feel free to reach out:</p>
-        <ul>
-            <li>Email: asyncdonkey@proton.me</li>
-            <li>LinkedIn: <a href="https://www.linkedin.com/in/umberto-trombetta" target="_blank" rel="noopener noreferrer">Umberto Trombetta</a></li>
-            <li>GitHub: <a href="https://github.com/asyncDonkey" target="_blank" rel="noopener noreferrer">asyncDonkey</a></li>
-        </ul>
-    </section>
+    <main>
+        <div class="portal-header">
+            <h1>Esplora i Miei Progetti</h1>
+            <p>Un hub centrale per navigare tra le mie creazioni, giochi e sezioni interattive.</p>
+        </div>
 
-</main>
 
-<footer>
-    <p>&copy; 2025 Developed by Umberto Trombetta.</p>
-</footer>
+        <div class="portal-grid">
+            <div class="portal-card">
+                <img src="images/icon-about.svg" alt="Icona About Me" class="card-icon"> Icona opzionale 
+                <h3>Chi Sono / Portfolio</h3>
+                <p>Scopri di più su di me, le mie competenze e il mio percorso da Ingegnere Civile a Sviluppatore Full-Stack.</p>
+                <a href="about.html" class="btn-portal">Vai alla Pagina</a>
+            </div>
 
-<button id="scrollToTopBtn" title="Scroll back to top">↑</button>
 
-<script src="js/main.js" type="module"></script>
+            <div class="portal-card">
+                <img src="images/icon-game.svg" alt="Icona Gioco" class="card-icon">
+                <h3>asyncDonkey: Code Rush</h3>
+                <p>Gioca al mio endless runner game! Salta, spara codice e sopravvivi ai glitch.</p>
+                <a href="donkeyRunner.html" class="btn-portal">Gioca Ora!</a>
+            </div>
+            
+            <div class="portal-card">
+                <img src="images/icon-feedback.svg" alt="Icona Feedback" class="card-icon">
+                <h3>Feedback & Contributi</h3>
+                <p>Hai trovato un bug nel gioco o hai un'idea per una nuova funzionalità? Fammelo sapere qui!</p>
+                <!---Questo potrebbe linkare a donkeyRunner.html#bugReportSection o a una pagina dedicata se la crei--> 
+                <a href="donkeyRunner.html#bugReportSection" class="btn-portal">Lascia Feedback</a>
+            </div>
+            
+            <div class="portal-card">
+                <img src="images/icon-guestbook.svg" alt="Icona Guestbook" class="card-icon">
+                <h3>Guestbook Generale</h3>
+                <p>Lascia un saluto o un commento generale sul sito e sui miei progetti.</p>
+                <!-- Linka alla sezione guestbook in about.html (ex index.html) -->
+                <a href="about.html#guestbook" class="btn-portal">Visita il Guestbook</a>
+            </div>
 
-<script src="js/comments.js" type="module"></script>
+            <!-- {/* Potresti aggiungere altre card qui in futuro */} -->
 
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Sviluppato da Umberto Trombetta.</p>
+        <p style="font-size: 0.8em; margin-top: 5px;">Avatars generati usando <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
+    </footer>
+
+    <!-- {/* Modali per Login e Signup (necessari se vuoi login/registrazione da questa pagina) */} -->
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <span class="closeLoginBtn">&times;</span>
+        <h3>Login</h3>
+        <form id="loginForm">
+          <div><label for="loginEmail">Email:</label><input type="email" id="loginEmail" name="loginEmail" required></div>
+          <div><label for="loginPassword">Password:</label><input type="password" id="loginPassword" name="loginPassword" required></div>
+          <button type="submit" class="game-button">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="signupModal" class="modal">
+      <div class="modal-content">
+        <span class="closeSignupBtn">&times;</span>
+        <h3>Register</h3>
+        <form id="signupForm">
+          <div><label for="signupEmail">Email:</label><input type="email" id="signupEmail" name="signupEmail" required></div>
+          <div><label for="signupPassword">Password (min. 6):</label><input type="password" id="signupPassword" name="signupPassword" required minlength="6"></div>
+          <button type="submit" class="game-button">Register</button>
+        </form>
+      </div>
+    </div>
+
+
+    <script src="js/main.js" type="module"></script>
+    <!-- {/* Non è necessario comments.js qui a meno che tu non voglia un guestbook separato ANCHE sulla pagina portale */} -->
 </body>
 </html>

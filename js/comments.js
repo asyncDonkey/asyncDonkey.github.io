@@ -1,251 +1,272 @@
 // js/comments.js
 
-// Importa le funzioni necessarie da Firebase SDK
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp, Timestamp, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-// Nota: Aggiunti 'doc', 'updateDoc', 'increment'
+import { db, auth, generateBlockieAvatar } from './main.js';
+import {
+    collection, addDoc, query, orderBy, limit, getDocs,
+    serverTimestamp, Timestamp, doc, updateDoc, increment,
+    getDoc, where // <<< Assicurati di importare 'where'
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// --- Configurazione Firebase ---
-const firebaseConfig = {
-    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk", // Sostituisci con la tua vera API Key se diversa
-    authDomain: "asyncdonkey.firebaseapp.com",
-    projectId: "asyncdonkey",
-    storageBucket: "asyncdonkey.appspot.com",
-    messagingSenderId: "939854468396",
-    appId: "1:939854468396:web:9646d4f51737add7704889",
-    measurementId: "G-EQDBKQM3YE"
-};
+let guestbookCollection;
+if (db) {
+    guestbookCollection = collection(db, "guestbookEntries");
+} else {
+    console.error("comments.js: DB instance not valid!");
+}
 
-// Inizializza Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const guestbookCollection = collection(db, "guestbookEntries");
+// DOM Elements
 
-// --- Elementi DOM ---
 const commentForm = document.getElementById('commentForm');
 const commentNameInput = document.getElementById('commentName');
 const commentMessageInput = document.getElementById('commentMessage');
 const submitCommentBtn = document.getElementById('submitCommentBtn');
 const commentsListDiv = document.getElementById('commentsList');
 
+const commentNameSection = document.getElementById('commentNameSection');
+const commentsListContainer = document.getElementById('commentsListContainer'); // <<< NUOVO RIFERIMENTO DOM
+
 const MAX_COMMENTS_DISPLAYED = 20;
 
-/**
- * Formats a Firestore Timestamp object or an ISO string into a readable string.
- * @param {Timestamp|string|any} firebaseTimestamp The timestamp field value from the database.
- * @returns {string} Formatted date and time or a fallback message.
- */
-function formatFirebaseTimestamp(firebaseTimestamp) {
-    if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
-        try {
-            const date = firebaseTimestamp.toDate();
-            return date.toLocaleString('en-US', { // Changed to en-US for English format
-                year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            });
-        } catch (e) {
-            console.error("Error converting Firestore Timestamp:", e);
-            return 'Date format error'; // Translated
-        }
-    }
-    else if (typeof firebaseTimestamp === 'string' && firebaseTimestamp.length > 0) {
-        try {
-            const date = new Date(firebaseTimestamp);
-            if (!isNaN(date.getTime())) {
-                return date.toLocaleString('en-US', { // Changed to en-US
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                }) + " (converted)"; // Translated
-            } else {
-                return firebaseTimestamp + ' (unrecognized format)'; // Translated
-            }
-        } catch (e) {
-            console.error("Error parsing timestamp string:", e);
-            return firebaseTimestamp + ' (parsing error)';
-        }
-    }
-    else {
-        console.warn("Unrecognized timestamp format or missing value:", firebaseTimestamp);
-        return 'Date not available'; // Translated
-    }
+// --- NUOVO: Ottieni il pageId dal data-attribute ---
+let currentPageId = 'default'; // Fallback
+if (commentsListContainer && commentsListContainer.dataset.pageId) {
+    currentPageId = commentsListContainer.dataset.pageId;
+    console.log(`comments.js: Initialized for pageId: ${currentPageId}`);
+} else {
+    console.warn('comments.js: commentsListContainer o data-page-id non trovato. Verrà usato il pageId di fallback "default".');
 }
 
 
-/**
- * Loads and displays comments from Firestore.
- */
+/** Formats Firestore Timestamp */
+function formatFirebaseTimestamp(firebaseTimestamp) {
+    if (!firebaseTimestamp?.toDate) return 'Date unavailable';
+    try {
+        return firebaseTimestamp.toDate().toLocaleString('it-IT', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return 'Date format error'; }
+}
+
+/** Loads and displays comments based on currentPageId */
 async function loadComments() {
-    if (!commentsListDiv) {
-        console.error("commentsList element not found!");
+    if (!commentsListDiv) return;
+    if (!guestbookCollection) {
+        commentsListDiv.innerHTML = '<p>Error: Database connection failed.</p>';
         return;
     }
-    commentsListDiv.innerHTML = '<p>Loading comments...</p>'; // Translated
+    commentsListDiv.innerHTML = `<p>Loading comments for ${currentPageId}...</p>`;
+    
+    let querySnapshot; // << DICHIARA querySnapshot QUI FUORI DAL TRY per il logging nel catch
 
     try {
-        const q = query(guestbookCollection, orderBy("timestamp", "desc"), limit(MAX_COMMENTS_DISPLAYED));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            commentsListDiv.innerHTML = '<p>No comments yet. Be the first!</p>'; // Translated
+        const q = query(
+            guestbookCollection,
+            where("pageId", "==", currentPageId), 
+            orderBy("timestamp", "desc"),
+            limit(MAX_COMMENTS_DISPLAYED)
+        );
+        querySnapshot = await getDocs(q); // << ASSEGNA QUI
+        
+        if (querySnapshot.empty) { // Ora querySnapshot dovrebbe essere definita se getDocs ha avuto successo
+            commentsListDiv.innerHTML = '<p>Nessun commento per questa pagina. Sii il primo!</p>';
             return;
         }
-
         commentsListDiv.innerHTML = '';
-
         querySnapshot.forEach((docSnapshot) => {
-            const commentData = docSnapshot.data();
-            const commentId = docSnapshot.id;
-            const commentElement = document.createElement('div');
-            commentElement.classList.add('comment-item');
+    const commentData = docSnapshot.data();
+    const commentId = docSnapshot.id;
+    const commentElement = document.createElement('div');
+    commentElement.classList.add('comment-item');
 
-            const nameEl = document.createElement('strong');
-            nameEl.textContent = commentData.name || 'Anonymous'; // Standard English for anonymous
+    const avatarImg = document.createElement('img');
+    avatarImg.width = 40; avatarImg.height = 40;
+    avatarImg.style.borderRadius = '4px';
+    avatarImg.style.imageRendering = 'pixelated';
+    avatarImg.style.flexShrink = '0';
+    avatarImg.classList.add('comment-avatar-img'); // Usa questa classe per stili CSS comuni se necessario
 
-            const dateEl = document.createElement('small');
-            dateEl.classList.add('comment-date');
-            dateEl.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
+    // --- NUOVA Logica Avatar con Blockies (RIMUOVI OGNI TRACCIA DI DICEBEAR QUI) ---
+    const seedForBlockie = commentData.userId || commentData.userName || commentData.name || `anon-${commentId}`;
+    // 'currentAltText' era usato per DiceBear, riutilizziamolo o creiamone uno specifico per Blockies se serve un alt text diverso.
+    let altTextForBlockie = commentData.userName || commentData.name || 'Anonymous'; 
+    
+    avatarImg.src = generateBlockieAvatar(seedForBlockie, 40, {size: 8}); // es. 40px
+    avatarImg.alt = `${altTextForBlockie}'s Blockie Avatar`;
+    avatarImg.style.backgroundColor = 'transparent'; // Blockies ha il suo sfondo
+    avatarImg.onerror = () => { 
+        avatarImg.style.backgroundColor = '#ddd'; 
+        avatarImg.alt = 'Avatar Error'; 
+        // Fallback SVG semplice
+        avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+    };
+    commentElement.appendChild(avatarImg);
+    // --- Fine Logica Avatar con Blockies ---
 
-            const messageEl = document.createElement('p');
-            messageEl.textContent = commentData.message || '';
-            messageEl.textContent = messageEl.textContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const commentContent = document.createElement('div');
+    commentContent.classList.add('comment-content');
+    const nameEl = document.createElement('strong');
+    nameEl.textContent = altTextForBlockie; // Usa lo stesso testo per il nome visualizzato
+    // ... resto della creazione del contenuto del commento (data, messaggio, like) ...
+    const dateEl = document.createElement('small');
+    dateEl.classList.add('comment-date');
+    dateEl.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
+    const messageEl = document.createElement('p');
+    messageEl.textContent = commentData.message ? String(commentData.message).replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+    commentContent.appendChild(nameEl); commentContent.appendChild(dateEl); commentContent.appendChild(messageEl);
 
-            commentElement.appendChild(nameEl);
-            commentElement.appendChild(dateEl);
-            commentElement.appendChild(messageEl);
+    const likesContainer = document.createElement('div');
+    likesContainer.classList.add('likes-container');
+    const likeButton = document.createElement('button');
+    likeButton.innerHTML = '👍'; likeButton.classList.add('like-btn');
+    likeButton.setAttribute('data-comment-id', commentId); likeButton.title = "Like this comment";
+    const likeCountSpan = document.createElement('span');
+    likeCountSpan.classList.add('like-count'); likeCountSpan.textContent = `${commentData.likes || 0}`;
+    const likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
+    if (likedComments.includes(commentId)) { likeButton.disabled = true; likeButton.classList.add('liked'); likeButton.innerHTML = '❤️'; }
+    likeButton.addEventListener('click', handleLikeComment);
+    likesContainer.appendChild(likeButton); likesContainer.appendChild(likeCountSpan);
+    commentContent.appendChild(likesContainer);
 
-            const likesContainer = document.createElement('div');
-            likesContainer.classList.add('likes-container');
-
-            const likeButton = document.createElement('button');
-            likeButton.innerHTML = '👍';
-            likeButton.classList.add('like-btn');
-            likeButton.setAttribute('data-comment-id', commentId);
-            likeButton.title = "Like this comment"; // Translated
-
-            const likeCountSpan = document.createElement('span');
-            likeCountSpan.classList.add('like-count');
-            likeCountSpan.textContent = `${commentData.likes || 0}`;
-
-            const likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
-            if (likedComments.includes(commentId)) {
-                likeButton.disabled = true;
-                likeButton.classList.add('liked');
-                likeButton.innerHTML = '❤️'; // Heart indicates already liked
-            }
-
-            likeButton.addEventListener('click', handleLikeComment);
-
-            likesContainer.appendChild(likeButton);
-            likesContainer.appendChild(likeCountSpan);
-            commentElement.appendChild(likesContainer);
-
-            commentsListDiv.appendChild(commentElement);
-        });
-
+    commentElement.appendChild(commentContent);
+    commentsListDiv.appendChild(commentElement);
+});
     } catch (error) {
-        console.error("Error loading comments: ", error);
-        commentsListDiv.innerHTML = '<p>Error loading comments. Please try again later.</p>'; // Translated
+        // Qui l'errore originale da Firestore viene loggato.
+        console.error(`comments.js - Error loading comments for pageId ${currentPageId}: `, error); 
+        if (error.code === 'failed-precondition' && commentsListDiv) {
+            commentsListDiv.innerHTML = `<p>Errore: Indice Firestore mancante per filtrare i commenti. Controlla la console del browser per il link per crearlo.</p>`;
+            // Non serve un altro console.error qui, quello sopra logga già l'oggetto error completo
+        } else if (commentsListDiv) {
+            commentsListDiv.innerHTML = '<p>Errore caricamento commenti. Riprova più tardi.</p>';
+        }
     }
 }
 
-/**
- * Handles the "Like" button click.
- * @param {Event} event
- */
+/** Handles the like button click (invariato, ma verifica che non modifichi pageId) */
 async function handleLikeComment(event) {
+    // ... (codice esistente, assicurati che l'updateDoc non rimuova/modifichi pageId accidentalmente)
+    // Solitamente, l'incremento dei like non tocca altri campi, quindi dovrebbe essere ok.
     const likeButton = event.currentTarget;
     const commentId = likeButton.getAttribute('data-comment-id');
-
-    if (!commentId) {
-        console.error("Comment ID not found for 'like'.");
+    if (!commentId) return;
+    const user = auth.currentUser; // Non serve per l'azione di like in sé, ma può essere un controllo
+    // if (!user) { alert("You must be logged in to like comments."); return; } // Rimosso per permettere like anonimi se le regole lo consentono (le regole attuali non lo vietano)
+    if (!guestbookCollection) { alert("Database connection error."); return; }
+    
+    let likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
+    if (likedComments.includes(commentId)) { // Controllo aggiuntivo per evitare doppi click veloci
+        console.log("Commento già piaciuto localmente.");
         return;
     }
 
-    likeButton.disabled = true;
-
+    likeButton.disabled = true; 
     try {
         const commentDocRef = doc(db, "guestbookEntries", commentId);
-        await updateDoc(commentDocRef, {
-            likes: increment(1)
-        });
-
+        await updateDoc(commentDocRef, { likes: increment(1) });
+        
         const likeCountSpan = likeButton.nextElementSibling;
-        if (likeCountSpan && likeCountSpan.classList.contains('like-count')) {
-            const currentLikes = parseInt(likeCountSpan.textContent);
-            likeCountSpan.textContent = `${currentLikes + 1}`;
+        if (likeCountSpan?.classList.contains('like-count')) {
+            likeCountSpan.textContent = `${parseInt(likeCountSpan.textContent || '0') + 1}`;
         }
-        likeButton.classList.add('liked');
-        likeButton.innerHTML = '❤️';
+        likeButton.classList.add('liked'); 
+        likeButton.innerHTML = '❤️'; 
+        
 
-        let likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
         if (!likedComments.includes(commentId)) {
             likedComments.push(commentId);
             localStorage.setItem('likedGuestbookComments', JSON.stringify(likedComments));
         }
 
     } catch (error) {
-        console.error("Error updating 'likes':", error);
-        alert("Could not register your 'like'. Please try again."); // Translated
-        const likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
-        if (!likedComments.includes(commentId)) {
-             likeButton.disabled = false;
+        console.error("comments.js - Like update error:", error); 
+        alert("Failed to register like.");
+        // Solo riabilita se non è già localmente segnato come 'liked'
+        const stillLikedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
+        if (!stillLikedComments.includes(commentId)) {
+             likeButton.disabled = false; 
+             likeButton.classList.remove('liked'); 
+             likeButton.innerHTML = '👍';
         }
     }
 }
 
 
-/**
- * Handles the comment form submission.
- * @param {Event} event
- */
+/** Handles comment form submission */
 async function handleCommentSubmit(event) {
     event.preventDefault();
+    if (!guestbookCollection) { alert("Error: DB connection failed."); return; }
+    const message = commentMessageInput?.value.trim();
+    if (!message) { alert("Please enter a message."); return; }
 
-    if (!commentNameInput || !commentMessageInput || !submitCommentBtn) {
-        console.error("Comment form elements missing!");
-        return;
+    const user = auth.currentUser;
+    let userIdToSave = null;
+    let nameIdentifier = 'Anonymous'; 
+
+    if (user) { 
+        userIdToSave = user.uid;
+        const userProfileRef = doc(db, "userProfiles", user.uid);
+        try {
+            const docSnap = await getDoc(userProfileRef);
+            nameIdentifier = docSnap.exists() && docSnap.data().nickname ? docSnap.data().nickname : user.email.split('@')[0];
+        } catch (profileError) {
+            console.error("comments.js - Error loading profile for comment:", profileError);
+            nameIdentifier = user.email.split('@')[0];
+        }
+    } else { 
+        const nameFromInput = commentNameInput?.value.trim();
+        if (!nameFromInput) { alert("Please enter your name or log in."); return; }
+        nameIdentifier = nameFromInput;
     }
 
-    const name = commentNameInput.value.trim();
-    const message = commentMessageInput.value.trim();
-
-    if (!name || !message) {
-        alert("Please enter both name and message."); // Translated
-        return;
-    }
-
-    submitCommentBtn.disabled = true;
-    submitCommentBtn.textContent = "Submitting..."; // Translated
+    if (!submitCommentBtn) { alert("Error: Submit button missing."); return; }
+    submitCommentBtn.disabled = true; submitCommentBtn.textContent = "Submitting...";
 
     try {
-        await addDoc(guestbookCollection, {
-            name: name,
+        const commentData = {
             message: message,
             timestamp: serverTimestamp(),
-            likes: 0
-        });
-
-        commentNameInput.value = '';
-        commentMessageInput.value = '';
-        alert("Comment submitted successfully!"); // Translated
-
-        await loadComments();
-
+            likes: 0,
+            pageId: currentPageId // <<< AGGIUNGI IL pageId CORRENTE
+        };
+        if (userIdToSave) {
+            commentData.userId = userIdToSave;
+            commentData.userName = nameIdentifier;
+        } else {
+            commentData.name = nameIdentifier;
+        }
+        
+        await addDoc(guestbookCollection, commentData);
+        
+        if (commentMessageInput) commentMessageInput.value = '';
+        if (commentNameInput && !user) commentNameInput.value = '';
+        await loadComments(); 
     } catch (error) {
-        console.error("Error submitting comment: ", error);
-        alert("There was an error submitting your comment. Please try again."); // Translated
+        console.error("comments.js - Error submitting comment:", error);
+        alert("Error submitting comment. Please try again.");
     } finally {
-        submitCommentBtn.disabled = false;
-        submitCommentBtn.textContent = "Submit Comment"; // Translated
+        if (submitCommentBtn) { submitCommentBtn.disabled = false; submitCommentBtn.textContent = "Submit Comment"; }
     }
 }
 
-// --- Event Listeners ---
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    const user = auth.currentUser; 
+    if (user && commentNameSection) {
+         commentNameSection.style.display = 'none';
+         if (commentNameInput) commentNameInput.required = false;
+    } else if (commentNameSection) {
+         commentNameSection.style.display = 'block';
+         if (commentNameInput) commentNameInput.required = true;
+    }
+    
     if (commentForm) {
         commentForm.addEventListener('submit', handleCommentSubmit);
-    } else {
-        console.error("Comment form not found!");
     }
-    loadComments();
+    
+    if (commentsListDiv && db && currentPageId) { // Assicurati che currentPageId sia definito
+        loadComments();
+    } else if (!db) {
+        if(commentsListDiv) commentsListDiv.innerHTML = "<p>Error: Cannot connect to database.</p>";
+    } else if (!currentPageId && commentsListDiv) {
+         commentsListDiv.innerHTML = "<p>Error: Page context for comments not defined.</p>";
+    }
+
 });

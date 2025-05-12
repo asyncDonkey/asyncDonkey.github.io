@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Umberto Trombetta</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header>
+        <div class="header-content" style="justify-content: center; padding: 10px 0;">
+            <h1>My Profile</h1>
+        </div>
+    </header>
+
+    <main>
+        <section id="profile">
+            <h2>Profile Details</h2>
+            <div id="profileContent" style="display: none;">
+                <img id="profileAvatar" src="" alt="User Avatar" width="80" height="80" style="border-radius: 4px; image-rendering: pixelated; background-color: #eee; vertical-align: middle; margin-bottom: 15px;">
+
+                <div id="profileDetailsDisplay" style="display: inline-block; vertical-align: middle; margin-left: 15px;">
+                     <p style="margin-bottom: 5px;"><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+                     <p style="margin-bottom: 5px;"><strong>Current Nickname:</strong> <span id="currentNickname">Loading...</span></p>
+                </div>
+                <hr style="margin: 20px 0;">
+                <h3>Update Profile</h3>
+                <form id="profileUpdateForm">
+                    <div>
+                        <label for="profileNicknameInput">New Nickname:</label>
+                        <input type="text" id="profileNicknameInput" name="profileNicknameInput" required minlength="3" maxlength="50">
+                    </div>
+                    <button type="submit" id="saveProfileBtn" class="game-button">Save Changes</button>
+                </form>
+                <p id="profileMessage" style="margin-top: 15px; font-weight: bold;"></p>
+            </div>
+             <div id="profileLoadingMessage"> <p>Loading profile...</p> </div>
+             <div id="profileLoginMessage" style="display: none;">
+                 <p>You need to be logged in to view your profile.</p>
+                 <p><a href="index.html">Go to Homepage to Log In</a></p>
+             </div>
+        </section>
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="index.html" style="color: var(--link-color); text-decoration: underline;">&larr; Back to Homepage</a>
+        </div>
+    </main>
+
+    <footer style="margin-top: 40px;">
+        <p>&copy; 2025 Developed by Umberto Trombetta.</p>
+        <p style="font-size: 0.8em; margin-top: 5px;">Avatars generated using <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
+    </footer>
+
+    <script src="js/profile.js" type="module"></script>
+    <script src="js/main.js" type="module"></script> </body>
+</html>
+
