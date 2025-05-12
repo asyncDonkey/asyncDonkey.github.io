@@ -1,6 +1,6 @@
 // js/profile.js
 
-import { db, auth } from './main.js'; // Import shared instances
+import { db, auth, generateBlockieAvatar } from './main.js'; 
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -28,7 +28,7 @@ let currentUserProfile = null;
  */
 async function loadProfileData(uid) {
     console.log("profile.js - Loading profile for UID:", uid);
-    if (!profileContent || !profileLoadingMessage || !profileLoginMessage || !profileAvatarImg) { // Check for img tag
+    if (!profileContent || !profileLoadingMessage || !profileLoginMessage || !profileAvatarImg) {
          console.error("Profile page DOM elements missing!");
          return;
     }
@@ -37,38 +37,39 @@ async function loadProfileData(uid) {
     profileContent.style.display = 'none';
     profileLoginMessage.style.display = 'none';
     profileMessage.textContent = '';
-    profileAvatarImg.src = ''; // Clear previous avatar
+    profileAvatarImg.src = '';
     profileAvatarImg.alt = 'Loading avatar...';
-    profileAvatarImg.style.backgroundColor = '#eee'; // Reimposta bg placeholder
+    profileAvatarImg.style.backgroundColor = '#eee';
 
     const userProfileRef = doc(db, "userProfiles", uid);
-
     try {
         const docSnap = await getDoc(userProfileRef);
-
         if (docSnap.exists()) {
             currentUserProfile = docSnap.data();
             console.log("profile.js - Profile data found:", currentUserProfile);
 
-            // Populate display fields
             if (profileEmailSpan) profileEmailSpan.textContent = currentUserProfile.email || 'N/A';
             if (currentNicknameSpan) currentNicknameSpan.textContent = currentUserProfile.nickname || 'Not Set';
             if (profileNicknameInput) profileNicknameInput.value = currentUserProfile.nickname || '';
 
-            // ++ Set Avatar using DiceBear API URL ++
+            // >>> MODIFICA PER USARE BLOCKIES NELLA PAGINA PROFILO <<<
             if (profileAvatarImg) {
-                 const avatarStyle = 'identicon'; // <-- Usa lo stile identicon come richiesto
-                 const avatarUrl = `https://api.dicebear.com/8.x/${avatarStyle}/svg?seed=${uid}`;
-                 profileAvatarImg.src = avatarUrl;
-                 profileAvatarImg.alt = `${currentUserProfile.nickname || 'User'}'s Avatar`;
-                 profileAvatarImg.onload = () => { profileAvatarImg.style.backgroundColor = 'transparent'; }; // Rimuovi bg solo se carica
-                 profileAvatarImg.onerror = () => { profileAvatarImg.style.backgroundColor = '#eee'; profileAvatarImg.alt='Error'; }; // Fallback visivo su errore
+                 const seedForAvatar = uid; // Usa sempre uid come seed primario
+                 // Per un avatar più grande sulla pagina profilo, es. 80px
+                 // size: 10, scale: 8 (10*8 = 80px)
+                 // size: 8, scale: 10 (8*10 = 80px)
+                 profileAvatarImg.src = generateBlockieAvatar(seedForAvatar, 80, { size: 8 }); 
+                 profileAvatarImg.alt = `${currentUserProfile.nickname || 'User'}'s Blockie Avatar`;
+                 profileAvatarImg.style.backgroundColor = 'transparent'; 
+                 profileAvatarImg.onerror = () => { 
+                     profileAvatarImg.style.backgroundColor = '#eee'; 
+                     profileAvatarImg.alt='Error loading avatar'; 
+                 };
             }
-            // ++ End Avatar ++
+            // >>> FINE MODIFICA AVATAR <<<
 
             profileLoadingMessage.style.display = 'none';
             profileContent.style.display = 'block';
-
         } else {
             console.warn("profile.js - No profile document found for user:", uid);
             profileLoadingMessage.style.display = 'none';
@@ -123,7 +124,7 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log("profile.js - User is logged in:", user.uid);
         currentUser = user;
-        loadProfileData(user.uid);
+        loadProfileData(user.uid); // Chiama la funzione aggiornata
     } else {
         console.log("profile.js - User is signed out.");
         currentUser = null; currentUserProfile = null;

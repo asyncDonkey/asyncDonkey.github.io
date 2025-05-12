@@ -2,7 +2,7 @@
 import { Animation } from './animation.js';
 import { PowerUpItem, POWERUP_TYPE, POWERUP_DURATION, POWERUP_COLORS, POWERUP_TARGET_HEIGHT, POWERUP_TARGET_WIDTH } from './powerUps.js';
 import * as AudioManager from './audioManager.js';
-import { db, auth } from './main.js';
+import { db, auth, generateBlockieAvatar } from './main.js'; 
 import {
     collection, query, orderBy, limit, getDocs, serverTimestamp, where, // 'where' dovrebbe già esserci
     addDoc, doc, getDoc // <<< AGGIUNGI addDoc, doc, getDoc
@@ -90,42 +90,55 @@ function displayDonkeyLeaderboard(leaderboardData) {
     }
 
     leaderboardData.forEach((entry, index) => {
-        const li = document.createElement('li');
+    const li = document.createElement('li');
 
-        const rankSpan = document.createElement('span');
-        rankSpan.className = 'player-rank';
-        rankSpan.textContent = `${index + 1}.`;
+    const rankSpan = document.createElement('span');
+    rankSpan.className = 'player-rank';
+    rankSpan.textContent = `${index + 1}.`;
 
-        const avatarImg = document.createElement('img');
-        avatarImg.className = 'player-avatar';
-        const avatarSeed = entry.userId || entry.userName || entry.initials || `anon-${entry.id}`;
-        avatarImg.src = `https://api.dicebear.com/8.x/identicon/svg?seed=${encodeURIComponent(avatarSeed)}`;
-        avatarImg.alt = 'Avatar';
+    const avatarImg = document.createElement('img');
+    avatarImg.className = 'player-avatar'; // Assicurati che questa classe sia stilizzata
 
-        const playerInfoDiv = document.createElement('div');
-        playerInfoDiv.className = 'player-info';
+    // --- NUOVA Logica Avatar con Blockies ---
+    const seedForBlockie = entry.userId || entry.userName || entry.initials || `anon-${entry.id}`;
+    let altTextForBlockie = entry.userName || entry.initials || 'Anon';
 
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'player-name';
-        nameSpan.textContent = entry.userName || entry.initials || 'Giocatore Anonimo';
-        
-        const dateSpan = document.createElement('span');
-        dateSpan.className = 'player-date';
-        dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
+    avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 }); // Usa size: 8 come nelle altre sezioni
+    avatarImg.alt = `${altTextForBlockie}'s Avatar`;
+    avatarImg.style.backgroundColor = 'transparent';
+    avatarImg.onerror = () => { 
+        avatarImg.style.backgroundColor = '#ddd'; 
+        avatarImg.alt = 'Avatar Error';
+        avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+    };
+    // --- Fine Logica Avatar con Blockies ---
+    
+    // Aggiungi l'avatar e il resto delle info al list item
+    li.appendChild(rankSpan);
+    li.appendChild(avatarImg);
+    // ... (resto della creazione del playerInfoDiv, nameSpan, dateSpan, scoreSpan) ...
+    const playerInfoDiv = document.createElement('div');
+    playerInfoDiv.className = 'player-info';
 
-        playerInfoDiv.appendChild(nameSpan);
-        playerInfoDiv.appendChild(dateSpan);
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'player-name';
+    nameSpan.textContent = entry.userName || entry.initials || 'Giocatore Anonimo';
+    
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'player-date';
+    dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
 
-        const scoreSpan = document.createElement('span');
-        scoreSpan.className = 'player-score';
-        scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
+    playerInfoDiv.appendChild(nameSpan);
+    playerInfoDiv.appendChild(dateSpan);
 
-        li.appendChild(rankSpan);
-        li.appendChild(avatarImg);
-        li.appendChild(playerInfoDiv);
-        li.appendChild(scoreSpan);
-        miniLeaderboardListEl.appendChild(li);
-    });
+    const scoreSpan = document.createElement('span');
+    scoreSpan.className = 'player-score';
+    scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
+
+    li.appendChild(playerInfoDiv); // Aggiungi playerInfoDiv dopo l'avatar
+    li.appendChild(scoreSpan);
+    miniLeaderboardListEl.appendChild(li);
+});
 }
 
 console.log("Script donkeyRunner.js caricato.");

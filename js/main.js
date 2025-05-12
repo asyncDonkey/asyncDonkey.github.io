@@ -1,8 +1,8 @@
 // js/main.js
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { createIcon } from './blockies.mjs';
 
 // Firebase Config
 const firebaseConfig = {
@@ -20,21 +20,40 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Export shared instances
+// --- FUNZIONE HELPER PER AVATAR BLOCKIES ---
+export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
+    if (typeof createIcon !== 'function') { // Verifica se createIcon è stata importata
+        console.error("Funzione createIcon da Blockies non definita o non importata!");
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E"; // Fallback
+    }
+    try {
+        const defaultOptions = {
+            seed: String(seed).toLowerCase(),
+            size: 8, // Numero di blocchi per lato (default della libreria)
+            scale: 5, // Pixel per blocco (default della libreria è 4, qui impostato a 5 per un avatar di 40px se size=8)
+            // color: '#hexcolor', // Colore principale opzionale
+            // bgcolor: '#hexcolor', // Colore di sfondo opzionale
+            // spotcolor: '#hexcolor' // Colore "macchia" opzionale
+        };
+        const options = { ...defaultOptions, ...blockieOptions };
+        options.scale = Math.max(1, Math.round(imgSize / options.size));
+
+        const canvasElement = createIcon(options);
+        return canvasElement.toDataURL();
+    } catch (e) {
+        console.error("Errore durante la generazione dell'avatar Blockie:", e, "Seed:", seed);
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E"; 
+    }
+}
+
 export { db, auth };
 
-// Initial console verification (can be removed later)
-// console.log("main.js: db instance created:", db ? 'OK' : 'FAIL');
-// console.log("main.js: auth instance created:", auth ? 'OK' : 'FAIL');
-
-
 document.addEventListener('DOMContentLoaded', function() {
-
     // --- Standard UI Enhancements ---
     setupSmoothScrolling();
     setupScrollToTopButton();
     setupInteractiveSkills();
-    setupThemeSwitcher(); // Initialize theme switcher and theme
+    setupThemeSwitcher();
 
     // --- Firebase Auth Related DOM Elements ---
     const authContainer = document.getElementById('authContainer');
@@ -49,7 +68,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const signupModal = document.getElementById('signupModal');
     const commentNameSection = document.getElementById('commentNameSection');
     const commentNameInput = document.getElementById('commentName');
-
     setupModalControls(); // Setup listeners for login/signup modals
 
     // --- Core Functions ---
@@ -162,65 +180,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    /** Loads user profile data and updates header UI */
-    async function loadUserProfile(user) {
-        if (!user || !userProfileContainer) return; // Exit if no user or container missing
+ // QUESTA È L'UNICA DEFINIZIONE DI loadUserProfile CHE DEVE RIMANERE
+async function loadUserProfile(user) {
+    const userProfileContainer = document.getElementById('userProfileContainer'); // Assicurati che questi siano accessibili
+    const userDisplayName = document.getElementById('userDisplayName');
+    const headerUserAvatar = document.getElementById('headerUserAvatar');
 
-        // Initial state while loading
-        if (userDisplayName) userDisplayName.textContent = `Loading...`;
-        if (headerUserAvatar) {
-            headerUserAvatar.style.display = 'inline-block'; // Show placeholder area
-            headerUserAvatar.src = '';
-            headerUserAvatar.alt = 'Loading avatar';
-            headerUserAvatar.style.backgroundColor = '#eee';
-        }
-
-        const userProfileRef = doc(db, "userProfiles", user.uid);
-        try {
-            const docSnap = await getDoc(userProfileRef);
-            let nicknameToShow = user.email.split('@')[0]; // Default to email part
-
-            if (docSnap.exists() && docSnap.data().nickname) {
-                nicknameToShow = docSnap.data().nickname;
-                // console.log("main.js - Nickname found:", nicknameToShow);
-            } else {
-                // console.log("main.js - No profile/nickname found, using default.");
-            }
-
-            // Update display name
-            if (userDisplayName) userDisplayName.textContent = `Ciao, ${nicknameToShow}`;
-
-            // Update DiceBear avatar
-            if (headerUserAvatar) {
-                const avatarStyle = 'identicon'; // Or your preferred style
-                const avatarUrl = `https://api.dicebear.com/8.x/${avatarStyle}/svg?seed=${user.uid}`;
-                headerUserAvatar.src = avatarUrl;
-                headerUserAvatar.alt = `${nicknameToShow}'s Avatar`;
-                headerUserAvatar.onload = () => { headerUserAvatar.style.backgroundColor = 'transparent'; };
-                headerUserAvatar.onerror = () => { headerUserAvatar.style.display = 'none'; console.warn("Failed to load header avatar."); };
-            }
-
-        } catch (error) {
-            console.error("main.js - Error loading user profile:", error);
-            // Fallback display on error
-            if (userDisplayName) userDisplayName.textContent = `Ciao, ${user.email.split('@')[0]}`;
-            if (headerUserAvatar) headerUserAvatar.style.display = 'none';
-        }
+    if (!user || !userProfileContainer) {
+        console.warn("loadUserProfile chiamato ma utente o userProfileContainer non disponibile");
+        return;
     }
 
-    /** Updates UI elements based on authentication state */
+    if (userDisplayName) userDisplayName.textContent = `Loading...`;
+    if (headerUserAvatar) {
+        headerUserAvatar.style.display = 'inline-block';
+        headerUserAvatar.src = ''; // Pulisci src precedente
+        headerUserAvatar.alt = 'Loading avatar';
+        headerUserAvatar.style.backgroundColor = '#eee'; // Placeholder
+    }
+
+    // Dichiarare nicknameToShow qui, fuori dal try, con un valore di default
+    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente'; 
+
+    const userProfileRef = doc(db, "userProfiles", user.uid);
+    try {
+        const docSnap = await getDoc(userProfileRef);
+
+        if (docSnap.exists() && docSnap.data().nickname) {
+            nicknameToShow = docSnap.data().nickname; // Aggiorna se il nickname esiste nel profilo
+        }
+        
+        if (userDisplayName) userDisplayName.textContent = `Ciao, ${nicknameToShow}`;
+
+        if (headerUserAvatar) {
+            // Ora nicknameToShow è sicuramente definito perché dichiarato nello scope della funzione
+            const seedForAvatar = user.uid; // Usa sempre user.uid come seed primario
+            
+            // Assicurati che generateBlockieAvatar sia accessibile qui
+            // (dovrebbe esserlo se è esportata da main.js o definita globalmente come window.generateBlockieAvatar)
+            headerUserAvatar.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 }); 
+            headerUserAvatar.alt = `${nicknameToShow}'s Avatar`;
+            headerUserAvatar.style.backgroundColor = 'transparent'; 
+            
+            headerUserAvatar.onload = () => {
+                // console.log("Avatar header Blockie caricato.");
+            }; 
+            headerUserAvatar.onerror = () => { 
+                headerUserAvatar.style.display = 'none'; 
+                console.warn("Fallimento caricamento avatar Blockie nell'header."); 
+                // Potresti impostare un SVG di fallback qui se l'errore è nella generazione del dataURL
+                headerUserAvatar.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+            };
+        }
+    } catch (error) {
+        console.error("main.js - Error loading user profile:", error);
+        // Usa il nicknameToShow di fallback definito all'inizio della funzione
+        if (userDisplayName) userDisplayName.textContent = `Ciao, ${nicknameToShow}`; // nicknameToShow qui sarà il default basato sull'email
+        if (headerUserAvatar) {
+             headerUserAvatar.src = generateBlockieAvatar(nicknameToShow || user.uid, 32, {size:8}); // Prova a generare anche in caso di errore parziale
+             headerUserAvatar.alt = `${nicknameToShow}'s Fallback Avatar`;
+        }
+    }
+}
+
     function updateAuthUI(user) {
-        if (user) { // Logged IN
+        if (user) {
             if (authContainer) authContainer.style.display = 'none';
-            if (userProfileContainer) userProfileContainer.style.display = 'flex'; // Use flex to align items
+            if (userProfileContainer) userProfileContainer.style.display = 'flex';
             if (logoutButton) logoutButton.style.display = 'inline-block';
             if (profileNavLink) profileNavLink.style.display = 'list-item';
             if (loginModal?.style.display === 'block') loginModal.style.display = 'none';
             if (signupModal?.style.display === 'block') signupModal.style.display = 'none';
             if (commentNameSection) commentNameSection.style.display = 'none';
             if (commentNameInput) commentNameInput.required = false;
-            loadUserProfile(user); // Load/refresh user details
-        } else { // Logged OUT
+            loadUserProfile(user); 
+        } else { 
             if (authContainer) authContainer.style.display = 'flex';
             if (userProfileContainer) userProfileContainer.style.display = 'none';
             if (logoutButton) logoutButton.style.display = 'none';
@@ -251,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Authentication State Change Listener
     onAuthStateChanged(auth, (user) => {
-        // console.log("main.js - Auth state changed, user:", user ? user.uid : 'None');
         updateAuthUI(user);
     });
 

@@ -1,6 +1,6 @@
 // js/comments.js
 
-import { db, auth } from './main.js';
+import { db, auth, generateBlockieAvatar } from './main.js';
 import {
     collection, addDoc, query, orderBy, limit, getDocs,
     serverTimestamp, Timestamp, doc, updateDoc, increment,
@@ -52,78 +52,86 @@ async function loadComments() {
     }
     commentsListDiv.innerHTML = `<p>Loading comments for ${currentPageId}...</p>`;
     
+    let querySnapshot; // << DICHIARA querySnapshot QUI FUORI DAL TRY per il logging nel catch
+
     try {
-        // MODIFICA: Aggiungi il filtro 'where' alla query
         const q = query(
             guestbookCollection,
-            where("pageId", "==", currentPageId), // Filtra per il pageId corrente
+            where("pageId", "==", currentPageId), 
             orderBy("timestamp", "desc"),
             limit(MAX_COMMENTS_DISPLAYED)
         );
-        const querySnapshot = await getDocs(q);
+        querySnapshot = await getDocs(q); // << ASSEGNA QUI
         
-        if (querySnapshot.empty) {
+        if (querySnapshot.empty) { // Ora querySnapshot dovrebbe essere definita se getDocs ha avuto successo
             commentsListDiv.innerHTML = '<p>Nessun commento per questa pagina. Sii il primo!</p>';
             return;
         }
         commentsListDiv.innerHTML = '';
         querySnapshot.forEach((docSnapshot) => {
-            const commentData = docSnapshot.data();
-            const commentId = docSnapshot.id;
-            // ... (il resto della logica per creare l'elemento del commento rimane invariato) ...
-            // Assicurati che la logica di creazione dell'avatar e del contenuto del commento sia qui sotto
-            const commentElement = document.createElement('div');
-            commentElement.classList.add('comment-item');
+    const commentData = docSnapshot.data();
+    const commentId = docSnapshot.id;
+    const commentElement = document.createElement('div');
+    commentElement.classList.add('comment-item');
 
-            const avatarImg = document.createElement('img');
-            avatarImg.width = 40; avatarImg.height = 40;
-            avatarImg.style.borderRadius = '4px'; avatarImg.style.imageRendering = 'pixelated';
-            avatarImg.style.backgroundColor = '#eee'; avatarImg.style.flexShrink = '0';
-            avatarImg.alt = 'Avatar'; avatarImg.classList.add('comment-avatar-img');
+    const avatarImg = document.createElement('img');
+    avatarImg.width = 40; avatarImg.height = 40;
+    avatarImg.style.borderRadius = '4px';
+    avatarImg.style.imageRendering = 'pixelated';
+    avatarImg.style.flexShrink = '0';
+    avatarImg.classList.add('comment-avatar-img'); // Usa questa classe per stili CSS comuni se necessario
 
-            const avatarStyle = 'identicon';
-            let seed = commentData.userId || commentData.name || `anon-${commentId}`;
-            let altText = commentData.userName || commentData.name || 'Anonymous';
+    // --- NUOVA Logica Avatar con Blockies (RIMUOVI OGNI TRACCIA DI DICEBEAR QUI) ---
+    const seedForBlockie = commentData.userId || commentData.userName || commentData.name || `anon-${commentId}`;
+    // 'currentAltText' era usato per DiceBear, riutilizziamolo o creiamone uno specifico per Blockies se serve un alt text diverso.
+    let altTextForBlockie = commentData.userName || commentData.name || 'Anonymous'; 
+    
+    avatarImg.src = generateBlockieAvatar(seedForBlockie, 40, {size: 8}); // es. 40px
+    avatarImg.alt = `${altTextForBlockie}'s Blockie Avatar`;
+    avatarImg.style.backgroundColor = 'transparent'; // Blockies ha il suo sfondo
+    avatarImg.onerror = () => { 
+        avatarImg.style.backgroundColor = '#ddd'; 
+        avatarImg.alt = 'Avatar Error'; 
+        // Fallback SVG semplice
+        avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+    };
+    commentElement.appendChild(avatarImg);
+    // --- Fine Logica Avatar con Blockies ---
 
-            const avatarUrl = `https://api.dicebear.com/8.x/${avatarStyle}/svg?seed=${encodeURIComponent(seed)}`;
-            avatarImg.src = avatarUrl;
-            avatarImg.alt = `${altText}'s Avatar`;
-            avatarImg.onload = () => { avatarImg.style.backgroundColor = 'transparent'; };
-            avatarImg.onerror = () => { avatarImg.style.backgroundColor = '#ddd'; avatarImg.alt = '!'; };
-            commentElement.appendChild(avatarImg);
+    const commentContent = document.createElement('div');
+    commentContent.classList.add('comment-content');
+    const nameEl = document.createElement('strong');
+    nameEl.textContent = altTextForBlockie; // Usa lo stesso testo per il nome visualizzato
+    // ... resto della creazione del contenuto del commento (data, messaggio, like) ...
+    const dateEl = document.createElement('small');
+    dateEl.classList.add('comment-date');
+    dateEl.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
+    const messageEl = document.createElement('p');
+    messageEl.textContent = commentData.message ? String(commentData.message).replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+    commentContent.appendChild(nameEl); commentContent.appendChild(dateEl); commentContent.appendChild(messageEl);
 
-            const commentContent = document.createElement('div');
-            commentContent.classList.add('comment-content');
-            const nameEl = document.createElement('strong');
-            nameEl.textContent = altText;
-            const dateEl = document.createElement('small');
-            dateEl.classList.add('comment-date');
-            dateEl.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
-            const messageEl = document.createElement('p');
-            messageEl.textContent = commentData.message ? String(commentData.message).replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-            commentContent.appendChild(nameEl); commentContent.appendChild(dateEl); commentContent.appendChild(messageEl);
+    const likesContainer = document.createElement('div');
+    likesContainer.classList.add('likes-container');
+    const likeButton = document.createElement('button');
+    likeButton.innerHTML = '👍'; likeButton.classList.add('like-btn');
+    likeButton.setAttribute('data-comment-id', commentId); likeButton.title = "Like this comment";
+    const likeCountSpan = document.createElement('span');
+    likeCountSpan.classList.add('like-count'); likeCountSpan.textContent = `${commentData.likes || 0}`;
+    const likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
+    if (likedComments.includes(commentId)) { likeButton.disabled = true; likeButton.classList.add('liked'); likeButton.innerHTML = '❤️'; }
+    likeButton.addEventListener('click', handleLikeComment);
+    likesContainer.appendChild(likeButton); likesContainer.appendChild(likeCountSpan);
+    commentContent.appendChild(likesContainer);
 
-            const likesContainer = document.createElement('div');
-            likesContainer.classList.add('likes-container');
-            const likeButton = document.createElement('button');
-            likeButton.innerHTML = '👍'; likeButton.classList.add('like-btn');
-            likeButton.setAttribute('data-comment-id', commentId); likeButton.title = "Like this comment";
-            const likeCountSpan = document.createElement('span');
-            likeCountSpan.classList.add('like-count'); likeCountSpan.textContent = `${commentData.likes || 0}`;
-            const likedComments = JSON.parse(localStorage.getItem('likedGuestbookComments')) || [];
-            if (likedComments.includes(commentId)) { likeButton.disabled = true; likeButton.classList.add('liked'); likeButton.innerHTML = '❤️'; }
-            likeButton.addEventListener('click', handleLikeComment);
-            likesContainer.appendChild(likeButton); likesContainer.appendChild(likeCountSpan);
-            commentContent.appendChild(likesContainer);
-
-            commentElement.appendChild(commentContent);
-            commentsListDiv.appendChild(commentElement);
-        });
+    commentElement.appendChild(commentContent);
+    commentsListDiv.appendChild(commentElement);
+});
     } catch (error) {
-        console.error(`comments.js - Error loading comments for pageId ${currentPageId}: `, error);
+        // Qui l'errore originale da Firestore viene loggato.
+        console.error(`comments.js - Error loading comments for pageId ${currentPageId}: `, error); 
         if (error.code === 'failed-precondition' && commentsListDiv) {
             commentsListDiv.innerHTML = `<p>Errore: Indice Firestore mancante per filtrare i commenti. Controlla la console del browser per il link per crearlo.</p>`;
-            console.error("Potrebbe essere necessario un indice composito in Firestore per la query dei commenti. L'errore originale è:", error.message);
+            // Non serve un altro console.error qui, quello sopra logga già l'oggetto error completo
         } else if (commentsListDiv) {
             commentsListDiv.innerHTML = '<p>Errore caricamento commenti. Riprova più tardi.</p>';
         }
