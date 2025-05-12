@@ -192,7 +192,7 @@ async function loadUserProfile(user) {
         return;
 
     }
-  });
+
 
 
     if (userDisplayName) userDisplayName.textContent = `Loading...`;
