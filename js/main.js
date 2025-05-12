@@ -22,7 +22,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Esporta db e auth se ti servono in altri moduli (raro per main.js)
-// export { db, auth };
+export { db, auth };
 
 // --- FUNZIONE HELPER PER AVATAR BLOCKIES ---
 // (Può stare fuori da DOMContentLoaded se non accede direttamente al DOM all'avvio)
