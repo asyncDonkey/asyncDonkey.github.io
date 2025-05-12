@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>asyncDonkey Runner</title>
     <link rel="icon" href="images/favicon.svg" type="image/svg">
     <style>
@@ -14,19 +14,119 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
+            font-family: 'Courier New', Courier, monospace; /* Added for button text consistency */
         }
-        canvas {
+
+        #gameContainer {
+            position: relative; /* For positioning controls */
+            width: 100%;
+            max-width: 800px; /* Max width of the game */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas#gameCanvas {
             border: 2px solid #0f0;
             display: block;
             image-rendering: -moz-crisp-edges;
             image-rendering: -webkit-crisp-edges;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
+            width: 100%; /* Make canvas responsive within its container */
+            height: auto; /* Maintain aspect ratio */
+            max-height: calc(100vh - 120px); /* Max height considering controls */
         }
+
+        /* Mobile Controls Styling */
+        #mobileControls {
+            display: none; /* Hidden by default, shown via JS for touch devices */
+            width: 100%;
+            padding: 10px 0;
+            box-sizing: border-box;
+            user-select: none; /* Prevent text selection */
+            -webkit-user-select: none;
+            position: absolute; /* Position relative to gameContainer */
+            bottom: 10px; /* Position at the bottom */
+            left: 0;
+            z-index: 10; /* Ensure controls are on top */
+        }
+
+        #mobileControlsInternal {
+            display: flex;
+            justify-content: space-between; /* Space out buttons */
+            align-items: center;
+            width: 95%;
+            margin: 0 auto;
+        }
+
+        .control-button {
+            background-color: rgba(50, 50, 50, 0.7);
+            color: #0f0;
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 1.5em; /* Larger for touch */
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            flex-grow: 1; /* Make buttons take available space */
+            margin: 0 5px; /* Spacing between buttons */
+            text-align: center;
+        }
+        .control-button:active {
+            background-color: rgba(70, 70, 70, 0.9);
+        }
+
+        /* Fullscreen Button Styling */
+        #fullscreenButton {
+            background-color: rgba(50, 50, 50, 0.7);
+            color: #0f0;
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 20; /* Ensure it's above other elements */
+            display: none; /* Hidden by default, shown via JS for touch devices */
+        }
+         #fullscreenButton:active {
+            background-color: rgba(70, 70, 70, 0.9);
+        }
+
+        /* Media query for better layout on very small screens or landscape */
+        @media (max-width: 400px), (max-height: 400px) and (orientation: landscape) {
+            .control-button {
+                padding: 10px 15px;
+                font-size: 1.2em;
+            }
+            #mobileControls {
+                bottom: 5px;
+            }
+             #fullscreenButton {
+                font-size: 0.8em;
+                padding: 6px 10px;
+                top: 5px;
+                right: 5px;
+            }
+        }
+
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <div id="mobileControls">
+            <div id="mobileControlsInternal">
+                <button id="jumpButton" class="control-button">SALTA</button>
+                <button id="shootButton" class="control-button">SPARA</button>
+            </div>
+        </div>
+        <button id="fullscreenButton">FULLSCREEN</button>
+    </div>
     <script type="module" src="js/donkeyRunner.js"></script>
 </body>
 </html>

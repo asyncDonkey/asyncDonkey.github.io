@@ -8,13 +8,35 @@ console.log("Script donkeyRunner.js caricato.");
 // --- IMPOSTAZIONI GLOBALI DI GIOCO ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+
 canvas.width = 800;
 canvas.height = 450;
+
 const groundHeight = 70;
-const gravity = 0.3; // User's value
+const gravity = 0.18;
 let gameSpeed = 220;
 const lineWidth = 2;
 const GLOBAL_SPRITE_SCALE_FACTOR = 1.5;
+
+// --- DOM ELEMENT REFERENCES ---
+const gameContainer = document.getElementById('gameContainer');
+const jumpButton = document.getElementById('jumpButton');
+const shootButton = document.getElementById('shootButton');
+const mobileControlsDiv = document.getElementById('mobileControls');
+const fullscreenButton = document.getElementById('fullscreenButton');
+
+// --- TOUCH DEVICE DETECTION & CONTROLS VISIBILITY ---
+const isTouchDevice = (('ontouchstart' in window) ||
+                       (navigator.maxTouchPoints > 0) ||
+                       (navigator.msMaxTouchPoints > 0));
+
+if (isTouchDevice) {
+    if (mobileControlsDiv) mobileControlsDiv.style.display = 'block';
+    if (fullscreenButton) fullscreenButton.style.display = 'block';
+    console.log("Dispositivo touch rilevato. Controlli mobile abilitati.");
+} else {
+    console.log("Non è un dispositivo touch. Controlli mobile nascosti.");
+}
 
 // --- IMPOSTAZIONI INDICATORE AVVERTIMENTO SPARO ---
 const WARNING_EXCLAMATION_COLOR = 'red';
@@ -112,11 +134,11 @@ const DANGEROUS_FLYING_ENEMY_TARGET_WIDTH = DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_
 const DANGEROUS_FLYING_ENEMY_TARGET_HEIGHT = DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const DANGEROUS_FLYING_ENEMY_HEALTH = 1;
 
-const GLITCHZILLA_BASE_SRC = 'images/glitchzilla_sprite.png'; // Corretto
+const GLITCHZILLA_BASE_SRC = 'images/glitchzilla_sprite.png';
 const GLITCHZILLA_DMG1_SRC = 'images/glitchzillaDmg1.png';
 const GLITCHZILLA_DMG2_SRC = 'images/glitchzillaDmg2.png';
 const GLITCHZILLA_DMG3_SRC = 'images/glitchzillaDmg3.png';
-const GLITCHZILLA_ACTUAL_FRAME_WIDTH = 96; const GLITCHZILLA_ACTUAL_FRAME_HEIGHT = 96; // Corretto
+const GLITCHZILLA_ACTUAL_FRAME_WIDTH = 96; const GLITCHZILLA_ACTUAL_FRAME_HEIGHT = 96;
 const GLITCHZILLA_NUM_FRAMES = 4;
 const GLITCHZILLA_TARGET_WIDTH = GLITCHZILLA_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
 const GLITCHZILLA_TARGET_HEIGHT = GLITCHZILLA_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
@@ -218,7 +240,9 @@ const imagesToLoad = [
 let imagesLoadedCount = 0; let allImagesLoaded = false; let resourcesInitialized = false; let gameLoopRequestId = null;
 
 let obstacles = []; let obstacleSpawnTimer = 0; let nextObstacleSpawnTime = 0; const obstacleSpawnColor = '#0f0';
-let projectiles = []; let canShoot = true; let shootTimer = 0; const projectileSpeed = 400; const shootCooldownTime = 0.3; const projectileColor = '#0ff';
+let projectiles = []; let canShoot = true;
+let shootTimer = 0; // << DECLARED ONCE GLOBALLY
+const projectileSpeed = 400; const shootCooldownTime = 0.3; const projectileColor = '#0ff';
 let enemies = []; let enemyBaseSpawnTimer = 0; let nextEnemyBaseSpawnTime = 0; const enemyBaseSpawnColor = '#0f0';
 let flyingEnemies = []; let flyingEnemySpawnTimer = 0; let nextFlyingEnemySpawnTime = 0; const flyingEnemyScoreValue = 100; const flyingEnemySpawnColor = '#ff0';
 const POWER_UP_DROP_CHANCE_FROM_FLYING_ENEMY = 0.35;
@@ -248,15 +272,18 @@ const SCORE_THRESHOLD_DANGEROUS_FLYING_ENEMY = 800;
 
 let score = 0; let finalScore = 0; let gameOverTrigger = false;
 
+// Timestamp for game loop
+let lastTime = 0; // << DECLARED ONCE GLOBALLY
+
+
 function loadImage(name, src) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         images[name] = img;
         img.onload = () => {
             imagesLoadedCount++;
-            // console.log(`Img ${name} onload (${imagesLoadedCount}/${imagesToLoad.length}), src: ${img.src}, naturalWidth: ${img.naturalWidth}, complete: ${img.complete}`);
             if (img.naturalWidth === 0) {
-                // console.error(`ERRORE CARICAMENTO EFFETTIVO: ${name} da ${src} - naturalWidth è 0. File non trovato o corrotto?`);
+                // console.error(`ERRORE CARICAMENTO EFFETTIVO: ${name} da ${src} - naturalWidth è 0.`);
             }
             if (imagesLoadedCount === imagesToLoad.length) {
                 allImagesLoaded = true;
@@ -276,7 +303,6 @@ function loadImage(name, src) {
     });
 }
 
-
 async function loadAllAssets() {
     console.log("Carico assets...");
     const imagePromises = imagesToLoad.map(d => loadImage(d.name, d.src));
@@ -284,8 +310,8 @@ async function loadAllAssets() {
     const backgroundMusicPromise = AudioManager.loadBackgroundMusic(backgroundMusicPath);
     await Promise.allSettled([...imagePromises, ...soundPromises, backgroundMusicPromise]);
     console.log("Processo di caricamento assets completato.");
-    if(allImagesLoaded) console.log("TUTTE le immagini dichiarate in imagesToLoad sono state processate (controllare log per errori individuali).");
-    else console.warn("Attenzione: Alcune immagini potrebbero non essersi processate correttamente (controlla i log ERRORE).");
+    if(allImagesLoaded) console.log("TUTTE le immagini dichiarate sono state processate.");
+    else console.warn("Attenzione: Alcune immagini potrebbero non essersi processate.");
     resourcesInitialized = true;
     if (gameLoopRequestId === null && currentGameState === GAME_STATE.MENU) {
         startGameLoop();
@@ -377,7 +403,8 @@ class Player {
                 projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase, isDebugMode));
             }
             AudioManager.playSound('shoot', false, 0.8);
-            canShoot = false; shootTimer = 0;
+            canShoot = false;
+            shootTimer = 0; // Assign to existing global variable
         }
     }
 
@@ -479,7 +506,7 @@ class Obstacle {
             if (OBSTACLE_NUM_FRAMES > 1) {
                  this.animation = new Animation(this.sprite,OBSTACLE_ACTUAL_FRAME_WIDTH,OBSTACLE_ACTUAL_FRAME_HEIGHT,OBSTACLE_NUM_FRAMES);
             }
-        } else { console.warn(`Sprite ostacolo non caricato o rotto. Sprite: ${this.sprite}, complete: ${this.sprite ? this.sprite.complete : 'N/A'}, naturalWidth: ${this.sprite ? this.sprite.naturalWidth : 'N/A'}`); }
+        } else { console.warn(`Sprite ostacolo non caricato o rotto. Sprite: ${this.sprite}`); }
     }
     update(dt){ this.x -= gameSpeed*dt; if(this.animation) this.animation.update(dt); }
     draw(){
@@ -519,9 +546,9 @@ class Projectile {
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
             this.animation = new Animation(this.sprite, PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH, PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT, PLAYER_PROJECTILE_NUM_FRAMES, PLAYER_PROJECTILE_ANIMATION_SPEED);
         } else if (this.sprite) {
-             console.warn(`Sprite proiettile (${this.isUpgraded ? 'potenziato' : 'normale'}) non completamente caricato o rotto (naturalWidth: ${this.sprite.naturalWidth}, complete: ${this.sprite.complete}), animazione non creata.`);
+            // console.warn(`Sprite proiettile (${this.isUpgraded ? 'potenziato':'normale'}) non animabile.`);
         } else {
-            console.warn(`Sprite proiettile (${this.isUpgraded ? 'potenziato' : 'normale'}) non trovato in images cache.`);
+            // console.warn(`Sprite proiettile (${this.isUpgraded ? 'potenziato':'normale'}) non trovato.`);
         }
     }
     update(dt) { this.x += this.speed * dt; if (this.animation) { this.animation.update(dt); } }
@@ -558,16 +585,16 @@ class BaseEnemy{
         this.loadAnimation(this.baseSpriteName, frameW, frameH, numFrames, 'base');
     }
 
-    loadAnimation(spriteNameKeyToLoad, frameW, frameH, numFrames, animationKey) {
+    loadAnimation(spriteNameKeyToLoad, frameW, frameH, numFramesAnim, animationKey) {
         const spriteInstance = images[spriteNameKeyToLoad];
-        if(spriteInstance && spriteInstance.complete && spriteInstance.naturalWidth > 0 && numFrames > 0){
-            this.animations[animationKey] = new Animation(spriteInstance, frameW, frameH, numFrames);
+        if(spriteInstance && spriteInstance.complete && spriteInstance.naturalWidth > 0 && numFramesAnim > 0){
+            this.animations[animationKey] = new Animation(spriteInstance, frameW, frameH, numFramesAnim);
             if (animationKey === 'base') {
                 this.animation = this.animations.base;
                 this.sprite = spriteInstance;
             }
         } else {
-            console.warn(`BaseEnemy.loadAnimation FALLITO per sprite key '${spriteNameKeyToLoad}' (anim key: ${animationKey}). Sprite obj: ${spriteInstance}, complete: ${spriteInstance ? spriteInstance.complete : 'N/A'}, naturalWidth: ${spriteInstance ? spriteInstance.naturalWidth : 'N/A'}, numFrames: ${numFrames}`);
+            console.warn(`BaseEnemy.loadAnimation FALLITO per sprite key '${spriteNameKeyToLoad}' (anim key: ${animationKey}).`);
             this.animations[animationKey] = null;
             if (animationKey === 'base') {
                 this.animation = null;
@@ -583,6 +610,7 @@ class BaseEnemy{
         let spriteToUse = currentAnimToDraw ? currentAnimToDraw.spritesheet : this.sprite;
         let actualFrameW = currentAnimToDraw ? currentAnimToDraw.frameWidth : this.frameWidth;
         let actualFrameH = currentAnimToDraw ? currentAnimToDraw.frameHeight : this.frameHeight;
+
         const spriteUsable = spriteToUse && spriteToUse.complete && spriteToUse.naturalWidth > 0;
 
         if(currentAnimToDraw && spriteUsable){
@@ -629,10 +657,10 @@ class ArmoredEnemy extends BaseEnemy{
     }
 }
 
-class ShootingEnemy extends BaseEnemy { // EnemyFour
+class ShootingEnemy extends BaseEnemy {
     constructor(x, y) {
         super(x, y, ENEMY_FOUR_TARGET_WIDTH, ENEMY_FOUR_TARGET_HEIGHT, 'enemyFourIdle', ENEMY_FOUR_ACTUAL_FRAME_WIDTH, ENEMY_FOUR_ACTUAL_FRAME_HEIGHT, ENEMY_FOUR_IDLE_NUM_FRAMES, 0.5, 1, shootingEnemySpawnColor, 40);
-        this.shootTimer = Math.random() * SHOOTING_ENEMY_SHOOT_INTERVAL + 1.5;
+        this.shootTimer = Math.random() * SHOOTING_ENEMY_SHOOT_INTERVAL + 1.5; // Note: `shootTimer` for enemy logic, not player's global one
 
         this.projectileSpriteName = 'enemyFourProjectile';
         this.projectileFrameWidth = ENEMY_FOUR_PROJECTILE_ACTUAL_FRAME_WIDTH;
@@ -657,7 +685,7 @@ class ShootingEnemy extends BaseEnemy { // EnemyFour
                     this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames,
                     this.projectileTargetWidth, this.projectileTargetHeight
                 ));
-                AudioManager.playSound('enemyShootLight'); // CORRETTO
+                AudioManager.playSound('enemyShootLight');
                 this.shootTimer = 0; 
             }
         } else {
@@ -680,9 +708,9 @@ class EnemyProjectile{
         if(this.sprite&&this.sprite.complete&&this.sprite.naturalWidth>0&&numFrames>1){
             this.animation=new Animation(this.sprite,frameW,frameH,numFrames, 0.1);
         }else if(this.sprite) {
-            console.warn(`Sprite proiettile nemico '${spriteNameKey}' non valido. naturalWidth: ${this.sprite.naturalWidth}, complete: ${this.sprite.complete}`);
+            // console.warn(`Sprite proiettile nemico '${spriteNameKey}' non animabile.`);
         } else {
-            console.warn(`Sprite proiettile nemico '${spriteNameKey}' non trovato in images cache.`);
+            // console.warn(`Sprite proiettile nemico '${spriteNameKey}' non trovato.`);
         }
     }
     update(dt){this.x-=this.speed*dt;if(this.animation)this.animation.update(dt);}
@@ -703,16 +731,15 @@ class EnemyProjectile{
 }
 class FlyingEnemy extends BaseEnemy{constructor(x,y){super(x,y,ENEMY_FIVE_TARGET_WIDTH,ENEMY_FIVE_TARGET_HEIGHT,'enemyFive',ENEMY_FIVE_ACTUAL_FRAME_WIDTH,ENEMY_FIVE_ACTUAL_FRAME_HEIGHT,ENEMY_FIVE_NUM_FRAMES,(0.6+Math.random()*0.3),1,flyingEnemySpawnColor, flyingEnemyScoreValue);this.initialY=y;this.angle=Math.random()*Math.PI*2;this.amplitude=20+Math.random()*20;this.frequency=0.02+Math.random()*0.03;}update(dt){super.update(dt);this.angle+=this.frequency;this.y=this.initialY+Math.sin(this.angle)*this.amplitude;}}
 
-class ArmoredShootingEnemy extends BaseEnemy { // EnemySix
+class ArmoredShootingEnemy extends BaseEnemy {
     constructor(x, y) {
         super(x, y, ENEMY_SIX_TARGET_WIDTH, ENEMY_SIX_TARGET_HEIGHT, 'enemySixBase', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 0.4, ARMORED_SHOOTING_ENEMY_HEALTH, armoredShootingEnemySpawnColor, 60);
+        this.shootTimer = Math.random() * ARMORED_SHOOTING_ENEMY_SHOOT_INTERVAL + 2.0; // Enemy's own shootTimer
 
         this.loadAnimation('enemySixDmg1', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 'dmg1');
         this.loadAnimation('enemySixDmg2', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 'dmg2');
         this.loadAnimation('enemySixDmg3', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 'dmg3');
         this.updateCurrentAnimation();
-
-        this.shootTimer = Math.random() * ARMORED_SHOOTING_ENEMY_SHOOT_INTERVAL + 2.0;
 
         this.projectileSpriteName = 'enemySixProjectile';
         this.projectileFrameWidth = ENEMY_SIX_PROJECTILE_ACTUAL_FRAME_WIDTH;
@@ -754,7 +781,7 @@ class ArmoredShootingEnemy extends BaseEnemy { // EnemySix
                     this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames,
                     this.projectileTargetWidth, this.projectileTargetHeight
                 ));
-                AudioManager.playSound('enemyShootHeavy'); // CORRETTO
+                AudioManager.playSound('enemyShootHeavy');
                 this.shootTimer = 0;
             }
         } else {
@@ -836,9 +863,9 @@ class Glitchzilla extends BaseEnemy {
 
     updateCurrentAnimation() {
         let animKey;
-        if (this.health > 20) animKey = 'base';
-        else if (this.health > 10) animKey = 'dmg1';
-        else if (this.health > 5) animKey = 'dmg2';
+        if (this.health > GLITCHZILLA_HEALTH * 0.75) animKey = 'base';
+        else if (this.health > GLITCHZILLA_HEALTH * 0.50) animKey = 'dmg1';
+        else if (this.health > GLITCHZILLA_HEALTH * 0.25) animKey = 'dmg2';
         else animKey = 'dmg3';
 
         this.animation = this.animations[animKey] || this.animations['base'];
@@ -853,8 +880,8 @@ class Glitchzilla extends BaseEnemy {
         if (this.health <= 0) {
             console.log("Glitchzilla SCONFITTO! Assegno punteggio: " + this.scoreValue);
             AudioManager.playSound('glitchzillaDefeat');
-            score += this.scoreValue; 
-            activeMiniboss = null; 
+            score += this.scoreValue;
+            activeMiniboss = null;
             hasGlitchzillaSpawnedThisGame = true;
         }
     }
@@ -971,9 +998,10 @@ function spawnPowerUpAmbientIfNeeded(dt) {
             if (conflictingActive.includes(asyncDonkey.activePowerUp)) {
                 availablePowerUps = availablePowerUps.filter(type => !conflictingActive.includes(type));
             }
+            if(asyncDonkey.activePowerUp === POWERUP_TYPE.SHIELD) availablePowerUps = availablePowerUps.filter(type => type !== POWERUP_TYPE.SHIELD);
+            if(asyncDonkey.activePowerUp === POWERUP_TYPE.FIREWALL) availablePowerUps = availablePowerUps.filter(type => type !== POWERUP_TYPE.FIREWALL);
         }
         if (availablePowerUps.length === 0) {
-             console.log("Nessun power-up non conflittuale disponibile per lo spawn.");
              return;
         }
 
@@ -1022,13 +1050,13 @@ function checkCollisions(){
         const checkPlayerCollisionWithEntity=(entity, isObstacle = false)=>{
             if (isObstacle && asyncDonkey.isFirewallActive) {
                 if(entity&&pC.x<entity.x+entity.width&&pC.x+pC.width>entity.x&&pC.y<entity.y+entity.height&&pC.y+pC.height>entity.y){
-                    // AudioManager.playSound('firewallDeflect');
+                    // AudioManager.playSound('firewallDeflect'); // Optional sound
                 }
                 return false;
             }
             if(entity&&pC.x<entity.x+entity.width&&pC.x+pC.width>entity.x&&pC.y<entity.y+entity.height&&pC.y+pC.height>entity.y){
                 gameOverTrigger=true; AudioManager.playSound('playerHit'); AudioManager.stopMusic();
-                console.error(`HIT Player vs ${entity.constructor.name}`);return true;
+                console.error(`HIT Player vs ${entity.constructor.name || 'Unknown Entity'}`);return true;
             }
             return false;
         };
@@ -1103,9 +1131,6 @@ function checkCollisions(){
         if (activeMiniboss && p.x < activeMiniboss.x + activeMiniboss.width && p.x + p.width > activeMiniboss.x && p.y < activeMiniboss.y + activeMiniboss.height && p.y + p.height > activeMiniboss.y) {
             activeMiniboss.takeDamage(p.damage); 
             projectileConsumedThisHit = true;
-            if (activeMiniboss && activeMiniboss.health > 0) { 
-                score += 5; 
-            }
         }
 
         if(projectileConsumedThisHit){projectiles.splice(i,1);continue;}
@@ -1125,7 +1150,7 @@ function checkCollisions(){
         if(projectileConsumedThisHit){projectiles.splice(i,1);continue;}
         for(let j=dangerousFlyingEnemies.length-1;j>=0;j--){if(processProjectileHitOnList(dangerousFlyingEnemies,j)){break;}}
         if(projectileConsumedThisHit){projectiles.splice(i,1);continue;}
-        for(let j=flyingEnemies.length-1;j>=0;j--){if (flyingEnemies[j]) {if(processProjectileHitOnList(flyingEnemies,j)){break;}} else {console.warn(`DEBUG: flyingEnemies[${j}] è undefined durante il check delle collisioni.`);}}
+        for(let j=flyingEnemies.length-1;j>=0;j--){if (flyingEnemies[j]) {if(processProjectileHitOnList(flyingEnemies,j)){break;}} else {/* console.warn(`DEBUG: flyingEnemies[${j}] è undefined.`);*/}}
         if(projectileConsumedThisHit){projectiles.splice(i,1);continue;}
     }
 }
@@ -1149,11 +1174,12 @@ function resetGame(){
     armoredShootingEnemySpawnTimer=0; nextArmoredShootingEnemySpawnTime=calculateNextGenericEnemySpawnTime(15.0, 25.0);
     toughBasicEnemySpawnTimer=0; nextToughBasicEnemySpawnTime=calculateNextGenericEnemySpawnTime(5.0, 9.0);
     dangerousFlyingEnemySpawnTimer=0; nextDangerousFlyingEnemySpawnTime=calculateNextGenericEnemySpawnTime(20.0, 35.0);
-    score=0;finalScore=0;gameOverTrigger=false;canShoot=true;shootTimer=0;
+    score=0;finalScore=0;gameOverTrigger=false;canShoot=true;
+    shootTimer=0; // Assign to existing global variable
     console.log("resetGame: Fatto.");
 }
 
-function drawMenuScreen(){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#0f0';ctx.font='42px "Courier New",Courier,monospace';ctx.textAlign='center';ctx.fillText("asyncDonkey Runner",canvas.width/2,canvas.height/2-120);ctx.font='24px "Courier New",Courier,monospace';ctx.fillText("I S T R U Z I O N I:",canvas.width/2,canvas.height/2-50);ctx.font='18px "Courier New",Courier,monospace';ctx.textAlign='left';const iSX=canvas.width/2-220;const lS=28;let cY=canvas.height/2-10;ctx.fillText("> [SPACE] or [ARROW UP] = Jump",iSX,cY);cY+=lS;ctx.fillText("> [CTRL]  or [X]        = Shoot",iSX,cY);cY+=lS;ctx.fillText("> Evita Ostacoli",iSX,cY);cY+=lS;ctx.fillText("> Distruggi i \"Virus\" ",iSX,cY);cY+=lS;ctx.fillText("> Colpisci i \"Glitches\" (gialli) per Bonus!",iSX,cY);ctx.font='28px "Courier New",Courier,monospace';ctx.fillStyle='#ff0';ctx.textAlign='center';ctx.fillText("PRESS ENTER TO START",canvas.width/2,canvas.height-80);}
+function drawMenuScreen(){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#0f0';ctx.font='42px "Courier New",Courier,monospace';ctx.textAlign='center';ctx.fillText("asyncDonkey Runner",canvas.width/2,canvas.height/2-120);ctx.font='24px "Courier New",Courier,monospace';ctx.fillText("I S T R U Z I O N I:",canvas.width/2,canvas.height/2-50);ctx.font='18px "Courier New",Courier,monospace';ctx.textAlign='left';const iSX=canvas.width/2-220;const lS=28;let cY=canvas.height/2-10;ctx.fillText("> [SPACE] or [ARROW UP] = Jump",iSX,cY);cY+=lS;ctx.fillText("> [CTRL]  or [X]        = Shoot",iSX,cY);cY+=lS;ctx.fillText("> Evita Ostacoli",iSX,cY);cY+=lS;ctx.fillText("> Distruggi i \"Virus\" ",iSX,cY);cY+=lS;ctx.fillText("> Colpisci i \"Glitches\" (gialli) per Bonus!",iSX,cY);ctx.font='28px "Courier New",Courier,monospace';ctx.fillStyle='#ff0';ctx.textAlign='center';ctx.fillText(isTouchDevice ? "TAP TO START" : "PRESS ENTER TO START",canvas.width/2,canvas.height-80);}
 
 function updatePlaying(dt){
     if(gameOverTrigger){finalScore=score;currentGameState=GAME_STATE.GAME_OVER;return;}
@@ -1195,39 +1221,159 @@ function drawPlayingScreen(){
         ctx.fillText(`${powerUpDisplayName}: ${asyncDonkey.powerUpTimer.toFixed(1)}s`,canvas.width-20,40);
     }
 }
-function drawGameOverScreen(){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#f00';ctx.font='52px "Courier New",Courier,monospace';ctx.textAlign='center';ctx.fillText("G A M E   O V E R",canvas.width/2,canvas.height/2-60);ctx.fillStyle='#ff0';ctx.font='32px "Courier New",Courier,monospace';ctx.fillText("Final Score: "+finalScore,canvas.width/2,canvas.height/2);ctx.fillStyle='#fff';ctx.font='22px "Courier New",Courier,monospace';ctx.fillText("PRESS ENTER TO RESTART",canvas.width/2,canvas.height/2+60);}
+function drawGameOverScreen(){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#f00';ctx.font='52px "Courier New",Courier,monospace';ctx.textAlign='center';ctx.fillText("G A M E   O V E R",canvas.width/2,canvas.height/2-60);ctx.fillStyle='#ff0';ctx.font='32px "Courier New",Courier,monospace';ctx.fillText("Final Score: "+finalScore,canvas.width/2,canvas.height/2);ctx.fillStyle='#fff';ctx.font='22px "Courier New",Courier,monospace';ctx.fillText(isTouchDevice ? "TAP TO RESTART" : "PRESS ENTER TO RESTART",canvas.width/2,canvas.height/2+60);}
 
-let lastTime=0;
-function gameLoop(timestamp){const deltaTime=(timestamp-lastTime)/1000||0;lastTime=timestamp;ctx.clearRect(0,0,canvas.width,canvas.height);if(!resourcesInitialized){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#0f0';ctx.font='20px "Courier New",Courier,monospace';ctx.textAlign='center';ctx.fillText("Loading Resources...",canvas.width/2,canvas.height/2);gameLoopRequestId=requestAnimationFrame(gameLoop);return;}
-switch(currentGameState){case GAME_STATE.MENU:drawMenuScreen();break;case GAME_STATE.PLAYING:updatePlaying(deltaTime);drawPlayingScreen();break;case GAME_STATE.GAME_OVER:drawGameOverScreen();break;}
-gameLoopRequestId=requestAnimationFrame(gameLoop);}
-function startGameLoop(){if(gameLoopRequestId!==null)cancelAnimationFrame(gameLoopRequestId);lastTime=performance.now();console.log("Avvio Game Loop...");currentGameState=GAME_STATE.MENU;gameLoopRequestId=requestAnimationFrame(gameLoop);}
 
+function gameLoop(timestamp){
+    const deltaTime=(timestamp-lastTime)/1000||0;
+    lastTime=timestamp; // Assign to existing global variable
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(!resourcesInitialized){
+        ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle='#0f0';ctx.font='20px "Courier New",Courier,monospace';
+        ctx.textAlign='center';ctx.fillText("Loading Resources...",canvas.width/2,canvas.height/2);
+        gameLoopRequestId=requestAnimationFrame(gameLoop);return;
+    }
+    switch(currentGameState){
+        case GAME_STATE.MENU:drawMenuScreen();break;
+        case GAME_STATE.PLAYING:updatePlaying(deltaTime);drawPlayingScreen();break;
+        case GAME_STATE.GAME_OVER:drawGameOverScreen();break;
+    }
+    gameLoopRequestId=requestAnimationFrame(gameLoop);
+}
+function startGameLoop(){
+    if(gameLoopRequestId!==null) cancelAnimationFrame(gameLoopRequestId);
+    lastTime=performance.now(); // Assign to existing global variable
+    console.log("Avvio Game Loop...");
+    gameLoopRequestId=requestAnimationFrame(gameLoop);
+}
+
+// --- EVENT LISTENERS PER NUOVI BOTTONI ---
+if (jumpButton) {
+    jumpButton.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        if (AudioManager.audioContext && AudioManager.audioContext.state === "suspended") {
+            AudioManager.audioContext.resume().catch(err => console.error("Errore resume AudioContext:", err));
+        }
+        if (currentGameState === GAME_STATE.PLAYING && asyncDonkey) {
+            asyncDonkey.jump();
+        } else if (currentGameState === GAME_STATE.MENU) {
+            AudioManager.playMusic(false);
+            currentGameState = GAME_STATE.PLAYING;
+            resetGame();
+        } else if (currentGameState === GAME_STATE.GAME_OVER) {
+            currentGameState = GAME_STATE.PLAYING;
+            resetGame();
+            AudioManager.playMusic(false);
+        }
+    });
+    jumpButton.addEventListener('click', function(e) { // Fallback per click
+         if (currentGameState === GAME_STATE.PLAYING && asyncDonkey) {
+            asyncDonkey.jump();
+        }
+    });
+}
+
+if (shootButton) {
+    shootButton.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+         if (AudioManager.audioContext && AudioManager.audioContext.state === "suspended") {
+            AudioManager.audioContext.resume().catch(err => console.error("Errore resume AudioContext:", err));
+        }
+        if (currentGameState === GAME_STATE.PLAYING && asyncDonkey) {
+            asyncDonkey.shoot();
+        }
+    });
+     shootButton.addEventListener('click', function(e) { // Fallback per click
+         if (currentGameState === GAME_STATE.PLAYING && asyncDonkey) {
+            asyncDonkey.shoot();
+        }
+    });
+}
+
+if (fullscreenButton) {
+    fullscreenButton.addEventListener('click', function() {
+        toggleFullscreen();
+    });
+}
+
+// --- FULLSCREEN FUNCTIONALITY ---
+function toggleFullscreen() {
+    if (!document.fullscreenElement &&
+        !document.mozFullScreenElement &&
+        !document.webkitFullscreenElement &&
+        !document.msFullscreenElement) {
+
+        if (gameContainer && gameContainer.requestFullscreen) {
+            gameContainer.requestFullscreen();
+        } else if (gameContainer && gameContainer.mozRequestFullScreen) {
+            gameContainer.mozRequestFullScreen();
+        } else if (gameContainer && gameContainer.webkitRequestFullscreen) {
+            gameContainer.webkitRequestFullscreen();
+        } else if (gameContainer && gameContainer.msRequestFullscreen) {
+            gameContainer.msRequestFullscreen();
+        }
+        // Testo aggiornato da event listener 'fullscreenchange'
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+        // Testo aggiornato da event listener 'fullscreenchange'
+    }
+}
+
+function updateFullscreenButtonText() {
+    if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+        if(fullscreenButton) fullscreenButton.textContent = "FULLSCREEN";
+    } else {
+        if(fullscreenButton) fullscreenButton.textContent = "ESCI FULLSCREEN";
+    }
+}
+document.addEventListener('fullscreenchange', updateFullscreenButtonText);
+document.addEventListener('webkitfullscreenchange', updateFullscreenButtonText);
+document.addEventListener('mozfullscreenchange', updateFullscreenButtonText);
+document.addEventListener('MSFullscreenChange', updateFullscreenButtonText);
+
+
+// KEYBOARD EVENT LISTENER
 window.addEventListener('keydown',(e)=>{
-    if(!resourcesInitialized)return;
+    if(!resourcesInitialized) return;
+
     if (AudioManager.audioContext && AudioManager.audioContext.state === "suspended") {
         AudioManager.audioContext.resume().catch(err => console.error("Errore nel riprendere AudioContext:", err));
     }
+
     switch(currentGameState){
         case GAME_STATE.MENU:
             if(e.key==='Enter'){
                 AudioManager.playMusic(false);
                 currentGameState=GAME_STATE.PLAYING;
                 resetGame();
-            } break;
+            }
+            break; // Added break
         case GAME_STATE.PLAYING:
             if(asyncDonkey){
                 if(e.code==='Space'||e.key==='ArrowUp'){e.preventDefault();asyncDonkey.jump();}
                 if(e.code==='ControlLeft'||e.key==='x'||e.key==='X'||e.key==='ControlRight'){e.preventDefault();asyncDonkey.shoot();}
-            } break;
+            }
+            break; // Added break
         case GAME_STATE.GAME_OVER:
             if(e.key==='Enter'){
                 currentGameState=GAME_STATE.PLAYING;
                 resetGame();
                 AudioManager.playMusic(false);
-            } break;
+            }
+            break; // Added break
     }
-});
+}); // Semicolon for addEventListener statement
 
+// INIZIO CARICAMENTO ASSETS E GIOCO
 loadAllAssets();
+
 console.log("Fine script donkeyRunner.js (esecuzione iniziale). In attesa caricamento assets...");
