@@ -1009,11 +1009,19 @@ body.donkey-runner-page {
 
 
 .donkey-runner-page canvas#gameCanvas {
-    /* ... */
+    display: block;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
     width: 100%; 
     height: auto; 
-    max-height: calc(100vh - 200px); 
-    /* ... */
+    max-height: calc(100vh - 220px);
+    border: 3px solid var(--game-border-color, #0b8a8f); /* Usa PALETTE.BORDER_LINE_COLOR */
+    border-radius: 8px;
+    /* Usa i valori RGB della palette per l'ombra, se vuoi. Esempio con BORDER_LINE_COLOR */
+    /* Per #0b8a8f -> rgba(11, 138, 143, 0.5) */
+    box-shadow: 0 0 15px rgba(11, 138, 143, 0.5); 
 }
 
 
@@ -1036,13 +1044,48 @@ body.dark-mode.donkey-runner-page {
 /* Stili aggiuntivi per i pulsanti del gioco se vuoi differenziarli
    dai .auth-button o .game-button generici di styles.css */
 .donkey-runner-page .control-button {
-    font-family: "Source Code Pro", monospace; /* Assicura il font corretto */
-    /* ... altri stili specifici se quelli inline non bastano ... */
+    background-color: var(--game-button-bg, rgba(50, 83, 95, 0.7)); /* Sfondo da PALETTE.DARK_TEAL_BLUE con alpha */
+    color: var(--game-button-text, #30e1b9); /* Testo da PALETTE.BRIGHT_GREEN_TEAL */
+    border: 2px solid var(--game-button-border, #0b8a8f); /* Bordo da PALETTE.MEDIUM_TEAL */
+    border-radius: 10px;
+    padding: 15px 20px;
+    font-size: 1.3em; 
+    font-weight: bold;
+    font-family: "Source Code Pro", monospace; 
+    cursor: pointer;
+    outline: none;
+    flex-grow: 0; 
+    flex-basis: 45%; 
+    margin: 0 5px;
+    text-align: center;
+    transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+.donkey-runner-page .control-button:active {
+    /* Scurisci leggermente lo sfondo del pulsante o cambia bordo al tocco */
+    background-color: var(--game-button-active-bg, rgba(50, 83, 95, 0.9));
+    border-color: var(--game-button-active-border, #30e1b9); /* Bordo più brillante al tocco */
+    transform: scale(0.95);
 }
 
 .donkey-runner-page #fullscreenButton {
-     font-family: "Source Code Pro", monospace;
-     /* Eredita molto da .auth-button o stili simili, ma con posizionamento specifico */
+    background-color: rgba(50, 83, 95, 0.7); /* Coerente con .control-button */
+    color: #30e1b9;
+    border: 1px solid #0b8a8f; /* Leggermente meno imponente del bordo dei controlli principali */
+    border-radius: 20px; 
+    padding: 8px 12px;
+    font-size: 0.9em;
+    font-family: "Source Code Pro", monospace;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+    display: none; /* Gestito da JS */
+    transition: background-color 0.2s, color 0.2s;
+}
+ .donkey-runner-page #fullscreenButton:hover {
+    background-color: rgba(50, 83, 95, 0.9); /* Usa colori della palette */
+    color: #0eaf9b; /* Un teal leggermente diverso per hover */
 }
 
 /* Stili per il footer specifici per la pagina del gioco, se necessario */

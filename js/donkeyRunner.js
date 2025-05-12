@@ -3,6 +3,15 @@ import { Animation } from './animation.js';
 import { PowerUpItem, POWERUP_TYPE, POWERUP_DURATION, POWERUP_COLORS, POWERUP_TARGET_HEIGHT, POWERUP_TARGET_WIDTH } from './powerUps.js';
 import * as AudioManager from './audioManager.js';
 
+const PALETTE = {
+    DARK_BACKGROUND: '#411d31',      // Sfondo principale del gioco/menu
+    MEDIUM_PURPLE: '#631b34',        // Per testi d'impatto come GAME OVER o accenti scuri
+    DARK_TEAL_BLUE: '#32535f',       // Utile per sfondi di UI o elementi meno brillanti
+    MEDIUM_TEAL: '#0b8a8f',          // Per bordi, linee, accenti secondari
+    BRIGHT_TEAL: '#0eaf9b',          // Testo secondario o elementi brillanti
+    BRIGHT_GREEN_TEAL: '#30e1b9',    // Testo primario, istruzioni, punteggi
+};
+
 console.log("Script donkeyRunner.js caricato.");
 
 // --- IMPOSTAZIONI GLOBALI DI GIOCO ---
@@ -954,14 +963,15 @@ class Glitchzilla extends BaseEnemy {
 
 
 function drawGround() {
-    // ctx.strokeStyle = '#0f0'; // Vecchio colore
-    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--game-ground-line-color').trim() || '#00b9be'; // Nuovo colore da variabile CSS, con fallback
-    ctx.lineWidth = lineWidth;
+    // Usa un colore dalla nuova palette per la linea di terra
+    ctx.strokeStyle = PALETTE.BORDER_LINE_COLOR; 
+    ctx.lineWidth = lineWidth; // lineWidth è già definito globalmente
     ctx.beginPath();
     ctx.moveTo(0, canvas.height - groundHeight);
     ctx.lineTo(canvas.width, canvas.height - groundHeight);
     ctx.stroke();
 }
+
 function calculateNextObstacleSpawnTime(){const minT=6.0;const maxT=10.0;return minT+Math.random()*(maxT-minT);}
 function spawnObstacleIfNeeded(dt){if(activeMiniboss) return; obstacleSpawnTimer+=dt;if(obstacleSpawnTimer>=nextObstacleSpawnTime){obstacleSpawnTimer=0;nextObstacleSpawnTime=calculateNextObstacleSpawnTime();obstacles.push(new Obstacle(canvas.width,canvas.height-groundHeight-OBSTACLE_TARGET_HEIGHT));}}
 function updateObstacles(dt){for(let i=obstacles.length-1;i>=0;i--){obstacles[i].update(dt);if(obstacles[i].x+obstacles[i].width<0){obstacles.splice(i,1);score+=5;}}}
@@ -1187,7 +1197,159 @@ function resetGame(){
     console.log("resetGame: Fatto.");
 }
 
-function drawMenuScreen(){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#0f0';ctx.font='42px "Courier New",Courier,monospace';ctx.textAlign='center';ctx.fillText("asyncDonkey Runner",canvas.width/2,canvas.height/2-120);ctx.font='24px "Courier New",Courier,monospace';ctx.fillText("I S T R U Z I O N I:",canvas.width/2,canvas.height/2-50);ctx.font='18px "Courier New",Courier,monospace';ctx.textAlign='left';const iSX=canvas.width/2-220;const lS=28;let cY=canvas.height/2-10;ctx.fillText("> [SPACE] or [ARROW UP] = Jump",iSX,cY);cY+=lS;ctx.fillText("> [CTRL]  or [X]        = Shoot",iSX,cY);cY+=lS;ctx.fillText("> Evita Ostacoli",iSX,cY);cY+=lS;ctx.fillText("> Distruggi i \"Virus\" ",iSX,cY);cY+=lS;ctx.fillText("> Colpisci i \"Glitches\" (gialli) per Bonus!",iSX,cY);ctx.font='28px "Courier New",Courier,monospace';ctx.fillStyle='#ff0';ctx.textAlign='center';ctx.fillText(isTouchDevice ? "TAP TO START" : "PRESS ENTER TO START",canvas.width/2,canvas.height-80);}
+function drawTerminalBackgroundEffects() {
+    // Questa funzione viene chiamata DOPO aver riempito lo sfondo principale
+    // con PALETTE.DARK_BACKGROUND.
+
+    // 1. Scanlines (Più Visibili)
+    ctx.save();
+    // PALETTE.DARK_TEAL_BLUE ('#32535f') -> rgb(50, 83, 95)
+    ctx.strokeStyle = 'rgba(50, 83, 95, 0.22)'; 
+    ctx.lineWidth = 1;
+    for (let y = 0; y < canvas.height; y += 2) { 
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(canvas.width, y + 0.5);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // 2. Griglia Sottile
+    ctx.save();
+    const gridSize = 25; 
+    // PALETTE.MEDIUM_PURPLE ('#631b34') -> rgb(99, 27, 52)
+    ctx.strokeStyle = 'rgba(99, 27, 52, 0.1)'; 
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(x + 0.5, canvas.height);
+        ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(canvas.width, y + 0.5);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // 3. Vignette (Più Pronunciata)
+    ctx.save();
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const outerRadius = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2)) * 1.1;
+    const innerRadius = canvas.width * 0.05; 
+
+    const gradient = ctx.createRadialGradient(centerX, centerY, innerRadius, centerX, centerY, outerRadius);
+    // PALETTE.DARK_BACKGROUND ('#411d31') -> rgb(65, 29, 49)
+    gradient.addColorStop(0, 'rgba(65, 29, 49, 0)');    
+    gradient.addColorStop(0.60, 'rgba(65, 29, 49, 0.3)'); 
+    gradient.addColorStop(1, 'rgba(65, 29, 49, 0.80)');   
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    // // 4. Ghost Characters (RIMOSSI)
+    // // La sezione seguente è stata commentata/rimossa:
+    // /*
+    // ctx.save(); 
+    // const ghostChars = ['0', '1', '{', '}', ';', '#', '$', '%', '*', '>', '<', '/', '(', ')', '[', ']'];
+    // ctx.fillStyle = 'rgba(48, 225, 185, 0.15)'; 
+    // ctx.font = '15px "Source Code Pro", "Courier New", monospace'; 
+    // const numberOfGhostChars = 80; 
+    // for (let i = 0; i < numberOfGhostChars; i++) { 
+    //     const char = ghostChars[Math.floor(Math.random() * ghostChars.length)];
+    //     const x = Math.random() * canvas.width;
+    //     const y = Math.random() * canvas.height;
+    //     ctx.fillText(char, x, y); 
+    // }
+    // ctx.restore(); 
+    // */
+}
+
+function drawGlitchText(text, x, y, fontSize, primaryColor, glitchColor1, glitchColor2, glitchOffsetX = 2, glitchOffsetY = 1) {
+    const baseFont = `"Source Code Pro", "Courier New", Courier, monospace`;
+    ctx.font = `bold ${fontSize}px ${baseFont}`;
+    ctx.textAlign = 'center';
+
+    // Livello glitch 1
+    ctx.fillStyle = glitchColor1;
+    ctx.fillText(text, x + glitchOffsetX, y + glitchOffsetY);
+
+    // Livello glitch 2
+    ctx.fillStyle = glitchColor2;
+    ctx.fillText(text, x - glitchOffsetX, y - glitchOffsetY);
+    
+    // Testo principale
+    ctx.fillStyle = primaryColor;
+    ctx.fillText(text, x, y);
+}
+
+function drawMenuScreen() {
+    ctx.fillStyle = PALETTE.DARK_BACKGROUND;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawTerminalBackgroundEffects();
+
+    // --- Titolo Principale ---
+    const mainTitle = "asyncDonkey: Code Rush"; // O il titolo che preferisci
+    ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
+    ctx.font = 'bold 48px "Source Code Pro", "Courier New", Courier, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(mainTitle, canvas.width / 2, canvas.height / 2 - 180); // Spostato più in alto
+
+    // --- Sottotitolo Glitch ---
+    const subTitleText = "F!ght GlI7chz!llA";
+    drawGlitchText(
+        subTitleText,
+        canvas.width / 2,
+        canvas.height / 2 - 130, // Sotto il titolo principale
+        38, // Dimensione font per il sottotitolo
+        PALETTE.BRIGHT_GREEN_TEAL,  // Colore primario del testo
+        PALETTE.MEDIUM_PURPLE,      // Colore glitch 1
+        PALETTE.BRIGHT_TEAL,        // Colore glitch 2
+        2,                          // Offset X per glitch
+        1                           // Offset Y per glitch
+    );
+
+    // --- Istruzioni (leggibili) ---
+    ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
+    ctx.font = '22px "Source Code Pro", "Courier New", Courier, monospace';
+    ctx.textAlign = 'center'; // Centra "OBJECTIVES"
+    ctx.fillText("OBJECTIVES:", canvas.width / 2, canvas.height / 2 - 60);
+
+    ctx.font = '18px "Source Code Pro", "Courier New", Courier, monospace';
+    ctx.textAlign = 'left';
+    const instructionStartX = canvas.width / 2 - 200;
+    let currentY = canvas.height / 2 - 20; // Abbassato leggermente
+    const lineHeight = 28;
+
+    ctx.fillText("   JUMP: [SPACE] / [ARROW UP]", instructionStartX, currentY);
+    currentY += lineHeight;
+    ctx.fillText("  SHOOT: [CTRL] / [X]", instructionStartX, currentY);
+    currentY += lineHeight;
+    ctx.fillText("  AVOID: CodeBlocks & Malware Threats", instructionStartX, currentY);
+    currentY += lineHeight;
+    ctx.fillText(" PURGE: Corrupted Virus Programs", instructionStartX, currentY);
+    currentY += lineHeight;
+    ctx.fillText("COLLECT: System Exploits (Power-Ups)", instructionStartX, currentY);
+
+    // --- Prompt di Avvio (Glitchato) ---
+    const startPromptText = isTouchDevice ? "TAP TO START" : "PRESS ENTER TO START";
+    drawGlitchText(
+        startPromptText,
+        canvas.width / 2,
+        canvas.height - 70,
+        28, // Dimensione font
+        PALETTE.BRIGHT_TEAL,        // Colore primario
+        PALETTE.MEDIUM_PURPLE,      // Colore glitch 1
+        PALETTE.BRIGHT_GREEN_TEAL,  // Colore glitch 2 (invertito per varietà)
+        3,                          // Offset X più marcato per il prompt
+        1.5                         // Offset Y
+    );
+}
 
 function updatePlaying(dt){
     if(gameOverTrigger){finalScore=score;currentGameState=GAME_STATE.GAME_OVER;return;}
@@ -1212,9 +1374,10 @@ function updatePlaying(dt){
 }
 
 function drawPlayingScreen() {
-    ctx.fillStyle = '#000'; // Sfondo
+    ctx.fillStyle = PALETTE.DARK_BACKGROUND; // Nuovo sfondo per l'area di gioco
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawGround();
+    drawTerminalBackgroundEffects();
+    drawGround(); // La linea di terra userà il nuovo colore da drawGround()
 
     if (!activeMiniboss) {
         drawObstacles();
@@ -1226,24 +1389,60 @@ function drawPlayingScreen() {
     if (asyncDonkey) asyncDonkey.draw();
 
     // Disegna Punteggio
-    ctx.fillStyle = '#0f0'; // Colore per il testo del punteggio (verde)
-    ctx.font = '24px "Courier New", Courier, monospace';
-    ctx.textAlign = 'left'; // Allinea a sinistra per il punteggio
-    ctx.fillText("Score: " + score, 20, 40); // Posizione Punteggio (x, y)
+    ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL; // Nuovo colore per il testo del punteggio
+    ctx.font = '24px "Source Code Pro", "Courier New", Courier, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText("Score: " + score, 20, 40);
 
-    // Disegna Timer Power-Up (MODIFICATO QUI)
+    // Disegna Timer Power-Up (già modificato per la posizione, il colore del testo è gestito da POWERUP_COLORS)
     if (asyncDonkey && asyncDonkey.activePowerUp && asyncDonkey.powerUpTimer > 0) {
-        const powerUpColor = (POWERUP_COLORS && POWERUP_COLORS[asyncDonkey.activePowerUp]) ? POWERUP_COLORS[asyncDonkey.activePowerUp] : '#FFD700';
+        const powerUpColor = (POWERUP_COLORS && POWERUP_COLORS[asyncDonkey.activePowerUp]) ? POWERUP_COLORS[asyncDonkey.activePowerUp] : PALETTE.BRIGHT_TEAL; // Fallback alla palette
         ctx.fillStyle = powerUpColor;
-        ctx.font = '18px "Courier New", Courier, monospace'; // Puoi aggiustare la dimensione del font se necessario
-        ctx.textAlign = 'left'; // Allinea a sinistra anche il timer del power-up
+        ctx.font = '18px "Source Code Pro", "Courier New", Courier, monospace';
+        ctx.textAlign = 'left';
         let powerUpDisplayName = POWERUP_THEMATIC_NAMES[asyncDonkey.activePowerUp] || asyncDonkey.activePowerUp.replace(/_/g, ' ');
-        
-        // Nuova posizione per il timer del power-up: sotto il punteggio
-        ctx.fillText(`${powerUpDisplayName}: ${asyncDonkey.powerUpTimer.toFixed(1)}s`, 20, 70); // (x: 20, y: 70)
+        ctx.fillText(`${powerUpDisplayName}: ${asyncDonkey.powerUpTimer.toFixed(1)}s`, 20, 70);
     }
 }
-function drawGameOverScreen(){ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#f00';ctx.font='52px "Courier New",Courier,monospace';ctx.textAlign='center';ctx.fillText("G A M E   O V E R",canvas.width/2,canvas.height/2-60);ctx.fillStyle='#ff0';ctx.font='32px "Courier New",Courier,monospace';ctx.fillText("Final Score: "+finalScore,canvas.width/2,canvas.height/2);ctx.fillStyle='#fff';ctx.font='22px "Courier New",Courier,monospace';ctx.fillText(isTouchDevice ? "TAP TO RESTART" : "PRESS ENTER TO RESTART",canvas.width/2,canvas.height/2+60);}
+
+function drawGameOverScreen() {
+    ctx.fillStyle = PALETTE.DARK_BACKGROUND;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawTerminalBackgroundEffects();
+
+    // --- Messaggio "GAME OVER" Glitchato ---
+    drawGlitchText(
+        "G A M E   O V E R",
+        canvas.width / 2,
+        canvas.height / 2 - 70,
+        60, // Dimensione Font
+        PALETTE.MEDIUM_PURPLE,      // Colore primario d'impatto (diverso dal menu)
+        PALETTE.BRIGHT_GREEN_TEAL,  // Colore glitch 1
+        PALETTE.BRIGHT_TEAL,        // Colore glitch 2
+        4,                          // Offset X per un glitch più forte
+        2                           // Offset Y
+    );
+
+    // --- Punteggio Finale (leggibile) ---
+    ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
+    ctx.font = '32px "Source Code Pro", "Courier New", Courier, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText("Final Score: " + finalScore, canvas.width / 2, canvas.height / 2 + 10); // Leggermente più in basso
+
+    // --- Prompt di Riavvio (Glitchato) ---
+    const restartPromptText = isTouchDevice ? "TAP TO RESTART" : "PRESS ENTER TO RESTART";
+    drawGlitchText(
+        restartPromptText,
+        canvas.width / 2,
+        canvas.height / 2 + 70,
+        22, // Dimensione font
+        PALETTE.BRIGHT_TEAL,        // Colore primario
+        PALETTE.MEDIUM_PURPLE,      // Colore glitch 1
+        PALETTE.BRIGHT_GREEN_TEAL,  // Colore glitch 2
+        3,
+        1.5
+    );
+}
 
 
 function gameLoop(timestamp){
