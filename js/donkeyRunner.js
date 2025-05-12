@@ -2,6 +2,13 @@
 import { Animation } from './animation.js';
 import { PowerUpItem, POWERUP_TYPE, POWERUP_DURATION, POWERUP_COLORS, POWERUP_TARGET_HEIGHT, POWERUP_TARGET_WIDTH } from './powerUps.js';
 import * as AudioManager from './audioManager.js';
+import { db, auth } from './main.js';
+import {
+    collection, query, orderBy, limit, getDocs, serverTimestamp, where, // 'where' dovrebbe già esserci
+    addDoc, doc, getDoc // <<< AGGIUNGI addDoc, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 
 const PALETTE = {
     DARK_BACKGROUND: '#411d31',      // Sfondo principale del gioco/menu
@@ -11,6 +18,115 @@ const PALETTE = {
     BRIGHT_TEAL: '#0eaf9b',          // Testo secondario o elementi brillanti
     BRIGHT_GREEN_TEAL: '#30e1b9',    // Testo primario, istruzioni, punteggi
 };
+
+// --- LEADERBOARD ELEMENT REF ---
+const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
+const MAX_LEADERBOARD_ENTRIES_MINI = 5;
+
+// --- FUNZIONI LEADERBOARD ---
+
+/** Formatta Firestore Timestamp per la leaderboard */
+function formatScoreTimestamp(firebaseTimestamp) {
+    if (!firebaseTimestamp || typeof firebaseTimestamp.toDate !== 'function') {
+        return 'N/A'; // Data non disponibile o formato non valido
+    }
+    try {
+        // Esempio: 10 Mag, 14:30
+        return firebaseTimestamp.toDate().toLocaleString('it-IT', {
+            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+        });
+    } catch (e) {
+        console.error("Errore formattazione timestamp:", e);
+        return 'Data errata';
+    }
+}
+
+async function loadDonkeyLeaderboard() {
+    if (!miniLeaderboardListEl) {
+        console.warn("Elemento miniLeaderboardList non trovato.");
+        return;
+    }
+    if (!db) {
+        console.error("Istanza DB non disponibile per caricare la leaderboard di DonkeyRunner.");
+        miniLeaderboardListEl.innerHTML = '<li>Errore connessione DB.</li>';
+        return;
+    }
+
+    const leaderboardScoresCollection = collection(db, "leaderboardScores");
+    miniLeaderboardListEl.innerHTML = '<li>Caricamento punteggi...</li>';
+
+    try {
+        // AGGIUNGI IL FILTRO "where" ALLA QUERY:
+        const q = query(
+            leaderboardScoresCollection,
+            where("gameId", "==", "donkeyRunner"), // Filtra per Donkey Runner
+            orderBy("score", "desc"),
+            limit(MAX_LEADERBOARD_ENTRIES_MINI)
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedLeaderboard = [];
+        querySnapshot.forEach((doc) => {
+            fetchedLeaderboard.push({ id: doc.id, ...doc.data() });
+        });
+        displayDonkeyLeaderboard(fetchedLeaderboard);
+    } catch (error) {
+        console.error("Errore caricamento DonkeyRunner leaderboard: ", error);
+        if (error.code === 'failed-precondition') {
+             miniLeaderboardListEl.innerHTML = '<li>Indice Firestore mancante. Controlla la console per il link per crearlo.</li>';
+             console.error("Potrebbe essere necessario un indice composito in Firestore. L'errore originale è:", error.message);
+        } else {
+            if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Errore caricamento punteggi.</li>';
+        }
+    }
+}
+
+function displayDonkeyLeaderboard(leaderboardData) {
+    if (!miniLeaderboardListEl) return;
+    miniLeaderboardListEl.innerHTML = ''; // Pulisci
+
+    if (!leaderboardData || leaderboardData.length === 0) {
+        miniLeaderboardListEl.innerHTML = '<li>Nessun punteggio registrato.</li>';
+        return;
+    }
+
+    leaderboardData.forEach((entry, index) => {
+        const li = document.createElement('li');
+
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'player-rank';
+        rankSpan.textContent = `${index + 1}.`;
+
+        const avatarImg = document.createElement('img');
+        avatarImg.className = 'player-avatar';
+        const avatarSeed = entry.userId || entry.userName || entry.initials || `anon-${entry.id}`;
+        avatarImg.src = `https://api.dicebear.com/8.x/identicon/svg?seed=${encodeURIComponent(avatarSeed)}`;
+        avatarImg.alt = 'Avatar';
+
+        const playerInfoDiv = document.createElement('div');
+        playerInfoDiv.className = 'player-info';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'player-name';
+        nameSpan.textContent = entry.userName || entry.initials || 'Giocatore Anonimo';
+        
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'player-date';
+        dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
+
+        playerInfoDiv.appendChild(nameSpan);
+        playerInfoDiv.appendChild(dateSpan);
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'player-score';
+        scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
+
+        li.appendChild(rankSpan);
+        li.appendChild(avatarImg);
+        li.appendChild(playerInfoDiv);
+        li.appendChild(scoreSpan);
+        miniLeaderboardListEl.appendChild(li);
+    });
+}
 
 console.log("Script donkeyRunner.js caricato.");
 
@@ -33,6 +149,12 @@ const jumpButton = document.getElementById('jumpButton');
 const shootButton = document.getElementById('shootButton');
 const mobileControlsDiv = document.getElementById('mobileControls');
 const fullscreenButton = document.getElementById('fullscreenButton');
+
+// --- SCORE INPUT DOM REFS ---
+const scoreInputContainerDonkey = document.getElementById('scoreInputContainerDonkey');
+const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
+const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
+const restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey'); // Pulsante di restart specifico
 
 // --- TOUCH DEVICE DETECTION & CONTROLS VISIBILITY ---
 const isTouchDevice = (('ontouchstart' in window) ||
@@ -321,7 +443,17 @@ async function loadAllAssets() {
     console.log("Processo di caricamento assets completato.");
     if(allImagesLoaded) console.log("TUTTE le immagini dichiarate sono state processate.");
     else console.warn("Attenzione: Alcune immagini potrebbero non essersi processate.");
+    
     resourcesInitialized = true;
+    
+    // Carica la leaderboard una volta che le risorse sono pronte e prima di avviare il game loop del menu
+    if (db) { // Controlla se db è stato importato e inizializzato correttamente
+        loadDonkeyLeaderboard(); // <<< CHIAMATA ALLA LEADERBOARD
+    } else {
+        console.error("DB non pronto, impossibile caricare la leaderboard per DonkeyRunner.");
+        if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Classifica non disponibile (DB error).</li>';
+    }
+
     if (gameLoopRequestId === null && currentGameState === GAME_STATE.MENU) {
         startGameLoop();
     }
@@ -386,9 +518,14 @@ class Player {
 
     update(dt) {
         this.applyGravity();
-        if (this.y + this.displayHeight > canvas.height - groundHeight) {
-            this.y = canvas.height - groundHeight - this.displayHeight; this.velocityY = 0; this.onGround = true;
-        } else { this.onGround = false; }
+        // MODIFICA: Cambiato > in >= per includere l'atterraggio esatto
+        if (this.y + this.displayHeight >= canvas.height - groundHeight) { 
+            this.y = canvas.height - groundHeight - this.displayHeight; // Posiziona sulla linea di terra
+            this.velocityY = 0; // Ferma la caduta
+            this.onGround = true; // Ora è correttamente a terra
+        } else {
+            this.onGround = false; // È in aria
+        }
         if (this.walkAnimation && this.onGround) this.walkAnimation.update(dt);
 
         if (this.activePowerUp) {
@@ -1060,6 +1197,162 @@ function drawAllEnemyTypes(){
     }
 }
 
+function shouldShowDonkeyScoreInput(currentScore) {
+    // Qui puoi mettere logica più complessa, es. solo se è un nuovo high score personale
+    // o se il punteggio è sopra una certa soglia. Per ora, mostriamolo se > 0.
+    return currentScore > 0;
+}
+
+async function handleSaveDonkeyScore() {
+    if (!db || !auth) {
+        console.error("DB o Auth non inizializzati. Impossibile salvare il punteggio.");
+        alert("Errore: Connessione al database fallita.");
+        return;
+    }
+    if (!saveScoreBtnDonkey || !playerInitialsDonkeyInput || !scoreInputContainerDonkey || !restartGameBtnDonkey) {
+        console.error("Elementi DOM per il salvataggio punteggio non trovati.");
+        return;
+    }
+
+    const scoreToSave = finalScore; // Assumendo che 'finalScore' contenga il punteggio del gioco
+    let initialsToSave = playerInitialsDonkeyInput.value.trim().toUpperCase();
+    let userNameToSave = "Giocatore Anonimo"; // Default
+    let userIdToSave = null;
+
+    saveScoreBtnDonkey.disabled = true;
+    saveScoreBtnDonkey.textContent = "Salvataggio...";
+
+    const currentUser = auth.currentUser;
+
+    if (currentUser) {
+        userIdToSave = currentUser.uid;
+        try {
+            const userProfileRef = doc(db, "userProfiles", currentUser.uid);
+            const docSnap = await getDoc(userProfileRef);
+            if (docSnap.exists() && docSnap.data().nickname) {
+                userNameToSave = docSnap.data().nickname;
+            } else {
+                userNameToSave = currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato";
+            }
+            // Se l'utente loggato non inserisce iniziali, usa le prime del nickname/email
+            if (!initialsToSave && userNameToSave) {
+                initialsToSave = userNameToSave.substring(0, 5).toUpperCase();
+            }
+        } catch (profileError) {
+            console.error("Errore caricamento profilo per punteggio:", profileError);
+            userNameToSave = currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato"; // Fallback
+             if (!initialsToSave && userNameToSave) {
+                initialsToSave = userNameToSave.substring(0, 5).toUpperCase();
+            }
+        }
+    } else { // Utente non loggato
+        if (initialsToSave.length === 0 || initialsToSave.length > 5) {
+            alert('Per favore, inserisci da 1 a 5 caratteri per le tue iniziali.');
+            playerInitialsDonkeyInput.focus();
+            saveScoreBtnDonkey.disabled = false;
+            saveScoreBtnDonkey.textContent = "Salva Punteggio";
+            return;
+        }
+        userNameToSave = initialsToSave; // Per anonimi, userName è le iniziali
+    }
+    
+    // Validazione finale iniziali (potrebbe essere ridondante se già fatta sopra per anonimi, ma sicura)
+    if (initialsToSave.length === 0 || initialsToSave.length > 5) {
+        alert('Le iniziali devono contenere da 1 a 5 caratteri.');
+        playerInitialsDonkeyInput.focus();
+        saveScoreBtnDonkey.disabled = false;
+        saveScoreBtnDonkey.textContent = "Salva Punteggio";
+        return;
+    }
+
+
+    const scoreData = {
+        score: scoreToSave,
+        timestamp: serverTimestamp(), // Da Firestore
+        initials: initialsToSave,
+        userName: userNameToSave,
+        gameId: "donkeyRunner" // FONDAMENTALE!
+    };
+
+    if (userIdToSave) {
+        scoreData.userId = userIdToSave;
+    }
+
+    try {
+        const leaderboardScoresCollection = collection(db, "leaderboardScores");
+        await addDoc(leaderboardScoresCollection, scoreData);
+        console.log("Punteggio DonkeyRunner salvato con ID:", scoreData); // Log dell'oggetto intero per debug
+        
+        scoreInputContainerDonkey.style.display = 'none';
+        playerInitialsDonkeyInput.value = ''; // Pulisci input
+        restartGameBtnDonkey.style.display = 'block'; // Mostra pulsante restart
+        
+        await loadDonkeyLeaderboard(); // Ricarica la classifica per mostrare il nuovo punteggio
+    } catch (error) {
+        console.error("Errore salvataggio punteggio DonkeyRunner a Firestore: ", error);
+        alert("Errore nel salvataggio del punteggio. Riprova.");
+        saveScoreBtnDonkey.disabled = false;
+        saveScoreBtnDonkey.textContent = "Salva Punteggio";
+    }
+}
+
+// Funzione per gestire il game over e mostrare l'input del punteggio
+function processGameOver() {
+    console.log("ProcessGameOver - Punteggio finale:", finalScore);
+    currentGameState = GAME_STATE.GAME_OVER; // Assicura che lo stato sia corretto
+
+    // Nascondi controlli touch del gioco se visibili
+    if (mobileControlsDiv && mobileControlsDiv.style.display === 'block') {
+        // mobileControlsDiv.style.display = 'none'; // Potresti volerli lasciare visibili
+    }
+    if (fullscreenButton && fullscreenButton.style.display === 'block'){
+        // fullscreenButton.style.display = 'none'; // Anche questo potresti volerlo lasciare
+    }
+
+
+    if (shouldShowDonkeyScoreInput(finalScore)) {
+        if (scoreInputContainerDonkey && playerInitialsDonkeyInput && saveScoreBtnDonkey && restartGameBtnDonkey) {
+            scoreInputContainerDonkey.style.display = 'block';
+            restartGameBtnDonkey.style.display = 'none'; // Nascondi restart finché non si salva o si ignora
+            saveScoreBtnDonkey.disabled = false;
+            saveScoreBtnDonkey.textContent = "Salva Punteggio";
+
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                // Precompila iniziali/nickname per utenti loggati
+                const userProfileRef = doc(db, "userProfiles", currentUser.uid);
+                getDoc(userProfileRef).then(docSnap => {
+                    if (docSnap.exists() && docSnap.data().nickname) {
+                        playerInitialsDonkeyInput.value = docSnap.data().nickname.substring(0,5).toUpperCase();
+                        playerInitialsDonkeyInput.placeholder = "NICKNAME";
+                    } else if (currentUser.email) {
+                        playerInitialsDonkeyInput.value = (currentUser.email.split('@')[0] || '').substring(0,5).toUpperCase();
+                        playerInitialsDonkeyInput.placeholder = "NICKNAME";
+                    }
+                }).catch(err => {
+                     console.error("Errore nel precompilare iniziali da profilo:", err);
+                     if (currentUser.email) playerInitialsDonkeyInput.value = (currentUser.email.split('@')[0] || '').substring(0,5).toUpperCase();
+                     playerInitialsDonkeyInput.placeholder = "ABCDE";
+                });
+            } else {
+                playerInitialsDonkeyInput.value = ''; // Pulisci per utenti non loggati
+                playerInitialsDonkeyInput.placeholder = "ABCDE";
+            }
+            playerInitialsDonkeyInput.focus();
+        } else {
+            console.warn("Contenitore input punteggio o suoi elementi non trovati!");
+            // Se il contenitore non c'è, mostra direttamente il pulsante di restart generico
+             if(restartGameBtnDonkey) restartGameBtnDonkey.style.display = 'block'; // Fallback
+        }
+    } else {
+        // Se non si mostra l'input (es. score = 0), mostra direttamente il pulsante restart
+        if(scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+        if(restartGameBtnDonkey) restartGameBtnDonkey.style.display = 'block';
+    }
+    // La logica per il messaggio "TAP TO RESTART" / "PRESS ENTER" è in drawGameOverScreen
+    // e negli event listener. Il pulsante restartGameBtnDonkey offre un'opzione esplicita.
+}
+
 function checkCollisions(){
     if(!asyncDonkey||gameOverTrigger)return;
     const pC={x:asyncDonkey.x+asyncDonkey.colliderOffsetX,y:asyncDonkey.y+asyncDonkey.colliderOffsetY,width:asyncDonkey.colliderWidth,height:asyncDonkey.colliderHeight};
@@ -1194,6 +1487,22 @@ function resetGame(){
     dangerousFlyingEnemySpawnTimer=0; nextDangerousFlyingEnemySpawnTime=calculateNextGenericEnemySpawnTime(20.0, 35.0);
     score=0;finalScore=0;gameOverTrigger=false;canShoot=true;
     shootTimer=0; // Assign to existing global variable
+    score = 0;
+    // finalScore = 0; // finalScore viene impostato solo al game over effettivo
+    gameOverTrigger = false;
+    canShoot = true;
+    shootTimer = 0;
+
+    // Nascondi UI per salvataggio punteggio e restart specifico
+    if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+    if (restartGameBtnDonkey) restartGameBtnDonkey.style.display = 'none';
+    
+    // Mostra i controlli di gioco principali se erano stati nascosti
+    if (isTouchDevice) { // O se li mostri sempre durante il gioco
+        if (mobileControlsDiv) mobileControlsDiv.style.display = 'block';
+        if (fullscreenButton) fullscreenButton.style.display = 'block';
+    }
+
     console.log("resetGame: Fatto.");
 }
 
@@ -1351,9 +1660,18 @@ function drawMenuScreen() {
     );
 }
 
-function updatePlaying(dt){
-    if(gameOverTrigger){finalScore=score;currentGameState=GAME_STATE.GAME_OVER;return;}
-    if(asyncDonkey)asyncDonkey.update(dt);
+function updatePlaying(dt) {
+    if (gameOverTrigger) {
+        finalScore = score; // Assicurati che finalScore sia impostato
+        // currentGameState = GAME_STATE.GAME_OVER; // Questo viene fatto in processGameOver
+        AudioManager.stopMusic(); // Ferma la musica se non già fatto
+        processGameOver(); // <<< NUOVA CHIAMATA per gestire la logica di fine gioco e input punteggio
+        return; // Esce da updatePlaying una volta che il gioco è finito
+    }
+
+    if (asyncDonkey) {
+        asyncDonkey.update(dt); // Aggiorna la logica del giocatore (gravità, onGround, animazione)
+    }
 
     spawnGlitchzillaIfNeeded();
     if (activeMiniboss) {
@@ -1517,6 +1835,27 @@ if (fullscreenButton) {
         toggleFullscreen();
     });
 }
+
+if (saveScoreBtnDonkey) {
+    saveScoreBtnDonkey.addEventListener('click', handleSaveDonkeyScore);
+}
+
+if (restartGameBtnDonkey) {
+    restartGameBtnDonkey.addEventListener('click', () => {
+        if(scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none'; // Nascondi input
+        currentGameState = GAME_STATE.PLAYING;
+        resetGame();
+        AudioManager.playMusic(false); // Ricomincia la musica
+    });
+}
+
+// Potresti voler modificare l'event listener 'keydown' e 'touchstart' del jumpButton
+// per gestire il riavvio se scoreInputContainerDonkey è visibile e l'utente preme Enter/Tap
+// senza aver cliccato "Salva" o "Ricomincia".
+// Per ora, il pulsante esplicito restartGameBtnDonkey è la via più chiara.
+
+// Assicurati che la funzione resetGame() nasconda anche scoreInputContainerDonkey
+// e restartGameBtnDonkey all'inizio di una nuova partita.
 
 // --- FULLSCREEN FUNCTIONALITY ---
 function toggleFullscreen() {
