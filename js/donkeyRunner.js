@@ -2,21 +2,21 @@
 import { Animation } from './animation.js';
 import { PowerUpItem, POWERUP_TYPE, POWERUP_DURATION, POWERUP_COLORS, POWERUP_TARGET_HEIGHT, POWERUP_TARGET_WIDTH } from './powerUps.js';
 import * as AudioManager from './audioManager.js';
-import { db, auth, generateBlockieAvatar } from './main.js'; 
+import { db, auth, generateBlockieAvatar } from './main.js';
 import {
-    collection, query, orderBy, limit, getDocs, serverTimestamp, where, // 'where' dovrebbe già esserci
-    addDoc, doc, getDoc // <<< AGGIUNGI addDoc, doc, getDoc
+    collection, query, orderBy, limit, getDocs, serverTimestamp, where,
+    addDoc, doc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
 const PALETTE = {
-    DARK_BACKGROUND: '#411d31',      // Sfondo principale del gioco/menu
-    MEDIUM_PURPLE: '#631b34',        // Per testi d'impatto come GAME OVER o accenti scuri
-    DARK_TEAL_BLUE: '#32535f',       // Utile per sfondi di UI o elementi meno brillanti
-    MEDIUM_TEAL: '#0b8a8f',          // Per bordi, linee, accenti secondari
-    BRIGHT_TEAL: '#0eaf9b',          // Testo secondario o elementi brillanti
-    BRIGHT_GREEN_TEAL: '#30e1b9',    // Testo primario, istruzioni, punteggi
+    DARK_BACKGROUND: '#411d31',
+    MEDIUM_PURPLE: '#631b34',
+    DARK_TEAL_BLUE: '#32535f',
+    MEDIUM_TEAL: '#0b8a8f',
+    BRIGHT_TEAL: '#0eaf9b',
+    BRIGHT_GREEN_TEAL: '#30e1b9',
 };
 
 // --- LEADERBOARD ELEMENT REF ---
@@ -28,10 +28,9 @@ const MAX_LEADERBOARD_ENTRIES_MINI = 5;
 /** Formatta Firestore Timestamp per la leaderboard */
 function formatScoreTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp || typeof firebaseTimestamp.toDate !== 'function') {
-        return 'N/A'; // Data non disponibile o formato non valido
+        return 'N/A';
     }
     try {
-        // Esempio: 10 Mag, 14:30
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
             day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
         });
@@ -56,10 +55,9 @@ async function loadDonkeyLeaderboard() {
     miniLeaderboardListEl.innerHTML = '<li>Caricamento punteggi...</li>';
 
     try {
-        // AGGIUNGI IL FILTRO "where" ALLA QUERY:
         const q = query(
             leaderboardScoresCollection,
-            where("gameId", "==", "donkeyRunner"), // Filtra per Donkey Runner
+            where("gameId", "==", "donkeyRunner"),
             orderBy("score", "desc"),
             limit(MAX_LEADERBOARD_ENTRIES_MINI)
         );
@@ -85,7 +83,7 @@ function displayDonkeyLeaderboard(leaderboardData) {
         console.warn("Elemento miniLeaderboardList non trovato.");
         return;
     }
-    miniLeaderboardListEl.innerHTML = ''; 
+    miniLeaderboardListEl.innerHTML = '';
 
     if (!leaderboardData || leaderboardData.length === 0) {
         miniLeaderboardListEl.innerHTML = '<li>Nessun punteggio registrato.</li>';
@@ -95,66 +93,57 @@ function displayDonkeyLeaderboard(leaderboardData) {
     leaderboardData.forEach((entry, index) => {
         const li = document.createElement('li');
 
-        // 1. Rank (invariato)
         const rankSpan = document.createElement('span');
         rankSpan.className = 'player-rank';
         rankSpan.textContent = `${index + 1}.`;
         li.appendChild(rankSpan);
 
-        // 2. Avatar (invariato)
         const avatarImg = document.createElement('img');
         avatarImg.className = 'player-avatar';
         const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${entry.id}`;
         let altTextForBlockie = entry.userName || entry.initials || 'Anon';
-        avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 }); 
+        avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 });
         avatarImg.alt = `${altTextForBlockie}'s Avatar`;
-        avatarImg.style.backgroundColor = 'transparent'; 
-        avatarImg.onerror = () => { /* ... fallback ... */ };
+        avatarImg.style.backgroundColor = 'transparent';
+        avatarImg.onerror = () => { avatarImg.style.backgroundColor = '#ddd'; avatarImg.alt='Error loading avatar'; avatarImg.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";};
         li.appendChild(avatarImg);
 
-        // 3. Player Info (Nome e Data) - MODIFICATO PER INCLUDERE BANDIERA
         const playerInfoDiv = document.createElement('div');
         playerInfoDiv.className = 'player-info';
 
-        // Nome del Giocatore e Bandiera
         const nameSpan = document.createElement('span');
         nameSpan.className = 'player-name';
-        
-        // --- AGGIUNTA BANDIERA ---
+
         if (entry.nationalityCode && entry.nationalityCode !== "OTHER") {
             const flagIconSpan = document.createElement('span');
             const countryCodeForLibrary = entry.nationalityCode.toLowerCase();
             flagIconSpan.classList.add('fi', `fi-${countryCodeForLibrary}`);
-            // Applica stili direttamente o tramite CSS (vedi Passo 4)
-            flagIconSpan.style.marginRight = '5px'; 
-            flagIconSpan.style.verticalAlign = 'middle'; 
-            // flagIconSpan.style.fontSize = '0.9em'; // Opzionale per aggiustare dimensione relativa al nome
-            nameSpan.appendChild(flagIconSpan); // Aggiungi bandiera prima del nome
+            flagIconSpan.style.marginRight = '5px';
+            flagIconSpan.style.verticalAlign = 'middle';
+            nameSpan.appendChild(flagIconSpan);
         }
-        // --- FINE AGGIUNTA BANDIERA ---
-        
+
         let displayName = entry.userName || entry.initials || 'Giocatore Anonimo';
-        if (!entry.userId && !entry.initials) { // Segnala gli ospiti se non hanno iniziali (più specifico)
+        if (!entry.userId && !entry.initials) {
              displayName += " (Ospite)";
-        } else if (!entry.userId && entry.initials) { // Se ha iniziali ma non userId, è un ospite con iniziali
+        } else if (!entry.userId && entry.initials) {
              displayName = entry.initials + " (Ospite)";
         }
-        
-        nameSpan.appendChild(document.createTextNode(displayName)); // Aggiungi il testo del nome dopo la bandiera
-        
+
+        nameSpan.appendChild(document.createTextNode(displayName));
+
         const dateSpan = document.createElement('span');
         dateSpan.className = 'player-date';
         dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
 
         playerInfoDiv.appendChild(nameSpan);
         playerInfoDiv.appendChild(dateSpan);
-        li.appendChild(playerInfoDiv); 
+        li.appendChild(playerInfoDiv);
 
-        // 4. Punteggio (invariato)
         const scoreSpan = document.createElement('span');
         scoreSpan.className = 'player-score';
         scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
-        li.appendChild(scoreSpan); 
+        li.appendChild(scoreSpan);
 
         miniLeaderboardListEl.appendChild(li);
     });
@@ -185,18 +174,17 @@ const fullscreenButton = document.getElementById('fullscreenButton');
 // --- SCORE INPUT DOM REFS ---
 const scoreInputContainerDonkey = document.getElementById('scoreInputContainerDonkey');
 const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
-const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey'); // Assicurati che sia definito globalmente o accessibile qui
+const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
 
 if (saveScoreBtnDonkey) {
-    saveScoreBtnDonkey.addEventListener('click', function() { // Modificato per aggiungere un log qui
-        console.log("EVENT LISTENER: Pulsante 'Salva Punteggio' CLICCATO!"); // NUOVO LOG
-        handleSaveDonkeyScore(); // Chiama la tua funzione originale
+    saveScoreBtnDonkey.addEventListener('click', function() {
+        console.log("EVENT LISTENER: Pulsante 'Salva Punteggio' CLICCATO!");
+        handleSaveDonkeyScore();
     });
 } else {
-    // Questo log è importante se il pulsante non viene trovato all'avvio!
     console.error("CRITICO: Elemento DOM saveScoreBtnDonkey NON TROVATO durante l'aggiunta del listener!");
 }
-const restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey'); // Pulsante di restart specifico
+const restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey');
 
 // --- TOUCH DEVICE DETECTION & CONTROLS VISIBILITY ---
 const isTouchDevice = (('ontouchstart' in window) ||
@@ -414,7 +402,7 @@ let imagesLoadedCount = 0; let allImagesLoaded = false; let resourcesInitialized
 
 let obstacles = []; let obstacleSpawnTimer = 0; let nextObstacleSpawnTime = 0; const obstacleSpawnColor = '#0f0';
 let projectiles = []; let canShoot = true;
-let shootTimer = 0; // << DECLARED ONCE GLOBALLY
+let shootTimer = 0;
 const projectileSpeed = 400; const shootCooldownTime = 0.3; const projectileColor = '#0ff';
 let enemies = []; let enemyBaseSpawnTimer = 0; let nextEnemyBaseSpawnTime = 0; const enemyBaseSpawnColor = '#0f0';
 let flyingEnemies = []; let flyingEnemySpawnTimer = 0; let nextFlyingEnemySpawnTime = 0; const flyingEnemyScoreValue = 100; const flyingEnemySpawnColor = '#ff0';
@@ -445,8 +433,7 @@ const SCORE_THRESHOLD_DANGEROUS_FLYING_ENEMY = 800;
 
 let score = 0; let finalScore = 0; let gameOverTrigger = false;
 
-// Timestamp for game loop
-let lastTime = 0; // << DECLARED ONCE GLOBALLY
+let lastTime = 0;
 
 
 function loadImage(name, src) {
@@ -485,12 +472,11 @@ async function loadAllAssets() {
     console.log("Processo di caricamento assets completato.");
     if(allImagesLoaded) console.log("TUTTE le immagini dichiarate sono state processate.");
     else console.warn("Attenzione: Alcune immagini potrebbero non essersi processate.");
-    
+
     resourcesInitialized = true;
-    
-    // Carica la leaderboard una volta che le risorse sono pronte e prima di avviare il game loop del menu
-    if (db) { // Controlla se db è stato importato e inizializzato correttamente
-        loadDonkeyLeaderboard(); // <<< CHIAMATA ALLA LEADERBOARD
+
+    if (db) {
+        loadDonkeyLeaderboard();
     } else {
         console.error("DB non pronto, impossibile caricare la leaderboard per DonkeyRunner.");
         if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Classifica non disponibile (DB error).</li>';
@@ -560,13 +546,12 @@ class Player {
 
     update(dt) {
         this.applyGravity();
-        // MODIFICA: Cambiato > in >= per includere l'atterraggio esatto
-        if (this.y + this.displayHeight >= canvas.height - groundHeight) { 
-            this.y = canvas.height - groundHeight - this.displayHeight; // Posiziona sulla linea di terra
-            this.velocityY = 0; // Ferma la caduta
-            this.onGround = true; // Ora è correttamente a terra
+        if (this.y + this.displayHeight >= canvas.height - groundHeight) {
+            this.y = canvas.height - groundHeight - this.displayHeight;
+            this.velocityY = 0;
+            this.onGround = true;
         } else {
-            this.onGround = false; // È in aria
+            this.onGround = false;
         }
         if (this.walkAnimation && this.onGround) this.walkAnimation.update(dt);
 
@@ -592,7 +577,7 @@ class Player {
             }
             AudioManager.playSound('shoot', false, 0.8);
             canShoot = false;
-            shootTimer = 0; // Assign to existing global variable
+            shootTimer = 0;
         }
     }
 
@@ -816,7 +801,7 @@ class BaseEnemy{
             ctx.textAlign = 'center';
             ctx.fillText('!', this.x + this.width / 2, this.y + WARNING_EXCLAMATION_OFFSET_Y);
         }
-        
+
         if(this.maxHealth>1&&this.health>0&&this.health<this.maxHealth){const hbW=this.width*.8,hbH=5,hbX=this.x+(this.width-hbW)/2,hbY=this.y-hbH-3;ctx.fillStyle='rgba(100,100,100,0.7)';ctx.fillRect(hbX,hbY,hbW,hbH);ctx.fillStyle='rgba(0,255,0,0.7)';ctx.fillRect(hbX,hbY,hbW*(this.health/this.maxHealth),hbH);}
     }
     takeDamage(dmg=1){
@@ -848,7 +833,7 @@ class ArmoredEnemy extends BaseEnemy{
 class ShootingEnemy extends BaseEnemy {
     constructor(x, y) {
         super(x, y, ENEMY_FOUR_TARGET_WIDTH, ENEMY_FOUR_TARGET_HEIGHT, 'enemyFourIdle', ENEMY_FOUR_ACTUAL_FRAME_WIDTH, ENEMY_FOUR_ACTUAL_FRAME_HEIGHT, ENEMY_FOUR_IDLE_NUM_FRAMES, 0.5, 1, shootingEnemySpawnColor, 40);
-        this.shootTimer = Math.random() * SHOOTING_ENEMY_SHOOT_INTERVAL + 1.5; // Note: `shootTimer` for enemy logic, not player's global one
+        this.shootTimer = Math.random() * SHOOTING_ENEMY_SHOOT_INTERVAL + 1.5;
 
         this.projectileSpriteName = 'enemyFourProjectile';
         this.projectileFrameWidth = ENEMY_FOUR_PROJECTILE_ACTUAL_FRAME_WIDTH;
@@ -859,7 +844,7 @@ class ShootingEnemy extends BaseEnemy {
     }
 
     update(dt) {
-        super.update(dt); 
+        super.update(dt);
 
         if (this.isWarning) {
             this.warningTimer += dt;
@@ -868,18 +853,18 @@ class ShootingEnemy extends BaseEnemy {
                 this.warningTimer = 0;
                 enemyProjectiles.push(new EnemyProjectile(
                     this.x - this.projectileTargetWidth,
-                    this.y + this.height / 2 - this.projectileTargetHeight / 2, 
+                    this.y + this.height / 2 - this.projectileTargetHeight / 2,
                     this.projectileSpriteName,
                     this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames,
                     this.projectileTargetWidth, this.projectileTargetHeight
                 ));
                 AudioManager.playSound('enemyShootLight');
-                this.shootTimer = 0; 
+                this.shootTimer = 0;
             }
         } else {
             this.shootTimer += dt;
             if (this.shootTimer >= SHOOTING_ENEMY_SHOOT_INTERVAL) {
-                this.isWarning = true; 
+                this.isWarning = true;
                 this.warningTimer = 0;
             }
         }
@@ -922,7 +907,7 @@ class FlyingEnemy extends BaseEnemy{constructor(x,y){super(x,y,ENEMY_FIVE_TARGET
 class ArmoredShootingEnemy extends BaseEnemy {
     constructor(x, y) {
         super(x, y, ENEMY_SIX_TARGET_WIDTH, ENEMY_SIX_TARGET_HEIGHT, 'enemySixBase', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 0.4, ARMORED_SHOOTING_ENEMY_HEALTH, armoredShootingEnemySpawnColor, 60);
-        this.shootTimer = Math.random() * ARMORED_SHOOTING_ENEMY_SHOOT_INTERVAL + 2.0; // Enemy's own shootTimer
+        this.shootTimer = Math.random() * ARMORED_SHOOTING_ENEMY_SHOOT_INTERVAL + 2.0;
 
         this.loadAnimation('enemySixDmg1', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 'dmg1');
         this.loadAnimation('enemySixDmg2', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 'dmg2');
@@ -954,14 +939,14 @@ class ArmoredShootingEnemy extends BaseEnemy {
     }
 
     update(dt) {
-        super.update(dt); 
+        super.update(dt);
 
         if (this.isWarning) {
             this.warningTimer += dt;
             if (this.warningTimer >= WARNING_DURATION) {
                 this.isWarning = false;
                 this.warningTimer = 0;
-                const projectileY = this.y + this.height - this.projectileTargetHeight - 5; 
+                const projectileY = this.y + this.height - this.projectileTargetHeight - 5;
                 enemyProjectiles.push(new EnemyProjectile(
                     this.x - this.projectileTargetWidth,
                     projectileY,
@@ -1033,7 +1018,7 @@ class Glitchzilla extends BaseEnemy {
         this.attackSequence = ['warn_high', 'high', 'pause_short', 'warn_medium', 'medium', 'pause_short', 'warn_low', 'low', 'pause_long'];
         this.attackSequenceIndex = 0;
         this.currentAttackPhaseDuration = 0;
-        this.shotFiredInPhase = false; 
+        this.shotFiredInPhase = false;
 
         this.pauseShortDuration = 0.75;
         this.pauseLongDuration = 2.0;
@@ -1061,9 +1046,9 @@ class Glitchzilla extends BaseEnemy {
     }
 
     takeDamage(dmg = 1) {
-        super.takeDamage(dmg); 
+        super.takeDamage(dmg);
         console.log(`Glitchzilla took ${dmg} damage, HP: ${this.health}`);
-        this.updateCurrentAnimation(); 
+        this.updateCurrentAnimation();
         AudioManager.playSound('glitchzillaHit');
         if (this.health <= 0) {
             console.log("Glitchzilla SCONFITTO! Assegno punteggio: " + this.scoreValue);
@@ -1075,7 +1060,7 @@ class Glitchzilla extends BaseEnemy {
     }
 
     update(dt) {
-        super.update(dt); 
+        super.update(dt);
 
         this.currentAttackPhaseDuration += dt;
         const currentPhase = this.attackSequence[this.attackSequenceIndex];
@@ -1085,10 +1070,10 @@ class Glitchzilla extends BaseEnemy {
             case 'warn_high':
             case 'warn_medium':
             case 'warn_low':
-                this.isWarning = true; 
+                this.isWarning = true;
                 if (this.currentAttackPhaseDuration >= WARNING_DURATION) {
                     phaseComplete = true;
-                    this.isWarning = false; 
+                    this.isWarning = false;
                 }
                 break;
 
@@ -1098,7 +1083,7 @@ class Glitchzilla extends BaseEnemy {
                 if (!this.shotFiredInPhase) {
                     let projectileY;
                     if (currentPhase === 'high') projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
-                    else if (currentPhase === 'medium') projectileY = this.y + this.height * 0.65 - this.projectileTargetHeight / 2; 
+                    else if (currentPhase === 'medium') projectileY = this.y + this.height * 0.65 - this.projectileTargetHeight / 2;
                     else projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
 
                     enemyProjectiles.push(new EnemyProjectile(
@@ -1128,7 +1113,7 @@ class Glitchzilla extends BaseEnemy {
         if (phaseComplete) {
             this.attackSequenceIndex = (this.attackSequenceIndex + 1) % this.attackSequence.length;
             this.currentAttackPhaseDuration = 0;
-            this.shotFiredInPhase = false; 
+            this.shotFiredInPhase = false;
             if (!this.attackSequence[this.attackSequenceIndex].startsWith('warn_')) {
                  this.isWarning = false;
             }
@@ -1142,9 +1127,8 @@ class Glitchzilla extends BaseEnemy {
 
 
 function drawGround() {
-    // Usa un colore dalla nuova palette per la linea di terra
-    ctx.strokeStyle = PALETTE.BORDER_LINE_COLOR; 
-    ctx.lineWidth = lineWidth; // lineWidth è già definito globalmente
+    ctx.strokeStyle = PALETTE.MEDIUM_TEAL; // Usa un colore dalla palette per la linea di terra
+    ctx.lineWidth = lineWidth;
     ctx.beginPath();
     ctx.moveTo(0, canvas.height - groundHeight);
     ctx.lineTo(canvas.width, canvas.height - groundHeight);
@@ -1223,9 +1207,9 @@ function updateAllEnemyTypes(dt){
     dangerousFlyingEnemies.forEach((e,i)=>{e.update(dt);if(e.x+e.width<0)dangerousFlyingEnemies.splice(i,1);});
     if (activeMiniboss) {
         activeMiniboss.update(dt);
-        if (activeMiniboss && activeMiniboss.health <= 0) { 
+        if (activeMiniboss && activeMiniboss.health <= 0) {
             activeMiniboss = null;
-        } else if (activeMiniboss && activeMiniboss.x + activeMiniboss.width < 0) { 
+        } else if (activeMiniboss && activeMiniboss.x + activeMiniboss.width < 0) {
             activeMiniboss = null;
         }
     }
@@ -1240,18 +1224,16 @@ function drawAllEnemyTypes(){
 }
 
 function shouldShowDonkeyScoreInput(currentScore) {
-    // Qui puoi mettere logica più complessa, es. solo se è un nuovo high score personale
-    // o se il punteggio è sopra una certa soglia. Per ora, mostriamolo se > 0.
     return currentScore > 0;
 }
 
 async function handleSaveDonkeyScore() {
-    console.log("handleSaveDonkeyScore: Inizio funzione."); // LOG 1
+    console.log("handleSaveDonkeyScore: Inizio funzione.");
 
     if (finalScore <= 0) {
         console.error("handleSaveDonkeyScore: Tentativo di salvare un punteggio non valido (<=0). Punteggio:", finalScore);
         alert("Impossibile salvare un punteggio di 0 o negativo.");
-        if (saveScoreBtnDonkey) { // Assicurati che il pulsante esista prima di modificarlo
+        if (saveScoreBtnDonkey) {
             saveScoreBtnDonkey.disabled = false;
             saveScoreBtnDonkey.textContent = "Salva Punteggio";
         }
@@ -1266,7 +1248,6 @@ async function handleSaveDonkeyScore() {
     }
     if (!saveScoreBtnDonkey || !playerInitialsDonkeyInput || !scoreInputContainerDonkey || !restartGameBtnDonkey) {
         console.error("Elementi DOM per il salvataggio punteggio non trovati.");
-        // Non reimpostare il pulsante qui se gli elementi DOM fondamentali mancano, perché l'utente non potrebbe comunque interagire.
         return;
     }
 
@@ -1274,14 +1255,14 @@ async function handleSaveDonkeyScore() {
     let userNameToSave = "Giocatore Anonimo";
     let userIdToSave = null;
     let initialsForDb = "";
-    let userNationalityCode = null; // <<< NUOVA VARIABILE
+    let userNationalityCode = null;
 
     saveScoreBtnDonkey.disabled = true;
     saveScoreBtnDonkey.textContent = "Salvataggio...";
 
     const currentUser = auth.currentUser;
 
-    if (currentUser) { // Utente Loggato
+    if (currentUser) {
         userIdToSave = currentUser.uid;
         try {
             const userProfileRef = doc(db, "userProfiles", currentUser.uid);
@@ -1289,7 +1270,7 @@ async function handleSaveDonkeyScore() {
             if (docSnap.exists()) {
                 const userProfileData = docSnap.data();
                 userNameToSave = userProfileData.nickname || (currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato");
-                if (userProfileData.nationalityCode && userProfileData.nationalityCode !== "OTHER") { // <<< RECUPERA NAZIONALITÀ
+                if (userProfileData.nationalityCode && userProfileData.nationalityCode !== "OTHER") {
                     userNationalityCode = userProfileData.nationalityCode.toUpperCase();
                 }
             } else {
@@ -1299,9 +1280,8 @@ async function handleSaveDonkeyScore() {
             console.error("Errore caricamento profilo per punteggio:", profileError);
             userNameToSave = currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato";
         }
-        initialsForDb = userNameToSave.substring(0, 5).toUpperCase(); // O usa un campo initials dedicato se presente nel profilo
-    } else { // Utente Non Loggato
-        // ... (logica esistente per iniziali anonime) ...
+        initialsForDb = userNameToSave.substring(0, 5).toUpperCase();
+    } else {
         const rawInitials = playerInitialsDonkeyInput.value.trim().toUpperCase();
         if (rawInitials.length === 0 || rawInitials.length > 5) {
             alert('Per favore, inserisci da 1 a 5 caratteri per le tue iniziali.');
@@ -1310,42 +1290,36 @@ async function handleSaveDonkeyScore() {
             saveScoreBtnDonkey.textContent = "Salva Punteggio";
             return;
         }
-        userNameToSave = rawInitials; // Per gli anonimi, userName è le iniziali
+        userNameToSave = rawInitials;
         initialsForDb = rawInitials;
     }
 
     const scoreData = {
         score: scoreToSave,
         timestamp: serverTimestamp(),
-        userName: userNameToSave, // Può essere nickname o iniziali
-        initials: initialsForDb,   // Iniziali esplicite
+        userName: userNameToSave,
+        initials: initialsForDb,
         gameId: "donkeyRunner"
     };
 
     if (userIdToSave) {
         scoreData.userId = userIdToSave;
     }
-    if (userNationalityCode) { // <<< AGGIUNGI NAZIONALITÀ SE DISPONIBILE
+    if (userNationalityCode) {
         scoreData.nationalityCode = userNationalityCode;
     }
-    // Considera se vuoi aggiungere anche glitchzillaDefeated, come nelle tue regole
-    // if (typeof someVariableForGlitchzillaDefeated !== 'undefined') {
-    //     scoreData.glitchzillaDefeated = someVariableForGlitchzillaDefeated;
-    // }
-
 
     try {
         const leaderboardScoresCollection = collection(db, "leaderboardScores");
         await addDoc(leaderboardScoresCollection, scoreData);
         console.log("Punteggio DonkeyRunner salvato con successo:", scoreData);
 
-        // ... (resto della logica per UI, ricaricamento leaderboard, ecc.) ...
         scoreInputContainerDonkey.style.display = 'none';
-        if (!currentUser) playerInitialsDonkeyInput.value = ''; // Pulisci solo se anonimo
+        if (!currentUser) playerInitialsDonkeyInput.value = '';
         const saveAsNameMessageEl = document.getElementById('saveAsNameMessage');
         if (saveAsNameMessageEl) saveAsNameMessageEl.style.display = 'none';
-        
-        restartGameBtnDonkey.style.display = 'block'; // Mostra il pulsante di riavvio generale
+
+        restartGameBtnDonkey.style.display = 'block';
         await loadDonkeyLeaderboard();
 
     } catch (error) {
@@ -1358,33 +1332,28 @@ async function handleSaveDonkeyScore() {
 }
 
 function processGameOver() {
-    console.log("ProcessGameOver - Punteggio finale:", finalScore); // Log esistente
+    console.log("ProcessGameOver - Punteggio finale:", finalScore);
     currentGameState = GAME_STATE.GAME_OVER;
     AudioManager.stopMusic();
 
-    // ---> NUOVI LOG DA AGGIUNGERE QUI <---
     console.log("processGameOver: Controllo elementi DOM per UI salvataggio punteggio:");
     console.log("scoreInputContainerDonkey:", scoreInputContainerDonkey);
     console.log("playerInitialsDonkeyInput:", playerInitialsDonkeyInput);
     console.log("saveScoreBtnDonkey:", saveScoreBtnDonkey);
     console.log("restartGameBtnDonkey:", restartGameBtnDonkey);
-    // ---> FINE NUOVI LOG <---
 
     if (shouldShowDonkeyScoreInput(finalScore)) {
         if (scoreInputContainerDonkey && playerInitialsDonkeyInput && saveScoreBtnDonkey && restartGameBtnDonkey) {
             scoreInputContainerDonkey.style.display = 'block';
-            // ... il resto della logica per mostrare/nascondere gli input specifici ...
-            // (come definito nella versione corretta di processGameOver che ti ho dato prima)
-            // Assicurati che questa parte sia completa e corretta
-            restartGameBtnDonkey.style.display = 'none'; // Nascondi il restart button del form inizialmente
+            restartGameBtnDonkey.style.display = 'none';
             saveScoreBtnDonkey.disabled = false;
             saveScoreBtnDonkey.textContent = "Salva Punteggio";
 
             const currentUser = auth.currentUser;
-            const playerInitialsLabelEl = document.getElementById('playerInitialsLabel'); // Questo viene preso qui dentro
-            const saveAsNameMessageEl = document.getElementById('saveAsNameMessage'); // Anche questo
+            const playerInitialsLabelEl = document.getElementById('playerInitialsLabel');
+            const saveAsNameMessageEl = document.getElementById('saveAsNameMessage');
 
-            if (currentUser) { // Utente Loggato
+            if (currentUser) {
                 playerInitialsDonkeyInput.style.display = 'none';
                 if (playerInitialsLabelEl) playerInitialsLabelEl.style.display = 'none';
                 if (saveAsNameMessageEl) {
@@ -1401,7 +1370,7 @@ function processGameOver() {
                         saveAsNameMessageEl.style.display = 'block';
                     });
                 }
-            } else { // Utente Non Loggato
+            } else {
                 playerInitialsDonkeyInput.style.display = 'block';
                 if (playerInitialsLabelEl) playerInitialsLabelEl.style.display = 'block';
                 if (saveAsNameMessageEl) saveAsNameMessageEl.style.display = 'none';
@@ -1430,7 +1399,7 @@ function checkCollisions(){
         const checkPlayerCollisionWithEntity=(entity, isObstacle = false)=>{
             if (isObstacle && asyncDonkey.isFirewallActive) {
                 if(entity&&pC.x<entity.x+entity.width&&pC.x+pC.width>entity.x&&pC.y<entity.y+entity.height&&pC.y+pC.height>entity.y){
-                    // AudioManager.playSound('firewallDeflect'); // Optional sound
+                    // AudioManager.playSound('firewallDeflect');
                 }
                 return false;
             }
@@ -1480,11 +1449,11 @@ function checkCollisions(){
             if(indexInArray<0||indexInArray>=enemyList.length)return false;
             const e=enemyList[indexInArray];
             if(e&&p.x<e.x+e.width&&p.x+p.width>e.x&&p.y<e.y+e.height&&p.y+p.height>e.y){
-                e.takeDamage(p.damage); 
+                e.takeDamage(p.damage);
                 AudioManager.playSound('enemyHit'); projectileConsumedThisHit=true;
                 if(e.health<=0){
                     AudioManager.playSound('enemyExplode');
-                    if (!(e instanceof Glitchzilla)) { 
+                    if (!(e instanceof Glitchzilla)) {
                        score+= e.scoreValue;
                     }
                     enemyList.splice(indexInArray,1);
@@ -1503,13 +1472,13 @@ function checkCollisions(){
                             powerUpItems.push(new PowerUpItem(e.x,e.y,randomType,images,() => gameSpeed));
                         }
                     }
-                }else if(e instanceof ArmoredEnemy || e instanceof ArmoredShootingEnemy || e instanceof ToughBasicEnemy || (e instanceof Glitchzilla && e.health > 0) ){score+=5;} 
+                }else if(e instanceof ArmoredEnemy || e instanceof ArmoredShootingEnemy || e instanceof ToughBasicEnemy || (e instanceof Glitchzilla && e.health > 0) ){score+=5;}
                 return true;
             }return false;
         };
 
         if (activeMiniboss && p.x < activeMiniboss.x + activeMiniboss.width && p.x + p.width > activeMiniboss.x && p.y < activeMiniboss.y + activeMiniboss.height && p.y + p.height > activeMiniboss.y) {
-            activeMiniboss.takeDamage(p.damage); 
+            activeMiniboss.takeDamage(p.damage);
             projectileConsumedThisHit = true;
         }
 
@@ -1555,19 +1524,16 @@ function resetGame(){
     toughBasicEnemySpawnTimer=0; nextToughBasicEnemySpawnTime=calculateNextGenericEnemySpawnTime(5.0, 9.0);
     dangerousFlyingEnemySpawnTimer=0; nextDangerousFlyingEnemySpawnTime=calculateNextGenericEnemySpawnTime(20.0, 35.0);
     score=0;finalScore=0;gameOverTrigger=false;canShoot=true;
-    shootTimer=0; // Assign to existing global variable
+    shootTimer=0;
     score = 0;
-    // finalScore = 0; // finalScore viene impostato solo al game over effettivo
     gameOverTrigger = false;
     canShoot = true;
     shootTimer = 0;
 
-    // Nascondi UI per salvataggio punteggio e restart specifico
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
     if (restartGameBtnDonkey) restartGameBtnDonkey.style.display = 'none';
-    
-    // Mostra i controlli di gioco principali se erano stati nascosti
-    if (isTouchDevice) { // O se li mostri sempre durante il gioco
+
+    if (isTouchDevice) {
         if (mobileControlsDiv) mobileControlsDiv.style.display = 'block';
         if (fullscreenButton) fullscreenButton.style.display = 'block';
     }
@@ -1576,15 +1542,10 @@ function resetGame(){
 }
 
 function drawTerminalBackgroundEffects() {
-    // Questa funzione viene chiamata DOPO aver riempito lo sfondo principale
-    // con PALETTE.DARK_BACKGROUND.
-
-    // 1. Scanlines (Più Visibili)
     ctx.save();
-    // PALETTE.DARK_TEAL_BLUE ('#32535f') -> rgb(50, 83, 95)
-    ctx.strokeStyle = 'rgba(50, 83, 95, 0.22)'; 
+    ctx.strokeStyle = 'rgba(50, 83, 95, 0.22)';
     ctx.lineWidth = 1;
-    for (let y = 0; y < canvas.height; y += 2) { 
+    for (let y = 0; y < canvas.height; y += 2) {
         ctx.beginPath();
         ctx.moveTo(0, y + 0.5);
         ctx.lineTo(canvas.width, y + 0.5);
@@ -1592,11 +1553,9 @@ function drawTerminalBackgroundEffects() {
     }
     ctx.restore();
 
-    // 2. Griglia Sottile
     ctx.save();
-    const gridSize = 25; 
-    // PALETTE.MEDIUM_PURPLE ('#631b34') -> rgb(99, 27, 52)
-    ctx.strokeStyle = 'rgba(99, 27, 52, 0.1)'; 
+    const gridSize = 25;
+    ctx.strokeStyle = 'rgba(99, 27, 52, 0.1)';
     ctx.lineWidth = 1;
 
     for (let x = 0; x < canvas.width; x += gridSize) {
@@ -1613,39 +1572,20 @@ function drawTerminalBackgroundEffects() {
     }
     ctx.restore();
 
-    // 3. Vignette (Più Pronunciata)
     ctx.save();
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const outerRadius = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2)) * 1.1;
-    const innerRadius = canvas.width * 0.05; 
+    const innerRadius = canvas.width * 0.05;
 
     const gradient = ctx.createRadialGradient(centerX, centerY, innerRadius, centerX, centerY, outerRadius);
-    // PALETTE.DARK_BACKGROUND ('#411d31') -> rgb(65, 29, 49)
-    gradient.addColorStop(0, 'rgba(65, 29, 49, 0)');    
-    gradient.addColorStop(0.60, 'rgba(65, 29, 49, 0.3)'); 
-    gradient.addColorStop(1, 'rgba(65, 29, 49, 0.80)');   
+    gradient.addColorStop(0, 'rgba(65, 29, 49, 0)');
+    gradient.addColorStop(0.60, 'rgba(65, 29, 49, 0.3)');
+    gradient.addColorStop(1, 'rgba(65, 29, 49, 0.80)');
 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
-
-    // // 4. Ghost Characters (RIMOSSI)
-    // // La sezione seguente è stata commentata/rimossa:
-    // /*
-    // ctx.save(); 
-    // const ghostChars = ['0', '1', '{', '}', ';', '#', '$', '%', '*', '>', '<', '/', '(', ')', '[', ']'];
-    // ctx.fillStyle = 'rgba(48, 225, 185, 0.15)'; 
-    // ctx.font = '15px "Source Code Pro", "Courier New", monospace'; 
-    // const numberOfGhostChars = 80; 
-    // for (let i = 0; i < numberOfGhostChars; i++) { 
-    //     const char = ghostChars[Math.floor(Math.random() * ghostChars.length)];
-    //     const x = Math.random() * canvas.width;
-    //     const y = Math.random() * canvas.height;
-    //     ctx.fillText(char, x, y); 
-    // }
-    // ctx.restore(); 
-    // */
 }
 
 function drawGlitchText(text, x, y, fontSize, primaryColor, glitchColor1, glitchColor2, glitchOffsetX = 2, glitchOffsetY = 1) {
@@ -1653,15 +1593,12 @@ function drawGlitchText(text, x, y, fontSize, primaryColor, glitchColor1, glitch
     ctx.font = `bold ${fontSize}px ${baseFont}`;
     ctx.textAlign = 'center';
 
-    // Livello glitch 1
     ctx.fillStyle = glitchColor1;
     ctx.fillText(text, x + glitchOffsetX, y + glitchOffsetY);
 
-    // Livello glitch 2
     ctx.fillStyle = glitchColor2;
     ctx.fillText(text, x - glitchOffsetX, y - glitchOffsetY);
-    
-    // Testo principale
+
     ctx.fillStyle = primaryColor;
     ctx.fillText(text, x, y);
 }
@@ -1671,37 +1608,34 @@ function drawMenuScreen() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawTerminalBackgroundEffects();
 
-    // --- Titolo Principale ---
-    const mainTitle = "asyncDonkey: Code Rush"; // O il titolo che preferisci
+    const mainTitle = "asyncDonkey: Code Rush";
     ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
     ctx.font = 'bold 48px "Source Code Pro", "Courier New", Courier, monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(mainTitle, canvas.width / 2, canvas.height / 2 - 180); // Spostato più in alto
+    ctx.fillText(mainTitle, canvas.width / 2, canvas.height / 2 - 180);
 
-    // --- Sottotitolo Glitch ---
     const subTitleText = "F!ght GlI7chz!llA";
     drawGlitchText(
         subTitleText,
         canvas.width / 2,
-        canvas.height / 2 - 130, // Sotto il titolo principale
-        38, // Dimensione font per il sottotitolo
-        PALETTE.BRIGHT_GREEN_TEAL,  // Colore primario del testo
-        PALETTE.MEDIUM_PURPLE,      // Colore glitch 1
-        PALETTE.BRIGHT_TEAL,        // Colore glitch 2
-        2,                          // Offset X per glitch
-        1                           // Offset Y per glitch
+        canvas.height / 2 - 130,
+        38,
+        PALETTE.BRIGHT_GREEN_TEAL,
+        PALETTE.MEDIUM_PURPLE,
+        PALETTE.BRIGHT_TEAL,
+        2,
+        1
     );
 
-    // --- Istruzioni (leggibili) ---
     ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
     ctx.font = '22px "Source Code Pro", "Courier New", Courier, monospace';
-    ctx.textAlign = 'center'; // Centra "OBJECTIVES"
+    ctx.textAlign = 'center';
     ctx.fillText("OBJECTIVES:", canvas.width / 2, canvas.height / 2 - 60);
 
     ctx.font = '18px "Source Code Pro", "Courier New", Courier, monospace';
     ctx.textAlign = 'left';
     const instructionStartX = canvas.width / 2 - 200;
-    let currentY = canvas.height / 2 - 20; // Abbassato leggermente
+    let currentY = canvas.height / 2 - 20;
     const lineHeight = 28;
 
     ctx.fillText("   JUMP: [SPACE] / [ARROW UP]", instructionStartX, currentY);
@@ -1714,37 +1648,35 @@ function drawMenuScreen() {
     currentY += lineHeight;
     ctx.fillText("COLLECT: System Exploits (Power-Ups)", instructionStartX, currentY);
 
-    // --- Prompt di Avvio (Glitchato) ---
     const startPromptText = isTouchDevice ? "TAP TO START" : "PRESS ENTER TO START";
     drawGlitchText(
         startPromptText,
         canvas.width / 2,
         canvas.height - 70,
-        28, // Dimensione font
-        PALETTE.BRIGHT_TEAL,        // Colore primario
-        PALETTE.MEDIUM_PURPLE,      // Colore glitch 1
-        PALETTE.BRIGHT_GREEN_TEAL,  // Colore glitch 2 (invertito per varietà)
-        3,                          // Offset X più marcato per il prompt
-        1.5                         // Offset Y
+        28,
+        PALETTE.BRIGHT_TEAL,
+        PALETTE.MEDIUM_PURPLE,
+        PALETTE.BRIGHT_GREEN_TEAL,
+        3,
+        1.5
     );
 }
 
 function updatePlaying(dt) {
     if (gameOverTrigger) {
-        finalScore = score; // Assicurati che finalScore sia impostato
-        // currentGameState = GAME_STATE.GAME_OVER; // Questo viene fatto in processGameOver
-        AudioManager.stopMusic(); // Ferma la musica se non già fatto
-        processGameOver(); // <<< NUOVA CHIAMATA per gestire la logica di fine gioco e input punteggio
-        return; // Esce da updatePlaying una volta che il gioco è finito
+        finalScore = score;
+        AudioManager.stopMusic();
+        processGameOver();
+        return;
     }
 
     if (asyncDonkey) {
-        asyncDonkey.update(dt); // Aggiorna la logica del giocatore (gravità, onGround, animazione)
+        asyncDonkey.update(dt);
     }
 
     spawnGlitchzillaIfNeeded();
     if (activeMiniboss) {
-        updateProjectiles(dt); 
+        updateProjectiles(dt);
         enemyProjectiles.forEach((ep,i)=>{ep.update(dt);if(ep.x+ep.width<0)enemyProjectiles.splice(i,1);});
     } else {
         spawnObstacleIfNeeded(dt);updateObstacles(dt);
@@ -1752,7 +1684,7 @@ function updatePlaying(dt) {
         spawnArmoredShootingEnemyIfNeeded(dt); spawnToughBasicEnemyIfNeeded(dt); spawnDangerousFlyingEnemyIfNeeded(dt);
         updateProjectiles(dt);
     }
-    updateAllEnemyTypes(dt); 
+    updateAllEnemyTypes(dt);
     spawnFlyingEnemyIfNeeded(dt);
 
     spawnPowerUpAmbientIfNeeded(dt); updatePowerUpItems(dt);
@@ -1761,10 +1693,10 @@ function updatePlaying(dt) {
 }
 
 function drawPlayingScreen() {
-    ctx.fillStyle = PALETTE.DARK_BACKGROUND; // Nuovo sfondo per l'area di gioco
+    ctx.fillStyle = PALETTE.DARK_BACKGROUND;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawTerminalBackgroundEffects();
-    drawGround(); // La linea di terra userà il nuovo colore da drawGround()
+    drawGround();
 
     if (!activeMiniboss) {
         drawObstacles();
@@ -1775,15 +1707,13 @@ function drawPlayingScreen() {
 
     if (asyncDonkey) asyncDonkey.draw();
 
-    // Disegna Punteggio
-    ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL; // Nuovo colore per il testo del punteggio
+    ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
     ctx.font = '24px "Source Code Pro", "Courier New", Courier, monospace';
     ctx.textAlign = 'left';
     ctx.fillText("Score: " + score, 20, 40);
 
-    // Disegna Timer Power-Up (già modificato per la posizione, il colore del testo è gestito da POWERUP_COLORS)
     if (asyncDonkey && asyncDonkey.activePowerUp && asyncDonkey.powerUpTimer > 0) {
-        const powerUpColor = (POWERUP_COLORS && POWERUP_COLORS[asyncDonkey.activePowerUp]) ? POWERUP_COLORS[asyncDonkey.activePowerUp] : PALETTE.BRIGHT_TEAL; // Fallback alla palette
+        const powerUpColor = (POWERUP_COLORS && POWERUP_COLORS[asyncDonkey.activePowerUp]) ? POWERUP_COLORS[asyncDonkey.activePowerUp] : PALETTE.BRIGHT_TEAL;
         ctx.fillStyle = powerUpColor;
         ctx.font = '18px "Source Code Pro", "Courier New", Courier, monospace';
         ctx.textAlign = 'left';
@@ -1797,35 +1727,32 @@ function drawGameOverScreen() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawTerminalBackgroundEffects();
 
-    // --- Messaggio "GAME OVER" Glitchato ---
     drawGlitchText(
         "G A M E   O V E R",
         canvas.width / 2,
         canvas.height / 2 - 70,
-        60, // Dimensione Font
-        PALETTE.MEDIUM_PURPLE,      // Colore primario d'impatto (diverso dal menu)
-        PALETTE.BRIGHT_GREEN_TEAL,  // Colore glitch 1
-        PALETTE.BRIGHT_TEAL,        // Colore glitch 2
-        4,                          // Offset X per un glitch più forte
-        2                           // Offset Y
+        60,
+        PALETTE.MEDIUM_PURPLE,
+        PALETTE.BRIGHT_GREEN_TEAL,
+        PALETTE.BRIGHT_TEAL,
+        4,
+        2
     );
 
-    // --- Punteggio Finale (leggibile) ---
     ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
     ctx.font = '32px "Source Code Pro", "Courier New", Courier, monospace';
     ctx.textAlign = 'center';
-    ctx.fillText("Final Score: " + finalScore, canvas.width / 2, canvas.height / 2 + 10); // Leggermente più in basso
+    ctx.fillText("Final Score: " + finalScore, canvas.width / 2, canvas.height / 2 + 10);
 
-    // --- Prompt di Riavvio (Glitchato) ---
     const restartPromptText = isTouchDevice ? "TAP TO RESTART" : "PRESS ENTER TO RESTART";
     drawGlitchText(
         restartPromptText,
         canvas.width / 2,
         canvas.height / 2 + 70,
-        22, // Dimensione font
-        PALETTE.BRIGHT_TEAL,        // Colore primario
-        PALETTE.MEDIUM_PURPLE,      // Colore glitch 1
-        PALETTE.BRIGHT_GREEN_TEAL,  // Colore glitch 2
+        22,
+        PALETTE.BRIGHT_TEAL,
+        PALETTE.MEDIUM_PURPLE,
+        PALETTE.BRIGHT_GREEN_TEAL,
         3,
         1.5
     );
@@ -1834,7 +1761,7 @@ function drawGameOverScreen() {
 
 function gameLoop(timestamp){
     const deltaTime=(timestamp-lastTime)/1000||0;
-    lastTime=timestamp; // Assign to existing global variable
+    lastTime=timestamp;
     ctx.clearRect(0,0,canvas.width,canvas.height);
     if(!resourcesInitialized){
         ctx.fillStyle='#000';ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -1851,7 +1778,7 @@ function gameLoop(timestamp){
 }
 function startGameLoop(){
     if(gameLoopRequestId!==null) cancelAnimationFrame(gameLoopRequestId);
-    lastTime=performance.now(); // Assign to existing global variable
+    lastTime=performance.now();
     console.log("Avvio Game Loop...");
     gameLoopRequestId=requestAnimationFrame(gameLoop);
 }
@@ -1875,7 +1802,7 @@ if (jumpButton) {
             AudioManager.playMusic(false);
         }
     });
-    jumpButton.addEventListener('click', function(e) { // Fallback per click
+    jumpButton.addEventListener('click', function(e) {
          if (currentGameState === GAME_STATE.PLAYING && asyncDonkey) {
             asyncDonkey.jump();
         }
@@ -1892,7 +1819,7 @@ if (shootButton) {
             asyncDonkey.shoot();
         }
     });
-     shootButton.addEventListener('click', function(e) { // Fallback per click
+     shootButton.addEventListener('click', function(e) {
          if (currentGameState === GAME_STATE.PLAYING && asyncDonkey) {
             asyncDonkey.shoot();
         }
@@ -1905,28 +1832,20 @@ if (fullscreenButton) {
     });
 }
 
-if (saveScoreBtnDonkey) {
-    saveScoreBtnDonkey.addEventListener('click', handleSaveDonkeyScore);
-}
+// RIMOSSA LA SECONDA AGGIUNTA DEL LISTENER PER saveScoreBtnDonkey
+// if (saveScoreBtnDonkey) {
+//    saveScoreBtnDonkey.addEventListener('click', handleSaveDonkeyScore);
+// }
 
 if (restartGameBtnDonkey) {
     restartGameBtnDonkey.addEventListener('click', () => {
-        if(scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none'; // Nascondi input
+        if(scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
         currentGameState = GAME_STATE.PLAYING;
         resetGame();
-        AudioManager.playMusic(false); // Ricomincia la musica
+        AudioManager.playMusic(false);
     });
 }
 
-// Potresti voler modificare l'event listener 'keydown' e 'touchstart' del jumpButton
-// per gestire il riavvio se scoreInputContainerDonkey è visibile e l'utente preme Enter/Tap
-// senza aver cliccato "Salva" o "Ricomincia".
-// Per ora, il pulsante esplicito restartGameBtnDonkey è la via più chiara.
-
-// Assicurati che la funzione resetGame() nasconda anche scoreInputContainerDonkey
-// e restartGameBtnDonkey all'inizio di una nuova partita.
-
-// --- FULLSCREEN FUNCTIONALITY ---
 function toggleFullscreen() {
     if (!document.fullscreenElement &&
         !document.mozFullScreenElement &&
@@ -1942,7 +1861,6 @@ function toggleFullscreen() {
         } else if (gameContainer && gameContainer.msRequestFullscreen) {
             gameContainer.msRequestFullscreen();
         }
-        // Testo aggiornato da event listener 'fullscreenchange'
     } else {
         if (document.exitFullscreen) {
             document.exitFullscreen();
@@ -1953,7 +1871,6 @@ function toggleFullscreen() {
         } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
         }
-        // Testo aggiornato da event listener 'fullscreenchange'
     }
 }
 
@@ -1970,7 +1887,6 @@ document.addEventListener('mozfullscreenchange', updateFullscreenButtonText);
 document.addEventListener('MSFullscreenChange', updateFullscreenButtonText);
 
 
-// KEYBOARD EVENT LISTENER
 window.addEventListener('keydown',(e)=>{
     if(!resourcesInitialized) return;
 
@@ -1985,24 +1901,23 @@ window.addEventListener('keydown',(e)=>{
                 currentGameState=GAME_STATE.PLAYING;
                 resetGame();
             }
-            break; // Added break
+            break;
         case GAME_STATE.PLAYING:
             if(asyncDonkey){
                 if(e.code==='Space'||e.key==='ArrowUp'){e.preventDefault();asyncDonkey.jump();}
                 if(e.code==='ControlLeft'||e.key==='x'||e.key==='X'||e.key==='ControlRight'){e.preventDefault();asyncDonkey.shoot();}
             }
-            break; // Added break
+            break;
         case GAME_STATE.GAME_OVER:
             if(e.key==='Enter'){
                 currentGameState=GAME_STATE.PLAYING;
                 resetGame();
                 AudioManager.playMusic(false);
             }
-            break; // Added break
+            break;
     }
-}); // Semicolon for addEventListener statement
+});
 
-// INIZIO CARICAMENTO ASSETS E GIOCO
 loadAllAssets();
 
 console.log("Fine script donkeyRunner.js (esecuzione iniziale). In attesa caricamento assets...");
