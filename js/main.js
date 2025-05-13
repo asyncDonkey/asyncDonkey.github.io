@@ -326,13 +326,12 @@ console.log('DOM Query - headerUserAvatar element:', headerUserAvatar); // <-- A
 
     function updateAuthUI(user) {
         console.log('updateAuthUI - user:', user);
-        // Helper array to manage UI elements visibility based on auth state
         const elementsToToggle = [
-            { el: authContainer, showWhenLoggedOut: true }, // Show Login/Register buttons if logged out
-            { el: userProfileContainer, showWhenLoggedOut: false }, // Show user profile area if logged in
-            { el: logoutButton, showWhenLoggedOut: false }, // Show logout button if logged in
-            { el: profileNavLink, showWhenLoggedOut: false, displayType: 'list-item' }, // Show Profile nav link if logged in
-            { el: commentNameSection, showWhenLoggedOut: true } // Show name input for comments if logged out
+            { el: authContainer, showWhenLoggedOut: true },
+            { el: userProfileContainer, showWhenLoggedOut: false }, // display: flex quando loggato
+            { el: logoutButton, showWhenLoggedOut: false, displayType: 'inline-block' }, // <-- MODIFICATO displayType
+            { el: profileNavLink, showWhenLoggedOut: false, displayType: 'list-item' },
+            { el: commentNameSection, showWhenLoggedOut: true }
         ];
 
         elementsToToggle.forEach(item => {

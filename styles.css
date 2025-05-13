@@ -32,7 +32,13 @@
   --skill-details-heading: var(--link-color);
 
   --link-color-rgb: 0, 123, 255; /* For focus ring */
-
+  --game-border-color: #00b9be;
+  --game-ground-line-color: #00b9be;
+  --game-button-bg: rgba(0, 50, 80, 0.6);
+  --game-button-text: #c4f0c2;
+  --game-button-border: #5ab9a8;
+  --game-button-active-bg: rgba(0, 70, 100, 0.8);
+  --game-border-color-rgb: 0, 185, 190; /* For canvas shadow */
 }
 
 body.dark-mode {
@@ -53,9 +59,18 @@ body.dark-mode {
   --button-bg-primary: var(--link-color);
   --button-text-primary: #121212;
   --button-hover-bg-primary: var(--link-hover-color);
+
   --skill-badge-bg: #3a3a3a;
   --skill-details-bg: #232323;
   --link-color-rgb: 100, 181, 246; /* For focus ring */
+
+  --game-border-color: #5ab9a8;
+  --game-ground-line-color: #5ab9a8;
+  --game-button-bg: rgba(20, 70, 100, 0.7);
+  /* --game-button-text: #c4f0c2; */ /* Already defined in :root, can inherit */
+  --game-button-border: #00b9be;
+  --game-button-active-bg: rgba(30, 90, 120, 0.9);
+  --game-border-color-rgb: 90, 185, 168; /* For canvas shadow in dark mode */
 }
 
 /* ===== General Reset & Base Styles ===== */
@@ -64,13 +79,34 @@ body { font-family: "Space Grotesk", sans-serif; line-height: 1.6; background-co
 a { color: var(--link-color); text-decoration: none; }
 a:hover { color: var(--link-hover-color); text-decoration: underline; }
 
+/* ===== Animations ===== */
+@keyframes cambio-colore-neon { /* Definizione singola */
+  0% {
+    color: #ff00ff; /* Magenta Neon */
+    border-color: #ff00ff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
+  }
+  33% {
+    color: #00ffff; /* Ciano Neon */
+    border-color: #00ffff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #00ffff, 0 0 15px #00ffff;
+  }
+  66% {
+    color: #39ff14; /* Verde Lime Neon */
+    border-color: #39ff14;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #39ff14, 0 0 15px #39ff14;
+  }
+  100% {
+    color: #ff00ff; /* Ritorna al Magenta per un ciclo pulito */
+    border-color: #ff00ff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
+  }
+}
 
-
-/* ===== Header Styles MODIFIED ===== */
+/* ===== Header Styles ===== */
 header {
   background-color: var(--surface-bg-primary);
-  padding: 10px 5%; /* Reduced padding */
-
+  padding: 10px 5%;
   border-bottom: 1px solid var(--border-color-primary);
   display: flex;
   align-items: center;
@@ -78,881 +114,269 @@ header {
   flex-wrap: wrap;
   transition: background-color 0.3s, border-color 0.3s;
 }
-
-header .avatar img { /* Main site avatar */
-  width: 50px; /* Slightly smaller */
-  height: 50px;
-  border-radius: 50%;
-  border: 2px solid var(--border-color-avatar);
-  display: block;
-
+header .avatar img {
+  width: 50px; height: 50px; border-radius: 50%;
+  border: 2px solid var(--border-color-avatar); display: block;
 }
 header .header-content {
-  display: flex;
-  align-items: center;
-
-  justify-content: space-between; /* Pushes items apart */
-  flex-grow: 1; /* Takes remaining space */
-  flex-wrap: wrap;
-  gap: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-grow: 1; flex-wrap: wrap; gap: 20px;
 }
 header h1 {
-  font-size: 1.6em;
-  margin: 0;
-  color: var(--heading-color);
-  white-space: nowrap; /* Prevent title wrapping if possible */
+  font-size: 1.6em; margin: 0; color: var(--heading-color); white-space: nowrap;
 }
 header .header-controls {
-  display: flex;
-  align-items: center;
-  gap: 15px; /* Space between nav, theme, auth */
-  flex-wrap: wrap;
-  margin-left: auto; /* Push the whole controls block right (alternative to space-between on parent) */
+  display: flex; align-items: center; gap: 15px;
+  flex-wrap: wrap; margin-left: auto;
 }
-header nav {
-  margin-left: 0; /* Reset margin */
-}
-header nav ul {
-  list-style-type: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
+header nav { margin-left: 0; }
+header nav ul { list-style-type: none; display: flex; flex-wrap: wrap; gap: 15px; }
 header nav a { color: var(--text-color-secondary); font-weight: 500; }
 header nav a:hover { color: var(--link-color); text-decoration: none; }
 
-/* === SEZIONE H.1: Stili per Immagine/Animazione Introduttiva (Task H.1) === */
-/* .intro-visual-container {
-    text-align: center; // Se vuoi centrare il contenuto del div
+/* Authentication related styles in Header */
+#authSection { display: flex; align-items: center; }
+#authContainer { display: flex; gap: 8px; }
+#userProfileContainer { display: none; align-items: center; } /* JS gestirà la visibilità */
+#userProfileContainer span { color: var(--text-color-primary); font-size: 0.9em; margin-right: 10px; white-space: nowrap; }
+#headerUserAvatar {
+  width: 32px; height: 32px; border-radius: 50%; margin-right: 8px;
+  background-color: #eee; display: none; /* JS gestirà la visibilità */
+  vertical-align: middle; object-fit: cover; border: 1px solid var(--border-color-secondary);
 }
+.auth-button { /* Stile generico per bottoni Login/Register/Logout e link nav */
+  background-color: transparent; border: 1px solid var(--text-color-muted); color: var(--text-color-secondary);
+  padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.9em;
+  transition: all 0.2s ease; white-space: nowrap; text-decoration: none; /* Assicura che non sia sottolineato se è un <a> */
+}
+.auth-button:hover { border-color: var(--link-color); color: var(--link-color); text-decoration: none; }
 
-.intro-visual-item {
-    max-width: 500px;   // Larghezza massima dell'immagine/GIF
-    height: auto;       // Mantiene le proporzioni
-    display: block;     // Necessario per applicare margin: auto orizzontalmente
-    margin: 20px auto 40px auto; // Spaziatura sopra, auto orizzontale, sotto
-    border-radius: 8px; // Bordi arrotondati
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1); // Ombra leggera
-    background-color: var(--surface-bg-secondary); // Sfondo placeholder se l'immagine non carica subito
-    border: 1px solid var(--border-color-secondary); // Bordo leggero opzionale
-}
-*/
-/* === FINE SEZIONE H.1 === */
 
-#themeToggleBtn { /* Theme button styles unchanged */
-  background: none; border: 1px solid var(--border-color-primary); color: var(--text-color-secondary); padding: 6px 10px; /* Slightly smaller */ border-radius: 20px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: all 0.3s;
-}
-#themeToggleBtn:hover { background-color: var(--surface-bg-secondary); border-color: var(--link-color); color: var(--link-color); }
-
-#authSection { /* Wrapper for login/signup or user profile */
-  display: flex;
-  align-items: center;
-}
-#authContainer { display: flex; gap: 8px; } /* Shown when logged out */
-#userProfileContainer { display: none; align-items: center; } /* Shown when logged in */
-
-.auth-button { /* Style for Login/Register/Logout buttons */
-  background-color: transparent; border: 1px solid var(--text-color-muted); color: var(--text-color-secondary); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: all 0.2s ease; white-space: nowrap;
-}
-.auth-button:hover { border-color: var(--link-color); color: var(--link-color); }
-#userProfileContainer span { /* User nickname display */
-  color: var(--text-color-primary); font-size: 0.9em; margin-right: 10px; white-space: nowrap;
-}
-#headerUserAvatar { /* Avatar shown in header */
-  width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; background-color: #eee; display: none; /* Hidden initially */ vertical-align: middle; object-fit: cover; border: 1px solid var(--border-color-secondary);
-}
-
-/* ===== Main Content Styles ===== */
-main {
-  padding: 30px 0;
-}
+/* ===== Main Content & Generic Section Styles ===== */
+main { padding: 30px 0; }
 main section {
-  width: 90%;
-  max-width: 960px;
-  margin: 40px auto;
-  padding: 25px 30px;
-  background-color: var(--surface-bg-primary); 
-  border: 1px solid var(--border-color-secondary); 
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  color: var(--text-color-secondary); 
-  transition: background-color 0.3s, border-color 0.3s;
+  width: 90%; max-width: 960px; margin: 40px auto; padding: 25px 30px;
+  background-color: var(--surface-bg-primary); border: 1px solid var(--border-color-secondary);
+  border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  color: var(--text-color-secondary); transition: background-color 0.3s, border-color 0.3s;
 }
-section#intro {
-  text-align: center;
-  background-color: transparent;
-  border: none;
-  box-shadow: none;
-}
-section#intro p {
- font-size: 1.15em;
- color: var(--text-color-secondary); 
- max-width: 700px;
- margin-left: auto;
- margin-right: auto;
-}
-main h2 {
-  font-size: 1.8em;
-  margin-bottom: 20px;
-  color: var(--heading-color); 
-  text-align: center;
-  border-bottom: 1px solid var(--border-color-primary); 
-  padding-bottom: 10px;
-  transition: color 0.3s, border-color 0.3s;
+main h2 { /* Titolo principale di una section */
+  font-size: 1.8em; margin-bottom: 20px; color: var(--heading-color);
+  text-align: center; border-bottom: 1px solid var(--border-color-primary);
+  padding-bottom: 10px; transition: color 0.3s, border-color 0.3s;
 }
 
-/* ===== Portfolio Section Styles (If you have one) ===== */
-.portfolio-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-.portfolio-header h2 { 
-  display: inline-block; 
-}
-.portfolio-header p {
-  color: var(--text-color-muted); 
-  font-size: 1em;
-  max-width: 600px;
-  margin: 10px auto 0 auto;
-}
-.portfolio-grid {
-  display: flex;
-  justify-content: space-around; 
-  flex-wrap: wrap;
-  gap: 25px;
-  margin-top: 20px;
-}
-.project {
-  background-color: var(--surface-bg-primary); 
-  border: 1px solid var(--border-color-primary); 
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-  text-align: left;
-  color: var(--text-color-secondary); 
-  flex: 1 1 300px; 
-  min-width: 280px; 
-  max-width: 350px; 
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
-}
-.project:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-.project img { 
-  width: 100%;
-  height: auto;
-  max-height: 180px; 
-  object-fit: cover;
-  border-radius: 4px; 
-  margin-bottom: 15px;
-}
-.project h3 {
-  color: var(--text-color-primary); 
-  margin-bottom: 10px;
-  font-size: 1.2em;
-  border: none; 
-  padding: 0; 
-  text-align: left; 
-}
-.project p {
-  font-size: 0.95em;
-  color: var(--text-color-muted); 
-  flex-grow: 1; 
-}
-
-/* ===== Skills Section Styles ===== */
-section#skills ul {
-  list-style-type: none;
-  padding: 0;
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-section#skills ul li {
-  background-color: var(--skill-badge-bg); 
-  color: var(--skill-badge-text); 
-  padding: 6px 14px;
-  border-radius: 15px;
-  font-size: 0.9em;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer; 
-}
-section#skills ul li:hover {
-  background-color: var(--skill-badge-hover-bg); 
-  color: var(--skill-badge-hover-text); 
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-section#skills ul li.active-skill {
-  background-color: var(--skill-badge-active-bg); 
-  color: var(--skill-badge-active-text); 
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-.skill-details-container { 
-  margin-top: 25px;
-  padding: 20px;
-  background-color: var(--skill-details-bg); 
-  border: 1px solid var(--skill-details-border); 
-  border-radius: 6px;
-  min-height: 70px; 
-  text-align: left;
-  color: var(--skill-details-text); 
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-  transition: all 0.3s ease-in-out;
-}
-.skill-details-container h3 {
-  color: var(--skill-details-heading); 
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.2em;
-}
-.skill-details-container p {
-  margin-bottom: 0;
-  font-size: 1em;
-  line-height: 1.6;
-}
-
-/* ===== Teammates Section Styles (If you have one) ===== */
-.teammates {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 25px;
-  margin-top: 20px;
-}
-.team-member {
-  background-color: var(--surface-bg-secondary); 
-  border: 1px solid var(--border-color-primary); 
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  color: var(--text-color-secondary); 
-  flex: 1 1 250px;
-  min-width: 200px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s, border-color 0.3s;
-}
-.team-member:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-}
-.team-member h3 {
-  color: var(--text-color-primary); 
-  margin-bottom: 10px;
-  font-size: 1.1em;
-  border: none; 
-  padding: 0;
-}
-.team-member p {
-  font-size: 0.9em;
-}
-.team-member img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 2px solid var(--border-color-teammate-avatar); 
-  margin: 0 auto 15px auto;
-  display: block;
-  transition: border-color 0.3s;
-}
-
-/* ===== Snake Game Section Styles ===== */
-#snake-game-section {
-  text-align: center; 
-}
-.game-ui-container {
-  display: block; 
-  margin: 15px auto 0 auto; 
-  max-width: 100%; 
-  padding: 0 10px; 
-}
-.game-details {
-  display: flex;
-  justify-content: space-between; 
-  align-items: center;
-  padding: 10px 0; 
-  margin-bottom: 15px;
-  font-size: 1em; 
-  color: var(--text-color-secondary);
-  max-width: 400px; 
-  margin-left: auto;
-  margin-right: auto;
-}
-.score-label, .highscore-label { font-weight: 500; }
-#currentScore, #highScore {
-  font-weight: bold;
-  color: var(--link-color); 
-  padding-left: 5px; 
-}
-
-#snakeCanvas {
-  display: block; 
-  margin: 0 auto 15px auto; 
-  border: 5px solid var(--surface-bg-secondary); 
-  border-radius: 10px; 
-  box-shadow: 0 0 15px rgba(0,0,0,0.2), 
-              inset 0 0 5px rgba(0,0,0,0.1); 
-  background-color: #2c3e50; 
-  max-width: 100%; 
-}
-body.dark-mode #snakeCanvas {
-  background-color: #222738; 
-  border-color: var(--surface-bg-primary); 
-  box-shadow: 0 0 15px rgba(0,0,0,0.5),
-              inset 0 0 8px rgba(0,0,0,0.3);
-}
-
-.game-button { 
-  background-color: var(--button-bg-primary);
-  color: var(--button-text-primary);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 1em;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 10px; 
-}
-.game-button:hover {
-  background-color: var(--button-hover-bg-primary);
-  transform: translateY(-1px); 
-}
-.game-button:active { transform: translateY(0px); }
-.game-instructions {
-  margin-top: 20px;
-  font-size: 0.9em;
-  color: var(--text-color-muted);
-}
-#highscore-input-container {
-  margin-top: 25px;
-  padding: 20px;
-  background-color: var(--surface-bg-secondary); 
-  border: 1px solid var(--border-color-primary);
-  border-radius: 6px;
-  text-align: center;
-  max-width: 400px; 
-  margin-left: auto;
-  margin-right: auto;
-}
-#highscore-input-container h3 {
-  color: var(--heading-color);
-  margin-bottom: 10px;
-  font-size: 1.3em;
-}
-#highscore-input-container p {
-  margin-bottom: 15px;
-  font-size: 0.95em;
-  color: var(--text-color-secondary);
-}
-#highscore-input-container input[type="text"] {
-  padding: 8px 12px;
-  border: 1px solid var(--border-color-primary);
-  border-radius: 4px;
-  background-color: var(--bg-color);
-  color: var(--text-color-primary);
-  font-size: 1em;
-  text-align: center;
-  text-transform: uppercase; 
-  width: 150px; 
-  margin-bottom: 15px;
-  display: block; 
-  margin-left: auto;
-  margin-right: auto;
-}
-#highscore-input-container input[type="text"]:focus {
-  outline: none;
-  border-color: var(--link-color);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); 
-}
-.leaderboard-container {
-  margin-top: 30px;
-  padding: 20px;
-  text-align: center;
-}
-.leaderboard-container h3 {
-  color: var(--heading-color);
-  margin-bottom: 15px;
-  font-size: 1.4em; 
-  border-bottom: 1px solid var(--border-color-secondary);
-  padding-bottom: 8px;
-  display: inline-block; 
-}
-#leaderboard-list {
-  list-style-type: decimal; 
-  padding-left: 20px; 
-  max-width: 350px; 
-  margin: 0 auto; 
-  text-align: left; 
-}
-#leaderboard-list li {
-  padding: 8px 0;
-  font-size: 1em;
-  color: var(--text-color-secondary);
-  border-bottom: 1px dashed var(--border-color-secondary); 
-  display: flex; 
-  justify-content: space-between; 
-}
-#leaderboard-list li:last-child { border-bottom: none; }
-#leaderboard-list li .player-name {
-  font-weight: 500;
-  color: var(--text-color-primary);
-  margin-right: 10px; 
-}
-#leaderboard-list li .player-score {
-  font-weight: bold;
-  color: var(--link-color);
-}
-
-/* Touch Controls for Snake Game */
-#touch-controls-container {
-  display: none; 
-  flex-direction: column; 
-  align-items: center; 
-  gap: 5px; 
-  margin-top: 20px;
-  user-select: none; 
-  -webkit-user-select: none; 
-  -ms-user-select: none; 
-}
-.touch-control-btn {
-  background-color: var(--button-bg-primary);
-  color: var(--button-text-primary);
-  border: 1px solid var(--border-color-primary);
-  border-radius: 8px; 
-  width: 60px;  
-  height: 60px;
-  font-size: 1.8em; 
-  font-weight: bold;
-  cursor: pointer;
-  margin: 5px; 
-  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-  display: flex; 
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent; 
-}
-.touch-control-btn:hover { 
-  background-color: var(--button-hover-bg-primary);
-}
-.touch-control-btn:active { 
-  transform: scale(0.95); 
-  background-color: var(--link-hover-color); 
-}
-.touch-controls-middle-row {
-  display: flex; 
-  justify-content: center; 
-  gap: 5px; 
-}
-body.touch-enabled .game-instructions {
-   font-size: 0.8em;
-   color: var(--text-color-muted);
-}
-
-/* Contact Section List Styling */
-section#contact ul {
-  list-style-type: none;
-  padding-left: 0;
-  margin-top: 15px;
-  text-align: center;
-}
+/* Specific Section Styles */
+section#intro { text-align: center; background-color: transparent; border: none; box-shadow: none;}
+section#intro p { font-size: 1.15em; color: var(--text-color-secondary); max-width: 700px; margin: 0 auto;}
+section#contact ul { list-style-type: none; padding-left: 0; margin-top: 15px; text-align: center;}
 section#contact li { margin-bottom: 10px; }
 
-/* ===== Footer Styles ===== */
-footer {
-  background-color: var(--surface-bg-secondary); 
-  padding: 25px;
-  border-top: 1px solid var(--border-color-primary); 
-  color: var(--text-color-muted); 
-  text-align: center;
-  margin-top: 40px;
-  font-size: 0.9em;
-  transition: background-color 0.3s, border-color 0.3s;
-}
-footer a { color: var(--link-color); }
 
-/* ===== Scroll to Top & Theme Toggle Button Styles ===== */
-#scrollToTopBtn {
-  display: none; 
-  position: fixed;
-  bottom: 20px;
-  right: 30px;
-  z-index: 99;
-  border: none;
-  background-color: var(--button-bg-primary); 
-  color: var(--button-text-primary); 
-  cursor: pointer;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  font-size: 20px;
-  line-height: 45px; 
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
+/* ===== Homepage Specific Styles (Portal, Articles on Home) ===== */
+.portal-header { /* Header per sezioni tipo portale o lista articoli */
+    text-align: center; padding: 40px 20px; background-color: var(--surface-bg-secondary);
+    border-bottom: 1px solid var(--border-color-primary); margin-bottom: 30px;
 }
-#scrollToTopBtn:hover { background-color: var(--button-hover-bg-primary); }
-#scrollToTopBtn.show { display: block; } 
+.portal-header h1 { /* Titolo H1 specifico del .portal-header */
+    font-family: "Space Grotesk", sans-serif; font-size: 2.8em;
+    color: var(--heading-color); margin-bottom: 10px;
+}
+.portal-header p { font-size: 1.2em; color: var(--text-color-secondary); max-width: 600px; margin: 0 auto; }
 
-#themeToggleBtn {
-  background: none;
-  border: 1px solid var(--border-color-primary);
-  color: var(--text-color-secondary);
-  padding: 8px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 1.2em; 
-  line-height: 1; 
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-  margin-left: 15px; 
+/* Placeholder per Immagine/Animazione Introduttiva Homepage */
+/*
+.intro-visual-container { text-align: center; }
+.intro-visual-item {
+    max-width: 500px; height: auto; display: block; margin: 20px auto 40px auto;
+    border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background-color: var(--surface-bg-secondary); border: 1px solid var(--border-color-secondary);
 }
-#themeToggleBtn:hover {
-  background-color: var(--surface-bg-secondary);
-  border-color: var(--link-color);
-  color: var(--link-color);
-}
-  
-/* ===== Responsive Design - Media Queries ===== */
-@media (max-width: 768px) { 
-  header { flex-direction: column; gap: 15px; padding: 15px 3%; }
-  header .header-content, header .header-controls { justify-content: center; width: 100%; }
-  header nav { margin-left: 0; }
-  main section { width: 95%; padding: 20px 15px; }
-  .project, .team-member { flex-basis: 45%; min-width: 250px; } 
-  h1, header h1 { font-size: 1.6em; }
-  main h2 { font-size: 1.5em; }
-  #snake-game-section h2 { font-size: 1.6em; }
-  #highscore-input-container { max-width: 90%; }
-  .leaderboard-container h3 { font-size: 1.3em; }
-  #leaderboard-list { max-width: 90%; }
-}
+*/
 
-@media (max-width: 576px) { 
-  body { font-size: 15px; }
-  header nav ul { gap: 10px; justify-content: center; }
-  header nav a { font-size: 0.95em; }
-  header .header-controls { gap: 15px; }
-  #themeToggleBtn { padding: 6px 10px; font-size: 1.1em; margin-left: 10px; }
-  main section { padding: 15px; margin: 25px auto; }
-  .project, .team-member { flex-basis: 90%; width: 90%; max-width: 400px; min-width: unset; } 
-  .portfolio-grid, .teammates { flex-direction: column; align-items: center; } 
-  h1, header h1 { font-size: 1.5em; }
-  main h2 { font-size: 1.4em; }
-  footer { font-size: 0.85em; }
-  #snake-game-section h2 { font-size: 1.4em; }
-  .game-details { font-size: 0.9em; padding: 8px 0; margin-bottom: 10px; }
-  .game-ui-container { padding: 0 5px; }
-  #highscore-input-container { padding: 15px; }
-  #highscore-input-container h3 { font-size: 1.2em; }
-  #highscore-input-container input[type="text"] { width: 120px; font-size: 0.9em; }
-  .game-button { padding: 8px 15px; font-size: 0.9em; }
-  .leaderboard-container { margin-top: 20px; padding: 15px 10px; }
-  .leaderboard-container h3 { font-size: 1.2em; }
-  #leaderboard-list li { font-size: 0.9em; padding: 6px 0; }
-  .game-instructions { font-size: 0.8em; margin-top: 15px; }
+.portal-grid { /* Griglia per card su homepage e griglia articoli */
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px; padding: 0 5% 30px 5%; max-width: 1200px; margin: 0 auto;
+}
+.portal-card { /* Stile base per card nel portale */
+    background-color: var(--surface-bg-primary); border: 1px solid var(--border-color-primary);
+    border-radius: 8px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex; flex-direction: column; justify-content: space-between;
+}
+.portal-card:hover { transform: translateY(-5px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+.portal-card img.card-icon { width: 60px; height: 60px; margin: 0 auto 15px auto; }
+.portal-card h3 { /* Titolo dentro una portal-card */
+    font-family: "Space Grotesk", sans-serif; font-size: 1.5em; color: var(--heading-color);
+    margin-bottom: 10px; border-bottom: none; padding-bottom: 0;
+}
+.portal-card p { color: var(--text-color-secondary); font-size: 1em; margin-bottom: 20px; flex-grow: 1; min-height: 60px; }
+.portal-card .btn-portal { /* Bottone specifico per portal-card */
+    display: inline-block; background-color: var(--link-color); color: var(--button-text-primary);
+    padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold;
+    transition: background-color 0.3s ease; border: none; cursor: pointer; align-self: center;
+}
+.portal-card .btn-portal:hover { background-color: var(--link-hover-color); }
+
+/* Mini Leaderboard (Homepage) */
+#homeMiniLeaderboardList { list-style-type: none; padding: 0; font-family: "Source Code Pro", monospace; font-size: 0.9em; text-align: left; }
+#homeMiniLeaderboardList li { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border-color-secondary); }
+#homeMiniLeaderboardList li:last-child { border-bottom: none; }
+#homeMiniLeaderboardList .player-rank { margin-right: 8px; font-weight: bold; min-width: 15px; }
+#homeMiniLeaderboardList .player-avatar { width: 24px; height: 24px; border-radius: 3px; margin-right: 8px; background-color: #eee; image-rendering: pixelated; }
+#homeMiniLeaderboardList .player-info { flex-grow: 1; display: flex; align-items: center; }
+#homeMiniLeaderboardList .player-name { font-weight: bold; color: var(--text-color-primary); margin-right: auto; display: flex; align-items: center; }
+#homeMiniLeaderboardList .player-name .fi { margin-right: 5px; vertical-align: middle; }
+#homeMiniLeaderboardList .player-score { font-weight: bold; color: var(--link-color); }
+
+/* Banner Glitchzilla (Homepage) */
+.glitchzilla-banner {
+    background-color: var(--surface-bg-secondary); color: var(--text-color-secondary);
+    padding: 12px 20px; text-align: center; margin: 0 auto 30px auto;
+    border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); max-width: 90%;
+    /* display: none; gestito da JS */
+}
+.glitchzilla-banner p { margin: 0; font-size: 1.1em; font-family: "Source Code Pro", monospace; }
+.glitchzilla-banner .glitch-text-effect,
+.glitchzilla-banner .player-name-highlight {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 8px currentColor;
+    animation: cambio-colore-neon 1.5s infinite steps(1, end);
+    font-weight: bold;
 }
 
-@media (max-width: 480px) { 
-  .touch-control-btn {
-    width: 50px; 
-    height: 50px;
-    font-size: 1.5em; 
-    margin: 3px; 
-  }
-  #touch-controls-container { gap: 3px; }
-  .touch-controls-middle-row { gap: 3px; }
+/* Sezione Griglia Articoli (Homepage) */
+#articlesSection { padding: 20px 0; /* display: none; gestito da JS */ }
+#articlesSection .portal-header { margin-bottom: 20px; }
+/* #articlesGrid eredita da .portal-grid */
+
+.article-card { /* Card singola articolo (usata in #articlesGrid) */
+    background-color: var(--surface-bg-primary); border: 1px solid var(--border-color-primary);
+    border-radius: 8px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+    text-align: left; display: flex; flex-direction: column; justify-content: space-between;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.article-card:hover { transform: translateY(-4px); box-shadow: 0 5px 14px rgba(0,0,0,0.1); }
+.article-card h4 { font-size: 1.3em; color: var(--heading-color); margin-top: 0; margin-bottom: 8px; }
+.article-card .article-meta {
+    font-size: 0.85em; color: var(--text-color-muted); margin-bottom: 12px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 5px 15px;
+}
+.article-card .article-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.article-card .article-tag {
+    background-color: var(--surface-bg-secondary); color: var(--text-color-secondary);
+    padding: 4px 10px; border-radius: 15px; font-size: 0.8em; font-weight: 500;
+    white-space: nowrap; transition: background-color 0.2s, color 0.2s;
+}
+.article-card .article-tag:hover { background-color: var(--link-color); color: var(--button-text-primary); }
+.article-card .article-snippet { font-size: 0.95em; color: var(--text-color-secondary); margin-bottom: 10px; flex-grow: 1; line-height: 1.6; }
+.article-card .article-stats {
+    display: flex; gap: 15px; margin-top: 10px; margin-bottom: 12px;
+    padding-top: 10px; border-top: 1px dashed var(--border-color-secondary);
+}
+.article-stat-badge {
+    display: flex; align-items: center; font-size: 0.85em; color: var(--text-color-muted);
+    background-color: var(--surface-bg-secondary); padding: 4px 8px; border-radius: 15px;
+    transition: color 0.2s, background-color 0.2s;
+}
+.article-stat-badge:hover { color: var(--link-hover-color); }
+.article-stat-badge .stat-icon { margin-right: 5px; font-size: 0.9em; }
+.article-stat-badge .stat-count { font-weight: 500; color: var(--text-color-secondary); }
+.article-card .btn-read-more {
+    display: inline-block; background-color: transparent; color: var(--link-color);
+    padding: 8px 0; text-decoration: none; font-weight: bold;
+    transition: color 0.3s ease; border: none; align-self: flex-start; margin-top: auto;
+}
+.article-card .btn-read-more:hover { color: var(--link-hover-color); text-decoration: underline; }
+
+/* Card Articolo in Evidenza (Homepage) */
+#featuredArticleCard { text-align: left; /* display: none; gestito da JS */ }
+#featuredArticleCard .card-icon { margin-left: 0; margin-right: auto; margin-bottom: 10px; }
+#featuredArticleCard > h3 { text-align: left; font-size: 1.6em; }
+#featuredArticleCard #featuredArticleActualTitle {
+    font-size: 1.3em; color: var(--text-color-primary); display: block;
+    margin-top: 5px; margin-bottom: 10px; font-weight: bold;
+}
+#featuredArticleCard .btn-portal { align-self: flex-start; } /* Sovrascrive .portal-card .btn-portal */
+
+
+/* ===== Pagina Visualizzazione Articolo Singolo (view-article.html) ===== */
+#articleDisplaySection { /* Eredita da main section, qui eventuali override */
+    padding: 25px 30px; /* Consistenza con altre sezioni */
+}
+#articleDisplayHeader {
+    border-bottom: 1px solid var(--border-color-secondary);
+    margin-bottom: 20px; /* Leggermente ridotto da 25px */
+    padding-top: 8px;    /* Riduci un po' se era 10px o più, o prova un valore piccolo */
+    padding-bottom: 12px; /* Riduci un po' per compattare */
 }
 
-/* ===== Guestbook Section Styles ===== */
-section#guestbook { text-align: left; }
-
-#commentForm {
-  background-color: var(--surface-bg-secondary);
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  max-width: 600px; /* Limita la larghezza del form */
-  margin-left: auto;
-  margin-right: auto;
+#articleDisplayTitle { /* h1 del titolo articolo */
+    font-size: 2.2em;
+    color: var(--heading-color);
+    margin-top: 0; 
+    margin-bottom: 8px; /* Leggermente ridotto da 10px */
+    line-height: 1.25;  /* Leggermente ridotta per compattare verticalmente */
+    white-space: normal !important; /* Assicura che il testo possa andare a capo */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
-#commentForm div {
-  margin-bottom: 15px;
+#articleDisplayMeta {
+    font-size: 0.9em;
+    color: var(--text-color-muted);
+    margin-bottom: 15px; /* Leggermente ridotto da 20px */
 }
-
-#commentForm label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: var(--text-color-primary);
+#articleDisplayMeta .meta-item { margin-right: 15px; display: inline-block; margin-bottom: 5px;}
+#articleDisplayMeta .meta-item .fi { margin-right: 5px; vertical-align: middle; }
+#articleDisplayMeta .article-tags-display .article-tag {
+    background-color: var(--surface-bg-secondary); color: var(--text-color-secondary); padding: 3px 8px;
+    border-radius: 12px; font-size: 0.9em; margin-right: 5px; margin-bottom: 5px; display: inline-block;
 }
+#articleDisplayContent { font-size: 1.05em; line-height: 1.7; color: var(--text-color-secondary); }
+#articleDisplayContent h1, #articleDisplayContent h2, #articleDisplayContent h3 { color: var(--heading-color); margin-top: 1.8em; margin-bottom: 0.8em; border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 0.3em; }
+#articleDisplayContent h1 { font-size: 1.8em; } #articleDisplayContent h2 { font-size: 1.5em; } #articleDisplayContent h3 { font-size: 1.3em; }
+#articleDisplayContent p { margin-bottom: 1.2em; }
+#articleDisplayContent a { color: var(--link-color); text-decoration: underline; }
+#articleDisplayContent a:hover { color: var(--link-hover-color); }
+#articleDisplayContent ul, #articleDisplayContent ol { margin-left: 20px; margin-bottom: 1.2em; }
+#articleDisplayContent li { margin-bottom: 0.5em; }
+#articleDisplayContent blockquote { border-left: 3px solid var(--link-color); padding-left: 15px; margin: 0 0 1.2em 0; font-style: italic; color: var(--text-color-muted); }
+#articleDisplayContent pre { background-color: var(--surface-bg-secondary); border: 1px solid var(--border-color-secondary); padding: 15px; border-radius: 6px; overflow-x: auto; font-family: "Source Code Pro", monospace; font-size: 0.95em; }
+#articleDisplayContent code { background-color: var(--surface-bg-secondary); padding: 0.2em 0.4em; border-radius: 3px; font-family: "Source Code Pro", monospace; font-size: 0.9em; }
+#articleDisplayContent pre code { padding: 0; background-color: transparent; border-radius: 0; font-size: inherit; }
+#articleDisplayContent img { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; display: block; }
+#articleInteractions { max-width: 800px; margin: 30px auto 20px auto; padding: 0 20px; /* display: none; gestito da JS */ }
+#articleInteractions h3 { margin-bottom: 15px; font-size: 1.4em; }
+#articleLikesContainer, #articleCommentsSection { margin-bottom: 20px; }
+.back-to-home-link { display: block; text-align: center; margin-top: 30px; margin-bottom: 20px; }
+.back-to-home-link a { color: var(--link-color); text-decoration: none; padding: 8px 15px; border: 1px solid var(--link-color); border-radius: 20px; transition: background-color 0.2s, color 0.2s; }
+.back-to-home-link a:hover { background-color: var(--link-color); color: var(--button-text-primary); text-decoration: none;}
 
-#commentForm input[type="text"],
-#commentForm textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--border-color-primary);
-  border-radius: 4px;
-  background-color: var(--bg-color); /* Sfondo input coerente con il tema */
-  color: var(--text-color-primary); /* Testo input coerente */
-  font-size: 1em;
-  font-family: inherit;
+
+/* ===== Skills Section Styles (Pagina About) ===== */
+section#skills ul.skills-grid { list-style-type: none; padding: 0; margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; justify-content: center; }
+section#skills li.skill-card {
+  background-color: var(--surface-bg-secondary); color: var(--text-color-secondary); padding: 12px;
+  border-radius: 6px; font-size: 0.9em; font-weight: 500; text-align: center;
+  border: 1px solid var(--border-color-secondary); box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+  transition: all 0.2s ease-in-out; cursor: pointer; min-height: 70px;
+  display: flex; align-items: center; justify-content: center; overflow-wrap: break-word; word-wrap: break-word;
 }
-
-#commentForm input[type="text"]:focus,
-#commentForm textarea:focus {
-  outline: none;
-  border-color: var(--link-color);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Simile al focus del gioco */
+section#skills li.skill-card:hover { background-color: var(--skill-badge-hover-bg); color: var(--skill-badge-hover-text); transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+section#skills li.skill-card.active-skill { background-color: var(--skill-badge-active-bg); color: var(--skill-badge-active-text); border-color: var(--link-color); transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.15), 0 0 0 2px var(--link-color); }
+.skill-details-container {
+  margin-top: 30px; padding: 20px; background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-primary); border-radius: 6px; min-height: 70px;
+  text-align: left; color: var(--skill-details-text); box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.3s ease-in-out;
 }
-
-#commentForm button[type="submit"] {
-  /* Usa la classe .game-button se vuoi lo stesso stile dei bottoni del gioco */
-  /* Altrimenti definisci uno stile specifico qui */
-  display: block; /* Rende il bottone a larghezza piena se necessario */
-  margin-top: 10px;
-}
-
-#commentsListContainer h3 {
-  color: var(--heading-color);
-  margin-bottom: 15px;
-  text-align: center; /* O left */
-}
-
-#commentsList { max-width: 700px; margin: 0 auto; }
-
-.comment-item {
-  display: flex;
-  align-items: flex-start; /* Align avatar top */
-  gap: 12px; /* Slightly more gap */
-  background-color: var(--surface-bg-primary);
-  border: 1px solid var(--border-color-secondary);
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-img.comment-avatar-img { /* Style for DiceBear <img> */
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: 4px; /* For identicon style */
-  overflow: hidden;
-  background-color: #eee; /* Placeholder bg */
-  image-rendering: pixelated; /* Crisp pixels */
-  border: 1px solid var(--border-color-primary); /* Optional subtle border */
-}
-
-.comment-avatar { /* Stile per il DIV contenitore del canvas */
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: 4px; /* Optional */
-  overflow: hidden; /* Importante per contenere il canvas */
-  background-color: #eee; /* Sfondo placeholder */
-  display: flex; /* Per centrare placeholder '?' se necessario */
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: #aaa;
-}
-
-.comment-avatar canvas { /* Stile per il canvas generato */
-  display: block; /* Rimuove spazio extra sotto il canvas */
-  width: 100%; /* Adatta il canvas al contenitore */
-  height: 100%;
-  /* image-rendering: pixelated; */ /* Potrebbe non essere necessario o applicabile direttamente qui */
-}
-
-.comment-content { flex-grow: 1; }
+.skill-details-container h3 { color: var(--heading-color); margin-top: 0; margin-bottom: 10px; font-size: 1.3em; }
+.skill-details-container p { margin-bottom: 0; font-size: 1.05em; line-height: 1.7; }
 
 
-.comment-item strong { color: var(--text-color-primary); font-size: 1.05em; }
-.comment-item .comment-date { color: var(--text-color-muted); font-size: 0.85em; margin-left: 5px; }
-.comment-item p { margin-top: 5px; margin-bottom: 8px; color: var(--text-color-secondary); line-height: 1.5; word-wrap: break-word; }
-.likes-container { margin-top: 8px; display: flex; align-items: center; }
-
-.like-btn {
-  background-color: transparent;
-  border: 1px solid var(--link-color);
-  color: var(--link-color);
-  padding: 5px 8px;
-  border-radius: 20px; /* Più arrotondato */
-  cursor: pointer;
-  font-size: 0.9em;
-  transition: background-color 0.2s, color 0.2s;
-  margin-right: 8px;
-}
-
-.like-btn:hover {
-  background-color: var(--link-color);
-  color: var(--button-text-primary); /* Testo bianco su sfondo colorato */
-}
-
-.like-btn.liked { /* Stile per quando è già piaciuto */
-  background-color: var(--link-hover-color); /* Un colore che indica "piaciuto" */
-  color: var(--button-text-primary);
-  border-color: var(--link-hover-color);
-  cursor: default;
-}
-
-.like-btn:disabled { /* Stile generale per disabilitato, inclusi i liked */
-  opacity: 0.7;
-  cursor: default;
-}
-
-
-.like-count {
-  font-size: 0.9em;
-  color: var(--text-color-secondary);
-}
-
-/* ===== Stili per Autenticazione (Modali e bottoni Header) ===== */
-.modal {
-  display: none; /* Nascosto di default */
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.6);
-}
-
-.modal-content {
-  background-color: var(--surface-bg-primary);
-  margin: 10% auto;
-  padding: 25px;
-  border: 1px solid var(--border-color-secondary);
-  border-radius: 8px;
-  width: 90%;
-  max-width: 450px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  position: relative;
-}
-
-.modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: var(--heading-color);
-  text-align: center;
-}
-
-.modal-content div {
-  margin-bottom: 15px;
-}
-
-.modal-content label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: var(--text-color-primary);
-}
-
-.modal-content input[type="email"],
-.modal-content input[type="password"] {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--border-color-primary);
-  border-radius: 4px;
-  background-color: var(--bg-color);
-  color: var(--text-color-primary);
-  font-size: 1em;
-  font-family: inherit;
-}
-
-.modal-content input[type="email"]:focus,
-.modal-content input[type="password"]:focus {
-  outline: none;
-  border-color: var(--link-color);
-  box-shadow: 0 0 0 2px rgba(var(--link-color-rgb, 0, 123, 255), 0.25); /* Fallback per rgb se non definito */
-}
-/* Aggiungi questa variabile se non l'hai per il box-shadow focus */
-:root {
-    --link-color-rgb: 0, 123, 255; /* Valori RGB di #007bff */
-}
-body.dark-mode {
-    --link-color-rgb: 100, 181, 246; /* Valori RGB di #64b5f6 */
-}
-
-
-.modal-content button.game-button[type="submit"] { /* Specificità per i bottoni nei modali */
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-}
-
-.closeLoginBtn, .closeSignupBtn {
-  color: var(--text-color-muted);
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-  line-height: 1;
-}
-.closeLoginBtn:hover, .closeSignupBtn:hover {
-  color: var(--text-color-primary);
-}
-
-/* Bottoni Auth nell'Header */
-.auth-button {
-  background-color: transparent;
-  border: 1px solid var(--text-color-muted);
-  color: var(--text-color-secondary);
-  padding: 6px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9em;
-  margin-left: 8px; /* Spazio tra i bottoni */
-  transition: all 0.2s ease;
-}
-.auth-button:hover {
-  border-color: var(--link-color);
-  color: var(--link-color);
-}
-
-#userProfileContainer span {
-  color: var(--text-color-primary);
-  font-size: 0.9em;
-}
-
-/* Responsive per i controlli auth nell'header */
-@media (max-width: 768px) {
-  header { flex-direction: column; gap: 10px; }
-  header .header-content { width: 100%; justify-content: center;}
-  header .header-controls { width: 100%; flex-direction: column; gap: 10px; margin-top: 10px;}
-  #authSection { margin-top: 10px; }
-  main section { width: 95%; padding: 20px 15px; }
-  h1, header h1 { font-size: 1.6em; }
-  main h2 { font-size: 1.5em; }
-}
-
-@media (max-width: 576px) {
-  body { font-size: 15px; }
-  header nav ul { gap: 10px; justify-content: center; }
-  header nav a { font-size: 0.95em; }
-  h1, header h1 { font-size: 1.5em; }
-  main h2 { font-size: 1.4em; }
-  footer { font-size: 0.85em; }
-  /* ... (other mobile styles remain) ... */
-}
-
-section#profile { max-width: 600px; margin: 40px auto; padding: 25px 30px; background-color: var(--surface-bg-primary); border: 1px solid var(--border-color-secondary); border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); color: var(--text-color-secondary); }
-section#profile h2, section#profile h3 { text-align: center; color: var(--heading-color); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color-primary); }
-section#profile h3 { margin-top: 30px; font-size: 1.5em; }
+/* ===== Sezione Profilo Utente (profile.html) ===== */
+section#profile { max-width: 600px; /* Eredita altri stili da main section */ }
+section#profile h3 { margin-top: 30px; font-size: 1.5em; /* Eredita da main h2 */ }
 #profileDetailsDisplay p { margin-bottom: 10px; font-size: 1.05em; }
 #profileDetailsDisplay strong { color: var(--text-color-primary); }
 #profileUpdateForm div { margin-bottom: 20px; }
@@ -961,637 +385,228 @@ section#profile h3 { margin-top: 30px; font-size: 1.5em; }
 #profileUpdateForm input[type="text"]:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25); }
 #profileUpdateForm button[type="submit"].game-button { display: block; width: 100%; margin-top: 10px; }
 #profileMessage { text-align: center; font-weight: bold; margin-top: 20px; }
-#profileAvatar { /* Style for profile page avatar */ image-rendering: pixelated; }
-
-/* Styles for future Avatar Selection */
-.avatar-gallery {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px; /* Slightly more gap */
-  margin-top: 10px;
-  justify-content: center; /* Center avatars */
-}
-.avatar-option {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 3px solid transparent; /* Thicker border */
-  cursor: pointer;
-  transition: border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
-  object-fit: cover; /* Ensure avatar images fit well */
-}
-.avatar-option:hover {
-  border-color: var(--text-color-muted);
-  transform: scale(1.05); /* Slight zoom on hover */
-}
-.avatar-option.selected {
-  border-color: var(--link-color);
-  box-shadow: 0 0 8px rgba(var(--link-color-rgb, 0, 123, 255), 0.5); /* Glow effect */
-  transform: scale(1.1);
-}
-
-/* ===== Donkey Runner Game Page Styles ===== */
-body.donkey-runner-page {
-    --game-border-color: #00b9be; /* Blu elettronico primario */
-    --game-ground-line-color: #00b9be; /* Stesso colore per la linea di terra */
-    --game-button-bg: rgba(0, 50, 80, 0.6); /* Sfondo pulsanti più scuro e trasparente */
-    --game-button-text: #c4f0c2; /* Testo verde chiaro per contrasto */
-    --game-button-border: #5ab9a8; /* Bordo verde acqua/bluastro */
-    --game-button-active-bg: rgba(0, 70, 100, 0.8);
-
-    /* Sovrascrive lo sfondo del body per la pagina del gioco se necessario,
-       altrimenti eredita da :root o body.dark-mode */
-    background-color: var(--bg-color); /* Eredita lo sfondo del tema */
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Assicura che il footer stia in basso */
-}
-
-.donkey-runner-page header .header-content h1 {
-    font-size: 1.8em; /* Dimensione titolo specifica per la pagina gioco */
-    color: var(--heading-color);
-}
-
-/* Rende il main flessibile per spingere il footer in basso */
-.donkey-runner-page main {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Centra il gameContainer verticalmente se c'è spazio */
-    align-items: center;
-    padding: 20px 5%; /* Padding laterale */
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.donkey-runner-page #gameContainer {
-    position: relative;
-    width: 100%;
-    max-width: 800px; /* Max larghezza del gioco */
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    margin-top: 20px; 
-    margin-bottom: 20px; 
-}
+#profileAvatar { image-rendering: pixelated; }
+#profileNationality .fi { display: inline-block; width: 1.33333333em; height: 1em; line-height: 1em; vertical-align: -0.15em; background-size: contain; background-position: 50%; background-repeat: no-repeat; }
 
 
-.donkey-runner-page canvas#gameCanvas {
-    display: block;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-crisp-edges;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    width: 100%; 
-    height: auto; 
-    max-height: calc(100vh - 220px);
-    border: 3px solid var(--game-border-color, #0b8a8f); /* Usa PALETTE.BORDER_LINE_COLOR */
-    border-radius: 8px;
-    /* Usa i valori RGB della palette per l'ombra, se vuoi. Esempio con BORDER_LINE_COLOR */
-    /* Per #0b8a8f -> rgba(11, 138, 143, 0.5) */
-    box-shadow: 0 0 15px rgba(11, 138, 143, 0.5); 
+/* ===== Componenti Riutilizzabili (Form Commenti, Lista Commenti, Modali) ===== */
+/* Form Commenti (usato per Guestbook e Articoli) */
+.comment-form-container {
+  background-color: var(--surface-bg-secondary); padding: 20px; border-radius: 8px;
+  margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto;
+}
+.comment-form-container div { margin-bottom: 15px; }
+.comment-form-container label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-color-primary); }
+.comment-form-container input[type="text"],
+.comment-form-container textarea {
+  width: 100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px;
+  background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;
+}
+.comment-form-container input[type="text"]:focus,
+.comment-form-container textarea:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.25); }
+.comment-form-container button[type="submit"].game-button { display: block; margin-top: 10px; } /* Usa .game-button se vuoi lo stesso stile */
+
+/* Lista Commenti (usato per Guestbook e Articoli) */
+.comments-list-section h3 { color: var(--heading-color); margin-bottom: 15px; text-align: center; }
+.comments-list { max-width: 700px; margin: 0 auto; }
+.comment-item {
+  display: flex; align-items: flex-start; gap: 12px; background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-secondary); padding: 15px; border-radius: 6px;
+  margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+img.comment-avatar-img { width: 40px; height: 40px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background-color: #eee; image-rendering: pixelated; border: 1px solid var(--border-color-primary); }
+.comment-content { flex-grow: 1; }
+.comment-item strong { color: var(--text-color-primary); font-size: 1.05em; } /* Nome utente */
+.comment-item .comment-date { color: var(--text-color-muted); font-size: 0.85em; margin-left: 5px; }
+.comment-item p { margin-top: 5px; margin-bottom: 8px; color: var(--text-color-secondary); line-height: 1.5; word-wrap: break-word; }
+.likes-container { margin-top: 8px; display: flex; align-items: center; }
+.like-btn { background-color: transparent; border: 1px solid var(--link-color); color: var(--link-color); padding: 5px 8px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s, color 0.2s; margin-right: 8px; }
+.like-btn:hover { background-color: var(--link-color); color: var(--button-text-primary); }
+.like-btn.liked { background-color: var(--link-hover-color); color: var(--button-text-primary); border-color: var(--link-hover-color); cursor: default; }
+.like-btn:disabled { opacity: 0.7; cursor: default; }
+.like-count { font-size: 0.9em; color: var(--text-color-secondary); }
+
+/* Modali (Login/Signup) */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
+.modal-content { background-color: var(--surface-bg-primary); margin: 10% auto; padding: 25px; border: 1px solid var(--border-color-secondary); border-radius: 8px; width: 90%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; }
+.modal-content h3 { margin-top: 0; margin-bottom: 20px; color: var(--heading-color); text-align: center; }
+.modal-content div { margin-bottom: 15px; }
+.modal-content label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-color-primary); }
+.modal-content input[type="email"], .modal-content input[type="password"], .modal-content input[type="text"], .modal-content select {
+  width: 100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px;
+  background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;
+}
+.modal-content input:focus, .modal-content select:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.25); }
+.modal-content button.game-button[type="submit"] { display: block; width: 100%; margin-top: 10px; }
+.closeLoginBtn, .closeSignupBtn { color: var(--text-color-muted); position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
+.closeLoginBtn:hover, .closeSignupBtn:hover { color: var(--text-color-primary); }
+
+
+/* ===== Donkey Runner Game Page Specific Styles ===== */
+/* body.donkey-runner-page è già definito con le variabili --game-* */
+.donkey-runner-page header .header-content h1 { font-size: 1.8em; } /* Già presente, ok */
+.donkey-runner-page main { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px 5%; width: 100%; box-sizing: border-box; }
+.donkey-runner-page #gameContainer { position: relative; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
+.donkey-runner-page canvas#gameCanvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; width: 100%; height: auto; max-height: calc(100vh - 220px); border: 3px solid var(--game-border-color); border-radius: 8px; box-shadow: 0 0 15px rgba(var(--game-border-color-rgb), 0.5); }
+.donkey-runner-page #mobileControls { display: none; width: 100%; padding: 10px 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; position: absolute; bottom: 10px; left: 0; z-index: 10; }
+.donkey-runner-page #mobileControlsInternal { display: flex; justify-content: space-around; align-items: center; width: 90%; max-width: 400px; margin: 0 auto; }
+.donkey-runner-page .control-button { background-color: var(--game-button-bg); color: var(--game-button-text); border: 2px solid var(--game-button-border); border-radius: 10px; padding: 15px 20px; font-size: 1.3em; font-weight: bold; font-family: "Source Code Pro", monospace; cursor: pointer; outline: none; flex-grow: 0; flex-basis: 45%; margin: 0 5px; text-align: center; transition: background-color 0.2s, border-color 0.2s, transform 0.1s; }
+.donkey-runner-page .control-button:active { background-color: var(--game-button-active-bg); transform: scale(0.95); }
+.donkey-runner-page #fullscreenButton { background-color: var(--surface-bg-secondary); color: var(--text-color-secondary); border: 1px solid var(--border-color-primary); border-radius: 20px; padding: 8px 12px; font-size: 0.9em; font-family: "Source Code Pro", monospace; cursor: pointer; position: absolute; top: 10px; right: 10px; z-index: 20; display: none; transition: background-color 0.2s, color 0.2s; }
+.donkey-runner-page #fullscreenButton:hover { background-color: var(--link-hover-color); color: var(--button-text-primary); }
+.donkey-runner-page #miniLeaderboardContainer { color: var(--text-color-secondary); background-color: var(--surface-bg-secondary); padding: 15px; border-radius: 8px; margin: 20px auto; max-width: 400px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.donkey-runner-page #miniLeaderboardContainer h3 { color: var(--heading-color); margin-top: 0; margin-bottom: 10px; font-size: 1.2em; text-align: center; border-bottom: 1px solid var(--border-color-primary); padding-bottom: 5px; }
+.donkey-runner-page #miniLeaderboardList { list-style-type: none; padding: 0; font-family: "Source Code Pro", monospace; }
+.donkey-runner-page #miniLeaderboardList li { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border-color-secondary); font-size: 0.9em; }
+.donkey-runner-page #miniLeaderboardList li:last-child { border-bottom: none; }
+.donkey-runner-page #miniLeaderboardList .player-rank { margin-right: 10px; font-weight: bold; min-width: 20px; }
+.donkey-runner-page #miniLeaderboardList .player-avatar { width: 30px; height: 30px; border-radius: 4px; margin-right: 10px; background-color: #eee; image-rendering: pixelated; }
+.donkey-runner-page #miniLeaderboardList .player-info { flex-grow: 1; display: flex; flex-direction: column; }
+.donkey-runner-page #miniLeaderboardList .player-name { font-weight: bold; color: var(--text-color-primary); display: flex; align-items: center;}
+.donkey-runner-page #miniLeaderboardList .player-name .fi { margin-right: 5px; vertical-align: middle; }
+.donkey-runner-page #miniLeaderboardList .player-date { font-size: 0.8em; color: var(--text-color-muted); }
+.donkey-runner-page #miniLeaderboardList .player-score { font-weight: bold; color: var(--link-color); font-size: 1.1em; }
+.donkey-runner-page footer { /* Eredita da footer generale, può essere rimosso se identico */ }
+
+
+/* ===== Componenti Generici (Bottoni, ecc.) ===== */
+.game-button { /* Stile base per bottoni "gioco" usati anche nei form */
+  background-color: var(--button-bg-primary); color: var(--button-text-primary);
+  border: none; padding: 10px 20px; border-radius: 5px; font-size: 1em;
+  font-weight: 500; cursor: pointer; transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+  text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px;
+}
+.game-button:hover { background-color: var(--button-hover-bg-primary); transform: translateY(-1px); }
+.game-button:active { transform: translateY(0px); }
+
+/* Stile per Snake Game (se ancora rilevante o da separare) */
+#snake-game-section { text-align: center; }
+.game-ui-container { display: block; margin: 15px auto 0 auto; max-width: 100%; padding: 0 10px; }
+.game-details { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 15px; font-size: 1em; color: var(--text-color-secondary); max-width: 400px; margin-left: auto; margin-right: auto; }
+.score-label, .highscore-label { font-weight: 500; }
+#currentScore, #highScore { font-weight: bold; color: var(--link-color); padding-left: 5px; }
+#snakeCanvas { display: block; margin: 0 auto 15px auto; border: 5px solid var(--surface-bg-secondary); border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2), inset 0 0 5px rgba(0,0,0,0.1); background-color: #2c3e50; max-width: 100%; }
+body.dark-mode #snakeCanvas { background-color: #222738; border-color: var(--surface-bg-primary); box-shadow: 0 0 15px rgba(0,0,0,0.5), inset 0 0 8px rgba(0,0,0,0.3); }
+.game-instructions { margin-top: 20px; font-size: 0.9em; color: var(--text-color-muted); }
+#highscore-input-container { margin-top: 25px; padding: 20px; background-color: var(--surface-bg-secondary); border: 1px solid var(--border-color-primary); border-radius: 6px; text-align: center; max-width: 400px; margin-left: auto; margin-right: auto; }
+#highscore-input-container h3 { color: var(--heading-color); margin-bottom: 10px; font-size: 1.3em; }
+#highscore-input-container p { margin-bottom: 15px; font-size: 0.95em; color: var(--text-color-secondary); }
+#highscore-input-container input[type="text"] { padding: 8px 12px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; text-align: center; text-transform: uppercase; width: 150px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
+#highscore-input-container input[type="text"]:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); }
+.leaderboard-container { margin-top: 30px; padding: 20px; text-align: center; } /* Per Snake Leaderboard */
+.leaderboard-container h3 { color: var(--heading-color); margin-bottom: 15px; font-size: 1.4em; border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; display: inline-block; }
+#leaderboard-list { list-style-type: decimal; padding-left: 20px; max-width: 350px; margin: 0 auto; text-align: left; } /* Per Snake Leaderboard */
+#leaderboard-list li { padding: 8px 0; font-size: 1em; color: var(--text-color-secondary); border-bottom: 1px dashed var(--border-color-secondary); display: flex; justify-content: space-between; }
+#leaderboard-list li:last-child { border-bottom: none; }
+#leaderboard-list li .player-name { font-weight: 500; color: var(--text-color-primary); margin-right: 10px; }
+#leaderboard-list li .player-score { font-weight: bold; color: var(--link-color); }
+#touch-controls-container { display: none; flex-direction: column; align-items: center; gap: 5px; margin-top: 20px; user-select: none; -webkit-user-select: none; -ms-user-select: none; }
+.touch-control-btn { background-color: var(--button-bg-primary); color: var(--button-text-primary); border: 1px solid var(--border-color-primary); border-radius: 8px; width: 60px; height: 60px; font-size: 1.8em; font-weight: bold; cursor: pointer; margin: 5px; transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+.touch-control-btn:hover { background-color: var(--button-hover-bg-primary); }
+.touch-control-btn:active { transform: scale(0.95); background-color: var(--link-hover-color); }
+.touch-controls-middle-row { display: flex; justify-content: center; gap: 5px; }
+body.touch-enabled .game-instructions { font-size: 0.8em; color: var(--text-color-muted); }
+
+
+/* ===== Utilities (Scroll-to-top, Theme Toggle Button) ===== */
+#scrollToTopBtn {
+  display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99;
+  border: none; background-color: var(--button-bg-primary); color: var(--button-text-primary);
+  cursor: pointer; width: 45px; height: 45px; border-radius: 50%;
+  font-size: 20px; line-height: 45px; text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
+}
+#scrollToTopBtn:hover { background-color: var(--button-hover-bg-primary); }
+#scrollToTopBtn.show { display: block; }
+
+#themeToggleBtn { /* Unico stile per il bottone tema, usato nell'header */
+  background: none; border: 1px solid var(--border-color-primary);
+  color: var(--text-color-secondary); padding: 6px 10px; /* Era 8px 12px, reso più piccolo come negli altri bottoni header */
+  border-radius: 20px; cursor: pointer; font-size: 1.1em; /* Era 1.2em */
+  line-height: 1; transition: all 0.3s; /* Era background-color 0.3s, color 0.3s, border-color 0.3s */
+  /* margin-left: 15px; Rimosso, il gap è gestito da .header-controls */
+}
+#themeToggleBtn:hover { background-color: var(--surface-bg-secondary); border-color: var(--link-color); color: var(--link-color); }
+
+
+/* ===== Testo Neon Arcade (usato in index.html e .glitchzilla-banner) ===== */
+.testo-neon-arcade { /* Usato nella card gioco in index.html */
+  font-size: 1.5em; text-align: center; padding: 0.5rem; margin-top: 10px;
+  border-width: 2px; border-style: solid;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px currentColor;
+  animation: cambio-colore-neon 1.5s infinite steps(1, end); /* Usa l'animazione globale */
 }
 
 
-/* Stili per i controlli già in donkeyRunner.html, qui per centralizzazione o override */
-/* .donkey-runner-page #mobileControls { ... } */
-/* .donkey-runner-page .control-button { ... } */
-/* .donkey-runner-page #fullscreenButton { ... } */
+/* ===== Footer Styles ===== */
+footer {
+  background-color: var(--surface-bg-secondary); padding: 25px;
+  border-top: 1px solid var(--border-color-primary); color: var(--text-color-muted);
+  text-align: center; margin-top: 40px; font-size: 0.9em;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+footer a { color: var(--link-color); }
 
 
-/* Assicurati che il tema scuro influenzi anche i nuovi colori del gioco se necessario */
-body.dark-mode.donkey-runner-page {
-    --game-border-color: #5ab9a8; /* Un blu/verde più brillante per il tema scuro */
-    --game-ground-line-color: #5ab9a8;
-    --game-button-bg: rgba(20, 70, 100, 0.7);
-    --game-button-text: #c4f0c2;
-    --game-button-border: #00b9be;
-    --game-button-active-bg: rgba(30, 90, 120, 0.9);
+/* ===== Responsive Design - Media Queries (Ordine: da grande a piccolo) ===== */
+@media (max-width: 768px) {
+  header { flex-direction: column; gap: 10px; padding: 15px 3%; }
+  header .header-content { width: 100%; justify-content: center; }
+  header .header-controls { width: 100%; flex-direction: column; gap: 10px; margin-top: 10px; margin-left:0; }
+  header nav { margin-left: 0; } /* Inutile se i controlli sono in colonna, ma non fa danno */
+  main section { width: 95%; padding: 20px 15px; }
+  .project, .team-member { flex-basis: 100%; min-width: unset; }
+  h1, header h1 { font-size: 1.5em; }
+  main h2 { font-size: 1.4em; }
+  #authSection { margin-top: 10px; justify-content: center; width: 100%;} /* Centro auth section */
+  #userProfileContainer { justify-content: center; } /* Centro user profile */
+
+  /* Snake Game Responsive */
+  #snake-game-section h2 { font-size: 1.5em; }
+  #highscore-input-container { max-width: 90%; }
+  .leaderboard-container h3 { font-size: 1.2em; } /* Snake Leaderboard */
+  #leaderboard-list { max-width: 90%; } /* Snake Leaderboard */
 }
 
-/* Stili aggiuntivi per i pulsanti del gioco se vuoi differenziarli
-   dai .auth-button o .game-button generici di styles.css */
-.donkey-runner-page .control-button {
-    background-color: var(--game-button-bg, rgba(50, 83, 95, 0.7)); /* Sfondo da PALETTE.DARK_TEAL_BLUE con alpha */
-    color: var(--game-button-text, #30e1b9); /* Testo da PALETTE.BRIGHT_GREEN_TEAL */
-    border: 2px solid var(--game-button-border, #0b8a8f); /* Bordo da PALETTE.MEDIUM_TEAL */
-    border-radius: 10px;
-    padding: 15px 20px;
-    font-size: 1.3em; 
-    font-weight: bold;
-    font-family: "Source Code Pro", monospace; 
-    cursor: pointer;
-    outline: none;
-    flex-grow: 0; 
-    flex-basis: 45%; 
-    margin: 0 5px;
-    text-align: center;
-    transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
-}
-.donkey-runner-page .control-button:active {
-    /* Scurisci leggermente lo sfondo del pulsante o cambia bordo al tocco */
-    background-color: var(--game-button-active-bg, rgba(50, 83, 95, 0.9));
-    border-color: var(--game-button-active-border, #30e1b9); /* Bordo più brillante al tocco */
-    transform: scale(0.95);
+@media (max-width: 576px) {
+  body { font-size: 15px; }
+  header nav ul { gap: 10px; justify-content: center; }
+  header nav a { font-size: 0.95em; }
+  header .header-controls { gap: 12px; }
+  #themeToggleBtn { padding: 6px 10px; font-size: 1em; /* margin-left: 0; */ } /* Tolto margin-left se già gestito da gap */
+
+  main section { padding: 15px 10px; margin: 20px auto; }
+  .portal-grid { grid-template-columns: 1fr; padding: 0 3% 20px 3%; }
+  .project, .team-member, .portal-card, .article-card { flex-basis: 100%; width: 100%; max-width: none; }
+
+  h1, header h1 { font-size: 1.4em; }
+  main h2 { font-size: 1.3em; }
+  footer { font-size: 0.85em; padding: 20px; }
+
+  /* Snake Game Responsive */
+  #snake-game-section h2 { font-size: 1.3em; }
+  .game-details { font-size: 0.85em; padding: 6px 0; margin-bottom: 8px; }
+  #highscore-input-container { padding: 12px; }
+  #highscore-input-container h3 { font-size: 1.1em; }
+  #highscore-input-container input[type="text"] { width: 100px; font-size: 0.85em; }
+  .game-button { padding: 8px 12px; font-size: 0.85em; } /* Stile generico bottone gioco */
+  .leaderboard-container { margin-top: 15px; padding: 12px 8px; } /* Snake Leaderboard */
+  .leaderboard-container h3 { font-size: 1.1em; } /* Snake Leaderboard */
+  #leaderboard-list li { font-size: 0.85em; padding: 5px 0; } /* Snake Leaderboard */
+  .game-instructions { font-size: 0.75em; margin-top: 12px; }
+
+  /* Donkey Runner Responsive */
+  .donkey-runner-page .control-button { padding: 12px 15px; font-size: 1.2em; }
+  .donkey-runner-page #fullscreenButton { font-size: 0.8em; padding: 6px 8px; }
+  .donkey-runner-page canvas#gameCanvas { max-height: calc(100vh - 170px); }
 }
 
-.donkey-runner-page #fullscreenButton {
-    background-color: rgba(50, 83, 95, 0.7); /* Coerente con .control-button */
-    color: #30e1b9;
-    border: 1px solid #0b8a8f; /* Leggermente meno imponente del bordo dei controlli principali */
-    border-radius: 20px; 
-    padding: 8px 12px;
-    font-size: 0.9em;
-    font-family: "Source Code Pro", monospace;
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 20;
-    display: none; /* Gestito da JS */
-    transition: background-color 0.2s, color 0.2s;
-}
- .donkey-runner-page #fullscreenButton:hover {
-    background-color: rgba(50, 83, 95, 0.9); /* Usa colori della palette */
-    color: #0eaf9b; /* Un teal leggermente diverso per hover */
-}
-
-/* Stili per il footer specifici per la pagina del gioco, se necessario */
-.donkey-runner-page footer {
-    background-color: var(--surface-bg-secondary);
-    border-top: 1px solid var(--border-color-primary);
-    color: var(--text-color-muted);
-    text-align: center;
-    padding: 20px;
-    font-size: 0.9em;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* === Stili per la Pagina Portale (Nuovo Index.html) === */
-.portal-header {
-    text-align: center;
-    padding: 40px 20px;
-    background-color: var(--surface-bg-secondary);
-    border-bottom: 1px solid var(--border-color-primary);
-    margin-bottom: 30px; /* Aggiunge spazio prima della griglia */
-}
-.portal-header h1 {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 2.8em;
-    color: var(--heading-color);
-    margin-bottom: 10px;
-}
-.portal-header p {
-    font-size: 1.2em;
-    color: var(--text-color-secondary);
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.portal-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-    padding: 0 5% 30px 5%; /* Padding aggiornato */
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.portal-card {
-    background-color: var(--surface-bg-primary);
-    border: 1px solid var(--border-color-primary);
-    border-radius: 8px;
-    padding: 25px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex; /* Per allineare il bottone in basso */
-    flex-direction: column; /* Per allineare il bottone in basso */
-    justify-content: space-between; /* Per allineare il bottone in basso */
-}
-.portal-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-}
-.portal-card img.card-icon {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 15px;
-    /* object-fit: contain; se le icone hanno dimensioni diverse */
-}
-.portal-card h3 {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 1.5em;
-    color: var(--heading-color);
-    margin-bottom: 10px;
-    border-bottom: none; /* Rimuovi eventuale bordo ereditato */
-    padding-bottom: 0; /* Rimuovi eventuale padding ereditato */
-}
-.portal-card p {
-    color: var(--text-color-secondary);
-    font-size: 1em;
-    margin-bottom: 20px;
-    flex-grow: 1; /* Fa sì che il paragrafo occupi spazio spingendo il bottone in basso */
-}
-.portal-card .btn-portal {
-    display: inline-block;
-    background-color: var(--link-color);
-    color: var(--button-text-primary);
-    padding: 10px 25px;
-    border-radius: 25px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    border: none; /* Assicura che non ci siano bordi da altri stili .button */
-    cursor: pointer;
-}
-.portal-card .btn-portal:hover {
-    background-color: var(--link-hover-color);
-}
-
-/* Assicurati che l'header del portale e quello delle altre pagine
-   abbiano un aspetto coerente o deliberatamente diverso come preferisci */
-header .header-content h1 { /* Potrebbe essere necessario specificare di più se ci sono conflitti */
-    color: var(--heading-color); /* Assicura che il colore sia quello del tema */
-}
-
-section#skills ul.skills-grid {
-  list-style-type: none;
-  padding: 0;
-  margin-top: 25px;
-  display: grid;
-  /* MODIFICA: Aumentata la larghezza minima delle card */
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Era 150px, proviamo con 180px. Puoi aumentarlo a 200px se necessario. */
-  gap: 15px;
-  justify-content: center;
-}
-
-section#skills li.skill-card {
-  background-color: var(--surface-bg-secondary); 
-  color: var(--text-color-secondary); 
-  /* MODIFICA: Leggermente ridotto il padding per dare più spazio al testo */
-  padding: 12px; 
-  border-radius: 6px;
-  /* MODIFICA: Leggermente ridotta la dimensione del font se necessario */
-  font-size: 0.9em; /* Era 0.95em, puoi provare anche 0.85em se il testo è ancora troppo grande */
-  font-weight: 500;
-  text-align: center; 
-  border: 1px solid var(--border-color-secondary);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-  transition: all 0.2s ease-in-out;
-  cursor: pointer; 
-  /* MODIFICA: Aumentata leggermente l'altezza minima per accomodare testo su più righe */
-  min-height: 70px; /* Era 60px */
-  display: flex; 
-  align-items: center;
-  justify-content: center;
-  /* AGGIUNTA: Per una migliore gestione del testo lungo e a capo */
-  overflow-wrap: break-word; /* Standard moderno */
-  word-wrap: break-word;     /* Fallback per browser più vecchi (uguale a overflow-wrap) */
-  /* hyphens: auto; */       /* Opzionale: permette la sillabazione automatica se supportata e configurata la lingua */
-}
-
-section#skills li.skill-card:hover {
-  background-color: var(--skill-badge-hover-bg); /* Puoi riutilizzare questi colori o definirne di nuovi */
-  color: var(--skill-badge-hover-text); 
-  transform: translateY(-3px); /* Leggero sollevamento */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-section#skills li.skill-card.active-skill {
-  background-color: var(--skill-badge-active-bg); 
-  color: var(--skill-badge-active-text); 
-  border-color: var(--link-color); 
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15), 0 0 0 2px var(--link-color);
-}
-
-/* Il contenitore per i dettagli della skill rimane stilizzato come prima, 
-   ma assicurati che si adatti bene sotto la nuova griglia di card. */
-.skill-details-container { 
-  margin-top: 30px; /* Più spazio dopo le card */
-  padding: 20px;
-  background-color: var(--surface-bg-primary); /* Sfondo leggermente diverso dalle card */
-  border: 1px solid var(--border-color-primary);
-
-  border-radius: 6px;
-  min-height: 70px; 
-  text-align: left;
-  color: var(--skill-details-text); 
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-  transition: all 0.3s ease-in-out;
-}
-.skill-details-container h3 {
-
-  color: var(--heading-color); /* Usa il colore principale per i titoli */
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.3em; /* Titolo più grande per i dettagli */
-}
-.skill-details-container p {
-  margin-bottom: 0;
-  font-size: 1.05em; /* Testo dettagli leggermente più grande */
-  line-height: 1.7;
-}
-
-/* Stili per le bandiere nella pagina del profilo */
-#profileNationality .fi {
-  display: inline-block; /* Necessario perché lo span prenda dimensioni */
-  width: 1.33333333em;  /* Standard della libreria, relativo al font-size del genitore */
-  height: 1em;          /* Standard della libreria */
-  line-height: 1em;     /* Per coerenza con l'altezza */
-  vertical-align: -0.15em; /* Leggero aggiustamento verticale, prova valori diversi se necessario */
-  /* background-image: è fornito dalla libreria flag-icons.min.css */
-  background-size: contain;
-  background-position: 50%;
-  background-repeat: no-repeat;
-  /* margin-right: 8px; // Già impostato via JS, puoi scegliere dove gestirlo */
-}
-
-/* Assicurati che il testo del profilo abbia un font-size di base 
-   perché le dimensioni 'em' della bandiera siano consistenti. */
-#profileDetailsDisplay p {
-    /* Se non già definito, o se vuoi sovrascriverlo per questa sezione: */
-    font-size: 1em; /* O 16px, o la tua dimensione base preferita */
-    line-height: 1.6; /* Per un buon allineamento verticale del testo */
-    margin-bottom: 5px; /* Già presente nel tuo HTML inline */
-}
-
-/* Stili per la mini-leaderboard di DonkeyRunner */
-.donkey-runner-page #miniLeaderboardList li .player-name .fi {
-  /* display: inline-block; // Già impostato dalla libreria .fi */
-  width: 1.33em;  /* Esempio, relativo al font-size di .player-name */
-  height: 1em;    /* Esempio */
-  line-height: 1em;
-  vertical-align: -0.1em; /* Aggiusta per allineare bene con il testo del nome */
-  /* margin-right: 5px; // Già impostato via JS, puoi scegliere */
-  background-size: contain;
-  background-position: 50%;
-  background-repeat: no-repeat;
-}
-
-/* Opzionale: aggiusta il font-size di .player-name se necessario 
-   perché la bandiera (basata su 'em') si adatti bene */
-.donkey-runner-page #miniLeaderboardList .player-name {
-  /* font-size: 0.95em; */ /* Esempio */
-  display: flex; /* Per aiutare con l'allineamento verticale della bandiera e del testo */
-  align-items: center; /* Allinea verticalmente bandiera e testo */
-}
-
-.testo-neon-arcade {
-  /* font-family: 'Press Start 2P', cursive; */
-  font-size: 2.5rem;
-  text-align: center;
-  padding: 1rem; /* Aggiungiamo un po' di padding per distanziare il testo dal bordo */
-
-  /* Impostazioni del bordo */
-  border-width: 0.1rem; /* Spessore del bordo come avevi indicato */
-  border-style: solid;  /* Stile del bordo, 'solid' è comune */
-  /* Il border-color iniziale sarà impostato dal primo frame dell'animazione */
-
-  /* Ombra per un leggero effetto neon di base, sempre attiva */
-  text-shadow:
-    0 0 5px rgba(255, 255, 255, 0.5), /* Un leggero alone bianco */
-    0 0 10px currentColor; /* Alone del colore corrente del testo */
-
-  animation: cambio-colore-neon-e-bordo 1.5s infinite steps(1, end); /* Animazione cambio colore per testo e bordo */
-}
-
-@keyframes cambio-colore-neon-e-bordo {
-  0% {
-    color: #ff00ff; /* Magenta Neon */
-    border-color: #ff00ff; /* Bordo Magenta Neon */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
+@media (max-width: 480px) {
+  .touch-control-btn { /* Per snake game */
+    width: 45px; height: 45px; font-size: 1.3em; margin: 2px;
   }
-  33% {
-    color: #00ffff; /* Ciano Neon */
-    border-color: #00ffff; /* Bordo Ciano Neon */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #00ffff, 0 0 15px #00ffff;
-  }
-  66% {
-    color: #39ff14; /* Verde Lime Neon */
-    border-color: #39ff14; /* Bordo Verde Lime Neon */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #39ff14, 0 0 15px #39ff14;
-  }
-  100% {
-    color: #ff00ff; /* Ritorna al Magenta per un ciclo pulito */
-    border-color: #ff00ff; /* Bordo ritorna al Magenta */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
-  }
-}
-
-/* Stili per la sezione articoli (Task H.3) */
-#articlesSection {
-    /* display: none; gestito da JS */
-    padding: 20px 0;
-}
-
-#articlesSection .portal-header { /* Titolo sezione articoli */
-     margin-bottom: 20px;
-}
-
-/* #articlesGrid -> eredita da .portal-grid se usi la stessa classe */
-
-.article-card {
-    background-color: var(--surface-bg-primary);
-    border: 1px solid var(--border-color-primary);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.07);
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; /* Aggiunta transizione */
-}
- .article-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 5px 14px rgba(0,0,0,0.1);
-}
-
-.article-card h4 { /* Titolo articolo */
-    font-size: 1.3em;
-    color: var(--heading-color);
-    margin-top: 0; /* Rimuovi margine superiore se presente da stili generali h4 */
-    margin-bottom: 8px;
-}
-
-.article-card .article-meta { /* Contenitore per data e tags */
-    font-size: 0.85em;
-    color: var(--text-color-muted);
-    margin-bottom: 12px;
-    display: flex;
-    flex-wrap: wrap; /* Permette ai tag di andare a capo */
-    align-items: center; /* Allinea data e blocco tags verticalmente */
-    gap: 5px 15px; /* Spazio tra data e primo tag, e tra i gruppi di tag */
-}
-
-.article-card .article-date {
-    /* Nessuno stile specifico necessario qui, eredita da .article-meta */
-}
-
-.article-card .article-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px; /* Spazio tra i singoli tag */
-}
-
-.article-card .article-tag {
-    background-color: var(--surface-bg-secondary);
-    color: var(--text-color-secondary);
-    padding: 4px 10px; /* Aumentato leggermente il padding */
-    border-radius: 15px; /* Più arrotondato */
-    font-size: 0.8em;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: background-color 0.2s, color 0.2s;
-}
-.article-card .article-tag:hover {
-    background-color: var(--link-color);
-    color: var(--button-text-primary);
-}
-
-.article-card .article-snippet {
-    font-size: 0.95em;
-    color: var(--text-color-secondary);
-    margin-bottom: 15px;
-    flex-grow: 1;
-    line-height: 1.6;
-}
-
-
-
-.article-card .btn-read-more {
-    display: inline-block;
-    background-color: transparent;
-    color: var(--link-color);
-    padding: 8px 0;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s ease;
-    border: none;
-    align-self: flex-start;
-    margin-top: auto; /* Spinge il bottone in basso se la card ha spazio extra */
-}
-.article-card .btn-read-more:hover {
-    color: var(--link-hover-color);
-    text-decoration: underline;
-}
-
-/* Stili per la card "Featured Article" nel portal-grid principale */
-#featuredArticleCard {
-    /* display: none; gestito da JS */
-    text-align: left; 
-}
-#featuredArticleCard .card-icon { /* Icona a sinistra */
-     margin-left: 0;
-     margin-right: auto;
-     margin-bottom: 10px;
-}
-#featuredArticleCard > h3 { /* Seleziona solo l'h3 diretto figlio */
-    text-align: left;
-    font-size: 1.6em; 
-}
-#featuredArticleCard #featuredArticleActualTitle { /* Titolo effettivo dell'articolo */
-    font-size: 1.3em;
-    color: var(--text-color-primary);
-    display: block;
-    margin-top: 5px;
-    margin-bottom: 10px;
-    font-weight: bold; /* Aggiunto per dare più enfasi */
-}
-#featuredArticleCard .btn-portal { /* Bottone per featured article */
-    align-self: flex-start;
-}
-
-/* Nuovi stili per i badge di statistiche */
-.article-stats {
-    display: flex;
-    gap: 15px; /* Spazio tra badge like e commenti */
-    margin-top: 10px; /* Spazio sopra le statistiche */
-    margin-bottom: 12px; /* Spazio sotto le statistiche, prima del link "Leggi di più" */
-    padding-top: 10px; /* Spazio interno superiore */
-    border-top: 1px dashed var(--border-color-secondary); /* Separatore leggero */
-}
-
-.article-stat-badge {
-    display: flex;
-    align-items: center;
-    font-size: 0.85em;
-    color: var(--text-color-muted);
-    background-color: var(--surface-bg-secondary); /* Leggero sfondo per il badge */
-    padding: 4px 8px;
-    border-radius: 15px;
-    transition: color 0.2s, background-color 0.2s;
-}
-
-.article-stat-badge:hover {
-    color: var(--link-hover-color); /* Cambia colore al hover per indicare interattività futura */
-    /* background-color: var(--border-color-primary); */ /* Opzionale: cambio sfondo al hover */
-}
-
-.article-stat-badge .stat-icon {
-    margin-right: 5px;
-    font-size: 0.9em; /* Leggermente più piccolo del testo del conteggio per bilanciare */
-    /* Per le emoji, l'aspetto può variare. Per SVG/Font Awesome potresti controllare meglio la dimensione */
-}
-
-.article-stat-badge .stat-count {
-    font-weight: 500;
-    color: var(--text-color-secondary); /* Conteggio leggermente più scuro del testo del badge */
-}
-
-.article-card .btn-read-more {
-    /* ... (stili esistenti per btn-read-more) ... */
-    /* margin-top: auto; Potrebbe non essere più necessario se .article-snippet non ha flex-grow o se le stats sono sempre presenti */
-}
-
-        @keyframes cambio-colore-neon {
-  0% {
-    color: #ff00ff; /* Magenta Neon */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
-  }
-  33% {
-    color: #00ffff; /* Ciano Neon */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #00ffff, 0 0 15px #00ffff;
-  }
-  66% {
-    color: #39ff14; /* Verde Lime Neon */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #39ff14, 0 0 15px #39ff14;
-  }
-  100% {
-    color: #ff00ff; /* Ritorna al Magenta per un ciclo pulito */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
-  }
-}
-
-/* Sposta questi stili da index.html a styles.css per una migliore organizzazione */
-.glitchzilla-banner {
-    background-color: var(--surface-bg-secondary);
-    color: var(--text-color-secondary);
-    padding: 12px 20px;
-    text-align: center;
-    margin: 0 auto 30px auto;
-    border-radius: 6px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    max-width: 90%; /* Adatta al tuo layout, es. 700px */
-    /* display: none; Sarà gestito da JS */
-}
-
-.glitchzilla-banner p {
-    margin: 0;
-    font-size: 1.1em;
-    font-family: "Source Code Pro", monospace;
-}
-
-.glitchzilla-banner .glitch-text-effect,
-.glitchzilla-banner .player-name-highlight {
-    text-shadow:
-        0 0 5px rgba(255, 255, 255, 0.3),
-        0 0 8px currentColor;
-    animation: cambio-colore-neon 1.5s infinite steps(1, end);
-    font-weight: bold;
+  #touch-controls-container { gap: 2px; } /* Snake Game */
+  .touch-controls-middle-row { gap: 2px; } /* Snake Game */
+  .testo-neon-arcade { font-size: 1.2em; padding: 0.3rem; }
 }

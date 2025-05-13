@@ -94,11 +94,13 @@ function createArticleCard(article, gridContainer) {
 
     const linkEl = document.createElement('a');
     linkEl.className = 'btn-read-more';
-    linkEl.href = article.link;
+    // MODIFICA QUI:
+    linkEl.href = `view-article.html?id=${article.id}`; // Passa l'ID dell'articolo come parametro URL
     linkEl.textContent = 'Leggi di più →';
-    if (article.link === "#") {
-        linkEl.onclick = (e) => { e.preventDefault(); alert('Articolo non ancora disponibile!'); };
-    }
+    // Rimuovi l'alert per il link placeholder se ora punta a una pagina reale
+    // if (article.link === "#") { 
+    //     linkEl.onclick = (e) => { e.preventDefault(); alert('Articolo non ancora disponibile!'); };
+    // }
     card.appendChild(linkEl);
 
     gridContainer.appendChild(card);
@@ -133,15 +135,15 @@ export function displayArticlesSection() {
         if (featuredArticle) {
             featuredArticleTitleEl.textContent = featuredArticle.title;
             featuredArticleSnippetEl.textContent = featuredArticle.snippet;
-            featuredArticleLinkEl.href = featuredArticle.link;
-             if (featuredArticle.link === "#") {
-                featuredArticleLinkEl.onclick = (e) => { e.preventDefault(); alert('Articolo non ancora disponibile!'); };
-            } else {
-                featuredArticleLinkEl.onclick = null; // Rimuovi l'handler di alert se il link è valido
-            }
-            featuredArticleCard.style.display = 'flex'; // Mostra la card featured (usa flex per coerenza con .portal-card)
-        } else {
-            featuredArticleCard.style.display = 'none'; // Nascondi se non ci sono articoli
+            // MODIFICA QUI:
+            featuredArticleLinkEl.href = `view-article.html?id=${featuredArticle.id}`;
+            // Rimuovi l'alert per il link placeholder
+            // if (featuredArticle.link === "#") {
+            //    featuredArticleLinkEl.onclick = (e) => { e.preventDefault(); alert('Articolo non ancora disponibile!'); };
+            // } else {
+            //    featuredArticleLinkEl.onclick = null;
+            // }
+            featuredArticleCard.style.display = 'flex';
         }
 
         // Popola la griglia degli articoli (escludendo quello già mostrato come featured, se diverso)
