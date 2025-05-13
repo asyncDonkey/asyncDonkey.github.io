@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World! by asyncDonkey!</title>
+    <title>asyncDonkey.io | Projects & Tech Hub</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
     <style>
-        /* Stili aggiuntivi per la pagina portale (index.html) */
         .portal-header {
             text-align: center;
             padding: 40px 20px;
-            background-color: var(--surface-bg-secondary); /* Un colore di sfondo leggero */
+            background-color: var(--surface-bg-secondary);
             border-bottom: 1px solid var(--border-color-primary);
+            margin-bottom: 30px;
         }
         .portal-header h1 {
             font-family: "Space Grotesk", sans-serif;
@@ -31,17 +31,14 @@
             max-width: 600px;
             margin: 0 auto;
         }
-
-
         .portal-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Layout a griglia responsive */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
-            padding: 30px 5%;
+            padding: 0 5% 30px 5%;
             max-width: 1200px;
             margin: 0 auto;
         }
-
         .portal-card {
             background-color: var(--surface-bg-primary);
             border: 1px solid var(--border-color-primary);
@@ -50,60 +47,117 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .portal-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 16px rgba(0,0,0,0.12);
         }
-        .portal-card img.card-icon { /* Stile per eventuali icone nelle card */
+        .portal-card img.card-icon {
             width: 60px;
             height: 60px;
-            margin-bottom: 15px;
-            /* Aggiungi qui l'URL di un'icona generica o specifica per sezione se vuoi */
-            /* Esempio: background-image: url('path/to/icon.svg'); background-size: cover; */
+            margin: 0 auto 15px auto;
         }
         .portal-card h3 {
             font-family: "Space Grotesk", sans-serif;
             font-size: 1.5em;
             color: var(--heading-color);
             margin-bottom: 10px;
+            border-bottom: none;
+            padding-bottom: 0;
         }
         .portal-card p {
             color: var(--text-color-secondary);
             font-size: 1em;
             margin-bottom: 20px;
-            min-height: 60px; /* Per allineare le card con descrizioni di diversa lunghezza */
+            flex-grow: 1;
+            min-height: 60px;
         }
-        .portal-card .btn-portal { /* Stile per i pulsanti nelle card */
+        .portal-card .btn-portal {
             display: inline-block;
             background-color: var(--link-color);
-            color: var(--button-text-primary); /* Spesso bianco */
+            color: var(--button-text-primary);
             padding: 10px 25px;
-            border-radius: 25px; /* Pulsanti più arrotondati */
+            border-radius: 25px;
             text-decoration: none;
             font-weight: bold;
             transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
         }
         .portal-card .btn-portal:hover {
             background-color: var(--link-hover-color);
+        }
+        #homeMiniLeaderboardList {
+            list-style-type: none;
+            padding: 0;
+            font-family: "Source Code Pro", monospace;
+            font-size: 0.9em;
+            text-align: left;
+        }
+        #homeMiniLeaderboardList li {
+            display: flex;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border-color-secondary);
+        }
+        #homeMiniLeaderboardList li:last-child {
+            border-bottom: none;
+        }
+        #homeMiniLeaderboardList .player-rank {
+            margin-right: 8px;
+            font-weight: bold;
+            min-width: 15px;
+        }
+        #homeMiniLeaderboardList .player-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 3px;
+            margin-right: 8px;
+            background-color: #eee;
+            image-rendering: pixelated;
+        }
+        #homeMiniLeaderboardList .player-info {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+        #homeMiniLeaderboardList .player-name {
+            font-weight: bold;
+            color: var(--text-color-primary);
+            margin-right: auto;
+             display: flex;
+             align-items: center;
+        }
+        #homeMiniLeaderboardList .player-name .fi {
+             margin-right: 5px;
+             vertical-align: middle;
+        }
+        #homeMiniLeaderboardList .player-score {
+            font-weight: bold;
+            color: var(--link-color);
+        }
+        .intro-animation-placeholder {
+             margin: 20px auto 40px auto;
         }
     </style>
 </head>
 <body>
 
     <header>
-       
         <div class="header-content" style="padding: 10px 5%; align-items: center; display: flex; justify-content: space-between; flex-wrap: wrap;">
             <a href="index.html" style="text-decoration: none;">
-                <h1 style="font-size: 1.8em; margin:0;">asyncDonkey Projects</h1> 
+                <h1 style="font-size: 1.8em; margin:0;">asyncDonkey.io</h1>
             </a>
             <nav>
-
                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 20px;">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About Me</a></li>
-                    <li><a href="donkeyRunner.html">Giochi</a></li>
-                    <li id="profileNav" style="display: none;"><a href="profile.html">Profilo</a></li>
+                    <li><a href="index.html" class="auth-button" style="text-decoration:none;">Home</a></li>
+                    <li><a href="about.html" class="auth-button" style="text-decoration:none;">.Dev</a></li>
+                    <li><a href="donkeyRunner.html" class="auth-button" style="text-decoration:none;">codeDash!</a></li>
+                    <li><a href="leaderboard.html" class="auth-button" style="text-decoration:none;">Leaderboard</a></li>
+                    <li id="profileNav" style="display: none;"><a href="profile.html" class="auth-button" style="text-decoration:none;">Profile</a></li>
                 </ul>
             </nav>
             <div class="header-controls" style="display: flex; align-items: center; gap: 10px;">
@@ -112,7 +166,7 @@
                     <button id="showSignupBtn" class="auth-button">Register</button>
                 </div>
                 <div id="userProfileContainer" style="display: none; align-items: center;">
-                    <img id="headerUserAvatar" src="" alt="Avatar">
+                    <img id="headerUserAvatar" src="" alt="User Avatar">
                     <span id="userDisplayName"></span>
                     <button id="logoutButton" class="auth-button">Logout</button>
                 </div>
@@ -123,54 +177,83 @@
 
     <main>
         <div class="portal-header">
-            <h1>Esplora i Miei Progetti</h1>
-            <p>Un hub centrale per navigare tra le mie creazioni, giochi e sezioni interattive.</p>
+            <h1>Esplora Progetti & Approfondimenti</h1>
+            <p>Un hub centrale per navigare tra applicazioni, games e articoli tecnici.</p>
         </div>
 
+        <div class="intro-animation-placeholder">
+             </div>
 
         <div class="portal-grid">
             <div class="portal-card">
-                <img src="images/icon-about.svg" alt="Icona About Me" class="card-icon"> Icona opzionale 
-                <h3>Chi Sono / Portfolio</h3>
-                <p>Scopri di più su di me, le mie competenze e il mio percorso da Ingegnere Civile a Sviluppatore Full-Stack.</p>
-                <a href="about.html" class="btn-portal">Vai alla Pagina</a>
+                <img src="images/icon-dev-solid.svg" alt="Icona .Dev" class="card-icon">
+                <h3>Il Percorso .Dev</h3>
+                <p>Scopri di più sullo stack tecnologico, le skills, e il percorso da Ingegneria Civile a Full-Stack Development.</p>
+                <a href="about.html" class="btn-portal">Leggi di più</a>
             </div>
 
-
             <div class="portal-card">
-                <img src="images/icon-game.svg" alt="Icona Gioco" class="card-icon">
-                <h3>asyncDonkey: Code Rush</h3>
-                <p>Gioca al mio endless runner game! Salta, spara codice e sopravvivi ai glitch.</p>
+                <img src="images/icon-game-controller-solid.svg" alt="Icona Gioco" class="card-icon">
+                <h3>CodeDash! Runner</h3>
+                <p>Gioca all'endless runner! Salta, spara codice, sopravvivi ai glitch e scala la classifica.</p>
+                <p class="testo-neon-arcade">F!ght GlI7chz!llA</p>
                 <a href="donkeyRunner.html" class="btn-portal">Gioca Ora!</a>
             </div>
+
+            <div class="portal-card">
+                <img src="images/icon-leaderboard-solid.svg" alt="Icona Leaderboard" class="card-icon">
+                <h3>CodeDash! Leaderboard</h3>
+                <p>Controlla i punteggi top globali per CodeDash! Runner. Riuscirai ad arrivare in cima?</p>
+                <a href="leaderboard.html" class="btn-portal">Vedi Leaderboard</a>
+            </div>
             
             <div class="portal-card">
-                <img src="images/icon-feedback.svg" alt="Icona Feedback" class="card-icon">
+                <img src="images/icon-ranking-solid.svg" alt="Icona Mini Leaderboard" class="card-icon">
+                <h3>Top Players (Snippet)</h3>
+                <ol id="homeMiniLeaderboardList">
+                    <li>Caricamento...</li>
+                </ol>
+                <a href="leaderboard.html" class="btn-portal" style="margin-top: 15px;">Leaderboard Completa</a>
+            </div>
+
+            <div class="portal-card">
+                <img src="images/icon-feedback-solid.svg" alt="Icona Feedback" class="card-icon">
                 <h3>Feedback & Contributi</h3>
-                <p>Hai trovato un bug nel gioco o hai un'idea per una nuova funzionalità? Fammelo sapere qui!</p>
-                <!---Questo potrebbe linkare a donkeyRunner.html#bugReportSection o a una pagina dedicata se la crei--> 
-                <a href="donkeyRunner.html#bugReportSection" class="btn-portal">Lascia Feedback</a>
+                <p>Trovato un bug o hai un'idea per una nuova feature? Fammelo sapere! Oppure segnala una issue direttamente su GitHub.</p>
+                <a href="donkeyRunner.html#bugReportSection" class="btn-portal" style="margin-bottom:10px;">Feedback Gioco</a>
+                <a href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=bug_report.yml" target="_blank" rel="noopener" class="btn-portal" style="background-color: var(--skill-badge-bg); color:var(--skill-badge-text);">Segnala Issue (GitHub)</a>
             </div>
             
             <div class="portal-card">
-                <img src="images/icon-guestbook.svg" alt="Icona Guestbook" class="card-icon">
+                <img src="images/icon-guestbook-solid.svg" alt="Icona Guestbook" class="card-icon">
                 <h3>Guestbook Generale</h3>
-                <p>Lascia un saluto o un commento generale sul sito e sui miei progetti.</p>
-                <!-- Linka alla sezione guestbook in about.html (ex index.html) -->
-                <a href="about.html#guestbook" class="btn-portal">Visita il Guestbook</a>
+                <p>Lascia un saluto o un commento generale sul sito e sui progetti.</p>
+                <a href="about.html#guestbook" class="btn-portal">Visita Guestbook</a>
             </div>
-
-            <!-- {/* Potresti aggiungere altre card qui in futuro */} -->
-
+            
+            <div class="portal-card" id="featuredArticleCard" style="display:none;">
+                <img src="images/icon-article-solid.svg" alt="Icona Articolo" class="card-icon">
+                <h3 id="featuredArticleTitle">Articolo in Evidenza</h3>
+                <p id="featuredArticleSnippet">Dai un'occhiata agli ultimi approfondimenti e aggiornamenti...</p>
+                <a href="#articlesSection" id="featuredArticleLink" class="btn-portal">Leggi di più</a>
+            </div>
         </div>
+
+        <section id="articlesSection" style="margin-top: 40px; display:none;">
+            <div class="portal-header" style="padding-top:20px; padding-bottom:20px; margin-bottom:20px;">
+                <h2>Articoli Tecnici & Updates</h2>
+                <p>Approfondimenti su sviluppo, progetti ed esplorazioni tecnologiche.</p>
+            </div>
+            <div id="articlesGrid" class="portal-grid">
+                </div>
+        </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Sviluppato da Umberto Trombetta.</p>
-        <p style="font-size: 0.8em; margin-top: 5px;">Avatars generati usando <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
+        <p>&copy; 2025 asyncDonkey.io.</p>
+        <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
     </footer>
 
-    <!-- {/* Modali per Login e Signup (necessari se vuoi login/registrazione da questa pagina) */} -->
     <div id="loginModal" class="modal">
       <div class="modal-content">
         <span class="closeLoginBtn">&times;</span>
@@ -186,7 +269,7 @@
     <div id="signupModal" class="modal">
       <div class="modal-content">
         <span class="closeSignupBtn">&times;</span>
-        <h3>Register</h3>
+        <h3>Registrati</h3>
         <form id="signupForm">
         <div>
             <label for="signupEmail">Email:</label>
@@ -201,10 +284,9 @@
             <input type="text" id="signupNickname" name="signupNickname" required minlength="3" maxlength="25">
         </div>
         <div>
-            <label for="signupNationality">Nazionalità (es. Italia, USA, etc.):</label>
             <label for="signupNationality">Nazionalità:</label>
             <select id="signupNationality" name="signupNationality">
-            <option value="">Seleziona Nazionalità...</option> 
+            <option value="">Seleziona Nazionalità...</option>
             <option value="AF">Afghanistan (AF)</option>
             <option value="ZA">Sudafrica (ZA)</option>
             <option value="AL">Albania (AL)</option>
@@ -393,15 +475,14 @@
             <option value="YE">Yemen (YE)</option>
             <option value="ZM">Zambia (ZM)</option>
             <option value="ZW">Zimbabwe (ZW)</option>
+            <option value="OTHER">Altro / Preferisco non specificare</option>
             </select>
             </div>
-        <button type="submit" class="game-button">Register</button>
+        <button type="submit" class="game-button">Registrati</button>
         </form>
       </div>
     </div>
 
-
     <script src="js/main.js" type="module"></script>
-    <!-- {/* Non è necessario comments.js qui a meno che tu non voglia un guestbook separato ANCHE sulla pagina portale */} -->
 </body>
 </html>

@@ -1,37 +1,72 @@
 <!DOCTYPE html>
-<html lang="it"> 
+<html lang="it">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi Sono - Umberto Trombetta | Ingegneria & Sviluppo Full-Stack</title> 
+    <title>The .Dev - asyncDonkey | Progetti e Tecnologie</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        /* Stili per l'immagine nella sezione "The .Dev" */
+        .dev-section-content {
+            display: flex;
+            flex-wrap: wrap; /* Per responsività */
+            gap: 20px;
+        }
+
+        .dev-text-content {
+            flex: 2; /* Più spazio per il testo */
+            min-width: 300px; /* Larghezza minima per il testo */
+        }
+
+        .dev-image-container {
+            flex: 1; /* Meno spazio per l'immagine */
+            min-width: 200px; /* Larghezza minima per l'immagine */
+            text-align: center; /* Centra l'immagine se più piccola del contenitore */
+        }
+
+        .dev-image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Media query per stackare immagine e testo su schermi piccoli */
+        @media (max-width: 768px) {
+            .dev-section-content {
+                flex-direction: column;
+            }
+            .dev-image-container {
+                order: -1; /* Sposta l'immagine sopra il testo su mobile se preferito */
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <header>
     <div class="avatar">
-        <img src="images/asyncDonkey.png" alt="Un simpatico asino in PixelArt" /> 
+        <img src="images/asyncDonkey.png" alt="Logo asyncDonkey" />
     </div>
     <div class="header-content">
-        <h1>Umberto Trombetta</h1>
+        <h1>asyncDonkey Projects</h1>
 
         <div class="header-controls">
             <nav>
                 <ul>
-                    <li><a href="index.html">Home</a></li> 
-                    <li><a href="#about">Chi Sono</a></li>
-                    <li><a href="#skills">Competenze</a></li> 
-                    <li><a href="donkeyRunner.html">Giochi</a></li> 
-                    <li><a href="#guestbook">Guestbook</a></li>
-                    <li id="profileNav" style="display: none;"><a href="profile.html">Profilo</a></li>
-                </ul>
+                    <li><a href="index.html" class="auth-button" style="text-decoration:none;">Home</a></li>
+                     
+                    <li><a href="#skills"class="auth-button" style="text-decoration:none;">Competenze</a></li>
+                    <li><a href="donkeyRunner.html" class="auth-button" style="text-decoration:none;">codeDash!</a></li>
+                    <li><a href="#guestbook" class="auth-button" style="text-decoration:none;">Guestbook</a></li>
+                    <li id="profileNav" style="display: none;"><a href="profile.html" class="auth-button" style="text-decoration:none;">Profile</a></li> </ul>
             </nav>
             <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
 
@@ -52,38 +87,53 @@
 
 <main>
     <section id="intro">
-        <p>Benvenuto! Sono Umberto, uno studente di Ingegneria Civile (L-7) con sede in Italia, e sto espandendo le mie competenze per diventare uno Sviluppatore Full-Stack. Questo sito documenta il mio percorso e i miei progetti.</p>
+        <p>Questa piattaforma documenta l'evoluzione di "asyncDonkey", un project hub che riflette un percorso focalizzato sullo Sviluppo Full-Stack. Presenta le attività correnti, le esplorazioni tecnologiche e i progetti sviluppati.</p>
     </section>
 
-    <section id="about"> 
-        <h2>Chi Sono</h2>
-        <p>Durante il mio percorso di Laurea Triennale (L-7) in Ingegneria Civile, sto contemporaneamente sviluppando competenze fondamentali come Sviluppatore Full-Stack. Questo percorso mira a unire il problem-solving analitico, intrinseco dell'ingegneria, con le applicazioni creative e pratiche della tecnologia web.</p>
-        <p>L'interesse iniziale per lo sviluppo software è nato da un corso universitario di Sistemi di Elaborazione delle Informazioni che utilizzava il linguaggio C. Questa scintilla si è rapidamente evoluta in un'esplorazione più ampia della programmazione, rivelando un particolare coinvolgimento nell'automazione dei processi, nella progettazione di interfacce, nella gestione dei dati e nella risoluzione di complesse sfide logiche. Un background nel pensiero strutturato, simile all'apprendimento delle lingue, fornisce una prospettiva utile per approcciare i linguaggi di programmazione.</p>
-        <p>Sebbene sia all'inizio di questo viaggio, l'attenzione attuale è rivolta alla padronanza dei fondamentali del web – HTML, CSS e JavaScript – principalmente attraverso l'apprendimento pratico su piattaforme come Codecademy e freeCodeCamp, e la realizzazione di progetti personali come questo sito e i giochi inclusi.</p>
-        <p>Tra i miei obiettivi futuri principali ci sono il contributo a progetti open-source di impatto e la collaborazione all'interno di team dinamici e proattivi. Cerco attivamente anche opportunità di lavoro a livello internazionale per acquisire esperienze professionali e prospettive diversificate. Inoltre, nutro un forte interesse nell'identificare sinergie tra le conoscenze dell'Ingegneria Civile e lo sviluppo software, potenzialmente attraverso la creazione di strumenti per l'analisi strutturale, la visualizzazione di progetti o la gestione dei dati infrastrutturali.</p>
-        <p>L'apprendimento continuo e lo sviluppo delle competenze nell'ingegneria del software rimangono un impegno fondamentale.</p>
+    <section id="about">
+        <h2>The .Dev</h2> <div class="dev-section-content">
+            <div class="dev-text-content">
+                <p>Ciao, sono Umberto. L'obiettivo primario di questo spazio è unire il problem-solving analitico, tipico della formazione ingegneristica, con le applicazioni pratiche richieste dallo sviluppo di software e tecnologie web.</p>
+                <p>L'interesse per lo sviluppo software è scaturito da un corso universitario sui Sistemi di Elaborazione delle Informazioni (basato su linguaggio C). Questo ha portato a un'esplorazione più ampia della programmazione, con un focus sull'automazione dei processi, sul design di interfacce (*UI/UX design*), sulla gestione dei dati (*data management*) e sulla risoluzione di problemi logici complessi.</p>
+                <p>Le attuali attività di sviluppo si concentrano sul consolidamento delle tecnologie web fondamentali attraverso l'applicazione pratica e la realizzazione di progetti personali. Le aree chiave includono:</p>
+                <ul>
+                    <li><strong>Sviluppo Frontend:</strong> HTML5, CSS3, JavaScript (ES6+).</li>
+                    <li><strong>Piattaforme di Apprendimento:</strong> Utilizzo di risorse come Codecademy e freeCodeCamp.</li>
+                    <li><strong>Lavori Pratici:</strong> Sviluppo di questa piattaforma (asyncDonkey.io) e delle applicazioni interattive incluse (es. il gioco "CodeDash!").</li>
+                </ul>
+                <p>Obiettivi futuri per il progetto asyncDonkey e percorsi di crescita includono:</p>
+                <ul>
+                    <li>Contribuire a progetti *open-source* di rilievo.</li>
+                    <li>Collaborare all'interno di team di sviluppo dinamici.</li>
+                    <li>Esplorare opportunità lavorative internazionali per diversificare le esperienze professionali.</li>
+                    <li>Identificare e sviluppare sinergie tra i principi dell'Ingegneria Civile e lo *software development*, ad esempio creando strumenti per l'analisi strutturale o la gestione di dati infrastrutturali.</li>
+                </ul>
+                <p>L'apprendimento continuo e lo sviluppo di competenze nel campo del *software engineering* restano un impegno fondamentale. Per maggiori dettagli sul mio background professionale e sui progetti, è possibile consultare il mio profilo <a href="https://www.linkedin.com/in/umberto-trombetta" target="_blank" rel="noopener noreferrer">LinkedIn</a>.</p>
+            </div>
+            <div class="dev-image-container">
+                <img src="images/placeholder-dev.png" alt="Immagine dello sviluppatore o logo del progetto">
+                </div>
+        </div>
     </section>
 
     <section id="skills">
-        <h2>Competenze</h2>
-        <p>Queste sono alcune delle tecnologie e competenze su cui sto lavorando (clicca su una card per dettagli):</p>
+        <h2>Competenze Tecniche</h2>
+        <p>Tecnologie e competenze chiave impiegate e in fase di sviluppo per il progetto asyncDonkey (clicca su una card per dettagli):</p>
         <ul class="skills-grid">
-            <li class="skill-card" data-skill-name="HTML" data-description="Costruzione di pagine web strutturate e semantiche, utilizzando tag moderni e best practice per l'accessibilità e SEO.">HTML</li>
-            <li class="skill-card" data-skill-name="CSS" data-description="Styling di pagine web per un look moderno e responsive. Esperienza con Flexbox, Grid, variabili CSS e metodologie come BEM per creare interfacce utente accattivanti.">CSS</li>
-            <li class="skill-card" data-skill-name="JavaScript" data-description="Aggiunta di interattività e comportamento dinamico ai siti web. Focus su manipolazione del DOM, eventi, programmazione asincrona (Promise, async/await) e concetti di ES6+. (In apprendimento)">JavaScript</li>
-            <li class="skill-card" data-skill-name="Linguaggio C" data-description="Solide basi di programmazione procedurale, gestione della memoria (allocazione dinamica, puntatori) e algoritmi fondamentali acquisite durante gli studi universitari. Utile per comprendere il funzionamento a basso livello dei sistemi.">Linguaggio C</li>
-            <li class="skill-card" data-skill-name="Firebase Platform" data-description="Utilizzo della piattaforma Firebase per backend-as-a-service: Firestore Database (NoSQL) per la gestione dei dati, Authentication per l'autenticazione utenti (email/password, social), Hosting per il deployment di web app e Security Rules per la protezione granulare dei dati.">Firebase Platform</li>
-            <li class="skill-card" data-skill-name="Backend (Concettuale)" data-description="Comprensione dei principi di funzionamento delle applicazioni server-side, progettazione di API RESTful e interazione con database. Interesse futuro per l'approfondimento di Python (con framework come Django o Flask) o Node.js (con Express).">[Python / Node.js]</li>
-            <li class="skill-card" data-skill-name="Frontend Frameworks (Studio Futuro)" data-description="Pianificazione dello studio di librerie/framework moderni come React, Vue.js o Svelte per costruire Single Page Applications (SPA) complesse, reattive e performanti.">[React / Vue / Svelte]</li>
-            <li class="skill-card" data-skill-name="Databases (Studio Futuro)" data-description="Interesse nell'apprendimento di database relazionali (SQL) come PostgreSQL per la gestione strutturata dei dati, e ulteriore approfondimento dei database NoSQL (come MongoDB o Firestore) per scenari flessibili e scalabili.">[SQL / NoSQL DBs]</li>
-            <li class="skill-card" data-skill-name="Da Ingegneria Civile" data-description="Problem-solving analitico per scomporre problemi complessi, project management per la pianificazione e l'esecuzione di compiti, spiccata attenzione ai dettagli e pensiero strutturato derivati dalla formazione in Ingegneria Civile, altamente trasferibili allo sviluppo software.">PS & PM</li>
+            <li class="skill-card" data-skill-name="HTML5" data-description="Costruzione di pagine web strutturate e semantiche, utilizzando tag moderni e best practice per l'accessibilità (accessibility) e SEO.">HTML5</li>
+            <li class="skill-card" data-skill-name="CSS3" data-description="Styling di pagine web per un look moderno e responsive. Esperienza con Flexbox, Grid, CSS Variables e metodologie come BEM per creare interfacce utente (UI) accattivanti.">CSS3</li>
+            <li class="skill-card" data-skill-name="JavaScript (ES6+)" data-description="Aggiunta di interattività e logica dinamica. Focus su manipolazione del DOM, gestione eventi, programmazione asincrona (Promises, async/await).">JavaScript (ES6+)</li>
+            <li class="skill-card" data-skill-name="Linguaggio C" data-description="Solide basi di programmazione procedurale, gestione della memoria e algoritmi, utili per comprendere il funzionamento a basso livello dei sistemi.">Linguaggio C</li>
+            <li class="skill-card" data-skill-name="Firebase Platform" data-description="Utilizzo di Firebase per backend-as-a-service (BaaS): Firestore Database (NoSQL), Authentication, Hosting e Security Rules.">Firebase Platform</li>
+            <li class="skill-card" data-skill-name="Backend Development (Concetti)" data-description="Comprensione dei principi server-side, design di API RESTful. Interesse per Python (Django/Flask) o Node.js (Express).">[Python / Node.js]</li>
+            <li class="skill-card" data-skill-name="Frontend Frameworks (Studio Futuro)" data-description="Studio pianificato di React, Vue.js o Svelte per Single Page Applications (SPA) complesse e performanti.">[React / Vue / Svelte]</li>
+            <li class="skill-card" data-skill-name="Databases (Studio Futuro)" data-description="Interesse per database relazionali (SQL) come PostgreSQL e approfondimento NoSQL (MongoDB, Firestore).">[SQL / NoSQL DBs]</li>
+            <li class="skill-card" data-skill-name="Problem Solving & Project Management" data-description="Capacità di problem-solving analitico, gestione di progetti, attenzione ai dettagli e pensiero strutturato, trasferibili allo sviluppo software.">PS & PM</li>
         </ul>
         <div id="skillDetails" class="skill-details-container">
             <p>Clicca su una competenza qui sopra per vedere più dettagli.</p>
         </div>
     </section>
-
-   
 
     <section id="guestbook">
         <h2>Guestbook Generale</h2>
@@ -109,23 +159,21 @@
 
     <section id="contact">
         <h2>Contatti</h2>
-        <p>Non esitare a contattarmi:</p>
+        <p>Puoi contattarmi tramite i seguenti canali:</p>
         <ul>
             <li>Email: asyncdonkey@proton.me</li>
             <li>LinkedIn: <a href="https://www.linkedin.com/in/umberto-trombetta" target="_blank" rel="noopener noreferrer">Umberto Trombetta</a></li>
             <li>GitHub: <a href="https://github.com/asyncDonkey" target="_blank" rel="noopener noreferrer">asyncDonkey</a></li>
         </ul>
     </section>
-
 </main>
 
 <footer>
-    <p>&copy; 2025 Sviluppato da Umberto Trombetta.</p>
-    <p style="font-size: 0.8em; margin-top: 5px;">Avatars generati usando <a href="https://www.dicebear.com/" target="_blank" rel="noopener">DiceBear</a>.</p>
+    <p>&copy; 2025 asyncDonkey.io.</p>
+    <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
 </footer>
 
 <button id="scrollToTopBtn" title="Torna in cima">↑</button>
-
 
 <div id="loginModal" class="modal">
   <div class="modal-content">
@@ -140,10 +188,10 @@
 </div>
 
 <div id="signupModal" class="modal">
-      <div class="modal-content">
-        <span class="closeSignupBtn">&times;</span>
-        <h3>Register</h3>
-        <form id="signupForm">
+  <div class="modal-content">
+    <span class="closeSignupBtn">&times;</span>
+    <h3>Register</h3>
+    <form id="signupForm">
         <div>
             <label for="signupEmail">Email:</label>
             <input type="email" id="signupEmail" name="signupEmail" required>
@@ -157,10 +205,9 @@
             <input type="text" id="signupNickname" name="signupNickname" required minlength="3" maxlength="25">
         </div>
         <div>
-            <label for="signupNationality">Nazionalità (es. Italia, USA, etc.):</label>
             <label for="signupNationality">Nazionalità:</label>
             <select id="signupNationality" name="signupNationality">
-            <option value="">Seleziona Nazionalità...</option> 
+            <option value="">Seleziona Nazionalità...</option>
             <option value="AF">Afghanistan (AF)</option>
             <option value="ZA">Sudafrica (ZA)</option>
             <option value="AL">Albania (AL)</option>
@@ -349,9 +396,10 @@
             <option value="YE">Yemen (YE)</option>
             <option value="ZM">Zambia (ZM)</option>
             <option value="ZW">Zimbabwe (ZW)</option>
+            <option value="OTHER">Altro / Preferisco non specificare</option>
             </select>
             </div>
-        <button type="submit" class="game-button">Register</button>
+        <button type="submit" class="game-button">Registrati</button>
         </form>
       </div>
     </div>

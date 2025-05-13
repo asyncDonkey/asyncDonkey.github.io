@@ -1322,3 +1322,33 @@ section#skills li.skill-card.active-skill {
   display: flex; /* Per aiutare con l'allineamento verticale della bandiera e del testo */
   align-items: center; /* Allinea verticalmente bandiera e testo */
 }
+
+.testo-neon-arcade {
+  /* font-family: 'Press Start 2P', cursive; */ /* Decommenta se vuoi usare il font pixelato */
+  font-size: 2.5rem; /* Regola la dimensione a piacere */
+  text-align: center; /* Opzionale, per centrare */
+  /* Ombra per un leggero effetto neon di base, sempre attiva */
+  text-shadow:
+    0 0 5px rgba(255, 255, 255, 0.5), /* Un leggero alone bianco */
+    0 0 10px currentColor; /* Alone del colore corrente del testo */
+  animation: cambio-colore-neon 1.5s infinite steps(1, end); /* Animazione cambio colore */
+}
+
+@keyframes cambio-colore-neon {
+  0% {
+    color: #ff00ff; /* Magenta Neon */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
+  }
+  33% {
+    color: #00ffff; /* Ciano Neon */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #00ffff, 0 0 15px #00ffff;
+  }
+  66% {
+    color: #39ff14; /* Verde Lime Neon */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #39ff14, 0 0 15px #39ff14;
+  }
+  100% {
+    color: #ff00ff; /* Ritorna al Magenta per un ciclo pulito */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
+  }
+}
