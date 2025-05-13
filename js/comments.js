@@ -18,11 +18,13 @@ if (db) {
 }
 
 // DOM Elements
+
 const commentForm = document.getElementById('commentForm');
 const commentNameInput = document.getElementById('commentName');
 const commentMessageInput = document.getElementById('commentMessage');
 const submitCommentBtn = document.getElementById('submitCommentBtn');
 const commentsListDiv = document.getElementById('commentsList');
+
 const commentNameSection = document.getElementById('commentNameSection');
 const commentsListContainer = document.getElementById('commentsListContainer');
 
@@ -278,6 +280,28 @@ document.addEventListener('DOMContentLoaded', () => {
         commentsListDiv.innerHTML = "<p>Error: Cannot connect to database.</p>";
     } else if (!currentPageId && commentsListDiv) {
          commentsListDiv.innerHTML = "<p>Error: Page context for comments not defined.</p>";
+    }
+
+});
+
+// --- Listener per cambio stato autenticazione (ORA CON IMPORT CORRETTO) ---
+onAuthStateChanged(auth, (user) => {
+    console.log("comments.js - Auth state changed. User:", user ? user.uid : "null");
+    // Aggiorna la visibilità del campo nome
+    if (commentNameSection && commentNameInput) {
+        if (user) { 
+            commentNameSection.style.display = 'none'; 
+            commentNameInput.required = false; 
+        } else { 
+            commentNameSection.style.display = 'block'; 
+            commentNameInput.required = true; 
+        }
+    }
+    // Ricarica i commenti perché lo stato dei like potrebbe dover cambiare per l'utente corrente
+    // e per aggiornare la UI dei pulsanti like
+    if (commentsListDiv && db && currentPageId) {
+        console.log("Auth state changed, reloading comments for like status and UI update.");
+        loadComments();
     }
 });
 

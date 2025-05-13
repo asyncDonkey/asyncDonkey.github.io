@@ -6,6 +6,7 @@
   --text-color-primary: #343a40;
   --text-color-secondary: #495057;
   --text-color-muted: #6c757d;
+
   --surface-bg-primary: #ffffff;
   --surface-bg-secondary: #e9ecef;
   --border-color-primary: #dee2e6;
@@ -17,17 +18,21 @@
   --button-bg-primary: #007bff;
   --button-text-primary: #ffffff;
   --button-hover-bg-primary: #0056b3;
+
   --skill-badge-bg: var(--surface-bg-secondary);
   --skill-badge-text: var(--text-color-secondary);
   --skill-badge-hover-bg: var(--link-color);
   --skill-badge-hover-text: var(--button-text-primary);
   --skill-badge-active-bg: var(--link-hover-color);
   --skill-badge-active-text: var(--button-text-primary);
+
   --skill-details-bg: var(--bg-color);
   --skill-details-border: var(--border-color-secondary);
   --skill-details-text: var(--text-color-secondary);
   --skill-details-heading: var(--link-color);
+
   --link-color-rgb: 0, 123, 255; /* For focus ring */
+
 }
 
 body.dark-mode {
@@ -36,6 +41,7 @@ body.dark-mode {
   --text-color-primary: #e0e0e0;
   --text-color-secondary: #b0b0b0;
   --text-color-muted: #888888;
+
   --surface-bg-primary: #1e1e1e;
   --surface-bg-secondary: #2a2a2a;
   --border-color-primary: #333333;
@@ -64,6 +70,7 @@ a:hover { color: var(--link-hover-color); text-decoration: underline; }
 header {
   background-color: var(--surface-bg-primary);
   padding: 10px 5%; /* Reduced padding */
+
   border-bottom: 1px solid var(--border-color-primary);
   display: flex;
   align-items: center;
@@ -71,16 +78,19 @@ header {
   flex-wrap: wrap;
   transition: background-color 0.3s, border-color 0.3s;
 }
+
 header .avatar img { /* Main site avatar */
   width: 50px; /* Slightly smaller */
   height: 50px;
   border-radius: 50%;
   border: 2px solid var(--border-color-avatar);
   display: block;
+
 }
 header .header-content {
   display: flex;
   align-items: center;
+
   justify-content: space-between; /* Pushes items apart */
   flex-grow: 1; /* Takes remaining space */
   flex-wrap: wrap;
@@ -1000,9 +1010,11 @@ body.donkey-runner-page {
     position: relative;
     width: 100%;
     max-width: 800px; /* Max larghezza del gioco */
+
     display: flex;
     flex-direction: column;
     align-items: center;
+
     margin-top: 20px; 
     margin-bottom: 20px; 
 }
@@ -1246,6 +1258,7 @@ section#skills li.skill-card.active-skill {
   padding: 20px;
   background-color: var(--surface-bg-primary); /* Sfondo leggermente diverso dalle card */
   border: 1px solid var(--border-color-primary);
+
   border-radius: 6px;
   min-height: 70px; 
   text-align: left;
@@ -1254,6 +1267,7 @@ section#skills li.skill-card.active-skill {
   transition: all 0.3s ease-in-out;
 }
 .skill-details-container h3 {
+
   color: var(--heading-color); /* Usa il colore principale per i titoli */
   margin-top: 0;
   margin-bottom: 10px;
