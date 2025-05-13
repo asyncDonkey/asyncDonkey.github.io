@@ -6,18 +6,22 @@ const sampleArticles = [
         id: 'article-1',
         title: "Ottimizzazione Query Firestore per Leaderboard Performanti",
         date: "2025-05-15",
-        snippet: "Un'analisi di come strutturare le query Firestore e gli indici per garantire che le leaderboard dei giochi rimangano veloci e scalabili man mano che il numero di punteggi aumenta.",
+        snippet: "Un'analisi di come strutturare le query Firestore e gli indici...",
         tags: ["Firebase", "Firestore", "Performance", "NoSQL"],
-        link: "#", // Link placeholder, punterà a un futuro articolo dedicato
-        featured: true // Flag per identificarlo come articolo in evidenza
+        link: "#",
+        featured: true,
+        likesPlaceholder: 15, // Esempio
+        commentsPlaceholder: 3  // Esempio
     },
     {
         id: 'article-2',
         title: "Introduzione all'Architettura dei Componenti Web con JS Puro",
         date: "2025-05-10",
-        snippet: "Esploriamo come creare componenti web riutilizzabili utilizzando solo HTML, CSS e JavaScript vanilla, senza l'ausilio di framework esterni.",
+        snippet: "Esploriamo come creare componenti web riutilizzabili...",
         tags: ["JavaScript", "Web Components", "Frontend"],
-        link: "#"
+        link: "#",
+        likesPlaceholder: 22, // Esempio
+        commentsPlaceholder: 7  // Esempio
     },
     {
         id: 'article-3',
@@ -36,7 +40,7 @@ const sampleArticles = [
  */
 function createArticleCard(article, gridContainer) {
     const card = document.createElement('div');
-    card.className = 'article-card'; // Usa la nuova classe CSS
+    card.className = 'article-card';
 
     const titleEl = document.createElement('h4');
     titleEl.textContent = article.title;
@@ -68,11 +72,30 @@ function createArticleCard(article, gridContainer) {
     snippetEl.textContent = article.snippet;
     card.appendChild(snippetEl);
 
+    // NUOVA SEZIONE PER STATISTICHE ARTICOLO (LIKE/COMMENTI)
+    const statsEl = document.createElement('div');
+    statsEl.className = 'article-stats';
+
+    // Placeholder per i Like
+    const likesBadge = document.createElement('span');
+    likesBadge.className = 'article-stat-badge article-likes-badge';
+    likesBadge.innerHTML = `<span class="stat-icon">❤️</span> <span class="stat-count">${article.likesPlaceholder || 0}</span>`; // Usiamo article.likesPlaceholder se lo aggiungeremo ai dati statici, altrimenti 0
+    likesBadge.title = `${article.likesPlaceholder || 0} Likes`;
+    statsEl.appendChild(likesBadge);
+
+    // Placeholder per i Commenti
+    const commentsBadge = document.createElement('span');
+    commentsBadge.className = 'article-stat-badge article-comments-badge';
+    commentsBadge.innerHTML = `<span class="stat-icon">💬</span> <span class="stat-count">${article.commentsPlaceholder || 0}</span>`; // Usiamo article.commentsPlaceholder se lo aggiungeremo, altrimenti 0
+    commentsBadge.title = `${article.commentsPlaceholder || 0} Commenti`;
+    statsEl.appendChild(commentsBadge);
+    
+    card.appendChild(statsEl); // Aggiungi il contenitore delle statistiche alla card
+
     const linkEl = document.createElement('a');
     linkEl.className = 'btn-read-more';
     linkEl.href = article.link;
     linkEl.textContent = 'Leggi di più →';
-    // Se il link è un placeholder, potresti voler aggiungere un target="_blank" o gestirlo diversamente
     if (article.link === "#") {
         linkEl.onclick = (e) => { e.preventDefault(); alert('Articolo non ancora disponibile!'); };
     }

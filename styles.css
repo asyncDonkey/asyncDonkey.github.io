@@ -1462,6 +1462,8 @@ section#skills li.skill-card.active-skill {
     line-height: 1.6;
 }
 
+
+
 .article-card .btn-read-more {
     display: inline-block;
     background-color: transparent;
@@ -1504,3 +1506,81 @@ section#skills li.skill-card.active-skill {
 #featuredArticleCard .btn-portal { /* Bottone per featured article */
     align-self: flex-start;
 }
+
+/* Nuovi stili per i badge di statistiche */
+.article-stats {
+    display: flex;
+    gap: 15px; /* Spazio tra badge like e commenti */
+    margin-top: 10px; /* Spazio sopra le statistiche */
+    margin-bottom: 12px; /* Spazio sotto le statistiche, prima del link "Leggi di più" */
+    padding-top: 10px; /* Spazio interno superiore */
+    border-top: 1px dashed var(--border-color-secondary); /* Separatore leggero */
+}
+
+.article-stat-badge {
+    display: flex;
+    align-items: center;
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    background-color: var(--surface-bg-secondary); /* Leggero sfondo per il badge */
+    padding: 4px 8px;
+    border-radius: 15px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.article-stat-badge:hover {
+    color: var(--link-hover-color); /* Cambia colore al hover per indicare interattività futura */
+    /* background-color: var(--border-color-primary); */ /* Opzionale: cambio sfondo al hover */
+}
+
+.article-stat-badge .stat-icon {
+    margin-right: 5px;
+    font-size: 0.9em; /* Leggermente più piccolo del testo del conteggio per bilanciare */
+    /* Per le emoji, l'aspetto può variare. Per SVG/Font Awesome potresti controllare meglio la dimensione */
+}
+
+.article-stat-badge .stat-count {
+    font-weight: 500;
+    color: var(--text-color-secondary); /* Conteggio leggermente più scuro del testo del badge */
+}
+
+.article-card .btn-read-more {
+    /* ... (stili esistenti per btn-read-more) ... */
+    /* margin-top: auto; Potrebbe non essere più necessario se .article-snippet non ha flex-grow o se le stats sono sempre presenti */
+}
+
+        .glitchzilla-banner {
+            background-color: var(--surface-bg-secondary); /* Sfondo leggero, o un colore più scuro a contrasto */
+            color: var(--text-color-secondary);
+            padding: 12px 20px;
+            text-align: center;
+            margin: 0 auto 30px auto; /* Centrato, con margine inferiore */
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            max-width: 90%; /* Non occupa tutta la larghezza su schermi grandi */
+            /* display: none; Sarà gestito da JS per mostrarlo/nasconderlo */
+        }
+
+        .glitchzilla-banner p {
+            margin: 0;
+            font-size: 1.1em; /* Dimensione testo base del banner */
+            font-family: "Source Code Pro", monospace; /* Font a tema */
+        }
+
+        .glitchzilla-banner .glitch-text-effect {
+            /* L'animazione 'cambio-colore-neon' è già definita in styles.css per il testo arcade */
+            /* Applichiamo direttamente l'animazione e un text-shadow di base */
+            text-shadow:
+                0 0 5px rgba(255, 255, 255, 0.3), /* Alone bianco leggero */
+                0 0 8px currentColor; /* Alone del colore del testo corrente */
+            animation: cambio-colore-neon 1.5s infinite steps(1, end);
+            font-weight: bold;
+        }
+
+        .glitchzilla-banner .player-name-highlight {
+            /* Stile specifico per il nome del giocatore, useremo la stessa animazione neon */
+            animation: cambio-colore-neon 1.5s infinite steps(1, end);
+            font-weight: bold;
+            /* Potremmo voler un colore base diverso per il nome prima che l'animazione parta,
+               ma l'animazione stessa imposterà il colore. */
+        }
