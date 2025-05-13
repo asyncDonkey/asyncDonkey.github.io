@@ -1,13 +1,19 @@
 // js/main.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { createIcon } from './blockies.mjs'; // Assicurati che il percorso sia corretto
+import {
+    getFirestore, doc, getDoc, setDoc, serverTimestamp,
+    collection, query, where, orderBy, limit, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { createIcon } from './blockies.mjs';
+import { displayArticlesSection } from './homePageFeatures.js';
 
 // --- Firebase Config ---
-// Assicurati che questi valori siano corretti per il tuo progetto
 const firebaseConfig = {
-    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk", // Potrebbe essere meglio usare variabili d'ambiente
+    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk",
     authDomain: "asyncdonkey.firebaseapp.com",
     projectId: "asyncdonkey",
     storageBucket: "asyncdonkey.appspot.com",
@@ -21,86 +27,152 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Esporta db e auth se ti servono in altri moduli (raro per main.js)
-// FIX: Rimuovo export duplicato qui perché è già presente sotto
-// export { db, auth };
-
-// --- FUNZIONE HELPER PER AVATAR BLOCKIES ---
-// (Può stare fuori da DOMContentLoaded se non accede direttamente al DOM all'avvio)
+// --- Avatar Generation ---
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
-    // Verifica se createIcon è stata importata correttamente
     if (typeof createIcon !== 'function') {
-        console.error("Funzione createIcon da Blockies non definita o non importata!");
-        // Fornisce un SVG di fallback semplice
-        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" + imgSize + "' height='" + imgSize + "' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+        console.error("createIcon from Blockies not imported!");
+        return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${imgSize}' height='${imgSize}' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E`;
     }
     try {
         const defaultOptions = {
-            seed: String(seed).toLowerCase(), // Il seed deve essere una stringa
-            size: 8, // Numero di blocchi (default libreria)
-            scale: 5, // Scala iniziale (verrà ricalcolata)
-            // color: '#hexcolor', // Colore principale opzionale
-            // bgcolor: '#hexcolor', // Colore di sfondo opzionale
-            // spotcolor: '#hexcolor' // Colore "macchia" opzionale
+            seed: String(seed).toLowerCase(),
+            size: 8,
+            scale: 5,
         };
         const options = { ...defaultOptions, ...blockieOptions };
-
-        // Calcola la scala per adattarsi alla dimensione richiesta dell'immagine
         options.scale = Math.max(1, Math.round(imgSize / options.size));
-
         const canvasElement = createIcon(options);
         if (canvasElement && typeof canvasElement.toDataURL === 'function') {
             return canvasElement.toDataURL();
         } else {
-            throw new Error("createIcon non ha restituito un canvas valido.");
+            throw new Error("createIcon did not return a valid canvas.");
         }
     } catch (e) {
-        console.error("Errore durante la generazione dell'avatar Blockie:", e, "Seed:", seed);
-        // Ritorna l'SVG di fallback in caso di errore
-        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" + imgSize + "' height='" + imgSize + "' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+        console.error("Error generating Blockie avatar:", e, "Seed:", seed);
+        return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${imgSize}' height='${imgSize}' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E`;
     }
 }
 
-// --- FUNZIONE HELPER PER EMOJI BANDIERA --- (LASCIATA INVARIATA COME RICHIESTO)
-export function getFlagEmoji(countryCode) {
-    if (!countryCode || typeof countryCode !== 'string' || countryCode.length !== 2) {
-        return ''; // Restituisce stringa vuota per input non validi
-    }
-    // Converte le lettere del codice paese (es. "IT") nei corrispondenti
-    // caratteri Regional Indicator Symbol dell'Unicode per formare l'emoji della bandiera.
-    // A = 127462 (0x1F1E6) ... Z = 127487 (0x1F1FF)
-    // L'offset da 'A' a Regional Indicator A è 127462 - 65 = 127397
-    try {
-        const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
-        return String.fromCodePoint(...codePoints);
-    } catch (e) {
-        console.warn("Impossibile generare emoji per il codice paese:", countryCode, e);
-        return '🏳️'; // Bandiera bianca di fallback o stringa vuota
-    }
-}
-
-// FIX: Lasciato un solo export
+// Export db and auth for use in other modules if needed by them
+// generateBlockieAvatar is already exported above.
 export { db, auth };
 
+// --- Homepage Mini Leaderboard ---
+const MAX_ENTRIES_HOME_LEADERBOARD = 5; // Number of entries for the home mini leaderboard
 
+async function loadHomeMiniLeaderboard() {
+    const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
+    if (!leaderboardListElement) {
+        // Element not found, likely not on the homepage. Do nothing.
+        return;
+    }
+    if (!db) {
+        console.error("DB instance not available for home mini-leaderboard.");
+        leaderboardListElement.innerHTML = '<li>Errore DB.</li>';
+        return;
+    }
+
+    leaderboardListElement.innerHTML = '<li>Caricamento...</li>'; // Loading message
+
+    try {
+        const scoresCollectionRef = collection(db, "leaderboardScores");
+        const q = query(
+            scoresCollectionRef,
+            where("gameId", "==", "donkeyRunner"), // Filter for the specific game
+            orderBy("score", "desc"),             // Order by score descending
+            limit(MAX_ENTRIES_HOME_LEADERBOARD)   // Limit to the desired number of entries
+        );
+
+        const querySnapshot = await getDocs(q);
+        leaderboardListElement.innerHTML = ''; // Clear list before populating
+
+        if (querySnapshot.empty) {
+            leaderboardListElement.innerHTML = '<li>Nessun punteggio! Sii il primo!</li>';
+            return;
+        }
+
+        let rank = 1;
+        querySnapshot.forEach((docSnapshot) => {
+            const entry = docSnapshot.data();
+            const listItem = document.createElement('li');
+
+            const rankSpan = document.createElement('span');
+            rankSpan.className = 'player-rank';
+            rankSpan.textContent = `${rank}.`;
+            listItem.appendChild(rankSpan);
+
+            const avatarImg = document.createElement('img');
+            avatarImg.className = 'player-avatar'; // CSS will style this
+            const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${docSnapshot.id}`;
+            avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 }); // Smaller avatar
+            avatarImg.alt = `Avatar`; // Alt text for accessibility
+            avatarImg.style.backgroundColor = 'transparent'; // Avoid placeholder bg showing through
+            avatarImg.onerror = () => { // Fallback if avatar fails to load
+                avatarImg.style.backgroundColor = '#ddd';
+                avatarImg.alt = 'Err';
+                avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+            };
+            listItem.appendChild(avatarImg);
+
+            const playerInfoSpan = document.createElement('span');
+            playerInfoSpan.className = 'player-info';
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'player-name';
+
+            // Add flag icon if nationalityCode is present
+            if (entry.nationalityCode && entry.nationalityCode !== "OTHER" && entry.nationalityCode.length === 2) {
+                const flagIconSpan = document.createElement('span');
+                flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
+                flagIconSpan.style.marginRight = '5px';
+                flagIconSpan.style.fontSize = '1em'; // Adjust size as needed
+                flagIconSpan.style.verticalAlign = 'middle';
+                nameSpan.appendChild(flagIconSpan);
+            }
+
+            let displayName = entry.userName || entry.initials || 'Anonimo';
+            if (!entry.userId && entry.initials) displayName = entry.initials; // Show only initials for guests
+            nameSpan.appendChild(document.createTextNode(displayName));
+            playerInfoSpan.appendChild(nameSpan);
+            listItem.appendChild(playerInfoSpan);
+
+            const scoreSpan = document.createElement('span');
+            scoreSpan.className = 'player-score';
+            scoreSpan.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
+            listItem.appendChild(scoreSpan);
+
+            leaderboardListElement.appendChild(listItem);
+            rank++;
+        });
+    } catch (error) {
+        console.error("Error loading home mini-leaderboard:", error);
+        leaderboardListElement.innerHTML = '<li>Errore caricamento.</li>';
+        if (error.code === 'failed-precondition') {
+            // This error often means a composite index is needed in Firestore
+            leaderboardListElement.innerHTML += '<li>(Indice DB mancante)</li>';
+             console.error("Firestore composite index likely missing. Original error:", error.message);
+        }
+    }
+}
+
+// --- DOMContentLoaded ---
 document.addEventListener('DOMContentLoaded', function() {
-
-    // --- Selezione Elementi DOM ---
-    // (È buona norma selezionarli tutti qui, all'inizio)
+    // Select DOM elements (cache them for performance)
     const authContainer = document.getElementById('authContainer');
     const userProfileContainer = document.getElementById('userProfileContainer');
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const logoutButton = document.getElementById('logoutButton');
     const userDisplayName = document.getElementById('userDisplayName');
-    const headerUserAvatar = document.getElementById('headerUserAvatar');
+const headerUserAvatar = document.getElementById('headerUserAvatar');
+console.log('DOM Query - userDisplayName element:', userDisplayName); // <-- AGGIUNGI QUESTO
+console.log('DOM Query - headerUserAvatar element:', headerUserAvatar); // <-- AGGIUNGI QUESTO
     const profileNavLink = document.getElementById('profileNav');
     const loginModal = document.getElementById('loginModal');
     const signupModal = document.getElementById('signupModal');
     const showLoginBtn = document.getElementById('showLoginBtn');
     const showSignupBtn = document.getElementById('showSignupBtn');
-    const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null; // Cerca dentro al modal
-    const closeSignupBtn = signupModal ? signupModal.querySelector('.closeSignupBtn') : null; // Cerca dentro al modal
+    const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
+    const closeSignupBtn = signupModal ? signupModal.querySelector('.closeSignupBtn') : null;
     const commentNameSection = document.getElementById('commentNameSection');
     const commentNameInput = document.getElementById('commentName');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
@@ -109,12 +181,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const bodyElement = document.body;
 
-    // --- Funzioni Helper e Setup UI ---
+    // --- Utility Functions ---
+    function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
 
-    /** Setup Smooth Scrolling per i link interni */
+    // --- UI Setup Functions ---
     function setupSmoothScrolling() {
-        const navLinks = document.querySelectorAll('header nav a[href^="#"]');
-        navLinks.forEach(link => {
+        document.querySelectorAll('header nav a[href^="#"]').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
@@ -122,300 +198,174 @@ document.addEventListener('DOMContentLoaded', function() {
                     const targetElement = document.querySelector(targetId);
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    } else {
-                        console.warn(`Elemento target per smooth scroll non trovato: ${targetId}`);
                     }
                 } catch (error) {
-                    console.error(`Errore nel selettore per smooth scroll: ${targetId}`, error);
+                    // console.error(`Error in selector for smooth scroll: ${targetId}`, error);
                 }
             });
         });
     }
 
-    /** Setup Bottone Scroll-to-Top */
     function setupScrollToTopButton() {
-        if (!scrollToTopBtn) return; // Esci se il bottone non esiste
-        const scrollThreshold = 200; // Mostra dopo 200px di scroll
-
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > scrollThreshold) {
-                scrollToTopBtn.classList.add('show');
-            } else {
-                scrollToTopBtn.classList.remove('show');
-            }
+        if (!scrollToTopBtn) return;
+        window.addEventListener('scroll', () => {
+            scrollToTopBtn.classList.toggle('show', window.pageYOffset > 200);
         });
-
-        scrollToTopBtn.addEventListener('click', function() {
+        scrollToTopBtn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
-    /** Setup Sezione Skills Interattiva */
     function setupInteractiveSkills() {
-        if (!skillDetailsContainer || skillBadges.length === 0) {
-            // console.log('Elementi per skills interattive non trovati, skip setup.');
-            return;
-        }
-        console.log('Inizializzazione sezione skills interattiva...');
-
+        if (!skillDetailsContainer || skillBadges.length === 0) return;
         let currentlyActiveSkillBadge = null;
-
         skillBadges.forEach(badge => {
             badge.addEventListener('click', function() {
-                const skillName = this.dataset.skillName || "Skill"; // Fallback nome
-                const skillDescription = this.dataset.description || "Nessun dettaglio disponibile."; // Fallback descrizione
-
-                // Rimuovi classe attiva dal precedente
                 if (currentlyActiveSkillBadge) {
                     currentlyActiveSkillBadge.classList.remove('active-skill');
                 }
-
-                // Aggiungi classe attiva a quello cliccato
                 this.classList.add('active-skill');
                 currentlyActiveSkillBadge = this;
-
-                // Aggiorna il contenitore dei dettagli
+                const skillName = this.dataset.skillName || "Skill";
+                const skillDescription = this.dataset.description || "No details available.";
                 skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
             });
         });
     }
 
-
-    /** Funzione Semplice per Escaping HTML (per sicurezza) */
-    function escapeHTML(str) {
-         // FIX: Handle potential non-string input gracefully within the function as originally intended
-         // (This function was defined twice, keeping the second definition style)
-        const div = document.createElement('div');
-        div.textContent = str; // textContent automatically handles null/undefined/etc. converting them to empty string
-        return div.innerHTML;
-    }
-
-
-    /** Setup Theme Switcher (Light/Dark Mode) */
     function setupThemeSwitcher() {
         if (!themeToggleBtn || !bodyElement) return;
-
-        const moonIcon = '🌙';
-        const sunIcon = '☀️';
+        const moonIcon = '🌙'; const sunIcon = '☀️';
 
         function applyTheme(theme) {
-            if (theme === 'dark') {
-                bodyElement.classList.add('dark-mode');
-                themeToggleBtn.textContent = sunIcon; // Mostra sole in dark mode
-                localStorage.setItem('theme', 'dark');
-            } else { // Default to light
-                bodyElement.classList.remove('dark-mode');
-                themeToggleBtn.textContent = moonIcon; // Mostra luna in light mode
-                localStorage.setItem('theme', 'light');
-            }
+            bodyElement.classList.toggle('dark-mode', theme === 'dark');
+            themeToggleBtn.textContent = theme === 'dark' ? sunIcon : moonIcon;
+            localStorage.setItem('theme', theme);
         }
-
-        function initializeTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            // Rileva preferenza sistema SOLO se non c'è un tema salvato
-            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-            if (savedTheme) {
-                applyTheme(savedTheme);
-            } else if (prefersDarkScheme) {
-                applyTheme('dark');
-            } else {
-                applyTheme('light'); // Default iniziale
-            }
-        }
-
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(savedTheme || (prefersDark ? 'dark' : 'light')); // Apply initial theme
         themeToggleBtn.addEventListener('click', () => {
-            // Cambia tema: se è dark passa a light, altrimenti passa a dark
-            const isDarkMode = bodyElement.classList.contains('dark-mode');
-            applyTheme(isDarkMode ? 'light' : 'dark');
+            applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
         });
-
-        initializeTheme(); // Applica tema al caricamento
     }
 
-    /** Setup Controlli Modali Login/Signup */
     function setupModalControls() {
-        // Funzione helper per aprire un modal
-        const openModal = (modal) => {
-            if (modal) modal.style.display = 'block';
-        };
+        const openModal = (modal) => { if (modal) modal.style.display = 'block'; };
+        const closeModal = (modal) => { if (modal) modal.style.display = 'none'; };
 
-        // Funzione helper per chiudere un modal
-        const closeModal = (modal) => {
-            if (modal) modal.style.display = 'none';
-        };
+        if (showLoginBtn && loginModal) showLoginBtn.addEventListener('click', () => openModal(loginModal));
+        if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal));
+        if (closeLoginBtn) closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
+        if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
 
-        // Listener per aprire i modal
-        if (showLoginBtn && loginModal) {
-            showLoginBtn.addEventListener('click', () => openModal(loginModal));
-        } else if (!showLoginBtn) {
-            // console.warn("Bottone 'showLoginBtn' non trovato.");
-        } else if (!loginModal) {
-            // console.warn("Modal 'loginModal' non trovato.");
-        }
-
-        if (showSignupBtn && signupModal) {
-            showSignupBtn.addEventListener('click', () => openModal(signupModal));
-        } else if (!showSignupBtn) {
-            // console.warn("Bottone 'showSignupBtn' non trovato.");
-        } else if (!signupModal) {
-            // console.warn("Modal 'signupModal' non trovato.");
-        }
-
-        // Listener per chiudere i modal (bottoni X)
-        if (closeLoginBtn) {
-            closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
-        }
-        if (closeSignupBtn) {
-            closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
-        }
-
-        // Listener per chiudere i modal cliccando fuori dal contenuto
-        window.addEventListener('click', (event) => {
-            if (event.target === loginModal) {
-                closeModal(loginModal);
-            }
-            if (event.target === signupModal) {
-                closeModal(signupModal);
-            }
+        window.addEventListener('click', (event) => { // Close by clicking outside
+            if (event.target === loginModal) closeModal(loginModal);
+            if (event.target === signupModal) closeModal(signupModal);
         });
     }
 
-    // ================================================================
-    // FIX: Rimuovendo la prima definizione duplicata/frammentata di loadUserProfile
-    // e mantenendo solo la seconda, come indicato nel commento originale.
-    // Questa seconda definizione, pur avendo problemi logici interni (uso di variabili
-    // non definite come nicknameToShow/seedForAvatar prima del loro assignment
-    // e logica incompleta nel try/catch), è SINTATTICAMENTE valida (parentesi bilanciate).
-    // La rimozione della duplicazione dovrebbe risolvere l'errore del linter/parser.
-    // NESSUN ALTRO MIGLIORAMENTO viene applicato a questa funzione come richiesto.
-    // ================================================================
-
-    // /** Carica e Visualizza Profilo Utente (Nickname e Avatar) */
-    // async function loadUserProfile(user) {  <--- RIMOSSA QUESTA PRIMA DEFINIZIONE FRAMMENTATA
-    //     // ... codice frammentato ...
-    // }
-
-
-    // QUESTA È L'UNICA DEFINIZIONE DI loadUserProfile CHE DEVE RIMANERE (COME DA COMMENTO ORIGINALE)
     async function loadUserProfile(user) {
-        const userProfileContainer = document.getElementById('userProfileContainer');
-        const userDisplayName = document.getElementById('userDisplayName');
-        const headerUserAvatar = document.getElementById('headerUserAvatar');
-
-        // ---> AGGIUNGI QUESTO CONTROLLO <--- (Commento originale mantenuto)
-        if (!user) {
-            // Non fare nulla se l'utente non è fornito
-            // console.warn("loadUserProfile chiamato senza utente.");
-            return;
-        }
-        // ---> FINE CONTROLLO <--- (Commento originale mantenuto)
-
-        // Se userProfileContainer non esiste sulla pagina corrente, non procedere con l'aggiornamento dell'header
-        if (!userProfileContainer && !userDisplayName && !headerUserAvatar) {
-            // console.log("loadUserProfile: Elementi UI dell'header non presenti in questa pagina.");
+        console.log('loadUserProfile - user:', user);
+        if (!user || (!userProfileContainer && !userDisplayName && !headerUserAvatar)) {
+            // No user or essential UI elements missing, do nothing.
             return;
         }
 
-        // IMPOSTAZIONI INIZIALI CORRETTE (spostate prima del try)
-        let nicknameToShow = user.email ? user.email.split('@')[0] : 'User'; // Fallback iniziale
-        let seedForAvatar = user.uid; // Usa sempre UID come seed affidabile
+        let nicknameToShow = user.email ? user.email.split('@')[0] : 'User'; // Fallback nickname
+        const seedForAvatar = user.uid; // Use UID for consistent avatar
 
-        if (userDisplayName) userDisplayName.textContent = `Loading...`;
-        if (headerUserAvatar) {
-            headerUserAvatar.style.display = 'inline-block'; // Assicurati sia visibile se c'è un utente
-            headerUserAvatar.src = ''; // Pulisci src precedente
-            headerUserAvatar.alt = 'Loading avatar';
-            headerUserAvatar.style.backgroundColor = '#eee'; // Placeholder
-        }
+        if (userDisplayName) userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
+            if (headerUserAvatar) {
+                headerUserAvatar.style.setProperty('display', 'inline-block', 'important'); // Forza la visualizzazione
+                console.log('Navbar Debug: #headerUserAvatar display set to inline-block !important');
+                headerUserAvatar.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
+                headerUserAvatar.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
+                headerUserAvatar.style.backgroundColor = 'transparent';
+                headerUserAvatar.onerror = () => {
+                    console.warn("Navbar Debug: Failed to load Blockie avatar in header. Hiding avatar.");
+                    headerUserAvatar.style.display = 'none';
+                };
+            }
 
         const userProfileRef = doc(db, "userProfiles", user.uid);
         try {
             const docSnap = await getDoc(userProfileRef);
-
             if (docSnap.exists()) {
-                const userProfileData = docSnap.data();
-                nicknameToShow = userProfileData.nickname || nicknameToShow; // Usa nickname da DB se esiste
-                // Eventualmente, recupera un URL avatar specifico se salvato nel profilo
-                // seedForAvatar rimane user.uid se non hai un URL specifico
-            } else {
-                console.warn("Profilo non trovato in Firestore, usando fallback.");
+                nicknameToShow = docSnap.data().nickname || nicknameToShow;
             }
+            console.log('loadUserProfile - profile data from DB:', docSnap.data());
 
-            // Aggiorna il nome visualizzato
             if (userDisplayName) userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-
-            // Genera e imposta l'avatar
             if (headerUserAvatar) {
-                const avatarSrc = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
-                headerUserAvatar.src = avatarSrc;
+                headerUserAvatar.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
                 headerUserAvatar.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
-                headerUserAvatar.style.backgroundColor = 'transparent'; // Rimuovi placeholder bg
-
-                headerUserAvatar.onload = () => {
-                    // console.log("Avatar header Blockie caricato.");
-                };
+                headerUserAvatar.style.backgroundColor = 'transparent';
                 headerUserAvatar.onerror = () => {
-                    console.warn("Fallimento caricamento avatar Blockie nell'header.");
+                    // console.warn("Failed to load Blockie avatar in header.");
                     headerUserAvatar.style.display = 'none';
                 };
             }
-
         } catch (error) {
-            console.error("Errore durante il caricamento del profilo utente da Firestore:", error);
-            if(userDisplayName) userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`; // Usa fallback
-            if (headerUserAvatar) { // Prova a generare avatar di fallback anche in caso di errore DB
+            // console.error("Error loading user profile from Firestore:", error);
+            if (userDisplayName) userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`; // Use fallback name
+            if (headerUserAvatar) { // Attempt to generate fallback avatar even on DB error
                 try {
-                    const fallbackAvatar = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
-                    headerUserAvatar.src = fallbackAvatar;
-                    headerUserAvatar.alt = `Avatar di fallback per ${escapeHTML(nicknameToShow)}`;
+                    headerUserAvatar.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
+                    headerUserAvatar.alt = `Fallback avatar for ${escapeHTML(nicknameToShow)}`;
                     headerUserAvatar.style.backgroundColor = 'transparent';
                 } catch (avatarError) {
-                    console.error("Errore anche nella generazione avatar di fallback", avatarError);
+                    // console.error("Error generating fallback avatar as well", avatarError);
                     headerUserAvatar.style.display = 'none';
                 }
             }
-        }}
-
-    /** Aggiorna l'Interfaccia Utente in base allo Stato di Autenticazione */
-    function updateAuthUI(user) {
-        if (user) {
-            // --- Utente Loggato ---
-            if (authContainer) authContainer.style.display = 'none'; // Nasconde bottoni login/signup
-            if (userProfileContainer) userProfileContainer.style.display = 'flex'; // Mostra area profilo
-            if (logoutButton) logoutButton.style.display = 'inline-block'; // Mostra bottone logout
-            if (profileNavLink) profileNavLink.style.display = 'list-item'; // Mostra link profilo nel nav
-
-            // Chiude i modal se aperti
-            if (loginModal && loginModal.style.display === 'block') closeModal(loginModal); // Usa la funzione helper
-            if (signupModal && signupModal.style.display === 'block') closeModal(signupModal); // Usa la funzione helper
-
-            // Gestione commenti (utente loggato non ha bisogno di inserire nome)
-            if (commentNameSection) commentNameSection.style.display = 'none';
-            if (commentNameInput) commentNameInput.required = false;
-
-            loadUserProfile(user); // Carica dettagli profilo (usa la versione non migliorata)
-
-        } else {
-            // --- Utente Non Loggato ---
-            if (authContainer) authContainer.style.display = 'flex'; // Mostra bottoni login/signup
-            if (userProfileContainer) userProfileContainer.style.display = 'none'; // Nasconde area profilo
-            if (logoutButton) logoutButton.style.display = 'none'; // Nasconde bottone logout
-            if (profileNavLink) profileNavLink.style.display = 'none'; // Nasconde link profilo nel nav
-
-            // Pulisce info utente precedente
-            if (userDisplayName) userDisplayName.textContent = '';
-            if (headerUserAvatar) headerUserAvatar.style.display = 'none';
-
-            // Gestione commenti (utente non loggato deve inserire nome)
-            if (commentNameSection) commentNameSection.style.display = 'block';
-            if (commentNameInput) commentNameInput.required = true;
         }
     }
 
-    /** Traduce Codici Errore Firebase Auth in Messaggi Utente */
+    function updateAuthUI(user) {
+        console.log('updateAuthUI - user:', user);
+        // Helper array to manage UI elements visibility based on auth state
+        const elementsToToggle = [
+            { el: authContainer, showWhenLoggedOut: true }, // Show Login/Register buttons if logged out
+            { el: userProfileContainer, showWhenLoggedOut: false }, // Show user profile area if logged in
+            { el: logoutButton, showWhenLoggedOut: false }, // Show logout button if logged in
+            { el: profileNavLink, showWhenLoggedOut: false, displayType: 'list-item' }, // Show Profile nav link if logged in
+            { el: commentNameSection, showWhenLoggedOut: true } // Show name input for comments if logged out
+        ];
+
+        elementsToToggle.forEach(item => {
+    if (item.el) {
+        const displayStyle = item.displayType || (item.showWhenLoggedOut ? 'flex' : 'none');
+        item.el.style.display = user ? (item.showWhenLoggedOut ? 'none' : displayStyle) : (item.showWhenLoggedOut ? displayStyle : 'none');
+        
+        // Log specifico per userProfileContainer
+        if (item.el.id === 'userProfileContainer') {
+            console.log(`Navbar Debug: #userProfileContainer display set to '${item.el.style.display}' by elementsToToggle logic. User logged in: ${!!user}`);
+        }
+    }
+});
+
+if (user && userProfileContainer && userProfileContainer.style.display === 'none') {
+    console.warn('Navbar Debug: #userProfileContainer was still display:none after elementsToToggle. Forcing to flex.');
+    userProfileContainer.style.setProperty('display', 'flex', 'important'); // Prova con !important
+    // Verifica subito dopo
+    console.log('Navbar Debug: #userProfileContainer display IS NOW:', window.getComputedStyle(userProfileContainer).display);
+}
+
+        if (commentNameInput) commentNameInput.required = !user;
+
+        // Clear user-specific info if logged out
+        if (!user) {
+    if (userDisplayName) userDisplayName.textContent = '';
+    if (headerUserAvatar) headerUserAvatar.style.display = 'none';
+} else {
+    loadUserProfile(user); // loadUserProfile si occuperà di mostrare headerUserAvatar
+    if (loginModal && loginModal.style.display === 'block') loginModal.style.display = 'none';
+    if (signupModal && signupModal.style.display === 'block') signupModal.style.display = 'none';
+}
+    }
+
     function traduireErroreFirebase(codiceErrore) {
-        // Mappa semplice (puoi espanderla)
         const errors = {
             "auth/invalid-email": "L'indirizzo email non è valido.",
             "auth/user-disabled": "Questo account utente è stato disabilitato.",
@@ -424,120 +374,95 @@ document.addEventListener('DOMContentLoaded', function() {
             "auth/email-already-in-use": "L'indirizzo email è già utilizzato da un altro account.",
             "auth/operation-not-allowed": "Operazione non permessa (controlla config Firebase Auth).",
             "auth/weak-password": "La password è troppo debole (minimo 6 caratteri)."
-            // Aggiungi altri codici errore se necessario
         };
         return errors[codiceErrore] || `Si è verificato un errore (${codiceErrore}). Riprova.`;
     }
 
-    // --- Inizializzazione e Listener Principali ---
+    // Initialize UI setup functions
     setupSmoothScrolling();
     setupScrollToTopButton();
     setupInteractiveSkills();
     setupThemeSwitcher();
-    setupModalControls(); // Chiamata alle funzioni di setup
+    setupModalControls();
 
-    // Authentication State Change Listener
-    onAuthStateChanged(auth, (user) => {
-        updateAuthUI(user);
+    // Load homepage specific features if on homepage
+    if (document.getElementById('homeMiniLeaderboardList')) {
+        loadHomeMiniLeaderboard(); // Assicurati che questa sia definita o importata correttamente
+    }
+    if (document.getElementById('articlesSection')) { // Verifica se la sezione articoli esiste
+        displayArticlesSection(); // CHIAMATA ALLA NUOVA FUNZIONE
+    }
+    // Add other homepage-specific function calls here if needed
 
-    });
+    // --- Authentication Listeners ---
+    onAuthStateChanged(auth, updateAuthUI); // Main listener for auth state changes
 
-    // Listener per il form di Login
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Impedisce ricaricamento pagina
+            e.preventDefault();
             const email = loginForm.loginEmail.value;
             const password = loginForm.loginPassword.value;
-            // Qui potresti aggiungere validazione semplice dei campi
             try {
-                console.log(`Tentativo login per: ${email}`);
                 await signInWithEmailAndPassword(auth, email, password);
-                // Il successo viene gestito da onAuthStateChanged che chiama updateAuthUI
-                loginForm.reset(); // Pulisce il form
-                // closeModal(loginModal); // Chiude modal (gestito da updateAuthUI)
+                loginForm.reset();
             } catch (error) {
-                console.error("Errore Login Firebase:", error.code, error.message);
+                // console.error("Firebase Login Error:", error.code, error.message);
                 alert("Errore Login: " + traduireErroreFirebase(error.code));
             }
         });
-    } else {
-        console.warn("Elemento Form di Login (loginForm) non trovato.");
     }
 
-    // Listener per il form di Signup
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = signupForm.signupEmail.value;
             const password = signupForm.signupPassword.value;
-            // Qui potresti aggiungere validazione password (es. conferma password)
+            const nickname = signupForm.signupNickname.value.trim();
+            const selectedNationalityCode = signupForm.signupNationality.value;
+
+            if (password.length < 6) {
+                alert("La password deve contenere almeno 6 caratteri.");
+                return;
+            }
+            if (nickname.length < 3) {
+                alert("Il nickname deve contenere almeno 3 caratteri.");
+                return;
+            }
 
             try {
-                console.log(`Tentativo registrazione per: ${email}`);
-                // 1. Crea utente in Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-                console.log("Registrazione Auth OK:", user.uid);
 
-                // Recupera i nuovi valori dal form
-                const nickname = signupForm.signupNickname.value.trim();
-                const selectedNationalityCode = signupForm.signupNationality.value; // Prende il 'value' dall'opzione selezionata
-
-                 const userProfileData = {
-                     email: user.email,
-                     nickname: nickname,
-                     createdAt: serverTimestamp(),
-                     // Logica originale per nationalityCode mantenuta
-                     ...(selectedNationalityCode && selectedNationalityCode !== "OTHER" && selectedNationalityCode !== "" && { nationalityCode: selectedNationalityCode }),
-                     ...(selectedNationalityCode === "OTHER" && { nationalityCode: "OTHER" }) // Mantiene la logica per "OTHER" se presente nell'originale implicitamente
-                 };
-
-                // ---> !!! FIX: RIGA MANCANTE AGGIUNTA QUI !!! <---
-                // Questa riga crea il riferimento al documento Firestore per il nuovo utente.
-                const userProfileRef = doc(db, "userProfiles", user.uid);
-
-                try {
-                    // Ora userProfileRef sarà definita e setDoc potrà usarla.
-                    // L'errore "userProfileRef is not defined" avveniva qui:
-                    await setDoc(userProfileRef, userProfileData);
-                    console.log("main.js - Profilo completo creato con successo per:", user.uid, " Dati:", userProfileData);
-                } catch (firestoreError) {
-                    console.error(`main.js - CREAZIONE PROFILO FIRESTORE FALLITA per ${user.uid}:`, firestoreError);
-                    alert("ATTENZIONE: Registrazione parzialmente riuscita. Impossibile creare il record del profilo utente con tutti i dettagli.");
-                    // Logica originale mantenuta: l'utente resta autenticato ma senza profilo completo
+                const userProfileData = {
+                    email: user.email,
+                    nickname: nickname,
+                    createdAt: serverTimestamp(),
+                };
+                // Add nationalityCode only if a valid selection is made (not empty and not "OTHER")
+                // or if "OTHER" is explicitly selected.
+                if (selectedNationalityCode && selectedNationalityCode !== "") {
+                    userProfileData.nationalityCode = selectedNationalityCode;
                 }
 
+                await setDoc(doc(db, "userProfiles", user.uid), userProfileData);
                 signupForm.reset();
-                alert("Registrazione avvenuta con successo!"); // User is automatically logged in
-
+                alert("Registrazione avvenuta con successo!");
             } catch (authError) {
-                console.error("Errore Registrazione Firebase Auth:", authError.code, authError.message);
+                // console.error("Firebase Signup Auth Error:", authError.code, authError.message);
                 alert("Errore Registrazione: " + traduireErroreFirebase(authError.code));
             }
         });
-    } else {
-        console.warn("Elemento Form di Signup (signupForm) non trovato.");
     }
 
-    // Listener per il bottone di Logout
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                console.log("Logout eseguito.");
-                // L'UI viene aggiornata da onAuthStateChanged
-                // Potresti reindirizzare alla homepage o fare altro qui se necessario
-                // window.location.href = '/';
+                // UI update is handled by onAuthStateChanged
             } catch (error) {
-                console.error("Errore Logout:", error);
+                // console.error("Logout Error:", error);
                 alert("Errore durante il logout: " + error.message);
             }
         });
-    } else {
-        // Non è un errore grave se non c'è, viene mostrato solo se loggati
-        // console.log("Bottone Logout (logoutButton) non trovato inizialmente (normale se non loggati).");
     }
-
-
 }); // End DOMContentLoaded
-

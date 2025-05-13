@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
     <style>
+        /* ... (stili esistenti invariati) ... */
         .portal-header {
             text-align: center;
             padding: 40px 20px;
@@ -139,9 +140,115 @@
             font-weight: bold;
             color: var(--link-color);
         }
-        .intro-animation-placeholder {
-             margin: 20px auto 40px auto;
+        /* Rimossa la classe .intro-animation-placeholder qui era vuota, 
+           lo stile sarà nella classe specifica definita in styles.css
+           o direttamente applicato se decommentato. */
+        
+        /* Stili per la sezione articoli (H.3) */
+        #articlesSection {
+            /* Stile per la section se necessario, es. padding, margin */
+            /* Inizialmente nascosta, JS la mostrerà se ci sono articoli */
+            display: none; 
+            padding: 20px 0; /* Aggiunto padding verticale */
         }
+        #articlesSection .portal-header { /* Titolo sezione articoli */
+             margin-bottom: 20px;
+        }
+        #articlesGrid {
+            /* Utilizza lo stesso stile di .portal-grid o definisci uno custom */
+        }
+        .article-card { /* Stile specifico per le card degli articoli */
+            background-color: var(--surface-bg-primary);
+            border: 1px solid var(--border-color-primary);
+            border-radius: 8px;
+            padding: 20px; /* Leggermente meno padding delle portal-card */
+            box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+            text-align: left; /* Allinea testo a sinistra */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Per spingere il link "Leggi" in basso */
+        }
+         .article-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 5px 14px rgba(0,0,0,0.1);
+        }
+        .article-card h4 { /* Titolo articolo */
+            font-size: 1.3em;
+            color: var(--heading-color);
+            margin-bottom: 8px;
+        }
+        .article-card .article-meta { /* Contenitore per data e tags */
+            font-size: 0.85em;
+            color: var(--text-color-muted);
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px 15px; /* Spazio tra data e tags, e tra i tags */
+        }
+        .article-card .article-date {
+            /* Stile specifico per la data se necessario */
+        }
+        .article-card .article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .article-card .article-tag {
+            background-color: var(--surface-bg-secondary);
+            color: var(--text-color-secondary);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+        .article-card .article-snippet { /* Estratto articolo */
+            font-size: 0.95em;
+            color: var(--text-color-secondary);
+            margin-bottom: 15px;
+            flex-grow: 1; /* Fa crescere il paragrafo per spingere il link in basso */
+            line-height: 1.6;
+        }
+        .article-card .btn-read-more { /* Link "Leggi di più" */
+            display: inline-block;
+            background-color: transparent;
+            color: var(--link-color);
+            padding: 8px 0; /* Più minimalista */
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            border: none;
+            align-self: flex-start; /* Allinea a sinistra */
+        }
+        .article-card .btn-read-more:hover {
+            color: var(--link-hover-color);
+            text-decoration: underline;
+        }
+        /* Stili per la card "Featured Article" nel portal-grid principale */
+        #featuredArticleCard {
+            /* Inizialmente nascosta, JS la mostrerà se c'è un articolo featured */
+            display: none; 
+            text-align: left; /* Allineamento a sinistra per questa card specifica */
+        }
+        #featuredArticleCard .card-icon {
+             margin-left: 0; /* Icona a sinistra per la card featured */
+             margin-right: auto;
+             margin-bottom: 10px;
+        }
+        #featuredArticleCard h3 { /* Titolo "Featured Article" */
+            text-align: left;
+            font-size: 1.6em; /* Più grande */
+        }
+         #featuredArticleCard #featuredArticleActualTitle {
+            font-size: 1.3em;
+            color: var(--text-color-primary); /* Colore diverso per il titolo effettivo */
+            display: block;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        #featuredArticleCard .btn-portal { /* Bottone per featured article */
+            align-self: flex-start; /* Allinea a sinistra */
+        }
+
     </style>
 </head>
 <body>
@@ -181,9 +288,9 @@
             <p>Un hub centrale per navigare tra applicazioni, games e articoli tecnici.</p>
         </div>
 
-        <div class="intro-animation-placeholder">
-             </div>
-
+        <div class="intro-visual-container-placeholder" style="text-align: center; margin: 20px auto 40px auto;">
+            <p style="color: var(--text-color-muted); font-style: italic;">[Placeholder per animazione/immagine introduttiva]</p>
+        </div>
         <div class="portal-grid">
             <div class="portal-card">
                 <img src="images/icon-dev-solid.svg" alt="Icona .Dev" class="card-icon">
@@ -239,13 +346,12 @@
             </div>
         </div>
 
-        <section id="articlesSection" style="margin-top: 40px; display:none;">
-            <div class="portal-header" style="padding-top:20px; padding-bottom:20px; margin-bottom:20px;">
-                <h2>Articoli Tecnici & Updates</h2>
+        <section id="articlesSection"> <div class="portal-header"> <h2>Articoli Tecnici & Updates</h2>
                 <p>Approfondimenti su sviluppo, progetti ed esplorazioni tecnologiche.</p>
             </div>
             <div id="articlesGrid" class="portal-grid">
-                </div>
+                <p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli...</p>
+            </div>
         </section>
     </main>
 
@@ -484,5 +590,5 @@
     </div>
 
     <script src="js/main.js" type="module"></script>
-</body>
+    </body>
 </html>

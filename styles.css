@@ -121,6 +121,24 @@ header nav ul {
 header nav a { color: var(--text-color-secondary); font-weight: 500; }
 header nav a:hover { color: var(--link-color); text-decoration: none; }
 
+/* === SEZIONE H.1: Stili per Immagine/Animazione Introduttiva (Task H.1) === */
+/* .intro-visual-container {
+    text-align: center; // Se vuoi centrare il contenuto del div
+}
+
+.intro-visual-item {
+    max-width: 500px;   // Larghezza massima dell'immagine/GIF
+    height: auto;       // Mantiene le proporzioni
+    display: block;     // Necessario per applicare margin: auto orizzontalmente
+    margin: 20px auto 40px auto; // Spaziatura sopra, auto orizzontale, sotto
+    border-radius: 8px; // Bordi arrotondati
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); // Ombra leggera
+    background-color: var(--surface-bg-secondary); // Sfondo placeholder se l'immagine non carica subito
+    border: 1px solid var(--border-color-secondary); // Bordo leggero opzionale
+}
+*/
+/* === FINE SEZIONE H.1 === */
+
 #themeToggleBtn { /* Theme button styles unchanged */
   background: none; border: 1px solid var(--border-color-primary); color: var(--text-color-secondary); padding: 6px 10px; /* Slightly smaller */ border-radius: 20px; cursor: pointer; font-size: 1.1em; line-height: 1; transition: all 0.3s;
 }
@@ -1324,31 +1342,165 @@ section#skills li.skill-card.active-skill {
 }
 
 .testo-neon-arcade {
-  /* font-family: 'Press Start 2P', cursive; */ /* Decommenta se vuoi usare il font pixelato */
-  font-size: 2.5rem; /* Regola la dimensione a piacere */
-  text-align: center; /* Opzionale, per centrare */
+  /* font-family: 'Press Start 2P', cursive; */
+  font-size: 2.5rem;
+  text-align: center;
+  padding: 1rem; /* Aggiungiamo un po' di padding per distanziare il testo dal bordo */
+
+  /* Impostazioni del bordo */
+  border-width: 0.1rem; /* Spessore del bordo come avevi indicato */
+  border-style: solid;  /* Stile del bordo, 'solid' è comune */
+  /* Il border-color iniziale sarà impostato dal primo frame dell'animazione */
+
   /* Ombra per un leggero effetto neon di base, sempre attiva */
   text-shadow:
     0 0 5px rgba(255, 255, 255, 0.5), /* Un leggero alone bianco */
     0 0 10px currentColor; /* Alone del colore corrente del testo */
-  animation: cambio-colore-neon 1.5s infinite steps(1, end); /* Animazione cambio colore */
+
+  animation: cambio-colore-neon-e-bordo 1.5s infinite steps(1, end); /* Animazione cambio colore per testo e bordo */
 }
 
-@keyframes cambio-colore-neon {
+@keyframes cambio-colore-neon-e-bordo {
   0% {
     color: #ff00ff; /* Magenta Neon */
+    border-color: #ff00ff; /* Bordo Magenta Neon */
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
   }
   33% {
     color: #00ffff; /* Ciano Neon */
+    border-color: #00ffff; /* Bordo Ciano Neon */
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #00ffff, 0 0 15px #00ffff;
   }
   66% {
     color: #39ff14; /* Verde Lime Neon */
+    border-color: #39ff14; /* Bordo Verde Lime Neon */
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #39ff14, 0 0 15px #39ff14;
   }
   100% {
     color: #ff00ff; /* Ritorna al Magenta per un ciclo pulito */
+    border-color: #ff00ff; /* Bordo ritorna al Magenta */
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
   }
+}
+
+/* Stili per la sezione articoli (Task H.3) */
+#articlesSection {
+    /* display: none; gestito da JS */
+    padding: 20px 0;
+}
+
+#articlesSection .portal-header { /* Titolo sezione articoli */
+     margin-bottom: 20px;
+}
+
+/* #articlesGrid -> eredita da .portal-grid se usi la stessa classe */
+
+.article-card {
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; /* Aggiunta transizione */
+}
+ .article-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 5px 14px rgba(0,0,0,0.1);
+}
+
+.article-card h4 { /* Titolo articolo */
+    font-size: 1.3em;
+    color: var(--heading-color);
+    margin-top: 0; /* Rimuovi margine superiore se presente da stili generali h4 */
+    margin-bottom: 8px;
+}
+
+.article-card .article-meta { /* Contenitore per data e tags */
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap; /* Permette ai tag di andare a capo */
+    align-items: center; /* Allinea data e blocco tags verticalmente */
+    gap: 5px 15px; /* Spazio tra data e primo tag, e tra i gruppi di tag */
+}
+
+.article-card .article-date {
+    /* Nessuno stile specifico necessario qui, eredita da .article-meta */
+}
+
+.article-card .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px; /* Spazio tra i singoli tag */
+}
+
+.article-card .article-tag {
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-secondary);
+    padding: 4px 10px; /* Aumentato leggermente il padding */
+    border-radius: 15px; /* Più arrotondato */
+    font-size: 0.8em;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.2s, color 0.2s;
+}
+.article-card .article-tag:hover {
+    background-color: var(--link-color);
+    color: var(--button-text-primary);
+}
+
+.article-card .article-snippet {
+    font-size: 0.95em;
+    color: var(--text-color-secondary);
+    margin-bottom: 15px;
+    flex-grow: 1;
+    line-height: 1.6;
+}
+
+.article-card .btn-read-more {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--link-color);
+    padding: 8px 0;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+    border: none;
+    align-self: flex-start;
+    margin-top: auto; /* Spinge il bottone in basso se la card ha spazio extra */
+}
+.article-card .btn-read-more:hover {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+/* Stili per la card "Featured Article" nel portal-grid principale */
+#featuredArticleCard {
+    /* display: none; gestito da JS */
+    text-align: left; 
+}
+#featuredArticleCard .card-icon { /* Icona a sinistra */
+     margin-left: 0;
+     margin-right: auto;
+     margin-bottom: 10px;
+}
+#featuredArticleCard > h3 { /* Seleziona solo l'h3 diretto figlio */
+    text-align: left;
+    font-size: 1.6em; 
+}
+#featuredArticleCard #featuredArticleActualTitle { /* Titolo effettivo dell'articolo */
+    font-size: 1.3em;
+    color: var(--text-color-primary);
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-weight: bold; /* Aggiunto per dare più enfasi */
+}
+#featuredArticleCard .btn-portal { /* Bottone per featured article */
+    align-self: flex-start;
 }
