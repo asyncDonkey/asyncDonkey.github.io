@@ -1549,38 +1549,49 @@ section#skills li.skill-card.active-skill {
     /* margin-top: auto; Potrebbe non essere più necessario se .article-snippet non ha flex-grow o se le stats sono sempre presenti */
 }
 
-        .glitchzilla-banner {
-            background-color: var(--surface-bg-secondary); /* Sfondo leggero, o un colore più scuro a contrasto */
-            color: var(--text-color-secondary);
-            padding: 12px 20px;
-            text-align: center;
-            margin: 0 auto 30px auto; /* Centrato, con margine inferiore */
-            border-radius: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            max-width: 90%; /* Non occupa tutta la larghezza su schermi grandi */
-            /* display: none; Sarà gestito da JS per mostrarlo/nasconderlo */
-        }
+        @keyframes cambio-colore-neon {
+  0% {
+    color: #ff00ff; /* Magenta Neon */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
+  }
+  33% {
+    color: #00ffff; /* Ciano Neon */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #00ffff, 0 0 15px #00ffff;
+  }
+  66% {
+    color: #39ff14; /* Verde Lime Neon */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #39ff14, 0 0 15px #39ff14;
+  }
+  100% {
+    color: #ff00ff; /* Ritorna al Magenta per un ciclo pulito */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
+  }
+}
 
-        .glitchzilla-banner p {
-            margin: 0;
-            font-size: 1.1em; /* Dimensione testo base del banner */
-            font-family: "Source Code Pro", monospace; /* Font a tema */
-        }
+/* Sposta questi stili da index.html a styles.css per una migliore organizzazione */
+.glitchzilla-banner {
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-secondary);
+    padding: 12px 20px;
+    text-align: center;
+    margin: 0 auto 30px auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    max-width: 90%; /* Adatta al tuo layout, es. 700px */
+    /* display: none; Sarà gestito da JS */
+}
 
-        .glitchzilla-banner .glitch-text-effect {
-            /* L'animazione 'cambio-colore-neon' è già definita in styles.css per il testo arcade */
-            /* Applichiamo direttamente l'animazione e un text-shadow di base */
-            text-shadow:
-                0 0 5px rgba(255, 255, 255, 0.3), /* Alone bianco leggero */
-                0 0 8px currentColor; /* Alone del colore del testo corrente */
-            animation: cambio-colore-neon 1.5s infinite steps(1, end);
-            font-weight: bold;
-        }
+.glitchzilla-banner p {
+    margin: 0;
+    font-size: 1.1em;
+    font-family: "Source Code Pro", monospace;
+}
 
-        .glitchzilla-banner .player-name-highlight {
-            /* Stile specifico per il nome del giocatore, useremo la stessa animazione neon */
-            animation: cambio-colore-neon 1.5s infinite steps(1, end);
-            font-weight: bold;
-            /* Potremmo voler un colore base diverso per il nome prima che l'animazione parta,
-               ma l'animazione stessa imposterà il colore. */
-        }
+.glitchzilla-banner .glitch-text-effect,
+.glitchzilla-banner .player-name-highlight {
+    text-shadow:
+        0 0 5px rgba(255, 255, 255, 0.3),
+        0 0 8px currentColor;
+    animation: cambio-colore-neon 1.5s infinite steps(1, end);
+    font-weight: bold;
+}

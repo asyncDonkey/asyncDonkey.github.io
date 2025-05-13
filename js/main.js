@@ -9,7 +9,9 @@ import {
     signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { createIcon } from './blockies.mjs';
-import { displayArticlesSection } from './homePageFeatures.js';
+import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
+
+
 
 // --- Firebase Config ---
 const firebaseConfig = {
@@ -391,6 +393,9 @@ if (user && userProfileContainer && userProfileContainer.style.display === 'none
     }
     if (document.getElementById('articlesSection')) { // Verifica se la sezione articoli esiste
         displayArticlesSection(); // CHIAMATA ALLA NUOVA FUNZIONE
+    }
+    if (document.getElementById('glitchzillaDefeatedBanner')) { // Verifica se il banner esiste
+        displayGlitchzillaBanner(); // <--- CHIAMATA ALLA NUOVA FUNZIONE PER IL BANNER
     }
     // Add other homepage-specific function calls here if needed
 

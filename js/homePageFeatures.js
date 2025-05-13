@@ -157,3 +157,34 @@ export function displayArticlesSection() {
         if (placeholderGrid) articlesGrid.appendChild(placeholderGrid); // Ripristina placeholder
     }
 }
+
+/**
+ * Mostra il banner dell'ultimo giocatore che ha sconfitto Glitchzilla.
+ * Per ora, usa dati placeholder.
+ */
+export function displayGlitchzillaBanner() {
+    const bannerElement = document.getElementById('glitchzillaDefeatedBanner');
+    const defeaterNameElement = document.getElementById('lastGlitchzillaDefeater');
+
+    if (!bannerElement || !defeaterNameElement) {
+        console.warn("Elementi DOM per il banner Glitchzilla non trovati.");
+        return;
+    }
+
+    // --- DATI PLACEHOLDER ---
+    // In futuro (Task C.3.4), questa informazione verrà da Firestore.
+    const lastDefeaterData = {
+        name: "cYd3R_pUnK_2077", // Nome placeholder
+        defeated: true // Flag per indicare se qualcuno l'ha sconfitto
+    };
+    // --- FINE DATI PLACEHOLDER ---
+
+    if (lastDefeaterData && lastDefeaterData.defeated && lastDefeaterData.name) {
+        defeaterNameElement.textContent = lastDefeaterData.name;
+        bannerElement.style.display = 'block'; // Mostra il banner
+        console.log(`Banner Glitchzilla mostrato per: ${lastDefeaterData.name}`);
+    } else {
+        bannerElement.style.display = 'none'; // Nascondi il banner se non ci sono dati o non è stato sconfitto
+        console.log("Banner Glitchzilla nascosto (nessun dato o Glitchzilla non sconfitto).");
+    }
+}
