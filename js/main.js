@@ -317,63 +317,65 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // NOTA: Le righe seguenti usano variabili (es. nicknameToShow, seedForAvatar)
-        // PRIMA che vengano definite nel blocco try/catch o abbiano un valore di fallback certo.
-        // Questo causerà errori a runtime, ma viene lasciato così per NON modificare la logica originale.
+        // IMPOSTAZIONI INIZIALI CORRETTE (spostate prima del try)
+        let nicknameToShow = user.email ? user.email.split('@')[0] : 'User'; // Fallback iniziale
+        let seedForAvatar = user.uid; // Usa sempre UID come seed affidabile
+
         if (userDisplayName) userDisplayName.textContent = `Loading...`;
         if (headerUserAvatar) {
-            headerUserAvatar.style.display = 'inline-block';
-            headerUserAvatar.src = '';
+            headerUserAvatar.style.display = 'inline-block'; // Assicurati sia visibile se c'è un utente
+            headerUserAvatar.src = ''; // Pulisci src precedente
             headerUserAvatar.alt = 'Loading avatar';
-            headerUserAvatar.style.backgroundColor = '#eee';
+            headerUserAvatar.style.backgroundColor = '#eee'; // Placeholder
         }
-
-
-        // Aggiorna il nome visualizzato (NOTA: nicknameToShow non è ancora definito qui!)
-        // Questa riga causerà probabilmente un ReferenceError
-        // userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-
 
         const userProfileRef = doc(db, "userProfiles", user.uid);
         try {
             const docSnap = await getDoc(userProfileRef);
 
-             // Manca logica per usare docSnap qui (es. if (docSnap.exists())...)
+            if (docSnap.exists()) {
+                const userProfileData = docSnap.data();
+                nicknameToShow = userProfileData.nickname || nicknameToShow; // Usa nickname da DB se esiste
+                // Eventualmente, recupera un URL avatar specifico se salvato nel profilo
+                // seedForAvatar rimane user.uid se non hai un URL specifico
+            } else {
+                console.warn("Profilo non trovato in Firestore, usando fallback.");
+            }
 
-            // Gestione caricamento/errore immagine (anche se è data URL, buona pratica)
-            // Posizionato qui come nell'originale, anche se idealmente va dopo aver impostato src
-            if (headerUserAvatar) { // Aggiunto controllo esistenza elemento
+            // Aggiorna il nome visualizzato
+            if (userDisplayName) userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
+
+            // Genera e imposta l'avatar
+            if (headerUserAvatar) {
+                const avatarSrc = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
+                headerUserAvatar.src = avatarSrc;
+                headerUserAvatar.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
+                headerUserAvatar.style.backgroundColor = 'transparent'; // Rimuovi placeholder bg
+
                 headerUserAvatar.onload = () => {
                     // console.log("Avatar header Blockie caricato.");
                 };
                 headerUserAvatar.onerror = () => {
                     console.warn("Fallimento caricamento avatar Blockie nell'header.");
-                    // Non dovrebbe succedere con data URL, ma per sicurezza
-                    headerUserAvatar.style.display = 'none'; // Nascondi se rotto
+                    headerUserAvatar.style.display = 'none';
                 };
             }
 
-
         } catch (error) {
             console.error("Errore durante il caricamento del profilo utente da Firestore:", error);
-            // Mostra comunque il fallback nickname in caso di errore DB
-            // (NOTA: nicknameToShow non è definito qui!)
-            if(userDisplayName) userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-            // Prova a generare l'avatar anche in caso di errore DB (usa UID o nickname)
-             // (NOTA: seedForAvatar non è definito qui!)
-            try {
-                 if (headerUserAvatar) { // Aggiunto controllo esistenza elemento
+            if(userDisplayName) userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`; // Usa fallback
+            if (headerUserAvatar) { // Prova a generare avatar di fallback anche in caso di errore DB
+                try {
                     const fallbackAvatar = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
                     headerUserAvatar.src = fallbackAvatar;
                     headerUserAvatar.alt = `Avatar di fallback per ${escapeHTML(nicknameToShow)}`;
                     headerUserAvatar.style.backgroundColor = 'transparent';
-                 }
-            } catch (avatarError) {
-                console.error("Errore anche nella generazione avatar di fallback", avatarError);
-                 if (headerUserAvatar) headerUserAvatar.style.display = 'none'; // Nascondi se tutto fallisce
+                } catch (avatarError) {
+                    console.error("Errore anche nella generazione avatar di fallback", avatarError);
+                    headerUserAvatar.style.display = 'none';
+                }
             }
-        }
-    }
+        }}
 
     /** Aggiorna l'Interfaccia Utente in base allo Stato di Autenticazione */
     function updateAuthUI(user) {
