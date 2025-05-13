@@ -1,9 +1,9 @@
 # .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🐛 Bug Report
-about: Create a report to help us improve the project.
+description: Create a report to help us improve the project. # <-- CHIAVE CORRETTA
 title: "[BUG] - Brief description of the bug"
 labels: ["bug", "needs-triage"]
-assignees: ["your-github-username"] # Personalizza con il tuo username o lascia vuoto
+assignees: ["your-github-username"]
 body:
   - type: markdown
     attributes:
