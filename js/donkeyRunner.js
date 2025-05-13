@@ -81,8 +81,11 @@ async function loadDonkeyLeaderboard() {
 }
 
 function displayDonkeyLeaderboard(leaderboardData) {
-    if (!miniLeaderboardListEl) return;
-    miniLeaderboardListEl.innerHTML = ''; // Pulisci
+    if (!miniLeaderboardListEl) {
+        console.warn("Elemento miniLeaderboardList non trovato.");
+        return;
+    }
+    miniLeaderboardListEl.innerHTML = ''; // Pulisci la lista precedente
 
     if (!leaderboardData || leaderboardData.length === 0) {
         miniLeaderboardListEl.innerHTML = '<li>Nessun punteggio registrato.</li>';
@@ -90,55 +93,65 @@ function displayDonkeyLeaderboard(leaderboardData) {
     }
 
     leaderboardData.forEach((entry, index) => {
-    const li = document.createElement('li');
+        const li = document.createElement('li');
 
-    const rankSpan = document.createElement('span');
-    rankSpan.className = 'player-rank';
-    rankSpan.textContent = `${index + 1}.`;
+        // 1. Rank
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'player-rank';
+        rankSpan.textContent = `${index + 1}.`;
+        li.appendChild(rankSpan);
 
-    const avatarImg = document.createElement('img');
-    avatarImg.className = 'player-avatar'; // Assicurati che questa classe sia stilizzata
+        // 2. Avatar
+        const avatarImg = document.createElement('img'); // Definizione di avatarImg
+        avatarImg.className = 'player-avatar';
+        
+        // Usa 'initials' come fallback per il seed se userName non è presente (utile per anonimi)
+        const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${entry.id}`;
+        let altTextForBlockie = entry.userName || entry.initials || 'Anon';
+        
+        // Utilizza size: 8 per coerenza con le altre sezioni
+        avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 }); 
+        avatarImg.alt = `${altTextForBlockie}'s Avatar`;
+        avatarImg.style.backgroundColor = 'transparent'; // Blockies ha il suo sfondo
+        avatarImg.onerror = () => { 
+            avatarImg.style.backgroundColor = '#ddd'; 
+            avatarImg.alt = 'Avatar Error';
+            // Fallback SVG semplice se l'avatar non si carica
+            avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+        };
+        li.appendChild(avatarImg); // Aggiungi l'avatar al list item
 
-    // --- NUOVA Logica Avatar con Blockies ---
-    const seedForBlockie = entry.userId || entry.userName || entry.initials || `anon-${entry.id}`;
-    let altTextForBlockie = entry.userName || entry.initials || 'Anon';
+        // 3. Player Info (Contenitore per Nome e Data)
+        const playerInfoDiv = document.createElement('div');
+        playerInfoDiv.className = 'player-info';
 
-    avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 }); // Usa size: 8 come nelle altre sezioni
-    avatarImg.alt = `${altTextForBlockie}'s Avatar`;
-    avatarImg.style.backgroundColor = 'transparent';
-    avatarImg.onerror = () => { 
-        avatarImg.style.backgroundColor = '#ddd'; 
-        avatarImg.alt = 'Avatar Error';
-        avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
-    };
-    // --- Fine Logica Avatar con Blockies ---
-    
-    // Aggiungi l'avatar e il resto delle info al list item
-    li.appendChild(rankSpan);
-    li.appendChild(avatarImg);
-    // ... (resto della creazione del playerInfoDiv, nameSpan, dateSpan, scoreSpan) ...
-    const playerInfoDiv = document.createElement('div');
-    playerInfoDiv.className = 'player-info';
+        // Nome del Giocatore
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'player-name';
+        let displayName = entry.userName || entry.initials || 'Giocatore Anonimo'; // Usa initials come fallback
+        if (!entry.userId) { // Se non c'è userId, è un ospite
+            displayName += " (Ospite)"; 
+        }
+        nameSpan.textContent = displayName;
+        
+        // Data del Punteggio
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'player-date';
+        dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
 
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'player-name';
-    nameSpan.textContent = entry.userName || entry.initials || 'Giocatore Anonimo';
-    
-    const dateSpan = document.createElement('span');
-    dateSpan.className = 'player-date';
-    dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
+        playerInfoDiv.appendChild(nameSpan);
+        playerInfoDiv.appendChild(dateSpan);
+        li.appendChild(playerInfoDiv); // Aggiungi il div con nome e data
 
-    playerInfoDiv.appendChild(nameSpan);
-    playerInfoDiv.appendChild(dateSpan);
+        // 4. Punteggio
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'player-score';
+        scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
+        li.appendChild(scoreSpan); // Aggiungi il punteggio
 
-    const scoreSpan = document.createElement('span');
-    scoreSpan.className = 'player-score';
-    scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
-
-    li.appendChild(playerInfoDiv); // Aggiungi playerInfoDiv dopo l'avatar
-    li.appendChild(scoreSpan);
-    miniLeaderboardListEl.appendChild(li);
-});
+        // 5. Aggiungi l'intero list item (li) alla lista della leaderboard (ol)
+        miniLeaderboardListEl.appendChild(li);
+    });
 }
 
 console.log("Script donkeyRunner.js caricato.");
@@ -166,7 +179,17 @@ const fullscreenButton = document.getElementById('fullscreenButton');
 // --- SCORE INPUT DOM REFS ---
 const scoreInputContainerDonkey = document.getElementById('scoreInputContainerDonkey');
 const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
-const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
+const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey'); // Assicurati che sia definito globalmente o accessibile qui
+
+if (saveScoreBtnDonkey) {
+    saveScoreBtnDonkey.addEventListener('click', function() { // Modificato per aggiungere un log qui
+        console.log("EVENT LISTENER: Pulsante 'Salva Punteggio' CLICCATO!"); // NUOVO LOG
+        handleSaveDonkeyScore(); // Chiama la tua funzione originale
+    });
+} else {
+    // Questo log è importante se il pulsante non viene trovato all'avvio!
+    console.error("CRITICO: Elemento DOM saveScoreBtnDonkey NON TROVATO durante l'aggiunta del listener!");
+}
 const restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey'); // Pulsante di restart specifico
 
 // --- TOUCH DEVICE DETECTION & CONTROLS VISIBILITY ---
@@ -1217,27 +1240,45 @@ function shouldShowDonkeyScoreInput(currentScore) {
 }
 
 async function handleSaveDonkeyScore() {
+    console.log("handleSaveDonkeyScore: Inizio funzione."); // LOG 1
+
+    if (finalScore <= 0) {
+        console.error("handleSaveDonkeyScore: Tentativo di salvare un punteggio non valido (<=0). Punteggio:", finalScore);
+        alert("Impossibile salvare un punteggio di 0 o negativo.");
+        if (saveScoreBtnDonkey) { // Assicurati che il pulsante esista prima di modificarlo
+            saveScoreBtnDonkey.disabled = false;
+            saveScoreBtnDonkey.textContent = "Salva Punteggio";
+        }
+        return;
+    }
+
     if (!db || !auth) {
         console.error("DB o Auth non inizializzati. Impossibile salvare il punteggio.");
         alert("Errore: Connessione al database fallita.");
+        if (saveScoreBtnDonkey) { saveScoreBtnDonkey.disabled = false; saveScoreBtnDonkey.textContent = "Salva Punteggio"; }
         return;
     }
     if (!saveScoreBtnDonkey || !playerInitialsDonkeyInput || !scoreInputContainerDonkey || !restartGameBtnDonkey) {
         console.error("Elementi DOM per il salvataggio punteggio non trovati.");
+        // Non reimpostare il pulsante qui se gli elementi DOM fondamentali mancano, perché l'utente non potrebbe comunque interagire.
         return;
     }
 
-    const scoreToSave = finalScore; // Assumendo che 'finalScore' contenga il punteggio del gioco
-    let initialsToSave = playerInitialsDonkeyInput.value.trim().toUpperCase();
-    let userNameToSave = "Giocatore Anonimo"; // Default
+    const scoreToSave = finalScore;
+    console.log("handleSaveDonkeyScore: Punteggio da salvare =", scoreToSave); // LOG 2
+    let userNameToSave = "Giocatore Anonimo";
     let userIdToSave = null;
+    let initialsForDb = "";
+    let isAnonymousSave = false;
 
     saveScoreBtnDonkey.disabled = true;
     saveScoreBtnDonkey.textContent = "Salvataggio...";
 
     const currentUser = auth.currentUser;
+    console.log("handleSaveDonkeyScore: currentUser =", currentUser ? currentUser.uid : 'Nessuno'); // LOG 3
 
-    if (currentUser) {
+    if (currentUser) { // Utente Loggato
+        console.log("handleSaveDonkeyScore: Blocco utente loggato."); // LOG 4
         userIdToSave = currentUser.uid;
         try {
             const userProfileRef = doc(db, "userProfiles", currentUser.uid);
@@ -1247,124 +1288,132 @@ async function handleSaveDonkeyScore() {
             } else {
                 userNameToSave = currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato";
             }
-            // Se l'utente loggato non inserisce iniziali, usa le prime del nickname/email
-            if (!initialsToSave && userNameToSave) {
-                initialsToSave = userNameToSave.substring(0, 5).toUpperCase();
-            }
+            console.log("handleSaveDonkeyScore: userNameToSave (loggato) =", userNameToSave); // LOG 5
         } catch (profileError) {
             console.error("Errore caricamento profilo per punteggio:", profileError);
             userNameToSave = currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato"; // Fallback
-             if (!initialsToSave && userNameToSave) {
-                initialsToSave = userNameToSave.substring(0, 5).toUpperCase();
-            }
         }
-    } else { // Utente non loggato
-        if (initialsToSave.length === 0 || initialsToSave.length > 5) {
+        initialsForDb = userNameToSave.substring(0, 5).toUpperCase();
+    } else { // Utente Non Loggato
+        console.log("handleSaveDonkeyScore: Blocco utente anonimo."); // LOG 6
+        isAnonymousSave = true;
+        const rawInitials = playerInitialsDonkeyInput.value.trim().toUpperCase();
+        console.log("handleSaveDonkeyScore: rawInitials (anonimo) =", rawInitials); // LOG 7
+        if (rawInitials.length === 0 || rawInitials.length > 5) {
+            console.log("handleSaveDonkeyScore: Validazione iniziali anonimo fallita."); // LOG 8
             alert('Per favore, inserisci da 1 a 5 caratteri per le tue iniziali.');
             playerInitialsDonkeyInput.focus();
             saveScoreBtnDonkey.disabled = false;
             saveScoreBtnDonkey.textContent = "Salva Punteggio";
             return;
         }
-        userNameToSave = initialsToSave; // Per anonimi, userName è le iniziali
+        userNameToSave = rawInitials;
+        initialsForDb = rawInitials;
+        console.log("handleSaveDonkeyScore: userNameToSave (anonimo) =", userNameToSave); // LOG 9
     }
-    
-    // Validazione finale iniziali (potrebbe essere ridondante se già fatta sopra per anonimi, ma sicura)
-    if (initialsToSave.length === 0 || initialsToSave.length > 5) {
-        alert('Le iniziali devono contenere da 1 a 5 caratteri.');
-        playerInitialsDonkeyInput.focus();
-        saveScoreBtnDonkey.disabled = false;
-        saveScoreBtnDonkey.textContent = "Salva Punteggio";
-        return;
-    }
-
 
     const scoreData = {
         score: scoreToSave,
-        timestamp: serverTimestamp(), // Da Firestore
-        initials: initialsToSave,
+        timestamp: serverTimestamp(),
         userName: userNameToSave,
-        gameId: "donkeyRunner" // FONDAMENTALE!
+        initials: initialsForDb,
+        gameId: "donkeyRunner"
     };
 
     if (userIdToSave) {
         scoreData.userId = userIdToSave;
     }
+    console.log("handleSaveDonkeyScore: scoreData pronto per Firestore =", scoreData); // LOG 10
 
     try {
+        console.log("handleSaveDonkeyScore: Tentativo di addDoc a Firestore."); // LOG 11
         const leaderboardScoresCollection = collection(db, "leaderboardScores");
         await addDoc(leaderboardScoresCollection, scoreData);
-        console.log("Punteggio DonkeyRunner salvato con ID:", scoreData); // Log dell'oggetto intero per debug
-        
+        console.log("Punteggio DonkeyRunner salvato con successo:", scoreData); // LOG 12 (SUCCESSO!)
+
         scoreInputContainerDonkey.style.display = 'none';
-        playerInitialsDonkeyInput.value = ''; // Pulisci input
-        restartGameBtnDonkey.style.display = 'block'; // Mostra pulsante restart
+        if (isAnonymousSave) {
+            playerInitialsDonkeyInput.value = '';
+        }
+        const saveAsNameMessageEl = document.getElementById('saveAsNameMessage');
+        if (saveAsNameMessageEl) saveAsNameMessageEl.style.display = 'none';
         
-        await loadDonkeyLeaderboard(); // Ricarica la classifica per mostrare il nuovo punteggio
+        restartGameBtnDonkey.style.display = 'block';
+
+        await loadDonkeyLeaderboard();
     } catch (error) {
-        console.error("Errore salvataggio punteggio DonkeyRunner a Firestore: ", error);
-        alert("Errore nel salvataggio del punteggio. Riprova.");
+        console.error("handleSaveDonkeyScore: ERRORE durante addDoc a Firestore:", error); // LOG 13 (ERRORE FIRESTORE)
+        alert("Errore nel salvataggio del punteggio. Riprova.\nControlla la console per dettagli (F12).");
         saveScoreBtnDonkey.disabled = false;
         saveScoreBtnDonkey.textContent = "Salva Punteggio";
     }
+    console.log("handleSaveDonkeyScore: Fine funzione."); // LOG 14
 }
 
-// Funzione per gestire il game over e mostrare l'input del punteggio
 function processGameOver() {
-    console.log("ProcessGameOver - Punteggio finale:", finalScore);
-    currentGameState = GAME_STATE.GAME_OVER; // Assicura che lo stato sia corretto
+    console.log("ProcessGameOver - Punteggio finale:", finalScore); // Log esistente
+    currentGameState = GAME_STATE.GAME_OVER;
+    AudioManager.stopMusic();
 
-    // Nascondi controlli touch del gioco se visibili
-    if (mobileControlsDiv && mobileControlsDiv.style.display === 'block') {
-        // mobileControlsDiv.style.display = 'none'; // Potresti volerli lasciare visibili
-    }
-    if (fullscreenButton && fullscreenButton.style.display === 'block'){
-        // fullscreenButton.style.display = 'none'; // Anche questo potresti volerlo lasciare
-    }
-
+    // ---> NUOVI LOG DA AGGIUNGERE QUI <---
+    console.log("processGameOver: Controllo elementi DOM per UI salvataggio punteggio:");
+    console.log("scoreInputContainerDonkey:", scoreInputContainerDonkey);
+    console.log("playerInitialsDonkeyInput:", playerInitialsDonkeyInput);
+    console.log("saveScoreBtnDonkey:", saveScoreBtnDonkey);
+    console.log("restartGameBtnDonkey:", restartGameBtnDonkey);
+    // ---> FINE NUOVI LOG <---
 
     if (shouldShowDonkeyScoreInput(finalScore)) {
         if (scoreInputContainerDonkey && playerInitialsDonkeyInput && saveScoreBtnDonkey && restartGameBtnDonkey) {
             scoreInputContainerDonkey.style.display = 'block';
-            restartGameBtnDonkey.style.display = 'none'; // Nascondi restart finché non si salva o si ignora
+            // ... il resto della logica per mostrare/nascondere gli input specifici ...
+            // (come definito nella versione corretta di processGameOver che ti ho dato prima)
+            // Assicurati che questa parte sia completa e corretta
+            restartGameBtnDonkey.style.display = 'none'; // Nascondi il restart button del form inizialmente
             saveScoreBtnDonkey.disabled = false;
             saveScoreBtnDonkey.textContent = "Salva Punteggio";
 
             const currentUser = auth.currentUser;
-            if (currentUser) {
-                // Precompila iniziali/nickname per utenti loggati
-                const userProfileRef = doc(db, "userProfiles", currentUser.uid);
-                getDoc(userProfileRef).then(docSnap => {
-                    if (docSnap.exists() && docSnap.data().nickname) {
-                        playerInitialsDonkeyInput.value = docSnap.data().nickname.substring(0,5).toUpperCase();
-                        playerInitialsDonkeyInput.placeholder = "NICKNAME";
-                    } else if (currentUser.email) {
-                        playerInitialsDonkeyInput.value = (currentUser.email.split('@')[0] || '').substring(0,5).toUpperCase();
-                        playerInitialsDonkeyInput.placeholder = "NICKNAME";
-                    }
-                }).catch(err => {
-                     console.error("Errore nel precompilare iniziali da profilo:", err);
-                     if (currentUser.email) playerInitialsDonkeyInput.value = (currentUser.email.split('@')[0] || '').substring(0,5).toUpperCase();
-                     playerInitialsDonkeyInput.placeholder = "ABCDE";
-                });
-            } else {
-                playerInitialsDonkeyInput.value = ''; // Pulisci per utenti non loggati
+            const playerInitialsLabelEl = document.getElementById('playerInitialsLabel'); // Questo viene preso qui dentro
+            const saveAsNameMessageEl = document.getElementById('saveAsNameMessage'); // Anche questo
+
+            if (currentUser) { // Utente Loggato
+                playerInitialsDonkeyInput.style.display = 'none';
+                if (playerInitialsLabelEl) playerInitialsLabelEl.style.display = 'none';
+                if (saveAsNameMessageEl) {
+                    getDoc(doc(db, "userProfiles", currentUser.uid)).then(docSnap => {
+                        let nameToDisplay = currentUser.email.split('@')[0];
+                        if (docSnap.exists() && docSnap.data().nickname) {
+                            nameToDisplay = docSnap.data().nickname;
+                        }
+                        saveAsNameMessageEl.textContent = `Il punteggio sarà salvato come: ${nameToDisplay}`;
+                        saveAsNameMessageEl.style.display = 'block';
+                    }).catch(err => {
+                        console.error("Errore nel recuperare il profilo per messaggio UI:", err);
+                        saveAsNameMessageEl.textContent = `Il punteggio sarà salvato con il tuo utente.`;
+                        saveAsNameMessageEl.style.display = 'block';
+                    });
+                }
+            } else { // Utente Non Loggato
+                playerInitialsDonkeyInput.style.display = 'block';
+                if (playerInitialsLabelEl) playerInitialsLabelEl.style.display = 'block';
+                if (saveAsNameMessageEl) saveAsNameMessageEl.style.display = 'none';
+                playerInitialsDonkeyInput.value = '';
                 playerInitialsDonkeyInput.placeholder = "ABCDE";
+                playerInitialsDonkeyInput.focus();
             }
-            playerInitialsDonkeyInput.focus();
+
         } else {
-            console.warn("Contenitore input punteggio o suoi elementi non trovati!");
-            // Se il contenitore non c'è, mostra direttamente il pulsante di restart generico
-             if(restartGameBtnDonkey) restartGameBtnDonkey.style.display = 'block'; // Fallback
+            console.warn("processGameOver: Uno o più elementi DOM (scoreInputContainerDonkey, playerInitialsDonkeyInput, saveScoreBtnDonkey, restartGameBtnDonkey) sono NULL. Impossibile mostrare UI per salvare.");
+            if (restartGameBtnDonkey) restartGameBtnDonkey.style.display = 'block';
         }
     } else {
-        // Se non si mostra l'input (es. score = 0), mostra direttamente il pulsante restart
-        if(scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-        if(restartGameBtnDonkey) restartGameBtnDonkey.style.display = 'block';
+        console.log("processGameOver: Punteggio finale non valido o zero, non mostro UI per salvare. Punteggio:", finalScore);
+        if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+        if (restartGameBtnDonkey) restartGameBtnDonkey.style.display = 'block';
     }
-    // La logica per il messaggio "TAP TO RESTART" / "PRESS ENTER" è in drawGameOverScreen
-    // e negli event listener. Il pulsante restartGameBtnDonkey offre un'opzione esplicita.
 }
+
 
 function checkCollisions(){
     if(!asyncDonkey||gameOverTrigger)return;
