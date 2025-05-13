@@ -351,7 +351,20 @@ section#contact li { margin-bottom: 10px; }
 .back-to-home-link { display: block; text-align: center; margin-top: 30px; margin-bottom: 20px; }
 .back-to-home-link a { color: var(--link-color); text-decoration: none; padding: 8px 15px; border: 1px solid var(--link-color); border-radius: 20px; transition: background-color 0.2s, color 0.2s; }
 .back-to-home-link a:hover { background-color: var(--link-color); color: var(--button-text-primary); text-decoration: none;}
-
+        /* Stili per la sezione commenti dell'articolo */
+        #articleCommentsFormContainer {
+            margin-bottom: 30px;
+            /* Puoi usare la classe .comment-form-container se gli stili sono già definiti globalmente */
+        }
+        #articleCommentsListContainer {
+            margin-top: 20px;
+        }
+        #articleCommentsList .comment-item { /* Riusa lo stile .comment-item */
+            /* Eventuali aggiustamenti specifici se necessario */
+        }
+        #articleCommentForm button[type="submit"] {
+            /* Può usare .game-button */
+        }
 
 /* ===== Skills Section Styles (Pagina About) ===== */
 section#skills ul.skills-grid { list-style-type: none; padding: 0; margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; justify-content: center; }
