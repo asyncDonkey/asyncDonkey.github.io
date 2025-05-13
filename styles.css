@@ -1277,5 +1277,48 @@ section#skills li.skill-card.active-skill {
   margin-bottom: 0;
   font-size: 1.05em; /* Testo dettagli leggermente più grande */
   line-height: 1.7;
+}
 
+/* Stili per le bandiere nella pagina del profilo */
+#profileNationality .fi {
+  display: inline-block; /* Necessario perché lo span prenda dimensioni */
+  width: 1.33333333em;  /* Standard della libreria, relativo al font-size del genitore */
+  height: 1em;          /* Standard della libreria */
+  line-height: 1em;     /* Per coerenza con l'altezza */
+  vertical-align: -0.15em; /* Leggero aggiustamento verticale, prova valori diversi se necessario */
+  /* background-image: è fornito dalla libreria flag-icons.min.css */
+  background-size: contain;
+  background-position: 50%;
+  background-repeat: no-repeat;
+  /* margin-right: 8px; // Già impostato via JS, puoi scegliere dove gestirlo */
+}
+
+/* Assicurati che il testo del profilo abbia un font-size di base 
+   perché le dimensioni 'em' della bandiera siano consistenti. */
+#profileDetailsDisplay p {
+    /* Se non già definito, o se vuoi sovrascriverlo per questa sezione: */
+    font-size: 1em; /* O 16px, o la tua dimensione base preferita */
+    line-height: 1.6; /* Per un buon allineamento verticale del testo */
+    margin-bottom: 5px; /* Già presente nel tuo HTML inline */
+}
+
+/* Stili per la mini-leaderboard di DonkeyRunner */
+.donkey-runner-page #miniLeaderboardList li .player-name .fi {
+  /* display: inline-block; // Già impostato dalla libreria .fi */
+  width: 1.33em;  /* Esempio, relativo al font-size di .player-name */
+  height: 1em;    /* Esempio */
+  line-height: 1em;
+  vertical-align: -0.1em; /* Aggiusta per allineare bene con il testo del nome */
+  /* margin-right: 5px; // Già impostato via JS, puoi scegliere */
+  background-size: contain;
+  background-position: 50%;
+  background-repeat: no-repeat;
+}
+
+/* Opzionale: aggiusta il font-size di .player-name se necessario 
+   perché la bandiera (basata su 'em') si adatti bene */
+.donkey-runner-page #miniLeaderboardList .player-name {
+  /* font-size: 0.95em; */ /* Esempio */
+  display: flex; /* Per aiutare con l'allineamento verticale della bandiera e del testo */
+  align-items: center; /* Allinea verticalmente bandiera e testo */
 }

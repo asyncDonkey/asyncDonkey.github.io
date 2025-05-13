@@ -60,7 +60,27 @@ export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
     }
 }
 
-// --- Codice Eseguito Dopo il Caricamento del DOM ---
+
+    export function getFlagEmoji(countryCode) {
+        if (!countryCode || typeof countryCode !== 'string' || countryCode.length !== 2) {
+            return ''; // Restituisce stringa vuota per input non validi
+        }
+        // Converte le lettere del codice paese (es. "IT") nei corrispondenti
+        // caratteri Regional Indicator Symbol dell'Unicode per formare l'emoji della bandiera.
+        // A = 127462 (0x1F1E6) ... Z = 127487 (0x1F1FF)
+        // L'offset da 'A' a Regional Indicator A è 127462 - 65 = 127397
+        try {
+            const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+            return String.fromCodePoint(...codePoints);
+        } catch (e) {
+            console.warn("Impossibile generare emoji per il codice paese:", countryCode, e);
+            return '🏳️'; // Bandiera bianca di fallback o stringa vuota
+        }
+    }
+
+export { db, auth};
+
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // --- Selezione Elementi DOM ---
@@ -158,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
     /** Funzione Semplice per Escaping HTML (per sicurezza) */
     function escapeHTML(str) {
         const div = document.createElement('div');
@@ -167,6 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     /** Setup Theme Switcher (Light/Dark Mode) */
+
     function setupThemeSwitcher() {
         if (!themeToggleBtn || !bodyElement) return;
 
@@ -268,38 +290,44 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
         }
 
-        // Stato iniziale mentre carica
-        userDisplayName.textContent = `Caricamento...`;
-        headerUserAvatar.style.display = 'inline-block'; // Mostra l'avatar
-        headerUserAvatar.src = ''; // Pulisci src precedente
-        headerUserAvatar.alt = 'Avatar in caricamento';
-        headerUserAvatar.style.backgroundColor = '#eee'; // Colore placeholder
 
-        // Nickname di fallback dall'email
-        let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente';
-        const seedForAvatar = user.uid; // Usa sempre UID per consistenza avatar
+ // QUESTA È L'UNICA DEFINIZIONE DI loadUserProfile CHE DEVE RIMANERE
+async function loadUserProfile(user) {
+    const userProfileContainer = document.getElementById('userProfileContainer');
+    const userDisplayName = document.getElementById('userDisplayName');
+    const headerUserAvatar = document.getElementById('headerUserAvatar');
 
-        try {
-            const userProfileRef = doc(db, "userProfiles", user.uid);
-            const docSnap = await getDoc(userProfileRef);
+    // ---> AGGIUNGI QUESTO CONTROLLO <---
+    if (!user) {
+        // Non fare nulla se l'utente non è fornito
+        // console.warn("loadUserProfile chiamato senza utente.");
+        return;
+    }
+    // ---> FINE CONTROLLO <---
 
-            if (docSnap.exists() && docSnap.data().nickname) {
-                nicknameToShow = docSnap.data().nickname; // Usa nickname da Firestore se esiste
-                // console.log(`Nickname caricato da Firestore: ${nicknameToShow}`);
-            } else {
-                // console.log("Nessun profilo Firestore trovato o nickname mancante, usando fallback.");
-                // Se il profilo non esiste, potresti volerlo creare qui
-                // await setDoc(userProfileRef, { email: user.email, nickname: nicknameToShow, createdAt: serverTimestamp() });
-            }
+    // Se userProfileContainer non esiste sulla pagina corrente, non procedere con l'aggiornamento dell'header
+    if (!userProfileContainer && !userDisplayName && !headerUserAvatar) {
+        // console.log("loadUserProfile: Elementi UI dell'header non presenti in questa pagina.");
+        return;
+    }
+
+    if (userDisplayName) userDisplayName.textContent = `Loading...`;
+    if (headerUserAvatar) {
+        headerUserAvatar.style.display = 'inline-block';
+        headerUserAvatar.src = '';
+        headerUserAvatar.alt = 'Loading avatar';
+        headerUserAvatar.style.backgroundColor = '#eee';
+    }
+
 
             // Aggiorna il nome visualizzato
             userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
 
-            // Genera e imposta l'avatar Blockie
-            const avatarDataUrl = generateBlockieAvatar(seedForAvatar, 32, { size: 8 }); // Dimensione avatar 32x32
-            headerUserAvatar.src = avatarDataUrl;
-            headerUserAvatar.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
-            headerUserAvatar.style.backgroundColor = 'transparent'; // Rimuovi sfondo placeholder
+
+    const userProfileRef = doc(db, "userProfiles", user.uid); 
+    try {
+        const docSnap = await getDoc(userProfileRef);
+
 
             // Gestione caricamento/errore immagine (anche se è data URL, buona pratica)
             headerUserAvatar.onload = () => {
@@ -382,17 +410,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Inizializzazione e Listener Principali ---
 
-    // Setup UI iniziale
-    setupSmoothScrolling();
-    setupScrollToTopButton();
-    setupInteractiveSkills();
-    setupThemeSwitcher();
-    setupModalControls();
 
-    // Listener per lo stato di autenticazione Firebase
+    // Authentication State Change Listener
     onAuthStateChanged(auth, (user) => {
-        console.log("Stato autenticazione cambiato:", user ? `Utente ${user.uid}` : "Nessun utente");
-        updateAuthUI(user); // Aggiorna UI in base allo stato
+        updateAuthUI(user);
+
     });
 
     // Listener per il form di Login
@@ -432,27 +454,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 const user = userCredential.user;
                 console.log("Registrazione Auth OK:", user.uid);
 
-                // 2. Crea documento profilo base in Firestore
-                const userProfileRef = doc(db, "userProfiles", user.uid);
+                // Recupera i nuovi valori dal form
+                const nickname = signupForm.signupNickname.value.trim();
+                const selectedNationalityCode = signupForm.signupNationality.value; // Prende il 'value' dall'opzione selezionata
+
                 const userProfileData = {
-                    email: user.email,
-                    nickname: user.email.split('@')[0], // Nickname iniziale
-                    createdAt: serverTimestamp() // Orario server creazione
-                };
+        email: user.email,
+        nickname: nickname,
+        createdAt: serverTimestamp(),
+    };
 
-                try {
-                    await setDoc(userProfileRef, userProfileData);
-                    console.log("Profilo Firestore base creato per:", user.uid);
-                } catch (firestoreError) {
-                    // Errore grave: utente creato ma profilo no. Loggalo bene.
-                    console.error(`FALLIMENTO CREAZIONE PROFILO Firestore per ${user.uid}:`, firestoreError);
-                    // Avvisa l'utente che qualcosa è andato storto ma è registrato
-                    alert("Registrazione completata, ma c'è stato un problema nella creazione del profilo utente. Contatta l'assistenza se necessario.");
-                }
+            if (selectedNationalityCode && selectedNationalityCode !== "OTHER" && selectedNationalityCode !== "") {
+                userProfileData.nationalityCode = selectedNationalityCode;
+            } else if (selectedNationalityCode === "OTHER") {
+                userProfileData.nationalityCode = "OTHER";
+            }
 
+            // ---> !!! RIGA MANCANTE DA AGGIUNGERE QUI !!! <---
+            const userProfileRef = doc(db, "userProfiles", user.uid); 
+            // Questa riga crea il riferimento al documento Firestore per il nuovo utente.
+
+            try {
+                // Ora userProfileRef sarà definita e setDoc potrà usarla.
+                // L'errore "userProfileRef is not defined" avviene qui (riga ~364 nel tuo file):
+                await setDoc(userProfileRef, userProfileData); 
+                console.log("main.js - Profilo completo creato con successo per:", user.uid, " Dati:", userProfileData);
+            } catch (firestoreError) {
+                console.error(`main.js - CREAZIONE PROFILO FIRESTORE FALLITA per ${user.uid}:`, firestoreError);
+                alert("ATTENZIONE: Registrazione parzialmente riuscita. Impossibile creare il record del profilo utente con tutti i dettagli.");
+            }
                 signupForm.reset();
-                // Non serve alert di successo qui, onAuthStateChanged aggiornerà l'UI e chiuderà il modal
-                // alert("Registrazione completata con successo!");
+                alert("Registrazione avvenuta con successo!"); // User is automatically logged in
 
             } catch (authError) {
                 console.error("Errore Registrazione Firebase Auth:", authError.code, authError.message);
@@ -482,5 +514,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // console.log("Bottone Logout (logoutButton) non trovato inizialmente (normale se non loggati).");
     }
 
-});
+
+}); // End DOMContentLoaded
 
