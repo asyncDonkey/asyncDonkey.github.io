@@ -1,0 +1,55 @@
+# .github/ISSUE_TEMPLATE/feature_request.yml
+name: ✨ Feature Request
+description: Suggest an idea or enhancement for this project.
+title: "[FEAT] - Brief description of the feature"
+labels: ["enhancement", "needs-discussion"]
+assignees: [] # Personalizza o lascia vuoto
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Thank you for suggesting an idea!** Help us understand your request by providing the following information.
+  - type: textarea
+    id: related-problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the problem is. Ex. "I'm always frustrated when..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered (Optional)
+      description: A clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: false
+  - type: textarea
+    id: audience
+    attributes:
+      label: Target Audience / Use Case (Optional)
+      description: |
+        Who would benefit from this feature? How would they use it?
+        *(Consider user stories: "As a [type of user], I want [some goal] so that [some reason].")*
+    validations:
+      required: false
+  - type: textarea
+    id: implementation-ideas
+    attributes:
+      label: Potential Implementation (Optional)
+      description: If you have ideas on how this could be implemented, please share them.
+    validations:
+      required: false
+  - type: textarea
+    id: additional-info-feat
+    attributes:
+      label: Additional Information (Optional)
+      description: Add any other context, mockups, screenshots, or links relevant to the feature request here.
+    validations:
+      required: false

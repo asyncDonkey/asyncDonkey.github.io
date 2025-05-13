@@ -85,7 +85,7 @@ function displayDonkeyLeaderboard(leaderboardData) {
         console.warn("Elemento miniLeaderboardList non trovato.");
         return;
     }
-    miniLeaderboardListEl.innerHTML = ''; // Pulisci la lista precedente
+    miniLeaderboardListEl.innerHTML = ''; 
 
     if (!leaderboardData || leaderboardData.length === 0) {
         miniLeaderboardListEl.innerHTML = '<li>Nessun punteggio registrato.</li>';
@@ -95,61 +95,67 @@ function displayDonkeyLeaderboard(leaderboardData) {
     leaderboardData.forEach((entry, index) => {
         const li = document.createElement('li');
 
-        // 1. Rank
+        // 1. Rank (invariato)
         const rankSpan = document.createElement('span');
         rankSpan.className = 'player-rank';
         rankSpan.textContent = `${index + 1}.`;
         li.appendChild(rankSpan);
 
-        // 2. Avatar
-        const avatarImg = document.createElement('img'); // Definizione di avatarImg
+        // 2. Avatar (invariato)
+        const avatarImg = document.createElement('img');
         avatarImg.className = 'player-avatar';
-        
-        // Usa 'initials' come fallback per il seed se userName non è presente (utile per anonimi)
         const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${entry.id}`;
         let altTextForBlockie = entry.userName || entry.initials || 'Anon';
-        
-        // Utilizza size: 8 per coerenza con le altre sezioni
         avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 }); 
         avatarImg.alt = `${altTextForBlockie}'s Avatar`;
-        avatarImg.style.backgroundColor = 'transparent'; // Blockies ha il suo sfondo
-        avatarImg.onerror = () => { 
-            avatarImg.style.backgroundColor = '#ddd'; 
-            avatarImg.alt = 'Avatar Error';
-            // Fallback SVG semplice se l'avatar non si carica
-            avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
-        };
-        li.appendChild(avatarImg); // Aggiungi l'avatar al list item
+        avatarImg.style.backgroundColor = 'transparent'; 
+        avatarImg.onerror = () => { /* ... fallback ... */ };
+        li.appendChild(avatarImg);
 
-        // 3. Player Info (Contenitore per Nome e Data)
+        // 3. Player Info (Nome e Data) - MODIFICATO PER INCLUDERE BANDIERA
         const playerInfoDiv = document.createElement('div');
         playerInfoDiv.className = 'player-info';
 
-        // Nome del Giocatore
+        // Nome del Giocatore e Bandiera
         const nameSpan = document.createElement('span');
         nameSpan.className = 'player-name';
-        let displayName = entry.userName || entry.initials || 'Giocatore Anonimo'; // Usa initials come fallback
-        if (!entry.userId) { // Se non c'è userId, è un ospite
-            displayName += " (Ospite)"; 
-        }
-        nameSpan.textContent = displayName;
         
-        // Data del Punteggio
+        // --- AGGIUNTA BANDIERA ---
+        if (entry.nationalityCode && entry.nationalityCode !== "OTHER") {
+            const flagIconSpan = document.createElement('span');
+            const countryCodeForLibrary = entry.nationalityCode.toLowerCase();
+            flagIconSpan.classList.add('fi', `fi-${countryCodeForLibrary}`);
+            // Applica stili direttamente o tramite CSS (vedi Passo 4)
+            flagIconSpan.style.marginRight = '5px'; 
+            flagIconSpan.style.verticalAlign = 'middle'; 
+            // flagIconSpan.style.fontSize = '0.9em'; // Opzionale per aggiustare dimensione relativa al nome
+            nameSpan.appendChild(flagIconSpan); // Aggiungi bandiera prima del nome
+        }
+        // --- FINE AGGIUNTA BANDIERA ---
+        
+        let displayName = entry.userName || entry.initials || 'Giocatore Anonimo';
+        if (!entry.userId && !entry.initials) { // Segnala gli ospiti se non hanno iniziali (più specifico)
+             displayName += " (Ospite)";
+        } else if (!entry.userId && entry.initials) { // Se ha iniziali ma non userId, è un ospite con iniziali
+             displayName = entry.initials + " (Ospite)";
+        }
+        
+        nameSpan.appendChild(document.createTextNode(displayName)); // Aggiungi il testo del nome dopo la bandiera
+        
         const dateSpan = document.createElement('span');
         dateSpan.className = 'player-date';
         dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
 
         playerInfoDiv.appendChild(nameSpan);
         playerInfoDiv.appendChild(dateSpan);
-        li.appendChild(playerInfoDiv); // Aggiungi il div con nome e data
+        li.appendChild(playerInfoDiv); 
 
-        // 4. Punteggio
+        // 4. Punteggio (invariato)
         const scoreSpan = document.createElement('span');
         scoreSpan.className = 'player-score';
         scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
-        li.appendChild(scoreSpan); // Aggiungi il punteggio
+        li.appendChild(scoreSpan); 
 
-        // 5. Aggiungi l'intero list item (li) alla lista della leaderboard (ol)
         miniLeaderboardListEl.appendChild(li);
     });
 }
@@ -1265,89 +1271,90 @@ async function handleSaveDonkeyScore() {
     }
 
     const scoreToSave = finalScore;
-    console.log("handleSaveDonkeyScore: Punteggio da salvare =", scoreToSave); // LOG 2
     let userNameToSave = "Giocatore Anonimo";
     let userIdToSave = null;
     let initialsForDb = "";
-    let isAnonymousSave = false;
+    let userNationalityCode = null; // <<< NUOVA VARIABILE
 
     saveScoreBtnDonkey.disabled = true;
     saveScoreBtnDonkey.textContent = "Salvataggio...";
 
     const currentUser = auth.currentUser;
-    console.log("handleSaveDonkeyScore: currentUser =", currentUser ? currentUser.uid : 'Nessuno'); // LOG 3
 
     if (currentUser) { // Utente Loggato
-        console.log("handleSaveDonkeyScore: Blocco utente loggato."); // LOG 4
         userIdToSave = currentUser.uid;
         try {
             const userProfileRef = doc(db, "userProfiles", currentUser.uid);
             const docSnap = await getDoc(userProfileRef);
-            if (docSnap.exists() && docSnap.data().nickname) {
-                userNameToSave = docSnap.data().nickname;
+            if (docSnap.exists()) {
+                const userProfileData = docSnap.data();
+                userNameToSave = userProfileData.nickname || (currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato");
+                if (userProfileData.nationalityCode && userProfileData.nationalityCode !== "OTHER") { // <<< RECUPERA NAZIONALITÀ
+                    userNationalityCode = userProfileData.nationalityCode.toUpperCase();
+                }
             } else {
                 userNameToSave = currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato";
             }
-            console.log("handleSaveDonkeyScore: userNameToSave (loggato) =", userNameToSave); // LOG 5
         } catch (profileError) {
             console.error("Errore caricamento profilo per punteggio:", profileError);
-            userNameToSave = currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato"; // Fallback
+            userNameToSave = currentUser.email ? currentUser.email.split('@')[0] : "Utente Registrato";
         }
-        initialsForDb = userNameToSave.substring(0, 5).toUpperCase();
+        initialsForDb = userNameToSave.substring(0, 5).toUpperCase(); // O usa un campo initials dedicato se presente nel profilo
     } else { // Utente Non Loggato
-        console.log("handleSaveDonkeyScore: Blocco utente anonimo."); // LOG 6
-        isAnonymousSave = true;
+        // ... (logica esistente per iniziali anonime) ...
         const rawInitials = playerInitialsDonkeyInput.value.trim().toUpperCase();
-        console.log("handleSaveDonkeyScore: rawInitials (anonimo) =", rawInitials); // LOG 7
         if (rawInitials.length === 0 || rawInitials.length > 5) {
-            console.log("handleSaveDonkeyScore: Validazione iniziali anonimo fallita."); // LOG 8
             alert('Per favore, inserisci da 1 a 5 caratteri per le tue iniziali.');
             playerInitialsDonkeyInput.focus();
             saveScoreBtnDonkey.disabled = false;
             saveScoreBtnDonkey.textContent = "Salva Punteggio";
             return;
         }
-        userNameToSave = rawInitials;
+        userNameToSave = rawInitials; // Per gli anonimi, userName è le iniziali
         initialsForDb = rawInitials;
-        console.log("handleSaveDonkeyScore: userNameToSave (anonimo) =", userNameToSave); // LOG 9
     }
 
     const scoreData = {
         score: scoreToSave,
         timestamp: serverTimestamp(),
-        userName: userNameToSave,
-        initials: initialsForDb,
+        userName: userNameToSave, // Può essere nickname o iniziali
+        initials: initialsForDb,   // Iniziali esplicite
         gameId: "donkeyRunner"
     };
 
     if (userIdToSave) {
         scoreData.userId = userIdToSave;
     }
-    console.log("handleSaveDonkeyScore: scoreData pronto per Firestore =", scoreData); // LOG 10
+    if (userNationalityCode) { // <<< AGGIUNGI NAZIONALITÀ SE DISPONIBILE
+        scoreData.nationalityCode = userNationalityCode;
+    }
+    // Considera se vuoi aggiungere anche glitchzillaDefeated, come nelle tue regole
+    // if (typeof someVariableForGlitchzillaDefeated !== 'undefined') {
+    //     scoreData.glitchzillaDefeated = someVariableForGlitchzillaDefeated;
+    // }
+
 
     try {
-        console.log("handleSaveDonkeyScore: Tentativo di addDoc a Firestore."); // LOG 11
         const leaderboardScoresCollection = collection(db, "leaderboardScores");
         await addDoc(leaderboardScoresCollection, scoreData);
-        console.log("Punteggio DonkeyRunner salvato con successo:", scoreData); // LOG 12 (SUCCESSO!)
+        console.log("Punteggio DonkeyRunner salvato con successo:", scoreData);
 
+        // ... (resto della logica per UI, ricaricamento leaderboard, ecc.) ...
         scoreInputContainerDonkey.style.display = 'none';
-        if (isAnonymousSave) {
-            playerInitialsDonkeyInput.value = '';
-        }
+        if (!currentUser) playerInitialsDonkeyInput.value = ''; // Pulisci solo se anonimo
         const saveAsNameMessageEl = document.getElementById('saveAsNameMessage');
         if (saveAsNameMessageEl) saveAsNameMessageEl.style.display = 'none';
         
-        restartGameBtnDonkey.style.display = 'block';
-
+        restartGameBtnDonkey.style.display = 'block'; // Mostra il pulsante di riavvio generale
         await loadDonkeyLeaderboard();
+
     } catch (error) {
-        console.error("handleSaveDonkeyScore: ERRORE durante addDoc a Firestore:", error); // LOG 13 (ERRORE FIRESTORE)
+        console.error("handleSaveDonkeyScore: ERRORE durante addDoc a Firestore:", error);
         alert("Errore nel salvataggio del punteggio. Riprova.\nControlla la console per dettagli (F12).");
         saveScoreBtnDonkey.disabled = false;
         saveScoreBtnDonkey.textContent = "Salva Punteggio";
     }
-    console.log("handleSaveDonkeyScore: Fine funzione."); // LOG 14
+    console.log("handleSaveDonkeyScore: Fine funzione.");
 }
 
 function processGameOver() {

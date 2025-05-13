@@ -1,6 +1,5 @@
 // js/profile.js
 
-// Importazioni
 import { db, auth, generateBlockieAvatar } from './main.js'; 
 import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -11,7 +10,7 @@ const profileDetailsDisplay = document.getElementById('profileDetailsDisplay');
 const profileAvatarImg = document.getElementById('profileAvatar');
 const profileEmailSpan = document.getElementById('profileEmail');
 const currentNicknameSpan = document.getElementById('currentNickname');
-const profileNationalitySpan = document.getElementById('profileNationality'); // Definito qui
+const profileNationalitySpan = document.getElementById('profileNationality');
 const profileUpdateForm = document.getElementById('profileUpdateForm');
 const profileNicknameInput = document.getElementById('profileNicknameInput');
 const saveProfileBtn = document.getElementById('saveProfileBtn');
@@ -21,14 +20,9 @@ const profileLoginMessage = document.getElementById('profileLoginMessage');
 // --- FINE DEFINIZIONE COSTANTI ---
 
 let currentUser = null;
-let currentUserProfile = null; // Inizializzato a null
+let currentUserProfile = null;
 
 // --- Functions ---
-
-/**
- * Loads the profile data for the given user UID.
- * @param {string} uid The user's unique ID.
- */
 async function loadProfileData(uid) {
     console.log("profile.js - Loading profile for UID:", uid);
     
@@ -51,26 +45,41 @@ async function loadProfileData(uid) {
     profileAvatarImg.style.backgroundColor = '#eee';
     profileEmailSpan.textContent = 'Loading...';
     currentNicknameSpan.textContent = 'Loading...';
-    profileNationalitySpan.textContent = 'Loading...'; // Testo di caricamento
+    profileNationalitySpan.textContent = 'Loading...';
     profileNicknameInput.value = '';
 
     const userProfileRef = doc(db, "userProfiles", uid);
     try {
         const docSnap = await getDoc(userProfileRef);
         if (docSnap.exists()) {
-            currentUserProfile = docSnap.data(); // <<< currentUserProfile VIENE POPOLATO QUI
+            currentUserProfile = docSnap.data();
             console.log("profile.js - Profile data found:", currentUserProfile);
 
             profileEmailSpan.textContent = currentUserProfile.email || 'N/A';
             currentNicknameSpan.textContent = currentUserProfile.nickname || 'Non impostato';
             profileNicknameInput.value = currentUserProfile.nickname || '';
 
-            // --- LOGICA PER LA NAZIONALITÀ (Solo Testo) SPOSTATA QUI DENTRO ---
-            if (profileNationalitySpan) { // profileNationalitySpan è la costante definita sopra
+            // --- LOGICA PER NAZIONALITÀ (flag-icons) ---
+            if (profileNationalitySpan) { 
                 if (currentUserProfile.nationalityCode && currentUserProfile.nationalityCode !== "OTHER") {
-                    const countryCode = currentUserProfile.nationalityCode.toUpperCase();
-                    profileNationalitySpan.textContent = countryCode; // Mostra solo il codice
-                    console.log("profile.js (Solo Testo): Codice Nazione visualizzato:", countryCode);
+                    const countryCodeOriginal = currentUserProfile.nationalityCode.toUpperCase();
+                    // La libreria flag-icons usa codici minuscoli per le classi CSS
+                    const countryCodeForLibrary = countryCodeOriginal.toLowerCase(); 
+                    
+                    profileNationalitySpan.innerHTML = ''; // Pulisci contenuto precedente
+
+                    const flagIconSpan = document.createElement('span');
+                    flagIconSpan.classList.add('fi', `fi-${countryCodeForLibrary}`);
+                    // Applica solo il margine destro via JS per la spaziatura
+                    flagIconSpan.style.marginRight = '8px'; 
+
+                    const codeTextNode = document.createTextNode(countryCodeOriginal);
+
+                    profileNationalitySpan.appendChild(flagIconSpan);
+                    profileNationalitySpan.appendChild(codeTextNode);
+                    
+                    console.log(`profile.js (flag-icons v7): Classe icona bandiera: fi fi-${countryCodeForLibrary}, Codice: ${countryCodeOriginal}`);
+
                 } else if (currentUserProfile.nationalityCode === "OTHER") {
                     profileNationalitySpan.textContent = 'Altro / Non specificato';
                 } else {
@@ -107,10 +116,6 @@ async function loadProfileData(uid) {
     }
 }
 
-/**
- * Handles the profile update form submission.
- * @param {Event} event
- */
 async function handleProfileUpdate(event) {
     event.preventDefault();
     if (!currentUser) { 
@@ -134,7 +139,6 @@ async function handleProfileUpdate(event) {
         profileMessage.style.color = 'red';
         return; 
     }
-    // Controlla se currentUserProfile è stato caricato prima di accedere al nickname
     const currentStoredNickname = currentUserProfile ? currentUserProfile.nickname : '';
     if (newNickname === (currentStoredNickname || '')) { 
         profileMessage.textContent = 'Nessuna modifica rilevata nel nickname.';

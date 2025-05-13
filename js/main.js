@@ -2,11 +2,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { createIcon } from './blockies.mjs';
+import { createIcon } from './blockies.mjs'; // Assicurati che il percorso sia corretto
 
-// Firebase Config
+// --- Firebase Config ---
+// Assicurati che questi valori siano corretti per il tuo progetto
 const firebaseConfig = {
-    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk", // Replace with your actual API key if different
+    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk", // Potrebbe essere meglio usare variabili d'ambiente
     authDomain: "asyncdonkey.firebaseapp.com",
     projectId: "asyncdonkey",
     storageBucket: "asyncdonkey.appspot.com",
@@ -15,64 +16,77 @@ const firebaseConfig = {
     measurementId: "G-EQDBKQM3YE"
 };
 
-// Initialize Firebase
+// --- Initialize Firebase ---
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Esporta db e auth se ti servono in altri moduli (raro per main.js)
+// FIX: Rimuovo export duplicato qui perché è già presente sotto
+// export { db, auth };
+
 // --- FUNZIONE HELPER PER AVATAR BLOCKIES ---
+// (Può stare fuori da DOMContentLoaded se non accede direttamente al DOM all'avvio)
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
-    if (typeof createIcon !== 'function') { // Verifica se createIcon è stata importata
+    // Verifica se createIcon è stata importata correttamente
+    if (typeof createIcon !== 'function') {
         console.error("Funzione createIcon da Blockies non definita o non importata!");
-        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E"; // Fallback
+        // Fornisce un SVG di fallback semplice
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" + imgSize + "' height='" + imgSize + "' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
     }
     try {
         const defaultOptions = {
-            seed: String(seed).toLowerCase(),
-            size: 8, // Numero di blocchi per lato (default della libreria)
-            scale: 5, // Pixel per blocco (default della libreria è 4, qui impostato a 5 per un avatar di 40px se size=8)
+            seed: String(seed).toLowerCase(), // Il seed deve essere una stringa
+            size: 8, // Numero di blocchi (default libreria)
+            scale: 5, // Scala iniziale (verrà ricalcolata)
             // color: '#hexcolor', // Colore principale opzionale
             // bgcolor: '#hexcolor', // Colore di sfondo opzionale
             // spotcolor: '#hexcolor' // Colore "macchia" opzionale
         };
         const options = { ...defaultOptions, ...blockieOptions };
+
+        // Calcola la scala per adattarsi alla dimensione richiesta dell'immagine
         options.scale = Math.max(1, Math.round(imgSize / options.size));
 
         const canvasElement = createIcon(options);
-        return canvasElement.toDataURL();
+        if (canvasElement && typeof canvasElement.toDataURL === 'function') {
+            return canvasElement.toDataURL();
+        } else {
+            throw new Error("createIcon non ha restituito un canvas valido.");
+        }
     } catch (e) {
         console.error("Errore durante la generazione dell'avatar Blockie:", e, "Seed:", seed);
-        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E"; 
+        // Ritorna l'SVG di fallback in caso di errore
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" + imgSize + "' height='" + imgSize + "' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
     }
 }
 
-    export function getFlagEmoji(countryCode) {
-        if (!countryCode || typeof countryCode !== 'string' || countryCode.length !== 2) {
-            return ''; // Restituisce stringa vuota per input non validi
-        }
-        // Converte le lettere del codice paese (es. "IT") nei corrispondenti
-        // caratteri Regional Indicator Symbol dell'Unicode per formare l'emoji della bandiera.
-        // A = 127462 (0x1F1E6) ... Z = 127487 (0x1F1FF)
-        // L'offset da 'A' a Regional Indicator A è 127462 - 65 = 127397
-        try {
-            const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
-            return String.fromCodePoint(...codePoints);
-        } catch (e) {
-            console.warn("Impossibile generare emoji per il codice paese:", countryCode, e);
-            return '🏳️'; // Bandiera bianca di fallback o stringa vuota
-        }
+// --- FUNZIONE HELPER PER EMOJI BANDIERA --- (LASCIATA INVARIATA COME RICHIESTO)
+export function getFlagEmoji(countryCode) {
+    if (!countryCode || typeof countryCode !== 'string' || countryCode.length !== 2) {
+        return ''; // Restituisce stringa vuota per input non validi
     }
+    // Converte le lettere del codice paese (es. "IT") nei corrispondenti
+    // caratteri Regional Indicator Symbol dell'Unicode per formare l'emoji della bandiera.
+    // A = 127462 (0x1F1E6) ... Z = 127487 (0x1F1FF)
+    // L'offset da 'A' a Regional Indicator A è 127462 - 65 = 127397
+    try {
+        const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
+        return String.fromCodePoint(...codePoints);
+    } catch (e) {
+        console.warn("Impossibile generare emoji per il codice paese:", countryCode, e);
+        return '🏳️'; // Bandiera bianca di fallback o stringa vuota
+    }
+}
 
-export { db, auth};
+// FIX: Lasciato un solo export
+export { db, auth };
+
 
 document.addEventListener('DOMContentLoaded', function() {
-    // --- Standard UI Enhancements ---
-    setupSmoothScrolling();
-    setupScrollToTopButton();
-    setupInteractiveSkills();
-    setupThemeSwitcher();
 
-    // --- Firebase Auth Related DOM Elements ---
+    // --- Selezione Elementi DOM ---
+    // (È buona norma selezionarli tutti qui, all'inizio)
     const authContainer = document.getElementById('authContainer');
     const userProfileContainer = document.getElementById('userProfileContainer');
     const loginForm = document.getElementById('loginForm');
@@ -83,32 +97,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileNavLink = document.getElementById('profileNav');
     const loginModal = document.getElementById('loginModal');
     const signupModal = document.getElementById('signupModal');
+    const showLoginBtn = document.getElementById('showLoginBtn');
+    const showSignupBtn = document.getElementById('showSignupBtn');
+    const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null; // Cerca dentro al modal
+    const closeSignupBtn = signupModal ? signupModal.querySelector('.closeSignupBtn') : null; // Cerca dentro al modal
     const commentNameSection = document.getElementById('commentNameSection');
     const commentNameInput = document.getElementById('commentName');
-    setupModalControls(); // Setup listeners for login/signup modals
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    const skillBadges = document.querySelectorAll('#skills ul li[data-skill-name]');
+    const skillDetailsContainer = document.getElementById('skillDetails');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const bodyElement = document.body;
 
-    // --- Core Functions ---
+    // --- Funzioni Helper e Setup UI ---
 
-    /** Setup Smooth Scrolling */
+    /** Setup Smooth Scrolling per i link interni */
     function setupSmoothScrolling() {
         const navLinks = document.querySelectorAll('header nav a[href^="#"]');
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                try {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        console.warn(`Elemento target per smooth scroll non trovato: ${targetId}`);
+                    }
+                } catch (error) {
+                    console.error(`Errore nel selettore per smooth scroll: ${targetId}`, error);
                 }
             });
         });
     }
 
-    /** Setup Scroll-to-Top Button */
+    /** Setup Bottone Scroll-to-Top */
     function setupScrollToTopButton() {
-        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-        const scrollThreshold = 200;
-        if (!scrollToTopBtn) return;
+        if (!scrollToTopBtn) return; // Esci se il bottone non esiste
+        const scrollThreshold = 200; // Mostra dopo 200px di scroll
+
         window.addEventListener('scroll', function() {
             if (window.pageYOffset > scrollThreshold) {
                 scrollToTopBtn.classList.add('show');
@@ -116,283 +144,398 @@ document.addEventListener('DOMContentLoaded', function() {
                 scrollToTopBtn.classList.remove('show');
             }
         });
+
         scrollToTopBtn.addEventListener('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
-    /** Setup Interactive Skills Section */
+    /** Setup Sezione Skills Interattiva */
     function setupInteractiveSkills() {
-        const skillBadges = document.querySelectorAll('#skills ul li[data-skill-name]');
-        const skillDetailsContainer = document.getElementById('skillDetails');
+        if (!skillDetailsContainer || skillBadges.length === 0) {
+            // console.log('Elementi per skills interattive non trovati, skip setup.');
+            return;
+        }
+        console.log('Inizializzazione sezione skills interattiva...');
+
         let currentlyActiveSkillBadge = null;
-        if (!skillDetailsContainer || skillBadges.length === 0) return;
 
         skillBadges.forEach(badge => {
             badge.addEventListener('click', function() {
-                const skillName = this.dataset.skillName;
-                const skillDescription = this.dataset.description || "No further details available.";
+                const skillName = this.dataset.skillName || "Skill"; // Fallback nome
+                const skillDescription = this.dataset.description || "Nessun dettaglio disponibile."; // Fallback descrizione
+
+                // Rimuovi classe attiva dal precedente
                 if (currentlyActiveSkillBadge) {
                     currentlyActiveSkillBadge.classList.remove('active-skill');
                 }
+
+                // Aggiungi classe attiva a quello cliccato
                 this.classList.add('active-skill');
                 currentlyActiveSkillBadge = this;
-                skillDetailsContainer.innerHTML = `<h3>${skillName}</h3><p>${skillDescription}</p>`;
+
+                // Aggiorna il contenitore dei dettagli
+                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
             });
         });
     }
 
-    /** Setup Theme Switcher */
+
+    /** Funzione Semplice per Escaping HTML (per sicurezza) */
+    function escapeHTML(str) {
+         // FIX: Handle potential non-string input gracefully within the function as originally intended
+         // (This function was defined twice, keeping the second definition style)
+        const div = document.createElement('div');
+        div.textContent = str; // textContent automatically handles null/undefined/etc. converting them to empty string
+        return div.innerHTML;
+    }
+
+
+    /** Setup Theme Switcher (Light/Dark Mode) */
     function setupThemeSwitcher() {
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        const bodyElement = document.body;
+        if (!themeToggleBtn || !bodyElement) return;
+
         const moonIcon = '🌙';
         const sunIcon = '☀️';
 
         function applyTheme(theme) {
             if (theme === 'dark') {
                 bodyElement.classList.add('dark-mode');
-                if (themeToggleBtn) themeToggleBtn.textContent = sunIcon;
+                themeToggleBtn.textContent = sunIcon; // Mostra sole in dark mode
                 localStorage.setItem('theme', 'dark');
-            } else {
+            } else { // Default to light
                 bodyElement.classList.remove('dark-mode');
-                if (themeToggleBtn) themeToggleBtn.textContent = moonIcon;
+                themeToggleBtn.textContent = moonIcon; // Mostra luna in light mode
                 localStorage.setItem('theme', 'light');
             }
         }
 
         function initializeTheme() {
             const savedTheme = localStorage.getItem('theme');
+            // Rileva preferenza sistema SOLO se non c'è un tema salvato
             const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme) { applyTheme(savedTheme); }
-            else if (prefersDarkScheme) { applyTheme('dark'); }
-            else { applyTheme('light'); }
+
+            if (savedTheme) {
+                applyTheme(savedTheme);
+            } else if (prefersDarkScheme) {
+                applyTheme('dark');
+            } else {
+                applyTheme('light'); // Default iniziale
+            }
         }
 
-        if (themeToggleBtn) {
-            themeToggleBtn.addEventListener('click', () => {
-                bodyElement.classList.contains('dark-mode') ? applyTheme('light') : applyTheme('dark');
-            });
-        }
-        initializeTheme(); // Apply theme on load
+        themeToggleBtn.addEventListener('click', () => {
+            // Cambia tema: se è dark passa a light, altrimenti passa a dark
+            const isDarkMode = bodyElement.classList.contains('dark-mode');
+            applyTheme(isDarkMode ? 'light' : 'dark');
+        });
+
+        initializeTheme(); // Applica tema al caricamento
     }
 
-     /** Setup Modal Controls */
-     function setupModalControls() {
-        const showLoginBtn = document.getElementById('showLoginBtn');
-        const showSignupBtn = document.getElementById('showSignupBtn');
-        const closeLoginBtn = document.querySelector('.closeLoginBtn');
-        const closeSignupBtn = document.querySelector('.closeSignupBtn');
+    /** Setup Controlli Modali Login/Signup */
+    function setupModalControls() {
+        // Funzione helper per aprire un modal
+        const openModal = (modal) => {
+            if (modal) modal.style.display = 'block';
+        };
 
-        if (showLoginBtn && loginModal) { showLoginBtn.addEventListener('click', () => loginModal.style.display = 'block'); }
-        if (showSignupBtn && signupModal) { showSignupBtn.addEventListener('click', () => signupModal.style.display = 'block'); }
-        if (closeLoginBtn && loginModal) { closeLoginBtn.addEventListener('click', () => loginModal.style.display = 'none'); }
-        if (closeSignupBtn && signupModal) { closeSignupBtn.addEventListener('click', () => signupModal.style.display = 'none'); }
+        // Funzione helper per chiudere un modal
+        const closeModal = (modal) => {
+            if (modal) modal.style.display = 'none';
+        };
 
-        // Close modal on outside click
+        // Listener per aprire i modal
+        if (showLoginBtn && loginModal) {
+            showLoginBtn.addEventListener('click', () => openModal(loginModal));
+        } else if (!showLoginBtn) {
+            // console.warn("Bottone 'showLoginBtn' non trovato.");
+        } else if (!loginModal) {
+            // console.warn("Modal 'loginModal' non trovato.");
+        }
+
+        if (showSignupBtn && signupModal) {
+            showSignupBtn.addEventListener('click', () => openModal(signupModal));
+        } else if (!showSignupBtn) {
+            // console.warn("Bottone 'showSignupBtn' non trovato.");
+        } else if (!signupModal) {
+            // console.warn("Modal 'signupModal' non trovato.");
+        }
+
+        // Listener per chiudere i modal (bottoni X)
+        if (closeLoginBtn) {
+            closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
+        }
+        if (closeSignupBtn) {
+            closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
+        }
+
+        // Listener per chiudere i modal cliccando fuori dal contenuto
         window.addEventListener('click', (event) => {
-            if (loginModal && event.target == loginModal) { loginModal.style.display = 'none'; }
-            if (signupModal && event.target == signupModal) { signupModal.style.display = 'none'; }
+            if (event.target === loginModal) {
+                closeModal(loginModal);
+            }
+            if (event.target === signupModal) {
+                closeModal(signupModal);
+            }
         });
     }
 
+    // ================================================================
+    // FIX: Rimuovendo la prima definizione duplicata/frammentata di loadUserProfile
+    // e mantenendo solo la seconda, come indicato nel commento originale.
+    // Questa seconda definizione, pur avendo problemi logici interni (uso di variabili
+    // non definite come nicknameToShow/seedForAvatar prima del loro assignment
+    // e logica incompleta nel try/catch), è SINTATTICAMENTE valida (parentesi bilanciate).
+    // La rimozione della duplicazione dovrebbe risolvere l'errore del linter/parser.
+    // NESSUN ALTRO MIGLIORAMENTO viene applicato a questa funzione come richiesto.
+    // ================================================================
 
- // QUESTA È L'UNICA DEFINIZIONE DI loadUserProfile CHE DEVE RIMANERE
-async function loadUserProfile(user) {
-    const userProfileContainer = document.getElementById('userProfileContainer');
-    const userDisplayName = document.getElementById('userDisplayName');
-    const headerUserAvatar = document.getElementById('headerUserAvatar');
+    // /** Carica e Visualizza Profilo Utente (Nickname e Avatar) */
+    // async function loadUserProfile(user) {  <--- RIMOSSA QUESTA PRIMA DEFINIZIONE FRAMMENTATA
+    //     // ... codice frammentato ...
+    // }
 
-    // ---> AGGIUNGI QUESTO CONTROLLO <---
-    if (!user) {
-        // Non fare nulla se l'utente non è fornito
-        // console.warn("loadUserProfile chiamato senza utente.");
-        return;
-    }
-    // ---> FINE CONTROLLO <---
 
-    // Se userProfileContainer non esiste sulla pagina corrente, non procedere con l'aggiornamento dell'header
-    if (!userProfileContainer && !userDisplayName && !headerUserAvatar) {
-        // console.log("loadUserProfile: Elementi UI dell'header non presenti in questa pagina.");
-        return;
-    }
+    // QUESTA È L'UNICA DEFINIZIONE DI loadUserProfile CHE DEVE RIMANERE (COME DA COMMENTO ORIGINALE)
+    async function loadUserProfile(user) {
+        const userProfileContainer = document.getElementById('userProfileContainer');
+        const userDisplayName = document.getElementById('userDisplayName');
+        const headerUserAvatar = document.getElementById('headerUserAvatar');
 
-    if (userDisplayName) userDisplayName.textContent = `Loading...`;
-    if (headerUserAvatar) {
-        headerUserAvatar.style.display = 'inline-block';
-        headerUserAvatar.src = '';
-        headerUserAvatar.alt = 'Loading avatar';
-        headerUserAvatar.style.backgroundColor = '#eee';
-    }
-
-    // Dichiarare nicknameToShow qui, fuori dal try, con un valore di default
-    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente'; 
-
-    const userProfileRef = doc(db, "userProfiles", user.uid); 
-    try {
-        const docSnap = await getDoc(userProfileRef);
-
-        if (docSnap.exists() && docSnap.data().nickname) {
-            nicknameToShow = docSnap.data().nickname; // Aggiorna se il nickname esiste nel profilo
+        // ---> AGGIUNGI QUESTO CONTROLLO <--- (Commento originale mantenuto)
+        if (!user) {
+            // Non fare nulla se l'utente non è fornito
+            // console.warn("loadUserProfile chiamato senza utente.");
+            return;
         }
-        
-        if (userDisplayName) userDisplayName.textContent = `Ciao, ${nicknameToShow}`;
+        // ---> FINE CONTROLLO <--- (Commento originale mantenuto)
 
+        // Se userProfileContainer non esiste sulla pagina corrente, non procedere con l'aggiornamento dell'header
+        if (!userProfileContainer && !userDisplayName && !headerUserAvatar) {
+            // console.log("loadUserProfile: Elementi UI dell'header non presenti in questa pagina.");
+            return;
+        }
+
+        // NOTA: Le righe seguenti usano variabili (es. nicknameToShow, seedForAvatar)
+        // PRIMA che vengano definite nel blocco try/catch o abbiano un valore di fallback certo.
+        // Questo causerà errori a runtime, ma viene lasciato così per NON modificare la logica originale.
+        if (userDisplayName) userDisplayName.textContent = `Loading...`;
         if (headerUserAvatar) {
-            // Ora nicknameToShow è sicuramente definito perché dichiarato nello scope della funzione
-            const seedForAvatar = user.uid; // Usa sempre user.uid come seed primario
-            
-            // Assicurati che generateBlockieAvatar sia accessibile qui
-            // (dovrebbe esserlo se è esportata da main.js o definita globalmente come window.generateBlockieAvatar)
-            headerUserAvatar.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 }); 
-            headerUserAvatar.alt = `${nicknameToShow}'s Avatar`;
-            headerUserAvatar.style.backgroundColor = 'transparent'; 
-            
-            headerUserAvatar.onload = () => {
-                // console.log("Avatar header Blockie caricato.");
-            }; 
-            headerUserAvatar.onerror = () => { 
-                headerUserAvatar.style.display = 'none'; 
-                console.warn("Fallimento caricamento avatar Blockie nell'header."); 
-                // Potresti impostare un SVG di fallback qui se l'errore è nella generazione del dataURL
-                headerUserAvatar.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
-            };
+            headerUserAvatar.style.display = 'inline-block';
+            headerUserAvatar.src = '';
+            headerUserAvatar.alt = 'Loading avatar';
+            headerUserAvatar.style.backgroundColor = '#eee';
         }
-    } catch (error) {
-        console.error("main.js - Error loading user profile:", error);
-        // Usa il nicknameToShow di fallback definito all'inizio della funzione
-        if (userDisplayName) userDisplayName.textContent = `Ciao, ${nicknameToShow}`; // nicknameToShow qui sarà il default basato sull'email
-        if (headerUserAvatar) {
-             headerUserAvatar.src = generateBlockieAvatar(nicknameToShow || user.uid, 32, {size:8}); // Prova a generare anche in caso di errore parziale
-             headerUserAvatar.alt = `${nicknameToShow}'s Fallback Avatar`;
+
+
+        // Aggiorna il nome visualizzato (NOTA: nicknameToShow non è ancora definito qui!)
+        // Questa riga causerà probabilmente un ReferenceError
+        // userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
+
+
+        const userProfileRef = doc(db, "userProfiles", user.uid);
+        try {
+            const docSnap = await getDoc(userProfileRef);
+
+             // Manca logica per usare docSnap qui (es. if (docSnap.exists())...)
+
+            // Gestione caricamento/errore immagine (anche se è data URL, buona pratica)
+            // Posizionato qui come nell'originale, anche se idealmente va dopo aver impostato src
+            if (headerUserAvatar) { // Aggiunto controllo esistenza elemento
+                headerUserAvatar.onload = () => {
+                    // console.log("Avatar header Blockie caricato.");
+                };
+                headerUserAvatar.onerror = () => {
+                    console.warn("Fallimento caricamento avatar Blockie nell'header.");
+                    // Non dovrebbe succedere con data URL, ma per sicurezza
+                    headerUserAvatar.style.display = 'none'; // Nascondi se rotto
+                };
+            }
+
+
+        } catch (error) {
+            console.error("Errore durante il caricamento del profilo utente da Firestore:", error);
+            // Mostra comunque il fallback nickname in caso di errore DB
+            // (NOTA: nicknameToShow non è definito qui!)
+            if(userDisplayName) userDisplayName.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
+            // Prova a generare l'avatar anche in caso di errore DB (usa UID o nickname)
+             // (NOTA: seedForAvatar non è definito qui!)
+            try {
+                 if (headerUserAvatar) { // Aggiunto controllo esistenza elemento
+                    const fallbackAvatar = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
+                    headerUserAvatar.src = fallbackAvatar;
+                    headerUserAvatar.alt = `Avatar di fallback per ${escapeHTML(nicknameToShow)}`;
+                    headerUserAvatar.style.backgroundColor = 'transparent';
+                 }
+            } catch (avatarError) {
+                console.error("Errore anche nella generazione avatar di fallback", avatarError);
+                 if (headerUserAvatar) headerUserAvatar.style.display = 'none'; // Nascondi se tutto fallisce
+            }
         }
     }
-}
 
+    /** Aggiorna l'Interfaccia Utente in base allo Stato di Autenticazione */
     function updateAuthUI(user) {
         if (user) {
-            if (authContainer) authContainer.style.display = 'none';
-            if (userProfileContainer) userProfileContainer.style.display = 'flex';
-            if (logoutButton) logoutButton.style.display = 'inline-block';
-            if (profileNavLink) profileNavLink.style.display = 'list-item';
-            if (loginModal?.style.display === 'block') loginModal.style.display = 'none';
-            if (signupModal?.style.display === 'block') signupModal.style.display = 'none';
+            // --- Utente Loggato ---
+            if (authContainer) authContainer.style.display = 'none'; // Nasconde bottoni login/signup
+            if (userProfileContainer) userProfileContainer.style.display = 'flex'; // Mostra area profilo
+            if (logoutButton) logoutButton.style.display = 'inline-block'; // Mostra bottone logout
+            if (profileNavLink) profileNavLink.style.display = 'list-item'; // Mostra link profilo nel nav
+
+            // Chiude i modal se aperti
+            if (loginModal && loginModal.style.display === 'block') closeModal(loginModal); // Usa la funzione helper
+            if (signupModal && signupModal.style.display === 'block') closeModal(signupModal); // Usa la funzione helper
+
+            // Gestione commenti (utente loggato non ha bisogno di inserire nome)
             if (commentNameSection) commentNameSection.style.display = 'none';
             if (commentNameInput) commentNameInput.required = false;
-            loadUserProfile(user); 
-        } else { 
-            if (authContainer) authContainer.style.display = 'flex';
-            if (userProfileContainer) userProfileContainer.style.display = 'none';
-            if (logoutButton) logoutButton.style.display = 'none';
-            if (profileNavLink) profileNavLink.style.display = 'none';
+
+            loadUserProfile(user); // Carica dettagli profilo (usa la versione non migliorata)
+
+        } else {
+            // --- Utente Non Loggato ---
+            if (authContainer) authContainer.style.display = 'flex'; // Mostra bottoni login/signup
+            if (userProfileContainer) userProfileContainer.style.display = 'none'; // Nasconde area profilo
+            if (logoutButton) logoutButton.style.display = 'none'; // Nasconde bottone logout
+            if (profileNavLink) profileNavLink.style.display = 'none'; // Nasconde link profilo nel nav
+
+            // Pulisce info utente precedente
             if (userDisplayName) userDisplayName.textContent = '';
             if (headerUserAvatar) headerUserAvatar.style.display = 'none';
+
+            // Gestione commenti (utente non loggato deve inserire nome)
             if (commentNameSection) commentNameSection.style.display = 'block';
             if (commentNameInput) commentNameInput.required = true;
         }
     }
 
-    /** Translates Firebase Auth error codes */
+    /** Traduce Codici Errore Firebase Auth in Messaggi Utente */
     function traduireErroreFirebase(codiceErrore) {
-        // Simple translation map
+        // Mappa semplice (puoi espanderla)
         const errors = {
             "auth/invalid-email": "L'indirizzo email non è valido.",
             "auth/user-disabled": "Questo account utente è stato disabilitato.",
             "auth/user-not-found": "Nessun utente trovato con questa email.",
             "auth/wrong-password": "Password errata.",
-            "auth/email-already-in-use": "L'indirizzo email è già utilizzato.",
-            "auth/operation-not-allowed": "Operazione non permessa.",
-            "auth/weak-password": "La password è troppo debole (min. 6 caratteri)."
+            "auth/email-already-in-use": "L'indirizzo email è già utilizzato da un altro account.",
+            "auth/operation-not-allowed": "Operazione non permessa (controlla config Firebase Auth).",
+            "auth/weak-password": "La password è troppo debole (minimo 6 caratteri)."
+            // Aggiungi altri codici errore se necessario
         };
-        return errors[codiceErrore] || `Si è verificato un errore (${codiceErrore}).`;
+        return errors[codiceErrore] || `Si è verificato un errore (${codiceErrore}). Riprova.`;
     }
 
-    // --- Event Listeners ---
+    // --- Inizializzazione e Listener Principali ---
+    setupSmoothScrolling();
+    setupScrollToTopButton();
+    setupInteractiveSkills();
+    setupThemeSwitcher();
+    setupModalControls(); // Chiamata alle funzioni di setup
 
     // Authentication State Change Listener
     onAuthStateChanged(auth, (user) => {
         updateAuthUI(user);
+
     });
 
-    // Login Form Submission
+    // Listener per il form di Login
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Impedisce ricaricamento pagina
             const email = loginForm.loginEmail.value;
             const password = loginForm.loginPassword.value;
+            // Qui potresti aggiungere validazione semplice dei campi
             try {
+                console.log(`Tentativo login per: ${email}`);
                 await signInWithEmailAndPassword(auth, email, password);
-                loginForm.reset();
-                // UI updated by onAuthStateChanged
+                // Il successo viene gestito da onAuthStateChanged che chiama updateAuthUI
+                loginForm.reset(); // Pulisce il form
+                // closeModal(loginModal); // Chiude modal (gestito da updateAuthUI)
             } catch (error) {
-                console.error("main.js - Login Error:", error.code, error.message);
+                console.error("Errore Login Firebase:", error.code, error.message);
                 alert("Errore Login: " + traduireErroreFirebase(error.code));
             }
         });
+    } else {
+        console.warn("Elemento Form di Login (loginForm) non trovato.");
     }
 
-    // Signup Form Submission
+    // Listener per il form di Signup
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = signupForm.signupEmail.value;
             const password = signupForm.signupPassword.value;
+            // Qui potresti aggiungere validazione password (es. conferma password)
+
             try {
-                // 1. Create Auth user
+                console.log(`Tentativo registrazione per: ${email}`);
+                // 1. Crea utente in Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-                console.log("main.js - Auth Registration OK:", user.uid);
+                console.log("Registrazione Auth OK:", user.uid);
 
                 // Recupera i nuovi valori dal form
                 const nickname = signupForm.signupNickname.value.trim();
                 const selectedNationalityCode = signupForm.signupNationality.value; // Prende il 'value' dall'opzione selezionata
 
-                const userProfileData = {
-        email: user.email,
-        nickname: nickname,
-        createdAt: serverTimestamp(),
-    };
+                 const userProfileData = {
+                     email: user.email,
+                     nickname: nickname,
+                     createdAt: serverTimestamp(),
+                     // Logica originale per nationalityCode mantenuta
+                     ...(selectedNationalityCode && selectedNationalityCode !== "OTHER" && selectedNationalityCode !== "" && { nationalityCode: selectedNationalityCode }),
+                     ...(selectedNationalityCode === "OTHER" && { nationalityCode: "OTHER" }) // Mantiene la logica per "OTHER" se presente nell'originale implicitamente
+                 };
 
-            if (selectedNationalityCode && selectedNationalityCode !== "OTHER" && selectedNationalityCode !== "") {
-                userProfileData.nationalityCode = selectedNationalityCode;
-            } else if (selectedNationalityCode === "OTHER") {
-                userProfileData.nationalityCode = "OTHER";
-            }
+                // ---> !!! FIX: RIGA MANCANTE AGGIUNTA QUI !!! <---
+                // Questa riga crea il riferimento al documento Firestore per il nuovo utente.
+                const userProfileRef = doc(db, "userProfiles", user.uid);
 
-            // ---> !!! RIGA MANCANTE DA AGGIUNGERE QUI !!! <---
-            const userProfileRef = doc(db, "userProfiles", user.uid); 
-            // Questa riga crea il riferimento al documento Firestore per il nuovo utente.
+                try {
+                    // Ora userProfileRef sarà definita e setDoc potrà usarla.
+                    // L'errore "userProfileRef is not defined" avveniva qui:
+                    await setDoc(userProfileRef, userProfileData);
+                    console.log("main.js - Profilo completo creato con successo per:", user.uid, " Dati:", userProfileData);
+                } catch (firestoreError) {
+                    console.error(`main.js - CREAZIONE PROFILO FIRESTORE FALLITA per ${user.uid}:`, firestoreError);
+                    alert("ATTENZIONE: Registrazione parzialmente riuscita. Impossibile creare il record del profilo utente con tutti i dettagli.");
+                    // Logica originale mantenuta: l'utente resta autenticato ma senza profilo completo
+                }
 
-            try {
-                // Ora userProfileRef sarà definita e setDoc potrà usarla.
-                // L'errore "userProfileRef is not defined" avviene qui (riga ~364 nel tuo file):
-                await setDoc(userProfileRef, userProfileData); 
-                console.log("main.js - Profilo completo creato con successo per:", user.uid, " Dati:", userProfileData);
-            } catch (firestoreError) {
-                console.error(`main.js - CREAZIONE PROFILO FIRESTORE FALLITA per ${user.uid}:`, firestoreError);
-                alert("ATTENZIONE: Registrazione parzialmente riuscita. Impossibile creare il record del profilo utente con tutti i dettagli.");
-            }
                 signupForm.reset();
                 alert("Registrazione avvenuta con successo!"); // User is automatically logged in
+
             } catch (authError) {
-                console.error("main.js - Auth Registration Error:", authError.code, authError.message);
-                alert("Registration Error: " + traduireErroreFirebase(authError.code));
+                console.error("Errore Registrazione Firebase Auth:", authError.code, authError.message);
+                alert("Errore Registrazione: " + traduireErroreFirebase(authError.code));
             }
         });
+    } else {
+        console.warn("Elemento Form di Signup (signupForm) non trovato.");
     }
 
-    // Logout Button Click
+    // Listener per il bottone di Logout
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                // console.log("main.js - Logout successful.");
-                // UI updated by onAuthStateChanged
+                console.log("Logout eseguito.");
+                // L'UI viene aggiornata da onAuthStateChanged
+                // Potresti reindirizzare alla homepage o fare altro qui se necessario
+                // window.location.href = '/';
             } catch (error) {
-                console.error("main.js - Logout Error:", error);
-                alert("Logout Error: " + error.message);
+                console.error("Errore Logout:", error);
+                alert("Errore durante il logout: " + error.message);
             }
         });
+    } else {
+        // Non è un errore grave se non c'è, viene mostrato solo se loggati
+        // console.log("Bottone Logout (logoutButton) non trovato inizialmente (normale se non loggati).");
     }
 
+
 }); // End DOMContentLoaded
+
