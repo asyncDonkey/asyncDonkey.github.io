@@ -41,6 +41,7 @@ const sampleArticles = [
 function createArticleCard(article, gridContainer) {
     const card = document.createElement('div');
     card.className = 'article-card';
+    card.setAttribute('data-article-id', article.id); // Aggiungiamo un ID per riferimento
 
     const titleEl = document.createElement('h4');
     titleEl.textContent = article.title;
@@ -72,35 +73,62 @@ function createArticleCard(article, gridContainer) {
     snippetEl.textContent = article.snippet;
     card.appendChild(snippetEl);
 
-    // NUOVA SEZIONE PER STATISTICHE ARTICOLO (LIKE/COMMENTI)
-    const statsEl = document.createElement('div');
-    statsEl.className = 'article-stats';
+    // --- INIZIO MODIFICHE PER LIKE E COMMENTI ---
+    const interactionsEl = document.createElement('div');
+    interactionsEl.className = 'article-card-interactions'; // Nuova classe per stilizzare
 
-    // Placeholder per i Like
-    const likesBadge = document.createElement('span');
-    likesBadge.className = 'article-stat-badge article-likes-badge';
-    likesBadge.innerHTML = `<span class="stat-icon">❤️</span> <span class="stat-count">${article.likesPlaceholder || 0}</span>`; // Usiamo article.likesPlaceholder se lo aggiungeremo ai dati statici, altrimenti 0
-    likesBadge.title = `${article.likesPlaceholder || 0} Likes`;
-    statsEl.appendChild(likesBadge);
+    // Bottone e contatore Like
+    const likeContainer = document.createElement('div');
+    likeContainer.className = 'interaction-item like-interaction-homepage';
 
-    // Placeholder per i Commenti
-    const commentsBadge = document.createElement('span');
-    commentsBadge.className = 'article-stat-badge article-comments-badge';
-    commentsBadge.innerHTML = `<span class="stat-icon">💬</span> <span class="stat-count">${article.commentsPlaceholder || 0}</span>`; // Usiamo article.commentsPlaceholder se lo aggiungeremo, altrimenti 0
-    commentsBadge.title = `${article.commentsPlaceholder || 0} Commenti`;
-    statsEl.appendChild(commentsBadge);
+    const likeButton = document.createElement('button');
+    likeButton.className = 'article-like-btn homepage-like-btn'; // Classe specifica per homepage
+    likeButton.setAttribute('data-article-id', article.id);
+    likeButton.innerHTML = `🤍`; // Icona iniziale, verrà aggiornata da JS
+    likeButton.title = "Like this article";
+
+    const likeCountSpan = document.createElement('span');
+    likeCountSpan.className = 'article-like-count homepage-like-count';
+    likeCountSpan.textContent = `${article.likesPlaceholder || 0}`; // Placeholder iniziale
+
+    likeContainer.appendChild(likeButton);
+    likeContainer.appendChild(likeCountSpan);
+    interactionsEl.appendChild(likeContainer);
+
+    // Contatore e link Commenti
+    const commentContainer = document.createElement('div');
+    commentContainer.className = 'interaction-item comment-interaction-homepage';
+
+    const commentIcon = document.createElement('span');
+    commentIcon.className = 'comment-icon-homepage';
+    commentIcon.innerHTML = '💬';
+
+    const commentCountSpan = document.createElement('span');
+    commentCountSpan.className = 'article-comment-count homepage-comment-count';
+    commentCountSpan.textContent = `${article.commentsPlaceholder || 0}`; // Placeholder iniziale
+    commentContainer.appendChild(commentIcon);
+    commentContainer.appendChild(commentCountSpan);
+
+    // Link per andare alla pagina dell'articolo (e poi alla sezione commenti)
+    const commentLink = document.createElement('a');
+    commentLink.className = 'article-comment-link-homepage';
+    commentLink.href = `view-article.html?id=${article.id}#articleCommentsSectionContainer`;
+    commentLink.textContent = "Commenta";
+    commentLink.title = "View comments and comment";
     
-    card.appendChild(statsEl); // Aggiungi il contenitore delle statistiche alla card
+    // Potremmo aggiungere il link commenta come parte del container o separato
+    // Per ora, mettiamolo vicino al conteggio
+    commentContainer.appendChild(commentLink);
+
+
+    interactionsEl.appendChild(commentContainer);
+    card.appendChild(interactionsEl);
+    // --- FINE MODIFICHE PER LIKE E COMMENTI ---
 
     const linkEl = document.createElement('a');
     linkEl.className = 'btn-read-more';
-    // MODIFICA QUI:
-    linkEl.href = `view-article.html?id=${article.id}`; // Passa l'ID dell'articolo come parametro URL
+    linkEl.href = `view-article.html?id=${article.id}`;
     linkEl.textContent = 'Leggi di più →';
-    // Rimuovi l'alert per il link placeholder se ora punta a una pagina reale
-    // if (article.link === "#") { 
-    //     linkEl.onclick = (e) => { e.preventDefault(); alert('Articolo non ancora disponibile!'); };
-    // }
     card.appendChild(linkEl);
 
     gridContainer.appendChild(card);
@@ -122,41 +150,29 @@ export function displayArticlesSection() {
         return;
     }
 
-    // Pulisci la griglia e placeholder
     const placeholderGrid = articlesGrid.querySelector('p');
     if(placeholderGrid) placeholderGrid.remove();
     articlesGrid.innerHTML = '';
 
 
     if (sampleArticles && sampleArticles.length > 0) {
-        // Trova l'articolo in evidenza
-        const featuredArticle = sampleArticles.find(article => article.featured) || sampleArticles[0]; // Prendi il primo se nessuno è marked 'featured'
+        const featuredArticle = sampleArticles.find(article => article.featured) || sampleArticles[0];
 
         if (featuredArticle) {
             featuredArticleTitleEl.textContent = featuredArticle.title;
             featuredArticleSnippetEl.textContent = featuredArticle.snippet;
-            // MODIFICA QUI:
             featuredArticleLinkEl.href = `view-article.html?id=${featuredArticle.id}`;
-            // Rimuovi l'alert per il link placeholder
-            // if (featuredArticle.link === "#") {
-            //    featuredArticleLinkEl.onclick = (e) => { e.preventDefault(); alert('Articolo non ancora disponibile!'); };
-            // } else {
-            //    featuredArticleLinkEl.onclick = null;
-            // }
-            featuredArticleCard.style.display = 'flex';
+            featuredArticleCard.style.display = 'flex'; // Assicurati che sia 'flex' se usi flexbox per la card
         }
 
-        // Popola la griglia degli articoli (escludendo quello già mostrato come featured, se diverso)
         sampleArticles.forEach(article => {
-            // if (!article.featured || article.id !== featuredArticle.id) { // Opzionale: non ripetere il featured nella griglia
-                createArticleCard(article, articlesGrid);
-            // }
+            createArticleCard(article, articlesGrid);
         });
-        articlesSection.style.display = 'block'; // Mostra la sezione articoli
+        articlesSection.style.display = 'block';
     } else {
-        articlesSection.style.display = 'none'; // Nascondi se non ci sono articoli
+        articlesSection.style.display = 'none';
         featuredArticleCard.style.display = 'none';
-        if (placeholderGrid) articlesGrid.appendChild(placeholderGrid); // Ripristina placeholder
+        if (placeholderGrid) articlesGrid.appendChild(placeholderGrid);
     }
 }
 
