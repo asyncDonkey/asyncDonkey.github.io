@@ -1,50 +1,54 @@
 // js/homePageFeatures.js
+import { db } from './main.js'; // Assicurati che db sia esportato da main.js
+import { collection, query, where, orderBy, limit, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Dati statici degli articoli (Sub-task H.3.3)
-const sampleArticles = [
-    {
-        id: 'article-1',
-        title: "Ottimizzazione Query Firestore per Leaderboard Performanti",
-        date: "2025-05-15",
-        snippet: "Un'analisi di come strutturare le query Firestore e gli indici...",
-        tags: ["Firebase", "Firestore", "Performance", "NoSQL"],
-        link: "#",
-        featured: true,
-        likesPlaceholder: 15, // Esempio
-        commentsPlaceholder: 3  // Esempio
-    },
-    {
-        id: 'article-2',
-        title: "Introduzione all'Architettura dei Componenti Web con JS Puro",
-        date: "2025-05-10",
-        snippet: "Esploriamo come creare componenti web riutilizzabili...",
-        tags: ["JavaScript", "Web Components", "Frontend"],
-        link: "#",
-        likesPlaceholder: 22, // Esempio
-        commentsPlaceholder: 7  // Esempio
-    },
-    {
-        id: 'article-3',
-        title: "Gestione dello Stato in un Gioco JavaScript Semplice",
-        date: "2025-05-01",
-        snippet: "Tecniche e pattern per gestire lo stato (punteggio, vite, power-up) in un gioco 2D sviluppato con JavaScript e Canvas API, mantenendo il codice organizzato.",
-        tags: ["JavaScript", "GameDev", "State Management"],
-        link: "#"
+// L'array statico sampleArticles è stato rimosso.
+// I dati degli articoli verranno caricati direttamente da Firestore.
+
+/**
+ * Formatta un oggetto Timestamp di Firestore o una stringa data in un formato leggibile.
+ * @param {object|string|null|undefined} dateInput - Timestamp di Firestore, oggetto {seconds: number, nanoseconds: number}, o stringa data.
+ * @returns {string} Data formattata o un messaggio di fallback.
+ */
+function formatArticleDate(dateInput) {
+    if (!dateInput) return 'Data non disponibile';
+    try {
+        let date;
+        if (dateInput instanceof Timestamp) {
+            date = dateInput.toDate();
+        } else if (typeof dateInput === 'string') {
+            date = new Date(dateInput);
+            if (isNaN(date.getTime())) { // Controlla se la data parsata è valida
+                console.warn("Formato stringa data non riconosciuto in formatArticleDate:", dateInput);
+                return "Data invalida";
+            }
+        } else if (dateInput && typeof dateInput.seconds === 'number' && typeof dateInput.nanoseconds === 'number') {
+            // Gestisce l'oggetto grezzo che Firestore potrebbe restituire in alcuni contesti o da vecchi dati
+            date = new Timestamp(dateInput.seconds, dateInput.nanoseconds).toDate();
+        } else {
+            console.warn("Formato data non gestito in formatArticleDate:", dateInput);
+            return 'Formato data sconosciuto';
+        }
+        return date.toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (e) {
+        console.error("Errore formattazione data articolo:", e, "Input:", dateInput);
+        return 'Errore data';
     }
-];
+}
 
 /**
  * Crea e appende una card articolo al DOM.
- * @param {object} article - L'oggetto articolo.
+ * @param {object} articleData - L'oggetto articolo da Firestore (doc.data()).
+ * @param {string} articleId - L'ID del documento articolo.
  * @param {HTMLElement} gridContainer - Il contenitore della griglia a cui appendere la card.
  */
-function createArticleCard(article, gridContainer) {
+function createArticleCard(articleData, articleId, gridContainer) {
     const card = document.createElement('div');
     card.className = 'article-card';
-    card.setAttribute('data-article-id', article.id); // Aggiungiamo un ID per riferimento
+    card.setAttribute('data-article-id', articleId);
 
     const titleEl = document.createElement('h4');
-    titleEl.textContent = article.title;
+    titleEl.textContent = articleData.title || "Titolo mancante";
     card.appendChild(titleEl);
 
     const metaEl = document.createElement('div');
@@ -52,13 +56,13 @@ function createArticleCard(article, gridContainer) {
 
     const dateEl = document.createElement('span');
     dateEl.className = 'article-date';
-    dateEl.textContent = new Date(article.date).toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
+    dateEl.textContent = formatArticleDate(articleData.date);
     metaEl.appendChild(dateEl);
 
-    if (article.tags && article.tags.length > 0) {
+    if (articleData.tags && Array.isArray(articleData.tags) && articleData.tags.length > 0) {
         const tagsContainer = document.createElement('div');
         tagsContainer.className = 'article-tags';
-        article.tags.forEach(tagText => {
+        articleData.tags.forEach(tagText => {
             const tagEl = document.createElement('span');
             tagEl.className = 'article-tag';
             tagEl.textContent = tagText;
@@ -70,74 +74,60 @@ function createArticleCard(article, gridContainer) {
 
     const snippetEl = document.createElement('p');
     snippetEl.className = 'article-snippet';
-    snippetEl.textContent = article.snippet;
+    snippetEl.textContent = articleData.snippet || "Nessun riassunto disponibile.";
     card.appendChild(snippetEl);
 
-    // --- INIZIO MODIFICHE PER LIKE E COMMENTI ---
     const interactionsEl = document.createElement('div');
-    interactionsEl.className = 'article-card-interactions'; // Nuova classe per stilizzare
+    interactionsEl.className = 'article-card-interactions';
 
-    // Bottone e contatore Like
+    // Like
     const likeContainer = document.createElement('div');
     likeContainer.className = 'interaction-item like-interaction-homepage';
-
     const likeButton = document.createElement('button');
-    likeButton.className = 'article-like-btn homepage-like-btn'; // Classe specifica per homepage
-    likeButton.setAttribute('data-article-id', article.id);
-    likeButton.innerHTML = `🤍`; // Icona iniziale, verrà aggiornata da JS
+    likeButton.className = 'article-like-btn homepage-like-btn';
+    likeButton.setAttribute('data-article-id', articleId);
+    likeButton.innerHTML = `🤍`; // L'UI del like verrà aggiornata da main.js
     likeButton.title = "Like this article";
-
     const likeCountSpan = document.createElement('span');
     likeCountSpan.className = 'article-like-count homepage-like-count';
-    likeCountSpan.textContent = `${article.likesPlaceholder || 0}`; // Placeholder iniziale
-
+    likeCountSpan.textContent = `${articleData.likeCount || 0}`;
     likeContainer.appendChild(likeButton);
     likeContainer.appendChild(likeCountSpan);
     interactionsEl.appendChild(likeContainer);
 
-    // Contatore e link Commenti
+    // Commenti
     const commentContainer = document.createElement('div');
     commentContainer.className = 'interaction-item comment-interaction-homepage';
-
     const commentIcon = document.createElement('span');
     commentIcon.className = 'comment-icon-homepage';
     commentIcon.innerHTML = '💬';
-
     const commentCountSpan = document.createElement('span');
     commentCountSpan.className = 'article-comment-count homepage-comment-count';
-    commentCountSpan.textContent = `${article.commentsPlaceholder || 0}`; // Placeholder iniziale
-    commentContainer.appendChild(commentIcon);
-    commentContainer.appendChild(commentCountSpan);
-
-    // Link per andare alla pagina dell'articolo (e poi alla sezione commenti)
+    commentCountSpan.textContent = `${articleData.commentCount || 0}`;
     const commentLink = document.createElement('a');
     commentLink.className = 'article-comment-link-homepage';
-    commentLink.href = `view-article.html?id=${article.id}#articleCommentsSectionContainer`;
+    commentLink.href = `view-article.html?id=${articleId}#articleCommentsSectionContainer`;
     commentLink.textContent = "Commenta";
-    commentLink.title = "View comments and comment";
-    
-    // Potremmo aggiungere il link commenta come parte del container o separato
-    // Per ora, mettiamolo vicino al conteggio
+    commentLink.title = "Vedi e aggiungi commenti";
+    commentContainer.appendChild(commentIcon);
+    commentContainer.appendChild(commentCountSpan);
     commentContainer.appendChild(commentLink);
-
-
     interactionsEl.appendChild(commentContainer);
     card.appendChild(interactionsEl);
-    // --- FINE MODIFICHE PER LIKE E COMMENTI ---
 
-    const linkEl = document.createElement('a');
-    linkEl.className = 'btn-read-more';
-    linkEl.href = `view-article.html?id=${article.id}`;
-    linkEl.textContent = 'Leggi di più →';
-    card.appendChild(linkEl);
+    const readMoreLinkEl = document.createElement('a');
+    readMoreLinkEl.className = 'btn-read-more';
+    readMoreLinkEl.href = `view-article.html?id=${articleId}`;
+    readMoreLinkEl.textContent = 'Leggi di più →';
+    card.appendChild(readMoreLinkEl);
 
     gridContainer.appendChild(card);
 }
 
 /**
- * Visualizza la sezione articoli e l'articolo in evidenza.
+ * Visualizza la sezione articoli e l'articolo in evidenza caricandoli da Firestore.
  */
-export function displayArticlesSection() {
+export async function displayArticlesSection() {
     const articlesSection = document.getElementById('articlesSection');
     const articlesGrid = document.getElementById('articlesGrid');
     const featuredArticleCard = document.getElementById('featuredArticleCard');
@@ -146,63 +136,92 @@ export function displayArticlesSection() {
     const featuredArticleLinkEl = document.getElementById('featuredArticleLink');
 
     if (!articlesSection || !articlesGrid || !featuredArticleCard || !featuredArticleTitleEl || !featuredArticleSnippetEl || !featuredArticleLinkEl) {
-        console.warn("Elementi DOM per la sezione articoli non trovati.");
+        console.warn("Elementi DOM per la sezione articoli non trovati in displayArticlesSection.");
         return;
     }
 
-    const placeholderGrid = articlesGrid.querySelector('p');
-    if(placeholderGrid) placeholderGrid.remove();
-    articlesGrid.innerHTML = '';
+    articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli da Firestore...</p>';
+    featuredArticleCard.style.display = 'none';
 
+    if (!db) {
+        articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
+        return;
+    }
 
-    if (sampleArticles && sampleArticles.length > 0) {
-        const featuredArticle = sampleArticles.find(article => article.featured) || sampleArticles[0];
+    try {
+        const articlesCollectionRef = collection(db, "articles");
+        const q = query(
+            articlesCollectionRef,
+            where("status", "==", "published"),
+            orderBy("date", "desc"),
+            limit(10)
+        );
 
-        if (featuredArticle) {
-            featuredArticleTitleEl.textContent = featuredArticle.title;
-            featuredArticleSnippetEl.textContent = featuredArticle.snippet;
-            featuredArticleLinkEl.href = `view-article.html?id=${featuredArticle.id}`;
-            featuredArticleCard.style.display = 'flex'; // Assicurati che sia 'flex' se usi flexbox per la card
-        }
-
-        sampleArticles.forEach(article => {
-            createArticleCard(article, articlesGrid);
+        const querySnapshot = await getDocs(q);
+        const articlesFromDb = [];
+        querySnapshot.forEach((doc) => {
+            articlesFromDb.push({ id: doc.id, ...doc.data() });
         });
+
+        articlesGrid.innerHTML = '';
+
+        if (articlesFromDb.length > 0) {
+            const featuredArticleData = articlesFromDb.find(article => article.featured === true) || articlesFromDb[0];
+
+            if (featuredArticleData) {
+                const featuredTitleHeaderEl = document.getElementById('featuredArticleTitle'); // L'H3 "Articolo in Evidenza"
+                if(featuredTitleHeaderEl) featuredTitleHeaderEl.style.display = 'block';
+
+                featuredArticleTitleEl.textContent = featuredArticleData.title;
+                featuredArticleSnippetEl.textContent = featuredArticleData.snippet || (articleData.content ? articleData.content.substring(0, 100) + "..." : "Leggi di più...");
+                featuredArticleLinkEl.href = `view-article.html?id=${featuredArticleData.id}`;
+                featuredArticleCard.style.display = 'flex';
+            } else {
+                 featuredArticleCard.style.display = 'none';
+            }
+
+            articlesFromDb.forEach(articleData => { // Rinominato per chiarezza
+                createArticleCard(articleData, articleData.id, articlesGrid);
+            });
+            articlesSection.style.display = 'block';
+        } else {
+            articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
+            articlesSection.style.display = 'block';
+            featuredArticleCard.style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Errore durante il caricamento degli articoli da Firestore:", error);
+        articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
+        if (error.code === 'failed-precondition' && error.message.includes('index')) {
+             articlesGrid.innerHTML += '<p style="text-align:center; color:orange;">Indice Firestore mancante. Controlla la console del browser per il link per crearlo.</p>';
+        }
         articlesSection.style.display = 'block';
-    } else {
-        articlesSection.style.display = 'none';
         featuredArticleCard.style.display = 'none';
-        if (placeholderGrid) articlesGrid.appendChild(placeholderGrid);
     }
 }
 
 /**
  * Mostra il banner dell'ultimo giocatore che ha sconfitto Glitchzilla.
- * Per ora, usa dati placeholder.
  */
 export function displayGlitchzillaBanner() {
     const bannerElement = document.getElementById('glitchzillaDefeatedBanner');
     const defeaterNameElement = document.getElementById('lastGlitchzillaDefeater');
 
     if (!bannerElement || !defeaterNameElement) {
-        console.warn("Elementi DOM per il banner Glitchzilla non trovati.");
+        // console.warn("Elementi DOM per il banner Glitchzilla non trovati."); // Meno verboso
         return;
     }
 
-    // --- DATI PLACEHOLDER ---
-    // In futuro (Task C.3.4), questa informazione verrà da Firestore.
+    // Dati placeholder, da sostituire con logica Firestore (Task C.3.4)
     const lastDefeaterData = {
-        name: "cYd3R_pUnK_2077", // Nome placeholder
-        defeated: true // Flag per indicare se qualcuno l'ha sconfitto
+        name: "cYd3R_pUnK_2077",
+        defeated: true
     };
-    // --- FINE DATI PLACEHOLDER ---
-
+    
     if (lastDefeaterData && lastDefeaterData.defeated && lastDefeaterData.name) {
         defeaterNameElement.textContent = lastDefeaterData.name;
-        bannerElement.style.display = 'block'; // Mostra il banner
-        console.log(`Banner Glitchzilla mostrato per: ${lastDefeaterData.name}`);
+        bannerElement.style.display = 'block';
     } else {
-        bannerElement.style.display = 'none'; // Nascondi il banner se non ci sono dati o non è stato sconfitto
-        console.log("Banner Glitchzilla nascosto (nessun dato o Glitchzilla non sconfitto).");
+        bannerElement.style.display = 'none';
     }
 }

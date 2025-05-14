@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
     getFirestore, doc, getDoc, setDoc, serverTimestamp,
     collection, query, where, orderBy, limit, getDocs,
-    updateDoc, increment, arrayUnion, arrayRemove // <-- IMPORTAZIONI AGGIUNTE/CORRETTE
+    updateDoc, increment, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
@@ -14,7 +14,7 @@ import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeat
 
 // --- Firebase Config ---
 const firebaseConfig = {
-    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk",
+    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk", // Sostituisci se necessario
     authDomain: "asyncdonkey.firebaseapp.com",
     projectId: "asyncdonkey",
     storageBucket: "asyncdonkey.appspot.com",
@@ -23,15 +23,14 @@ const firebaseConfig = {
     measurementId: "G-EQDBKQM3YE"
 };
 
-// --- Initialize Firebase ---
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// --- Utility Functions (definite a livello di modulo) ---
+// --- Utility Functions ---
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
     if (typeof createIcon !== 'function') {
-        console.error("createIcon from Blockies not imported!");
+        console.error("createIcon from Blockies non importata!");
         return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${imgSize}' height='${imgSize}' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E`;
     }
     try {
@@ -46,10 +45,10 @@ export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
         if (canvasElement && typeof canvasElement.toDataURL === 'function') {
             return canvasElement.toDataURL();
         } else {
-            throw new Error("createIcon did not return a valid canvas.");
+            throw new Error("createIcon non ha restituito un canvas valido.");
         }
     } catch (e) {
-        console.error("Error generating Blockie avatar:", e, "Seed:", seed);
+        console.error("Errore generazione avatar Blockie:", e, "Seed:", seed);
         return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${imgSize}' height='${imgSize}' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E`;
     }
 }
@@ -64,11 +63,8 @@ function escapeHTML(str) {
 async function loadUserProfile(user) {
     const userDisplayNameElement = document.getElementById('userDisplayName');
     const headerUserAvatarElement = document.getElementById('headerUserAvatar');
-    const userProfileContainerElement = document.getElementById('userProfileContainer');
 
-    // Aggiunto controllo per user, userDisplayNameElement e headerUserAvatarElement
     if (!user || !userDisplayNameElement || !headerUserAvatarElement) {
-        // console.warn('loadUserProfile: Utente non loggato o elementi DOM mancanti.');
         if (userDisplayNameElement) userDisplayNameElement.textContent = '';
         if (headerUserAvatarElement) headerUserAvatarElement.style.display = 'none';
         return;
@@ -83,7 +79,6 @@ async function loadUserProfile(user) {
     headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
     headerUserAvatarElement.style.backgroundColor = 'transparent';
     headerUserAvatarElement.onerror = () => {
-        console.warn("Navbar Debug: Failed to load Blockie avatar in header. Hiding avatar.");
         headerUserAvatarElement.style.display = 'none';
     };
 
@@ -94,10 +89,9 @@ async function loadUserProfile(user) {
             nicknameToShow = docSnap.data().nickname || nicknameToShow;
         }
         userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-        headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`; // Aggiorna alt text
+        headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
     } catch (error) {
         console.error("Errore caricamento profilo utente per navbar:", error);
-        // Lascia il nickname di fallback già impostato
     }
 }
 
@@ -106,8 +100,6 @@ function updateAuthUI(user) {
     const userProfileContainer = document.getElementById('userProfileContainer');
     const logoutButton = document.getElementById('logoutButton');
     const profileNavLink = document.getElementById('profileNav');
-    // Rimosso commentNameSection e commentNameInput da qui, sono più specifici di about.html e altre pagine.
-    // Se una pagina specifica ne ha bisogno, lo gestirà nel suo script o in onAuthStateChanged locale.
 
     const elementsToToggle = [
         { el: authContainer, showWhenLoggedOut: true, displayType: 'flex' },
@@ -118,13 +110,13 @@ function updateAuthUI(user) {
 
     elementsToToggle.forEach(item => {
         if (item.el) {
-            const displayStyle = item.displayType; // Già include 'flex' o 'inline-block'
+            const displayStyle = item.displayType;
             item.el.style.display = user ? (item.showWhenLoggedOut ? 'none' : displayStyle) : (item.showWhenLoggedOut ? displayStyle : 'none');
         }
     });
     
-    const userDisplayName = document.getElementById('userDisplayName'); // Definizione spostata
-    const headerUserAvatar = document.getElementById('headerUserAvatar'); // Definizione spostata
+    const userDisplayName = document.getElementById('userDisplayName');
+    const headerUserAvatar = document.getElementById('headerUserAvatar');
 
     if (!user) {
         if (userDisplayName) userDisplayName.textContent = '';
@@ -138,30 +130,20 @@ function updateAuthUI(user) {
     }
 }
 
-// Export db and auth for use in other modules if needed by them
 export { db, auth };
-
-
-// --- Homepage Mini Leaderboard ---
-const MAX_ENTRIES_HOME_LEADERBOARD = 5;
 
 async function loadHomeMiniLeaderboard() {
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
     if (!leaderboardListElement) return;
     if (!db) {
-        console.error("DB instance not available for home mini-leaderboard.");
+        console.error("DB instance non disponibile per mini-leaderboard homepage.");
         leaderboardListElement.innerHTML = '<li>Errore DB.</li>';
         return;
     }
     leaderboardListElement.innerHTML = '<li>Caricamento...</li>';
     try {
         const scoresCollectionRef = collection(db, "leaderboardScores");
-        const q = query(
-            scoresCollectionRef,
-            where("gameId", "==", "donkeyRunner"),
-            orderBy("score", "desc"),
-            limit(MAX_ENTRIES_HOME_LEADERBOARD)
-        );
+        const q = query(scoresCollectionRef, where("gameId", "==", "donkeyRunner"), orderBy("score", "desc"), limit(5));
         const querySnapshot = await getDocs(q);
         leaderboardListElement.innerHTML = '';
         if (querySnapshot.empty) {
@@ -182,11 +164,7 @@ async function loadHomeMiniLeaderboard() {
             avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
             avatarImg.alt = `Avatar`;
             avatarImg.style.backgroundColor = 'transparent';
-            avatarImg.onerror = () => {
-                avatarImg.style.backgroundColor = '#ddd';
-                avatarImg.alt = 'Err';
-                avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
-            };
+            avatarImg.onerror = () => { avatarImg.style.backgroundColor = '#ddd'; avatarImg.alt='Err'; avatarImg.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";};
             listItem.appendChild(avatarImg);
             const playerInfoSpan = document.createElement('span');
             playerInfoSpan.className = 'player-info';
@@ -213,52 +191,73 @@ async function loadHomeMiniLeaderboard() {
             rank++;
         });
     } catch (error) {
-        console.error("Error loading home mini-leaderboard:", error);
+        console.error("Errore caricamento mini-leaderboard homepage:", error);
         leaderboardListElement.innerHTML = '<li>Errore caricamento.</li>';
         if (error.code === 'failed-precondition') {
             leaderboardListElement.innerHTML += '<li>(Indice DB mancante)</li>';
-            console.error("Firestore composite index likely missing. Original error:", error.message);
         }
     }
 }
 
-// --- FUNZIONI PER LIKE ARTICOLI SULLA HOMEPAGE (definite a livello di modulo) ---
 async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser) {
-    if (!buttonElement || !articleId) return;
+    if (!buttonElement || !articleId) {
+        // console.log(`Chiamata a updateHomepageLikeButtonUI INTERROTTA: buttonElement o articleId mancante. ArticleId: ${articleId}`);
+        return;
+    }
     const likeCountSpan = buttonElement.nextElementSibling;
+    if (!likeCountSpan || !likeCountSpan.classList.contains('homepage-like-count')) {
+        console.warn(`Span conteggio like non trovato o errato per articleId: ${articleId}.`);
+    }
+
     try {
         const articleRef = doc(db, "articles", articleId);
         const docSnap = await getDoc(articleRef);
+
         if (docSnap.exists()) {
             const articleData = docSnap.data();
+            if (articleData.status !== 'published') {
+                // console.warn(`Articolo "${articleId}" non pubblicato. Like UI non aggiornata come 'liked'.`);
+                if (likeCountSpan) likeCountSpan.textContent = articleData.likeCount || 0;
+                buttonElement.innerHTML = `🤍`;
+                buttonElement.disabled = true;
+                buttonElement.title = "Articolo non disponibile per like";
+                buttonElement.classList.remove('liked');
+                return; 
+            }
+
             const likes = articleData.likeCount || 0;
-            const likedByUsers = articleData.likedByUsers || [];
-            if (likeCountSpan) likeCountSpan.textContent = likes;
+            const likedByUsers = articleData.likedByUsers || []; 
+
+            if (likeCountSpan) {
+                likeCountSpan.textContent = likes;
+            }
+
             if (currentUser) {
                 buttonElement.disabled = false;
-                if (likedByUsers.includes(currentUser.uid)) {
-                    buttonElement.innerHTML = `💙`;
+                const userHasLiked = Array.isArray(likedByUsers) && likedByUsers.includes(currentUser.uid);
+                if (userHasLiked) {
+                    buttonElement.innerHTML = `💙`; 
                     buttonElement.classList.add('liked');
-                    buttonElement.title = "Togli il like a questo articolo";
+                    buttonElement.title = "Hai messo 'Mi piace' (vedi articolo per cambiare)";
                 } else {
-                    buttonElement.innerHTML = `🤍`;
+                    buttonElement.innerHTML = `🤍`; 
                     buttonElement.classList.remove('liked');
-                    buttonElement.title = "Metti like a questo articolo";
+                    buttonElement.title = "Metti 'Mi piace' (vedi articolo)";
                 }
             } else {
-                buttonElement.innerHTML = `🤍`;
+                buttonElement.innerHTML = `🤍`; 
                 buttonElement.disabled = true;
                 buttonElement.title = "Fai login per mettere like";
                 buttonElement.classList.remove('liked');
             }
         } else {
-            console.warn(`Articolo ${articleId} non trovato per aggiornamento UI like.`);
+            console.warn(`Articolo "${articleId}" non trovato in Firestore.`);
             if (likeCountSpan) likeCountSpan.textContent = "0";
             buttonElement.innerHTML = `🤍`;
             buttonElement.disabled = true;
         }
     } catch (error) {
-        console.error(`Errore durante l'aggiornamento UI like per ${articleId}:`, error);
+        console.error(`Errore Firestore aggiornamento UI like per articolo "${articleId}":`, error);
         if (likeCountSpan) likeCountSpan.textContent = "Err";
         buttonElement.innerHTML = `🤍`;
         buttonElement.disabled = true;
@@ -269,106 +268,75 @@ async function handleHomepageArticleLike(event) {
     const button = event.currentTarget;
     const articleId = button.dataset.articleId;
     const currentUser = auth.currentUser;
-    if (!articleId || !currentUser) {
-        alert("Devi essere loggato per mettere like agli articoli.");
+
+    if (!currentUser) {
+        alert("Devi essere loggato per interagire con i like. Puoi mettere like dalla pagina dell'articolo.");
         return;
     }
-    button.disabled = true;
-    const articleRef = doc(db, "articles", articleId);
-    try {
-        const docSnap = await getDoc(articleRef);
-        if (!docSnap.exists()) {
-            console.error("Articolo non trovato per il like/unlike.");
-            alert("Errore: articolo non trovato.");
-            button.disabled = false;
-            return;
-        }
-        const articleData = docSnap.data();
-        const likedByUsers = articleData.likedByUsers || [];
-        const userHasLiked = likedByUsers.includes(currentUser.uid);
-        let newLikeCountOp;
-        let userArrayUpdateOp;
-        if (userHasLiked) {
-            newLikeCountOp = increment(-1);
-            userArrayUpdateOp = arrayRemove(currentUser.uid);
-        } else {
-            newLikeCountOp = increment(1);
-            userArrayUpdateOp = arrayUnion(currentUser.uid);
-        }
-        if (userHasLiked && (articleData.likeCount || 0) <= 0) {
-             console.warn(`Tentativo di unlike su articolo con likeCount <= 0. Articolo: ${articleId}, Like attuali: ${articleData.likeCount}`);
-        }
-        await updateDoc(articleRef, {
-            likeCount: newLikeCountOp,
-            likedByUsers: userArrayUpdateOp
-        });
-        await updateHomepageLikeButtonUI(button, articleId, currentUser);
-    } catch (error) {
-        console.error("Errore durante il like/unlike dell'articolo:", error);
-        alert("Si è verificato un errore. Riprova.");
-        await updateHomepageLikeButtonUI(button, articleId, currentUser); // Ripristina UI allo stato del DB
+    if (!articleId) {
+        console.error("ArticleId mancante nel dataset del bottone like homepage.");
+        return;
     }
+    window.location.href = `view-article.html?id=${articleId}#articleLikesContainer`;
 }
 
-/**
- * Aggiorna l'UI del conteggio commenti per un articolo sulla homepage.
- * @param {HTMLElement} countSpanElement - Lo span che mostra il conteggio.
- * @param {string} articleId - L'ID dell'articolo.
- */
 async function updateHomepageCommentCountUI(countSpanElement, articleId) {
     if (!countSpanElement || !articleId) return;
-
     try {
         const articleRef = doc(db, "articles", articleId);
         const docSnap = await getDoc(articleRef);
-
-        if (docSnap.exists()) {
+        if (docSnap.exists() && docSnap.data().status === 'published') {
             const articleData = docSnap.data();
-            const comments = articleData.commentCount || 0; // Usa il campo commentCount da Firestore
+            const comments = articleData.commentCount || 0;
             countSpanElement.textContent = comments;
         } else {
-            console.warn(`Articolo ${articleId} non trovato per aggiornamento UI conteggio commenti.`);
-            countSpanElement.textContent = "0"; // Default se l'articolo non ha dati
+            countSpanElement.textContent = "0";
         }
     } catch (error) {
-        console.error(`Errore l'aggiornamento UI conteggio commenti per ${articleId}:`, error);
+        console.error(`Errore aggiornamento UI conteggio commenti per ${articleId}:`, error);
         countSpanElement.textContent = "Err";
     }
 }
 
-
 export async function initializeHomepageArticleInteractions(currentUser) {
-    const articleCards = document.querySelectorAll('#articlesGrid .article-card');
-    if (articleCards.length === 0 && document.getElementById('articlesGrid')) {
+    // console.log("Chiamata a initializeHomepageArticleInteractions. Utente:", currentUser ? currentUser.uid : "Nessuno");
+    const articlesGrid = document.getElementById('articlesGrid');
+    if (!articlesGrid) {
+        // console.warn("#articlesGrid non trovato. Impossibile inizializzare interazioni.");
         return;
     }
-    // console.log(`Inizializzazione interazioni per ${articleCards.length} card articolo sulla homepage.`);
+    const articleCards = articlesGrid.querySelectorAll('.article-card');
+    // console.log(`Trovate ${articleCards.length} .article-card.`);
+
+    if (articleCards.length === 0) {
+        // console.log("Nessuna card articolo trovata, possibile attesa rendering...");
+        return;
+    }
+
     for (const card of articleCards) {
         const articleId = card.dataset.articleId;
         const likeButton = card.querySelector('.homepage-like-btn');
-        const commentCountSpan = card.querySelector('.homepage-comment-count'); // Seleziona lo span del conteggio commenti
+        const commentCountSpan = card.querySelector('.homepage-comment-count');
+
+        // console.log(`Processo card per articolo ID: ${articleId}`);
 
         if (articleId) {
             if (likeButton) {
+                // console.log(`Trovato bottone like per ${articleId}. Chiamo updateHomepageLikeButtonUI.`);
                 await updateHomepageLikeButtonUI(likeButton, articleId, currentUser);
-                likeButton.removeEventListener('click', handleHomepageArticleLike); // Evita duplicati
+                likeButton.removeEventListener('click', handleHomepageArticleLike);
                 likeButton.addEventListener('click', handleHomepageArticleLike);
             } else {
-                // console.warn(`Bottone like non trovato per articolo ID: ${articleId} in card:`, card);
+                // console.warn(`Bottone like NON trovato per articolo ID: ${articleId} in card:`, card);
             }
-
-            // --- AGGIUNTA: Inizializza/Aggiorna conteggio commenti ---
             if (commentCountSpan) {
                 await updateHomepageCommentCountUI(commentCountSpan, articleId);
-            } else {
-                // console.warn(`Span conteggio commenti non trovato per articolo ID: ${articleId} in card:`, card);
             }
-            // --- FINE AGGIUNTA ---
-
         } else {
             // console.warn("Card articolo senza data-article-id:", card);
         }
     }
+    // console.log("Fine initializeHomepageArticleInteractions.");
 }
 
 function traduireErroreFirebase(codiceErrore) {
@@ -381,19 +349,15 @@ function traduireErroreFirebase(codiceErrore) {
         "auth/operation-not-allowed": "Operazione non permessa (controlla config Firebase Auth).",
         "auth/weak-password": "La password è troppo debole (minimo 6 caratteri)."
     };
-    return errors[codiceErrore] || `Si è verificato un errore (${codiceErrore}). Riprova.`;
+    return errors[codiceErrore] || `Errore (${codiceErrore}).`;
 }
 
-// --- DOMContentLoaded ---
 document.addEventListener('DOMContentLoaded', function() {
-    // Select DOM elements (cache them for performance)
-    // Queste variabili ora sono definite all'interno di DOMContentLoaded o nelle funzioni che le usano.
+    // console.log("DOMContentLoaded eseguito.");
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const logoutButton = document.getElementById('logoutButton');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-    const skillBadges = document.querySelectorAll('#skills ul li[data-skill-name]');
-    const skillDetailsContainer = document.getElementById('skillDetails');
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const bodyElement = document.body;
     const loginModal = document.getElementById('loginModal');
@@ -403,8 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
     const closeSignupBtn = signupModal ? signupModal.querySelector('.closeSignupBtn') : null;
 
-
-    // --- UI Setup Functions (definite qui o importate se modularizzate) ---
+    // Definizioni inline per semplicità, potrebbero essere spostate se diventano complesse
     function setupSmoothScrolling() {
         document.querySelectorAll('header nav a[href^="#"]').forEach(link => {
             link.addEventListener('click', function(e) {
@@ -415,24 +378,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                } catch (error) {
-                    console.error(`Error in selector for smooth scroll: ${targetId}`, error);
-                }
+                } catch (error) { /* Gestisci errore selettore */ }
             });
         });
     }
-
-    function setupScrollToTopButton() {
-        if (!scrollToTopBtn) return;
-        window.addEventListener('scroll', () => {
-            scrollToTopBtn.classList.toggle('show', window.pageYOffset > 200);
-        });
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-
-    function setupInteractiveSkills() {
+    function setupScrollToTopButton() { if (!scrollToTopBtn) return; window.addEventListener('scroll', () => { scrollToTopBtn.classList.toggle('show', window.pageYOffset > 200); }); scrollToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); }); }
+    function setupInteractiveSkills() { 
+        const skillBadges = document.querySelectorAll('#skills ul li[data-skill-name]');
+        const skillDetailsContainer = document.getElementById('skillDetails');
         if (!skillDetailsContainer || skillBadges.length === 0) return;
         let currentlyActiveSkillBadge = null;
         skillBadges.forEach(badge => {
@@ -443,61 +396,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.classList.add('active-skill');
                 currentlyActiveSkillBadge = this;
                 const skillName = this.dataset.skillName || "Skill";
-                const skillDescription = this.dataset.description || "No details available.";
+                const skillDescription = this.dataset.description || "Nessun dettaglio disponibile.";
                 skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
             });
         });
     }
+    function setupThemeSwitcher() { if (!themeToggleBtn || !bodyElement) return; const moonIcon = '🌙'; const sunIcon = '☀️'; function applyTheme(theme) { bodyElement.classList.toggle('dark-mode', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? sunIcon : moonIcon; localStorage.setItem('theme', theme); } const savedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; applyTheme(savedTheme || (prefersDark ? 'dark' : 'light')); themeToggleBtn.addEventListener('click', () => { applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark'); }); }
+    function setupModalControls() { const openModal = (modal) => { if (modal) modal.style.display = 'block'; }; const closeModal = (modal) => { if (modal) modal.style.display = 'none'; }; if (showLoginBtn && loginModal) showLoginBtn.addEventListener('click', () => openModal(loginModal)); if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal)); if (closeLoginBtn) closeLoginBtn.addEventListener('click', () => closeModal(loginModal)); if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal)); window.addEventListener('click', (event) => { if (event.target === loginModal) closeModal(loginModal); if (event.target === signupModal) closeModal(signupModal); }); }
 
-    function setupThemeSwitcher() {
-        if (!themeToggleBtn || !bodyElement) return;
-        const moonIcon = '🌙'; const sunIcon = '☀️';
-        function applyTheme(theme) {
-            bodyElement.classList.toggle('dark-mode', theme === 'dark');
-            themeToggleBtn.textContent = theme === 'dark' ? sunIcon : moonIcon;
-            localStorage.setItem('theme', theme);
-        }
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
-        themeToggleBtn.addEventListener('click', () => {
-            applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
-        });
-    }
-
-    function setupModalControls() {
-        const openModal = (modal) => { if (modal) modal.style.display = 'block'; };
-        const closeModal = (modal) => { if (modal) modal.style.display = 'none'; };
-        if (showLoginBtn && loginModal) showLoginBtn.addEventListener('click', () => openModal(loginModal));
-        if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal));
-        if (closeLoginBtn) closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
-        if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
-        window.addEventListener('click', (event) => {
-            if (event.target === loginModal) closeModal(loginModal);
-            if (event.target === signupModal) closeModal(signupModal);
-        });
-    }
-
-    // Initialize UI setup functions
     setupSmoothScrolling();
     setupScrollToTopButton();
-    setupInteractiveSkills();
+    setupInteractiveSkills(); // Chiamata se la sezione skills è presente
     setupThemeSwitcher();
     setupModalControls();
 
-    // Load homepage specific features if on homepage
     if (document.getElementById('homeMiniLeaderboardList')) {
         loadHomeMiniLeaderboard();
     }
     if (document.getElementById('articlesSection')) {
-        displayArticlesSection();
-        // La chiamata a initializeHomepageArticleInteractions è gestita da onAuthStateChanged
+        displayArticlesSection().then(() => {
+            // console.log("displayArticlesSection completata. Inizializzo interazioni se utente già loggato.");
+            if (auth.currentUser) { // Controlla se l'utente è già noto
+                 initializeHomepageArticleInteractions(auth.currentUser);
+            }
+        }).catch(error => {
+            console.error("Errore durante displayArticlesSection in DOMContentLoaded:", error);
+        });
     }
     if (document.getElementById('glitchzillaDefeatedBanner')) {
         displayGlitchzillaBanner();
     }
 
-    // --- Authentication Listeners (ora dentro DOMContentLoaded per assicurare che gli elementi esistano) ---
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -506,13 +435,11 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 loginForm.reset();
-                // La chiusura del modale e l'aggiornamento UI sono gestiti da onAuthStateChanged -> updateAuthUI
             } catch (error) {
                 alert("Errore Login: " + traduireErroreFirebase(error.code));
             }
         });
     }
-
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -520,14 +447,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = signupForm.signupPassword.value;
             const nickname = signupForm.signupNickname.value.trim();
             const selectedNationalityCode = signupForm.signupNationality.value;
-
-            if (password.length < 6) {
-                alert("La password deve contenere almeno 6 caratteri."); return;
-            }
-            if (nickname.length < 3 || nickname.length > 25) { // Max 25 come da rules
-                 alert("Il nickname deve avere tra 3 e 25 caratteri."); return;
-            }
-
+            if (password.length < 6) { alert("Password min. 6 caratteri."); return; }
+            if (nickname.length < 3 || nickname.length > 25) { alert("Nickname 3-25 caratteri."); return; }
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
@@ -542,38 +463,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 await setDoc(doc(db, "userProfiles", user.uid), userProfileData);
                 signupForm.reset();
                 alert("Registrazione avvenuta con successo!");
-                // La chiusura del modale e l'aggiornamento UI sono gestiti da onAuthStateChanged -> updateAuthUI
             } catch (authError) {
                 alert("Errore Registrazione: " + traduireErroreFirebase(authError.code));
             }
         });
     }
-
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                // UI update is handled by onAuthStateChanged
             } catch (error) {
-                alert("Errore durante il logout: " + error.message);
+                alert("Errore logout: " + error.message);
             }
         });
     }
-}); // End DOMContentLoaded
+});
 
-
-// Listener globale per lo stato di autenticazione
-// Questo ora è correttamente a livello di modulo e può chiamare updateAuthUI
 onAuthStateChanged(auth, (user) => {
-    console.log('main.js - Auth state changed. User:', user ? user.uid : "null");
-    updateAuthUI(user); // Chiamata alla funzione definita a livello di modulo
-
-    // Inizializza/Aggiorna i like sulla homepage ogni volta che lo stato auth cambia
-    if (document.getElementById('articlesGrid')) {
-        initializeHomepageArticleInteractions(user);
-    } else if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
-        // Se siamo sulla homepage ma #articlesGrid non è ancora pronto (improbabile con dati statici)
-        // Potremmo aggiungere un piccolo timeout o un observer, ma per ora logghiamo.
-        console.warn("onAuthStateChanged: #articlesGrid non trovato sulla homepage, i like potrebbero non inizializzarsi correttamente subito.");
+    // console.log('onAuthStateChanged eseguito. Utente:', user ? user.uid : "Nessuno");
+    updateAuthUI(user);
+    
+    const articlesGridElement = document.getElementById('articlesGrid');
+    if (articlesGridElement) {
+        // Se la griglia esiste, è probabile che displayArticlesSection sia stata chiamata o lo sarà.
+        // La chiamata a initializeHomepageArticleInteractions qui assicura che
+        // lo stato dei like venga aggiornato quando l'utente fa login/logout.
+        // Il timeout serve a dare tempo a displayArticlesSection di popolare le card,
+        // specialmente se ci fosse un caricamento asincrono più lungo in futuro.
+        setTimeout(() => {
+            if (articlesGridElement.querySelector('.article-card')) {
+                // console.log('onAuthStateChanged: Chiamo initializeHomepageArticleInteractions.');
+                initializeHomepageArticleInteractions(user);
+            } else {
+                // console.warn('onAuthStateChanged: .article-card non ancora pronti dopo timeout.');
+            }
+        }, 250); // Un breve timeout, potrebbe essere 0 o rimosso se displayArticlesSection è sempre veloce.
     }
 });
