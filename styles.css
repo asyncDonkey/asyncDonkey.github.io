@@ -623,3 +623,62 @@ footer a { color: var(--link-color); }
   .touch-controls-middle-row { gap: 2px; } /* Snake Game */
   .testo-neon-arcade { font-size: 1.2em; padding: 0.3rem; }
 }
+
+.article-card-interactions {
+    display: flex;
+    justify-content: space-between; /* Spazia like e commenti */
+    align-items: center;
+    padding: 10px 0; /* Spaziatura verticale */
+    margin-top: 10px;
+    border-top: 1px dashed var(--border-color-secondary); /* Separatore opzionale */
+}
+
+.interaction-item {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Spazio tra icona/bottone e testo */
+}
+
+.article-like-btn,
+.article-comment-link-homepage {
+    background-color: transparent;
+    border: 1px solid var(--text-color-muted);
+    color: var(--text-color-muted);
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.article-like-btn:hover,
+.article-comment-link-homepage:hover {
+    border-color: var(--link-color);
+    color: var(--link-color);
+}
+
+.article-like-btn.liked { /* Stile per quando l'utente ha messo like */
+    background-color: var(--link-color); /* O un colore specifico per "liked" */
+    color: var(--button-text-primary);
+    border-color: var(--link-color);
+}
+.article-like-btn.liked:hover {
+    background-color: var(--link-hover-color);
+}
+
+
+.article-like-btn .stat-icon,
+.comment-icon-homepage { /* Per le icone se decidi di usarle dentro i bottoni o span */
+    margin-right: 4px;
+}
+
+.article-like-count, .article-comment-count {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--text-color-secondary);
+}
+
+.comment-icon-homepage {
+    font-size: 1em; /* Adatta se necessario */
+}
