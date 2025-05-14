@@ -133,6 +133,8 @@ async function loadArticleComments() {
 
             const nameEl = document.createElement('strong');
             let commenterNameDisplay = commentData.userId ? (commentData.userName || 'Utente Registrato') : ((commentData.name || 'Anonimo') + " (Ospite)");
+            
+            
 
             if (commentData.nationalityCode && commentData.nationalityCode !== "OTHER") {
                 const flagIconSpan = document.createElement('span');
@@ -154,22 +156,38 @@ async function loadArticleComments() {
             commentContentDiv.appendChild(dateEl);
             commentContentDiv.appendChild(messageEl);
 
-            // Logica per i like ai commenti (se vuoi aggiungerla qui in futuro)
-            const commentLikesContainer = document.createElement('div');
-            commentLikesContainer.classList.add('likes-container');
-            const commentLikeButton = document.createElement('button');
-            commentLikeButton.classList.add('like-btn'); // Potresti voler una classe diversa per i like ai commenti vs articoli
-            commentLikeButton.setAttribute('data-comment-id', commentId);
-            // commentLikeButton.setAttribute('data-collection-type', 'articleComments'); // Già presente
-            commentLikeButton.innerHTML = `❤️ <span class="like-count">${commentData.likes || 0}</span>`;
-            // TODO: Aggiungere event listener per handleCommentLike(commentId, 'articleComments')
-            commentLikesContainer.appendChild(commentLikeButton);
-            commentContentDiv.appendChild(commentLikesContainer);
+        // Logica per i like ai commenti
+        const commentLikesContainer = document.createElement('div');
+        commentLikesContainer.classList.add('likes-container'); // Usa la stessa classe di comments.js
+        const commentLikeButton = document.createElement('button');
+        commentLikeButton.classList.add('like-btn'); // Usa la stessa classe
 
+        commentLikeButton.setAttribute('data-comment-id', commentId);
+        const currentLikes = commentData.likes || 0;
+        let userHasLikedThisComment = false;
+        const currentUser = auth.currentUser; // Prendi l'utente corrente
 
-            commentElement.appendChild(commentContentDiv);
-            commentsListDiv.appendChild(commentElement);
-        });
+        if (currentUser && commentData.likedBy && commentData.likedBy.includes(currentUser.uid)) {
+            userHasLikedThisComment = true;
+        }
+
+        commentLikeButton.innerHTML = `${userHasLikedThisComment ? LIKED_COMMENT_EMOJI : INITIAL_COMMENT_LIKE_EMOJI} <span class="like-count">${currentLikes}</span>`;
+        if (userHasLikedThisComment) {
+            commentLikeButton.classList.add('liked');
+        }
+        commentLikeButton.title = userHasLikedThisComment ? "Togli il like" : "Metti like";
+        commentLikeButton.disabled = !currentUser; // Disabilita se l'utente non è loggato
+
+        commentLikeButton.addEventListener('click', handleArticleCommentLike); // <-- COLLEGAMENTO EVENT LISTENER
+
+        commentLikesContainer.appendChild(commentLikeButton);
+        // Non serve aggiungere un altro span per il conteggio se è già dentro innerHTML del bottone
+
+        commentContentDiv.appendChild(commentLikesContainer); // Aggiungi al contenuto del commento
+
+        commentElement.appendChild(commentContentDiv);
+        commentsListDiv.appendChild(commentElement);
+    });
 
     } catch (error) {
         console.error(`Errore caricamento commenti per articolo ${articleIdInternal}:`, error);
@@ -375,6 +393,95 @@ async function handleArticleLike() {
         if (articleIdInternal) {
             await loadAndDisplayArticleLikes(articleIdInternal);
         }
+    }
+}
+
+const INITIAL_COMMENT_LIKE_EMOJI = '🤍'; // Cuore bianco per "non piaciuto"
+const LIKED_COMMENT_EMOJI = '💙';       // Cuore blu per "piaciuto" (diverso da quello degli articoli se vuoi)
+
+async function handleArticleCommentLike(event) {
+    const button = event.currentTarget;
+    const commentId = button.dataset.commentId;
+    const currentUser = auth.currentUser;
+
+    if (!commentId || !currentUser) {
+        alert("Devi essere loggato per mettere like ai commenti.");
+        return;
+    }
+
+    button.disabled = true;
+    const commentRef = doc(db, "articleComments", commentId);
+
+    try {
+        const commentSnap = await getDoc(commentRef);
+        if (!commentSnap.exists()) {
+            console.error("Commento non trovato:", commentId);
+            alert("Errore: commento non trovato.");
+            button.disabled = false;
+            return;
+        }
+
+        const commentData = commentSnap.data();
+        const likedByUsers = commentData.likedBy || []; // Assicurati che likedBy esista
+        const userHasLiked = likedByUsers.includes(currentUser.uid);
+
+        let newLikesCountOp;
+        let userArrayUpdateOp;
+
+        if (userHasLiked) {
+            newLikesCountOp = increment(-1);
+            userArrayUpdateOp = arrayRemove(currentUser.uid);
+        } else {
+            newLikesCountOp = increment(1);
+            userArrayUpdateOp = arrayUnion(currentUser.uid);
+        }
+
+        // Prevenzione decremento likes sotto zero (anche se increment(-1) su 0 dovrebbe risultare in -1, che poi la regola potrebbe bloccare se non lo gestisce)
+        if (userHasLiked && (commentData.likes || 0) <= 0) {
+             console.warn(`Tentativo di unlike su commento con likeCount <= 0. Commento: ${commentId}, Likes attuali: ${commentData.likes}`);
+             // Non decrementare ulteriormente se già 0 e l'utente sta cercando di fare unlike (improbabile se l'UI è corretta)
+             if (!likedByUsers.includes(currentUser.uid)) { // se l'utente non aveva messo like, non fare nulla
+                  button.disabled = false;
+                  return;
+             }
+        }
+
+
+        await updateDoc(commentRef, {
+            likes: newLikesCountOp,
+            likedBy: userArrayUpdateOp
+        });
+
+        // Aggiorna UI del bottone e conteggio
+        const newCommentSnap = await getDoc(commentRef); // Rileggi per i dati aggiornati
+        if (newCommentSnap.exists()) {
+            const updatedCommentData = newCommentSnap.data();
+            const likeCountSpan = button.querySelector('.like-count'); // Se lo span è dentro il bottone
+            if (likeCountSpan) {
+                likeCountSpan.textContent = updatedCommentData.likes || 0;
+            } else { // Se lo span è un fratello, come in comments.js
+                const siblingLikeCountSpan = button.nextElementSibling;
+                if (siblingLikeCountSpan && siblingLikeCountSpan.classList.contains('like-count')) {
+                     siblingLikeCountSpan.textContent = updatedCommentData.likes || 0;
+                }
+            }
+
+            if (updatedCommentData.likedBy && updatedCommentData.likedBy.includes(currentUser.uid)) {
+            button.innerHTML = `${LIKED_COMMENT_EMOJI} <span class="like-count">${updatedCommentData.likes || 0}</span>`;
+            button.classList.add('liked');
+            button.title = "Togli il like a questo commento";
+            } else {
+                button.innerHTML = `${INITIAL_COMMENT_LIKE_EMOJI} <span class="like-count">${updatedCommentData.likes || 0}</span>`;
+                button.classList.remove('liked');
+                button.title = "Metti like a questo commento";
+            }
+        }
+         button.disabled = false; // Riabilita dopo l'aggiornamento
+    } catch (error) {
+        console.error("Errore durante il like/unlike del commento articolo:", error);
+        alert("Si è verificato un errore. Riprova.");
+        button.disabled = false; // Riabilita in caso di errore
+        // Potresti voler ricaricare lo stato esatto del bottone qui se l'operazione fallisce
     }
 }
 
