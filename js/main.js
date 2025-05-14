@@ -310,6 +310,33 @@ async function handleHomepageArticleLike(event) {
     }
 }
 
+/**
+ * Aggiorna l'UI del conteggio commenti per un articolo sulla homepage.
+ * @param {HTMLElement} countSpanElement - Lo span che mostra il conteggio.
+ * @param {string} articleId - L'ID dell'articolo.
+ */
+async function updateHomepageCommentCountUI(countSpanElement, articleId) {
+    if (!countSpanElement || !articleId) return;
+
+    try {
+        const articleRef = doc(db, "articles", articleId);
+        const docSnap = await getDoc(articleRef);
+
+        if (docSnap.exists()) {
+            const articleData = docSnap.data();
+            const comments = articleData.commentCount || 0; // Usa il campo commentCount da Firestore
+            countSpanElement.textContent = comments;
+        } else {
+            console.warn(`Articolo ${articleId} non trovato per aggiornamento UI conteggio commenti.`);
+            countSpanElement.textContent = "0"; // Default se l'articolo non ha dati
+        }
+    } catch (error) {
+        console.error(`Errore l'aggiornamento UI conteggio commenti per ${articleId}:`, error);
+        countSpanElement.textContent = "Err";
+    }
+}
+
+
 export async function initializeHomepageArticleInteractions(currentUser) {
     const articleCards = document.querySelectorAll('#articlesGrid .article-card');
     if (articleCards.length === 0 && document.getElementById('articlesGrid')) {
@@ -319,13 +346,27 @@ export async function initializeHomepageArticleInteractions(currentUser) {
     for (const card of articleCards) {
         const articleId = card.dataset.articleId;
         const likeButton = card.querySelector('.homepage-like-btn');
-        if (articleId && likeButton) {
-            await updateHomepageLikeButtonUI(likeButton, articleId, currentUser);
-            likeButton.removeEventListener('click', handleHomepageArticleLike);
-            likeButton.addEventListener('click', handleHomepageArticleLike);
+        const commentCountSpan = card.querySelector('.homepage-comment-count'); // Seleziona lo span del conteggio commenti
+
+        if (articleId) {
+            if (likeButton) {
+                await updateHomepageLikeButtonUI(likeButton, articleId, currentUser);
+                likeButton.removeEventListener('click', handleHomepageArticleLike); // Evita duplicati
+                likeButton.addEventListener('click', handleHomepageArticleLike);
+            } else {
+                // console.warn(`Bottone like non trovato per articolo ID: ${articleId} in card:`, card);
+            }
+
+            // --- AGGIUNTA: Inizializza/Aggiorna conteggio commenti ---
+            if (commentCountSpan) {
+                await updateHomepageCommentCountUI(commentCountSpan, articleId);
+            } else {
+                // console.warn(`Span conteggio commenti non trovato per articolo ID: ${articleId} in card:`, card);
+            }
+            // --- FINE AGGIUNTA ---
+
         } else {
-            if (!articleId) console.warn("Card articolo senza data-article-id:", card);
-            if (!likeButton) console.warn(`Bottone like non trovato per articolo ID: ${articleId} in card:`, card);
+            // console.warn("Card articolo senza data-article-id:", card);
         }
     }
 }

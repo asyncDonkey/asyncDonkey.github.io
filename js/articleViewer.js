@@ -179,7 +179,6 @@ async function loadArticleComments() {
 
 async function handleArticleCommentSubmit(event) {
     event.preventDefault();
-    // articleCommentMessageInput, submitArticleCommentBtn, articleCommentNameInput sono già inizializzati in DOMContentLoaded
     if (!articleCommentMessageInput || !submitArticleCommentBtn || !articleIdInternal) {
         alert("Errore nel form dei commenti.");
         return;
@@ -219,11 +218,11 @@ async function handleArticleCommentSubmit(event) {
         }
     } else {
         const name = articleCommentNameInput ? articleCommentNameInput.value.trim() : '';
-        if (!name && articleCommentNameInput && articleCommentNameInput.required) { // Controlla .required
+        if (!name && articleCommentNameInput && articleCommentNameInput.required) {
             alert("Per favore, inserisci il tuo nome.");
             return;
         }
-        if (name) commentData.name = name; // Aggiungi il nome solo se fornito
+        if (name) commentData.name = name;
     }
 
     submitArticleCommentBtn.disabled = true;
@@ -231,12 +230,24 @@ async function handleArticleCommentSubmit(event) {
 
     try {
         const commentsCollectionRef = collection(db, "articleComments");
-        await addDoc(commentsCollectionRef, commentData);
+        await addDoc(commentsCollectionRef, commentData); // Aggiunge il commento
+
+        // --- INIZIO AGGIUNTA: Incrementa commentCount sull'articolo ---
+        if (articleIdInternal) {
+            const articleRef = doc(db, "articles", articleIdInternal);
+            await updateDoc(articleRef, {
+                commentCount: increment(1)
+            });
+            console.log(`Conteggio commenti incrementato per l'articolo ${articleIdInternal}`);
+        }
+        // --- FINE AGGIUNTA ---
+
         articleCommentMessageInput.value = '';
         if (articleCommentNameInput && !user) articleCommentNameInput.value = '';
-        await loadArticleComments();
+        await loadArticleComments(); // Ricarica la lista dei commenti
+        // Potremmo anche aggiornare un eventuale contatore totale sulla pagina articolo qui
     } catch (error) {
-        console.error("Errore invio commento articolo:", error);
+        console.error("Errore invio commento articolo o aggiornamento conteggio:", error);
         alert("Errore durante l'invio del commento. Riprova.");
     } finally {
         if (submitArticleCommentBtn) {
