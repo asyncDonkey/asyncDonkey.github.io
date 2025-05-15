@@ -446,26 +446,15 @@ async function handleArticleLike() {
 }
 
 async function loadAndDisplayArticleFromFirestore(articleId) {
-    const tempLikeArticleButton = document.getElementById('likeArticleButton');
-    const tempArticleLikeCountSpan = document.getElementById('articleLikeCount'); 
+    // Ottieni riferimenti DOM (come hai già fatto)
+    // likeArticleButton, articleLikeCountSpan, commentsListDiv, ecc.
+    // articleDisplayLoading, articleContentContainer, articleDisplayTitle, ecc.
 
-    if (!articleContentContainer || !articleDisplayTitle || !articleDisplayDate ||
-        !articleDisplayAuthor || !articleDisplayTagsContainer || !articleDisplayContent ||
-        !articleDisplayLoading || !articleInteractionsSection || 
-        !tempLikeArticleButton || !tempArticleLikeCountSpan ) {
-        console.error("Elementi DOM essenziali mancanti in loadAndDisplayArticleFromFirestore.");
-        if(articleDisplayLoading) {
-            articleDisplayLoading.innerHTML = "<p>Errore: Elementi della pagina non caricati.</p>";
-        } else if (document.body) {
-            document.body.innerHTML = "<p>Errore grave: Impossibile inizializzare pagina articolo.</p>";
-        }
-        return;
-    }
-    
-    articleDisplayLoading.style.display = 'none';
-    articleContentContainer.style.display = 'block';
-    if(articleInteractionsSection) articleInteractionsSection.style.display = 'block';
-
+    // --- GESTIONE LOADER ALL'INIZIO ---
+    if (articleDisplayLoading) articleDisplayLoading.style.display = 'block';
+    if (articleContentContainer) articleContentContainer.style.display = 'none';
+    if (articleInteractionsSection) articleInteractionsSection.style.display = 'none';
+    if (articleDisplayContent) articleDisplayContent.innerHTML = ''; // Pulisci contenuto precedente
 
     try {
         const articleRef = doc(db, "articles", articleId);
@@ -475,72 +464,85 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
             const articleDataFromDb = docSnap.data();
             currentArticleData = articleDataFromDb; 
             document.title = `${articleDataFromDb.title || 'Articolo'} - asyncDonkey.io`;
-            articleDisplayTitle.textContent = articleDataFromDb.title || "N/D";
-
-            // --- MODIFICA PER LA DATA ---
-            const displayDate = articleDataFromDb.publishedAt || articleDataFromDb.createdAt; // Usa publishedAt se esiste, altrimenti createdAt
-            articleDisplayDate.textContent = formatArticleDateForViewer(displayDate); 
-            // --- FINE MODIFICA DATA ---
-
-            articleDisplayAuthor.textContent = articleDataFromDb.authorName || "N/D"; // Verifica che 'authorName' sia popolato in Firestore
             
-            articleDisplayTagsContainer.innerHTML = ''; // Pulisci tags
-            if (articleDataFromDb.tags && Array.isArray(articleDataFromDb.tags) && articleDataFromDb.tags.length > 0) {
-                articleDataFromDb.tags.forEach(tagText => {
-                    const tagEl = document.createElement('span');
-                    tagEl.className = 'article-tag'; // Assicurati che questa classe esista e sia stilizzata in styles.css
-                    tagEl.textContent = tagText;
-                    articleDisplayTagsContainer.appendChild(tagEl);
-                });
-            } else {
-                articleDisplayTagsContainer.textContent = 'Nessun tag'; // Verifica che 'tags' sia popolato in Firestore
+            if (articleDisplayTitle) articleDisplayTitle.textContent = articleDataFromDb.title || "N/D";
+            
+            // --- GESTIONE METADATI ---
+            if (articleDisplayDate) {
+                const displayDate = articleDataFromDb.publishedAt || articleDataFromDb.createdAt;
+                articleDisplayDate.textContent = formatArticleDateForViewer(displayDate);
             }
-            // --- FINE BLOCCO CORRETTO PER IL CONTENUTO ---
+            if (articleDisplayAuthor) articleDisplayAuthor.textContent = articleDataFromDb.authorName || "N/D";
+            
+            if (articleDisplayTagsContainer) {
+                articleDisplayTagsContainer.innerHTML = ''; // Pulisci tags
+                if (articleDataFromDb.tags && Array.isArray(articleDataFromDb.tags) && articleDataFromDb.tags.length > 0) {
+                    articleDataFromDb.tags.forEach(tagText => {
+                        const tagEl = document.createElement('span');
+                        tagEl.className = 'article-tag';
+                        tagEl.textContent = tagText;
+                        articleDisplayTagsContainer.appendChild(tagEl);
+                    });
+                } else {
+                    articleDisplayTagsContainer.textContent = 'Nessun tag';
+                }
+            }
+            // --- FINE GESTIONE METADATI ---
 
-            // RIMUOVI QUESTA RIGA DUPLICATA CHE SEGUEVA IL BLOCCO SOPRA:
-            // articleDisplayContent.innerHTML = articleDataFromDb.contentMarkdown || "<p>Contenuto non disponibile.</p>"; // <-- QUESTA RIGA VA RIMOSSA
+            // --- GESTIONE CONTENUTO MARKDOWN ---
+            if (articleDisplayContent) {
+                if (articleDataFromDb.contentMarkdown) {
+                    try {
+                        articleDisplayContent.innerHTML = marked.parse(articleDataFromDb.contentMarkdown);
+                    } catch (e) {
+                        console.error("Errore durante il parsing del Markdown:", e);
+                        articleDisplayContent.textContent = articleDataFromDb.contentMarkdown; // Fallback a testo grezzo
+                    }
+                } else {
+                    articleDisplayContent.innerHTML = "<p>Contenuto non disponibile.</p>";
+                }
+            }
+            // --- FINE GESTIONE CONTENUTO MARKDOWN ---
 
-            articleDisplayLoading.style.display = 'none';
-            articleContentContainer.style.display = 'block';
-            if(articleInteractionsSection) articleInteractionsSection.style.display = 'block';;
+            if (articleContentContainer) articleContentContainer.style.display = 'block';
+            if (articleInteractionsSection) articleInteractionsSection.style.display = 'block';
 
             await loadAndDisplayArticleLikes(articleId); 
-            await loadArticleComments();                 
+            await loadArticleComments();                                 
 
-            // Assicurati che il riferimento globale 'likeArticleButton' sia aggiornato qui
-            // sebbene dovrebbe già essere stato inizializzato in DOMContentLoaded.
-            // È meglio usare il riferimento locale 'tempLikeArticleButton' per coerenza interna alla funzione.
-            if (tempLikeArticleButton && !tempLikeArticleButton.hasAttribute('data-listener-attached')) {
-                tempLikeArticleButton.addEventListener('click', handleArticleLike);
-                tempLikeArticleButton.setAttribute('data-listener-attached', 'true');
+            if (likeArticleButton && !likeArticleButton.hasAttribute('data-listener-attached')) {
+                likeArticleButton.addEventListener('click', handleArticleLike);
+                likeArticleButton.setAttribute('data-listener-attached', 'true');
             }
             if (articleCommentForm && !articleCommentForm.hasAttribute('data-listener-attached')) {
                 articleCommentForm.addEventListener('submit', handleArticleCommentSubmit);
                 articleCommentForm.setAttribute('data-listener-attached', 'true');
             }
         } else {
-            let message = `<p>Spiacenti, articolo ID "${articleId}" non trovato.`;
+            let message = `<p>Spiacenti, articolo ID "${articleId}" non trovato o non pubblicato.`;
             if (docSnap.exists() && docSnap.data().status !== 'published') {
-                message = `<p>Spiacenti, articolo ID "${articleId}" non pubblicato.`;
+                message = `<p>Spiacenti, l'articolo ID "${articleId}" non è attualmente pubblicato.`;
             }
             message += ` Torna alla <a href='index.html#articlesSection'>lista articoli</a>.</p>`;
-            articleDisplayLoading.style.display = 'none';
-            articleContentContainer.style.display = 'block';
+            
+            if (articleContentContainer) articleContentContainer.style.display = 'block';
+            if (articleDisplayTitle) articleDisplayTitle.textContent = "Articolo Non Trovato";
+            if (articleDisplayContent) articleDisplayContent.innerHTML = message;
+            if (articleInteractionsSection) articleInteractionsSection.style.display = 'none';
             document.title = "Articolo Non Trovato - asyncDonkey.io";
-            articleDisplayTitle.textContent = "Articolo Non Trovato";
-            articleDisplayContent.innerHTML = message;
-            if(articleInteractionsSection) articleInteractionsSection.style.display = 'none';
         }
     } catch (error) {
         console.error("Errore caricamento articolo:", error);
-        articleDisplayLoading.style.display = 'none';
-        articleContentContainer.style.display = 'block';
-        articleDisplayTitle.textContent = "Errore Caricamento";
-        articleDisplayContent.innerHTML = "<p>Errore caricamento. Riprova.</p>";
-        if(articleInteractionsSection) articleInteractionsSection.style.display = 'none';
+        if (articleContentContainer) articleContentContainer.style.display = 'block';
+        if (articleDisplayTitle) articleDisplayTitle.textContent = "Errore Caricamento";
+        if (articleDisplayContent) articleDisplayContent.innerHTML = "<p>Errore nel caricamento dell'articolo. Riprova più tardi.</p>";
+        if (articleInteractionsSection) articleInteractionsSection.style.display = 'none';
         if (error.code === 'failed-precondition' && error.message.includes('index')) {
-             articleDisplayContent.innerHTML += '<p style="color:orange;">Indice Firestore mancante.</p>';
+             if (articleDisplayContent) articleDisplayContent.innerHTML += '<p style="color:orange;">Indice Firestore mancante.</p>';
         }
+    } finally {
+        // Nascondi sempre il loader alla fine
+        if (articleDisplayLoading) articleDisplayLoading.style.display = 'none';
     }
 }
 

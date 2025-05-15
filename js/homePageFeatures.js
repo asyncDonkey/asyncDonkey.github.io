@@ -56,7 +56,8 @@ function createArticleCard(articleData, articleId, gridContainer) {
 
     const dateEl = document.createElement('span');
     dateEl.className = 'article-date';
-    dateEl.textContent = formatArticleDate(articleData.date);
+    const dateValueForCard = articleData.publishedAt || articleData.createdAt; // Privilegia publishedAt, fallback a createdAt
+    dateEl.textContent = formatArticleDate(dateValueForCard);
     metaEl.appendChild(dateEl);
 
     if (articleData.tags && Array.isArray(articleData.tags) && articleData.tags.length > 0) {
