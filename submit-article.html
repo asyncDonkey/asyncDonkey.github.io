@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invia Nuovo Articolo - asyncDonkey.io</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invia Nuovo Articolo - asyncDonkey.io</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
     <style>
         /* Stili specifici per la pagina di sottomissione articolo, se necessari */
         #articleSubmissionForm div {
@@ -109,10 +107,9 @@
                 </div>
 
                 <div>
-                    <label for="articleContent">Contenuto Articolo (Markdown):</label>
-                    <textarea id="articleContent" name="articleContent" rows="20" required placeholder="Scrivi qui il contenuto del tuo articolo. Puoi usare la sintassi Markdown..."></textarea>
-                    <small>Anteprima Markdown non ancora disponibile. Assicurati che la sintassi sia corretta.</small>
-                </div>
+    <label for="articleContent">Contenuto Articolo (Markdown):</label>
+    <textarea id="articleContent" name="articleContent" rows="20" required placeholder="Scrivi qui il contenuto del tuo articolo. Puoi usare la sintassi Markdown..."></textarea>
+    </div>
 
                 <div>
                     <label for="articleTags">Tags (separati da virgola):</label>

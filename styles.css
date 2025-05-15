@@ -832,7 +832,7 @@ footer a { color: var(--link-color); }
 .likes-container .like-btn span.clickable-comment-like-count {
      text-decoration: underline; /* Potrebbe essere già sufficiente dal JS o dal browser */
       color: var(white); /* Potrebbe cambiare il colore del numero dentro il bottone */
-      padding: 1px 3px; // Piccolo padding se necessario */
+      padding: 1px 3px;
     /* border-radius: 3px; */
     /* transition: background-color 0.2s, color 0.2s; */
     
