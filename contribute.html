@@ -125,8 +125,68 @@
                 Per ora, puoi usare il form di <a href="donkeyRunner.html#featureRequestSection">suggerimento funzionalità nel gioco CodeDash!</a> per idee generali o relative ai giochi, oppure, per questioni più tecniche o dettagliate, apri una "Feature Request" direttamente su
                 <a href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=feature_request.yml" target="_blank" rel="noopener">GitHub Issues</a>.
             </p>
-            <div id="issueTrackerPlaceholder" style="margin-top: 20px; padding: 15px; background-color: var(--surface-bg-secondary); border-radius: 6px; text-align:center;">
-                <p style="color: var(--text-color-muted);"><em>(Sezione Tracciamento Issue e Suggerimenti in arrivo...)</em></p>
+            <div id="issueTrackerSection" style="margin-top: 20px;">
+                <h4>Invia una Nuova Segnalazione o Suggerimento</h4>
+                <div id="issueAuthRequiredMessage" style="display:none; padding: 10px; background-color: var(--surface-bg-secondary); border-radius: 4px; margin-bottom:15px;">
+                    <p>Devi essere <a href="#" id="loginLinkFromContributePage">loggato</a> per inviare una segnalazione o un suggerimento.</p>
+                </div>
+                <form id="issueSubmissionForm" style="display:none;">
+                    <div>
+                        <label for="issueTitle">Titolo (opzionale ma consigliato):</label>
+                        <input type="text" id="issueTitle" name="issueTitle" maxlength="150" style="width:100%;">
+                    </div>
+                    <div>
+                        <label for="issueDescription">Descrizione Dettagliata:</label>
+                        <textarea id="issueDescription" name="issueDescription" rows="5" required maxlength="2000" style="width:100%;"></textarea>
+                    </div>
+                    <div>
+                        <label for="issueType">Tipo:</label>
+                        <select id="issueType" name="issueType" required style="width:100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;">
+                            <option value="">Seleziona tipo...</option>
+                            <option value="generalFeature">Richiesta Funzionalità Generale (Sito)</option>
+                            <option value="newGameRequest">Suggerimento Nuovo Gioco</option>
+                            <option value="gameIssue">Segnalazione Bug/Problema Gioco</option>
+                            </select>
+                    </div>
+                    <div id="gameSelectionContainer" style="display:none;">
+                        <label for="issueGameId">Gioco di Riferimento (se 'Segnalazione Bug/Problema Gioco'):</label>
+                        <select id="issueGameId" name="issueGameId" style="width:100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;">
+                            <option value="">Seleziona gioco...</option>
+                            <option value="donkeyRunner">CodeDash! Runner</option>
+                            <option value="otherGame">Altro (specifica nella descrizione)</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="submitIssueBtn" class="btn-action" style="margin-top:15px;">Invia Segnalazione/Suggerimento</button>
+                    <div id="issueSubmissionMessage" style="margin-top:15px; font-weight:bold;"></div>
+                </form>
+
+                <hr style="margin: 30px 0;">
+
+                <h4>Segnalazioni e Suggerimenti Esistenti</h4>
+                <div id="issuesFilterControls" style="margin-bottom:15px;">
+                    <label for="filterIssueType">Filtra per Tipo:</label>
+                    <select id="filterIssueType" style="padding: 8px; border-radius: 4px;">
+                        <option value="all">Tutti i Tipi</option>
+                        <option value="generalFeature">Richiesta Funzionalità Generale</option>
+                        <option value="newGameRequest">Suggerimento Nuovo Gioco</option>
+                        <option value="gameIssue">Segnalazione Bug/Problema Gioco</option>
+                    </select>
+                    <label for="filterIssueStatus" style="margin-left:15px;">Filtra per Stato:</label>
+                    <select id="filterIssueStatus" style="padding: 8px; border-radius: 4px;">
+                        <option value="all">Tutti gli Stati</option>
+                        <option value="new">Nuovo</option>
+                        <option value="underConsideration">In Considerazione</option>
+                        <option value="accepted">Accettato</option>
+                        <option value="planned">Pianificato</option>
+                        <option value="inProgress">In Corso</option>
+                        <option value="completed">Completato</option>
+                        <option value="declined">Rifiutato</option>
+                    </select>
+                     <button id="applyIssueFiltersBtn" class="btn-action" style="margin-left:10px; padding: 8px 15px; font-size:0.9em;">Applica Filtri</button>
+                </div>
+                <div id="issuesDisplayArea">
+                    <p>Caricamento segnalazioni...</p>
+                </div>
             </div>
         </section>
 
@@ -178,9 +238,12 @@
       </div>
     </div>
 
+    <div id="toast-container" aria-live="assertive" aria-atomic="true">
+    </div>
+
     <script src="js/main.js" type="module"></script>
+    <script src="js/issueTracker.js" type="module"></script> {/* NUOVA RIGA */}
     <script>
-        // Piccolo script inline per l'anno corrente nel footer
         document.getElementById('currentYear').textContent = new Date().getFullYear();
     </script>
 </body>

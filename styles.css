@@ -258,16 +258,69 @@ section#contact li { margin-bottom: 10px; }
 .article-card:hover { transform: translateY(-4px); box-shadow: 0 5px 14px rgba(0,0,0,0.1); }
 .article-card h4 { font-size: 1.3em; color: var(--heading-color); margin-top: 0; margin-bottom: 8px; }
 .article-card .article-meta {
-    font-size: 0.85em; color: var(--text-color-muted); margin-bottom: 12px;
-    display: flex; flex-wrap: wrap; align-items: center; gap: 5px 15px;
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap; /* Permette agli elementi di andare a capo se necessario */
+    align-items: center; /* Allinea verticalmente gli elementi nel meta container */
+    gap: 8px 15px; /* 8px di spazio verticale (se vanno a capo), 15px di spazio orizzontale */
 }
-.article-card .article-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.article-author-info {
+    display: inline-flex; /* Tratta questo blocco come inline, ma permette flex per i suoi figli */
+    align-items: center; /* Allinea verticalmente avatar, nome e bandierina */
+    gap: 6px; /* Spazio tra avatar, nome e bandierina */
+    color: var(--text-color-secondary); /* Colore di default per il testo in questo blocco */
+    order: -1; /* Opzionale: per provare a mettere le info autore prima della data/tags nella riga flex */
+}
+
+.author-avatar-homepage {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%; /* Avatar circolare */
+    object-fit: cover;
+    background-color: var(--surface-bg-secondary); /* Colore di sfondo placeholder */
+    border: 1px solid var(--border-color-secondary);
+    image-rendering: pixelated; /* Mantiene lo stile blockie */
+    vertical-align: middle; /* Utile se non fosse un flex child diretto */
+}
+
+.article-author-name {
+    font-weight: 500; /* Nome autore leggermente più marcato */
+    color: var(--text-color-primary); /* Colore più scuro per il nome */
+    white-space: nowrap; /* Evita che il nome vada a capo */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px; /* Limita la larghezza massima del nome se necessario */
+}
+
+.article-author-info .fi {
+    font-size: 1.1em; /* Dimensione della bandierina */
+    line-height: 1; /* Per un corretto allineamento verticale */
+    /* vertical-align: middle; / * Alternativa se non flex child * / */
+}
+
+.article-card .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
 .article-card .article-tag {
-    background-color: var(--surface-bg-secondary); color: var(--text-color-secondary);
-    padding: 4px 10px; border-radius: 15px; font-size: 0.8em; font-weight: 500;
-    white-space: nowrap; transition: background-color 0.2s, color 0.2s;
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-secondary);
+    padding: 4px 10px; /* Aumentato leggermente padding per leggibilità */
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.2s, color 0.2s;
 }
-.article-card .article-tag:hover { background-color: var(--link-color); color: var(--button-text-primary); }
+.article-card .article-tag:hover {
+    background-color: var(--link-color);
+    color: var(--button-text-primary);
+}
 .article-card .article-snippet { font-size: 0.95em; color: var(--text-color-secondary); margin-bottom: 10px; flex-grow: 1; line-height: 1.6; }
 .article-card .article-stats {
     display: flex; gap: 15px; margin-top: 10px; margin-bottom: 12px;
@@ -842,3 +895,669 @@ footer a { color: var(--link-color); }
        La cosa più importante qui è che il title attribute viene già impostato dal JS.
     */
 }
+
+/* Stili per Issue Tracker */
+.issue-card {
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-secondary);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+}
+
+.issue-card h5 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: var(--heading-color);
+    font-size: 1.2em;
+}
+
+.issue-description {
+    font-size: 0.95em;
+    color: var(--text-color-secondary);
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.issue-meta {
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    margin-bottom: 10px;
+}
+.issue-meta p {
+    margin: 3px 0;
+}
+.issue-meta strong {
+    color: var(--text-color-primary);
+}
+.issue-meta .fi { /* Stile per bandierina nazionalità del submittente */
+    font-size: 1em;
+    margin-left: 3px;
+    vertical-align: middle;
+}
+
+
+.issue-status-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 500;
+    color: white;
+    text-transform: capitalize;
+}
+
+.status-new { background-color: #007bff; } /* Blu */
+.status-under-consideration { background-color: #ffc107; color: #333;} /* Giallo */
+.status-accepted { background-color: #28a745; } /* Verde */
+.status-planned { background-color: #17a2b8; } /* Ciano Info */
+.status-in-progress { background-color: #fd7e14; } /* Arancione */
+.status-completed { background-color: #6c757d; } /* Grigio */
+.status-declined { background-color: #dc3545; } /* Rosso */
+.status-unknown { background-color: #343a40; } /* Nero/Grigio Scuro */
+
+
+.issue-actions {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.upvote-issue-btn {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    /* Altri stili ereditati da .game-button o personalizzati */
+}
+.upvote-issue-btn.voted {
+    background-color: var(--link-hover-color); /* O un colore che indica "votato" */
+    color: var(--button-text-primary);
+    border-color: var(--link-hover-color);
+}
+.upvote-issue-btn .upvote-count {
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+#issuesFilterControls label {
+    margin-right: 5px;
+}
+#issuesFilterControls select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color-primary);
+    background-color: var(--bg-color);
+    color: var(--text-color-primary);
+    margin-right: 15px; /* Spazio tra i select */
+}
+/* Stile per il contenitore del form di invio issue */
+#issueSubmissionForm div {
+    margin-bottom: 15px; /* Spazio tra i campi del form */
+}
+
+#issueSubmissionForm label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--text-color-primary);
+}
+
+/* Input e textarea ereditano già da stili globali,
+   ma puoi aggiungere specificità se necessario */
+#issueSubmissionForm input[type="text"],
+#issueSubmissionForm textarea,
+#issueSubmissionForm select {
+    width: 100%; /* Occupa tutta la larghezza disponibile */
+    padding: 10px;
+    border: 1px solid var(--border-color-primary);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color-primary);
+    font-size: 1em;
+    font-family: inherit; /* Usa il font del body */
+}
+#issueSubmissionForm input:focus,
+#issueSubmissionForm textarea:focus,
+#issueSubmissionForm select:focus {
+    outline: none;
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.2);
+}
+
+/* Stili per la lista issue nell'admin dashboard */
+#adminUserIssuesList .article-info small em { /* Enfasi per la descrizione */
+    color: var(--text-color-muted);
+}
+#adminUserIssuesList .admin-issue-status-select {
+    /* Stili specifici per il select dello stato se necessario */
+    border: 1px solid var(--border-color-primary);
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-primary);
+}
+
+/* Stili per Admin Dashboard - Linee Guida Moderazione */
+.admin-section#moderationGuidelinesSection {
+    background-color: var(--surface-bg-secondary);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color-secondary);
+}
+
+.admin-section#moderationGuidelinesSection h2 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color-primary);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.guidelines-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.guideline-item h4 {
+    margin-bottom: 8px;
+}
+
+.guideline-toggle-btn {
+    background-color: transparent;
+    border: none;
+    color: var(--link-color);
+    padding: 8px 0; /* Rimosso padding laterale per allineamento con testo */
+    text-align: left;
+    font-size: 1.1em; /* Leggermente più grande per i titoli delle sezioni */
+    font-weight: bold; /* Simile a un h4 */
+    cursor: pointer;
+    width: 100%;
+    display: flex; /* Per l'icona ::after */
+    justify-content: space-between; /* Spinge l'icona a destra */
+    align-items: center;
+}
+
+.guideline-toggle-btn:hover,
+.guideline-toggle-btn:focus {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+.guideline-toggle-btn::after {
+    content: '▼'; /* Freccia verso il basso di default */
+    font-size: 0.8em;
+    margin-left: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.guideline-toggle-btn[aria-expanded="true"]::after {
+    transform: rotate(-180deg); /* Freccia verso l'alto quando espanso */
+}
+
+
+.guideline-content {
+    padding-left: 15px; /* Indentazione per il contenuto */
+    border-left: 2px solid var(--border-color-primary);
+    margin-top: 5px;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.guideline-content ul, .guideline-content ol {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 20px; /* Spazio per i bullet points */
+}
+
+.guideline-content li {
+    margin-bottom: 6px;
+}
+
+/* Stili per la sezione "I Miei Articoli" in profile.html */
+#myArticlesSection {
+    background-color: var(--surface-bg-primary);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 30px; /* Spazio dalla sezione profilo */
+    border: 1px solid var(--border-color-secondary);
+}
+
+#myArticlesSection h2 {
+    color: var(--heading-color);
+    border-bottom: 1px solid var(--border-color-primary);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+#myArticlesSection h3 { /* Per i titoli delle sottosezioni (Bozze, In Revisione, etc.) */
+    color: var(--heading-color);
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+#myArticlesSection #myArticlesTabs h3 { /* Stile specifico per il titolo "Le Mie Bozze" dentro i tabs */
+    margin-top: 0;
+    font-size: 1.2em; /* Leggermente più piccolo se dentro i tabs */
+}
+
+
+.my-article-item { 
+    background-color: var(--surface-bg-secondary);
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color-primary);
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+}
+
+/* Stili specifici per lo stato dell'articolo (puoi personalizzarli) */
+.my-article-status-draft {
+    font-style: italic;
+    color: var(--text-color-muted);
+    background-color: var(--surface-bg-primary); /* Leggero bg diverso */
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px dashed var(--text-color-muted);
+    display: inline-block; /* Per far funzionare padding/margin correttamente */
+    margin-left: 5px;
+}
+.my-article-status-pendingReview {
+    font-style: italic;
+    color: #ffa000; /* Arancione */
+    background-color: rgba(255, 160, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px dashed #ffa000;
+    display: inline-block;
+    margin-left: 5px;
+}
+.my-article-status-published {
+    color: #388e3c; /* Verde */
+    background-color: rgba(56, 142, 60, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px dashed #388e3c;
+    display: inline-block;
+    margin-left: 5px;
+}
+.my-article-status-rejected {
+    color: #d32f2f; /* Rosso */
+    background-color: rgba(211, 47, 47, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px dashed #d32f2f;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.my-article-rejection-reason { /* Per il motivo del rifiuto */
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    padding: 8px;
+    background-color: var(--bg-color); /* Sfondo leggermente diverso */
+    border-left: 3px solid var(--link-color);
+    margin-top: 8px;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Stili per la Griglia e le Card degli Articoli dell'Utente in profile.html */
+.my-articles-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Crea colonne responsive */
+    gap: 20px; /* Spazio tra le card */
+    padding-top: 10px;
+}
+
+.my-article-profile-card {
+    background-color: var(--surface-bg-secondary); /* Leggermente diverso dalle card principali */
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Spinge le azioni in basso */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.my-article-profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.my-article-card-title {
+    font-size: 1.15em;
+    color: var(--heading-color);
+    margin-top: 0;
+    margin-bottom: 8px;
+    word-break: break-word; /* Per titoli lunghi */
+}
+
+.my-article-card-meta {
+    font-size: 0.8em;
+    color: var(--text-color-muted);
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column; /* Stato e data uno sotto l'altro */
+    gap: 4px;
+}
+
+.my-article-card-status {
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    display: inline-block; /* Per far funzionare padding */
+    margin-bottom: 4px; /* Spazio se data è sotto */
+    text-align: center;
+}
+
+.my-article-item strong {
+    color: var(--text-color-primary);
+    font-size: 1.1em;
+}
+
+.my-article-item small {
+    color: var(--text-color-muted);
+    font-size: 0.9em;
+    display: block; /* Per far andare a capo la data */
+}
+
+.my-article-status-draft {
+    font-style: italic;
+    color: var(--text-color-muted);
+}
+/* Aggiungi qui classi per .my-article-status-pending, .my-article-status-published, .my-article-status-rejected se necessario */
+
+.my-article-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Permetti ai bottoni di andare a capo */
+}
+
+.my-article-button,
+.my-article-button-delete {
+    padding: 8px 15px;
+    font-size: 0.9em;
+    text-decoration: none; /* Per i link stilizzati come bottoni */
+}
+
+.my-article-button-delete {
+    background-color: #dc3545; /* Rosso per eliminare */
+    border-color: #dc3545;
+    color: white;
+}
+.my-article-button-delete:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+#myDraftsLoadingMessage, 
+#myPendingLoadingMessage, 
+#myPublishedLoadingMessage, 
+#myRejectedLoadingMessage { /* Stili per i messaggi di caricamento */
+    color: var(--text-color-muted);
+    font-style: italic;
+}
+
+.my-articles-subsection { /* Nuovo contenitore per ogni stato */
+    margin-bottom: 25px;
+}
+
+.my-articles-subsection h3 {
+    color: var(--heading-color);
+    border-bottom: 1px solid var(--border-color-secondary);
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+
+.my-articles-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Crea colonne responsive */
+    gap: 20px; /* Spazio tra le card */
+    padding-top: 10px;
+}
+
+.my-article-profile-card {
+    background-color: var(--surface-bg-secondary); /* Leggermente diverso dalle card principali */
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Spinge le azioni in basso */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.my-article-profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.my-article-card-title {
+    font-size: 1.15em;
+    color: var(--heading-color);
+    margin-top: 0;
+    margin-bottom: 8px;
+    word-break: break-word; /* Per titoli lunghi */
+}
+
+.my-article-card-meta {
+    font-size: 0.8em;
+    color: var(--text-color-muted);
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column; /* Stato e data uno sotto l'altro */
+    gap: 4px;
+}
+
+.my-article-card-status {
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    display: inline-block; /* Per far funzionare padding */
+    margin-bottom: 4px; /* Spazio se data è sotto */
+    text-align: center;
+}
+
+/* Stili specifici per status (riutilizza quelli già definiti se possibile) */
+.status-draft {
+    background-color: var(--surface-bg-primary);
+    border: 1px dashed var(--text-color-muted);
+    color: var(--text-color-muted);
+}
+.status-pendingReview {
+    background-color: rgba(255, 160, 0, 0.1);
+    border: 1px dashed #ffa000;
+    color: #ffa000;
+}
+.status-published {
+    background-color: rgba(56, 142, 60, 0.1);
+    border: 1px dashed #388e3c;
+    color: #388e3c;
+}
+.status-rejected {
+    background-color: rgba(211, 47, 47, 0.1);
+    border: 1px dashed #d32f2f;
+    color: #d32f2f;
+}
+.status-unknown {
+    background-color: var(--text-color-muted);
+    color: var(--button-text-primary);
+}
+
+
+.my-article-card-date {
+    /* Stile specifico se necessario, altrimenti eredita da meta */
+}
+
+.my-article-card-rejection-reason {
+    font-size: 0.85em;
+    color: var(--text-color-primary); /* Più leggibile del muted per il motivo */
+    background-color: var(--bg-color);
+    padding: 8px;
+    border-left: 3px solid var(--link-color); /* Usa un colore tema per evidenziare */
+    margin-top: 8px;
+    margin-bottom: 8px;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+}
+
+.my-article-card-snippet { /* Se decidi di aggiungerlo */
+    font-size: 0.9em;
+    color: var(--text-color-secondary);
+    margin-bottom: 12px;
+    flex-grow: 1; /* Se vuoi che occupi spazio */
+}
+
+.my-article-card-actions {
+    margin-top: auto; /* Spinge le azioni in fondo alla card */
+    padding-top: 10px; /* Spazio sopra i bottoni */
+    border-top: 1px solid var(--border-color-primary); /* Separatore opzionale */
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Bottoni a capo se non c'è spazio */
+    justify-content: flex-end; /* Allinea bottoni a destra */
+}
+
+.my-article-action-button { /* Stile per i bottoni dentro la card */
+    padding: 6px 12px;
+    font-size: 0.85em;
+}
+.my-article-action-button.delete {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+.my-article-action-button.delete:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* styles.css - Stili per Notifiche Toast */
+
+#toast-container {
+    position: fixed;
+    bottom: 20px; /* O 'top: 20px;' se preferisci in alto */
+    right: 20px;
+    z-index: 9999; /* Assicura che sia sopra la maggior parte degli altri elementi */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Spazio tra le notifiche se ce ne sono multiple */
+    max-width: 320px; /* Larghezza massima delle notifiche */
+}
+
+.toast-notification {
+    background-color: var(--surface-bg-primary, #fff);
+    color: var(--text-color-primary, #333);
+    padding: 15px 20px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-left: 5px solid var(--text-color-muted, #6c757d); /* Colore bordo di default */
+    opacity: 0;
+    transform: translateX(100%); /* Inizia fuori schermo a destra */
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 250px; /* Larghezza minima */
+    word-wrap: break-word; /* Per messaggi lunghi */
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast-notification.hide {
+    opacity: 0;
+    /* La trasformazione per nascondere può essere la stessa dell'inizio o diversa */
+    /* transform: translateX(100%); */
+    /* O potremmo semplicemente farla svanire e poi rimuoverla */
+}
+
+/* Stili per tipi specifici di notifiche */
+.toast-notification.success {
+    border-left-color: #28a745; /* Verde successo */
+    /* background-color: rgba(40, 167, 69, 0.05); */ /* Sfondo leggermente verde opzionale */
+}
+.toast-notification.success .toast-message::before {
+    /* content: '✔ '; /* Icona opzionale */
+    /* color: #28a745; */
+    /* margin-right: 5px; */
+}
+
+.toast-notification.error {
+    border-left-color: #dc3545; /* Rosso errore */
+}
+.toast-notification.error .toast-message::before {
+    /* content: '✖ '; */
+    /* color: #dc3545; */
+    /* margin-right: 5px; */
+}
+
+.toast-notification.warning {
+    border-left-color: #ffc107; /* Giallo warning */
+}
+.toast-notification.warning .toast-message::before {
+    /* content: '⚠ '; */
+    /* color: #ffc107; */
+    /* margin-right: 5px; */
+}
+
+.toast-notification.info {
+    border-left-color: #17a2b8; /* Ciano info */
+}
+.toast-notification.info .toast-message::before {
+    /* content: 'ℹ '; */
+    /* color: #17a2b8; */
+    /* margin-right: 5px; */
+}
+
+.toast-message {
+    flex-grow: 1;
+    font-size: 0.95em;
+    padding-right: 10px; /* Spazio per il pulsante di chiusura */
+}
+
+.toast-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-color-muted);
+    font-size: 1.3em; /* Leggermente più grande per essere più cliccabile */
+    line-height: 1;
+    padding: 0; /* Rimuovi padding per allineamento migliore */
+    cursor: pointer;
+    opacity: 0.6;
+    align-self: flex-start; /* Allinea in alto se il messaggio è su più righe */
+}
+.toast-close-btn:hover {
+    opacity: 1;
+    color: var(--text-color-primary);
+}
+
+/* Responsive per schermi piccoli */
+@media (max-width: 576px) {
+    #toast-container {
+        bottom: 10px;
+        right: 10px;
+        left: 10px; /* Occupa più larghezza */
+        max-width: none;
+        width: auto; /* Permette al contenitore di adattarsi */
+    }
+    .toast-notification {
+        min-width: 0; /* Rimuovi larghezza minima per adattarsi meglio */
+        padding: 12px 15px;
+    }
+    .toast-message {
+        font-size: 0.9em;
+    }
+    .toast-close-btn {
+        font-size: 1.1em;
+    }
+}
+

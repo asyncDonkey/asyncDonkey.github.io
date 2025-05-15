@@ -6,6 +6,7 @@ import {
     arrayUnion, arrayRemove, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked@5.0.1/lib/marked.esm.js'; 
 
 const INITIAL_COMMENT_LIKE_EMOJI = '🤍';
 const LIKED_COMMENT_EMOJI = '💙';
@@ -69,7 +70,7 @@ async function handleArticleCommentLike(event) {
     const currentUser = auth.currentUser;
 
     if (!commentId || !currentUser) {
-        alert("Devi essere loggato per mettere like ai commenti.");
+        showToast("Devi essere loggato per mettere like ai commenti.");
         return;
     }
 
@@ -80,7 +81,7 @@ async function handleArticleCommentLike(event) {
         const commentSnap = await getDoc(commentRef);
         if (!commentSnap.exists()) {
             console.error("Commento non trovato:", commentId);
-            alert("Errore: commento non trovato.");
+            showToast("Errore: commento non trovato.");
             button.disabled = false;
             return;
         }
@@ -132,7 +133,7 @@ async function handleArticleCommentLike(event) {
         button.disabled = false;
     } catch (error) {
         console.error("Errore like/unlike commento articolo:", error);
-        alert("Si è verificato un errore durante il like/unlike del commento. Riprova.");
+        showToast("Si è verificato un errore durante il like/unlike del commento. Riprova.");
         button.disabled = false;
         if(commentsListDiv && articleIdInternal) await loadArticleComments();
     }
@@ -245,11 +246,11 @@ async function loadArticleComments() {
 async function handleArticleCommentSubmit(event) {
     event.preventDefault();
     if (!articleCommentMessageInput || !submitArticleCommentBtn || !articleIdInternal) {
-        alert("Errore form commenti."); return;
+        showToast("Errore form commenti."); return;
     }
     const message = articleCommentMessageInput.value.trim();
     if (!message) {
-        alert("Inserisci un messaggio."); return;
+        showToast("Inserisci un messaggio."); return;
     }
     const user = auth.currentUser;
     let commentDataPayload = {
@@ -279,7 +280,7 @@ async function handleArticleCommentSubmit(event) {
     } else {
         const name = articleCommentNameInput ? articleCommentNameInput.value.trim() : '';
         if (!name && articleCommentNameInput && articleCommentNameInput.required) {
-            alert("Inserisci il nome."); return;
+            showToast("Inserisci il nome."); return;
         }
         if (name) commentDataPayload.name = name;
     }
@@ -289,15 +290,24 @@ async function handleArticleCommentSubmit(event) {
         const commentsCollectionRef = collection(db, "articleComments");
         await addDoc(commentsCollectionRef, commentDataPayload);
         if (articleIdInternal) {
-            const articleRef = doc(db, "articles", articleIdInternal);
-            await updateDoc(articleRef, { commentCount: increment(1) });
-        }
+    const articleRef = doc(db, "articles", articleIdInternal);
+    try {
+        await updateDoc(articleRef, { 
+            commentCount: increment(1),
+            updatedAt: serverTimestamp() // Conferma che questo sia presente
+        });
+    } catch (e) {
+        console.error("Errore client durante l'aggiornamento del conteggio commenti:", e);
+        // Anche se le regole dovrebbero permetterlo, un errore qui potrebbe indicare
+        // un problema con i dati inviati o una condizione imprevista.
+    }
+}
         articleCommentMessageInput.value = '';
         if (articleCommentNameInput && !user) articleCommentNameInput.value = '';
         await loadArticleComments();
     } catch (error) {
         console.error("Errore invio commento:", error);
-        alert("Errore invio commento. Riprova.");
+        showToast("Errore invio commento. Riprova.");
     } finally {
         if (submitArticleCommentBtn) {
             submitArticleCommentBtn.disabled = false;
@@ -390,7 +400,7 @@ async function loadAndDisplayArticleLikes(articleId) {
 
 async function handleArticleLike() {
     if (!articleIdInternal || !auth.currentUser) {
-        alert("Devi essere loggato per mettere like.");
+        showToast("Devi essere loggato per mettere like.");
         return;
     }
     const localLikeArticleButton = document.getElementById('likeArticleButton');
@@ -399,7 +409,7 @@ async function handleArticleLike() {
         return;
     }
     if (!currentArticleData || !currentArticleData.hasOwnProperty('likeCount')) { 
-        alert("Dati articolo non caricati. Riprova.");
+        showToast("Dati articolo non caricati. Riprova.");
         if (articleIdInternal) await loadAndDisplayArticleFromFirestore(articleIdInternal);
         if (!currentArticleData || !currentArticleData.hasOwnProperty('likeCount')) return;
     }
@@ -417,15 +427,17 @@ async function handleArticleLike() {
     }
 
     const updatePayload = {
-        likeCount: likeUpdateOperation,
-        likedByUsers: userArrayUpdateOperation
-    };
+    likeCount: likeUpdateOperation,
+    likedByUsers: userArrayUpdateOperation,
+    updatedAt: serverTimestamp() // <-- AGGIUNGI QUESTO
+};
+
 
     try {
         await updateDoc(articleRef, updatePayload);
     } catch (error) {
         console.error("Errore aggiornamento like articolo:", error);
-        alert("Errore nell'aggiornare il like. Riprova.");
+        showToast("Errore nell'aggiornare il like. Riprova.");
     } finally {
         if (articleIdInternal) {
             await loadAndDisplayArticleLikes(articleIdInternal); 
@@ -434,25 +446,15 @@ async function handleArticleLike() {
 }
 
 async function loadAndDisplayArticleFromFirestore(articleId) {
-    const tempLikeArticleButton = document.getElementById('likeArticleButton');
-    const tempArticleLikeCountSpan = document.getElementById('articleLikeCount'); 
+    // Ottieni riferimenti DOM (come hai già fatto)
+    // likeArticleButton, articleLikeCountSpan, commentsListDiv, ecc.
+    // articleDisplayLoading, articleContentContainer, articleDisplayTitle, ecc.
 
-    if (!articleContentContainer || !articleDisplayTitle || !articleDisplayDate ||
-        !articleDisplayAuthor || !articleDisplayTagsContainer || !articleDisplayContent ||
-        !articleDisplayLoading || !articleInteractionsSection || 
-        !tempLikeArticleButton || !tempArticleLikeCountSpan ) {
-        console.error("Elementi DOM essenziali mancanti in loadAndDisplayArticleFromFirestore.");
-        if(articleDisplayLoading) {
-            articleDisplayLoading.innerHTML = "<p>Errore: Elementi della pagina non caricati.</p>";
-        } else if (document.body) {
-            document.body.innerHTML = "<p>Errore grave: Impossibile inizializzare pagina articolo.</p>";
-        }
-        return;
-    }
-    
-    articleDisplayLoading.style.display = 'block';
-    articleContentContainer.style.display = 'none';
-    if(articleInteractionsSection) articleInteractionsSection.style.display = 'none';
+    // --- GESTIONE LOADER ALL'INIZIO ---
+    if (articleDisplayLoading) articleDisplayLoading.style.display = 'block';
+    if (articleContentContainer) articleContentContainer.style.display = 'none';
+    if (articleInteractionsSection) articleInteractionsSection.style.display = 'none';
+    if (articleDisplayContent) articleDisplayContent.innerHTML = ''; // Pulisci contenuto precedente
 
     try {
         const articleRef = doc(db, "articles", articleId);
@@ -462,62 +464,85 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
             const articleDataFromDb = docSnap.data();
             currentArticleData = articleDataFromDb; 
             document.title = `${articleDataFromDb.title || 'Articolo'} - asyncDonkey.io`;
-            articleDisplayTitle.textContent = articleDataFromDb.title || "N/D";
-            articleDisplayDate.textContent = formatArticleDateForViewer(articleDataFromDb.date);
-            articleDisplayAuthor.textContent = articleDataFromDb.author || "N/D";
-            articleDisplayTagsContainer.innerHTML = '';
-            if (articleDataFromDb.tags && Array.isArray(articleDataFromDb.tags) && articleDataFromDb.tags.length > 0) {
-                articleDataFromDb.tags.forEach(tagText => {
-                    const tagEl = document.createElement('span');
-                    tagEl.className = 'article-tag';
-                    tagEl.textContent = tagText;
-                    articleDisplayTagsContainer.appendChild(tagEl);
-                });
-            } else {
-                articleDisplayTagsContainer.textContent = 'Nessun tag';
+            
+            if (articleDisplayTitle) articleDisplayTitle.textContent = articleDataFromDb.title || "N/D";
+            
+            // --- GESTIONE METADATI ---
+            if (articleDisplayDate) {
+                const displayDate = articleDataFromDb.publishedAt || articleDataFromDb.createdAt;
+                articleDisplayDate.textContent = formatArticleDateForViewer(displayDate);
             }
-            articleDisplayContent.innerHTML = articleDataFromDb.content || "<p>Contenuto non disponibile.</p>";
-            articleDisplayLoading.style.display = 'none';
-            articleContentContainer.style.display = 'block';
-            if(articleInteractionsSection) articleInteractionsSection.style.display = 'block';
+            if (articleDisplayAuthor) articleDisplayAuthor.textContent = articleDataFromDb.authorName || "N/D";
+            
+            if (articleDisplayTagsContainer) {
+                articleDisplayTagsContainer.innerHTML = ''; // Pulisci tags
+                if (articleDataFromDb.tags && Array.isArray(articleDataFromDb.tags) && articleDataFromDb.tags.length > 0) {
+                    articleDataFromDb.tags.forEach(tagText => {
+                        const tagEl = document.createElement('span');
+                        tagEl.className = 'article-tag';
+                        tagEl.textContent = tagText;
+                        articleDisplayTagsContainer.appendChild(tagEl);
+                    });
+                } else {
+                    articleDisplayTagsContainer.textContent = 'Nessun tag';
+                }
+            }
+            // --- FINE GESTIONE METADATI ---
+
+            // --- GESTIONE CONTENUTO MARKDOWN ---
+            if (articleDisplayContent) {
+                if (articleDataFromDb.contentMarkdown) {
+                    try {
+                        articleDisplayContent.innerHTML = marked.parse(articleDataFromDb.contentMarkdown);
+                    } catch (e) {
+                        console.error("Errore durante il parsing del Markdown:", e);
+                        articleDisplayContent.textContent = articleDataFromDb.contentMarkdown; // Fallback a testo grezzo
+                    }
+                } else {
+                    articleDisplayContent.innerHTML = "<p>Contenuto non disponibile.</p>";
+                }
+            }
+            // --- FINE GESTIONE CONTENUTO MARKDOWN ---
+
+            if (articleContentContainer) articleContentContainer.style.display = 'block';
+            if (articleInteractionsSection) articleInteractionsSection.style.display = 'block';
 
             await loadAndDisplayArticleLikes(articleId); 
-            await loadArticleComments();                 
+            await loadArticleComments();                                 
 
-            // Assicurati che il riferimento globale 'likeArticleButton' sia aggiornato qui
-            // sebbene dovrebbe già essere stato inizializzato in DOMContentLoaded.
-            // È meglio usare il riferimento locale 'tempLikeArticleButton' per coerenza interna alla funzione.
-            if (tempLikeArticleButton && !tempLikeArticleButton.hasAttribute('data-listener-attached')) {
-                tempLikeArticleButton.addEventListener('click', handleArticleLike);
-                tempLikeArticleButton.setAttribute('data-listener-attached', 'true');
+            if (likeArticleButton && !likeArticleButton.hasAttribute('data-listener-attached')) {
+                likeArticleButton.addEventListener('click', handleArticleLike);
+                likeArticleButton.setAttribute('data-listener-attached', 'true');
             }
             if (articleCommentForm && !articleCommentForm.hasAttribute('data-listener-attached')) {
                 articleCommentForm.addEventListener('submit', handleArticleCommentSubmit);
                 articleCommentForm.setAttribute('data-listener-attached', 'true');
             }
         } else {
-            let message = `<p>Spiacenti, articolo ID "${articleId}" non trovato.`;
+            let message = `<p>Spiacenti, articolo ID "${articleId}" non trovato o non pubblicato.`;
             if (docSnap.exists() && docSnap.data().status !== 'published') {
-                message = `<p>Spiacenti, articolo ID "${articleId}" non pubblicato.`;
+                message = `<p>Spiacenti, l'articolo ID "${articleId}" non è attualmente pubblicato.`;
             }
             message += ` Torna alla <a href='index.html#articlesSection'>lista articoli</a>.</p>`;
-            articleDisplayLoading.style.display = 'none';
-            articleContentContainer.style.display = 'block';
+            
+            if (articleContentContainer) articleContentContainer.style.display = 'block';
+            if (articleDisplayTitle) articleDisplayTitle.textContent = "Articolo Non Trovato";
+            if (articleDisplayContent) articleDisplayContent.innerHTML = message;
+            if (articleInteractionsSection) articleInteractionsSection.style.display = 'none';
             document.title = "Articolo Non Trovato - asyncDonkey.io";
-            articleDisplayTitle.textContent = "Articolo Non Trovato";
-            articleDisplayContent.innerHTML = message;
-            if(articleInteractionsSection) articleInteractionsSection.style.display = 'none';
         }
     } catch (error) {
         console.error("Errore caricamento articolo:", error);
-        articleDisplayLoading.style.display = 'none';
-        articleContentContainer.style.display = 'block';
-        articleDisplayTitle.textContent = "Errore Caricamento";
-        articleDisplayContent.innerHTML = "<p>Errore caricamento. Riprova.</p>";
-        if(articleInteractionsSection) articleInteractionsSection.style.display = 'none';
+        if (articleContentContainer) articleContentContainer.style.display = 'block';
+        if (articleDisplayTitle) articleDisplayTitle.textContent = "Errore Caricamento";
+        if (articleDisplayContent) articleDisplayContent.innerHTML = "<p>Errore nel caricamento dell'articolo. Riprova più tardi.</p>";
+        if (articleInteractionsSection) articleInteractionsSection.style.display = 'none';
         if (error.code === 'failed-precondition' && error.message.includes('index')) {
-             articleDisplayContent.innerHTML += '<p style="color:orange;">Indice Firestore mancante.</p>';
+             if (articleDisplayContent) articleDisplayContent.innerHTML += '<p style="color:orange;">Indice Firestore mancante.</p>';
         }
+    } finally {
+        // Nascondi sempre il loader alla fine
+        if (articleDisplayLoading) articleDisplayLoading.style.display = 'none';
     }
 }
 
@@ -536,7 +561,7 @@ async function openLikedByListModal(contentId, contentType) {
          return;
     }
     if (!auth.currentUser) {
-        alert("Devi essere loggato per vedere i like.");
+        showToast("Devi essere loggato per vedere i like.");
         return;
     }
 

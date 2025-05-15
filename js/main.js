@@ -276,7 +276,7 @@ async function handleHomepageArticleLike(event) {
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
-        alert("Devi essere loggato per interagire con i like. Puoi mettere like dalla pagina dell'articolo.");
+        showToast("Devi essere loggato per interagire con i like. Puoi mettere like dalla pagina dell'articolo.");
         return;
     }
     if (!articleId) {
@@ -442,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 await signInWithEmailAndPassword(auth, email, password);
                 loginForm.reset();
             } catch (error) {
-                alert("Errore Login: " + traduireErroreFirebase(error.code));
+                showToast("Errore Login: " + traduireErroreFirebase(error.code));
             }
         });
     }
@@ -453,8 +453,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = signupForm.signupPassword.value;
             const nickname = signupForm.signupNickname.value.trim();
             const selectedNationalityCode = signupForm.signupNationality.value;
-            if (password.length < 6) { alert("Password min. 6 caratteri."); return; }
-            if (nickname.length < 3 || nickname.length > 25) { alert("Nickname 3-25 caratteri."); return; }
+            if (password.length < 6) { showToast("Password min. 6 caratteri."); return; }
+            if (nickname.length < 3 || nickname.length > 25) { showToast("Nickname 3-25 caratteri."); return; }
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
@@ -468,9 +468,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 await setDoc(doc(db, "userProfiles", user.uid), userProfileData);
                 signupForm.reset();
-                alert("Registrazione avvenuta con successo!");
+                showToast("Registrazione avvenuta con successo!");
             } catch (authError) {
-                alert("Errore Registrazione: " + traduireErroreFirebase(authError.code));
+                showToast("Errore Registrazione: " + traduireErroreFirebase(authError.code));
             }
         });
     }
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 await signOut(auth);
             } catch (error) {
-                alert("Errore logout: " + error.message);
+                showToast("Errore logout: " + error.message);
             }
         });
     }

@@ -67,6 +67,47 @@
              <p><a href="index.html">Go to Homepage to Log In</a></p>
          </div>
     </section>
+
+    <section id="myArticlesSection" style="margin-top: 40px;">
+    <h2>I Miei Articoli</h2>
+
+    <div id="myArticlesTabs" style="margin-bottom: 20px; border-bottom: 1px solid var(--border-color-primary);">
+        <h3 style="margin-bottom: 10px; color: var(--heading-color);">Le Mie Bozze</h3>
+    </div>
+
+    <div id="myDraftArticlesListContainer">
+    <p id="myDraftsLoadingMessage">Caricamento bozze...</p>
+    <div id="myDraftArticlesList" class="my-articles-grid-container"> </div>
+</div>
+
+    </section>
+    <div class="my-articles-subsection" style="margin-top: 30px;">
+        <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 5px; margin-bottom: 15px;">In Revisione</h3>
+        <div id="myPendingArticlesListContainer">
+            <p id="myPendingLoadingMessage">Caricamento articoli in revisione...</p>
+            <div id="myPendingArticlesList" class="my-articles-grid-container">
+                </div>
+        </div>
+    </div>
+
+    <div class="my-articles-subsection" style="margin-top: 30px;">
+        <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 5px; margin-bottom: 15px;">Pubblicati</h3>
+        <div id="myPublishedArticlesListContainer">
+            <p id="myPublishedLoadingMessage">Caricamento articoli pubblicati...</p>
+            <div id="myPublishedArticlesList" class="my-articles-grid-container">
+                </div>
+        </div>
+    </div>
+
+    <div class="my-articles-subsection" style="margin-top: 30px;">
+        <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 5px; margin-bottom: 15px;">Respinti</h3>
+        <div id="myRejectedArticlesListContainer">
+            <p id="myRejectedLoadingMessage">Caricamento articoli respinti...</p>
+            <div id="myRejectedArticlesList" class="my-articles-grid-container">
+                </div>
+        </div>
+    </div>
+    
     <div style="text-align: center; margin-top: 30px;">
          <a href="index.html" style="color: var(--link-color); text-decoration: underline;">&larr; Back to Homepage</a>
     </div>
@@ -77,6 +118,8 @@
     <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
 </footer>
 
+<div id="toast-container" aria-live="assertive" aria-atomic="true">
+    </div>
 
 <script src="js/profile.js" type="module"></script>
 <script src="js/main.js" type="module"></script>

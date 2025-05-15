@@ -67,7 +67,7 @@ async function handleGuestbookCommentLike(event) {
         return;
     }
     if (!currentUser) {
-        alert("Devi essere loggato per mettere 'Mi piace' ai commenti.");
+        showToast("Devi essere loggato per mettere 'Mi piace' ai commenti.");
         return;
     }
 
@@ -78,7 +78,7 @@ async function handleGuestbookCommentLike(event) {
         const commentSnap = await getDoc(commentDocRef);
         if (!commentSnap.exists()) {
             console.error("Commento del guestbook non trovato:", commentId);
-            alert("Errore: commento non trovato.");
+            showToast("Errore: commento non trovato.");
             button.disabled = false;
             return;
         }
@@ -150,7 +150,7 @@ async function handleGuestbookCommentLike(event) {
 
     } catch (error) {
         console.error("comments.js - Errore durante l'aggiornamento del like al commento guestbook:", error);
-        alert("Si è verificato un errore durante l'aggiornamento del like. Riprova.");
+        showToast("Si è verificato un errore durante l'aggiornamento del like. Riprova.");
         button.disabled = false;
         // Potrebbe essere utile ricaricare i commenti per riflettere lo stato corretto
         if (commentsListDiv && guestbookCollection && currentPageId) {
@@ -287,11 +287,11 @@ async function handleCommentSubmit(event) {
     event.preventDefault();
     if (!guestbookCollection || !commentMessageInput || !submitCommentBtn || !commentsListDiv) {
          console.error("comments.js - Elementi DOM del form commenti mancanti.");
-         alert("Errore interfaccia. Riprova.");
+         showToast("Errore interfaccia. Riprova.");
          return;
     }
     const message = commentMessageInput.value.trim();
-    if (!message) { alert("Please enter a message."); return; }
+    if (!message) { showToast("Please enter a message."); return; }
 
     const user = auth.currentUser;
     let userIdToSave = null, userNameForDb = null, nameForDb = null, userNationalityCode = null;
@@ -317,11 +317,11 @@ async function handleCommentSubmit(event) {
     } else {
         if (!commentNameInput || !commentNameSection) {
             console.error("comments.js - Elementi DOM per nome anonimo mancanti.");
-            alert("Errore interfaccia. Riprova.");
+            showToast("Errore interfaccia. Riprova.");
             return;
         }
         nameForDb = commentNameInput.value.trim();
-        if (!nameForDb) { alert("Please enter your name or log in."); return; }
+        if (!nameForDb) { showToast("Please enter your name or log in."); return; }
     }
 
     submitCommentBtn.disabled = true; submitCommentBtn.textContent = "Submitting...";
@@ -351,7 +351,7 @@ async function handleCommentSubmit(event) {
         await loadComments();
     } catch (error) {
         console.error("comments.js - Error submitting comment:", error);
-        alert("Error submitting comment. Please try again.");
+        showToast("Error submitting comment. Please try again.");
     } finally {
         if (submitCommentBtn) { submitCommentBtn.disabled = false; submitCommentBtn.textContent = "Submit Comment"; }
     }
