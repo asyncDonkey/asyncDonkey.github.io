@@ -417,9 +417,11 @@ async function handleArticleLike() {
     }
 
     const updatePayload = {
-        likeCount: likeUpdateOperation,
-        likedByUsers: userArrayUpdateOperation
-    };
+    likeCount: likeUpdateOperation,
+    likedByUsers: userArrayUpdateOperation,
+    updatedAt: serverTimestamp() // <-- AGGIUNGI QUESTO
+};
+
 
     try {
         await updateDoc(articleRef, updatePayload);
