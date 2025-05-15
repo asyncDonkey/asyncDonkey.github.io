@@ -1109,3 +1109,91 @@ footer a { color: var(--link-color); }
 .guideline-content li {
     margin-bottom: 6px;
 }
+
+/* Stili per la sezione "I Miei Articoli" in profile.html */
+#myArticlesSection {
+    background-color: var(--surface-bg-primary);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 30px; /* Spazio dalla sezione profilo */
+    border: 1px solid var(--border-color-secondary);
+}
+
+#myArticlesSection h2 {
+    color: var(--heading-color);
+    border-bottom: 1px solid var(--border-color-primary);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+#myArticlesSection h3 { /* Per i titoli delle sottosezioni (Bozze, In Revisione, etc.) */
+    color: var(--heading-color);
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+#myArticlesSection #myArticlesTabs h3 { /* Stile specifico per il titolo "Le Mie Bozze" dentro i tabs */
+    margin-top: 0;
+    font-size: 1.2em; /* Leggermente più piccolo se dentro i tabs */
+}
+
+
+.my-article-item {
+    background-color: var(--surface-bg-secondary);
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color-primary);
+    display: flex;
+    flex-direction: column; /* Stacka titolo/info e azioni verticalmente */
+    gap: 10px;
+}
+
+.my-article-item strong {
+    color: var(--text-color-primary);
+    font-size: 1.1em;
+}
+
+.my-article-item small {
+    color: var(--text-color-muted);
+    font-size: 0.9em;
+    display: block; /* Per far andare a capo la data */
+}
+
+.my-article-status-draft {
+    font-style: italic;
+    color: var(--text-color-muted);
+}
+/* Aggiungi qui classi per .my-article-status-pending, .my-article-status-published, .my-article-status-rejected se necessario */
+
+.my-article-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Permetti ai bottoni di andare a capo */
+}
+
+.my-article-button,
+.my-article-button-delete {
+    padding: 8px 15px;
+    font-size: 0.9em;
+    text-decoration: none; /* Per i link stilizzati come bottoni */
+}
+
+.my-article-button-delete {
+    background-color: #dc3545; /* Rosso per eliminare */
+    border-color: #dc3545;
+    color: white;
+}
+.my-article-button-delete:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+#myDraftsLoadingMessage, 
+#myPendingLoadingMessage, 
+#myPublishedLoadingMessage, 
+#myRejectedLoadingMessage { /* Stili per i messaggi di caricamento */
+    color: var(--text-color-muted);
+    font-style: italic;
+}
