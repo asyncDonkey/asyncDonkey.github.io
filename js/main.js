@@ -98,20 +98,25 @@ async function loadUserProfile(user) {
 function updateAuthUI(user) {
     const authContainer = document.getElementById('authContainer');
     const userProfileContainer = document.getElementById('userProfileContainer');
-    const logoutButton = document.getElementById('logoutButton');
+    // const logoutButton = document.getElementById('logoutButton'); // Già gestito da userProfileContainer
     const profileNavLink = document.getElementById('profileNav');
+    const writeArticleNavLink = document.getElementById('navWriteArticle'); // Per "Scrivi Articolo"
 
-    const elementsToToggle = [
+    // Il link "Contribuisci" non ha bisogno di essere gestito qui perché è sempre visibile.
+
+    const elementsToToggleBasedOnLogin = [
         { el: authContainer, showWhenLoggedOut: true, displayType: 'flex' },
         { el: userProfileContainer, showWhenLoggedOut: false, displayType: 'flex' },
-        { el: logoutButton, showWhenLoggedOut: false, displayType: 'inline-block' },
         { el: profileNavLink, showWhenLoggedOut: false, displayType: 'list-item' },
+        { el: writeArticleNavLink, showWhenLoggedOut: false, displayType: 'list-item' }
     ];
 
-    elementsToToggle.forEach(item => {
+    elementsToToggleBasedOnLogin.forEach(item => {
         if (item.el) {
-            const displayStyle = item.displayType;
-            item.el.style.display = user ? (item.showWhenLoggedOut ? 'none' : displayStyle) : (item.showWhenLoggedOut ? displayStyle : 'none');
+            const displayStyle = user ?
+                                 (item.showWhenLoggedOut ? 'none' : item.displayType) :
+                                 (item.showWhenLoggedOut ? item.displayType : 'none');
+            item.el.style.display = displayStyle;
         }
     });
     
@@ -122,13 +127,14 @@ function updateAuthUI(user) {
         if (userDisplayName) userDisplayName.textContent = '';
         if (headerUserAvatar) headerUserAvatar.style.display = 'none';
     } else {
-        loadUserProfile(user);
+        loadUserProfile(user); // Funzione che carica nome e avatar
         const loginModal = document.getElementById('loginModal');
         const signupModal = document.getElementById('signupModal');
         if (loginModal && loginModal.style.display === 'block') loginModal.style.display = 'none';
         if (signupModal && signupModal.style.display === 'block') signupModal.style.display = 'none';
     }
 }
+
 
 export { db, auth };
 
@@ -480,23 +486,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 onAuthStateChanged(auth, (user) => {
-    // console.log('onAuthStateChanged eseguito. Utente:', user ? user.uid : "Nessuno");
+    console.log('main.js - Auth state changed. User:', user ? user.uid : "null");
     updateAuthUI(user);
     
+    // Altra logica che dipende dallo stato dell'utente, es. per la homepage
     const articlesGridElement = document.getElementById('articlesGrid');
-    if (articlesGridElement) {
-        // Se la griglia esiste, è probabile che displayArticlesSection sia stata chiamata o lo sarà.
-        // La chiamata a initializeHomepageArticleInteractions qui assicura che
-        // lo stato dei like venga aggiornato quando l'utente fa login/logout.
-        // Il timeout serve a dare tempo a displayArticlesSection di popolare le card,
-        // specialmente se ci fosse un caricamento asincrono più lungo in futuro.
+    if (articlesGridElement && typeof initializeHomepageArticleInteractions === 'function') {
         setTimeout(() => {
             if (articlesGridElement.querySelector('.article-card')) {
-                // console.log('onAuthStateChanged: Chiamo initializeHomepageArticleInteractions.');
                 initializeHomepageArticleInteractions(user);
-            } else {
-                // console.warn('onAuthStateChanged: .article-card non ancora pronti dopo timeout.');
             }
-        }, 250); // Un breve timeout, potrebbe essere 0 o rimosso se displayArticlesSection è sempre veloce.
+        }, 250);
     }
 });

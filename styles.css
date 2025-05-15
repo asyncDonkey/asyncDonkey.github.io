@@ -806,3 +806,39 @@ footer a { color: var(--link-color); }
 .clickable-like-count:hover {
     color: var(--link-hover-color); /* Esempio */
 }
+
+#articleLikesContainer .clickable-like-count { /* Più specifico per l'articolo */
+    cursor: pointer;
+    text-decoration: underline;
+    color: var(--link-color); /* Usa il colore del link per indicare interattività */
+    padding: 2px 5px; /* Aggiunge un po' di area cliccabile attorno al numero */
+    border-radius: 4px; /* Angoli smussati per un aspetto più "button-like" */
+    transition: background-color 0.2s, color 0.2s;
+}
+
+#articleLikesContainer .clickable-like-count:hover,
+#articleLikesContainer .clickable-like-count:focus {
+    color: var(--link-hover-color);
+    background-color: var(--surface-bg-secondary); /* Leggero sfondo al passaggio del mouse */
+    text-decoration: underline; /* Mantieni la sottolineatura */
+}
+
+#articleLikesContainer > span#articleLikeCount + span { 
+  cursor: pointerù
+}
+
+/* Stile per il conteggio dei like dei COMMENTI (guestbook e articoli) quando cliccabile */
+/* Questo è lo span DENTRO il bottone like del commento */
+.likes-container .like-btn span.clickable-comment-like-count {
+     text-decoration: underline; /* Potrebbe essere già sufficiente dal JS o dal browser */
+      color: var(white); /* Potrebbe cambiare il colore del numero dentro il bottone */
+      padding: 1px 3px;
+    /* border-radius: 3px; */
+    /* transition: background-color 0.2s, color 0.2s; */
+    
+    /* Per ora, ci affidiamo principalmente al fatto che l'intero bottone like è già cliccabile
+       e il JS aggiunge la sottolineatura. Se vogliamo rendere solo il numero più evidente,
+       possiamo decommentare e aggiustare.
+       La cosa più importante qui è che il title attribute viene già impostato dal JS.
+    */
+}

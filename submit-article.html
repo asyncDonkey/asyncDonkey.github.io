@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invia Nuovo Articolo - asyncDonkey.io</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <style>
+        /* Stili specifici per la pagina di sottomissione articolo, se necessari */
+        #articleSubmissionForm div {
+            margin-bottom: 20px;
+        }
+        #articleSubmissionForm label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color-primary);
+        }
+        #articleSubmissionForm input[type="text"],
+        #articleSubmissionForm input[type="url"],
+        #articleSubmissionForm textarea,
+        #articleSubmissionForm select { /* Aggiunto select per coerenza futura */
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color-primary);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color-primary);
+            font-size: 1em;
+            font-family: inherit;
+        }
+        #articleSubmissionForm input:focus,
+        #articleSubmissionForm textarea:focus,
+        #articleSubmissionForm select:focus {
+            outline: none;
+            border-color: var(--link-color);
+            box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25);
+        }
+        #submissionMessage {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        #submissionMessage.success {
+            background-color: var(--surface-bg-secondary); /* Un verde chiaro sarebbe meglio */
+            color: var(--text-color-primary); /* Un verde scuro */
+            border: 1px solid var(--game-border-color); /* Un verde */
+        }
+        #submissionMessage.error {
+            background-color: var(--surface-bg-secondary); /* Un rosso chiaro */
+            color: red;
+            border: 1px solid red;
+        }
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content" style="padding: 10px 5%; align-items: center; display: flex; justify-content: space-between; flex-wrap: wrap;">
+            <a href="index.html" style="text-decoration: none;">
+                <h1 style="font-size: 1.8em; margin:0;">asyncDonkey.io</h1>
+            </a>
+            <nav>
+    <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 20px;">
+        <li><a href="index.html" class="auth-button" style="text-decoration:none;">Home</a></li>
+        <li><a href="about.html" class="auth-button" style="text-decoration:none;">.Dev</a></li>
+        <li><a href="contribute.html" class="auth-button" style="text-decoration:none;" id="navContributeLink">Contribuisci</a></li> <li><a href="donkeyRunner.html" class="auth-button" style="text-decoration:none;">codeDash!</a></li>
+        <li><a href="leaderboard.html" class="auth-button" style="text-decoration:none;">Leaderboard</a></li>
+        <li id="profileNav" style="display: none;"><a href="profile.html" class="auth-button" style="text-decoration:none;">Profile</a></li>
+        <li id="navWriteArticle" style="display: none;"><a href="submit-article.html" class="auth-button" style="text-decoration:none;">Scrivi Articolo</a></li>
+    </ul>
+</nav>
+            <div class="header-controls" style="display: flex; align-items: center; gap: 10px;">
+                <div id="authContainer">
+                    <button id="showLoginBtn" class="auth-button">Login</button>
+                    <button id="showSignupBtn" class="auth-button">Register</button>
+                </div>
+                <div id="userProfileContainer" style="display: none; align-items: center;">
+                    <img id="headerUserAvatar" src="" alt="User Avatar">
+                    <span id="userDisplayName"></span>
+                    <button id="logoutButton" class="auth-button">Logout</button>
+                </div>
+                <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="articleSubmissionSection">
+            <h2>Invia Nuovo Articolo</h2>
+            <div id="authRequiredMessage" style="display:none; text-align:center; padding: 20px; background-color: var(--surface-bg-secondary); border-radius: 8px;">
+                <p>Devi essere <a href="#" id="loginLinkFromSubmitPage">loggato</a> per inviare un articolo.</p>
+            </div>
+
+            <form id="articleSubmissionForm" style="display:none;">
+                <div>
+                    <label for="articleTitle">Titolo Articolo:</label>
+                    <input type="text" id="articleTitle" name="articleTitle" required maxlength="150">
+                </div>
+
+                <div>
+    <label for="articleContent">Contenuto Articolo (Markdown):</label>
+    <textarea id="articleContent" name="articleContent" rows="20" required placeholder="Scrivi qui il contenuto del tuo articolo. Puoi usare la sintassi Markdown..."></textarea>
+    </div>
+
+                <div>
+                    <label for="articleTags">Tags (separati da virgola):</label>
+                    <input type="text" id="articleTags" name="articleTags" placeholder="es: javascript, firestore, webdev">
+                </div>
+                
+                <div>
+                    <label for="articleSnippet">Riassunto/Snippet (max 300 caratteri):</label>
+                    <textarea id="articleSnippet" name="articleSnippet" rows="4" maxlength="300" placeholder="Una breve descrizione dell'articolo che apparirà nelle anteprime..."></textarea>
+                </div>
+
+                <div>
+                    <label for="articleCoverImageUrl">URL Immagine di Copertina (Opzionale):</label>
+                    <input type="url" id="articleCoverImageUrl" name="articleCoverImageUrl" placeholder="https://example.com/immagine.jpg">
+                </div>
+
+                <div id="submissionMessage"></div>
+
+                <div class="form-actions">
+                    <button type="submit" id="submitArticleForReviewBtn" class="game-button">Invia per Revisione</button>
+                    <button type="button" id="saveArticleDraftBtn" class="game-button" style="background-color: var(--text-color-muted); border-color: var(--text-color-muted);">Salva Bozza</button>
+                </div>
+            </form>
+        </section>
+        <div class="back-to-home-link" style="margin-top: 30px;">
+            <a href="index.html">&larr; Torna alla Homepage</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; ${new Date().getFullYear()} asyncDonkey.io.</p>
+        <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
+    </footer>
+
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <span class="closeLoginBtn">&times;</span>
+        <h3>Login</h3>
+        <form id="loginForm">
+          <div><label for="loginEmail">Email:</label><input type="email" id="loginEmail" name="loginEmail" required></div>
+          <div><label for="loginPassword">Password:</label><input type="password" id="loginPassword" name="loginPassword" required></div>
+          <button type="submit" class="game-button">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="signupModal" class="modal">
+      <div class="modal-content">
+        <span class="closeSignupBtn">&times;</span>
+        <h3>Registrati</h3>
+        <form id="signupForm">
+        <div><label for="signupEmail">Email:</label><input type="email" id="signupEmail" name="signupEmail" required></div>
+        <div><label for="signupPassword">Password (min. 6 caratteri):</label><input type="password" id="signupPassword" name="signupPassword" required minlength="6"></div>
+        <div>
+            <label for="signupNickname">Nickname:</label>
+            <input type="text" id="signupNickname" name="signupNickname" required minlength="3" maxlength="25">
+        </div>
+        <div>
+            <label for="signupNationality">Nazionalità:</label>
+            <select id="signupNationality" name="signupNationality">
+                <option value="">Seleziona Nazionalità...</option>
+                </select>
+            </div>
+        <button type="submit" class="game-button">Registrati</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/main.js" type="module"></script>
+    <script src="js/articleSubmission.js" type="module"></script> 
+</body>
+</html>

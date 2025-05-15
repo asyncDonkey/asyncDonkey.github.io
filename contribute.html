@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contribuisci - asyncDonkey.io</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
+    <style>
+        /* Stili specifici per contribute.html se necessari */
+        .contribution-section {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--border-color-secondary);
+        }
+        .contribution-section:last-child {
+            border-bottom: none;
+        }
+        .contribution-section h3 {
+            margin-bottom: 15px;
+            color: var(--heading-color);
+        }
+        .contribution-section ul {
+            list-style-position: inside;
+            padding-left: 0;
+        }
+        .contribution-section ul li {
+            margin-bottom: 8px;
+        }
+        .btn-action { /* Stile per bottoni call-to-action */
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 25px;
+            background-color: var(--link-color);
+            color: var(--button-text-primary);
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-action:hover {
+            background-color: var(--link-hover-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content" style="padding: 10px 5%; align-items: center; display: flex; justify-content: space-between; flex-wrap: wrap;">
+            <a href="index.html" style="text-decoration: none;">
+                <h1 style="font-size: 1.8em; margin:0;">asyncDonkey.io</h1>
+            </a>
+            <nav>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 20px;">
+                    <li><a href="index.html" class="auth-button" style="text-decoration:none;">Home</a></li>
+                    <li><a href="about.html" class="auth-button" style="text-decoration:none;">.Dev</a></li>
+                    <li><a href="donkeyRunner.html" class="auth-button" style="text-decoration:none;">codeDash!</a></li>
+                    <li><a href="leaderboard.html" class="auth-button" style="text-decoration:none;">Leaderboard</a></li>
+                    <li id="profileNav" style="display: none;"><a href="profile.html" class="auth-button" style="text-decoration:none;">Profile</a></li>
+                    <li id="navWriteArticle" style="display: none;"><a href="submit-article.html" class="auth-button" style="text-decoration:none;">Scrivi Articolo</a></li>
+                </ul>
+            </nav>
+            <div class="header-controls" style="display: flex; align-items: center; gap: 10px;">
+                <div id="authContainer">
+                    <button id="showLoginBtn" class="auth-button">Login</button>
+                    <button id="showSignupBtn" class="auth-button">Register</button>
+                </div>
+                <div id="userProfileContainer" style="display: none; align-items: center;">
+                    <img id="headerUserAvatar" src="" alt="User Avatar">
+                    <span id="userDisplayName"></span>
+                    <button id="logoutButton" class="auth-button">Logout</button>
+                </div>
+                <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="pageHeader" style="text-align: center; margin-bottom: 30px;">
+            <h2>Contribuisci al Progetto</h2>
+            <p>La tua partecipazione è preziosa! Scopri come puoi contribuire con articoli, idee e segnalazioni.</p>
+        </section>
+
+        <section id="contributeArticles" class="contribution-section">
+            <h3>✍️ Scrivere un Articolo</h3>
+            <p>Hai conoscenze da condividere o un progetto interessante di cui parlare? Puoi proporre un articolo per la pubblicazione sul sito!</p>
+            <h4>Come Funziona:</h4>
+            <ul>
+                <li><strong>Sottomissione:</strong> Utilizza la <a href="submit-article.html">pagina di sottomissione dedicata</a> per scrivere e inviare il tuo articolo.</li>
+                <li><strong>Editor Markdown:</strong> La pagina di sottomissione include un editor Markdown facile da usare che ti permette di formattare il testo, inserire codice, link, immagini e altro. L'editor offre anche una comoda funzione di anteprima.</li>
+                <li><strong>Revisione:</strong> Ogni articolo inviato viene sottoposto a una breve revisione prima della pubblicazione per garantire qualità e coerenza con i temi del sito. Riceverai un feedback se necessario.</li>
+                <li><strong>Pubblicazione:</strong> Una volta approvato, il tuo articolo sarà pubblicato e visibile a tutti!</li>
+            </ul>
+            <a href="submit-article.html" class="btn-action">Inizia a Scrivere un Articolo</a>
+        </section>
+
+        <section id="aboutMarkdown" class="contribution-section">
+            <h3>📄 Cos'è il Markdown?</h3>
+            <p>
+                Il Markdown è un linguaggio di markup leggero con una sintassi di formattazione del testo semplice. È stato creato nel 2004 da John Gruber con Aaron Swartz.
+                La sua filosofia principale è quella di essere il più leggibile possibile nella sua forma sorgente, senza che sembri marcato con tag o istruzioni di formattazione, a differenza, ad esempio, dell'RTF o dell'HTML.
+            </p>
+            <p>
+                Viene ampiamente utilizzato per scrivere documentazione, messaggi nei forum, file README e, naturalmente, articoli di blog e contenuti web. L'editor che forniamo ti aiuterà a utilizzare la sintassi Markdown in modo intuitivo.
+            </p>
+            <a href="view-article.html?id=markdown-guide-placeholder" class="btn-action" style="background-color: var(--surface-bg-secondary); color: var(--text-color-secondary);">Guida Completa al Markdown (Prossimamente)</a>
+        </section>
+
+        <section id="contributeIssues" class="contribution-section">
+            <h3>💡 Segnalazioni e Suggerimenti</h3>
+            <p>Il tuo feedback è fondamentale per migliorare asyncDonkey.io e i giochi presenti!</p>
+            <h4>Tipi di Contributi:</h4>
+            <ul>
+                <li><strong>Segnalazione Bug:</strong> Se hai riscontrato un errore o un comportamento anomalo in un gioco o nel sito, <a href="donkeyRunner.html#bugReportSection">segnalacelo qui</a> o apri una issue su <a href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=bug_report.yml" target="_blank" rel="noopener">GitHub</a>.</li>
+                <li><strong>Proposta di Nuova Funzionalità (Generale):</strong> Hai un'idea per una nuova sezione del sito o un miglioramento generale della piattaforma?</li>
+                <li><strong>Proposta di Nuovo Gioco:</strong> Ti piacerebbe vedere un nuovo tipo di gioco su asyncDonkey.io?</li>
+                <li><strong>Miglioramenti a Giochi Esistenti:</strong> Idee per rendere i giochi attuali ancora più divertenti o funzionali.</li>
+            </ul>
+            <p>
+                A breve implementeremo una sezione dedicata qui sulla pagina "Contribuisci" dove potrai inviare queste proposte e votare quelle degli altri utenti.
+                Per ora, puoi usare il form di <a href="donkeyRunner.html#featureRequestSection">suggerimento funzionalità nel gioco CodeDash!</a> per idee generali o relative ai giochi, oppure, per questioni più tecniche o dettagliate, apri una "Feature Request" direttamente su
+                <a href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=feature_request.yml" target="_blank" rel="noopener">GitHub Issues</a>.
+            </p>
+            <div id="issueTrackerPlaceholder" style="margin-top: 20px; padding: 15px; background-color: var(--surface-bg-secondary); border-radius: 6px; text-align:center;">
+                <p style="color: var(--text-color-muted);"><em>(Sezione Tracciamento Issue e Suggerimenti in arrivo...)</em></p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer style="margin-top: auto;"> <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>
+        <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
+    </footer>
+
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <span class="closeLoginBtn">&times;</span>
+        <h3>Login</h3>
+        <form id="loginForm">
+          <div><label for="loginEmail">Email:</label><input type="email" id="loginEmail" name="loginEmail" required></div>
+          <div><label for="loginPassword">Password:</label><input type="password" id="loginPassword" name="loginPassword" required></div>
+          <button type="submit" class="game-button">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="signupModal" class="modal">
+      <div class="modal-content">
+        <span class="closeSignupBtn">&times;</span>
+        <h3>Registrati</h3>
+        <form id="signupForm">
+        <div><label for="signupEmail">Email:</label><input type="email" id="signupEmail" name="signupEmail" required></div>
+        <div><label for="signupPassword">Password (min. 6 caratteri):</label><input type="password" id="signupPassword" name="signupPassword" required minlength="6"></div>
+        <div>
+            <label for="signupNickname">Nickname:</label>
+            <input type="text" id="signupNickname" name="signupNickname" required minlength="3" maxlength="25">
+        </div>
+        <div>
+            <label for="signupNationality">Nazionalità:</label>
+            <select id="signupNationality" name="signupNationality">
+                <option value="">Seleziona Nazionalità...</option>
+                <option value="IT">Italia (IT)</option> 
+                <option value="US">Stati Uniti (US)</option>
+                <option value="GB">Regno Unito (GB)</option>
+                <option value="DE">Germania (DE)</option>
+                <option value="FR">Francia (FR)</option>
+                <option value="ES">Spagna (ES)</option>
+                <option value="JP">Giappone (JP)</option>
+                <option value="OTHER">Altro / Preferisco non specificare</option>
+            </select>
+            </div>
+        <button type="submit" class="game-button">Registrati</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/main.js" type="module"></script>
+    <script>
+        // Piccolo script inline per l'anno corrente nel footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
