@@ -1,7 +1,7 @@
 // js/adminDashboard.js
 import { db, auth } from './main.js';
 import {
-    collection, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp, orderBy, deleteDoc // Aggiunto deleteDoc
+    collection, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp, orderBy, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -19,9 +19,23 @@ const editArticleContentTextarea = document.getElementById('editArticleContent')
 const editArticleTagsInput = document.getElementById('editArticleTags');
 const editArticleSnippetInput = document.getElementById('editArticleSnippet');
 const editArticleCoverImageUrlInput = document.getElementById('editArticleCoverImageUrl');
-// const editArticleIsFeaturedCheckbox = document.getElementById('editArticleIsFeatured'); // Decommenta se usi isFeatured
+const editArticleIsFeaturedCheckbox = document.getElementById('editArticleIsFeatured'); // Decommentato per completezza, assicurati sia nell'HTML se lo usi
 
 let easyMDEEditInstance = null;
+
+// Riferimenti DOM per bozze e articoli respinti
+const draftArticlesListDiv = document.getElementById('draftArticlesList');
+const rejectedArticlesListDiv = document.getElementById('rejectedArticlesList');
+
+// --- Gestione Issue Utente per Admin (variabili esistenti) ---
+const adminUserIssuesListDiv = document.getElementById('adminUserIssuesList');
+const adminFilterIssueTypeSelect = document.getElementById('adminFilterIssueType');
+const adminFilterIssueStatusSelect = document.getElementById('adminFilterIssueStatus');
+const adminApplyIssueFiltersBtn = document.getElementById('adminApplyIssueFiltersBtn');
+
+const ISSUE_STATUSES = ["new", "underConsideration", "accepted", "planned", "inProgress", "completed", "declined"];
+const ISSUE_TYPES = ["generalFeature", "newGameRequest", "gameIssue"];
+
 
 function initializeOrUpdateEditMarkdownEditor(content = '') {
     if (editArticleContentTextarea) {
@@ -40,7 +54,7 @@ function initializeOrUpdateEditMarkdownEditor(content = '') {
                         "guide"
                     ],
                     autosave: {
-                        enabled: false,
+                        enabled: false, // Disabilitato per la modale di modifica admin
                     },
                 });
                 console.log("EasyMDE per modifica articolo inizializzato.");
@@ -68,7 +82,7 @@ function destroyEditMarkdownEditor() {
         }
     }
     if (editArticleContentTextarea) {
-        editArticleContentTextarea.value = '';
+        editArticleContentTextarea.value = ''; // Pulisci il textarea
     }
 }
 
@@ -116,19 +130,21 @@ async function loadPendingArticles() {
 }
 
 function addEventListenersToAdminArticleButtons() {
-    document.querySelectorAll('.view-edit-btn').forEach(button => {
+    // Event listener per articoli in pendingReview
+    document.querySelectorAll('#pendingArticlesList .view-edit-btn').forEach(button => {
         button.removeEventListener('click', handleViewEditArticleClick);
         button.addEventListener('click', handleViewEditArticleClick);
     });
-    document.querySelectorAll('.approve-btn').forEach(button => {
+    document.querySelectorAll('#pendingArticlesList .approve-btn').forEach(button => {
         button.removeEventListener('click', handleApproveArticleClick);
         button.addEventListener('click', handleApproveArticleClick);
     });
-    document.querySelectorAll('.reject-btn').forEach(button => {
+    document.querySelectorAll('#pendingArticlesList .reject-btn').forEach(button => {
         button.removeEventListener('click', handleRejectArticleClick);
         button.addEventListener('click', handleRejectArticleClick);
     });
 }
+
 
 async function handleViewEditArticleClick(e) {
     const articleId = e.target.dataset.id;
@@ -144,8 +160,8 @@ async function handleRejectArticleClick(e) {
 }
 
 async function openEditArticleModal(articleId) {
-    if (!editArticleModal || !editingArticleIdInput || !editArticleTitleInput || !editArticleContentTextarea || !editArticleTagsInput || !editArticleSnippetInput || !editArticleCoverImageUrlInput) {
-        console.error("Elementi della modale di modifica articolo non trovati.");
+    if (!editArticleModal || !editingArticleIdInput || !editArticleTitleInput || !editArticleContentTextarea || !editArticleTagsInput || !editArticleSnippetInput || !editArticleCoverImageUrlInput || (editArticleIsFeaturedCheckbox === undefined)) { // Check anche per isFeatured se lo si usa
+        console.error("Elementi della modale di modifica articolo non trovati o non completamente definiti.");
         return;
     }
     const articleRef = doc(db, "articles", articleId);
@@ -159,7 +175,7 @@ async function openEditArticleModal(articleId) {
             editArticleTagsInput.value = (articleData.tags || []).join(', ');
             editArticleSnippetInput.value = articleData.snippet || '';
             editArticleCoverImageUrlInput.value = articleData.coverImageUrl || '';
-            // if (editArticleIsFeaturedCheckbox) editArticleIsFeaturedCheckbox.checked = articleData.isFeatured || false; // Decommenta se usi isFeatured
+            if (editArticleIsFeaturedCheckbox) editArticleIsFeaturedCheckbox.checked = articleData.isFeatured || false;
 
             if (document.getElementById('editArticleModalTitle')) {
                 document.getElementById('editArticleModalTitle').textContent = `Modifica Articolo: ${articleData.title || 'Senza Titolo'}`;
@@ -176,9 +192,10 @@ async function openEditArticleModal(articleId) {
 
 function closeEditArticleModal() {
     if (editArticleModal) editArticleModal.style.display = 'none';
-    destroyEditMarkdownEditor();
+    destroyEditMarkdownEditor(); // Pulisce l'editor
     if (editArticleForm) editArticleForm.reset();
     if (editingArticleIdInput) editingArticleIdInput.value = '';
+    if (editArticleIsFeaturedCheckbox) editArticleIsFeaturedCheckbox.checked = false;
 }
 
 async function approveArticle(articleId) {
@@ -192,7 +209,7 @@ async function approveArticle(articleId) {
         });
         alert("Articolo approvato e pubblicato!");
         loadPendingArticles();
-        loadPublishedArticlesForAdmin(); // Ricarica anche i pubblicati per vederlo lì
+        loadPublishedArticlesForAdmin();
     } catch (error) {
         console.error("Errore approvazione articolo:", error);
         alert("Errore durante l'approvazione.");
@@ -200,31 +217,28 @@ async function approveArticle(articleId) {
 }
 
 async function rejectArticle(articleId) {
-    if (!confirm(`Sei sicuro di voler RESPINGERE l'articolo ID: ${articleId}? (Status: 'rejected')`)) return;
+    const reason = prompt(`Sei sicuro di voler RESPINGERE l'articolo ID: ${articleId}?\nOpzionale: Inserisci un motivo per il rigetto (visibile solo agli admin per ora).`);
+    if (reason === null) return; // L'utente ha cliccato "Annulla"
+
     try {
         const articleRef = doc(db, "articles", articleId);
-        await updateDoc(articleRef, {
-    status: "rejected",
-    publishedAt: null, // <-- Assicurati che sia null
-    updatedAt: serverTimestamp()
-});
+        const updateData = {
+            status: "rejected",
+            publishedAt: null,
+            updatedAt: serverTimestamp()
+        };
+        if (reason.trim() !== "") {
+            updateData.rejectionReason = reason.trim(); // Salva il motivo se fornito
+        }
+        await updateDoc(articleRef, updateData);
         alert("Articolo respinto.");
         loadPendingArticles();
-        // Potresti voler aggiungere una vista per gli articoli respinti o ricaricare publishedArticles se la logica cambia
+        loadRejectedArticlesForAdmin(); // Ricarica la lista dei respinti
     } catch (error) {
         console.error("Errore respingimento articolo:", error);
         alert("Errore durante il respingimento.");
     }
 }
-
-// --- Gestione Issue Utente per Admin ---
-const adminUserIssuesListDiv = document.getElementById('adminUserIssuesList');
-const adminFilterIssueTypeSelect = document.getElementById('adminFilterIssueType');
-const adminFilterIssueStatusSelect = document.getElementById('adminFilterIssueStatus');
-const adminApplyIssueFiltersBtn = document.getElementById('adminApplyIssueFiltersBtn');
-
-const ISSUE_STATUSES = ["new", "underConsideration", "accepted", "planned", "inProgress", "completed", "declined"];
-const ISSUE_TYPES = ["generalFeature", "newGameRequest", "gameIssue"];
 
 function formatAdminTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
@@ -247,8 +261,8 @@ function populateSelectWithOptions(selectElement, optionsArray, defaultOptionTex
     optionsArray.forEach(optionValue => {
         const opt = document.createElement('option');
         opt.value = optionValue;
-        let text = optionValue.replace(/([A-Z])/g, ' $1').trim();
-        text = text.charAt(0).toUpperCase() + text.slice(1);
+        let text = optionValue.replace(/([A-Z])/g, ' $1').trim(); // Converte camelCase in parole separate
+        text = text.charAt(0).toUpperCase() + text.slice(1); // Capitalizza la prima lettera
         opt.textContent = text;
         selectElement.appendChild(opt);
     });
@@ -269,7 +283,7 @@ async function loadUserIssuesForAdmin() {
         if (filterType !== 'all') conditions.push(where("type", "==", filterType));
         if (filterStatus !== 'all') conditions.push(where("status", "==", filterStatus));
         
-        const orderByField = "timestamp";
+        const orderByField = "timestamp"; // Assicurati che esista un indice per questo
         q_issues = conditions.length > 0 ? query(issuesCollectionRef, ...conditions, orderBy(orderByField, "desc")) : query(issuesCollectionRef, orderBy(orderByField, "desc"));
         
         const querySnapshot = await getDocs(q_issues);
@@ -277,18 +291,19 @@ async function loadUserIssuesForAdmin() {
             adminUserIssuesListDiv.innerHTML = '<p>Nessuna segnalazione o suggerimento trovato per i filtri selezionati.</p>';
             return;
         }
-        adminUserIssuesListDiv.innerHTML = '';
+        adminUserIssuesListDiv.innerHTML = ''; // Pulisci la lista
         querySnapshot.forEach((docSnapshot) => {
             const issue = docSnapshot.data();
             const issueId = docSnapshot.id;
             const itemDiv = document.createElement('div');
-            itemDiv.classList.add('article-list-item');
+            itemDiv.classList.add('article-list-item'); // Riusa lo stile se appropriato
             const submittedDate = formatAdminTimestamp(issue.timestamp);
             const gameIdText = issue.type === 'gameIssue' && issue.gameId ? ` (${issue.gameId})` : '';
             let readableType = issue.type;
             if (issue.type === 'generalFeature') readableType = 'Funzionalità Generale';
             else if (issue.type === 'newGameRequest') readableType = 'Nuovo Gioco';
             else if (issue.type === 'gameIssue') readableType = 'Problema Gioco';
+
             itemDiv.innerHTML = `
                 <span class="article-info" style="flex-basis: 70%;">
                     <strong>${issue.title || '<em>Senza titolo</em>'}</strong> <small>[Tipo: ${readableType}${gameIdText}]</small><br>
@@ -307,8 +322,9 @@ async function loadUserIssuesForAdmin() {
                 </span>`;
             adminUserIssuesListDiv.appendChild(itemDiv);
         });
+        // Riattacca gli event listener ai select dopo averli ricreati
         document.querySelectorAll('.admin-issue-status-select').forEach(select => {
-            select.removeEventListener('change', handleIssueStatusChange);
+            select.removeEventListener('change', handleIssueStatusChange); // Previene listener duplicati
             select.addEventListener('change', handleIssueStatusChange);
         });
     } catch (error) {
@@ -325,11 +341,13 @@ async function handleIssueStatusChange(event) {
     const selectElement = event.target;
     const issueId = selectElement.dataset.id;
     const newStatus = selectElement.value;
+
     if (!issueId || !newStatus) {
         alert("Errore: ID issue o nuovo stato non validi.");
         return;
     }
     if (!confirm(`Cambiare stato della issue ID: ${issueId} a "${newStatus}"?`)) {
+        // Ripristina il valore precedente se l'utente annulla
         const issueRefForOldStatus = doc(db, "userIssues", issueId);
         try {
             const docSnap = await getDoc(issueRefForOldStatus);
@@ -337,19 +355,19 @@ async function handleIssueStatusChange(event) {
         } catch (e) { console.error("Errore ripristino select status", e); }
         return;
     }
+
     try {
         const issueRef = doc(db, "userIssues", issueId);
         await updateDoc(issueRef, { status: newStatus, updatedAt: serverTimestamp() });
         alert(`Stato issue ${issueId} aggiornato a "${newStatus}".`);
-        loadUserIssuesForAdmin();
+        loadUserIssuesForAdmin(); // Ricarica la lista per riflettere il cambiamento
     } catch (error) {
         console.error("Errore aggiornamento stato issue:", error);
         alert("Errore durante l'aggiornamento stato.");
-        loadUserIssuesForAdmin();
+        loadUserIssuesForAdmin(); // Ricarica comunque per coerenza UI
     }
 }
 
-// --- Gestione Articoli Pubblicati per Admin ---
 const adminPublishedArticlesListDiv = document.getElementById('adminPublishedArticlesList');
 const adminSearchPublishedTitleInput = document.getElementById('adminSearchPublishedTitle');
 const adminApplyPublishedFiltersBtn = document.getElementById('adminApplyPublishedFiltersBtn');
@@ -364,6 +382,7 @@ async function loadPublishedArticlesForAdmin() {
         const articlesCollectionRef = collection(db, "articles");
         const baseQueryConstraints = [where("status", "==", "published"), orderBy("publishedAt", "desc")];
         const q_published_articles = query(articlesCollectionRef, ...baseQueryConstraints);
+        
         const querySnapshot = await getDocs(q_published_articles);
         let articlesToDisplay = [];
         querySnapshot.forEach((docSnapshot) => articlesToDisplay.push({ id: docSnapshot.id, ...docSnapshot.data() }));
@@ -379,13 +398,14 @@ async function loadPublishedArticlesForAdmin() {
                 '<p>Nessun articolo pubblicato.</p>';
             return;
         }
-        adminPublishedArticlesListDiv.innerHTML = '';
+        adminPublishedArticlesListDiv.innerHTML = ''; // Pulisci
         articlesToDisplay.forEach((article) => {
             const articleId = article.id;
             const itemDiv = document.createElement('div');
             itemDiv.classList.add('article-list-item');
             const publishedDate = formatAdminTimestamp(article.publishedAt);
             const updatedDate = formatAdminTimestamp(article.updatedAt);
+
             itemDiv.innerHTML = `
                 <span class="article-info" style="flex-basis: 60%;">
                     <strong>${article.title || '<em>Senza titolo</em>'}</strong><br>
@@ -399,7 +419,7 @@ async function loadPublishedArticlesForAdmin() {
                 </span>`;
             adminPublishedArticlesListDiv.appendChild(itemDiv);
         });
-        addEventListenersToPublishedArticleButtons();
+        addEventListenersToPublishedArticleButtons(); // Assicurati che questa funzione riattacchi i listener correttamente
     } catch (error) {
         console.error("Errore caricamento articoli pubblicati admin:", error);
         if (adminPublishedArticlesListDiv) adminPublishedArticlesListDiv.innerHTML = '<p>Errore caricamento articoli pubblicati.</p>';
@@ -407,15 +427,15 @@ async function loadPublishedArticlesForAdmin() {
 }
 
 function addEventListenersToPublishedArticleButtons() {
-    document.querySelectorAll('.edit-published-btn').forEach(button => {
+    document.querySelectorAll('#adminPublishedArticlesList .edit-published-btn').forEach(button => {
         button.removeEventListener('click', handleEditPublishedArticleClick);
         button.addEventListener('click', handleEditPublishedArticleClick);
     });
-    document.querySelectorAll('.unpublish-btn').forEach(button => {
+    document.querySelectorAll('#adminPublishedArticlesList .unpublish-btn').forEach(button => {
         button.removeEventListener('click', handleUnpublishArticleClick);
         button.addEventListener('click', handleUnpublishArticleClick);
     });
-    document.querySelectorAll('.delete-published-btn').forEach(button => {
+    document.querySelectorAll('#adminPublishedArticlesList .delete-published-btn').forEach(button => {
         button.removeEventListener('click', handleDeletePublishedArticleClick);
         button.addEventListener('click', handleDeletePublishedArticleClick);
     });
@@ -427,18 +447,19 @@ async function handleEditPublishedArticleClick(e) {
 
 async function handleUnpublishArticleClick(e) {
     const articleId = e.target.dataset.id;
-    const newStatus = "draft";
-    if (!confirm(`Rimuovere dalla pubblicazione l'articolo ID: ${articleId}? (Status: '${newStatus}')`)) return;
+    const newStatus = "draft"; // Cambia lo stato a 'draft' quando si rimuove dalla pubblicazione
+    if (!confirm(`Rimuovere dalla pubblicazione l'articolo ID: ${articleId}? (Status diventerà: '${newStatus}')`)) return;
     try {
         const articleRef = doc(db, "articles", articleId);
         await updateDoc(articleRef, {
-    status: newStatus, // "draft"
-    publishedAt: null, // <-- Assicurati che sia null
-    updatedAt: serverTimestamp()
-});
+            status: newStatus,
+            publishedAt: null, // Rimuovi la data di pubblicazione
+            updatedAt: serverTimestamp()
+        });
         alert(`Articolo ${articleId} rimosso dalla pubblicazione. Status: ${newStatus}.`);
-        loadPublishedArticlesForAdmin();
-        loadPendingArticles();
+        loadPublishedArticlesForAdmin(); // Ricarica questa lista
+        loadPendingArticles(); // Potrebbe essere utile ricaricare anche i pending (o le bozze se implementato)
+        loadDraftArticlesForAdmin(); // Ricarica la lista delle bozze
     } catch (error) {
         console.error("Errore rimozione pubblicazione:", error);
         alert("Errore durante la rimozione dalla pubblicazione.");
@@ -450,7 +471,7 @@ async function handleDeletePublishedArticleClick(e) {
     if (!confirm(`ELIMINARE PERMANENTEMENTE l'articolo ID: ${articleId}? Azione IRREVERSIBILE.`)) return;
     try {
         const articleRef = doc(db, "articles", articleId);
-        await deleteDoc(articleRef); // <-- Implementazione effettiva dell'eliminazione
+        await deleteDoc(articleRef);
         alert(`Articolo ID: ${articleId} eliminato con successo.`);
         loadPublishedArticlesForAdmin();
     } catch (error) {
@@ -459,7 +480,167 @@ async function handleDeletePublishedArticleClick(e) {
     }
 }
 
-// --- Funzioni Comuni e Inizializzazione ---
+// Funzione per inizializzare i toggle delle linee guida
+function initializeGuidelineToggles() {
+    const guidelineToggleButtons = document.querySelectorAll('.guideline-toggle-btn');
+    guidelineToggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const contentId = button.getAttribute('aria-controls');
+            const contentElement = document.getElementById(contentId);
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+            button.setAttribute('aria-expanded', String(!isExpanded)); // Converti a stringa
+            if (contentElement) contentElement.hidden = isExpanded;
+        });
+    });
+}
+
+// Nuova funzione per caricare le bozze
+async function loadDraftArticlesForAdmin() {
+    if (!draftArticlesListDiv) {
+        console.warn("Elemento draftArticlesListDiv non trovato. La visualizzazione delle bozze non sarà disponibile.");
+        return;
+    }
+    draftArticlesListDiv.innerHTML = '<p>Caricamento bozze articoli...</p>';
+    try {
+        const articlesRef = collection(db, "articles");
+        const q = query(articlesRef, where("status", "==", "draft"), orderBy("updatedAt", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            draftArticlesListDiv.innerHTML = '<p>Nessuna bozza trovata.</p>';
+            return;
+        }
+
+        draftArticlesListDiv.innerHTML = '';
+        querySnapshot.forEach((docSnapshot) => {
+            const article = docSnapshot.data();
+            const articleId = docSnapshot.id;
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('article-list-item');
+            const updatedDate = formatAdminTimestamp(article.updatedAt);
+            const authorInfo = article.authorName || article.authorId;
+
+            itemDiv.innerHTML = `
+                <span class="article-info">
+                    <strong>${article.title || '<em>Bozza Senza Titolo</em>'}</strong><br>
+                    <small>Autore: ${authorInfo} | Ultima Modifica: ${updatedDate}</small>
+                </span>
+                <span class="actions">
+                    <button class="game-button view-edit-btn" data-id="${articleId}" style="margin-right:5px;">Visualizza/Modifica</button>
+                    <button class="game-button delete-draft-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina Bozza</button>
+                </span>
+            `;
+            draftArticlesListDiv.appendChild(itemDiv);
+        });
+        addEventListenersToDraftArticleButtons();
+    } catch (error) {
+        console.error("Errore caricamento bozze articoli admin:", error);
+        draftArticlesListDiv.innerHTML = '<p>Errore nel caricamento delle bozze.</p>';
+    }
+}
+
+// Nuova funzione per caricare gli articoli respinti
+async function loadRejectedArticlesForAdmin() {
+    if (!rejectedArticlesListDiv) {
+        console.warn("Elemento rejectedArticlesListDiv non trovato. La visualizzazione degli articoli respinti non sarà disponibile.");
+        return;
+    }
+    rejectedArticlesListDiv.innerHTML = '<p>Caricamento articoli respinti...</p>';
+    try {
+        const articlesRef = collection(db, "articles");
+        const q = query(articlesRef, where("status", "==", "rejected"), orderBy("updatedAt", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            rejectedArticlesListDiv.innerHTML = '<p>Nessun articolo respinto trovato.</p>';
+            return;
+        }
+
+        rejectedArticlesListDiv.innerHTML = '';
+        querySnapshot.forEach((docSnapshot) => {
+            const article = docSnapshot.data();
+            const articleId = docSnapshot.id;
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('article-list-item');
+            const rejectedDate = formatAdminTimestamp(article.updatedAt);
+            const authorInfo = article.authorName || article.authorId;
+            const rejectionReasonText = article.rejectionReason ? `<br><small style="color: var(--text-color-muted);">Motivo: ${article.rejectionReason}</small>` : '';
+
+
+            itemDiv.innerHTML = `
+                <span class="article-info">
+                    <strong>${article.title || '<em>Articolo Senza Titolo</em>'}</strong><br>
+                    <small>Autore: ${authorInfo} | Respinto il: ${rejectedDate}</small>
+                    ${rejectionReasonText}
+                </span>
+                <span class="actions">
+                    <button class="game-button view-edit-btn" data-id="${articleId}" style="margin-right:5px;">Visualizza/Modifica</button>
+                    <button class="game-button delete-rejected-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina Definitivamente</button>
+                </span>
+            `;
+            rejectedArticlesListDiv.appendChild(itemDiv);
+        });
+        addEventListenersToRejectedArticleButtons();
+    } catch (error) {
+        console.error("Errore caricamento articoli respinti admin:", error);
+        rejectedArticlesListDiv.innerHTML = '<p>Errore nel caricamento degli articoli respinti.</p>';
+    }
+}
+
+// Funzioni per aggiungere event listener specifici per bozze e respinti
+function addEventListenersToDraftArticleButtons() {
+    document.querySelectorAll('#draftArticlesList .view-edit-btn').forEach(button => {
+        button.removeEventListener('click', handleViewEditArticleClick);
+        button.addEventListener('click', handleViewEditArticleClick);
+    });
+    document.querySelectorAll('#draftArticlesList .delete-draft-btn').forEach(button => {
+        button.removeEventListener('click', handleDeleteDraftArticleClick);
+        button.addEventListener('click', handleDeleteDraftArticleClick);
+    });
+}
+
+function addEventListenersToRejectedArticleButtons() {
+    document.querySelectorAll('#rejectedArticlesList .view-edit-btn').forEach(button => {
+        button.removeEventListener('click', handleViewEditArticleClick);
+        button.addEventListener('click', handleViewEditArticleClick);
+    });
+    document.querySelectorAll('#rejectedArticlesList .delete-rejected-btn').forEach(button => {
+        button.removeEventListener('click', handleDeleteRejectedArticleClick);
+        button.addEventListener('click', handleDeleteRejectedArticleClick);
+    });
+}
+
+// Handler per eliminare bozze o articoli respinti
+async function handleDeleteDraftArticleClick(e) {
+    const articleId = e.target.dataset.id;
+    if (!confirm(`ELIMINARE PERMANENTEMENTE la BOZZA ID: ${articleId}? Azione IRREVERSIBILE.`)) return;
+    try {
+        const articleRef = doc(db, "articles", articleId);
+        await deleteDoc(articleRef);
+        alert(`Bozza ID: ${articleId} eliminata con successo.`);
+        loadDraftArticlesForAdmin();
+    } catch (error) {
+        console.error("Errore eliminazione bozza:", error);
+        alert("Errore durante l'eliminazione della bozza.");
+    }
+}
+
+async function handleDeleteRejectedArticleClick(e) {
+    const articleId = e.target.dataset.id;
+    if (!confirm(`ELIMINARE PERMANENTEMENTE l'articolo RESPINTO ID: ${articleId}? Azione IRREVERSIBILE.`)) return;
+    try {
+        const articleRef = doc(db, "articles", articleId);
+        await deleteDoc(articleRef);
+        alert(`Articolo respinto ID: ${articleId} eliminato con successo.`);
+        loadRejectedArticlesForAdmin();
+    } catch (error) {
+        console.error("Errore eliminazione articolo respinto:", error);
+        alert("Errore durante l'eliminazione dell'articolo respinto.");
+    }
+}
+
+
 async function checkAdminPermissions() {
     const user = auth.currentUser;
     if (user) {
@@ -469,15 +650,20 @@ async function checkAdminPermissions() {
             if (docSnap.exists() && docSnap.data().isAdmin === true) {
                 if (adminAuthMessageDiv) adminAuthMessageDiv.style.display = 'none';
                 if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'block';
+                
                 if (adminFilterIssueTypeSelect && adminFilterIssueTypeSelect.options.length <= 1) {
                     populateSelectWithOptions(adminFilterIssueTypeSelect, ISSUE_TYPES, "Tutti i Tipi");
                 }
                 if (adminFilterIssueStatusSelect && adminFilterIssueStatusSelect.options.length <= 1) {
                     populateSelectWithOptions(adminFilterIssueStatusSelect, ISSUE_STATUSES, "Tutti gli Stati");
                 }
+
                 loadPendingArticles();
                 loadUserIssuesForAdmin();
                 loadPublishedArticlesForAdmin();
+                initializeGuidelineToggles();
+                loadDraftArticlesForAdmin();
+                loadRejectedArticlesForAdmin();
             } else {
                 if (adminAuthMessageDiv) adminAuthMessageDiv.innerHTML = '<p>Accesso negato. <a href="index.html">Home</a></p>';
                 if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'none';
@@ -506,37 +692,57 @@ async function checkAdminPermissions() {
 
 document.addEventListener('DOMContentLoaded', () => {
     if (closeEditArticleModalBtn) closeEditArticleModalBtn.addEventListener('click', closeEditArticleModal);
-    if (editArticleModal) editArticleModal.addEventListener('click', (event) => {
-        if (event.target === editArticleModal) closeEditArticleModal();
-    });
-    if (editArticleForm) editArticleForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const articleId = editingArticleIdInput.value;
-        if (!articleId) { alert("ID articolo mancante."); return; }
-        const updatedTitle = editArticleTitleInput.value.trim();
-        const updatedContentMarkdown = easyMDEEditInstance ? easyMDEEditInstance.value() : editArticleContentTextarea.value.trim();
-        if (!updatedTitle || !updatedContentMarkdown) { alert("Titolo e Contenuto obbligatori."); return; }
-        const updates = {
-            title: updatedTitle,
-            contentMarkdown: updatedContentMarkdown,
-            tags: editArticleTagsInput.value.trim() ? editArticleTagsInput.value.trim().split(',').map(tag => tag.trim()).filter(tag => tag) : [],
-            snippet: editArticleSnippetInput.value.trim(),
-            coverImageUrl: editArticleCoverImageUrlInput.value.trim() || null,
-            // isFeatured: editArticleIsFeaturedCheckbox ? editArticleIsFeaturedCheckbox.checked : false, // Decommenta se usi isFeatured
-            updatedAt: serverTimestamp()
-        };
-        try {
-            const articleRef = doc(db, "articles", articleId);
-            await updateDoc(articleRef, updates);
-            alert("Articolo modificato!");
-            closeEditArticleModal();
-            loadPendingArticles();
-            loadPublishedArticlesForAdmin();
-        } catch (error) {
-            console.error("Errore salvataggio modifiche articolo admin:", error);
-            alert("Errore salvataggio modifiche.");
-        }
-    });
+    
+    if (editArticleModal) {
+        editArticleModal.addEventListener('click', (event) => {
+            if (event.target === editArticleModal) {
+                closeEditArticleModal();
+            }
+        });
+    }
+    
+    if (editArticleForm) {
+        editArticleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const articleId = editingArticleIdInput.value;
+            if (!articleId) { alert("ID articolo mancante."); return; }
+
+            const updatedTitle = editArticleTitleInput.value.trim();
+            const updatedContentMarkdown = easyMDEEditInstance ? easyMDEEditInstance.value() : editArticleContentTextarea.value.trim(); // Fallback se EasyMDE non è inizializzato
+            
+            if (!updatedTitle || !updatedContentMarkdown) { alert("Titolo e Contenuto sono obbligatori."); return; }
+
+            const updates = {
+                title: updatedTitle,
+                contentMarkdown: updatedContentMarkdown,
+                tags: editArticleTagsInput.value.trim() ? editArticleTagsInput.value.trim().split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [], // Tags in minuscolo
+                snippet: editArticleSnippetInput.value.trim(),
+                coverImageUrl: editArticleCoverImageUrlInput.value.trim() || null,
+                updatedAt: serverTimestamp()
+            };
+            // Gestione opzionale del campo isFeatured
+            if (editArticleIsFeaturedCheckbox) {
+                updates.isFeatured = editArticleIsFeaturedCheckbox.checked;
+            }
+
+
+            try {
+                const articleRef = doc(db, "articles", articleId);
+                await updateDoc(articleRef, updates);
+                alert("Articolo modificato con successo!");
+                closeEditArticleModal();
+                // Ricarica le liste rilevanti in base allo stato dell'articolo modificato
+                // Per sicurezza, ricarichiamo tutte quelle che potrebbero essere state impattate
+                loadPendingArticles();
+                loadPublishedArticlesForAdmin();
+                loadDraftArticlesForAdmin();
+                loadRejectedArticlesForAdmin();
+            } catch (error) {
+                console.error("Errore salvataggio modifiche articolo admin:", error);
+                alert("Errore durante il salvataggio delle modifiche.");
+            }
+        });
+    }
 
     if (adminApplyIssueFiltersBtn && !adminApplyIssueFiltersBtn.hasAttribute('data-listener-attached-issues')) {
         adminApplyIssueFiltersBtn.addEventListener('click', loadUserIssuesForAdmin);
