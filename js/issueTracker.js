@@ -303,7 +303,7 @@ async function loadIssues() {
 
 // Gestione upvote
 async function handleIssueUpvote(issueId) {
-    if (!currentUser) {
+    if (!currentUser) { // currentUser dovrebbe essere già definito globalmente nel modulo
         alert("Devi essere loggato per votare.");
         return;
     }
@@ -311,11 +311,16 @@ async function handleIssueUpvote(issueId) {
     const issueCard = document.querySelector(`.issue-card[data-issue-id="${issueId}"]`);
     const upvoteButton = issueCard ? issueCard.querySelector('.upvote-issue-btn') : null;
 
-    if(upvoteButton) upvoteButton.disabled = true;
+    if (upvoteButton) upvoteButton.disabled = true;
 
     try {
         const docSnap = await getDoc(issueRef);
-        if (!docSnap.exists()) throw new Error("Issue non trovata.");
+        if (!docSnap.exists()) {
+            console.error("Issue non trovata:", issueId);
+            alert("Errore: Segnalazione non trovata.");
+            if (upvoteButton) upvoteButton.disabled = false;
+            return;
+        }
 
         const issueData = docSnap.data();
         const userHasUpvoted = issueData.upvotedBy && issueData.upvotedBy.includes(currentUser.uid);
@@ -323,17 +328,21 @@ async function handleIssueUpvote(issueId) {
         const newUpvotesCountOp = userHasUpvoted ? increment(-1) : increment(1);
         const userArrayUpdateOp = userHasUpvoted ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid);
 
-        await updateDoc(issueRef, {
+        // *** Oggetto di aggiornamento CORRETTO ***
+        const updatePayload = {
             upvotes: newUpvotesCountOp,
-            upvotedBy: userArrayUpdateOp
-        });
+            upvotedBy: userArrayUpdateOp,
+            updatedAt: serverTimestamp() // <-- AGGIUNTA CRUCIALE
+        };
+
+        await updateDoc(issueRef, updatePayload);
 
         // Aggiorna UI direttamente o ricarica quella specifica issue/tutta la lista
         const updatedDocSnap = await getDoc(issueRef); // Richiedi dati aggiornati
         if (updatedDocSnap.exists() && upvoteButton) {
             const updatedData = updatedDocSnap.data();
             const countSpan = upvoteButton.querySelector('.upvote-count');
-            if(countSpan) countSpan.textContent = updatedData.upvotes || 0;
+            if (countSpan) countSpan.textContent = updatedData.upvotes || 0;
 
             if (updatedData.upvotedBy && updatedData.upvotedBy.includes(currentUser.uid)) {
                 upvoteButton.classList.add('voted');
@@ -345,12 +354,13 @@ async function handleIssueUpvote(issueId) {
         }
 
     } catch (error) {
-        console.error("Errore upvote issue:", error);
+        console.error("Errore upvote issue:", error); // Log originale del tuo errore
         alert("Errore durante il voto.");
     } finally {
-        if(upvoteButton) upvoteButton.disabled = false;
+        if (upvoteButton) upvoteButton.disabled = false;
     }
 }
+
 
 
 // Event listener per i filtri
