@@ -3,6 +3,7 @@
 import { db, auth, generateBlockieAvatar } from './main.js';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, orderBy, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { showToast } from './toastNotifications.js';
 
 // --- DEFINIZIONE COSTANTI ELEMENTI DOM (ESISTENTI) ---
 const profileContent = document.getElementById('profileContent');
