@@ -127,7 +127,7 @@ async function handleProfileUpdate(event) {
     }
     if (!profileNicknameInput || !saveProfileBtn || !profileMessage || !currentNicknameSpan) {
         console.error("profile.js - Elementi DOM per l'aggiornamento del profilo mancanti.");
-        alert("Errore nell'interfaccia utente. Impossibile salvare.");
+        showToast("Errore nell'interfaccia utente. Impossibile salvare.");
         return;
     }
     const newNickname = profileNicknameInput.value.trim();
@@ -149,8 +149,7 @@ async function handleProfileUpdate(event) {
     const dataToUpdate = { nickname: newNickname };
     try {
         await updateDoc(userProfileRef, dataToUpdate);
-        profileMessage.textContent = 'Profilo aggiornato con successo!';
-        profileMessage.style.color = 'green';
+        showToast('Profilo aggiornato con successo!', 'success'); // Esempio chiamata
         currentNicknameSpan.textContent = newNickname;
         if (currentUserProfile) currentUserProfile.nickname = newNickname;
         const userDisplayNameElement = document.getElementById('userDisplayName');
@@ -162,7 +161,7 @@ async function handleProfileUpdate(event) {
         profileMessage.textContent = `Errore aggiornamento profilo: ${error.message}`;
         profileMessage.style.color = 'red';
         if (error.code === 'permission-denied') {
-            profileMessage.textContent += ' (Controlla le Regole Firestore)';
+            showToast(friendlyErrorMessage, ' (Controlla le Regole Firestore)'); // Esempio chiamata
         }
     } finally {
         if (saveProfileBtn) {
@@ -189,20 +188,25 @@ async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
         return;
     }
     try {
-        const articleRef = doc(db, "articles", articleId);
-        await deleteDoc(articleRef);
-        alert(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`);
-        if (currentUser) {
-            loadMyArticles(currentUser.uid); // Ricarica tutte le liste di articoli dell'utente
-        }
-    } catch (error) {
-        console.error(`Errore durante l'eliminazione di ${statusText}:`, error);
-        alert(`Si è verificato un errore durante l'eliminazione. Riprova.`);
+    const articleRef = doc(db, "articles", articleId);
+    await deleteDoc(articleRef);
+    // alert(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`); // VECCHIO
+    showToast(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`, 'success'); // NUOVO
+    if (currentUser) {
+        loadMyArticles(currentUser.uid); 
     }
+} catch (error) {
+    console.error(`Errore durante l'eliminazione di ${statusText}:`, error); // Log dell'errore
+    // alert(`Si è verificato un errore durante l'eliminazione. Riprova.`); // VECCHIO
+    showToast(`Si è verificato un errore durante l'eliminazione. Riprova.`, 'error'); // NUOVO
+}
 }
 
 /**
- * Crea un elemento DOM per un articolo dell'utente, con azioni appropriate per il suo stato.
+ * Crea un elemento DOM CARD per un articolo dell'utente.
+ * @param {object} article - L'oggetto dati dell'articolo.
+ * @param {string} articleId - L'ID dell'articolo.
+ * @returns {HTMLElement} L'elemento div (card) per l'articolo.
  */
 function createMyArticleItemElement(article, articleId) {
     const cardDiv = document.createElement('div');
@@ -301,6 +305,7 @@ function createMyArticleItemElement(article, articleId) {
     }
     return cardDiv;
 }
+
 
 async function loadMyArticles(userId) {
     if (!userId) return;

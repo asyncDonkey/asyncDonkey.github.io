@@ -304,7 +304,7 @@ async function loadIssues() {
 // Gestione upvote
 async function handleIssueUpvote(issueId) {
     if (!currentUser) { // currentUser dovrebbe essere già definito globalmente nel modulo
-        alert("Devi essere loggato per votare.");
+        showToast("Devi essere loggato per votare.");
         return;
     }
     const issueRef = doc(db, "userIssues", issueId);
@@ -317,7 +317,7 @@ async function handleIssueUpvote(issueId) {
         const docSnap = await getDoc(issueRef);
         if (!docSnap.exists()) {
             console.error("Issue non trovata:", issueId);
-            alert("Errore: Segnalazione non trovata.");
+            showToast("Errore: Segnalazione non trovata.");
             if (upvoteButton) upvoteButton.disabled = false;
             return;
         }
@@ -355,7 +355,7 @@ async function handleIssueUpvote(issueId) {
 
     } catch (error) {
         console.error("Errore upvote issue:", error); // Log originale del tuo errore
-        alert("Errore durante il voto.");
+        showToast("Errore durante il voto.");
     } finally {
         if (upvoteButton) upvoteButton.disabled = false;
     }

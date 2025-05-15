@@ -70,7 +70,7 @@ async function handleArticleCommentLike(event) {
     const currentUser = auth.currentUser;
 
     if (!commentId || !currentUser) {
-        alert("Devi essere loggato per mettere like ai commenti.");
+        showToast("Devi essere loggato per mettere like ai commenti.");
         return;
     }
 
@@ -81,7 +81,7 @@ async function handleArticleCommentLike(event) {
         const commentSnap = await getDoc(commentRef);
         if (!commentSnap.exists()) {
             console.error("Commento non trovato:", commentId);
-            alert("Errore: commento non trovato.");
+            showToast("Errore: commento non trovato.");
             button.disabled = false;
             return;
         }
@@ -133,7 +133,7 @@ async function handleArticleCommentLike(event) {
         button.disabled = false;
     } catch (error) {
         console.error("Errore like/unlike commento articolo:", error);
-        alert("Si è verificato un errore durante il like/unlike del commento. Riprova.");
+        showToast("Si è verificato un errore durante il like/unlike del commento. Riprova.");
         button.disabled = false;
         if(commentsListDiv && articleIdInternal) await loadArticleComments();
     }
@@ -246,11 +246,11 @@ async function loadArticleComments() {
 async function handleArticleCommentSubmit(event) {
     event.preventDefault();
     if (!articleCommentMessageInput || !submitArticleCommentBtn || !articleIdInternal) {
-        alert("Errore form commenti."); return;
+        showToast("Errore form commenti."); return;
     }
     const message = articleCommentMessageInput.value.trim();
     if (!message) {
-        alert("Inserisci un messaggio."); return;
+        showToast("Inserisci un messaggio."); return;
     }
     const user = auth.currentUser;
     let commentDataPayload = {
@@ -280,7 +280,7 @@ async function handleArticleCommentSubmit(event) {
     } else {
         const name = articleCommentNameInput ? articleCommentNameInput.value.trim() : '';
         if (!name && articleCommentNameInput && articleCommentNameInput.required) {
-            alert("Inserisci il nome."); return;
+            showToast("Inserisci il nome."); return;
         }
         if (name) commentDataPayload.name = name;
     }
@@ -307,7 +307,7 @@ async function handleArticleCommentSubmit(event) {
         await loadArticleComments();
     } catch (error) {
         console.error("Errore invio commento:", error);
-        alert("Errore invio commento. Riprova.");
+        showToast("Errore invio commento. Riprova.");
     } finally {
         if (submitArticleCommentBtn) {
             submitArticleCommentBtn.disabled = false;
@@ -400,7 +400,7 @@ async function loadAndDisplayArticleLikes(articleId) {
 
 async function handleArticleLike() {
     if (!articleIdInternal || !auth.currentUser) {
-        alert("Devi essere loggato per mettere like.");
+        showToast("Devi essere loggato per mettere like.");
         return;
     }
     const localLikeArticleButton = document.getElementById('likeArticleButton');
@@ -409,7 +409,7 @@ async function handleArticleLike() {
         return;
     }
     if (!currentArticleData || !currentArticleData.hasOwnProperty('likeCount')) { 
-        alert("Dati articolo non caricati. Riprova.");
+        showToast("Dati articolo non caricati. Riprova.");
         if (articleIdInternal) await loadAndDisplayArticleFromFirestore(articleIdInternal);
         if (!currentArticleData || !currentArticleData.hasOwnProperty('likeCount')) return;
     }
@@ -437,7 +437,7 @@ async function handleArticleLike() {
         await updateDoc(articleRef, updatePayload);
     } catch (error) {
         console.error("Errore aggiornamento like articolo:", error);
-        alert("Errore nell'aggiornare il like. Riprova.");
+        showToast("Errore nell'aggiornare il like. Riprova.");
     } finally {
         if (articleIdInternal) {
             await loadAndDisplayArticleLikes(articleIdInternal); 
@@ -561,7 +561,7 @@ async function openLikedByListModal(contentId, contentType) {
          return;
     }
     if (!auth.currentUser) {
-        alert("Devi essere loggato per vedere i like.");
+        showToast("Devi essere loggato per vedere i like.");
         return;
     }
 

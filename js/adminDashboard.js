@@ -182,11 +182,11 @@ async function openEditArticleModal(articleId) {
             }
             editArticleModal.style.display = 'block';
         } else {
-            alert("Articolo non trovato per la modifica.");
+            showToast("Articolo non trovato per la modifica.");
         }
     } catch (error) {
         console.error("Errore apertura modale modifica articolo:", error);
-        alert("Errore caricamento dati articolo per modifica.");
+        showToast("Errore caricamento dati articolo per modifica.");
     }
 }
 
@@ -207,12 +207,12 @@ async function approveArticle(articleId) {
             publishedAt: serverTimestamp(),
             updatedAt: serverTimestamp()
         });
-        alert("Articolo approvato e pubblicato!");
+        showToast("Articolo approvato e pubblicato!");
         loadPendingArticles();
         loadPublishedArticlesForAdmin();
     } catch (error) {
         console.error("Errore approvazione articolo:", error);
-        alert("Errore durante l'approvazione.");
+        showToast("Errore durante l'approvazione.");
     }
 }
 
@@ -247,7 +247,7 @@ async function rejectArticle(articleId) {
 
         await updateDoc(articleRef, updateData);
 
-        alert("Articolo respinto con successo." + (reason && reason.trim() !== "" ? " Motivo salvato." : ""));
+        showToast("Articolo respinto con successo." + (reason && reason.trim() !== "" ? " Motivo salvato." : ""));
         loadPendingArticles(); // Ricarica la lista degli articoli in attesa
         loadRejectedArticlesForAdmin(); // Ricarica la lista degli articoli respinti per vedere l'aggiornamento
         loadPublishedArticlesForAdmin(); // Potrebbe essere utile anche se un articolo pubblicato viene respinto (improbabile ma copre il caso)
@@ -255,7 +255,7 @@ async function rejectArticle(articleId) {
 
     } catch (error) {
         console.error("Errore durante il respingimento dell'articolo:", error);
-        alert("Si è verificato un errore durante il respingimento dell'articolo. Riprova.");
+        showToast("Si è verificato un errore durante il respingimento dell'articolo. Riprova.");
     }
 }
 
@@ -363,7 +363,7 @@ async function handleIssueStatusChange(event) {
     const newStatus = selectElement.value;
 
     if (!issueId || !newStatus) {
-        alert("Errore: ID issue o nuovo stato non validi.");
+        showToast("Errore: ID issue o nuovo stato non validi.");
         return;
     }
     if (!confirm(`Cambiare stato della issue ID: ${issueId} a "${newStatus}"?`)) {
@@ -379,11 +379,11 @@ async function handleIssueStatusChange(event) {
     try {
         const issueRef = doc(db, "userIssues", issueId);
         await updateDoc(issueRef, { status: newStatus, updatedAt: serverTimestamp() });
-        alert(`Stato issue ${issueId} aggiornato a "${newStatus}".`);
+        showToast(`Stato issue ${issueId} aggiornato a "${newStatus}".`);
         loadUserIssuesForAdmin(); // Ricarica la lista per riflettere il cambiamento
     } catch (error) {
         console.error("Errore aggiornamento stato issue:", error);
-        alert("Errore durante l'aggiornamento stato.");
+        showToast("Errore durante l'aggiornamento stato.");
         loadUserIssuesForAdmin(); // Ricarica comunque per coerenza UI
     }
 }
@@ -476,13 +476,13 @@ async function handleUnpublishArticleClick(e) {
             publishedAt: null, // Rimuovi la data di pubblicazione
             updatedAt: serverTimestamp()
         });
-        alert(`Articolo ${articleId} rimosso dalla pubblicazione. Status: ${newStatus}.`);
+        showToast(`Articolo ${articleId} rimosso dalla pubblicazione. Status: ${newStatus}.`);
         loadPublishedArticlesForAdmin(); // Ricarica questa lista
         loadPendingArticles(); // Potrebbe essere utile ricaricare anche i pending (o le bozze se implementato)
         loadDraftArticlesForAdmin(); // Ricarica la lista delle bozze
     } catch (error) {
         console.error("Errore rimozione pubblicazione:", error);
-        alert("Errore durante la rimozione dalla pubblicazione.");
+        showToast("Errore durante la rimozione dalla pubblicazione.");
     }
 }
 
@@ -492,11 +492,11 @@ async function handleDeletePublishedArticleClick(e) {
     try {
         const articleRef = doc(db, "articles", articleId);
         await deleteDoc(articleRef);
-        alert(`Articolo ID: ${articleId} eliminato con successo.`);
+        showToast(`Articolo ID: ${articleId} eliminato con successo.`);
         loadPublishedArticlesForAdmin();
     } catch (error) {
         console.error("Errore eliminazione articolo:", error);
-        alert("Errore durante l'eliminazione dell'articolo.");
+        showToast("Errore durante l'eliminazione dell'articolo.");
     }
 }
 
@@ -638,11 +638,11 @@ async function handleDeleteDraftArticleClick(e) {
     try {
         const articleRef = doc(db, "articles", articleId);
         await deleteDoc(articleRef);
-        alert(`Bozza ID: ${articleId} eliminata con successo.`);
+        showToast(`Bozza ID: ${articleId} eliminata con successo.`);
         loadDraftArticlesForAdmin();
     } catch (error) {
         console.error("Errore eliminazione bozza:", error);
-        alert("Errore durante l'eliminazione della bozza.");
+        showToast("Errore durante l'eliminazione della bozza.");
     }
 }
 
@@ -652,11 +652,11 @@ async function handleDeleteRejectedArticleClick(e) {
     try {
         const articleRef = doc(db, "articles", articleId);
         await deleteDoc(articleRef);
-        alert(`Articolo respinto ID: ${articleId} eliminato con successo.`);
+        showToast(`Articolo respinto ID: ${articleId} eliminato con successo.`);
         loadRejectedArticlesForAdmin();
     } catch (error) {
         console.error("Errore eliminazione articolo respinto:", error);
-        alert("Errore durante l'eliminazione dell'articolo respinto.");
+        showToast("Errore durante l'eliminazione dell'articolo respinto.");
     }
 }
 
@@ -725,12 +725,12 @@ document.addEventListener('DOMContentLoaded', () => {
         editArticleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const articleId = editingArticleIdInput.value;
-            if (!articleId) { alert("ID articolo mancante."); return; }
+            if (!articleId) { showToast("ID articolo mancante."); return; }
 
             const updatedTitle = editArticleTitleInput.value.trim();
             const updatedContentMarkdown = easyMDEEditInstance ? easyMDEEditInstance.value() : editArticleContentTextarea.value.trim(); // Fallback se EasyMDE non è inizializzato
             
-            if (!updatedTitle || !updatedContentMarkdown) { alert("Titolo e Contenuto sono obbligatori."); return; }
+            if (!updatedTitle || !updatedContentMarkdown) { showToast("Titolo e Contenuto sono obbligatori."); return; }
 
             const updates = {
                 title: updatedTitle,
@@ -749,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const articleRef = doc(db, "articles", articleId);
                 await updateDoc(articleRef, updates);
-                alert("Articolo modificato con successo!");
+                showToast("Articolo modificato con successo!");
                 closeEditArticleModal();
                 // Ricarica le liste rilevanti in base allo stato dell'articolo modificato
                 // Per sicurezza, ricarichiamo tutte quelle che potrebbero essere state impattate
@@ -759,7 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadRejectedArticlesForAdmin();
             } catch (error) {
                 console.error("Errore salvataggio modifiche articolo admin:", error);
-                alert("Errore durante il salvataggio delle modifiche.");
+                showToast("Errore durante il salvataggio delle modifiche.");
             }
         });
     }

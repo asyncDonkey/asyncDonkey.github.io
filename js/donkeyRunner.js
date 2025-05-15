@@ -1232,7 +1232,7 @@ async function handleSaveDonkeyScore() {
 
     if (finalScore <= 0) {
         console.error("handleSaveDonkeyScore: Tentativo di salvare un punteggio non valido (<=0). Punteggio:", finalScore);
-        alert("Impossibile salvare un punteggio di 0 o negativo.");
+        showToast("Impossibile salvare un punteggio di 0 o negativo.");
         if (saveScoreBtnDonkey) {
             saveScoreBtnDonkey.disabled = false;
             saveScoreBtnDonkey.textContent = "Salva Punteggio";
@@ -1242,7 +1242,7 @@ async function handleSaveDonkeyScore() {
 
     if (!db || !auth) {
         console.error("DB o Auth non inizializzati. Impossibile salvare il punteggio.");
-        alert("Errore: Connessione al database fallita.");
+        showToast("Errore: Connessione al database fallita.");
         if (saveScoreBtnDonkey) { saveScoreBtnDonkey.disabled = false; saveScoreBtnDonkey.textContent = "Salva Punteggio"; }
         return;
     }
@@ -1284,7 +1284,7 @@ async function handleSaveDonkeyScore() {
     } else {
         const rawInitials = playerInitialsDonkeyInput.value.trim().toUpperCase();
         if (rawInitials.length === 0 || rawInitials.length > 5) {
-            alert('Per favore, inserisci da 1 a 5 caratteri per le tue iniziali.');
+            showToast('Per favore, inserisci da 1 a 5 caratteri per le tue iniziali.');
             playerInitialsDonkeyInput.focus();
             saveScoreBtnDonkey.disabled = false;
             saveScoreBtnDonkey.textContent = "Salva Punteggio";
@@ -1324,7 +1324,7 @@ async function handleSaveDonkeyScore() {
 
     } catch (error) {
         console.error("handleSaveDonkeyScore: ERRORE durante addDoc a Firestore:", error);
-        alert("Errore nel salvataggio del punteggio. Riprova.\nControlla la console per dettagli (F12).");
+        showToast("Errore nel salvataggio del punteggio. Riprova.\nControlla la console per dettagli (F12).");
         saveScoreBtnDonkey.disabled = false;
         saveScoreBtnDonkey.textContent = "Salva Punteggio";
     }
