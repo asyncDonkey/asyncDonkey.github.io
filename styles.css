@@ -1,5 +1,6 @@
 /* styles.css - Refactored with CSS Variables for Theme Switching */
 
+/* ===== CSS Variables ===== */
 :root {
   /* Light Theme Palette (Default) */
   --bg-color: #f8f9fa;
@@ -32,6 +33,8 @@
   --skill-details-heading: var(--link-color);
 
   --link-color-rgb: 0, 123, 255; /* For focus ring */
+
+  /* Game Specific Variables - Light Theme */
   --game-border-color: #00b9be;
   --game-ground-line-color: #00b9be;
   --game-button-bg: rgba(0, 50, 80, 0.6);
@@ -64,46 +67,67 @@ body.dark-mode {
   --skill-details-bg: #232323;
   --link-color-rgb: 100, 181, 246; /* For focus ring */
 
+  /* Game Specific Variables - Dark Theme */
   --game-border-color: #5ab9a8;
   --game-ground-line-color: #5ab9a8;
   --game-button-bg: rgba(20, 70, 100, 0.7);
-  /* --game-button-text: #c4f0c2; */ /* Already defined in :root, can inherit */
+  /* --game-button-text: #c4f0c2; /* Inherits from :root if not overridden */
   --game-button-border: #00b9be;
   --game-button-active-bg: rgba(30, 90, 120, 0.9);
   --game-border-color-rgb: 90, 185, 168; /* For canvas shadow in dark mode */
 }
 
 /* ===== General Reset & Base Styles ===== */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: "Space Grotesk", sans-serif; line-height: 1.6; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 16px; transition: background-color 0.3s, color 0.3s; }
-a { color: var(--link-color); text-decoration: none; }
-a:hover { color: var(--link-hover-color); text-decoration: underline; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-/* ===== Animations ===== */
-@keyframes cambio-colore-neon { /* Definizione singola */
+body {
+  font-family: "Space Grotesk", sans-serif;
+  line-height: 1.6;
+  background-color: var(--bg-color);
+  color: var(--text-color-primary);
+  font-size: 16px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+/* ===== Global Animations ===== */
+@keyframes cambio-colore-neon {
   0% {
     color: #ff00ff; /* Magenta Neon */
     border-color: #ff00ff;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
   }
   33% {
-    color: #00ffff; /* Ciano Neon */
+    color: #00ffff; /* Cyan Neon */
     border-color: #00ffff;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #00ffff, 0 0 15px #00ffff;
   }
   66% {
-    color: #39ff14; /* Verde Lime Neon */
+    color: #39ff14; /* Lime Green Neon */
     border-color: #39ff14;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #39ff14, 0 0 15px #39ff14;
   }
   100% {
-    color: #ff00ff; /* Ritorna al Magenta per un ciclo pulito */
+    color: #ff00ff; /* Back to Magenta for a clean loop */
     border-color: #ff00ff;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px #ff00ff, 0 0 15px #ff00ff;
   }
 }
 
-/* ===== Header Styles ===== */
+/* ===== Layout Structure ===== */
+/* Header */
 header {
   background-color: var(--surface-bg-primary);
   padding: 10px 5%;
@@ -115,1085 +139,1996 @@ header {
   transition: background-color 0.3s, border-color 0.3s;
 }
 header .avatar img {
-  width: 50px; height: 50px; border-radius: 50%;
-  border: 2px solid var(--border-color-avatar); display: block;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color-avatar);
+  display: block;
 }
 header .header-content {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-grow: 1; flex-wrap: wrap; gap: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 header h1 {
-  font-size: 1.6em; margin: 0; color: var(--heading-color); white-space: nowrap;
+  font-size: 1.6em;
+  margin: 0;
+  color: var(--heading-color);
+  white-space: nowrap;
 }
 header .header-controls {
-  display: flex; align-items: center; gap: 15px;
-  flex-wrap: wrap; margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-left: auto;
 }
-header nav { margin-left: 0; }
-header nav ul { list-style-type: none; display: flex; flex-wrap: wrap; gap: 15px; }
-header nav a { color: var(--text-color-secondary); font-weight: 500; }
-header nav a:hover { color: var(--link-color); text-decoration: none; }
+header nav {
+  margin-left: 0; /* Adjusted by flex layout */
+}
+header nav ul {
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+header nav a {
+  color: var(--text-color-secondary);
+  font-weight: 500;
+}
+header nav a:hover {
+  color: var(--link-color);
+  text-decoration: none;
+}
 
-/* Authentication related styles in Header */
-#authSection { display: flex; align-items: center; }
-#authContainer { display: flex; gap: 8px; }
-#userProfileContainer { display: none; align-items: center; } /* JS gestirà la visibilità */
-#userProfileContainer span { color: var(--text-color-primary); font-size: 0.9em; margin-right: 10px; white-space: nowrap; }
+/* Header Authentication */
+#authSection {
+  display: flex;
+  align-items: center;
+}
+#authContainer {
+  display: flex;
+  gap: 8px;
+}
+#userProfileContainer {
+  display: none; /* JS manages visibility */
+  align-items: center;
+}
+#userProfileContainer span {
+  color: var(--text-color-primary);
+  font-size: 0.9em;
+  margin-right: 10px;
+  white-space: nowrap;
+}
 #headerUserAvatar {
-  width: 32px; height: 32px; border-radius: 50%; margin-right: 8px;
-  background-color: #eee; display: none; /* JS gestirà la visibilità */
-  vertical-align: middle; object-fit: cover; border: 1px solid var(--border-color-secondary);
-}
-.auth-button { /* Stile generico per bottoni Login/Register/Logout e link nav */
-  background-color: transparent; border: 1px solid var(--text-color-muted); color: var(--text-color-secondary);
-  padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.9em;
-  transition: all 0.2s ease; white-space: nowrap; text-decoration: none; /* Assicura che non sia sottolineato se è un <a> */
-}
-.auth-button:hover { border-color: var(--link-color); color: var(--link-color); text-decoration: none; }
-
-
-/* ===== Main Content & Generic Section Styles ===== */
-main { padding: 30px 0; }
-main section {
-  width: 90%; max-width: 960px; margin: 40px auto; padding: 25px 30px;
-  background-color: var(--surface-bg-primary); border: 1px solid var(--border-color-secondary);
-  border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  color: var(--text-color-secondary); transition: background-color 0.3s, border-color 0.3s;
-}
-main h2 { /* Titolo principale di una section */
-  font-size: 1.8em; margin-bottom: 20px; color: var(--heading-color);
-  text-align: center; border-bottom: 1px solid var(--border-color-primary);
-  padding-bottom: 10px; transition: color 0.3s, border-color 0.3s;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background-color: #eee;
+  display: none; /* JS manages visibility */
+  vertical-align: middle;
+  object-fit: cover;
+  border: 1px solid var(--border-color-secondary);
 }
 
-/* Specific Section Styles */
-section#intro { text-align: center; background-color: transparent; border: none; box-shadow: none;}
-section#intro p { font-size: 1.15em; color: var(--text-color-secondary); max-width: 700px; margin: 0 auto;}
-section#contact ul { list-style-type: none; padding-left: 0; margin-top: 15px; text-align: center;}
-section#contact li { margin-bottom: 10px; }
-
-
-/* ===== Homepage Specific Styles (Portal, Articles on Home) ===== */
-.portal-header { /* Header per sezioni tipo portale o lista articoli */
-    text-align: center; padding: 40px 20px; background-color: var(--surface-bg-secondary);
-    border-bottom: 1px solid var(--border-color-primary); margin-bottom: 30px;
+/* Main Content Area */
+main {
+  padding: 30px 0;
 }
-.portal-header h1 { /* Titolo H1 specifico del .portal-header */
-    font-family: "Space Grotesk", sans-serif; font-size: 2.8em;
-    color: var(--heading-color); margin-bottom: 10px;
+main section { /* Generic section styling */
+  width: 90%;
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 25px 30px;
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-secondary);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  color: var(--text-color-secondary);
+  transition: background-color 0.3s, border-color 0.3s;
 }
-.portal-header p { font-size: 1.2em; color: var(--text-color-secondary); max-width: 600px; margin: 0 auto; }
-
-/* Placeholder per Immagine/Animazione Introduttiva Homepage */
-/*
-.intro-visual-container { text-align: center; }
-.intro-visual-item {
-    max-width: 500px; height: auto; display: block; margin: 20px auto 40px auto;
-    border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    background-color: var(--surface-bg-secondary); border: 1px solid var(--border-color-secondary);
-}
-*/
-
-.portal-grid { /* Griglia per card su homepage e griglia articoli */
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px; padding: 0 5% 30px 5%; max-width: 1200px; margin: 0 auto;
-}
-.portal-card { /* Stile base per card nel portale */
-    background-color: var(--surface-bg-primary); border: 1px solid var(--border-color-primary);
-    border-radius: 8px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex; flex-direction: column; justify-content: space-between;
-}
-.portal-card:hover { transform: translateY(-5px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
-.portal-card img.card-icon { width: 60px; height: 60px; margin: 0 auto 15px auto; }
-.portal-card h3 { /* Titolo dentro una portal-card */
-    font-family: "Space Grotesk", sans-serif; font-size: 1.5em; color: var(--heading-color);
-    margin-bottom: 10px; border-bottom: none; padding-bottom: 0;
-}
-.portal-card p { color: var(--text-color-secondary); font-size: 1em; margin-bottom: 20px; flex-grow: 1; min-height: 60px; }
-.portal-card .btn-portal { /* Bottone specifico per portal-card */
-    display: inline-block; background-color: var(--link-color); color: var(--button-text-primary);
-    padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold;
-    transition: background-color 0.3s ease; border: none; cursor: pointer; align-self: center;
-}
-.portal-card .btn-portal:hover { background-color: var(--link-hover-color); }
-
-/* Mini Leaderboard (Homepage) */
-#homeMiniLeaderboardList { list-style-type: none; padding: 0; font-family: "Source Code Pro", monospace; font-size: 0.9em; text-align: left; }
-#homeMiniLeaderboardList li { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border-color-secondary); }
-#homeMiniLeaderboardList li:last-child { border-bottom: none; }
-#homeMiniLeaderboardList .player-rank { margin-right: 8px; font-weight: bold; min-width: 15px; }
-#homeMiniLeaderboardList .player-avatar { width: 24px; height: 24px; border-radius: 3px; margin-right: 8px; background-color: #eee; image-rendering: pixelated; }
-#homeMiniLeaderboardList .player-info { flex-grow: 1; display: flex; align-items: center; }
-#homeMiniLeaderboardList .player-name { font-weight: bold; color: var(--text-color-primary); margin-right: auto; display: flex; align-items: center; }
-#homeMiniLeaderboardList .player-name .fi { margin-right: 5px; vertical-align: middle; }
-#homeMiniLeaderboardList .player-score { font-weight: bold; color: var(--link-color); }
-
-/* Banner Glitchzilla (Homepage) */
-.glitchzilla-banner {
-    background-color: var(--surface-bg-secondary); color: var(--text-color-secondary);
-    padding: 12px 20px; text-align: center; margin: 0 auto 30px auto;
-    border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); max-width: 90%;
-    /* display: none; gestito da JS */
-}
-.glitchzilla-banner p { margin: 0; font-size: 1.1em; font-family: "Source Code Pro", monospace; }
-.glitchzilla-banner .glitch-text-effect,
-.glitchzilla-banner .player-name-highlight {
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 8px currentColor;
-    animation: cambio-colore-neon 1.5s infinite steps(1, end);
-    font-weight: bold;
+main h2 { /* Main title for a section */
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  color: var(--heading-color);
+  text-align: center;
+  border-bottom: 1px solid var(--border-color-primary);
+  padding-bottom: 10px;
+  transition: color 0.3s, border-color 0.3s;
 }
 
-/* Sezione Griglia Articoli (Homepage) */
-#articlesSection { padding: 20px 0; /* display: none; gestito da JS */ }
-#articlesSection .portal-header { margin-bottom: 20px; }
-/* #articlesGrid eredita da .portal-grid */
-
-.article-card { /* Card singola articolo (usata in #articlesGrid) */
-    background-color: var(--surface-bg-primary); border: 1px solid var(--border-color-primary);
-    border-radius: 8px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.07);
-    text-align: left; display: flex; flex-direction: column; justify-content: space-between;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+/* Footer */
+footer {
+  background-color: var(--surface-bg-secondary);
+  padding: 25px;
+  border-top: 1px solid var(--border-color-primary);
+  color: var(--text-color-muted);
+  text-align: center;
+  margin-top: 40px;
+  font-size: 0.9em;
+  transition: background-color 0.3s, border-color 0.3s;
 }
-.article-card:hover { transform: translateY(-4px); box-shadow: 0 5px 14px rgba(0,0,0,0.1); }
-.article-card h4 { font-size: 1.3em; color: var(--heading-color); margin-top: 0; margin-bottom: 8px; }
-.article-card .article-meta {
-    font-size: 0.85em;
-    color: var(--text-color-muted);
-    margin-bottom: 12px;
-    display: flex;
-    flex-wrap: wrap; /* Permette agli elementi di andare a capo se necessario */
-    align-items: center; /* Allinea verticalmente gli elementi nel meta container */
-    gap: 8px 15px; /* 8px di spazio verticale (se vanno a capo), 15px di spazio orizzontale */
+footer a {
+  color: var(--link-color);
 }
 
-.article-author-info {
-    display: inline-flex; /* Tratta questo blocco come inline, ma permette flex per i suoi figli */
-    align-items: center; /* Allinea verticalmente avatar, nome e bandierina */
-    gap: 6px; /* Spazio tra avatar, nome e bandierina */
-    color: var(--text-color-secondary); /* Colore di default per il testo in questo blocco */
-    order: -1; /* Opzionale: per provare a mettere le info autore prima della data/tags nella riga flex */
+/* ===== Utility Classes ===== */
+/* Form Inputs */
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color-primary);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color-primary);
+  font-size: 1em;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.25);
 }
 
-.author-avatar-homepage {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%; /* Avatar circolare */
-    object-fit: cover;
-    background-color: var(--surface-bg-secondary); /* Colore di sfondo placeholder */
-    border: 1px solid var(--border-color-secondary);
-    image-rendering: pixelated; /* Mantiene lo stile blockie */
-    vertical-align: middle; /* Utile se non fosse un flex child diretto */
+/* Buttons */
+.game-button { /* Primary action button style */
+  background-color: var(--button-bg-primary);
+  color: var(--button-text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 10px; /* Common margin, can be overridden */
+}
+.game-button:hover {
+  background-color: var(--button-hover-bg-primary);
+  transform: translateY(-1px);
+}
+.game-button:active {
+  transform: translateY(0px);
 }
 
-.article-author-name {
-    font-weight: 500; /* Nome autore leggermente più marcato */
-    color: var(--text-color-primary); /* Colore più scuro per il nome */
-    white-space: nowrap; /* Evita che il nome vada a capo */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 150px; /* Limita la larghezza massima del nome se necessario */
+.utility-button-outline { /* For secondary/outline buttons */
+  background-color: transparent;
+  border: 1px solid var(--text-color-muted);
+  color: var(--text-color-secondary);
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.utility-button-outline:hover {
+  border-color: var(--link-color);
+  color: var(--link-color);
+  text-decoration: none;
 }
 
-.article-author-info .fi {
-    font-size: 1.1em; /* Dimensione della bandierina */
-    line-height: 1; /* Per un corretto allineamento verticale */
-    /* vertical-align: middle; / * Alternativa se non flex child * / */
+/* Status Indicators / Badges */
+.status-indicator {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  font-size: 0.85em;
+  border: 1px solid transparent; /* Base for bordered ones */
+}
+/* General/Issue Statuses */
+.status-new           { background-color: #007bff; color: white; text-transform: capitalize; }
+.status-under-consideration { background-color: #ffc107; color: #333; text-transform: capitalize; }
+.status-accepted      { background-color: #28a745; color: white; text-transform: capitalize; }
+.status-planned       { background-color: #17a2b8; color: white; text-transform: capitalize; }
+.status-in-progress   { background-color: #fd7e14; color: white; text-transform: capitalize; }
+.status-completed     { background-color: #6c757d; color: white; text-transform: capitalize; }
+.status-declined      { background-color: #dc3545; color: white; text-transform: capitalize; }
+.status-unknown       { background-color: #343a40; color: white; text-transform: capitalize; }
+
+/* Article Card Statuses (apply .status-indicator and one of these) */
+.status-article-draft {
+  background-color: var(--surface-bg-primary);
+  border-color: var(--text-color-muted);
+  border-style: dashed;
+  color: var(--text-color-muted);
+  font-size: 0.9em; /* Specific size for article card status */
+}
+.status-article-pendingReview {
+  background-color: rgba(255, 160, 0, 0.1);
+  border-color: #ffa000;
+  border-style: dashed;
+  color: #ffa000;
+  font-size: 0.9em;
+}
+.status-article-published {
+  background-color: rgba(56, 142, 60, 0.1);
+  border-color: #388e3c;
+  border-style: dashed;
+  color: #388e3c;
+  font-size: 0.9em;
+}
+.status-article-rejected {
+  background-color: rgba(211, 47, 47, 0.1);
+  border-color: #d32f2f;
+  border-style: dashed;
+  color: #d32f2f;
+  font-size: 0.9em;
 }
 
-.article-card .article-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+/* Neon Text Effect */
+.testo-neon-arcade {
+  font-size: 1.5em;
+  text-align: center;
+  padding: 0.5rem;
+  margin-top: 10px;
+  border-width: 2px;
+  border-style: solid;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px currentColor;
+  animation: cambio-colore-neon 1.5s infinite steps(1, end);
 }
 
-.article-card .article-tag {
-    background-color: var(--surface-bg-secondary);
-    color: var(--text-color-secondary);
-    padding: 4px 10px; /* Aumentato leggermente padding per leggibilità */
-    border-radius: 15px;
-    font-size: 0.8em;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: background-color 0.2s, color 0.2s;
-}
-.article-card .article-tag:hover {
-    background-color: var(--link-color);
-    color: var(--button-text-primary);
-}
-.article-card .article-snippet { font-size: 0.95em; color: var(--text-color-secondary); margin-bottom: 10px; flex-grow: 1; line-height: 1.6; }
-.article-card .article-stats {
-    display: flex; gap: 15px; margin-top: 10px; margin-bottom: 12px;
-    padding-top: 10px; border-top: 1px dashed var(--border-color-secondary);
-}
-.article-stat-badge {
-    display: flex; align-items: center; font-size: 0.85em; color: var(--text-color-muted);
-    background-color: var(--surface-bg-secondary); padding: 4px 8px; border-radius: 15px;
-    transition: color 0.2s, background-color 0.2s;
-}
-.article-stat-badge:hover { color: var(--link-hover-color); }
-.article-stat-badge .stat-icon { margin-right: 5px; font-size: 0.9em; }
-.article-stat-badge .stat-count { font-weight: 500; color: var(--text-color-secondary); }
-.article-card .btn-read-more {
-    display: inline-block; background-color: transparent; color: var(--link-color);
-    padding: 8px 0; text-decoration: none; font-weight: bold;
-    transition: color 0.3s ease; border: none; align-self: flex-start; margin-top: auto;
-}
-.article-card .btn-read-more:hover { color: var(--link-hover-color); text-decoration: underline; }
-
-/* Card Articolo in Evidenza (Homepage) */
-#featuredArticleCard { text-align: left; /* display: none; gestito da JS */ }
-#featuredArticleCard .card-icon { margin-left: 0; margin-right: auto; margin-bottom: 10px; }
-#featuredArticleCard > h3 { text-align: left; font-size: 1.6em; }
-#featuredArticleCard #featuredArticleActualTitle {
-    font-size: 1.3em; color: var(--text-color-primary); display: block;
-    margin-top: 5px; margin-bottom: 10px; font-weight: bold;
-}
-#featuredArticleCard .btn-portal { align-self: flex-start; } /* Sovrascrive .portal-card .btn-portal */
-
-
-/* ===== Pagina Visualizzazione Articolo Singolo (view-article.html) ===== */
-#articleDisplaySection { /* Eredita da main section, qui eventuali override */
-    padding: 25px 30px; /* Consistenza con altre sezioni */
-}
-#articleDisplayHeader {
-    border-bottom: 1px solid var(--border-color-secondary);
-    margin-bottom: 20px; /* Leggermente ridotto da 25px */
-    padding-top: 8px;    /* Riduci un po' se era 10px o più, o prova un valore piccolo */
-    padding-bottom: 12px; /* Riduci un po' per compattare */
-}
-
-#articleDisplayTitle { /* h1 del titolo articolo */
-    font-size: 2.2em;
-    color: var(--heading-color);
-    margin-top: 0; 
-    margin-bottom: 8px; /* Leggermente ridotto da 10px */
-    line-height: 1.25;  /* Leggermente ridotta per compattare verticalmente */
-    white-space: normal !important; /* Assicura che il testo possa andare a capo */
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-#articleDisplayMeta {
-    font-size: 0.9em;
-    color: var(--text-color-muted);
-    margin-bottom: 15px; /* Leggermente ridotto da 20px */
-}
-#articleDisplayMeta .meta-item { margin-right: 15px; display: inline-block; margin-bottom: 5px;}
-#articleDisplayMeta .meta-item .fi { margin-right: 5px; vertical-align: middle; }
-#articleDisplayMeta .article-tags-display .article-tag {
-    background-color: var(--surface-bg-secondary); color: var(--text-color-secondary); padding: 3px 8px;
-    border-radius: 12px; font-size: 0.9em; margin-right: 5px; margin-bottom: 5px; display: inline-block;
-}
-#articleDisplayContent { font-size: 1.05em; line-height: 1.7; color: var(--text-color-secondary); }
-#articleDisplayContent h1, #articleDisplayContent h2, #articleDisplayContent h3 { color: var(--heading-color); margin-top: 1.8em; margin-bottom: 0.8em; border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 0.3em; }
-#articleDisplayContent h1 { font-size: 1.8em; } #articleDisplayContent h2 { font-size: 1.5em; } #articleDisplayContent h3 { font-size: 1.3em; }
-#articleDisplayContent p { margin-bottom: 1.2em; }
-#articleDisplayContent a { color: var(--link-color); text-decoration: underline; }
-#articleDisplayContent a:hover { color: var(--link-hover-color); }
-#articleDisplayContent ul, #articleDisplayContent ol { margin-left: 20px; margin-bottom: 1.2em; }
-#articleDisplayContent li { margin-bottom: 0.5em; }
-#articleDisplayContent blockquote { border-left: 3px solid var(--link-color); padding-left: 15px; margin: 0 0 1.2em 0; font-style: italic; color: var(--text-color-muted); }
-#articleDisplayContent pre { background-color: var(--surface-bg-secondary); border: 1px solid var(--border-color-secondary); padding: 15px; border-radius: 6px; overflow-x: auto; font-family: "Source Code Pro", monospace; font-size: 0.95em; }
-#articleDisplayContent code { background-color: var(--surface-bg-secondary); padding: 0.2em 0.4em; border-radius: 3px; font-family: "Source Code Pro", monospace; font-size: 0.9em; }
-#articleDisplayContent pre code { padding: 0; background-color: transparent; border-radius: 0; font-size: inherit; }
-#articleDisplayContent img { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; display: block; }
-#articleInteractions { max-width: 800px; margin: 30px auto 20px auto; padding: 0 20px; /* display: none; gestito da JS */ }
-#articleInteractions h3 { margin-bottom: 15px; font-size: 1.4em; }
-#articleLikesContainer, #articleCommentsSection { margin-bottom: 20px; }
-.back-to-home-link { display: block; text-align: center; margin-top: 30px; margin-bottom: 20px; }
-.back-to-home-link a { color: var(--link-color); text-decoration: none; padding: 8px 15px; border: 1px solid var(--link-color); border-radius: 20px; transition: background-color 0.2s, color 0.2s; }
-.back-to-home-link a:hover { background-color: var(--link-color); color: var(--button-text-primary); text-decoration: none;}
-        /* Stili per la sezione commenti dell'articolo */
-        #articleCommentsFormContainer {
-            margin-bottom: 30px;
-            /* Puoi usare la classe .comment-form-container se gli stili sono già definiti globalmente */
-        }
-        #articleCommentsListContainer {
-            margin-top: 20px;
-        }
-        #articleCommentsList .comment-item { /* Riusa lo stile .comment-item */
-            /* Eventuali aggiustamenti specifici se necessario */
-        }
-        #articleCommentForm button[type="submit"] {
-            /* Può usare .game-button */
-        }
-
-/* ===== Skills Section Styles (Pagina About) ===== */
-section#skills ul.skills-grid { list-style-type: none; padding: 0; margin-top: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; justify-content: center; }
-section#skills li.skill-card {
-  background-color: var(--surface-bg-secondary); color: var(--text-color-secondary); padding: 12px;
-  border-radius: 6px; font-size: 0.9em; font-weight: 500; text-align: center;
-  border: 1px solid var(--border-color-secondary); box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-  transition: all 0.2s ease-in-out; cursor: pointer; min-height: 70px;
-  display: flex; align-items: center; justify-content: center; overflow-wrap: break-word; word-wrap: break-word;
-}
-section#skills li.skill-card:hover { background-color: var(--skill-badge-hover-bg); color: var(--skill-badge-hover-text); transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-section#skills li.skill-card.active-skill { background-color: var(--skill-badge-active-bg); color: var(--skill-badge-active-text); border-color: var(--link-color); transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.15), 0 0 0 2px var(--link-color); }
-.skill-details-container {
-  margin-top: 30px; padding: 20px; background-color: var(--surface-bg-primary);
-  border: 1px solid var(--border-color-primary); border-radius: 6px; min-height: 70px;
-  text-align: left; color: var(--skill-details-text); box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-  transition: all 0.3s ease-in-out;
-}
-.skill-details-container h3 { color: var(--heading-color); margin-top: 0; margin-bottom: 10px; font-size: 1.3em; }
-.skill-details-container p { margin-bottom: 0; font-size: 1.05em; line-height: 1.7; }
-
-
-/* ===== Sezione Profilo Utente (profile.html) ===== */
-section#profile { max-width: 600px; /* Eredita altri stili da main section */ }
-section#profile h3 { margin-top: 30px; font-size: 1.5em; /* Eredita da main h2 */ }
-#profileDetailsDisplay p { margin-bottom: 10px; font-size: 1.05em; }
-#profileDetailsDisplay strong { color: var(--text-color-primary); }
-#profileUpdateForm div { margin-bottom: 20px; }
-#profileUpdateForm label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-color-primary); }
-#profileUpdateForm input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; }
-#profileUpdateForm input[type="text"]:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25); }
-#profileUpdateForm button[type="submit"].game-button { display: block; width: 100%; margin-top: 10px; }
-#profileMessage { text-align: center; font-weight: bold; margin-top: 20px; }
-#profileAvatar { image-rendering: pixelated; }
-#profileNationality .fi { display: inline-block; width: 1.33333333em; height: 1em; line-height: 1em; vertical-align: -0.15em; background-size: contain; background-position: 50%; background-repeat: no-repeat; }
-
-
-/* ===== Componenti Riutilizzabili (Form Commenti, Lista Commenti, Modali) ===== */
-/* Form Commenti (usato per Guestbook e Articoli) */
-.comment-form-container {
-  background-color: var(--surface-bg-secondary); padding: 20px; border-radius: 8px;
-  margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto;
-}
-.comment-form-container div { margin-bottom: 15px; }
-.comment-form-container label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-color-primary); }
-.comment-form-container input[type="text"],
-.comment-form-container textarea {
-  width: 100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px;
-  background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;
-}
-.comment-form-container input[type="text"]:focus,
-.comment-form-container textarea:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.25); }
-.comment-form-container button[type="submit"].game-button { display: block; margin-top: 10px; } /* Usa .game-button se vuoi lo stesso stile */
-
-/* Lista Commenti (usato per Guestbook e Articoli) */
-.comments-list-section h3 { color: var(--heading-color); margin-bottom: 15px; text-align: center; }
-.comments-list { max-width: 700px; margin: 0 auto; }
-.comment-item {
-  display: flex; align-items: flex-start; gap: 12px; background-color: var(--surface-bg-primary);
-  border: 1px solid var(--border-color-secondary); padding: 15px; border-radius: 6px;
-  margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-img.comment-avatar-img { width: 40px; height: 40px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background-color: #eee; image-rendering: pixelated; border: 1px solid var(--border-color-primary); }
-.comment-content { flex-grow: 1; }
-.comment-item strong { color: var(--text-color-primary); font-size: 1.05em; } /* Nome utente */
-.comment-item .comment-date { color: var(--text-color-muted); font-size: 0.85em; margin-left: 5px; }
-.comment-item p { margin-top: 5px; margin-bottom: 8px; color: var(--text-color-secondary); line-height: 1.5; word-wrap: break-word; }
-.likes-container { margin-top: 8px; display: flex; align-items: center; }
-.like-btn { background-color: transparent; border: 1px solid var(--link-color); color: var(--link-color); padding: 5px 8px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s, color 0.2s; margin-right: 8px; }
-.like-btn:hover { background-color: var(--link-color); color: var(--button-text-primary); }
-.like-btn.liked { background-color: var(--link-hover-color); color: var(--button-text-primary); border-color: var(--link-hover-color); cursor: default; }
-.like-btn:disabled { opacity: 0.7; cursor: default; }
-.like-count { font-size: 0.9em; color: var(--text-color-secondary); }
-
-/* Modali (Login/Signup) */
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
-.modal-content { background-color: var(--surface-bg-primary); margin: 10% auto; padding: 25px; border: 1px solid var(--border-color-secondary); border-radius: 8px; width: 90%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; }
-.modal-content h3 { margin-top: 0; margin-bottom: 20px; color: var(--heading-color); text-align: center; }
-.modal-content div { margin-bottom: 15px; }
-.modal-content label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-color-primary); }
-.modal-content input[type="email"], .modal-content input[type="password"], .modal-content input[type="text"], .modal-content select {
-  width: 100%; padding: 10px; border: 1px solid var(--border-color-primary); border-radius: 4px;
-  background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; font-family: inherit;
-}
-.modal-content input:focus, .modal-content select:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.25); }
-.modal-content button.game-button[type="submit"] { display: block; width: 100%; margin-top: 10px; }
-.closeLoginBtn, .closeSignupBtn { color: var(--text-color-muted); position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; }
-.closeLoginBtn:hover, .closeSignupBtn:hover { color: var(--text-color-primary); }
-
-
-/* ===== Donkey Runner Game Page Specific Styles ===== */
-/* body.donkey-runner-page è già definito con le variabili --game-* */
-.donkey-runner-page header .header-content h1 { font-size: 1.8em; } /* Già presente, ok */
-.donkey-runner-page main { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px 5%; width: 100%; box-sizing: border-box; }
-.donkey-runner-page #gameContainer { position: relative; width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
-.donkey-runner-page canvas#gameCanvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; width: 100%; height: auto; max-height: calc(100vh - 220px); border: 3px solid var(--game-border-color); border-radius: 8px; box-shadow: 0 0 15px rgba(var(--game-border-color-rgb), 0.5); }
-.donkey-runner-page #mobileControls { display: none; width: 100%; padding: 10px 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; position: absolute; bottom: 10px; left: 0; z-index: 10; }
-.donkey-runner-page #mobileControlsInternal { display: flex; justify-content: space-around; align-items: center; width: 90%; max-width: 400px; margin: 0 auto; }
-.donkey-runner-page .control-button { background-color: var(--game-button-bg); color: var(--game-button-text); border: 2px solid var(--game-button-border); border-radius: 10px; padding: 15px 20px; font-size: 1.3em; font-weight: bold; font-family: "Source Code Pro", monospace; cursor: pointer; outline: none; flex-grow: 0; flex-basis: 45%; margin: 0 5px; text-align: center; transition: background-color 0.2s, border-color 0.2s, transform 0.1s; }
-.donkey-runner-page .control-button:active { background-color: var(--game-button-active-bg); transform: scale(0.95); }
-.donkey-runner-page #fullscreenButton { background-color: var(--surface-bg-secondary); color: var(--text-color-secondary); border: 1px solid var(--border-color-primary); border-radius: 20px; padding: 8px 12px; font-size: 0.9em; font-family: "Source Code Pro", monospace; cursor: pointer; position: absolute; top: 10px; right: 10px; z-index: 20; display: none; transition: background-color 0.2s, color 0.2s; }
-.donkey-runner-page #fullscreenButton:hover { background-color: var(--link-hover-color); color: var(--button-text-primary); }
-.donkey-runner-page #miniLeaderboardContainer { color: var(--text-color-secondary); background-color: var(--surface-bg-secondary); padding: 15px; border-radius: 8px; margin: 20px auto; max-width: 400px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.donkey-runner-page #miniLeaderboardContainer h3 { color: var(--heading-color); margin-top: 0; margin-bottom: 10px; font-size: 1.2em; text-align: center; border-bottom: 1px solid var(--border-color-primary); padding-bottom: 5px; }
-.donkey-runner-page #miniLeaderboardList { list-style-type: none; padding: 0; font-family: "Source Code Pro", monospace; }
-.donkey-runner-page #miniLeaderboardList li { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border-color-secondary); font-size: 0.9em; }
-.donkey-runner-page #miniLeaderboardList li:last-child { border-bottom: none; }
-.donkey-runner-page #miniLeaderboardList .player-rank { margin-right: 10px; font-weight: bold; min-width: 20px; }
-.donkey-runner-page #miniLeaderboardList .player-avatar { width: 30px; height: 30px; border-radius: 4px; margin-right: 10px; background-color: #eee; image-rendering: pixelated; }
-.donkey-runner-page #miniLeaderboardList .player-info { flex-grow: 1; display: flex; flex-direction: column; }
-.donkey-runner-page #miniLeaderboardList .player-name { font-weight: bold; color: var(--text-color-primary); display: flex; align-items: center;}
-.donkey-runner-page #miniLeaderboardList .player-name .fi { margin-right: 5px; vertical-align: middle; }
-.donkey-runner-page #miniLeaderboardList .player-date { font-size: 0.8em; color: var(--text-color-muted); }
-.donkey-runner-page #miniLeaderboardList .player-score { font-weight: bold; color: var(--link-color); font-size: 1.1em; }
-.donkey-runner-page footer { /* Eredita da footer generale, può essere rimosso se identico */ }
-
-
-/* ===== Componenti Generici (Bottoni, ecc.) ===== */
-.game-button { /* Stile base per bottoni "gioco" usati anche nei form */
-  background-color: var(--button-bg-primary); color: var(--button-text-primary);
-  border: none; padding: 10px 20px; border-radius: 5px; font-size: 1em;
-  font-weight: 500; cursor: pointer; transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-  text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px;
-}
-.game-button:hover { background-color: var(--button-hover-bg-primary); transform: translateY(-1px); }
-.game-button:active { transform: translateY(0px); }
-
-/* Stile per Snake Game (se ancora rilevante o da separare) */
-#snake-game-section { text-align: center; }
-.game-ui-container { display: block; margin: 15px auto 0 auto; max-width: 100%; padding: 0 10px; }
-.game-details { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 15px; font-size: 1em; color: var(--text-color-secondary); max-width: 400px; margin-left: auto; margin-right: auto; }
-.score-label, .highscore-label { font-weight: 500; }
-#currentScore, #highScore { font-weight: bold; color: var(--link-color); padding-left: 5px; }
-#snakeCanvas { display: block; margin: 0 auto 15px auto; border: 5px solid var(--surface-bg-secondary); border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2), inset 0 0 5px rgba(0,0,0,0.1); background-color: #2c3e50; max-width: 100%; }
-body.dark-mode #snakeCanvas { background-color: #222738; border-color: var(--surface-bg-primary); box-shadow: 0 0 15px rgba(0,0,0,0.5), inset 0 0 8px rgba(0,0,0,0.3); }
-.game-instructions { margin-top: 20px; font-size: 0.9em; color: var(--text-color-muted); }
-#highscore-input-container { margin-top: 25px; padding: 20px; background-color: var(--surface-bg-secondary); border: 1px solid var(--border-color-primary); border-radius: 6px; text-align: center; max-width: 400px; margin-left: auto; margin-right: auto; }
-#highscore-input-container h3 { color: var(--heading-color); margin-bottom: 10px; font-size: 1.3em; }
-#highscore-input-container p { margin-bottom: 15px; font-size: 0.95em; color: var(--text-color-secondary); }
-#highscore-input-container input[type="text"] { padding: 8px 12px; border: 1px solid var(--border-color-primary); border-radius: 4px; background-color: var(--bg-color); color: var(--text-color-primary); font-size: 1em; text-align: center; text-transform: uppercase; width: 150px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
-#highscore-input-container input[type="text"]:focus { outline: none; border-color: var(--link-color); box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); }
-.leaderboard-container { margin-top: 30px; padding: 20px; text-align: center; } /* Per Snake Leaderboard */
-.leaderboard-container h3 { color: var(--heading-color); margin-bottom: 15px; font-size: 1.4em; border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; display: inline-block; }
-#leaderboard-list { list-style-type: decimal; padding-left: 20px; max-width: 350px; margin: 0 auto; text-align: left; } /* Per Snake Leaderboard */
-#leaderboard-list li { padding: 8px 0; font-size: 1em; color: var(--text-color-secondary); border-bottom: 1px dashed var(--border-color-secondary); display: flex; justify-content: space-between; }
-#leaderboard-list li:last-child { border-bottom: none; }
-#leaderboard-list li .player-name { font-weight: 500; color: var(--text-color-primary); margin-right: 10px; }
-#leaderboard-list li .player-score { font-weight: bold; color: var(--link-color); }
-#touch-controls-container { display: none; flex-direction: column; align-items: center; gap: 5px; margin-top: 20px; user-select: none; -webkit-user-select: none; -ms-user-select: none; }
-.touch-control-btn { background-color: var(--button-bg-primary); color: var(--button-text-primary); border: 1px solid var(--border-color-primary); border-radius: 8px; width: 60px; height: 60px; font-size: 1.8em; font-weight: bold; cursor: pointer; margin: 5px; transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
-.touch-control-btn:hover { background-color: var(--button-hover-bg-primary); }
-.touch-control-btn:active { transform: scale(0.95); background-color: var(--link-hover-color); }
-.touch-controls-middle-row { display: flex; justify-content: center; gap: 5px; }
-body.touch-enabled .game-instructions { font-size: 0.8em; color: var(--text-color-muted); }
-
-
-/* ===== Utilities (Scroll-to-top, Theme Toggle Button) ===== */
+/* Scroll-to-top Button */
 #scrollToTopBtn {
-  display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99;
-  border: none; background-color: var(--button-bg-primary); color: var(--button-text-primary);
-  cursor: pointer; width: 45px; height: 45px; border-radius: 50%;
-  font-size: 20px; line-height: 45px; text-align: center;
+  display: none; /* JS manages visibility */
+  position: fixed;
+  bottom: 20px;
+  right: 30px;
+  z-index: 99;
+  border: none;
+  background-color: var(--button-bg-primary);
+  color: var(--button-text-primary);
+  cursor: pointer;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 45px; /* Vertically center icon */
+  text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s, opacity 0.3s, visibility 0.3s;
 }
-#scrollToTopBtn:hover { background-color: var(--button-hover-bg-primary); }
-#scrollToTopBtn.show { display: block; }
-
-#themeToggleBtn { /* Unico stile per il bottone tema, usato nell'header */
-  background: none; border: 1px solid var(--border-color-primary);
-  color: var(--text-color-secondary); padding: 6px 10px; /* Era 8px 12px, reso più piccolo come negli altri bottoni header */
-  border-radius: 20px; cursor: pointer; font-size: 1.1em; /* Era 1.2em */
-  line-height: 1; transition: all 0.3s; /* Era background-color 0.3s, color 0.3s, border-color 0.3s */
-  /* margin-left: 15px; Rimosso, il gap è gestito da .header-controls */
+#scrollToTopBtn:hover {
+  background-color: var(--button-hover-bg-primary);
 }
-#themeToggleBtn:hover { background-color: var(--surface-bg-secondary); border-color: var(--link-color); color: var(--link-color); }
-
-
-/* ===== Testo Neon Arcade (usato in index.html e .glitchzilla-banner) ===== */
-.testo-neon-arcade { /* Usato nella card gioco in index.html */
-  font-size: 1.5em; text-align: center; padding: 0.5rem; margin-top: 10px;
-  border-width: 2px; border-style: solid;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px currentColor;
-  animation: cambio-colore-neon 1.5s infinite steps(1, end); /* Usa l'animazione globale */
+#scrollToTopBtn.show { /* Added for clarity, JS will toggle this or display:block */
+  display: block;
 }
 
-
-/* ===== Footer Styles ===== */
-footer {
-  background-color: var(--surface-bg-secondary); padding: 25px;
-  border-top: 1px solid var(--border-color-primary); color: var(--text-color-muted);
-  text-align: center; margin-top: 40px; font-size: 0.9em;
-  transition: background-color 0.3s, border-color 0.3s;
+/* Theme Toggle Button (in header) */
+#themeToggleBtn { /* Uses .utility-button-outline as a base conceptually */
+  background: none;
+  border: 1px solid var(--border-color-primary); /* Specific border */
+  color: var(--text-color-secondary);
+  padding: 6px 10px; /* Specific padding */
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1.1em; /* Specific font size */
+  line-height: 1;
+  transition: all 0.3s;
 }
-footer a { color: var(--link-color); }
+#themeToggleBtn:hover {
+  background-color: var(--surface-bg-secondary);
+  border-color: var(--link-color);
+  color: var(--link-color);
+}
+
+/* Auth Buttons (in header) */
+.auth-button { /* Uses .utility-button-outline */
+  /* Specific overrides for auth-button if any, otherwise it inherits from .utility-button-outline */
+}
 
 
-/* ===== Responsive Design - Media Queries (Ordine: da grande a piccolo) ===== */
-@media (max-width: 768px) {
-  header { flex-direction: column; gap: 10px; padding: 15px 3%; }
-  header .header-content { width: 100%; justify-content: center; }
-  header .header-controls { width: 100%; flex-direction: column; gap: 10px; margin-top: 10px; margin-left:0; }
-  header nav { margin-left: 0; } /* Inutile se i controlli sono in colonna, ma non fa danno */
-  main section { width: 95%; padding: 20px 15px; }
-  .project, .team-member { flex-basis: 100%; min-width: unset; }
+/* ===== Reusable UI Components ===== */
+/* Modals (Login/Signup, LikedBy) */
+.modal {
+  display: none; /* JS manages visibility */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+.modal-content {
+  background-color: var(--surface-bg-primary);
+  margin: 10% auto;
+  padding: 25px;
+  border: 1px solid var(--border-color-secondary);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 450px; /* Default max-width */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  position: relative;
+}
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--heading-color);
+  text-align: center;
+}
+.modal-content div { /* Form group */
+  margin-bottom: 15px;
+}
+.modal-content label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+/* Inputs inside modals use .form-input, .form-select */
+.modal-content button.game-button[type="submit"] { /* Submit button in modal */
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+.closeLoginBtn, .closeSignupBtn, .close-modal-btn { /* Generic close button for modals */
+  color: var(--text-color-muted);
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+}
+.closeLoginBtn:hover, .closeSignupBtn:hover, .close-modal-btn:hover {
+  color: var(--text-color-primary);
+}
+
+/* LikedBy Modal Specifics */
+.modal#likedByModal .modal-content {
+  max-width: 480px; /* Slightly wider for lists */
+  min-height: 200px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+.liked-by-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+.liked-by-list li {
+  display: flex;
+  align-items: center;
+  padding: 10px 5px;
+  border-bottom: 1px solid var(--border-color-secondary);
+}
+.liked-by-list li:last-child {
+  border-bottom: none;
+}
+.liked-by-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 12px;
+  object-fit: cover;
+  background-color: var(--surface-bg-secondary);
+  image-rendering: pixelated;
+}
+.liked-by-name {
+  flex-grow: 1;
+  font-size: 0.95em;
+  color: var(--text-color-primary);
+}
+.liked-by-list .fi { /* Flag icon */
+  font-size: 1.1em;
+  margin-left: 8px;
+}
+
+/* Comment Forms (Guestbook, Articles) */
+.comment-form-container {
+  background-color: var(--surface-bg-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.comment-form-container div { /* Form group */
+  margin-bottom: 15px;
+}
+.comment-form-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+/* Inputs use .form-input, .form-textarea */
+.comment-form-container button[type="submit"].game-button {
+  display: block;
+  margin-top: 10px;
+}
+
+/* Comment Lists (Guestbook, Articles) */
+.comments-list-section h3 { /* Title above comments list */
+  color: var(--heading-color);
+  margin-bottom: 15px;
+  text-align: center;
+}
+.comments-list { /* Container for all comment items */
+  max-width: 700px;
+  margin: 0 auto;
+}
+.comment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-secondary);
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+img.comment-avatar-img {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #eee; /* Placeholder */
+  image-rendering: pixelated;
+  border: 1px solid var(--border-color-primary);
+}
+.comment-content {
+  flex-grow: 1;
+}
+.comment-item strong { /* Username */
+  color: var(--text-color-primary);
+  font-size: 1.05em;
+}
+.comment-item .comment-date {
+  color: var(--text-color-muted);
+  font-size: 0.85em;
+  margin-left: 5px;
+}
+.comment-item p { /* Comment text */
+  margin-top: 5px;
+  margin-bottom: 8px;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+.likes-container { /* For comment likes */
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+}
+.like-btn { /* Comment like button */
+  background-color: transparent;
+  border: 1px solid var(--link-color);
+  color: var(--link-color);
+  padding: 5px 8px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s, color 0.2s;
+  margin-right: 8px;
+}
+.like-btn:hover {
+  background-color: var(--link-color);
+  color: var(--button-text-primary);
+}
+.like-btn.liked {
+  background-color: var(--link-hover-color);
+  color: var(--button-text-primary);
+  border-color: var(--link-hover-color);
+  cursor: default;
+}
+.like-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+.like-count { /* Comment like count text */
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+}
+.clickable-comment-like-count { /* Span inside like-btn for comment like count */
+  text-decoration: underline; /* JS might also set this */
+  /* color: var(--button-text-primary); /* If button is liked */
+  padding: 1px 3px;
+}
+.clickable-comment-like-count:hover,
+.clickable-comment-like-count:focus {
+  color: var(--link-hover-color);
+  background-color: var(--surface-bg-secondary);
+  outline: none;
+}
+
+/* Mini Leaderboard Base Styles */
+.mini-leaderboard-base {
+  list-style-type: none;
+  padding: 0;
+  font-family: "Source Code Pro", monospace;
+}
+.mini-leaderboard-base li {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px dashed var(--border-color-secondary);
+}
+.mini-leaderboard-base li:last-child {
+  border-bottom: none;
+}
+.mini-leaderboard-base .player-rank {
+  font-weight: bold;
+}
+.mini-leaderboard-base .player-avatar {
+  border-radius: 3px; /* Default, can be overridden */
+  background-color: #eee; /* Placeholder */
+  image-rendering: pixelated;
+}
+.mini-leaderboard-base .player-info {
+  flex-grow: 1;
+  display: flex;
+}
+.mini-leaderboard-base .player-name {
+  font-weight: bold;
+  color: var(--text-color-primary);
+  display: flex; /* For icon alignment */
+  align-items: center;
+}
+.mini-leaderboard-base .player-name .fi { /* Flag icon */
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.mini-leaderboard-base .player-score {
+  font-weight: bold;
+  color: var(--link-color);
+}
+
+
+/* ===== Page Specific Styles ===== */
+/* Homepage (General Intro, Portal, Articles on Home) */
+section#intro { /* Homepage intro section */
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+section#intro p {
+  font-size: 1.15em;
+  color: var(--text-color-secondary);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.portal-header { /* Header for portal-like sections or article lists */
+  text-align: center;
+  padding: 40px 20px;
+  background-color: var(--surface-bg-secondary);
+  border-bottom: 1px solid var(--border-color-primary);
+  margin-bottom: 30px;
+}
+.portal-header h1 { /* Title within .portal-header */
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 2.8em;
+  color: var(--heading-color);
+  margin-bottom: 10px;
+}
+.portal-header p { /* Subtitle within .portal-header */
+  font-size: 1.2em;
+  color: var(--text-color-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.portal-grid { /* Grid for cards on homepage and articles grid */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  padding: 0 5% 30px 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.portal-card { /* Base style for cards in the portal grid */
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.portal-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+.portal-card img.card-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 15px auto;
+}
+.portal-card h3 { /* Title inside a portal-card */
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.5em;
+  color: var(--heading-color);
+  margin-bottom: 10px;
+  border-bottom: none; /* Overrides main h2 if needed */
+  padding-bottom: 0;
+}
+.portal-card p { /* Description in portal-card */
+  color: var(--text-color-secondary);
+  font-size: 1em;
+  margin-bottom: 20px;
+  flex-grow: 1;
+  min-height: 60px; /* Ensure some consistent height */
+}
+.portal-card .btn-portal { /* Button specific to portal-card */
+  display: inline-block;
+  background-color: var(--link-color);
+  color: var(--button-text-primary);
+  padding: 10px 25px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  border: none;
+  cursor: pointer;
+  align-self: center;
+}
+.portal-card .btn-portal:hover {
+  background-color: var(--link-hover-color);
+}
+
+/* Homepage Mini Leaderboard */
+#homeMiniLeaderboardContainer { /* Wrapper for the home leaderboard, if any */
+  /* Add specific wrapper styles if needed */
+}
+#homeMiniLeaderboardList { /* Applies .mini-leaderboard-base */
+  font-size: 0.9em;
+  text-align: left;
+}
+#homeMiniLeaderboardList li {
+  padding: 6px 0;
+}
+#homeMiniLeaderboardList .player-rank {
+  margin-right: 8px;
+  min-width: 15px;
+}
+#homeMiniLeaderboardList .player-avatar {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+#homeMiniLeaderboardList .player-info {
+  align-items: center;
+}
+#homeMiniLeaderboardList .player-name {
+  margin-right: auto; /* Pushes score to the right */
+}
+
+/* Homepage Glitchzilla Banner */
+.glitchzilla-banner {
+  background-color: var(--surface-bg-secondary);
+  color: var(--text-color-secondary);
+  padding: 12px 20px;
+  text-align: center;
+  margin: 0 auto 30px auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+  max-width: 90%;
+  /* display: none; /* JS manages visibility */
+}
+.glitchzilla-banner p {
+  margin: 0;
+  font-size: 1.1em;
+  font-family: "Source Code Pro", monospace;
+}
+.glitchzilla-banner .glitch-text-effect,
+.glitchzilla-banner .player-name-highlight {
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 8px currentColor;
+  animation: cambio-colore-neon 1.5s infinite steps(1, end);
+  font-weight: bold;
+}
+
+/* Homepage Articles Section */
+#articlesSection {
+  padding: 20px 0;
+  /* display: none; /* JS manages visibility */
+}
+#articlesSection .portal-header { /* Header for "Recent Articles" */
+  margin-bottom: 20px;
+}
+#articlesGrid { /* Uses .portal-grid styles */
+  /* Specific overrides for #articlesGrid if any */
+}
+
+.article-card { /* Card for a single article in a grid */
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.article-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.1);
+}
+.article-card h4 { /* Article title in card */
+  font-size: 1.3em;
+  color: var(--heading-color);
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+.article-card .article-meta {
+  font-size: 0.85em;
+  color: var(--text-color-muted);
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 15px; /* row-gap column-gap */
+}
+.article-author-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-color-secondary);
+  order: -1; /* Attempt to place author info first */
+}
+.author-avatar-homepage {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--surface-bg-secondary); /* Placeholder */
+  border: 1px solid var(--border-color-secondary);
+  image-rendering: pixelated;
+}
+.article-author-name {
+  font-weight: 500;
+  color: var(--text-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px; /* Limit width */
+}
+.article-author-info .fi { /* Flag icon */
+  font-size: 1.1em;
+  line-height: 1;
+}
+.article-card .article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.article-card .article-tag {
+  background-color: var(--surface-bg-secondary);
+  color: var(--text-color-secondary);
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.8em;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
+}
+.article-card .article-tag:hover {
+  background-color: var(--link-color);
+  color: var(--button-text-primary);
+}
+.article-card .article-snippet {
+  font-size: 0.95em;
+  color: var(--text-color-secondary);
+  margin-bottom: 10px;
+  flex-grow: 1;
+  line-height: 1.6;
+}
+.article-card .article-stats { /* Container for views, etc. */
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  margin-bottom: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-color-secondary);
+}
+.article-stat-badge {
+  display: flex;
+  align-items: center;
+  font-size: 0.85em;
+  color: var(--text-color-muted);
+  background-color: var(--surface-bg-secondary);
+  padding: 4px 8px;
+  border-radius: 15px;
+  transition: color 0.2s, background-color 0.2s;
+}
+.article-stat-badge:hover {
+  color: var(--link-hover-color);
+}
+.article-stat-badge .stat-icon {
+  margin-right: 5px;
+  font-size: 0.9em;
+}
+.article-stat-badge .stat-count {
+  font-weight: 500;
+  color: var(--text-color-secondary);
+}
+.article-card .btn-read-more {
+  display: inline-block;
+  background-color: transparent;
+  color: var(--link-color);
+  padding: 8px 0; /* Top/bottom padding only */
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+  border: none;
+  align-self: flex-start;
+  margin-top: auto; /* Pushes to bottom if card is flex column */
+}
+.article-card .btn-read-more:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+/* Article Card Interactions (Likes, Comments link on homepage card) */
+.article-card-interactions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  margin-top: 10px;
+  border-top: 1px dashed var(--border-color-secondary);
+}
+.interaction-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.article-like-btn, /* Like button on article card */
+.article-comment-link-homepage { /* "Comments" link on article card */
+  background-color: transparent;
+  border: 1px solid var(--text-color-muted);
+  color: var(--text-color-muted);
+  padding: 5px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.article-like-btn:hover,
+.article-comment-link-homepage:hover {
+  border-color: var(--link-color);
+  color: var(--link-color);
+}
+.article-like-btn.liked {
+  background-color: var(--link-color);
+  color: var(--button-text-primary);
+  border-color: var(--link-color);
+}
+.article-like-btn.liked:hover {
+  background-color: var(--link-hover-color);
+}
+.article-like-btn .stat-icon, /* Icon within like button */
+.comment-icon-homepage { /* Icon for comments link */
+  margin-right: 4px;
+}
+.article-like-count, .article-comment-count { /* Text for counts */
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+}
+.clickable-like-count { /* General style for clickable counts */
+  cursor: pointer;
+  text-decoration: underline;
+}
+.clickable-like-count:hover {
+  color: var(--link-hover-color);
+}
+.view-likers-icon { /* Small icon next to like count if clickable */
+  font-size: 0.8em;
+  margin-left: 4px;
+}
+
+
+/* Homepage Featured Article Card */
+#featuredArticleCard { /* Specific portal card for featured article */
+  text-align: left;
+  /* display: none; /* JS manages visibility */
+}
+#featuredArticleCard .card-icon { /* Icon for featured article */
+  margin-left: 0;
+  margin-right: auto;
+  margin-bottom: 10px;
+}
+#featuredArticleCard > h3 { /* "Featured Article" title */
+  text-align: left;
+  font-size: 1.6em;
+}
+#featuredArticleCard #featuredArticleActualTitle { /* Actual title of the featured article */
+  font-size: 1.3em;
+  color: var(--text-color-primary);
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+#featuredArticleCard .btn-portal { /* Button on featured article card */
+  align-self: flex-start;
+}
+
+/* About Page - Skills Section */
+section#skills ul.skills-grid {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 25px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  justify-content: center;
+}
+section#skills li.skill-card {
+  background-color: var(--skill-badge-bg);
+  color: var(--skill-badge-text);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid var(--border-color-secondary);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+section#skills li.skill-card:hover {
+  background-color: var(--skill-badge-hover-bg);
+  color: var(--skill-badge-hover-text);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+section#skills li.skill-card.active-skill {
+  background-color: var(--skill-badge-active-bg);
+  color: var(--skill-badge-active-text);
+  border-color: var(--link-color);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15), 0 0 0 2px var(--link-color);
+}
+.skill-details-container {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: var(--skill-details-bg); /* Uses different variable set */
+  border: 1px solid var(--skill-details-border);
+  border-radius: 6px;
+  min-height: 70px;
+  text-align: left;
+  color: var(--skill-details-text);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.3s ease-in-out;
+}
+.skill-details-container h3 {
+  color: var(--skill-details-heading);
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.3em;
+}
+.skill-details-container p {
+  margin-bottom: 0;
+  font-size: 1.05em;
+  line-height: 1.7;
+}
+
+/* Contact Section (e.g., on About Page) */
+section#contact ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 15px;
+  text-align: center;
+}
+section#contact li {
+  margin-bottom: 10px;
+}
+
+
+/* Article Display Page (view-article.html) */
+#articleDisplaySection {
+  padding: 25px 30px; /* Consistent with other sections */
+}
+#articleDisplayHeader {
+  border-bottom: 1px solid var(--border-color-secondary);
+  margin-bottom: 20px;
+  padding-top: 8px;
+  padding-bottom: 12px;
+}
+#articleDisplayTitle { /* Article H1 title */
+  font-size: 2.2em;
+  color: var(--heading-color);
+  margin-top: 0;
+  margin-bottom: 8px;
+  line-height: 1.25;
+  white-space: normal !important; /* Ensure text wraps */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+#articleDisplayMeta {
+  font-size: 0.9em;
+  color: var(--text-color-muted);
+  margin-bottom: 15px;
+}
+#articleDisplayMeta .meta-item {
+  margin-right: 15px;
+  display: inline-block;
+  margin-bottom: 5px; /* For wrapping */
+}
+#articleDisplayMeta .meta-item .fi { /* Flag icon */
+  margin-right: 5px;
+  vertical-align: middle;
+}
+#articleDisplayMeta .article-tags-display .article-tag { /* Tags on article view page */
+  background-color: var(--surface-bg-secondary);
+  color: var(--text-color-secondary);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.9em;
+  margin-right: 5px;
+  margin-bottom: 5px; /* For wrapping */
+  display: inline-block;
+}
+#articleDisplayContent { /* Main content of the article */
+  font-size: 1.05em;
+  line-height: 1.7;
+  color: var(--text-color-secondary);
+}
+#articleDisplayContent h1,
+#articleDisplayContent h2,
+#articleDisplayContent h3 { /* Headings within article content */
+  color: var(--heading-color);
+  margin-top: 1.8em;
+  margin-bottom: 0.8em;
+  border-bottom: 1px solid var(--border-color-secondary);
+  padding-bottom: 0.3em;
+}
+#articleDisplayContent h1 { font-size: 1.8em; }
+#articleDisplayContent h2 { font-size: 1.5em; }
+#articleDisplayContent h3 { font-size: 1.3em; }
+#articleDisplayContent p { margin-bottom: 1.2em; }
+#articleDisplayContent a { color: var(--link-color); text-decoration: underline; }
+#articleDisplayContent a:hover { color: var(--link-hover-color); }
+#articleDisplayContent ul,
+#articleDisplayContent ol { margin-left: 20px; margin-bottom: 1.2em; }
+#articleDisplayContent li { margin-bottom: 0.5em; }
+#articleDisplayContent blockquote {
+  border-left: 3px solid var(--link-color);
+  padding-left: 15px;
+  margin: 0 0 1.2em 0;
+  font-style: italic;
+  color: var(--text-color-muted);
+}
+#articleDisplayContent pre {
+  background-color: var(--surface-bg-secondary);
+  border: 1px solid var(--border-color-secondary);
+  padding: 15px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.95em;
+}
+#articleDisplayContent code { /* Inline code */
+  background-color: var(--surface-bg-secondary);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.9em;
+}
+#articleDisplayContent pre code { /* Code within pre, reset some styles */
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+  font-size: inherit; /* Inherit from pre */
+}
+#articleDisplayContent img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 15px 0;
+  display: block;
+}
+#articleInteractions { /* Container for likes/comments section below article */
+  max-width: 800px;
+  margin: 30px auto 20px auto;
+  padding: 0 20px;
+  /* display: none; /* JS manages visibility */
+}
+#articleInteractions h3 {
+  margin-bottom: 15px;
+  font-size: 1.4em;
+}
+#articleLikesContainer,
+#articleCommentsSection {
+  margin-bottom: 20px;
+}
+#articleLikesContainer .clickable-like-count { /* Clickable like count on article page */
+  color: var(--link-color);
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+#articleLikesContainer .clickable-like-count:hover,
+#articleLikesContainer .clickable-like-count:focus {
+  color: var(--link-hover-color);
+  background-color: var(--surface-bg-secondary);
+  text-decoration: underline;
+}
+#articleLikesContainer > span#articleLikeCount + span { /* Assuming this is for an icon or text next to count */
+  cursor: pointer;
+}
+.back-to-home-link { /* "Back to Home/Articles" link */
+  display: block;
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+.back-to-home-link a {
+  color: var(--link-color);
+  text-decoration: none;
+  padding: 8px 15px;
+  border: 1px solid var(--link-color);
+  border-radius: 20px;
+  transition: background-color 0.2s, color 0.2s;
+}
+.back-to-home-link a:hover {
+  background-color: var(--link-color);
+  color: var(--button-text-primary);
+  text-decoration: none;
+}
+/* Comment form/list on article page use generic .comment-form-container and .comments-list */
+#articleCommentsFormContainer { margin-bottom: 30px; }
+#articleCommentsListContainer { margin-top: 20px; }
+
+
+/* User Profile Page (profile.html) */
+section#profile {
+  max-width: 600px;
+}
+section#profile h3 { /* Sub-headings in profile section */
+  margin-top: 30px;
+  font-size: 1.5em;
+  /* Inherits other styles from main h2 if not overridden */
+}
+#profileDetailsDisplay p {
+  margin-bottom: 10px;
+  font-size: 1.05em;
+}
+#profileDetailsDisplay strong {
+  color: var(--text-color-primary);
+}
+#profileAvatar { /* User's avatar on profile page */
+  image-rendering: pixelated;
+}
+#profileNationality .fi { /* Flag icon for nationality */
+  display: inline-block;
+  width: 1.33333333em; /* Standard flag-icons aspect ratio */
+  height: 1em;
+  line-height: 1em;
+  vertical-align: -0.15em;
+  background-size: contain;
+  background-position: 50%;
+  background-repeat: no-repeat;
+}
+
+/* Profile Update Form */
+#profileUpdateForm div { /* Form group */
+  margin-bottom: 20px;
+}
+#profileUpdateForm label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+#profileUpdateForm input[type="text"] { /* Uses .form-input */
+  padding: 12px; /* Specific padding for profile form */
+}
+#profileUpdateForm button[type="submit"].game-button {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+#profileMessage { /* Success/error messages */
+  text-align: center;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+/* "My Articles" Section on Profile Page */
+#myArticlesSection {
+  background-color: var(--surface-bg-primary);
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 30px;
+  border: 1px solid var(--border-color-secondary);
+}
+#myArticlesSection h2 { /* "My Articles" main title */
+  color: var(--heading-color);
+  border-bottom: 1px solid var(--border-color-primary);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  text-align: left; /* Override default center for main section h2 */
+}
+.my-articles-subsection { /* Container for each status (Drafts, Pending, etc.) */
+  margin-bottom: 25px;
+}
+.my-articles-subsection h3 { /* Titles like "Drafts", "Pending Review" */
+  color: var(--heading-color);
+  border-bottom: 1px solid var(--border-color-secondary);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+}
+#myArticlesTabs h3 { /* If using tabs, title inside tab panel */
+    margin-top: 0;
+    font-size: 1.2em;
+}
+#myDraftsLoadingMessage,
+#myPendingLoadingMessage,
+#myPublishedLoadingMessage,
+#myRejectedLoadingMessage {
+  color: var(--text-color-muted);
+  font-style: italic;
+}
+
+.my-articles-grid-container { /* Grid for user's article cards */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding-top: 10px;
+}
+.my-article-profile-card { /* Individual article card in user's profile */
+  background-color: var(--surface-bg-secondary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.my-article-profile-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.my-article-card-title {
+  font-size: 1.15em;
+  color: var(--heading-color);
+  margin-top: 0;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+.my-article-card-meta {
+  font-size: 0.8em;
+  color: var(--text-color-muted);
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.my-article-card-status { /* Uses .status-indicator and .status-article-* classes */
+  margin-bottom: 4px; /* Spacing if date is below */
+}
+/* .my-article-card-date { styles for date if needed } */
+.my-article-card-rejection-reason {
+  font-size: 0.85em;
+  color: var(--text-color-primary);
+  background-color: var(--bg-color);
+  padding: 8px;
+  border-left: 3px solid var(--link-color);
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-radius: 0 4px 4px 0;
+  font-style: italic;
+}
+.my-article-card-snippet {
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+  margin-bottom: 12px;
+  flex-grow: 1;
+}
+.my-article-card-actions {
+  margin-top: auto; /* Pushes actions to bottom */
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color-primary);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.my-article-action-button { /* Generic button for actions on user's article card */
+  padding: 6px 12px;
+  font-size: 0.85em;
+  /* Typically use .game-button or .utility-button-outline and add this for sizing */
+}
+.my-article-action-button.delete { /* Specific delete button style */
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+.my-article-action-button.delete:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+/* Text-based status indicators (not badges) for list views if any */
+.my-article-item { /* For list view of articles, if different from card */
+  background-color: var(--surface-bg-secondary);
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  border: 1px solid var(--border-color-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.my-article-item strong { color: var(--text-color-primary); font-size: 1.1em; }
+.my-article-item small { color: var(--text-color-muted); font-size: 0.9em; display: block; }
+
+.my-article-status-text-base { /* Base for text status, not a badge */
+  font-style: italic;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-left: 5px;
+}
+.my-article-status-draft { /* Text status */
+  color: var(--text-color-muted);
+  background-color: var(--surface-bg-primary);
+  border: 1px dashed var(--text-color-muted);
+}
+.my-article-status-pendingReview { /* Text status */
+  color: #ffa000; /* Orange */
+  background-color: rgba(255, 160, 0, 0.1);
+  border: 1px dashed #ffa000;
+}
+.my-article-status-published { /* Text status */
+  color: #388e3c; /* Green */
+  background-color: rgba(56, 142, 60, 0.1);
+  border: 1px dashed #388e3c;
+}
+.my-article-status-rejected { /* Text status */
+  color: #d32f2f; /* Red */
+  background-color: rgba(211, 47, 47, 0.1);
+  border: 1px dashed #d32f2f;
+}
+.my-article-rejection-reason { /* Text for rejection reason in list item */
+  font-size: 0.85em;
+  color: var(--text-color-muted);
+  padding: 8px;
+  background-color: var(--bg-color);
+  border-left: 3px solid var(--link-color);
+  margin-top: 8px;
+  border-radius: 0 4px 4px 0;
+}
+
+
+/* Issue Tracker Page */
+#issueTrackerSection { /* Main section for issue tracker */
+  /* General section styles apply */
+}
+#issuesFilterControls {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+#issuesFilterControls label {
+  margin-right: 5px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+}
+#issuesFilterControls select { /* Uses .form-select */
+  padding: 8px; /* Slightly different padding */
+  margin-right: 15px;
+}
+#issueSubmissionFormContainer {
+  margin-bottom: 30px;
+  /* Uses .comment-form-container styling if similar, or define here */
+}
+#issueSubmissionForm div { margin-bottom: 15px; }
+#issueSubmissionForm label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-color-primary); }
+/* Inputs use .form-input, .form-textarea, .form-select */
+
+.issue-card {
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-secondary);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+}
+.issue-card h5 { /* Issue title */
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--heading-color);
+  font-size: 1.2em;
+}
+.issue-description {
+  font-size: 0.95em;
+  color: var(--text-color-secondary);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.issue-meta {
+  font-size: 0.85em;
+  color: var(--text-color-muted);
+  margin-bottom: 10px;
+}
+.issue-meta p { margin: 3px 0; }
+.issue-meta strong { color: var(--text-color-primary); }
+.issue-meta .fi { /* Submitter nationality flag */
+  font-size: 1em;
+  margin-left: 3px;
+  vertical-align: middle;
+}
+/* Issue status badge uses .status-indicator and .status-* classes */
+.issue-actions {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+.upvote-issue-btn { /* Uses .game-button or .utility-button-outline */
+  padding: 6px 12px;
+  font-size: 0.9em;
+}
+.upvote-issue-btn.voted {
+  background-color: var(--link-hover-color);
+  color: var(--button-text-primary);
+  border-color: var(--link-hover-color);
+}
+.upvote-issue-btn .upvote-count {
+  margin-left: 5px;
+  font-weight: bold;
+}
+
+/* Admin Dashboard Specifics */
+.admin-section { /* Base for admin sections */
+  /* Inherits from main section, can add specific admin bg/padding */
+}
+#adminUserIssuesList .article-info small em { /* Description emphasis */
+  color: var(--text-color-muted);
+}
+#adminUserIssuesList .admin-issue-status-select { /* Select for changing issue status */
+  border: 1px solid var(--border-color-primary);
+  background-color: var(--surface-bg-secondary);
+  color: var(--text-color-primary);
+  padding: 6px; /* Smaller padding */
+  border-radius: 4px;
+}
+
+/* Admin Moderation Guidelines */
+.admin-section#moderationGuidelinesSection {
+  background-color: var(--surface-bg-secondary);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color-secondary);
+}
+.admin-section#moderationGuidelinesSection h2 {
+  margin-top: 0;
+  border-bottom: 1px solid var(--border-color-primary);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+.guidelines-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.guideline-item h4 { /* Title of a guideline if not using button */
+  margin-bottom: 8px;
+}
+.guideline-toggle-btn {
+  background-color: transparent;
+  border: none;
+  color: var(--link-color);
+  padding: 8px 0;
+  text-align: left;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.guideline-toggle-btn:hover,
+.guideline-toggle-btn:focus {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+.guideline-toggle-btn::after { /* Toggle icon */
+  content: '▼'; /* Down arrow */
+  font-size: 0.8em;
+  margin-left: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+.guideline-toggle-btn[aria-expanded="true"]::after {
+  transform: rotate(-180deg); /* Up arrow */
+}
+.guideline-content {
+  padding-left: 15px;
+  border-left: 2px solid var(--border-color-primary);
+  margin-top: 5px;
+  font-size: 0.95em;
+  line-height: 1.6;
+  display: none; /* JS will toggle to show */
+}
+.guideline-content.show { /* JS adds this class to show content */
+    display: block;
+}
+.guideline-content ul, .guideline-content ol {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-left: 20px;
+}
+.guideline-content li {
+  margin-bottom: 6px;
+}
+
+
+/* ===== Game Specific Pages ===== */
+/* Donkey Runner Game Page */
+/* body.donkey-runner-page variables are applied via JS or body class */
+.donkey-runner-page header .header-content h1 {
+  font-size: 1.8em; /* Consistent with other game page headers */
+}
+.donkey-runner-page main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 5%;
+  width: 100%;
+}
+.donkey-runner-page #gameContainer {
+  position: relative;
+  width: 100%;
+  max-width: 800px; /* Max game width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+}
+.donkey-runner-page canvas#gameCanvas {
+  display: block;
+  image-rendering: pixelated; /* For crisp pixel art */
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  max-height: calc(100vh - 220px); /* Limit height based on viewport */
+  border: 3px solid var(--game-border-color);
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(var(--game-border-color-rgb), 0.5);
+}
+.donkey-runner-page #mobileControls {
+  display: none; /* JS shows on touch devices */
+  width: 100%;
+  padding: 10px 0;
+  user-select: none;
+  -webkit-user-select: none;
+  position: absolute; /* Position over canvas or below */
+  bottom: 10px;
+  left: 0;
+  z-index: 10;
+}
+.donkey-runner-page #mobileControlsInternal { /* Inner container for centering */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 90%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+.donkey-runner-page .control-button { /* Jump/Action buttons for game */
+  background-color: var(--game-button-bg);
+  color: var(--game-button-text);
+  border: 2px solid var(--game-button-border);
+  border-radius: 10px;
+  padding: 15px 20px;
+  font-size: 1.3em;
+  font-weight: bold;
+  font-family: "Source Code Pro", monospace; /* Game-like font */
+  cursor: pointer;
+  outline: none;
+  flex-grow: 0;
+  flex-basis: 45%; /* Two buttons side-by-side */
+  margin: 0 5px;
+  text-align: center;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+}
+.donkey-runner-page .control-button:active {
+  background-color: var(--game-button-active-bg);
+  transform: scale(0.95);
+}
+.donkey-runner-page #fullscreenButton {
+  background-color: var(--surface-bg-secondary);
+  color: var(--text-color-secondary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 0.9em;
+  font-family: "Source Code Pro", monospace;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+  display: none; /* JS manages visibility */
+  transition: background-color 0.2s, color 0.2s;
+}
+.donkey-runner-page #fullscreenButton:hover {
+  background-color: var(--link-hover-color);
+  color: var(--button-text-primary);
+}
+.donkey-runner-page #miniLeaderboardContainer { /* Leaderboard on game page */
+  color: var(--text-color-secondary);
+  background-color: var(--surface-bg-secondary);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px auto;
+  max-width: 400px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.donkey-runner-page #miniLeaderboardContainer h3 {
+  color: var(--heading-color);
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color-primary);
+  padding-bottom: 5px;
+}
+.donkey-runner-page #miniLeaderboardList { /* Applies .mini-leaderboard-base */
+  /* Base styles from .mini-leaderboard-base are applied */
+}
+.donkey-runner-page #miniLeaderboardList li {
+  padding: 8px 0;
+  font-size: 0.9em; /* Specific font size for this leaderboard */
+}
+.donkey-runner-page #miniLeaderboardList .player-rank {
+  margin-right: 10px;
+  min-width: 20px;
+}
+.donkey-runner-page #miniLeaderboardList .player-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px; /* Slightly different radius */
+  margin-right: 10px;
+}
+.donkey-runner-page #miniLeaderboardList .player-info {
+  flex-direction: column; /* Name above date */
+}
+.donkey-runner-page #miniLeaderboardList .player-date {
+  font-size: 0.8em;
+  color: var(--text-color-muted);
+}
+.donkey-runner-page #miniLeaderboardList .player-score {
+  font-size: 1.1em; /* Larger score display */
+}
+
+/* Snake Game Page */
+#snake-game-section { /* Main section for Snake game */
+  text-align: center;
+}
+.game-ui-container { /* Wrapper for score, etc. above canvas */
+  display: block; /* Or flex if needed */
+  margin: 15px auto 0 auto;
+  max-width: 100%;
+  padding: 0 10px; /* Ensure some padding on small screens */
+}
+.game-details { /* Score and highscore display */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  margin-bottom: 15px;
+  font-size: 1em;
+  color: var(--text-color-secondary);
+  max-width: 400px; /* Match canvas width or common game UI width */
+  margin-left: auto;
+  margin-right: auto;
+}
+.score-label, .highscore-label {
+  font-weight: 500;
+}
+#currentScore, #highScore {
+  font-weight: bold;
+  color: var(--link-color);
+  padding-left: 5px;
+}
+#snakeCanvas {
+  display: block;
+  margin: 0 auto 15px auto;
+  border: 5px solid var(--surface-bg-secondary);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2), inset 0 0 5px rgba(0,0,0,0.1);
+  background-color: #2c3e50; /* Default darkish background for snake */
+  max-width: 100%; /* Ensure it's responsive */
+}
+body.dark-mode #snakeCanvas {
+  background-color: #222738; /* Even darker for dark mode */
+  border-color: var(--surface-bg-primary); /* Lighter border in dark mode */
+  box-shadow: 0 0 15px rgba(0,0,0,0.5), inset 0 0 8px rgba(0,0,0,0.3);
+}
+.game-instructions {
+  margin-top: 20px;
+  font-size: 0.9em;
+  color: var(--text-color-muted);
+}
+#highscore-input-container { /* Form to submit highscore */
+  margin-top: 25px;
+  padding: 20px;
+  background-color: var(--surface-bg-secondary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: 6px;
+  text-align: center;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#highscore-input-container h3 {
+  color: var(--heading-color);
+  margin-bottom: 10px;
+  font-size: 1.3em;
+}
+#highscore-input-container p {
+  margin-bottom: 15px;
+  font-size: 0.95em;
+  color: var(--text-color-secondary);
+}
+#highscore-input-container input[type="text"] { /* Uses .form-input but with overrides */
+  padding: 8px 12px;
+  text-align: center;
+  text-transform: uppercase;
+  width: 150px; /* Fixed width for initials */
+  margin-bottom: 15px;
+  display: block; /* Center it */
+  margin-left: auto;
+  margin-right: auto;
+}
+.leaderboard-container { /* Snake game leaderboard */
+  margin-top: 30px;
+  padding: 20px;
+  text-align: center;
+}
+.leaderboard-container h3 {
+  color: var(--heading-color);
+  margin-bottom: 15px;
+  font-size: 1.4em;
+  border-bottom: 1px solid var(--border-color-secondary);
+  padding-bottom: 8px;
+  display: inline-block; /* So border only spans text */
+}
+#leaderboard-list { /* Snake game leaderboard list */
+  list-style-type: decimal; /* Numbered list */
+  padding-left: 20px; /* Space for numbers */
+  max-width: 350px;
+  margin: 0 auto;
+  text-align: left;
+}
+#leaderboard-list li {
+  padding: 8px 0;
+  font-size: 1em;
+  color: var(--text-color-secondary);
+  border-bottom: 1px dashed var(--border-color-secondary);
+  display: flex;
+  justify-content: space-between;
+}
+#leaderboard-list li:last-child {
+  border-bottom: none;
+}
+#leaderboard-list li .player-name {
+  font-weight: 500;
+  color: var(--text-color-primary);
+  margin-right: 10px;
+}
+#leaderboard-list li .player-score {
+  font-weight: bold;
+  color: var(--link-color);
+}
+#touch-controls-container { /* For Snake game touch controls */
+  display: none; /* JS shows on touch devices */
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-top: 20px;
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+.touch-control-btn { /* Arrow buttons for Snake */
+  background-color: var(--button-bg-primary);
+  color: var(--button-text-primary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+  font-size: 1.8em; /* Arrow icon size */
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on touch */
+}
+.touch-control-btn:hover {
+  background-color: var(--button-hover-bg-primary);
+}
+.touch-control-btn:active {
+  transform: scale(0.95);
+  background-color: var(--link-hover-color); /* Feedback color */
+}
+.touch-controls-middle-row { /* For left/right buttons if side-by-side */
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+body.touch-enabled .game-instructions { /* Smaller instructions on touch devices */
+  font-size: 0.8em;
+  color: var(--text-color-muted);
+}
+
+
+/* ===== Responsive Design - Media Queries ===== */
+/* Order: Larger breakpoints first, then smaller */
+
+@media (max-width: 768px) { /* Tablets and smaller */
+  header {
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px 3%;
+  }
+  header .header-content {
+    width: 100%;
+    justify-content: center;
+  }
+  header .header-controls {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    margin-left: 0; /* Reset margin */
+  }
+  /* header nav margin is handled by flex parent */
+
+  main section {
+    width: 95%;
+    padding: 20px 15px;
+  }
+  /* .project, .team-member were in original, kept if used elsewhere */
+  .project, .team-member {
+    flex-basis: 100%;
+    min-width: unset;
+  }
+
   h1, header h1 { font-size: 1.5em; }
   main h2 { font-size: 1.4em; }
-  #authSection { margin-top: 10px; justify-content: center; width: 100%;} /* Centro auth section */
-  #userProfileContainer { justify-content: center; } /* Centro user profile */
 
-  /* Snake Game Responsive */
+  #authSection { /* Center auth buttons on mobile */
+    margin-top: 10px;
+    justify-content: center;
+    width: 100%;
+  }
+  #userProfileContainer { /* Center user profile info */
+    justify-content: center;
+  }
+
+  /* Snake Game Responsive (768px) */
   #snake-game-section h2 { font-size: 1.5em; }
   #highscore-input-container { max-width: 90%; }
-  .leaderboard-container h3 { font-size: 1.2em; } /* Snake Leaderboard */
-  #leaderboard-list { max-width: 90%; } /* Snake Leaderboard */
+  .leaderboard-container h3 { font-size: 1.2em; }
+  #leaderboard-list { max-width: 90%; }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 576px) { /* Small devices, large phones */
   body { font-size: 15px; }
-  header nav ul { gap: 10px; justify-content: center; }
+
+  header nav ul {
+    gap: 10px;
+    justify-content: center;
+  }
   header nav a { font-size: 0.95em; }
   header .header-controls { gap: 12px; }
-  #themeToggleBtn { padding: 6px 10px; font-size: 1em; /* margin-left: 0; */ } /* Tolto margin-left se già gestito da gap */
+  #themeToggleBtn {
+    padding: 6px 10px;
+    font-size: 1em;
+  }
 
-  main section { padding: 15px 10px; margin: 20px auto; }
-  .portal-grid { grid-template-columns: 1fr; padding: 0 3% 20px 3%; }
-  .project, .team-member, .portal-card, .article-card { flex-basis: 100%; width: 100%; max-width: none; }
+  main section {
+    padding: 15px 10px;
+    margin: 20px auto;
+  }
+  .portal-grid { /* Single column for portal/article grids */
+    grid-template-columns: 1fr;
+    padding: 0 3% 20px 3%;
+  }
+  /* Ensure cards take full width in single column */
+  .project, .team-member, .portal-card, .article-card, .my-article-profile-card {
+    flex-basis: 100%;
+    width: 100%;
+    max-width: none;
+  }
 
   h1, header h1 { font-size: 1.4em; }
   main h2 { font-size: 1.3em; }
   footer { font-size: 0.85em; padding: 20px; }
 
-  /* Snake Game Responsive */
+  /* Modal content on small screens */
+  .modal-content {
+    margin: 5% auto; /* Less top margin */
+    padding: 20px;
+  }
+  .modal#likedByModal .modal-content {
+     padding: 20px;
+  }
+  .liked-by-name { font-size: 0.9em; }
+
+
+  /* Snake Game Responsive (576px) */
   #snake-game-section h2 { font-size: 1.3em; }
   .game-details { font-size: 0.85em; padding: 6px 0; margin-bottom: 8px; }
   #highscore-input-container { padding: 12px; }
   #highscore-input-container h3 { font-size: 1.1em; }
   #highscore-input-container input[type="text"] { width: 100px; font-size: 0.85em; }
-  .game-button { padding: 8px 12px; font-size: 0.85em; } /* Stile generico bottone gioco */
-  .leaderboard-container { margin-top: 15px; padding: 12px 8px; } /* Snake Leaderboard */
-  .leaderboard-container h3 { font-size: 1.1em; } /* Snake Leaderboard */
-  #leaderboard-list li { font-size: 0.85em; padding: 5px 0; } /* Snake Leaderboard */
+  .game-button { padding: 8px 12px; font-size: 0.85em; } /* Scale down generic game buttons */
+  .leaderboard-container { margin-top: 15px; padding: 12px 8px; }
+  .leaderboard-container h3 { font-size: 1.1em; }
+  #leaderboard-list li { font-size: 0.85em; padding: 5px 0; }
   .game-instructions { font-size: 0.75em; margin-top: 12px; }
 
-  /* Donkey Runner Responsive */
+  /* Donkey Runner Responsive (576px) */
   .donkey-runner-page .control-button { padding: 12px 15px; font-size: 1.2em; }
   .donkey-runner-page #fullscreenButton { font-size: 0.8em; padding: 6px 8px; }
-  .donkey-runner-page canvas#gameCanvas { max-height: calc(100vh - 170px); }
+  .donkey-runner-page canvas#gameCanvas { max-height: calc(100vh - 170px); } /* Adjust max height */
 }
 
-@media (max-width: 480px) {
-  .touch-control-btn { /* Per snake game */
-    width: 45px; height: 45px; font-size: 1.3em; margin: 2px;
-  }
-  #touch-controls-container { gap: 2px; } /* Snake Game */
-  .touch-controls-middle-row { gap: 2px; } /* Snake Game */
+@media (max-width: 480px) { /* Extra small devices, phones */
   .testo-neon-arcade { font-size: 1.2em; padding: 0.3rem; }
-}
-
-.article-card-interactions {
-    display: flex;
-    justify-content: space-between; /* Spazia like e commenti */
-    align-items: center;
-    padding: 10px 0; /* Spaziatura verticale */
-    margin-top: 10px;
-    border-top: 1px dashed var(--border-color-secondary); /* Separatore opzionale */
-}
-
-.interaction-item {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Spazio tra icona/bottone e testo */
-}
-
-.article-like-btn,
-.article-comment-link-homepage {
-    background-color: transparent;
-    border: 1px solid var(--text-color-muted);
-    color: var(--text-color-muted);
-    padding: 5px 10px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: all 0.2s ease;
-    text-decoration: none;
-}
-
-.article-like-btn:hover,
-.article-comment-link-homepage:hover {
-    border-color: var(--link-color);
-    color: var(--link-color);
-}
-
-.article-like-btn.liked { /* Stile per quando l'utente ha messo like */
-    background-color: var(--link-color); /* O un colore specifico per "liked" */
-    color: var(--button-text-primary);
-    border-color: var(--link-color);
-}
-.article-like-btn.liked:hover {
-    background-color: var(--link-hover-color);
-}
-
-
-.article-like-btn .stat-icon,
-.comment-icon-homepage { /* Per le icone se decidi di usarle dentro i bottoni o span */
-    margin-right: 4px;
-}
-
-.article-like-count, .article-comment-count {
-    font-size: 0.9em;
-    font-weight: 500;
-    color: var(--text-color-secondary);
-}
-
-.comment-icon-homepage {
-    font-size: 1em; /* Adatta se necessario */
-}
-
-.modal#likedByModal {
-    /* Stessi stili base delle modali esistenti (login/signup) per coerenza */
-    /* display: none; gestito da JS o inline style */
-    /* position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; */
-    /* overflow: auto; background-color: rgba(0,0,0,0.6); */
-}
-
-.modal#likedByModal .modal-content {
-    /* Stessi stili base .modal-content, ma con possibili aggiustamenti */
-    /* background-color: var(--surface-bg-primary); margin: 10% auto; padding: 25px; */
-    /* border: 1px solid var(--border-color-secondary); border-radius: 8px; */
-    /* width: 90%; max-width: 480px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; */
-    min-height: 200px; /* Altezza minima per dare spazio */
-    max-height: 70vh; /* Altezza massima per evitare che sia troppo lunga su schermi grandi */
-    display: flex;
-    flex-direction: column;
-}
-
-.modal#likedByModal .close-modal-btn { /* Stile bottone chiusura */
-    /* Eredita da .closeLoginBtn, .closeSignupBtn o definisci uno specifico */
-    color: var(--text-color-muted);
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 1;
-}
-.modal#likedByModal .close-modal-btn:hover {
-    color: var(--text-color-primary);
-}
-
-.modal#likedByModal h3 {
-    /* Eredita da .modal-content h3 o definisci */
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: var(--heading-color);
-    text-align: center;
-}
-
-.liked-by-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto; /* Scroll se la lista è lunga */
-    flex-grow: 1; /* Fa espandere la lista per riempire lo spazio */
-}
-
-.liked-by-list li {
-    display: flex;
-    align-items: center;
-    padding: 10px 5px;
-    border-bottom: 1px solid var(--border-color-secondary);
-}
-.liked-by-list li:last-child {
-    border-bottom: none;
-}
-
-.liked-by-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    margin-right: 12px;
-    object-fit: cover;
-    background-color: var(--surface-bg-secondary); /* Placeholder bg */
-    image-rendering: pixelated;
-}
-
-.liked-by-name {
-    flex-grow: 1;
-    font-size: 0.95em;
-    color: var(--text-color-primary);
-}
-
-.liked-by-list .fi { /* Stile per bandierina */
-    font-size: 1.1em;
-    margin-left: 8px;
-}
-
-/* Responsive adjustments for the modal if needed beyond the base .modal-content */
-@media (max-width: 600px) {
-    .modal#likedByModal .modal-content {
-        /* Potrebbe non servire se .modal-content è già responsivo */
-        /* margin: 5% auto; */
-        /* max-width: 95%; */
-        padding: 20px;
-    }
-    .liked-by-name {
-        font-size: 0.9em;
-    }
-}
-
-.view-likers-icon {
-    font-size: 0.8em; /* O la dimensione che preferisci */
-    margin-left: 4px;
-    /* Potresti voler cambiare il colore o altro */
-}
-
-.clickable-comment-like-count {
-    /* text-decoration: underline; (già impostato via JS, ma può stare qui) */
-    /* cursor: pointer; (già impostato via JS) */
-    display: inline-block; /* Per padding/margin se necessario */
-    padding: 2px 4px; /* Opzionale: piccolo padding per allargare area cliccabile e per background */
-    border-radius: 3px; /* Opzionale: per angoli smussati se usi background */
-    transition: background-color 0.2s, color 0.2s; /* Transizione fluida */
-}
-
-.clickable-comment-like-count:hover,
-.clickable-comment-like-count:focus {
-    color: var(--link-hover-color); /* Cambia colore del testo */
-    background-color: var(--surface-bg-secondary); /* Leggero sfondo al passaggio del mouse */
-    outline: none; /* Rimuovi outline di default del focus se personalizzi */
-}
-
-.clickable-like-count {
-    cursor: pointer;
-    text-decoration: underline;
-    /* Altri stili desiderati, es. su hover */
-}
-.clickable-like-count:hover {
-    color: var(--link-hover-color); /* Esempio */
-}
-
-#articleLikesContainer .clickable-like-count { /* Più specifico per l'articolo */
-    cursor: pointer;
-    text-decoration: underline;
-    color: var(--link-color); /* Usa il colore del link per indicare interattività */
-    padding: 2px 5px; /* Aggiunge un po' di area cliccabile attorno al numero */
-    border-radius: 4px; /* Angoli smussati per un aspetto più "button-like" */
-    transition: background-color 0.2s, color 0.2s;
-}
-
-#articleLikesContainer .clickable-like-count:hover,
-#articleLikesContainer .clickable-like-count:focus {
-    color: var(--link-hover-color);
-    background-color: var(--surface-bg-secondary); /* Leggero sfondo al passaggio del mouse */
-    text-decoration: underline; /* Mantieni la sottolineatura */
-}
-
-#articleLikesContainer > span#articleLikeCount + span { 
-  cursor: pointerù
-}
-
-/* Stile per il conteggio dei like dei COMMENTI (guestbook e articoli) quando cliccabile */
-/* Questo è lo span DENTRO il bottone like del commento */
-.likes-container .like-btn span.clickable-comment-like-count {
-     text-decoration: underline; /* Potrebbe essere già sufficiente dal JS o dal browser */
-      color: var(white); /* Potrebbe cambiare il colore del numero dentro il bottone */
-      padding: 1px 3px;
-    /* border-radius: 3px; */
-    /* transition: background-color 0.2s, color 0.2s; */
-    
-    /* Per ora, ci affidiamo principalmente al fatto che l'intero bottone like è già cliccabile
-       e il JS aggiunge la sottolineatura. Se vogliamo rendere solo il numero più evidente,
-       possiamo decommentare e aggiustare.
-       La cosa più importante qui è che il title attribute viene già impostato dal JS.
-    */
-}
-
-/* Stili per Issue Tracker */
-.issue-card {
-    background-color: var(--surface-bg-primary);
-    border: 1px solid var(--border-color-secondary);
-    border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
-}
-
-.issue-card h5 {
-    margin-top: 0;
-    margin-bottom: 8px;
-    color: var(--heading-color);
-    font-size: 1.2em;
-}
-
-.issue-description {
-    font-size: 0.95em;
-    color: var(--text-color-secondary);
-    margin-bottom: 10px;
-    line-height: 1.5;
-}
-
-.issue-meta {
-    font-size: 0.85em;
-    color: var(--text-color-muted);
-    margin-bottom: 10px;
-}
-.issue-meta p {
-    margin: 3px 0;
-}
-.issue-meta strong {
-    color: var(--text-color-primary);
-}
-.issue-meta .fi { /* Stile per bandierina nazionalità del submittente */
-    font-size: 1em;
-    margin-left: 3px;
-    vertical-align: middle;
-}
-
-
-.issue-status-badge {
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    font-weight: 500;
-    color: white;
-    text-transform: capitalize;
-}
-
-.status-new { background-color: #007bff; } /* Blu */
-.status-under-consideration { background-color: #ffc107; color: #333;} /* Giallo */
-.status-accepted { background-color: #28a745; } /* Verde */
-.status-planned { background-color: #17a2b8; } /* Ciano Info */
-.status-in-progress { background-color: #fd7e14; } /* Arancione */
-.status-completed { background-color: #6c757d; } /* Grigio */
-.status-declined { background-color: #dc3545; } /* Rosso */
-.status-unknown { background-color: #343a40; } /* Nero/Grigio Scuro */
-
-
-.issue-actions {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-}
-
-.upvote-issue-btn {
-    padding: 6px 12px;
-    font-size: 0.9em;
-    /* Altri stili ereditati da .game-button o personalizzati */
-}
-.upvote-issue-btn.voted {
-    background-color: var(--link-hover-color); /* O un colore che indica "votato" */
-    color: var(--button-text-primary);
-    border-color: var(--link-hover-color);
-}
-.upvote-issue-btn .upvote-count {
-    margin-left: 5px;
-    font-weight: bold;
-}
-
-#issuesFilterControls label {
-    margin-right: 5px;
-}
-#issuesFilterControls select {
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid var(--border-color-primary);
-    background-color: var(--bg-color);
-    color: var(--text-color-primary);
-    margin-right: 15px; /* Spazio tra i select */
-}
-/* Stile per il contenitore del form di invio issue */
-#issueSubmissionForm div {
-    margin-bottom: 15px; /* Spazio tra i campi del form */
-}
-
-#issueSubmissionForm label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: var(--text-color-primary);
-}
-
-/* Input e textarea ereditano già da stili globali,
-   ma puoi aggiungere specificità se necessario */
-#issueSubmissionForm input[type="text"],
-#issueSubmissionForm textarea,
-#issueSubmissionForm select {
-    width: 100%; /* Occupa tutta la larghezza disponibile */
-    padding: 10px;
-    border: 1px solid var(--border-color-primary);
-    border-radius: 4px;
-    background-color: var(--bg-color);
-    color: var(--text-color-primary);
-    font-size: 1em;
-    font-family: inherit; /* Usa il font del body */
-}
-#issueSubmissionForm input:focus,
-#issueSubmissionForm textarea:focus,
-#issueSubmissionForm select:focus {
-    outline: none;
-    border-color: var(--link-color);
-    box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.2);
-}
-
-/* Stili per la lista issue nell'admin dashboard */
-#adminUserIssuesList .article-info small em { /* Enfasi per la descrizione */
-    color: var(--text-color-muted);
-}
-#adminUserIssuesList .admin-issue-status-select {
-    /* Stili specifici per il select dello stato se necessario */
-    border: 1px solid var(--border-color-primary);
-    background-color: var(--surface-bg-secondary);
-    color: var(--text-color-primary);
-}
-
-/* Stili per Admin Dashboard - Linee Guida Moderazione */
-.admin-section#moderationGuidelinesSection {
-    background-color: var(--surface-bg-secondary);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color-secondary);
-}
-
-.admin-section#moderationGuidelinesSection h2 {
-    margin-top: 0;
-    border-bottom: 1px solid var(--border-color-primary);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
-
-.guidelines-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.guideline-item h4 {
-    margin-bottom: 8px;
-}
-
-.guideline-toggle-btn {
-    background-color: transparent;
-    border: none;
-    color: var(--link-color);
-    padding: 8px 0; /* Rimosso padding laterale per allineamento con testo */
-    text-align: left;
-    font-size: 1.1em; /* Leggermente più grande per i titoli delle sezioni */
-    font-weight: bold; /* Simile a un h4 */
-    cursor: pointer;
-    width: 100%;
-    display: flex; /* Per l'icona ::after */
-    justify-content: space-between; /* Spinge l'icona a destra */
-    align-items: center;
-}
 
-.guideline-toggle-btn:hover,
-.guideline-toggle-btn:focus {
-    color: var(--link-hover-color);
-    text-decoration: underline;
+  /* Snake Game Touch Controls (480px) */
+  .touch-control-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3em; /* Smaller touch buttons */
+    margin: 2px;
+  }
+  #touch-controls-container { gap: 2px; }
+  .touch-controls-middle-row { gap: 2px; }
 }
 
-.guideline-toggle-btn::after {
-    content: '▼'; /* Freccia verso il basso di default */
-    font-size: 0.8em;
-    margin-left: 10px;
-    transition: transform 0.2s ease-in-out;
-}
-
-.guideline-toggle-btn[aria-expanded="true"]::after {
-    transform: rotate(-180deg); /* Freccia verso l'alto quando espanso */
-}
-
-
-.guideline-content {
-    padding-left: 15px; /* Indentazione per il contenuto */
-    border-left: 2px solid var(--border-color-primary);
-    margin-top: 5px;
-    font-size: 0.95em;
-    line-height: 1.6;
-}
-
-.guideline-content ul, .guideline-content ol {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding-left: 20px; /* Spazio per i bullet points */
-}
-
-.guideline-content li {
-    margin-bottom: 6px;
-}
-
-/* Stili per la sezione "I Miei Articoli" in profile.html */
-#myArticlesSection {
-    background-color: var(--surface-bg-primary);
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 30px; /* Spazio dalla sezione profilo */
-    border: 1px solid var(--border-color-secondary);
-}
-
-#myArticlesSection h2 {
-    color: var(--heading-color);
-    border-bottom: 1px solid var(--border-color-primary);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
-
-#myArticlesSection h3 { /* Per i titoli delle sottosezioni (Bozze, In Revisione, etc.) */
-    color: var(--heading-color);
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-size: 1.3em;
-}
-#myArticlesSection #myArticlesTabs h3 { /* Stile specifico per il titolo "Le Mie Bozze" dentro i tabs */
-    margin-top: 0;
-    font-size: 1.2em; /* Leggermente più piccolo se dentro i tabs */
-}
 
-
-.my-article-item {
-    background-color: var(--surface-bg-secondary);
-    padding: 15px;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    border: 1px solid var(--border-color-primary);
-    display: flex;
-    flex-direction: column; /* Stacka titolo/info e azioni verticalmente */
-    gap: 10px;
-}
-
-.my-article-item strong {
-    color: var(--text-color-primary);
-    font-size: 1.1em;
-}
-
-.my-article-item small {
-    color: var(--text-color-muted);
-    font-size: 0.9em;
-    display: block; /* Per far andare a capo la data */
-}
-
-.my-article-status-draft {
-    font-style: italic;
-    color: var(--text-color-muted);
-}
-/* Aggiungi qui classi per .my-article-status-pending, .my-article-status-published, .my-article-status-rejected se necessario */
-
-.my-article-actions {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap; /* Permetti ai bottoni di andare a capo */
-}
-
-.my-article-button,
-.my-article-button-delete {
-    padding: 8px 15px;
-    font-size: 0.9em;
-    text-decoration: none; /* Per i link stilizzati come bottoni */
-}
-
-.my-article-button-delete {
-    background-color: #dc3545; /* Rosso per eliminare */
-    border-color: #dc3545;
-    color: white;
-}
-.my-article-button-delete:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
-}
-
-#myDraftsLoadingMessage, 
-#myPendingLoadingMessage, 
-#myPublishedLoadingMessage, 
-#myRejectedLoadingMessage { /* Stili per i messaggi di caricamento */
-    color: var(--text-color-muted);
-    font-style: italic;
-}
