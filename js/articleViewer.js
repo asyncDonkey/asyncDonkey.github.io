@@ -6,6 +6,7 @@ import {
     arrayUnion, arrayRemove, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked@5.0.1/lib/marked.esm.js'; 
 
 const INITIAL_COMMENT_LIKE_EMOJI = '🤍';
 const LIKED_COMMENT_EMOJI = '💙';
@@ -289,9 +290,18 @@ async function handleArticleCommentSubmit(event) {
         const commentsCollectionRef = collection(db, "articleComments");
         await addDoc(commentsCollectionRef, commentDataPayload);
         if (articleIdInternal) {
-            const articleRef = doc(db, "articles", articleIdInternal);
-            await updateDoc(articleRef, { commentCount: increment(1) });
-        }
+    const articleRef = doc(db, "articles", articleIdInternal);
+    try {
+        await updateDoc(articleRef, { 
+            commentCount: increment(1),
+            updatedAt: serverTimestamp() // Conferma che questo sia presente
+        });
+    } catch (e) {
+        console.error("Errore client durante l'aggiornamento del conteggio commenti:", e);
+        // Anche se le regole dovrebbero permetterlo, un errore qui potrebbe indicare
+        // un problema con i dati inviati o una condizione imprevista.
+    }
+}
         articleCommentMessageInput.value = '';
         if (articleCommentNameInput && !user) articleCommentNameInput.value = '';
         await loadArticleComments();
@@ -452,9 +462,10 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
         return;
     }
     
-    articleDisplayLoading.style.display = 'block';
-    articleContentContainer.style.display = 'none';
-    if(articleInteractionsSection) articleInteractionsSection.style.display = 'none';
+    articleDisplayLoading.style.display = 'none';
+    articleContentContainer.style.display = 'block';
+    if(articleInteractionsSection) articleInteractionsSection.style.display = 'block';
+
 
     try {
         const articleRef = doc(db, "articles", articleId);
@@ -465,23 +476,33 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
             currentArticleData = articleDataFromDb; 
             document.title = `${articleDataFromDb.title || 'Articolo'} - asyncDonkey.io`;
             articleDisplayTitle.textContent = articleDataFromDb.title || "N/D";
-            articleDisplayDate.textContent = formatArticleDateForViewer(articleDataFromDb.date);
-            articleDisplayAuthor.textContent = articleDataFromDb.author || "N/D";
-            articleDisplayTagsContainer.innerHTML = '';
+
+            // --- MODIFICA PER LA DATA ---
+            const displayDate = articleDataFromDb.publishedAt || articleDataFromDb.createdAt; // Usa publishedAt se esiste, altrimenti createdAt
+            articleDisplayDate.textContent = formatArticleDateForViewer(displayDate); 
+            // --- FINE MODIFICA DATA ---
+
+            articleDisplayAuthor.textContent = articleDataFromDb.authorName || "N/D"; // Verifica che 'authorName' sia popolato in Firestore
+            
+            articleDisplayTagsContainer.innerHTML = ''; // Pulisci tags
             if (articleDataFromDb.tags && Array.isArray(articleDataFromDb.tags) && articleDataFromDb.tags.length > 0) {
                 articleDataFromDb.tags.forEach(tagText => {
                     const tagEl = document.createElement('span');
-                    tagEl.className = 'article-tag';
+                    tagEl.className = 'article-tag'; // Assicurati che questa classe esista e sia stilizzata in styles.css
                     tagEl.textContent = tagText;
                     articleDisplayTagsContainer.appendChild(tagEl);
                 });
             } else {
-                articleDisplayTagsContainer.textContent = 'Nessun tag';
+                articleDisplayTagsContainer.textContent = 'Nessun tag'; // Verifica che 'tags' sia popolato in Firestore
             }
-            articleDisplayContent.innerHTML = articleDataFromDb.content || "<p>Contenuto non disponibile.</p>";
+            // --- FINE BLOCCO CORRETTO PER IL CONTENUTO ---
+
+            // RIMUOVI QUESTA RIGA DUPLICATA CHE SEGUEVA IL BLOCCO SOPRA:
+            // articleDisplayContent.innerHTML = articleDataFromDb.contentMarkdown || "<p>Contenuto non disponibile.</p>"; // <-- QUESTA RIGA VA RIMOSSA
+
             articleDisplayLoading.style.display = 'none';
             articleContentContainer.style.display = 'block';
-            if(articleInteractionsSection) articleInteractionsSection.style.display = 'block';
+            if(articleInteractionsSection) articleInteractionsSection.style.display = 'block';;
 
             await loadAndDisplayArticleLikes(articleId); 
             await loadArticleComments();                 

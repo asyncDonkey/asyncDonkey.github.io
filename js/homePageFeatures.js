@@ -137,25 +137,27 @@ export async function displayArticlesSection() {
 
     if (!articlesSection || !articlesGrid || !featuredArticleCard || !featuredArticleTitleEl || !featuredArticleSnippetEl || !featuredArticleLinkEl) {
         console.warn("Elementi DOM per la sezione articoli non trovati in displayArticlesSection.");
+        if (articlesSection) articlesSection.style.display = 'none'; // Nascondi la sezione se incompleta
         return;
     }
 
-    articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli da Firestore...</p>';
-    featuredArticleCard.style.display = 'none';
+    if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli da Firestore...</p>';
+    if (featuredArticleCard) featuredArticleCard.style.display = 'none';
+    if (articlesSection) articlesSection.style.display = 'block'; // Mostra la sezione con il messaggio di caricamento
 
     if (!db) {
-        articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
+        if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
         return;
     }
 
     try {
         const articlesCollectionRef = collection(db, "articles");
         const q = query(
-    articlesCollectionRef,
-    where("status", "==", "published"),
-    orderBy("publishedAt", "desc"), // MODIFICA QUI
-    limit(10) // Lasciamo 10 per ora per il debug
-);
+            articlesCollectionRef,
+            where("status", "==", "published"),
+            orderBy("publishedAt", "desc"),
+            limit(10)
+        );
 
         const querySnapshot = await getDocs(q);
         const articlesFromDb = [];
@@ -163,40 +165,57 @@ export async function displayArticlesSection() {
             articlesFromDb.push({ id: doc.id, ...doc.data() });
         });
 
-        articlesGrid.innerHTML = '';
+        // Pulisci la griglia solo una volta prima di popolarla
+        if (articlesGrid) articlesGrid.innerHTML = ''; 
 
+        let featuredArticleData = null;
         if (articlesFromDb.length > 0) {
-            const featuredArticleData = articlesFromDb.find(article => article.featured === true) || articlesFromDb[0];
+            featuredArticleData = articlesFromDb.find(article => article.isFeatured === true) || articlesFromDb[0];
 
             if (featuredArticleData) {
-                const featuredTitleHeaderEl = document.getElementById('featuredArticleTitle'); // L'H3 "Articolo in Evidenza"
-                if(featuredTitleHeaderEl) featuredTitleHeaderEl.style.display = 'block';
+                const featuredH3TitleEl = document.getElementById('featuredArticleTitle'); 
+                if (featuredH3TitleEl) featuredH3TitleEl.style.display = 'block';
 
-                featuredArticleTitleEl.textContent = featuredArticleData.title;
-                featuredArticleSnippetEl.textContent = featuredArticleData.snippet || (articleData.content ? articleData.content.substring(0, 100) + "..." : "Leggi di più...");
-                featuredArticleLinkEl.href = `view-article.html?id=${featuredArticleData.id}`;
-                featuredArticleCard.style.display = 'flex';
-            } else {
-                 featuredArticleCard.style.display = 'none';
+                if (featuredArticleTitleEl) featuredArticleTitleEl.textContent = featuredArticleData.title || "Titolo non disponibile";
+                
+                if (featuredArticleSnippetEl) {
+                    featuredArticleSnippetEl.textContent = featuredArticleData.snippet || 
+                                                         (featuredArticleData.contentMarkdown ? featuredArticleData.contentMarkdown.substring(0, 150) + "..." : "Leggi di più...");
+                }
+                
+                if (featuredArticleLinkEl) featuredArticleLinkEl.href = `view-article.html?id=${featuredArticleData.id}`;
+                if (featuredArticleCard) featuredArticleCard.style.display = 'flex';
             }
+        }
+        
+        // Popola la griglia con gli articoli non "featured" (o tutti se non c'è un featured esplicito e ne abbiamo solo uno)
+        let articlesAddedToGrid = 0;
+        articlesFromDb.forEach(articleDataInLoop => {
+            if (!featuredArticleData || articleDataInLoop.id !== featuredArticleData.id) { // Non duplicare il featured
+                if (typeof createArticleCard === "function") { // Verifica che createArticleCard esista
+                    createArticleCard(articleDataInLoop, articleDataInLoop.id, articlesGrid);
+                    articlesAddedToGrid++;
+                } else {
+                    console.error("Funzione createArticleCard non definita!");
+                }
+            }
+        });
 
-            articlesFromDb.forEach(articleData => { // Rinominato per chiarezza
-                createArticleCard(articleData, articleData.id, articlesGrid);
-            });
-            articlesSection.style.display = 'block';
-        } else {
-            articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
-            articlesSection.style.display = 'block';
-            featuredArticleCard.style.display = 'none';
+        if (articlesFromDb.length === 0) { // Nessun articolo trovato
+            if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
+            if (featuredArticleCard) featuredArticleCard.style.display = 'none';
+        } else if (articlesAddedToGrid === 0 && !featuredArticleData) { // C'erano articoli, ma nessuno aggiunto alla griglia (es. solo il featured) e il featured non è stato mostrato
+             if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare.</p>';
         }
+
+
     } catch (error) {
-        console.error("Errore durante il caricamento degli articoli da Firestore:", error);
-        articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
+        console.error("Errore durante il caricamento degli articoli da Firestore (homePageFeatures.js):", error);
+        if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
         if (error.code === 'failed-precondition' && error.message.includes('index')) {
-             articlesGrid.innerHTML += '<p style="text-align:center; color:orange;">Indice Firestore mancante. Controlla la console del browser per il link per crearlo.</p>';
+             if (articlesGrid) articlesGrid.innerHTML += '<p style="text-align:center; color:orange;">Indice Firestore mancante. Controlla la console del browser per il link per crearlo.</p>';
         }
-        articlesSection.style.display = 'block';
-        featuredArticleCard.style.display = 'none';
+        if (featuredArticleCard) featuredArticleCard.style.display = 'none';
     }
 }
 

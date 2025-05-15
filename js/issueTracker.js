@@ -154,16 +154,19 @@ if (issueSubmissionForm) {
             }
 
             const issueData = {
-                title: title || "Segnalazione/Suggerimento senza titolo", // Titolo di fallback se vuoto
+                title: title || "Segnalazione/Suggerimento senza titolo",
                 description: description,
                 type: type,
+                userId: currentUser.uid, // <-- RIGA DA AGGIUNGERE/MODIFICARE
                 submittedBy: submittedByInfo,
                 timestamp: serverTimestamp(),
-                status: "new", // initial status
+                status: "new",
                 upvotes: 0,
                 upvotedBy: []
             };
-            if (gameId) issueData.gameId = gameId;
+            if (gameId) { // gameId viene aggiunto solo se presente
+                issueData.gameId = gameId;
+            }
 
             const issuesCollectionRef = collection(db, "userIssues");
             await addDoc(issuesCollectionRef, issueData);
