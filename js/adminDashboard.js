@@ -217,28 +217,48 @@ async function approveArticle(articleId) {
 }
 
 async function rejectArticle(articleId) {
-    const reason = prompt(`Sei sicuro di voler RESPINGERE l'articolo ID: ${articleId}?\nOpzionale: Inserisci un motivo per il rigetto (visibile solo agli admin per ora).`);
-    if (reason === null) return; // L'utente ha cliccato "Annulla"
+    // Chiedi conferma e, opzionalmente, un motivo per il rifiuto
+    const confirmationMessage = `Sei sicuro di voler RESPINGERE l'articolo ID: ${articleId}? (Status diventerà: 'rejected')`;
+    const rejectionPromptMessage = "Opzionale: Inserisci un breve motivo per il rifiuto (verrà mostrato all'autore):";
+
+    if (!confirm(confirmationMessage)) {
+        return; // L'utente ha annullato la prima conferma
+    }
+
+    const reason = prompt(rejectionPromptMessage);
+    // L'utente potrebbe cliccare "Annulla" sul prompt del motivo, in tal caso reason sarà null.
+    // Se clicca "OK" senza scrivere nulla, reason sarà una stringa vuota.
+    // Decidiamo di procedere comunque con il rigetto anche se non viene fornito un motivo.
 
     try {
         const articleRef = doc(db, "articles", articleId);
         const updateData = {
             status: "rejected",
-            publishedAt: null,
+            publishedAt: null, // Assicura che non sia considerato pubblicato
             updatedAt: serverTimestamp()
         };
-        if (reason.trim() !== "") {
-            updateData.rejectionReason = reason.trim(); // Salva il motivo se fornito
+
+        if (reason !== null && reason.trim() !== "") { // Salva il motivo solo se fornito e non vuoto
+            updateData.rejectionReason = reason.trim();
+        } else {
+            // Se non viene fornito un motivo o è vuoto, potremmo voler assicurare che il campo sia assente o null
+            // updateData.rejectionReason = null; // oFieldValue.delete() se vuoi rimuoverlo completamente
         }
+
         await updateDoc(articleRef, updateData);
-        alert("Articolo respinto.");
-        loadPendingArticles();
-        loadRejectedArticlesForAdmin(); // Ricarica la lista dei respinti
+
+        alert("Articolo respinto con successo." + (reason && reason.trim() !== "" ? " Motivo salvato." : ""));
+        loadPendingArticles(); // Ricarica la lista degli articoli in attesa
+        loadRejectedArticlesForAdmin(); // Ricarica la lista degli articoli respinti per vedere l'aggiornamento
+        loadPublishedArticlesForAdmin(); // Potrebbe essere utile anche se un articolo pubblicato viene respinto (improbabile ma copre il caso)
+
+
     } catch (error) {
-        console.error("Errore respingimento articolo:", error);
-        alert("Errore durante il respingimento.");
+        console.error("Errore durante il respingimento dell'articolo:", error);
+        alert("Si è verificato un errore durante il respingimento dell'articolo. Riprova.");
     }
 }
+
 
 function formatAdminTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
