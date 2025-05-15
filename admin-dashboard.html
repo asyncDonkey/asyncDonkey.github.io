@@ -51,6 +51,34 @@
                 </div>
             </div>
 
+            <div class="admin-section" id="userIssuesSection">
+                <h2>Segnalazioni e Suggerimenti Utenti</h2>
+                <div id="issuesFilterControlsAdmin" style="margin-bottom:15px;">
+                    <label for="adminFilterIssueType">Filtra per Tipo:</label>
+                    <select id="adminFilterIssueType" style="padding: 8px; border-radius: 4px;">
+                        <option value="all">Tutti i Tipi</option>
+                        <option value="generalFeature">Richiesta Funzionalità Generale</option>
+                        <option value="newGameRequest">Suggerimento Nuovo Gioco</option>
+                        <option value="gameIssue">Segnalazione Bug/Problema Gioco</option>
+                    </select>
+                    <label for="adminFilterIssueStatus" style="margin-left:15px;">Filtra per Stato:</label>
+                    <select id="adminFilterIssueStatus" style="padding: 8px; border-radius: 4px;">
+                        <option value="all">Tutti gli Stati</option>
+                        <option value="new">Nuovo</option>
+                        <option value="underConsideration">In Considerazione</option>
+                        <option value="accepted">Accettato</option>
+                        <option value="planned">Pianificato</option>
+                        <option value="inProgress">In Corso</option>
+                        <option value="completed">Completato</option>
+                        <option value="declined">Rifiutato</option>
+                    </select>
+                    <button id="adminApplyIssueFiltersBtn" class="game-button" style="margin-left:10px; padding: 8px 15px; font-size:0.9em;">Applica Filtri Issues</button>
+                </div>
+                <div id="adminUserIssuesList">
+                    <p>Caricamento segnalazioni utenti...</p>
+                </div>
+            </div>
+
             </section>
     </main>
 

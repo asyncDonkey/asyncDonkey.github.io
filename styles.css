@@ -969,3 +969,14 @@ footer a { color: var(--link-color); }
     border-color: var(--link-color);
     box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.2);
 }
+
+/* Stili per la lista issue nell'admin dashboard */
+#adminUserIssuesList .article-info small em { /* Enfasi per la descrizione */
+    color: var(--text-color-muted);
+}
+#adminUserIssuesList .admin-issue-status-select {
+    /* Stili specifici per il select dello stato se necessario */
+    border: 1px solid var(--border-color-primary);
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-primary);
+}

@@ -151,11 +151,11 @@ export async function displayArticlesSection() {
     try {
         const articlesCollectionRef = collection(db, "articles");
         const q = query(
-            articlesCollectionRef,
-            where("status", "==", "published"),
-            orderBy("date", "desc"),
-            limit(10)
-        );
+    articlesCollectionRef,
+    where("status", "==", "published"),
+    orderBy("publishedAt", "desc"), // MODIFICA QUI
+    limit(10) // Lasciamo 10 per ora per il debug
+);
 
         const querySnapshot = await getDocs(q);
         const articlesFromDb = [];

@@ -1,7 +1,7 @@
 // js/adminDashboard.js
 import { db, auth } from './main.js';
 import {
-    collection, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp, orderBy // orderBy è stato aggiunto qui
+    collection, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -19,16 +19,9 @@ const editArticleContentTextarea = document.getElementById('editArticleContent')
 const editArticleTagsInput = document.getElementById('editArticleTags');
 const editArticleSnippetInput = document.getElementById('editArticleSnippet');
 const editArticleCoverImageUrlInput = document.getElementById('editArticleCoverImageUrl');
-// Aggiungi qui altri input della modale se necessario, es. per isFeatured
-// const editArticleIsFeaturedCheckbox = document.getElementById('editArticleIsFeatured');
 
+let easyMDEEditInstance = null;
 
-let easyMDEEditInstance = null; // Istanza EasyMDE per la modale di modifica
-
-/**
- * Inizializza l'editor EasyMDE per la modale di modifica articolo.
- * Lo crea se non esiste, altrimenti si assicura che il contenuto sia aggiornato.
- */
 function initializeOrUpdateEditMarkdownEditor(content = '') {
     if (editArticleContentTextarea) {
         if (!easyMDEEditInstance) {
@@ -39,26 +32,22 @@ function initializeOrUpdateEditMarkdownEditor(content = '') {
                     spellChecker: false,
                     placeholder: "Contenuto dell'articolo in Markdown...",
                     toolbar: [
-                        "bold", "italic", "heading", "|", 
+                        "bold", "italic", "heading", "|",
                         "quote", "unordered-list", "ordered-list", "|",
                         "link", "image", "code", "horizontal-rule", "|",
                         "preview", "side-by-side", "fullscreen", "|",
                         "guide"
                     ],
-                    // Potresti voler disabilitare l'autosave qui o dargli un ID specifico per la modifica
                     autosave: {
-                        enabled: false, // Disabilitato per la modale di modifica per semplicità iniziale
-                        // uniqueId: "adminEditArticle_" + editingArticleIdInput.value, 
-                        // delay: 10000,
+                        enabled: false,
                     },
                 });
                 console.log("EasyMDE per modifica articolo inizializzato.");
             } catch (e) {
                 console.error("Errore inizializzazione EasyMDE per modifica:", e);
-                editArticleContentTextarea.value = content; // Fallback al textarea semplice
+                editArticleContentTextarea.value = content;
             }
         } else {
-            // Se l'istanza esiste già, aggiorna semplicemente il suo valore
             easyMDEEditInstance.value(content);
             console.log("EasyMDE per modifica articolo: contenuto aggiornato.");
         }
@@ -67,9 +56,6 @@ function initializeOrUpdateEditMarkdownEditor(content = '') {
     }
 }
 
-/**
- * Rimuove l'istanza di EasyMDE e ripristina il textarea originale.
- */
 function destroyEditMarkdownEditor() {
     if (easyMDEEditInstance) {
         try {
@@ -80,62 +66,11 @@ function destroyEditMarkdownEditor() {
             console.error("Errore rimozione EasyMDE per modifica:", e);
         }
     }
-    // Pulisci il textarea manualmente dopo aver rimosso EasyMDE
     if (editArticleContentTextarea) {
         editArticleContentTextarea.value = '';
     }
 }
 
-/**
- * Controlla i permessi dell'utente corrente.
- * Mostra la dashboard se l'utente è admin, altrimenti un messaggio di accesso negato.
- */
-async function checkAdminPermissions() {
-    const user = auth.currentUser;
-    if (user) {
-        try {
-            const userProfileRef = doc(db, "userProfiles", user.uid);
-            const docSnap = await getDoc(userProfileRef);
-            if (docSnap.exists() && docSnap.data().isAdmin === true) {
-                if (adminAuthMessageDiv) adminAuthMessageDiv.style.display = 'none';
-                if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'block';
-                loadPendingArticles();
-                // Qui potresti caricare altre sezioni della dashboard (es. articoli pubblicati, issue)
-            } else {
-                if (adminAuthMessageDiv) adminAuthMessageDiv.innerHTML = '<p>Accesso negato. Devi essere un amministratore per visualizzare questa pagina. <a href="index.html">Torna alla Home</a></p>';
-                if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'none';
-            }
-        } catch (error) {
-            console.error("Errore verifica permessi admin:", error);
-            if (adminAuthMessageDiv) adminAuthMessageDiv.innerHTML = '<p>Errore durante la verifica dei permessi. Riprova. <a href="index.html">Torna alla Home</a></p>';
-            if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'none';
-        }
-    } else {
-        if (adminAuthMessageDiv) {
-            adminAuthMessageDiv.innerHTML = '<p>Devi essere <a href="#" id="loginLinkFromAdminPage">loggato</a> come amministratore per accedere. <a href="index.html">Torna alla Home</a></p>';
-            const loginLink = document.getElementById('loginLinkFromAdminPage');
-            if (loginLink) {
-                loginLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    // Tenta di triggerare la modale di login globale (se esiste in main.js e la pagina la include)
-                    const showLoginBtnGlobal = document.getElementById('showLoginBtn');
-                    if (showLoginBtnGlobal) {
-                        showLoginBtnGlobal.click();
-                    } else {
-                        console.warn("Bottone login globale non trovato per triggerare la modale.");
-                        // Fallback: reindirizza alla home dove l'utente può loggarsi
-                        // window.location.href = 'index.html';
-                    }
-                });
-            }
-        }
-        if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'none';
-    }
-}
-
-/**
- * Carica e visualizza gli articoli con status "pendingReview".
- */
 async function loadPendingArticles() {
     if (!pendingArticlesListDiv) {
         console.warn("Elemento pendingArticlesListDiv non trovato. Impossibile caricare articoli.");
@@ -152,8 +87,8 @@ async function loadPendingArticles() {
             return;
         }
 
-        pendingArticlesListDiv.innerHTML = ''; // Pulisci la lista
-        querySnapshot.forEach((docSnapshot) => { // Rinominato doc in docSnapshot per chiarezza
+        pendingArticlesListDiv.innerHTML = '';
+        querySnapshot.forEach((docSnapshot) => {
             const article = docSnapshot.data();
             const articleId = docSnapshot.id;
             const itemDiv = document.createElement('div');
@@ -172,57 +107,46 @@ async function loadPendingArticles() {
             `;
             pendingArticlesListDiv.appendChild(itemDiv);
         });
-
-        addEventListenersToAdminButtons();
-
+        addEventListenersToAdminArticleButtons();
     } catch (error) {
         console.error("Errore caricamento articoli pending:", error);
         pendingArticlesListDiv.innerHTML = '<p>Errore nel caricamento degli articoli in attesa. Controlla la console.</p>';
     }
 }
 
-/**
- * Aggiunge gli event listener ai pulsanti di azione per ogni articolo nella lista admin.
- */
-function addEventListenersToAdminButtons() {
+function addEventListenersToAdminArticleButtons() {
     document.querySelectorAll('.view-edit-btn').forEach(button => {
-        button.removeEventListener('click', handleViewEditClick); // Rimuovi vecchi listener
-        button.addEventListener('click', handleViewEditClick);
+        button.removeEventListener('click', handleViewEditArticleClick);
+        button.addEventListener('click', handleViewEditArticleClick);
     });
     document.querySelectorAll('.approve-btn').forEach(button => {
-        button.removeEventListener('click', handleApproveClick);
-        button.addEventListener('click', handleApproveClick);
+        button.removeEventListener('click', handleApproveArticleClick);
+        button.addEventListener('click', handleApproveArticleClick);
     });
     document.querySelectorAll('.reject-btn').forEach(button => {
-        button.removeEventListener('click', handleRejectClick);
-        button.addEventListener('click', handleRejectClick);
+        button.removeEventListener('click', handleRejectArticleClick);
+        button.addEventListener('click', handleRejectArticleClick);
     });
 }
-// Definisci le funzioni handler fuori da addEventListenersToAdminButtons per poterle rimuovere
-async function handleViewEditClick(e) {
+
+async function handleViewEditArticleClick(e) {
     const articleId = e.target.dataset.id;
     await openEditArticleModal(articleId);
 }
-async function handleApproveClick(e) {
+async function handleApproveArticleClick(e) {
     const articleId = e.target.dataset.id;
     await approveArticle(articleId);
 }
-async function handleRejectClick(e) {
+async function handleRejectArticleClick(e) {
     const articleId = e.target.dataset.id;
     await rejectArticle(articleId);
 }
 
-
-/**
- * Apre la modale per modificare un articolo, popolandola con i dati dell'articolo.
- * @param {string} articleId - L'ID dell'articolo da modificare.
- */
 async function openEditArticleModal(articleId) {
     if (!editArticleModal || !editingArticleIdInput || !editArticleTitleInput || !editArticleContentTextarea || !editArticleTagsInput || !editArticleSnippetInput || !editArticleCoverImageUrlInput) {
-        console.error("Elementi della modale di modifica non trovati.");
+        console.error("Elementi della modale di modifica articolo non trovati.");
         return;
     }
-    
     const articleRef = doc(db, "articles", articleId);
     try {
         const docSnap = await getDoc(articleRef);
@@ -230,19 +154,12 @@ async function openEditArticleModal(articleId) {
             const articleData = docSnap.data();
             editingArticleIdInput.value = articleId;
             editArticleTitleInput.value = articleData.title || '';
-            
-            // Inizializza o aggiorna EasyMDE con il contenuto
             initializeOrUpdateEditMarkdownEditor(articleData.contentMarkdown || '');
-            
             editArticleTagsInput.value = (articleData.tags || []).join(', ');
             editArticleSnippetInput.value = articleData.snippet || '';
             editArticleCoverImageUrlInput.value = articleData.coverImageUrl || '';
-            // if (editArticleIsFeaturedCheckbox) {
-            // editArticleIsFeaturedCheckbox.checked = articleData.isFeatured || false;
-            // }
-            
-            if(document.getElementById('editArticleModalTitle')) { // Verifica esistenza prima di usarlo
-                 document.getElementById('editArticleModalTitle').textContent = `Modifica: ${articleData.title || 'Articolo senza titolo'}`;
+            if (document.getElementById('editArticleModalTitle')) {
+                document.getElementById('editArticleModalTitle').textContent = `Modifica: ${articleData.title || 'Articolo senza titolo'}`;
             }
             editArticleModal.style.display = 'block';
         } else {
@@ -254,20 +171,13 @@ async function openEditArticleModal(articleId) {
     }
 }
 
-/**
- * Chiude la modale di modifica articolo e pulisce l'editor.
- */
-function closeEditModal() {
-    if(editArticleModal) editArticleModal.style.display = 'none';
-    destroyEditMarkdownEditor(); // Rimuovi EasyMDE e pulisci textarea
-    if(editArticleForm) editArticleForm.reset(); // Resetta gli altri campi del form
-    if(editingArticleIdInput) editingArticleIdInput.value = ''; // Pulisci ID articolo
+function closeEditArticleModal() {
+    if (editArticleModal) editArticleModal.style.display = 'none';
+    destroyEditMarkdownEditor();
+    if (editArticleForm) editArticleForm.reset();
+    if (editingArticleIdInput) editingArticleIdInput.value = '';
 }
 
-/**
- * Approva un articolo, cambiando il suo status a "published" e impostando "publishedAt".
- * @param {string} articleId - L'ID dell'articolo da approvare.
- */
 async function approveArticle(articleId) {
     if (!confirm(`Sei sicuro di voler approvare e pubblicare l'articolo ID: ${articleId}?`)) return;
     try {
@@ -275,20 +185,16 @@ async function approveArticle(articleId) {
         await updateDoc(articleRef, {
             status: "published",
             publishedAt: serverTimestamp(),
-            updatedAt: serverTimestamp() // Aggiorna anche updatedAt per coerenza
+            updatedAt: serverTimestamp()
         });
         alert("Articolo approvato e pubblicato con successo!");
-        loadPendingArticles(); // Ricarica la lista degli articoli in attesa
+        loadPendingArticles();
     } catch (error) {
         console.error("Errore durante l'approvazione dell'articolo:", error);
         alert("Si è verificato un errore durante l'approvazione dell'articolo.");
     }
 }
 
-/**
- * Respinge un articolo, cambiando il suo status a "rejected".
- * @param {string} articleId - L'ID dell'articolo da respingere.
- */
 async function rejectArticle(articleId) {
     if (!confirm(`Sei sicuro di voler respingere l'articolo ID: ${articleId}? Lo status diventerà 'rejected'.`)) return;
     try {
@@ -298,29 +204,238 @@ async function rejectArticle(articleId) {
             updatedAt: serverTimestamp()
         });
         alert("Articolo respinto.");
-        loadPendingArticles(); // Ricarica la lista
+        loadPendingArticles();
     } catch (error) {
         console.error("Errore nel respingere l'articolo:", error);
         alert("Si è verificato un errore durante il rigetto dell'articolo.");
     }
 }
 
-// --- Event Listener Iniziali ---
-document.addEventListener('DOMContentLoaded', () => {
-    // La chiamata a checkAdminPermissions() verrà fatta da onAuthStateChanged
-    // per assicurare che lo stato utente sia definito.
+// --- NUOVA SEZIONE: Gestione Issue Utente per Admin ---
+const adminUserIssuesListDiv = document.getElementById('adminUserIssuesList');
+const adminFilterIssueTypeSelect = document.getElementById('adminFilterIssueType');
+const adminFilterIssueStatusSelect = document.getElementById('adminFilterIssueStatus');
+const adminApplyIssueFiltersBtn = document.getElementById('adminApplyIssueFiltersBtn');
 
+const ISSUE_STATUSES = ["new", "underConsideration", "accepted", "planned", "inProgress", "completed", "declined"];
+const ISSUE_TYPES = ["generalFeature", "newGameRequest", "gameIssue"];
+
+function formatAdminTimestamp(firebaseTimestamp) {
+    if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
+        return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
+            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+    }
+    return 'N/A';
+}
+
+function populateSelectWithOptions(selectElement, optionsArray, defaultOptionText, defaultOptionValue = "all") {
+    if (!selectElement) return;
+    selectElement.innerHTML = ''; 
+    if (defaultOptionText) {
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = defaultOptionValue;
+        defaultOpt.textContent = defaultOptionText;
+        selectElement.appendChild(defaultOpt);
+    }
+    optionsArray.forEach(optionValue => {
+        const opt = document.createElement('option');
+        opt.value = optionValue;
+        let text = optionValue.replace(/([A-Z])/g, ' $1').trim();
+        text = text.charAt(0).toUpperCase() + text.slice(1);
+        opt.textContent = text;
+        selectElement.appendChild(opt);
+    });
+}
+
+async function loadUserIssuesForAdmin() {
+    if (!adminUserIssuesListDiv) {
+        console.warn("Elemento adminUserIssuesListDiv non trovato.");
+        return;
+    }
+    adminUserIssuesListDiv.innerHTML = '<p>Caricamento segnalazioni e suggerimenti...</p>';
+
+    try {
+        const issuesCollectionRef = collection(db, "userIssues");
+        let q_issues;
+
+        const filterType = adminFilterIssueTypeSelect ? adminFilterIssueTypeSelect.value : 'all';
+        const filterStatus = adminFilterIssueStatusSelect ? adminFilterIssueStatusSelect.value : 'all';
+
+        const conditions = [];
+        if (filterType !== 'all') {
+            conditions.push(where("type", "==", filterType));
+        }
+        if (filterStatus !== 'all') {
+            conditions.push(where("status", "==", filterStatus));
+        }
+        
+        const orderByField = "timestamp"; // Ordina sempre per data di invio decrescente
+
+        if (conditions.length > 0) {
+            q_issues = query(issuesCollectionRef, ...conditions, orderBy(orderByField, "desc"));
+        } else {
+            q_issues = query(issuesCollectionRef, orderBy(orderByField, "desc"));
+        }
+
+        const querySnapshot = await getDocs(q_issues);
+
+        if (querySnapshot.empty) {
+            adminUserIssuesListDiv.innerHTML = '<p>Nessuna segnalazione o suggerimento trovato per i filtri selezionati.</p>';
+            return;
+        }
+
+        adminUserIssuesListDiv.innerHTML = '';
+        querySnapshot.forEach((docSnapshot) => {
+            const issue = docSnapshot.data();
+            const issueId = docSnapshot.id;
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('article-list-item');
+
+            const submittedDate = formatAdminTimestamp(issue.timestamp);
+            const gameIdText = issue.type === 'gameIssue' && issue.gameId ? ` (${issue.gameId})` : '';
+            
+            // Formattazione del tipo per renderlo più leggibile
+            let readableType = issue.type;
+            if (issue.type === 'generalFeature') readableType = 'Funzionalità Generale';
+            else if (issue.type === 'newGameRequest') readableType = 'Nuovo Gioco';
+            else if (issue.type === 'gameIssue') readableType = 'Problema Gioco';
+
+
+            itemDiv.innerHTML = `
+                <span class="article-info" style="flex-basis: 70%;">
+                    <strong>${issue.title || '<em>Senza titolo</em>'}</strong> <small>[Tipo: ${readableType}${gameIdText}]</small><br>
+                    <small>Autore: ${issue.submittedBy.userName || 'N/D'} | Inviato: ${submittedDate} | Upvotes: ${issue.upvotes || 0}</small><br>
+                    <small style="display:block; margin-top:5px; max-height: 60px; overflow-y:auto; background: var(--surface-bg-secondary); padding:5px; border-radius:3px;">Desc: <em>${issue.description.substring(0,150)}${issue.description.length > 150 ? '...' : ''}</em></small>
+                </span>
+                <span class="actions" style="flex-basis: 30%; text-align:right;">
+                    <label for="statusSelect-${issueId}" style="font-size:0.8em; display:block; margin-bottom:3px;">Cambia Stato:</label>
+                    <select id="statusSelect-${issueId}" data-id="${issueId}" class="admin-issue-status-select" style="padding: 5px; font-size:0.9em; margin-bottom:5px;">
+                        ${ISSUE_STATUSES.map(s_val => {
+                            let s_text = s_val.replace(/([A-Z])/g, ' $1').trim();
+                            s_text = s_text.charAt(0).toUpperCase() + s_text.slice(1);
+                            return `<option value="${s_val}" ${issue.status === s_val ? 'selected' : ''}>${s_text}</option>`;
+                        }).join('')}
+                    </select>
+                </span>
+            `;
+            adminUserIssuesListDiv.appendChild(itemDiv);
+        });
+
+        document.querySelectorAll('.admin-issue-status-select').forEach(select => {
+            select.removeEventListener('change', handleIssueStatusChange); // Prevenire listener duplicati
+            select.addEventListener('change', handleIssueStatusChange);
+        });
+
+    } catch (error) {
+        console.error("Errore caricamento issue per admin:", error);
+        if (adminUserIssuesListDiv) {
+            if (error.code === 'failed-precondition') {
+                 adminUserIssuesListDiv.innerHTML = '<p>Errore: Indice Firestore mancante per i filtri o ordinamento. Controlla la console del browser per il link per crearlo.</p>';
+            } else {
+                 adminUserIssuesListDiv.innerHTML = '<p>Errore nel caricamento delle segnalazioni. Controlla la console.</p>';
+            }
+        }
+    }
+}
+
+async function handleIssueStatusChange(event) {
+    const selectElement = event.target;
+    const issueId = selectElement.dataset.id;
+    const newStatus = selectElement.value;
+
+    if (!issueId || !newStatus) {
+        alert("Errore: ID issue o nuovo stato non validi.");
+        return;
+    }
+
+    if (!confirm(`Sei sicuro di voler cambiare lo stato della issue ID: ${issueId} a "${newStatus}"?`)) {
+        const issueRefForOldStatus = doc(db, "userIssues", issueId);
+        try {
+            const docSnap = await getDoc(issueRefForOldStatus);
+            if (docSnap.exists()) {
+                selectElement.value = docSnap.data().status;
+            }
+        } catch (e) { console.error("Errore nel ripristinare select status", e); }
+        return;
+    }
+
+    try {
+        const issueRef = doc(db, "userIssues", issueId);
+        await updateDoc(issueRef, {
+            status: newStatus,
+            updatedAt: serverTimestamp()
+        });
+        alert(`Stato della issue ${issueId} aggiornato a "${newStatus}".`);
+        loadUserIssuesForAdmin();
+    } catch (error) {
+        console.error("Errore aggiornamento stato issue:", error);
+        alert("Si è verificato un errore durante l'aggiornamento dello stato.");
+        loadUserIssuesForAdmin();
+    }
+}
+// --- FINE NUOVA SEZIONE ---
+
+
+async function checkAdminPermissions() {
+    const user = auth.currentUser;
+    if (user) {
+        try {
+            const userProfileRef = doc(db, "userProfiles", user.uid);
+            const docSnap = await getDoc(userProfileRef);
+            if (docSnap.exists() && docSnap.data().isAdmin === true) {
+                if (adminAuthMessageDiv) adminAuthMessageDiv.style.display = 'none';
+                if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'block';
+                
+                if (adminFilterIssueTypeSelect && adminFilterIssueTypeSelect.options.length <= 1) {
+                    populateSelectWithOptions(adminFilterIssueTypeSelect, ISSUE_TYPES, "Tutti i Tipi");
+                }
+                if (adminFilterIssueStatusSelect && adminFilterIssueStatusSelect.options.length <=1 ) {
+                     populateSelectWithOptions(adminFilterIssueStatusSelect, ISSUE_STATUSES, "Tutti gli Stati");
+                }
+
+                loadPendingArticles();
+                loadUserIssuesForAdmin(); // Chiamata alla nuova funzione
+
+            } else {
+                if (adminAuthMessageDiv) adminAuthMessageDiv.innerHTML = '<p>Accesso negato. Devi essere un amministratore per visualizzare questa pagina. <a href="index.html">Torna alla Home</a></p>';
+                if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'none';
+            }
+        } catch (error) {
+            console.error("Errore verifica permessi admin:", error);
+            if (adminAuthMessageDiv) adminAuthMessageDiv.innerHTML = '<p>Errore durante la verifica dei permessi. Riprova. <a href="index.html">Torna alla Home</a></p>';
+            if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'none';
+        }
+    } else {
+        if (adminAuthMessageDiv) {
+            adminAuthMessageDiv.innerHTML = '<p>Devi essere <a href="#" id="loginLinkFromAdminPage">loggato</a> come amministratore per accedere. <a href="index.html">Torna alla Home</a></p>';
+            const loginLink = document.getElementById('loginLinkFromAdminPage');
+            // Aggiungi listener solo se non già presente
+            if (loginLink && !loginLink.hasAttribute('data-listener-attached-admin-login')) { 
+                loginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const showLoginBtnGlobal = document.getElementById('showLoginBtn');
+                    if (showLoginBtnGlobal) showLoginBtnGlobal.click();
+                });
+                loginLink.setAttribute('data-listener-attached-admin-login', 'true');
+            }
+        }
+        if (adminDashboardContentDiv) adminDashboardContentDiv.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     if (closeEditArticleModalBtn) {
-        closeEditArticleModalBtn.addEventListener('click', closeEditModal);
+        closeEditArticleModalBtn.addEventListener('click', closeEditArticleModal);
     }
     if (editArticleModal) {
         editArticleModal.addEventListener('click', (event) => {
             if (event.target === editArticleModal) {
-                closeEditModal();
+                closeEditArticleModal();
             }
         });
     }
-    if(editArticleForm) {
+    if (editArticleForm) {
         editArticleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const articleId = editingArticleIdInput.value;
@@ -328,43 +443,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("ID articolo mancante. Impossibile salvare le modifiche.");
                 return;
             }
-
             const updatedTitle = editArticleTitleInput.value.trim();
             const updatedContentMarkdown = easyMDEEditInstance ? easyMDEEditInstance.value() : editArticleContentTextarea.value.trim();
-            
             if (!updatedTitle || !updatedContentMarkdown) {
                 alert("Titolo e Contenuto sono obbligatori.");
                 return;
             }
-
             const updates = {
                 title: updatedTitle,
                 contentMarkdown: updatedContentMarkdown,
                 tags: editArticleTagsInput.value.trim() ? editArticleTagsInput.value.trim().split(',').map(tag => tag.trim()).filter(tag => tag) : [],
                 snippet: editArticleSnippetInput.value.trim(),
                 coverImageUrl: editArticleCoverImageUrlInput.value.trim() ? editArticleCoverImageUrlInput.value.trim() : null,
-                // isFeatured: editArticleIsFeaturedCheckbox ? editArticleIsFeaturedCheckbox.checked : false,
                 updatedAt: serverTimestamp()
-                // Lo status non viene modificato qui; si usano i pulsanti "Approva" o "Respingi".
             };
-
             try {
                 const articleRef = doc(db, "articles", articleId);
                 await updateDoc(articleRef, updates);
                 alert("Articolo modificato con successo!");
-                closeEditModal();
-                loadPendingArticles(); // Ricarica la lista per riflettere le modifiche (se era un pending)
-                                      // o la lista appropriata se l'articolo era già pubblicato
+                closeEditArticleModal();
+                loadPendingArticles();
             } catch (error) {
                 console.error("Errore salvataggio modifiche articolo admin:", error);
                 alert("Errore durante il salvataggio delle modifiche dell'articolo.");
             }
         });
     }
+
+    // Aggiungi listener per i filtri delle issue
+    if (adminApplyIssueFiltersBtn && !adminApplyIssueFiltersBtn.hasAttribute('data-listener-attached-issues')) {
+        adminApplyIssueFiltersBtn.addEventListener('click', loadUserIssuesForAdmin);
+        adminApplyIssueFiltersBtn.setAttribute('data-listener-attached-issues', 'true');
+    }
 });
 
-// Listener per lo stato di autenticazione
 onAuthStateChanged(auth, (user) => {
     console.log("adminDashboard.js - Auth state changed. User:", user ? user.uid : "null");
-    checkAdminPermissions(); // Controlla i permessi ogni volta che lo stato auth cambia
+    checkAdminPermissions();
+    // Rimuoviamo la chiamata duplicata ai listener dei filtri da qui,
+    // checkAdminPermissions si occuperà di chiamare le funzioni di caricamento
+    // e il DOMContentLoaded si occupa di settare i listener una volta.
 });
