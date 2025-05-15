@@ -1,0 +1,31 @@
+{
+  "name": "asyncdonkey.github.io",
+  "version": "1.0.0",
+  "description": "Welcome to the GitHub repository for my personal portfolio website! This site showcases my journey as a Civil Engineering student transitioning into Full-Stack Engineering, documenting my learning process and projects.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asyncDonkey/asyncDonkey.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asyncDonkey/asyncDonkey.github.io/issues"
+  },
+  "homepage": "https://github.com/asyncDonkey/asyncDonkey.github.io#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.26.0",
+    "@eslint/json": "^0.12.0",
+    "@eslint/markdown": "^6.4.0",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-jsonc": "^2.20.0",
+    "eslint-plugin-markdown": "^5.1.0",
+    "globals": "^16.1.0",
+    "prettier": "^3.5.3"
+  }
+}
