@@ -258,16 +258,69 @@ section#contact li { margin-bottom: 10px; }
 .article-card:hover { transform: translateY(-4px); box-shadow: 0 5px 14px rgba(0,0,0,0.1); }
 .article-card h4 { font-size: 1.3em; color: var(--heading-color); margin-top: 0; margin-bottom: 8px; }
 .article-card .article-meta {
-    font-size: 0.85em; color: var(--text-color-muted); margin-bottom: 12px;
-    display: flex; flex-wrap: wrap; align-items: center; gap: 5px 15px;
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap; /* Permette agli elementi di andare a capo se necessario */
+    align-items: center; /* Allinea verticalmente gli elementi nel meta container */
+    gap: 8px 15px; /* 8px di spazio verticale (se vanno a capo), 15px di spazio orizzontale */
 }
-.article-card .article-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.article-author-info {
+    display: inline-flex; /* Tratta questo blocco come inline, ma permette flex per i suoi figli */
+    align-items: center; /* Allinea verticalmente avatar, nome e bandierina */
+    gap: 6px; /* Spazio tra avatar, nome e bandierina */
+    color: var(--text-color-secondary); /* Colore di default per il testo in questo blocco */
+    order: -1; /* Opzionale: per provare a mettere le info autore prima della data/tags nella riga flex */
+}
+
+.author-avatar-homepage {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%; /* Avatar circolare */
+    object-fit: cover;
+    background-color: var(--surface-bg-secondary); /* Colore di sfondo placeholder */
+    border: 1px solid var(--border-color-secondary);
+    image-rendering: pixelated; /* Mantiene lo stile blockie */
+    vertical-align: middle; /* Utile se non fosse un flex child diretto */
+}
+
+.article-author-name {
+    font-weight: 500; /* Nome autore leggermente più marcato */
+    color: var(--text-color-primary); /* Colore più scuro per il nome */
+    white-space: nowrap; /* Evita che il nome vada a capo */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px; /* Limita la larghezza massima del nome se necessario */
+}
+
+.article-author-info .fi {
+    font-size: 1.1em; /* Dimensione della bandierina */
+    line-height: 1; /* Per un corretto allineamento verticale */
+    /* vertical-align: middle; / * Alternativa se non flex child * / */
+}
+
+.article-card .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
 .article-card .article-tag {
-    background-color: var(--surface-bg-secondary); color: var(--text-color-secondary);
-    padding: 4px 10px; border-radius: 15px; font-size: 0.8em; font-weight: 500;
-    white-space: nowrap; transition: background-color 0.2s, color 0.2s;
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-secondary);
+    padding: 4px 10px; /* Aumentato leggermente padding per leggibilità */
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.2s, color 0.2s;
 }
-.article-card .article-tag:hover { background-color: var(--link-color); color: var(--button-text-primary); }
+.article-card .article-tag:hover {
+    background-color: var(--link-color);
+    color: var(--button-text-primary);
+}
 .article-card .article-snippet { font-size: 0.95em; color: var(--text-color-secondary); margin-bottom: 10px; flex-grow: 1; line-height: 1.6; }
 .article-card .article-stats {
     display: flex; gap: 15px; margin-top: 10px; margin-bottom: 12px;

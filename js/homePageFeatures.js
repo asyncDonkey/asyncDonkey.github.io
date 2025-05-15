@@ -1,9 +1,6 @@
 // js/homePageFeatures.js
-import { db } from './main.js'; // Assicurati che db sia esportato da main.js
+import { db, generateBlockieAvatar } from './main.js'; // Importa generateBlockieAvatar
 import { collection, query, where, orderBy, limit, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-// L'array statico sampleArticles è stato rimosso.
-// I dati degli articoli verranno caricati direttamente da Firestore.
 
 /**
  * Formatta un oggetto Timestamp di Firestore o una stringa data in un formato leggibile.
@@ -54,9 +51,40 @@ function createArticleCard(articleData, articleId, gridContainer) {
     const metaEl = document.createElement('div');
     metaEl.className = 'article-meta';
 
+    // --- START: Author Info Insertion (Task D.7) ---
+    const authorInfoSpan = document.createElement('span');
+    authorInfoSpan.className = 'article-author-info';
+
+    // D.7.1: Author Avatar
+    if (articleData.authorId) {
+        const avatarImg = document.createElement('img');
+        avatarImg.className = 'author-avatar-homepage';
+        avatarImg.src = generateBlockieAvatar(articleData.authorId, 24); // Avatar da 24px
+        avatarImg.alt = `Avatar di ${articleData.authorName || 'Autore'}`;
+        // Gli stili specifici (border-radius, etc.) saranno gestiti da CSS
+        authorInfoSpan.appendChild(avatarImg);
+    }
+
+    // Author Name
+    const authorNameSpanElement = document.createElement('span');
+    authorNameSpanElement.className = 'article-author-name';
+    authorNameSpanElement.textContent = articleData.authorName || 'Autore Sconosciuto';
+    authorInfoSpan.appendChild(authorNameSpanElement);
+
+    // D.7.2: Author Nationality Flag
+    if (articleData.authorNationalityCode && articleData.authorNationalityCode !== "OTHER" && typeof articleData.authorNationalityCode === 'string') {
+        const flagIcon = document.createElement('span');
+        flagIcon.classList.add('fi', `fi-${articleData.authorNationalityCode.toLowerCase()}`);
+        flagIcon.title = articleData.authorNationalityCode; // Mostra il codice del paese al passaggio del mouse
+        // Gli stili specifici (margini, allineamento) saranno gestiti da CSS
+        authorInfoSpan.appendChild(flagIcon);
+    }
+    metaEl.appendChild(authorInfoSpan); // Aggiungi le info autore come primo elemento del meta container
+    // --- END: Author Info Insertion ---
+
     const dateEl = document.createElement('span');
     dateEl.className = 'article-date';
-    const dateValueForCard = articleData.publishedAt || articleData.createdAt; // Privilegia publishedAt, fallback a createdAt
+    const dateValueForCard = articleData.publishedAt || articleData.createdAt; // Correzione bug data
     dateEl.textContent = formatArticleDate(dateValueForCard);
     metaEl.appendChild(dateEl);
 
@@ -144,10 +172,11 @@ export async function displayArticlesSection() {
 
     if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli da Firestore...</p>';
     if (featuredArticleCard) featuredArticleCard.style.display = 'none';
-    if (articlesSection) articlesSection.style.display = 'block'; // Mostra la sezione con il messaggio di caricamento
+    // if (articlesSection) articlesSection.style.display = 'block'; // Mostra la sezione con il messaggio di caricamento (rimosso per evitare flash se non ci sono articoli)
 
     if (!db) {
         if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
+        if (articlesSection) articlesSection.style.display = 'block'; // Mostra l'errore
         return;
     }
 
@@ -156,7 +185,7 @@ export async function displayArticlesSection() {
         const q = query(
             articlesCollectionRef,
             where("status", "==", "published"),
-            orderBy("publishedAt", "desc"),
+            orderBy("publishedAt", "desc"), // Assicurati che questo campo esista e sia indicizzato per l'ordinamento
             limit(10)
         );
 
@@ -166,34 +195,36 @@ export async function displayArticlesSection() {
             articlesFromDb.push({ id: doc.id, ...doc.data() });
         });
 
-        // Pulisci la griglia solo una volta prima di popolarla
-        if (articlesGrid) articlesGrid.innerHTML = ''; 
+        if (articlesGrid) articlesGrid.innerHTML = ''; // Pulisci la griglia solo una volta prima di popolarla
 
         let featuredArticleData = null;
         if (articlesFromDb.length > 0) {
-            featuredArticleData = articlesFromDb.find(article => article.isFeatured === true) || articlesFromDb[0];
+            if (articlesSection) articlesSection.style.display = 'block'; // Mostra la sezione articoli solo se ci sono articoli
+
+            featuredArticleData = articlesFromDb.find(article => article.isFeatured === true) || articlesFromDb[0]; // Prendi il primo se nessun featured esplicito
 
             if (featuredArticleData) {
-                const featuredH3TitleEl = document.getElementById('featuredArticleTitle'); 
-                if (featuredH3TitleEl) featuredH3TitleEl.style.display = 'block';
+                const featuredH3TitleEl = document.getElementById('featuredArticleTitle');
+                if (featuredH3TitleEl) featuredH3TitleEl.style.display = 'block'; // Mostra il titolo "Articolo in Evidenza"
 
                 if (featuredArticleTitleEl) featuredArticleTitleEl.textContent = featuredArticleData.title || "Titolo non disponibile";
-                
                 if (featuredArticleSnippetEl) {
-                    featuredArticleSnippetEl.textContent = featuredArticleData.snippet || 
+                    featuredArticleSnippetEl.textContent = featuredArticleData.snippet ||
                                                          (featuredArticleData.contentMarkdown ? featuredArticleData.contentMarkdown.substring(0, 150) + "..." : "Leggi di più...");
                 }
-                
                 if (featuredArticleLinkEl) featuredArticleLinkEl.href = `view-article.html?id=${featuredArticleData.id}`;
-                if (featuredArticleCard) featuredArticleCard.style.display = 'flex';
+                if (featuredArticleCard) featuredArticleCard.style.display = 'flex'; // Mostra la card featured
             }
+        } else {
+             if (articlesSection) articlesSection.style.display = 'block'; // Mostra comunque la section per dare il messaggio
         }
-        
-        // Popola la griglia con gli articoli non "featured" (o tutti se non c'è un featured esplicito e ne abbiamo solo uno)
+
+
         let articlesAddedToGrid = 0;
         articlesFromDb.forEach(articleDataInLoop => {
-            if (!featuredArticleData || articleDataInLoop.id !== featuredArticleData.id) { // Non duplicare il featured
-                if (typeof createArticleCard === "function") { // Verifica che createArticleCard esista
+            // Non duplicare l'articolo in evidenza nella griglia generale se è già mostrato separatamente
+            if (!featuredArticleData || articleDataInLoop.id !== featuredArticleData.id) {
+                if (typeof createArticleCard === "function") {
                     createArticleCard(articleDataInLoop, articleDataInLoop.id, articlesGrid);
                     articlesAddedToGrid++;
                 } else {
@@ -202,16 +233,19 @@ export async function displayArticlesSection() {
             }
         });
 
-        if (articlesFromDb.length === 0) { // Nessun articolo trovato
+        if (articlesFromDb.length === 0) {
             if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
-            if (featuredArticleCard) featuredArticleCard.style.display = 'none';
-        } else if (articlesAddedToGrid === 0 && !featuredArticleData) { // C'erano articoli, ma nessuno aggiunto alla griglia (es. solo il featured) e il featured non è stato mostrato
-             if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare.</p>';
+            if (featuredArticleCard) featuredArticleCard.style.display = 'none'; // Nascondi se non ci sono articoli
+        } else if (articlesAddedToGrid === 0 && featuredArticleData) {
+            // Caso in cui c'è solo l'articolo featured e nessun altro, la griglia può rimanere vuota o mostrare un messaggio.
+            // Per ora, la lasciamo vuota se l'unico articolo è il featured.
+             if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare al momento.</p>';
         }
 
 
     } catch (error) {
         console.error("Errore durante il caricamento degli articoli da Firestore (homePageFeatures.js):", error);
+        if (articlesSection) articlesSection.style.display = 'block'; // Mostra la sezione per visualizzare l'errore
         if (articlesGrid) articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
         if (error.code === 'failed-precondition' && error.message.includes('index')) {
              if (articlesGrid) articlesGrid.innerHTML += '<p style="text-align:center; color:orange;">Indice Firestore mancante. Controlla la console del browser per il link per crearlo.</p>';
@@ -228,14 +262,13 @@ export function displayGlitchzillaBanner() {
     const defeaterNameElement = document.getElementById('lastGlitchzillaDefeater');
 
     if (!bannerElement || !defeaterNameElement) {
-        // console.warn("Elementi DOM per il banner Glitchzilla non trovati."); // Meno verboso
         return;
     }
 
     // Dati placeholder, da sostituire con logica Firestore (Task C.3.4)
     const lastDefeaterData = {
         name: "cYd3R_pUnK_2077",
-        defeated: true
+        defeated: true // Simula che sia stato sconfitto per mostrare il banner
     };
     
     if (lastDefeaterData && lastDefeaterData.defeated && lastDefeaterData.name) {
