@@ -5,7 +5,8 @@
 // Per ora, assumiamo che venga passata al costruttore o che usi un valore di default.
 
 export class Animation {
-    constructor(spritesheet, frameWidth, frameHeight, numFrames, animationSpeed = 0.1) { // Default animation speed
+    constructor(spritesheet, frameWidth, frameHeight, numFrames, animationSpeed = 0.1) {
+        // Default animation speed
         this.spritesheet = spritesheet;
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
@@ -14,7 +15,7 @@ export class Animation {
         this.currentFrameIndex = 0;
         this.elapsedTime = 0;
         if (numFrames <= 0) {
-            console.warn("Animazione creata con 0 o meno frame!", spritesheet ? spritesheet.src : "Spritesheet nullo");
+            console.warn('Animazione creata con 0 o meno frame!', spritesheet ? spritesheet.src : 'Spritesheet nullo');
         }
     }
 
@@ -22,7 +23,7 @@ export class Animation {
         if (this.numFrames <= 1) return; // Non animare se c'è solo un frame o nessuno
         this.elapsedTime += deltaTime;
         if (this.elapsedTime >= this.animationSpeed) {
-            this.elapsedTime -= this.animationSpeed; 
+            this.elapsedTime -= this.animationSpeed;
             this.currentFrameIndex = (this.currentFrameIndex + 1) % this.numFrames;
         }
     }

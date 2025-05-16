@@ -1,179 +1,307 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - asyncDonkey.io</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-    <style>
-        #adminDashboardContent { display: none; } /* Nascosto di default, mostrato da JS se admin */
-        .admin-section { margin-bottom: 30px; }
-        .article-list-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-        .article-list-item .actions button { margin-left: 10px; }
-    </style>
-</head>
-<body>
-    <header>
-        </header>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Admin Dashboard - asyncDonkey.io</title>
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css" />
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+        <style>
+            #adminDashboardContent {
+                display: none;
+            } /* Nascosto di default, mostrato da JS se admin */
+            .admin-section {
+                margin-bottom: 30px;
+            }
+            .article-list-item {
+                border-bottom: 1px solid #eee;
+                padding: 10px 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .article-list-item .actions button {
+                margin-left: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <header></header>
 
-    <main>
-        <section id="adminAuthMessage" style="text-align:center; padding: 20px;">
-            <p>Verifica permessi...</p>
-        </section>
-
-        <section id="adminDashboardContent">
-            <h1>Admin Dashboard</h1>
-
-            <div class="admin-section" id="moderationGuidelinesSection">
-                <h2>Linee Guida per la Moderazione Articoli</h2>
-                <div class="guidelines-container">
-                    <div class="guideline-item">
-                        <h4><button class="guideline-toggle-btn" aria-expanded="false" aria-controls="guideline-content-1">Quando Apportare Modifiche Minori</button></h4>
-                        <div class="guideline-content" id="guideline-content-1" hidden>
-                            <p>È incoraggiato apportare piccole modifiche per migliorare la qualità e la leggibilità dell'articolo prima della pubblicazione. Queste includono:</p>
-                            <ul>
-                                <li><strong>Correzioni Ortografiche e Grammaticali:</strong> Errori di battitura, concordanze, punteggiatura.</li>
-                                <li><strong>Formattazione Markdown:</strong> Migliorare la struttura del Markdown per una resa ottimale (es. corretto uso di heading, liste, blocchi di codice). Assicurarsi che link e immagini siano funzionanti.</li>
-                                <li><strong>Chiarezza e Fluidità:</strong> Piccoli aggiustamenti per rendere il testo più scorrevole, senza alterare il significato o il messaggio dell'autore.</li>
-                                <li><strong>Titolo e Snippet:</strong> Se necessario, riformulare leggermente il titolo o lo snippet per maggiore impatto o chiarezza, sempre rispettando l'intento originale.</li>
-                            </ul>
-                            <p><em>Obiettivo:</em> Presentare l'articolo nella sua forma migliore, facilitando la lettura e la comprensione da parte degli utenti.</p>
-                        </div>
-                    </div>
-
-                    <div class="guideline-item">
-                        <h4><button class="guideline-toggle-btn" aria-expanded="false" aria-controls="guideline-content-2">Quando Respingere un Articolo</button></h4>
-                        <div class="guideline-content" id="guideline-content-2" hidden>
-                            <p>Un articolo dovrebbe essere respinto se presenta uno o più dei seguenti problemi:</p>
-                            <ul>
-                                <li><strong>Contenuto Inappropriato:</strong> Materiale offensivo, discriminatorio, illegale, o che viola i termini di servizio.</li>
-                                <li><strong>Spam o Auto-promozione Eccessiva:</strong> Contenuti puramente promozionali senza valore aggiunto per la community.</li>
-                                <li><strong>Fuori Tema:</strong> Argomenti non pertinenti allo spirito e ai temi trattati da asyncDonkey.io (sviluppo, tecnologia, progetti correlati).</li>
-                                <li><strong>Qualità Insufficiente:</strong> Articoli scritti male, difficili da comprendere, con informazioni palesemente errate o non verificate, o privi di una struttura logica.</li>
-                                <li><strong>Plagio:</strong> Contenuto copiato da altre fonti senza corretta attribuzione o permesso.</li>
-                                <li><strong>Problemi Tecnici Gravi:</strong> Eccessivo numero di errori nel codice presentato, link non funzionanti irrisolvibili, o formattazione illeggibile che non può essere facilmente corretta.</li>
-                            </ul>
-                            <p><em>Obiettivo:</em> Mantenere un alto standard di qualità e pertinenza dei contenuti offerti sulla piattaforma.</p>
-                             </div>
-                    </div>
-
-                    <div class="guideline-item">
-                        <h4><button class="guideline-toggle-btn" aria-expanded="false" aria-controls="guideline-content-3">Workflow di Approvazione</button></h4>
-                        <div class="guideline-content" id="guideline-content-3" hidden>
-                            <p>Prima di approvare un articolo e cambiarne lo status a "published":</p>
-                            <ol>
-                                <li><strong>Revisione Completa:</strong> Leggere attentamente l'intero articolo per valutarne contenuto, accuratezza, chiarezza e formattazione.</li>
-                                <li><strong>Applicare Modifiche Minori (se necessario):</strong> Vedi sezione "Quando Apportare Modifiche Minori".</li>
-                                <li><strong>Controllo Finale:</strong>
-                                    <ul>
-                                        <li>Verificare che titoli, snippet e tag siano appropriati.</li>
-                                        <li>Assicurarsi che eventuali immagini di copertina siano pertinenti e di buona qualità.</li>
-                                        <li>Controllare la resa del Markdown (anteprima se disponibile o pubblicazione su ambiente di test).</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Approvazione:</strong> Se l'articolo soddisfa gli standard, procedere con l'approvazione. Questo imposterà automaticamente:
-                                    <ul>
-                                        <li><code>status: "published"</code></li>
-                                        <li><code>publishedAt: serverTimestamp()</code> (data e ora correnti della pubblicazione)</li>
-                                    </ul>
-                                </li>
-                            </ol>
-                            <p><em>Obiettivo:</em> Garantire che solo contenuti validi, ben presentati e pertinenti vengano resi pubblici.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="admin-section" id="pendingArticlesSection">
-                <h2>Articoli in Attesa di Revisione</h2>
-                <div id="pendingArticlesList">
-                    <p>Caricamento articoli...</p>
-                </div>
-            </div>
-
-            <div class="admin-section" id="editArticleModal" class="modal" style="display:none;">
-                <div class="modal-content" style="max-width: 800px;">
-                    <span class="close-modal-btn" id="closeEditArticleModalBtn">&times;</span>
-                    <h3 id="editArticleModalTitle">Modifica Articolo</h3>
-                    <form id="editArticleForm">
-                        <input type="hidden" id="editingArticleId">
-                        <div><label for="editArticleTitle">Titolo:</label><input type="text" id="editArticleTitle" style="width:100%;"></div>
-                        <div><label for="editArticleContent">Contenuto (Markdown):</label><textarea id="editArticleContent" rows="15"></textarea></div>
-                        <div><label for="editArticleTags">Tags:</label><input type="text" id="editArticleTags" style="width:100%;"></div>
-                        <div><label for="editArticleSnippet">Snippet:</label><textarea id="editArticleSnippet" rows="3" style="width:100%;"></textarea></div>
-                        <div><label for="editArticleCoverImageUrl">URL Immagine Copertina:</label><input type="url" id="editArticleCoverImageUrl" style="width:100%;"></div>
-                        <div style="margin-top:15px;">
-                            <button type="submit" class="game-button">Salva Modifiche Articolo</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="admin-section" id="userIssuesSection">
-                <h2>Segnalazioni e Suggerimenti Utenti</h2>
-                <div id="issuesFilterControlsAdmin" style="margin-bottom:15px;">
-                    <label for="adminFilterIssueType">Filtra per Tipo:</label>
-                    <select id="adminFilterIssueType" style="padding: 8px; border-radius: 4px;">
-                        <option value="all">Tutti i Tipi</option>
-                        <option value="generalFeature">Richiesta Funzionalità Generale</option>
-                        <option value="newGameRequest">Suggerimento Nuovo Gioco</option>
-                        <option value="gameIssue">Segnalazione Bug/Problema Gioco</option>
-                    </select>
-                    <label for="adminFilterIssueStatus" style="margin-left:15px;">Filtra per Stato:</label>
-                    <select id="adminFilterIssueStatus" style="padding: 8px; border-radius: 4px;">
-                        <option value="all">Tutti gli Stati</option>
-                        <option value="new">Nuovo</option>
-                        <option value="underConsideration">In Considerazione</option>
-                        <option value="accepted">Accettato</option>
-                        <option value="planned">Pianificato</option>
-                        <option value="inProgress">In Corso</option>
-                        <option value="completed">Completato</option>
-                        <option value="declined">Rifiutato</option>
-                    </select>
-                    <button id="adminApplyIssueFiltersBtn" class="game-button" style="margin-left:10px; padding: 8px 15px; font-size:0.9em;">Applica Filtri Issues</button>
-                </div>
-                <div id="adminUserIssuesList">
-                    <p>Caricamento segnalazioni utenti...</p>
-                </div>
-            </div>
-
-            <div class="admin-section" id="publishedArticlesSection">
-                <h2>Articoli Pubblicati</h2>
-                <div id="publishedArticlesFilterControls" style="margin-bottom:15px;">
-                    <input type="text" id="adminSearchPublishedTitle" placeholder="Cerca per titolo..." style="padding: 8px; border-radius: 4px; border: 1px solid var(--border-color-primary);">
-                    <button id="adminApplyPublishedFiltersBtn" class="game-button" style="margin-left:10px; padding: 8px 15px; font-size:0.9em;">Cerca</button>
-                </div>
-                <div id="adminPublishedArticlesList">
-                    <p>Caricamento articoli pubblicati...</p>
-                </div>
-            </div>
-
-            <div class="admin-section" id="draftArticlesSection">
-                <h2>Bozze Articoli Utenti (Opzionale)</h2>
-                <div id="draftArticlesList">
-                    <p>Caricamento bozze...</p>
-                </div>
-            </div>
-
-            <div class="admin-section" id="rejectedArticlesSection">
-                <h2>Articoli Respinti (Opzionale)</h2>
-                <div id="rejectedArticlesList">
-                    <p>Caricamento articoli respinti...</p>
-                </div>
-            </div>
-
+        <main>
+            <section id="adminAuthMessage" style="text-align: center; padding: 20px">
+                <p>Verifica permessi...</p>
             </section>
-    </main>
 
-    <footer>
-        </footer>
+            <section id="adminDashboardContent">
+                <h1>Admin Dashboard</h1>
 
-        <div id="toast-container" aria-live="assertive" aria-atomic="true">
-    </div>
+                <div class="admin-section" id="moderationGuidelinesSection">
+                    <h2>Linee Guida per la Moderazione Articoli</h2>
+                    <div class="guidelines-container">
+                        <div class="guideline-item">
+                            <h4>
+                                <button
+                                    class="guideline-toggle-btn"
+                                    aria-expanded="false"
+                                    aria-controls="guideline-content-1"
+                                >
+                                    Quando Apportare Modifiche Minori
+                                </button>
+                            </h4>
+                            <div class="guideline-content" id="guideline-content-1" hidden>
+                                <p>
+                                    È incoraggiato apportare piccole modifiche per migliorare la qualità e la
+                                    leggibilità dell'articolo prima della pubblicazione. Queste includono:
+                                </p>
+                                <ul>
+                                    <li>
+                                        <strong>Correzioni Ortografiche e Grammaticali:</strong> Errori di battitura,
+                                        concordanze, punteggiatura.
+                                    </li>
+                                    <li>
+                                        <strong>Formattazione Markdown:</strong> Migliorare la struttura del Markdown
+                                        per una resa ottimale (es. corretto uso di heading, liste, blocchi di codice).
+                                        Assicurarsi che link e immagini siano funzionanti.
+                                    </li>
+                                    <li>
+                                        <strong>Chiarezza e Fluidità:</strong> Piccoli aggiustamenti per rendere il
+                                        testo più scorrevole, senza alterare il significato o il messaggio dell'autore.
+                                    </li>
+                                    <li>
+                                        <strong>Titolo e Snippet:</strong> Se necessario, riformulare leggermente il
+                                        titolo o lo snippet per maggiore impatto o chiarezza, sempre rispettando
+                                        l'intento originale.
+                                    </li>
+                                </ul>
+                                <p>
+                                    <em>Obiettivo:</em> Presentare l'articolo nella sua forma migliore, facilitando la
+                                    lettura e la comprensione da parte degli utenti.
+                                </p>
+                            </div>
+                        </div>
 
-    <script src="js/main.js" type="module"></script>
-    <script src="js/adminDashboard.js" type="module"></script>
-</body>
+                        <div class="guideline-item">
+                            <h4>
+                                <button
+                                    class="guideline-toggle-btn"
+                                    aria-expanded="false"
+                                    aria-controls="guideline-content-2"
+                                >
+                                    Quando Respingere un Articolo
+                                </button>
+                            </h4>
+                            <div class="guideline-content" id="guideline-content-2" hidden>
+                                <p>Un articolo dovrebbe essere respinto se presenta uno o più dei seguenti problemi:</p>
+                                <ul>
+                                    <li>
+                                        <strong>Contenuto Inappropriato:</strong> Materiale offensivo, discriminatorio,
+                                        illegale, o che viola i termini di servizio.
+                                    </li>
+                                    <li>
+                                        <strong>Spam o Auto-promozione Eccessiva:</strong> Contenuti puramente
+                                        promozionali senza valore aggiunto per la community.
+                                    </li>
+                                    <li>
+                                        <strong>Fuori Tema:</strong> Argomenti non pertinenti allo spirito e ai temi
+                                        trattati da asyncDonkey.io (sviluppo, tecnologia, progetti correlati).
+                                    </li>
+                                    <li>
+                                        <strong>Qualità Insufficiente:</strong> Articoli scritti male, difficili da
+                                        comprendere, con informazioni palesemente errate o non verificate, o privi di
+                                        una struttura logica.
+                                    </li>
+                                    <li>
+                                        <strong>Plagio:</strong> Contenuto copiato da altre fonti senza corretta
+                                        attribuzione o permesso.
+                                    </li>
+                                    <li>
+                                        <strong>Problemi Tecnici Gravi:</strong> Eccessivo numero di errori nel codice
+                                        presentato, link non funzionanti irrisolvibili, o formattazione illeggibile che
+                                        non può essere facilmente corretta.
+                                    </li>
+                                </ul>
+                                <p>
+                                    <em>Obiettivo:</em> Mantenere un alto standard di qualità e pertinenza dei contenuti
+                                    offerti sulla piattaforma.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guideline-item">
+                            <h4>
+                                <button
+                                    class="guideline-toggle-btn"
+                                    aria-expanded="false"
+                                    aria-controls="guideline-content-3"
+                                >
+                                    Workflow di Approvazione
+                                </button>
+                            </h4>
+                            <div class="guideline-content" id="guideline-content-3" hidden>
+                                <p>Prima di approvare un articolo e cambiarne lo status a "published":</p>
+                                <ol>
+                                    <li>
+                                        <strong>Revisione Completa:</strong> Leggere attentamente l'intero articolo per
+                                        valutarne contenuto, accuratezza, chiarezza e formattazione.
+                                    </li>
+                                    <li>
+                                        <strong>Applicare Modifiche Minori (se necessario):</strong> Vedi sezione
+                                        "Quando Apportare Modifiche Minori".
+                                    </li>
+                                    <li>
+                                        <strong>Controllo Finale:</strong>
+                                        <ul>
+                                            <li>Verificare che titoli, snippet e tag siano appropriati.</li>
+                                            <li>
+                                                Assicurarsi che eventuali immagini di copertina siano pertinenti e di
+                                                buona qualità.
+                                            </li>
+                                            <li>
+                                                Controllare la resa del Markdown (anteprima se disponibile o
+                                                pubblicazione su ambiente di test).
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <strong>Approvazione:</strong> Se l'articolo soddisfa gli standard, procedere
+                                        con l'approvazione. Questo imposterà automaticamente:
+                                        <ul>
+                                            <li><code>status: "published"</code></li>
+                                            <li>
+                                                <code>publishedAt: serverTimestamp()</code> (data e ora correnti della
+                                                pubblicazione)
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                                <p>
+                                    <em>Obiettivo:</em> Garantire che solo contenuti validi, ben presentati e pertinenti
+                                    vengano resi pubblici.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-section" id="pendingArticlesSection">
+                    <h2>Articoli in Attesa di Revisione</h2>
+                    <div id="pendingArticlesList">
+                        <p>Caricamento articoli...</p>
+                    </div>
+                </div>
+
+                <div class="admin-section" id="editArticleModal" class="modal" style="display: none">
+                    <div class="modal-content" style="max-width: 800px">
+                        <span class="close-modal-btn" id="closeEditArticleModalBtn">&times;</span>
+                        <h3 id="editArticleModalTitle">Modifica Articolo</h3>
+                        <form id="editArticleForm">
+                            <input type="hidden" id="editingArticleId" />
+                            <div>
+                                <label for="editArticleTitle">Titolo:</label
+                                ><input type="text" id="editArticleTitle" style="width: 100%" />
+                            </div>
+                            <div>
+                                <label for="editArticleContent">Contenuto (Markdown):</label
+                                ><textarea id="editArticleContent" rows="15"></textarea>
+                            </div>
+                            <div>
+                                <label for="editArticleTags">Tags:</label
+                                ><input type="text" id="editArticleTags" style="width: 100%" />
+                            </div>
+                            <div>
+                                <label for="editArticleSnippet">Snippet:</label
+                                ><textarea id="editArticleSnippet" rows="3" style="width: 100%"></textarea>
+                            </div>
+                            <div>
+                                <label for="editArticleCoverImageUrl">URL Immagine Copertina:</label
+                                ><input type="url" id="editArticleCoverImageUrl" style="width: 100%" />
+                            </div>
+                            <div style="margin-top: 15px">
+                                <button type="submit" class="game-button">Salva Modifiche Articolo</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="admin-section" id="userIssuesSection">
+                    <h2>Segnalazioni e Suggerimenti Utenti</h2>
+                    <div id="issuesFilterControlsAdmin" style="margin-bottom: 15px">
+                        <label for="adminFilterIssueType">Filtra per Tipo:</label>
+                        <select id="adminFilterIssueType" style="padding: 8px; border-radius: 4px">
+                            <option value="all">Tutti i Tipi</option>
+                            <option value="generalFeature">Richiesta Funzionalità Generale</option>
+                            <option value="newGameRequest">Suggerimento Nuovo Gioco</option>
+                            <option value="gameIssue">Segnalazione Bug/Problema Gioco</option>
+                        </select>
+                        <label for="adminFilterIssueStatus" style="margin-left: 15px">Filtra per Stato:</label>
+                        <select id="adminFilterIssueStatus" style="padding: 8px; border-radius: 4px">
+                            <option value="all">Tutti gli Stati</option>
+                            <option value="new">Nuovo</option>
+                            <option value="underConsideration">In Considerazione</option>
+                            <option value="accepted">Accettato</option>
+                            <option value="planned">Pianificato</option>
+                            <option value="inProgress">In Corso</option>
+                            <option value="completed">Completato</option>
+                            <option value="declined">Rifiutato</option>
+                        </select>
+                        <button
+                            id="adminApplyIssueFiltersBtn"
+                            class="game-button"
+                            style="margin-left: 10px; padding: 8px 15px; font-size: 0.9em"
+                        >
+                            Applica Filtri Issues
+                        </button>
+                    </div>
+                    <div id="adminUserIssuesList">
+                        <p>Caricamento segnalazioni utenti...</p>
+                    </div>
+                </div>
+
+                <div class="admin-section" id="publishedArticlesSection">
+                    <h2>Articoli Pubblicati</h2>
+                    <div id="publishedArticlesFilterControls" style="margin-bottom: 15px">
+                        <input
+                            type="text"
+                            id="adminSearchPublishedTitle"
+                            placeholder="Cerca per titolo..."
+                            style="padding: 8px; border-radius: 4px; border: 1px solid var(--border-color-primary)"
+                        />
+                        <button
+                            id="adminApplyPublishedFiltersBtn"
+                            class="game-button"
+                            style="margin-left: 10px; padding: 8px 15px; font-size: 0.9em"
+                        >
+                            Cerca
+                        </button>
+                    </div>
+                    <div id="adminPublishedArticlesList">
+                        <p>Caricamento articoli pubblicati...</p>
+                    </div>
+                </div>
+
+                <div class="admin-section" id="draftArticlesSection">
+                    <h2>Bozze Articoli Utenti (Opzionale)</h2>
+                    <div id="draftArticlesList">
+                        <p>Caricamento bozze...</p>
+                    </div>
+                </div>
+
+                <div class="admin-section" id="rejectedArticlesSection">
+                    <h2>Articoli Respinti (Opzionale)</h2>
+                    <div id="rejectedArticlesList">
+                        <p>Caricamento articoli respinti...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer></footer>
+
+        <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+        <script src="js/main.js" type="module"></script>
+        <script src="js/adminDashboard.js" type="module"></script>
+    </body>
 </html>

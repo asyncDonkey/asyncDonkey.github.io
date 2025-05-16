@@ -1,9 +1,14 @@
 // js/articleSubmission.js
 import { db, auth } from './main.js';
 import {
-    doc, setDoc, addDoc, collection, serverTimestamp, getDoc, updateDoc // Aggiunto updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    doc,
+    addDoc,
+    collection,
+    serverTimestamp,
+    getDoc,
+    updateDoc, // Aggiunto updateDoc
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 // Riferimenti DOM (esistenti)
 const articleSubmissionForm = document.getElementById('articleSubmissionForm');
@@ -25,20 +30,21 @@ let editingDraftId = null; // NUOVA VARIABILE GLOBALE per tracciare l'ID della b
 // Funzione per mostrare/nascondere il form e inizializzare/distruggere l'editor (esistente)
 function toggleFormVisibility(isLoggedIn) {
     if (isLoggedIn) {
-        if(authRequiredMessageDiv) authRequiredMessageDiv.style.display = 'none';
-        if(articleSubmissionForm) articleSubmissionForm.style.display = 'block';
+        if (authRequiredMessageDiv) authRequiredMessageDiv.style.display = 'none';
+        if (articleSubmissionForm) articleSubmissionForm.style.display = 'block';
         initializeMarkdownEditor();
         checkAndLoadDraft(); // NUOVA CHIAMATA: controlla se stiamo modificando una bozza
     } else {
-        if(authRequiredMessageDiv) authRequiredMessageDiv.style.display = 'block';
-        if(articleSubmissionForm) articleSubmissionForm.style.display = 'none';
+        if (authRequiredMessageDiv) authRequiredMessageDiv.style.display = 'block';
+        if (articleSubmissionForm) articleSubmissionForm.style.display = 'none';
         destroyMarkdownEditor();
         editingDraftId = null; // Resetta l'ID della bozza al logout
     }
 }
 
 // Funzione per inizializzare EasyMDE (esistente)
-function initializeMarkdownEditor(initialContent = '') { // Modificata per accettare contenuto iniziale
+function initializeMarkdownEditor(initialContent = '') {
+    // Modificata per accettare contenuto iniziale
     if (articleContentTextarea && !easyMDEInstance) {
         try {
             easyMDEInstance = new EasyMDE({
@@ -47,23 +53,39 @@ function initializeMarkdownEditor(initialContent = '') { // Modificata per accet
                 spellChecker: false,
                 autosave: {
                     enabled: true,
-                    uniqueId: "articleSubmitContent_" + (currentUser ? currentUser.uid : "guest") + (editingDraftId ? `_draft_${editingDraftId}` : "_new"), // ID univoco per autosave, include draftId
+                    uniqueId:
+                        'articleSubmitContent_' +
+                        (currentUser ? currentUser.uid : 'guest') +
+                        (editingDraftId ? `_draft_${editingDraftId}` : '_new'), // ID univoco per autosave, include draftId
                     delay: 15000,
                 },
-                placeholder: "Scrivi qui il contenuto del tuo articolo in formato Markdown...",
+                placeholder: 'Scrivi qui il contenuto del tuo articolo in formato Markdown...',
                 toolbar: [
-                    "bold", "italic", "heading", "|",
-                    "quote", "unordered-list", "ordered-list", "|",
-                    "link", "image", "code", "horizontal-rule", "|",
-                    "preview", "side-by-side", "fullscreen", "|",
-                    "guide"
+                    'bold',
+                    'italic',
+                    'heading',
+                    '|',
+                    'quote',
+                    'unordered-list',
+                    'ordered-list',
+                    '|',
+                    'link',
+                    'image',
+                    'code',
+                    'horizontal-rule',
+                    '|',
+                    'preview',
+                    'side-by-side',
+                    'fullscreen',
+                    '|',
+                    'guide',
                 ],
                 forceSync: true,
             });
-            console.log("EasyMDE inizializzato.");
+            console.log('EasyMDE inizializzato.');
         } catch (e) {
             console.error("Errore durante l'inizializzazione di EasyMDE:", e);
-            if(initialContent && articleContentTextarea) articleContentTextarea.value = initialContent;
+            if (initialContent && articleContentTextarea) articleContentTextarea.value = initialContent;
         }
     } else if (easyMDEInstance && initialContent) {
         easyMDEInstance.value(initialContent); // Aggiorna il valore se l'istanza esiste già
@@ -76,12 +98,12 @@ function destroyMarkdownEditor() {
         try {
             easyMDEInstance.toTextArea();
             easyMDEInstance = null;
-            console.log("EasyMDE rimosso.");
+            console.log('EasyMDE rimosso.');
         } catch (e) {
-            console.error("Errore durante la rimozione di EasyMDE:", e);
+            console.error('Errore durante la rimozione di EasyMDE:', e);
         }
     }
-     if (articleContentTextarea) articleContentTextarea.value = ''; // Pulisci il textarea
+    if (articleContentTextarea) articleContentTextarea.value = ''; // Pulisci il textarea
 }
 
 // NUOVA FUNZIONE: Controlla se c'è un draftId nell'URL e carica i dati
@@ -91,7 +113,7 @@ async function checkAndLoadDraft() {
 
     if (draftIdFromUrl && currentUser) {
         console.log(`Trovato draftId nell'URL: ${draftIdFromUrl}. Tento il caricamento...`);
-        const articleRef = doc(db, "articles", draftIdFromUrl);
+        const articleRef = doc(db, 'articles', draftIdFromUrl);
         try {
             const docSnap = await getDoc(articleRef);
             if (docSnap.exists()) {
@@ -99,13 +121,13 @@ async function checkAndLoadDraft() {
                 // Verifica che l'articolo appartenga all'utente corrente e sia una bozza
                 if (articleData.authorId === currentUser.uid && articleData.status === 'draft') {
                     editingDraftId = draftIdFromUrl; // Imposta l'ID globale
-                    console.log("Caricamento dati bozza:", articleData);
+                    console.log('Caricamento dati bozza:', articleData);
 
                     if (articleTitleInput) articleTitleInput.value = articleData.title || '';
                     if (articleTagsInput) articleTagsInput.value = (articleData.tags || []).join(', ');
                     if (articleSnippetInput) articleSnippetInput.value = articleData.snippet || '';
                     if (articleCoverImageUrlInput) articleCoverImageUrlInput.value = articleData.coverImageUrl || '';
-                    
+
                     // Popola EasyMDE (o il textarea se EasyMDE non è inizializzato)
                     if (easyMDEInstance) {
                         easyMDEInstance.value(articleData.contentMarkdown || '');
@@ -114,35 +136,35 @@ async function checkAndLoadDraft() {
                         // Questo caso dovrebbe essere coperto da initializeMarkdownEditor chiamato dopo
                         articleContentTextarea.value = articleData.contentMarkdown || '';
                     }
-                    
+
                     // Aggiorna testo dei pulsanti per indicare la modifica
-                    if(submitArticleForReviewBtn) submitArticleForReviewBtn.textContent = 'Aggiorna e Invia per Revisione';
-                    if(saveArticleDraftBtn) saveArticleDraftBtn.textContent = 'Aggiorna Bozza';
-                    if(submissionMessageDiv) {
+                    if (submitArticleForReviewBtn)
+                        submitArticleForReviewBtn.textContent = 'Aggiorna e Invia per Revisione';
+                    if (saveArticleDraftBtn) saveArticleDraftBtn.textContent = 'Aggiorna Bozza';
+                    if (submissionMessageDiv) {
                         submissionMessageDiv.textContent = `Stai modificando la bozza: "${articleData.title || 'Senza Titolo'}".`;
                         submissionMessageDiv.className = 'info'; // Potresti creare una classe .info
                     }
-                     // Re-inizializza/aggiorna EasyMDE se necessario, specialmente se il contenuto è stato impostato prima dell'inizializzazione
+                    // Re-inizializza/aggiorna EasyMDE se necessario, specialmente se il contenuto è stato impostato prima dell'inizializzazione
                     if (easyMDEInstance) {
                         easyMDEInstance.value(articleData.contentMarkdown || '');
                     } else {
                         // Se EasyMDE non è inizializzato, initializeMarkdownEditor lo farà con il contenuto del textarea
                         initializeMarkdownEditor(articleData.contentMarkdown || '');
                     }
-
-
                 } else {
-                    console.warn("Accesso alla bozza negato o stato non valido.");
-                    if(submissionMessageDiv) {
-                        submissionMessageDiv.textContent = 'Errore: Impossibile caricare la bozza specificata o accesso negato.';
+                    console.warn('Accesso alla bozza negato o stato non valido.');
+                    if (submissionMessageDiv) {
+                        submissionMessageDiv.textContent =
+                            'Errore: Impossibile caricare la bozza specificata o accesso negato.';
                         submissionMessageDiv.className = 'error';
                     }
                     editingDraftId = null; // Resetta se non valido
                     window.history.replaceState({}, document.title, window.location.pathname); // Rimuovi draftId dall'URL
                 }
             } else {
-                console.warn("Bozza non trovata con ID:", draftIdFromUrl);
-                 if(submissionMessageDiv) {
+                console.warn('Bozza non trovata con ID:', draftIdFromUrl);
+                if (submissionMessageDiv) {
                     submissionMessageDiv.textContent = `Errore: Bozza con ID ${draftIdFromUrl} non trovata.`;
                     submissionMessageDiv.className = 'error';
                 }
@@ -150,8 +172,8 @@ async function checkAndLoadDraft() {
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         } catch (error) {
-            console.error("Errore caricamento bozza:", error);
-            if(submissionMessageDiv) {
+            console.error('Errore caricamento bozza:', error);
+            if (submissionMessageDiv) {
                 submissionMessageDiv.textContent = `Errore durante il caricamento della bozza: ${error.message}`;
                 submissionMessageDiv.className = 'error';
             }
@@ -163,7 +185,6 @@ async function checkAndLoadDraft() {
     }
 }
 
-
 // Gestione autenticazione (esistente, con aggiunta di checkAndLoadDraft)
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
@@ -171,8 +192,8 @@ onAuthStateChanged(auth, (user) => {
 
     if (!user && loginLinkFromSubmitPage && document.getElementById('showLoginBtn')) {
         const newLoginLink = loginLinkFromSubmitPage.cloneNode(true);
-        if(loginLinkFromSubmitPage.parentNode){
-             loginLinkFromSubmitPage.parentNode.replaceChild(newLoginLink, loginLinkFromSubmitPage);
+        if (loginLinkFromSubmitPage.parentNode) {
+            loginLinkFromSubmitPage.parentNode.replaceChild(newLoginLink, loginLinkFromSubmitPage);
         }
         newLoginLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -206,7 +227,12 @@ if (articleSubmissionForm) {
             return;
         }
 
-        const tagsArray = tagsString ? tagsString.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
+        const tagsArray = tagsString
+            ? tagsString
+                  .split(',')
+                  .map((tag) => tag.trim().toLowerCase())
+                  .filter((tag) => tag)
+            : [];
 
         submitArticleForReviewBtn.disabled = true;
         submitArticleForReviewBtn.textContent = editingDraftId ? 'Aggiornamento e Invio...' : 'Invio in corso...';
@@ -217,7 +243,7 @@ if (articleSubmissionForm) {
             let authorNameResolved = currentUser.displayName || currentUser.email.split('@')[0];
             let authorNationalityCodeResolved = null;
 
-            const userProfileRef = doc(db, "userProfiles", currentUser.uid);
+            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
             const userProfileSnap = await getDoc(userProfileRef);
             if (userProfileSnap.exists()) {
                 const profileData = userProfileSnap.data();
@@ -234,45 +260,44 @@ if (articleSubmissionForm) {
                 authorId: currentUser.uid, // Rimane invariato se si modifica
                 authorName: authorNameResolved, // Può aggiornarsi se il profilo è cambiato
                 updatedAt: serverTimestamp(),
-                status: "pendingReview", // Stato finale per questa azione
+                status: 'pendingReview', // Stato finale per questa azione
                 // Campi che non vengono toccati qui se si modifica, o inizializzati se si crea:
                 // likeCount, commentCount, likedByUsers, isFeatured, createdAt
             };
             if (authorNationalityCodeResolved) {
-                 articleDataPayload.authorNationalityCode = authorNationalityCodeResolved; // Può aggiornarsi
+                articleDataPayload.authorNationalityCode = authorNationalityCodeResolved; // Può aggiornarsi
             }
 
-
-            if (editingDraftId) { // Stiamo MODIFICANDO una bozza esistente
-                const articleRef = doc(db, "articles", editingDraftId);
+            if (editingDraftId) {
+                // Stiamo MODIFICANDO una bozza esistente
+                const articleRef = doc(db, 'articles', editingDraftId);
                 // Non resettiamo createdAt, likeCount, commentCount, likedByUsers, isFeatured, authorId
                 // authorName e authorNationalityCode potrebbero essere aggiornati
                 await updateDoc(articleRef, articleDataPayload);
                 submissionMessageDiv.textContent = 'Bozza aggiornata e inviata per la revisione con successo!';
                 // Potresti voler reindirizzare l'utente o svuotare il form in modo diverso qui
-            } else { // Stiamo CREANDO un nuovo articolo
+            } else {
+                // Stiamo CREANDO un nuovo articolo
                 articleDataPayload.createdAt = serverTimestamp();
                 articleDataPayload.likeCount = 0;
                 articleDataPayload.commentCount = 0;
                 articleDataPayload.likedByUsers = [];
                 articleDataPayload.isFeatured = false;
                 // publishedAt e rejectionReason non vengono impostati qui
-                
-                await addDoc(collection(db, "articles"), articleDataPayload);
+
+                await addDoc(collection(db, 'articles'), articleDataPayload);
                 submissionMessageDiv.textContent = 'Articolo inviato per la revisione con successo!';
             }
-            
+
             submissionMessageDiv.className = 'success';
             articleSubmissionForm.reset();
-            if (easyMDEInstance) easyMDEInstance.value("");
+            if (easyMDEInstance) easyMDEInstance.value('');
             editingDraftId = null; // Resetta dopo l'operazione
-             if(submitArticleForReviewBtn) submitArticleForReviewBtn.textContent = 'Invia per Revisione';
-             if(saveArticleDraftBtn) saveArticleDraftBtn.textContent = 'Salva Bozza';
-             window.history.replaceState({}, document.title, window.location.pathname); // Pulisci URL
-
-
+            if (submitArticleForReviewBtn) submitArticleForReviewBtn.textContent = 'Invia per Revisione';
+            if (saveArticleDraftBtn) saveArticleDraftBtn.textContent = 'Salva Bozza';
+            window.history.replaceState({}, document.title, window.location.pathname); // Pulisci URL
         } catch (error) {
-            console.error("Errore invio/aggiornamento articolo:", error);
+            console.error('Errore invio/aggiornamento articolo:', error);
             submissionMessageDiv.textContent = `Errore: ${error.message}`;
             submissionMessageDiv.className = 'error';
         } finally {
@@ -292,7 +317,8 @@ if (saveArticleDraftBtn) {
         }
 
         const title = articleTitleInput.value.trim();
-        if (!title && !editingDraftId) { // Titolo obbligatorio solo per nuove bozze, per le modifiche potrebbe essere vuoto temporaneamente
+        if (!title && !editingDraftId) {
+            // Titolo obbligatorio solo per nuove bozze, per le modifiche potrebbe essere vuoto temporaneamente
             submissionMessageDiv.textContent = 'Inserisci almeno un titolo per salvare una nuova bozza.';
             submissionMessageDiv.className = 'error';
             return;
@@ -307,22 +333,27 @@ if (saveArticleDraftBtn) {
         const tagsString = articleTagsInput.value.trim();
         const snippet = articleSnippetInput.value.trim();
         const coverImageUrl = articleCoverImageUrlInput.value.trim();
-        const tagsArray = tagsString ? tagsString.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
+        const tagsArray = tagsString
+            ? tagsString
+                  .split(',')
+                  .map((tag) => tag.trim().toLowerCase())
+                  .filter((tag) => tag)
+            : [];
 
         try {
             let authorNameResolved = currentUser.displayName || currentUser.email.split('@')[0];
             let authorNationalityCodeResolved = null;
 
-            const userProfileRef = doc(db, "userProfiles", currentUser.uid);
+            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
             const userProfileSnap = await getDoc(userProfileRef);
             if (userProfileSnap.exists()) {
                 const profileData = userProfileSnap.data();
                 if (profileData.nickname) authorNameResolved = profileData.nickname;
                 if (profileData.nationalityCode) authorNationalityCodeResolved = profileData.nationalityCode;
             }
-            
+
             const draftArticleDataPayload = {
-                title: title || (editingDraftId ? "" : "Bozza senza titolo"), // Permetti titolo vuoto se si modifica una bozza esistente
+                title: title || (editingDraftId ? '' : 'Bozza senza titolo'), // Permetti titolo vuoto se si modifica una bozza esistente
                 contentMarkdown: contentMarkdown,
                 tags: tagsArray,
                 snippet: snippet,
@@ -330,19 +361,20 @@ if (saveArticleDraftBtn) {
                 authorId: currentUser.uid,
                 authorName: authorNameResolved,
                 updatedAt: serverTimestamp(),
-                status: "draft", // Lo stato è sempre 'draft' per questa azione
+                status: 'draft', // Lo stato è sempre 'draft' per questa azione
             };
-             if (authorNationalityCodeResolved) {
-                 draftArticleDataPayload.authorNationalityCode = authorNationalityCodeResolved;
+            if (authorNationalityCodeResolved) {
+                draftArticleDataPayload.authorNationalityCode = authorNationalityCodeResolved;
             }
 
-
-            if (editingDraftId) { // Stiamo AGGIORNANDO una bozza esistente
-                const articleRef = doc(db, "articles", editingDraftId);
+            if (editingDraftId) {
+                // Stiamo AGGIORNANDO una bozza esistente
+                const articleRef = doc(db, 'articles', editingDraftId);
                 // Non resettiamo createdAt o altri campi non modificabili dall'autore per una bozza
                 await updateDoc(articleRef, draftArticleDataPayload);
                 submissionMessageDiv.textContent = 'Bozza aggiornata con successo!';
-            } else { // Stiamo CREANDO una nuova bozza
+            } else {
+                // Stiamo CREANDO una nuova bozza
                 draftArticleDataPayload.createdAt = serverTimestamp();
                 draftArticleDataPayload.likeCount = 0;
                 draftArticleDataPayload.commentCount = 0;
@@ -350,31 +382,35 @@ if (saveArticleDraftBtn) {
                 draftArticleDataPayload.isFeatured = false;
                 // publishedAt e rejectionReason non vengono impostati qui
 
-                const docRef = await addDoc(collection(db, "articles"), draftArticleDataPayload);
+                const docRef = await addDoc(collection(db, 'articles'), draftArticleDataPayload);
                 editingDraftId = docRef.id; // Imposta l'ID per modifiche successive senza ricaricare la pagina
-                submissionMessageDiv.textContent = 'Bozza salvata con successo! Ora puoi continuare a modificarla o inviarla per revisione.';
+                submissionMessageDiv.textContent =
+                    'Bozza salvata con successo! Ora puoi continuare a modificarla o inviarla per revisione.';
                 // Aggiorna l'URL per includere il draftId, così un refresh non perde il contesto
                 if (window.history.pushState) {
-                    const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?draftId=${editingDraftId}`;
-                    window.history.pushState({path:newurl},'',newurl);
+                    const newurl =
+                        window.location.protocol +
+                        '//' +
+                        window.location.host +
+                        window.location.pathname +
+                        `?draftId=${editingDraftId}`;
+                    window.history.pushState({ path: newurl }, '', newurl);
                 }
-                 // Aggiorna testo dei pulsanti
-                if(submitArticleForReviewBtn) submitArticleForReviewBtn.textContent = 'Aggiorna e Invia per Revisione';
-                if(saveArticleDraftBtn) saveArticleDraftBtn.textContent = 'Aggiorna Bozza';
+                // Aggiorna testo dei pulsanti
+                if (submitArticleForReviewBtn) submitArticleForReviewBtn.textContent = 'Aggiorna e Invia per Revisione';
+                if (saveArticleDraftBtn) saveArticleDraftBtn.textContent = 'Aggiorna Bozza';
             }
-            
+
             submissionMessageDiv.className = 'success';
             // Non resettare il form/editor dopo aver salvato una bozza, l'utente potrebbe voler continuare.
-
         } catch (error) {
-            console.error("Errore salvataggio bozza:", error);
+            console.error('Errore salvataggio bozza:', error);
             submissionMessageDiv.textContent = `Errore: ${error.message}`;
             submissionMessageDiv.className = 'error';
         } finally {
             saveArticleDraftBtn.disabled = false;
             // Il testo del bottone viene aggiornato sopra o rimane se c'è errore
             if (!editingDraftId && saveArticleDraftBtn) saveArticleDraftBtn.textContent = 'Salva Bozza';
-
         }
     });
 }
@@ -382,12 +418,12 @@ if (saveArticleDraftBtn) {
 // Event listener DOMContentLoaded per inizializzazione (esistente)
 document.addEventListener('DOMContentLoaded', () => {
     const user = auth.currentUser; // Controlla subito se l'utente è già loggato
-    currentUser = user; 
+    currentUser = user;
     toggleFormVisibility(!!user); // Chiamata iniziale per gestire UI e caricamento bozza
 
     if (!user && loginLinkFromSubmitPage && document.getElementById('showLoginBtn')) {
         const newLoginLink = loginLinkFromSubmitPage.cloneNode(true);
-         if(loginLinkFromSubmitPage.parentNode){
+        if (loginLinkFromSubmitPage.parentNode) {
             loginLinkFromSubmitPage.parentNode.replaceChild(newLoginLink, loginLinkFromSubmitPage);
         }
         newLoginLink.addEventListener('click', (e) => {

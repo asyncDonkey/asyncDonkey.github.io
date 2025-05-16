@@ -1,10 +1,23 @@
 // js/issueTracker.js
 import { db, auth } from './main.js'; // Assicurati che main.js esporti db e auth
 import {
-    collection, addDoc, query, where, orderBy, limit, getDocs,
-    serverTimestamp, doc, updateDoc, getDoc, increment, arrayUnion, arrayRemove, Timestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    collection,
+    addDoc,
+    query,
+    where,
+    orderBy,
+    limit,
+    getDocs,
+    serverTimestamp,
+    doc,
+    updateDoc,
+    getDoc,
+    increment,
+    arrayUnion,
+    arrayRemove,
+    Timestamp,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 // Riferimenti DOM
 const issueSubmissionForm = document.getElementById('issueSubmissionForm');
@@ -39,24 +52,37 @@ function formatIssueTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp?.toDate) return 'Data non disponibile';
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
-    } catch (e) { return 'Formato data errato'; }
+    } catch (e) {
+        return 'Formato data errato';
+    }
 }
 
 function getStatusBadgeClass(status) {
     switch (status) {
-        case 'new': return 'status-new';
-        case 'underConsideration': return 'status-under-consideration';
-        case 'accepted': return 'status-accepted';
-        case 'planned': return 'status-planned';
-        case 'inProgress': return 'status-in-progress';
-        case 'completed': return 'status-completed';
-        case 'declined': return 'status-declined';
-        default: return 'status-unknown';
+        case 'new':
+            return 'status-new';
+        case 'underConsideration':
+            return 'status-under-consideration';
+        case 'accepted':
+            return 'status-accepted';
+        case 'planned':
+            return 'status-planned';
+        case 'inProgress':
+            return 'status-in-progress';
+        case 'completed':
+            return 'status-completed';
+        case 'declined':
+            return 'status-declined';
+        default:
+            return 'status-unknown';
     }
 }
-
 
 // Gestione autenticazione per il form
 onAuthStateChanged(auth, (user) => {
@@ -72,7 +98,7 @@ onAuthStateChanged(auth, (user) => {
                 // Clona il link per evitare listener multipli se onAuthStateChanged scatta più volte
                 const newLoginLink = loginLinkFromContributePage.cloneNode(true);
                 if (loginLinkFromContributePage.parentNode) {
-                     loginLinkFromContributePage.parentNode.replaceChild(newLoginLink, loginLinkFromContributePage);
+                    loginLinkFromContributePage.parentNode.replaceChild(newLoginLink, loginLinkFromContributePage);
                 }
                 newLoginLink.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -92,12 +118,12 @@ if (issueTypeSelect && gameSelectionContainer) {
     issueTypeSelect.addEventListener('change', () => {
         if (issueTypeSelect.value === 'gameIssue') {
             gameSelectionContainer.style.display = 'block';
-            if(issueGameIdSelect) issueGameIdSelect.required = true;
+            if (issueGameIdSelect) issueGameIdSelect.required = true;
         } else {
             gameSelectionContainer.style.display = 'none';
-            if(issueGameIdSelect) {
-                 issueGameIdSelect.required = false;
-                 issueGameIdSelect.value = ""; // Resetta la selezione
+            if (issueGameIdSelect) {
+                issueGameIdSelect.required = false;
+                issueGameIdSelect.value = ''; // Resetta la selezione
             }
         }
     });
@@ -116,7 +142,7 @@ if (issueSubmissionForm) {
         const title = issueTitleInput.value.trim();
         const description = issueDescriptionInput.value.trim();
         const type = issueTypeSelect.value;
-        const gameId = (type === 'gameIssue' && issueGameIdSelect) ? issueGameIdSelect.value : null;
+        const gameId = type === 'gameIssue' && issueGameIdSelect ? issueGameIdSelect.value : null;
 
         if (!description || !type) {
             issueSubmissionMessageDiv.textContent = 'Descrizione e Tipo sono obbligatori.';
@@ -129,22 +155,22 @@ if (issueSubmissionForm) {
             return;
         }
 
-        if(submitIssueBtn) {
+        if (submitIssueBtn) {
             submitIssueBtn.disabled = true;
             submitIssueBtn.textContent = 'Invio in corso...';
         }
-        if(issueSubmissionMessageDiv) {
+        if (issueSubmissionMessageDiv) {
             issueSubmissionMessageDiv.textContent = '';
             issueSubmissionMessageDiv.className = '';
         }
 
         try {
-            const userProfileRef = doc(db, "userProfiles", currentUser.uid);
+            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
             const userProfileSnap = await getDoc(userProfileRef);
             let submittedByInfo = {
                 userId: currentUser.uid,
                 userName: currentUser.displayName || currentUser.email.split('@')[0], // Fallback
-                userNationalityCode: null
+                userNationalityCode: null,
             };
 
             if (userProfileSnap.exists()) {
@@ -154,39 +180,39 @@ if (issueSubmissionForm) {
             }
 
             const issueData = {
-                title: title || "Segnalazione/Suggerimento senza titolo",
+                title: title || 'Segnalazione/Suggerimento senza titolo',
                 description: description,
                 type: type,
                 userId: currentUser.uid, // <-- RIGA DA AGGIUNGERE/MODIFICARE
                 submittedBy: submittedByInfo,
                 timestamp: serverTimestamp(),
-                status: "new",
+                status: 'new',
                 upvotes: 0,
-                upvotedBy: []
+                upvotedBy: [],
             };
-            if (gameId) { // gameId viene aggiunto solo se presente
+            if (gameId) {
+                // gameId viene aggiunto solo se presente
                 issueData.gameId = gameId;
             }
 
-            const issuesCollectionRef = collection(db, "userIssues");
+            const issuesCollectionRef = collection(db, 'userIssues');
             await addDoc(issuesCollectionRef, issueData);
 
-            if(issueSubmissionMessageDiv) {
+            if (issueSubmissionMessageDiv) {
                 issueSubmissionMessageDiv.textContent = 'Segnalazione/suggerimento inviato con successo!';
                 issueSubmissionMessageDiv.style.color = 'green';
             }
             issueSubmissionForm.reset();
-            if(gameSelectionContainer) gameSelectionContainer.style.display = 'none'; // Nascondi di nuovo la selezione gioco
+            if (gameSelectionContainer) gameSelectionContainer.style.display = 'none'; // Nascondi di nuovo la selezione gioco
             loadIssues(); // Ricarica la lista
-
         } catch (error) {
-            console.error("Errore invio issue:", error);
-            if(issueSubmissionMessageDiv) {
+            console.error('Errore invio issue:', error);
+            if (issueSubmissionMessageDiv) {
                 issueSubmissionMessageDiv.textContent = `Errore durante l'invio: ${error.message}`;
                 issueSubmissionMessageDiv.style.color = 'red';
             }
         } finally {
-            if(submitIssueBtn) {
+            if (submitIssueBtn) {
                 submitIssueBtn.disabled = false;
                 submitIssueBtn.textContent = 'Invia Segnalazione/Suggerimento';
             }
@@ -197,28 +223,28 @@ if (issueSubmissionForm) {
 // Funzione per caricare e visualizzare le issue
 async function loadIssues() {
     if (!issuesDisplayArea || !db) {
-        if(issuesDisplayArea) issuesDisplayArea.innerHTML = '<p>Errore: Impossibile caricare le segnalazioni.</p>';
+        if (issuesDisplayArea) issuesDisplayArea.innerHTML = '<p>Errore: Impossibile caricare le segnalazioni.</p>';
         return;
     }
     issuesDisplayArea.innerHTML = '<p>Caricamento segnalazioni...</p>';
 
     try {
-        const issuesCollectionRef = collection(db, "userIssues");
-        let q = query(issuesCollectionRef, orderBy("timestamp", "desc"), limit(ISSUES_PER_PAGE));
+        const issuesCollectionRef = collection(db, 'userIssues');
+        let q = query(issuesCollectionRef, orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE));
 
         const filterType = filterIssueTypeSelect ? filterIssueTypeSelect.value : 'all';
         const filterStatus = filterIssueStatusSelect ? filterIssueStatusSelect.value : 'all';
 
         const conditions = [];
         if (filterType !== 'all') {
-            conditions.push(where("type", "==", filterType));
+            conditions.push(where('type', '==', filterType));
         }
         if (filterStatus !== 'all') {
-            conditions.push(where("status", "==", filterStatus));
+            conditions.push(where('status', '==', filterStatus));
         }
 
         if (conditions.length > 0) {
-             q = query(issuesCollectionRef, ...conditions, orderBy("timestamp", "desc"), limit(ISSUES_PER_PAGE));
+            q = query(issuesCollectionRef, ...conditions, orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE));
         }
         // Nota: Firestore richiede che il primo orderBy sia sullo stesso campo di un'eventuale disuguaglianza
         // Se ci sono filtri (where), potremmo dover aggiustare l'orderBy o creare indici compositi.
@@ -228,7 +254,8 @@ async function loadIssues() {
         issuesDisplayArea.innerHTML = ''; // Pulisci
 
         if (querySnapshot.empty) {
-            issuesDisplayArea.innerHTML = '<p>Nessuna segnalazione o suggerimento trovato per i filtri selezionati.</p>';
+            issuesDisplayArea.innerHTML =
+                '<p>Nessuna segnalazione o suggerimento trovato per i filtri selezionati.</p>';
             return;
         }
 
@@ -244,19 +271,24 @@ async function loadIssues() {
 
             const descriptionEl = document.createElement('p');
             descriptionEl.className = 'issue-description';
-            descriptionEl.textContent = escapeHTML(issue.description.substring(0, 200)) + (issue.description.length > 200 ? '...' : '');
-
+            descriptionEl.textContent =
+                escapeHTML(issue.description.substring(0, 200)) + (issue.description.length > 200 ? '...' : '');
 
             const metaEl = document.createElement('div');
             metaEl.className = 'issue-meta';
-            const typeText = issue.type === 'gameIssue' ? `Problema Gioco (${escapeHTML(issue.gameId || 'Non specificato')})` :
-                             issue.type === 'generalFeature' ? 'Funzionalità Generale Sito' :
-                             issue.type === 'newGameRequest' ? 'Suggerimento Nuovo Gioco' : 'Sconosciuto';
+            const typeText =
+                issue.type === 'gameIssue'
+                    ? `Problema Gioco (${escapeHTML(issue.gameId || 'Non specificato')})`
+                    : issue.type === 'generalFeature'
+                      ? 'Funzionalità Generale Sito'
+                      : issue.type === 'newGameRequest'
+                        ? 'Suggerimento Nuovo Gioco'
+                        : 'Sconosciuto';
             const statusBadge = `<span class="issue-status-badge ${getStatusBadgeClass(issue.status)}">${escapeHTML(issue.status)}</span>`;
 
             let submittedByText = `Inviato da: ${escapeHTML(issue.submittedBy.userName || 'Anonimo')}`;
-            if (issue.submittedBy.userNationalityCode && issue.submittedBy.userNationalityCode !== "OTHER") {
-                 submittedByText += ` <span class="fi fi-${issue.submittedBy.userNationalityCode.toLowerCase()}"></span>`;
+            if (issue.submittedBy.userNationalityCode && issue.submittedBy.userNationalityCode !== 'OTHER') {
+                submittedByText += ` <span class="fi fi-${issue.submittedBy.userNationalityCode.toLowerCase()}"></span>`;
             }
             submittedByText += ` il ${formatIssueTimestamp(issue.timestamp)}`;
 
@@ -270,12 +302,12 @@ async function loadIssues() {
             const upvoteButton = document.createElement('button');
             upvoteButton.className = 'upvote-issue-btn game-button';
             upvoteButton.innerHTML = `👍 <span class="upvote-count">${issue.upvotes || 0}</span>`;
-            upvoteButton.title = "Vota questa segnalazione";
+            upvoteButton.title = 'Vota questa segnalazione';
             upvoteButton.disabled = !currentUser; // Disabilita se utente non loggato
 
             if (currentUser && issue.upvotedBy && issue.upvotedBy.includes(currentUser.uid)) {
                 upvoteButton.classList.add('voted');
-                upvoteButton.title = "Hai già votato";
+                upvoteButton.title = 'Hai già votato';
             }
             upvoteButton.addEventListener('click', () => handleIssueUpvote(issueId));
 
@@ -288,14 +320,14 @@ async function loadIssues() {
             issueCard.appendChild(actionsEl);
             issuesDisplayArea.appendChild(issueCard);
         });
-
     } catch (error) {
-        console.error("Errore caricamento issues:", error);
+        console.error('Errore caricamento issues:', error);
         if (issuesDisplayArea) {
             if (error.code === 'failed-precondition') {
-                 issuesDisplayArea.innerHTML = '<p>Errore: Indice Firestore mancante per i filtri o ordinamento. Controlla la console per il link per crearlo.</p>';
+                issuesDisplayArea.innerHTML =
+                    '<p>Errore: Indice Firestore mancante per i filtri o ordinamento. Controlla la console per il link per crearlo.</p>';
             } else {
-                 issuesDisplayArea.innerHTML = '<p>Errore caricamento segnalazioni. Riprova più tardi.</p>';
+                issuesDisplayArea.innerHTML = '<p>Errore caricamento segnalazioni. Riprova più tardi.</p>';
             }
         }
     }
@@ -303,11 +335,12 @@ async function loadIssues() {
 
 // Gestione upvote
 async function handleIssueUpvote(issueId) {
-    if (!currentUser) { // currentUser dovrebbe essere già definito globalmente nel modulo
-        showToast("Devi essere loggato per votare.");
+    if (!currentUser) {
+        // currentUser dovrebbe essere già definito globalmente nel modulo
+        showToast('Devi essere loggato per votare.');
         return;
     }
-    const issueRef = doc(db, "userIssues", issueId);
+    const issueRef = doc(db, 'userIssues', issueId);
     const issueCard = document.querySelector(`.issue-card[data-issue-id="${issueId}"]`);
     const upvoteButton = issueCard ? issueCard.querySelector('.upvote-issue-btn') : null;
 
@@ -316,8 +349,8 @@ async function handleIssueUpvote(issueId) {
     try {
         const docSnap = await getDoc(issueRef);
         if (!docSnap.exists()) {
-            console.error("Issue non trovata:", issueId);
-            showToast("Errore: Segnalazione non trovata.");
+            console.error('Issue non trovata:', issueId);
+            showToast('Errore: Segnalazione non trovata.');
             if (upvoteButton) upvoteButton.disabled = false;
             return;
         }
@@ -332,7 +365,7 @@ async function handleIssueUpvote(issueId) {
         const updatePayload = {
             upvotes: newUpvotesCountOp,
             upvotedBy: userArrayUpdateOp,
-            updatedAt: serverTimestamp() // <-- AGGIUNTA CRUCIALE
+            updatedAt: serverTimestamp(), // <-- AGGIUNTA CRUCIALE
         };
 
         await updateDoc(issueRef, updatePayload);
@@ -346,22 +379,19 @@ async function handleIssueUpvote(issueId) {
 
             if (updatedData.upvotedBy && updatedData.upvotedBy.includes(currentUser.uid)) {
                 upvoteButton.classList.add('voted');
-                upvoteButton.title = "Hai già votato";
+                upvoteButton.title = 'Hai già votato';
             } else {
                 upvoteButton.classList.remove('voted');
-                upvoteButton.title = "Vota questa segnalazione";
+                upvoteButton.title = 'Vota questa segnalazione';
             }
         }
-
     } catch (error) {
-        console.error("Errore upvote issue:", error); // Log originale del tuo errore
-        showToast("Errore durante il voto.");
+        console.error('Errore upvote issue:', error); // Log originale del tuo errore
+        showToast('Errore durante il voto.');
     } finally {
         if (upvoteButton) upvoteButton.disabled = false;
     }
 }
-
-
 
 // Event listener per i filtri
 if (applyIssueFiltersBtn) {

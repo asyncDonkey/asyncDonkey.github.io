@@ -17,7 +17,6 @@ const musicGainNode = audioContext.createGain(); // Nodo Gain per la musica
 musicGainNode.connect(masterGainNode);
 musicGainNode.gain.value = 0.5; // Volume musica (relativo al master, spesso più basso)
 
-
 /**
  * Carica un singolo file audio.
  * @param {string} name - Nome identificativo del suono.
@@ -26,8 +25,8 @@ musicGainNode.gain.value = 0.5; // Volume musica (relativo al master, spesso pi�
  */
 async function loadSound(name, path) {
     if (!audioContext) {
-        console.warn("AudioContext non supportato. Audio disabilitato.");
-        return Promise.reject("AudioContext not supported");
+        console.warn('AudioContext non supportato. Audio disabilitato.');
+        return Promise.reject('AudioContext not supported');
     }
     if (sounds[name]) {
         return Promise.resolve(sounds[name]); // Già caricato
@@ -57,14 +56,14 @@ async function loadBackgroundMusic(path) {
     if (!audioContext) return;
     try {
         const response = await fetch(path);
-         if (!response.ok) {
+        if (!response.ok) {
             throw new Error(`Errore HTTP ${response.status} nel caricare la musica ${path}`);
         }
         const arrayBuffer = await response.arrayBuffer();
         backgroundMusicBuffer = await audioContext.decodeAudioData(arrayBuffer);
         console.log(`Musica di sottofondo caricata da: ${path}`);
     } catch (error) {
-        console.error("Errore caricamento musica di sottofondo:", error);
+        console.error('Errore caricamento musica di sottofondo:', error);
         backgroundMusicBuffer = null;
     }
 }
@@ -108,12 +107,12 @@ function playSound(name, loop = false, volume = 1.0) {
  */
 function playMusic(loop = true) {
     if (!audioContext || !backgroundMusicBuffer) {
-        console.warn("Buffer musica di sottofondo non caricato o AudioContext non disponibile.");
+        console.warn('Buffer musica di sottofondo non caricato o AudioContext non disponibile.');
         return;
     }
     if (audioContext.state === 'suspended') {
         audioContext.resume().then(() => {
-            console.log("AudioContext ripreso, avvio musica.");
+            console.log('AudioContext ripreso, avvio musica.');
             actuallyPlayMusic(loop);
         });
     } else {
@@ -130,7 +129,7 @@ function actuallyPlayMusic(loop) {
     backgroundMusicSource.connect(musicGainNode); // Connetti al gain della musica
     backgroundMusicSource.loop = loop;
     backgroundMusicSource.onended = () => {
-        console.log("Musica di sottofondo terminata.");
+        console.log('Musica di sottofondo terminata.');
         isMusicPlaying = false;
         // Se non è in loop e vuoi che ricominci, puoi chiamare di nuovo playMusic qui,
         // ma attenzione a non creare loop infiniti se l'utente non vuole.
@@ -139,9 +138,8 @@ function actuallyPlayMusic(loop) {
     };
     backgroundMusicSource.start(0);
     isMusicPlaying = true;
-    console.log("Musica di sottofondo avviata.");
+    console.log('Musica di sottofondo avviata.');
 }
-
 
 /**
  * Ferma la musica di sottofondo.
@@ -150,7 +148,7 @@ function stopMusic() {
     if (backgroundMusicSource && isMusicPlaying) {
         backgroundMusicSource.stop(0);
         isMusicPlaying = false;
-        console.log("Musica di sottofondo fermata.");
+        console.log('Musica di sottofondo fermata.');
     }
 }
 
@@ -186,7 +184,6 @@ function setMusicVolume(volumeLevel) {
     }
 }
 
-
 // Esporta le funzioni che vuoi rendere disponibili al gioco
 export {
     loadSound,
@@ -197,5 +194,5 @@ export {
     setMasterVolume,
     setSoundEffectsVolume,
     setMusicVolume,
-    audioContext // Esponi per controlli avanzati o resume su interazione utente
+    audioContext, // Esponi per controlli avanzati o resume su interazione utente
 };

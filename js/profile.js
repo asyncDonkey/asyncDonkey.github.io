@@ -1,8 +1,19 @@
 // js/profile.js
 
 import { db, auth, generateBlockieAvatar } from './main.js';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs, orderBy, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+    doc,
+    getDoc,
+    updateDoc,
+    collection,
+    query,
+    where,
+    getDocs,
+    orderBy,
+    deleteDoc,
+    Timestamp,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
 
 // --- DEFINIZIONE COSTANTI ELEMENTI DOM (ESISTENTI) ---
@@ -38,15 +49,24 @@ const myPublishedArticlesListDiv = document.getElementById('myPublishedArticlesL
 const myRejectedLoadingMessage = document.getElementById('myRejectedLoadingMessage');
 const myRejectedArticlesListDiv = document.getElementById('myRejectedArticlesList');
 
-
 let currentUser = null;
 let currentUserProfile = null;
 
 // --- Funzioni Esistenti (loadProfileData, handleProfileUpdate) ---
 async function loadProfileData(uid) {
-    console.log("profile.js - Loading profile for UID:", uid);
-    if (!profileContent || !profileLoadingMessage || !profileLoginMessage || !profileAvatarImg || !profileNationalitySpan || !profileEmailSpan || !currentNicknameSpan || !profileNicknameInput || !profileMessage) {
-        console.error("Profile page DOM elements (for profile data) missing! Check IDs.");
+    console.log('profile.js - Loading profile for UID:', uid);
+    if (
+        !profileContent ||
+        !profileLoadingMessage ||
+        !profileLoginMessage ||
+        !profileAvatarImg ||
+        !profileNationalitySpan ||
+        !profileEmailSpan ||
+        !currentNicknameSpan ||
+        !profileNicknameInput ||
+        !profileMessage
+    ) {
+        console.error('Profile page DOM elements (for profile data) missing! Check IDs.');
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
         if (profileLoginMessage) {
             profileLoginMessage.style.display = 'block';
@@ -66,7 +86,7 @@ async function loadProfileData(uid) {
     profileNationalitySpan.textContent = 'Loading...';
     profileNicknameInput.value = '';
 
-    const userProfileRef = doc(db, "userProfiles", uid);
+    const userProfileRef = doc(db, 'userProfiles', uid);
     try {
         const docSnap = await getDoc(userProfileRef);
         if (docSnap.exists()) {
@@ -75,7 +95,7 @@ async function loadProfileData(uid) {
             currentNicknameSpan.textContent = currentUserProfile.nickname || 'Non impostato';
             profileNicknameInput.value = currentUserProfile.nickname || '';
             if (profileNationalitySpan) {
-                if (currentUserProfile.nationalityCode && currentUserProfile.nationalityCode !== "OTHER") {
+                if (currentUserProfile.nationalityCode && currentUserProfile.nationalityCode !== 'OTHER') {
                     const countryCodeOriginal = currentUserProfile.nationalityCode.toUpperCase();
                     const countryCodeForLibrary = countryCodeOriginal.toLowerCase();
                     profileNationalitySpan.innerHTML = '';
@@ -85,7 +105,7 @@ async function loadProfileData(uid) {
                     const codeTextNode = document.createTextNode(countryCodeOriginal);
                     profileNationalitySpan.appendChild(flagIconSpan);
                     profileNationalitySpan.appendChild(codeTextNode);
-                } else if (currentUserProfile.nationalityCode === "OTHER") {
+                } else if (currentUserProfile.nationalityCode === 'OTHER') {
                     profileNationalitySpan.textContent = 'Altro / Non specificato';
                 } else {
                     profileNationalitySpan.textContent = 'Non specificata';
@@ -104,13 +124,13 @@ async function loadProfileData(uid) {
             profileLoadingMessage.style.display = 'none';
             profileContent.style.display = 'block';
         } else {
-            console.warn("profile.js - No profile document found for user:", uid);
+            console.warn('profile.js - No profile document found for user:', uid);
             profileLoadingMessage.style.display = 'none';
             profileLoginMessage.style.display = 'block';
             profileLoginMessage.innerHTML = '<p>Error: Could not find profile data.</p>';
         }
     } catch (error) {
-        console.error("profile.js - Error loading profile data:", error);
+        console.error('profile.js - Error loading profile data:', error);
         profileLoadingMessage.style.display = 'none';
         profileLoginMessage.style.display = 'block';
         profileLoginMessage.innerHTML = `<p>Error loading profile: ${error.message}</p>`;
@@ -146,7 +166,7 @@ async function handleProfileUpdate(event) {
     saveProfileBtn.disabled = true;
     saveProfileBtn.textContent = 'Saving...';
     profileMessage.textContent = '';
-    const userProfileRef = doc(db, "userProfiles", currentUser.uid);
+    const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
     const dataToUpdate = { nickname: newNickname };
     try {
         await updateDoc(userProfileRef, dataToUpdate);
@@ -158,11 +178,11 @@ async function handleProfileUpdate(event) {
         const headerUserAvatarElement = document.getElementById('headerUserAvatar');
         if (headerUserAvatarElement) headerUserAvatarElement.alt = `Avatar di ${newNickname}`;
     } catch (error) {
-        console.error("profile.js - Error updating profile:", error);
+        console.error('profile.js - Error updating profile:', error);
         profileMessage.textContent = `Errore aggiornamento profilo: ${error.message}`;
         profileMessage.style.color = 'red';
         if (error.code === 'permission-denied') {
-            showToast(friendlyErrorMessage, ' (Controlla le Regole Firestore)'); // Esempio chiamata
+            //showToast(friendlyErrorMessage, ' (Controlla le Regole Firestore)'); // Esempio chiamata
         }
     } finally {
         if (saveProfileBtn) {
@@ -177,7 +197,11 @@ async function handleProfileUpdate(event) {
 function formatMyArticleTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
         return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
-            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
     }
     return 'N/A';
@@ -185,22 +209,29 @@ function formatMyArticleTimestamp(firebaseTimestamp) {
 
 async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
     const statusText = currentStatus === 'draft' ? 'bozza' : 'articolo respinto';
-    if (!confirm(`Sei sicuro di voler eliminare ${statusText} "${articleTitle || 'Senza Titolo'}"? L'azione è irreversibile.`)) {
+    if (
+        !confirm(
+            `Sei sicuro di voler eliminare ${statusText} "${articleTitle || 'Senza Titolo'}"? L'azione è irreversibile.`
+        )
+    ) {
         return;
     }
     try {
-    const articleRef = doc(db, "articles", articleId);
-    await deleteDoc(articleRef);
-    // alert(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`); // VECCHIO
-    showToast(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`, 'success'); // NUOVO
-    if (currentUser) {
-        loadMyArticles(currentUser.uid); 
+        const articleRef = doc(db, 'articles', articleId);
+        await deleteDoc(articleRef);
+        // alert(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`); // VECCHIO
+        showToast(
+            `${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`,
+            'success'
+        ); // NUOVO
+        if (currentUser) {
+            loadMyArticles(currentUser.uid);
+        }
+    } catch (error) {
+        console.error(`Errore durante l'eliminazione di ${statusText}:`, error); // Log dell'errore
+        // alert(`Si è verificato un errore durante l'eliminazione. Riprova.`); // VECCHIO
+        showToast(`Si è verificato un errore durante l'eliminazione. Riprova.`, 'error'); // NUOVO
     }
-} catch (error) {
-    console.error(`Errore durante l'eliminazione di ${statusText}:`, error); // Log dell'errore
-    // alert(`Si è verificato un errore durante l'eliminazione. Riprova.`); // VECCHIO
-    showToast(`Si è verificato un errore durante l'eliminazione. Riprova.`, 'error'); // NUOVO
-}
 }
 
 /**
@@ -216,24 +247,24 @@ function createMyArticleItemElement(article, articleId) {
 
     const titleEl = document.createElement('h4'); // Usiamo h4 per il titolo della card
     titleEl.className = 'my-article-card-title';
-    titleEl.textContent = article.title || `Articolo senza titolo (ID: ${articleId.substring(0,6)}...)`;
+    titleEl.textContent = article.title || `Articolo senza titolo (ID: ${articleId.substring(0, 6)}...)`;
     cardDiv.appendChild(titleEl);
 
     const metaInfoDiv = document.createElement('div');
     metaInfoDiv.className = 'my-article-card-meta';
 
     const statusTextMap = {
-        draft: "Bozza",
-        pendingReview: "In Revisione",
-        published: "Pubblicato",
-        rejected: "Respinto"
+        draft: 'Bozza',
+        pendingReview: 'In Revisione',
+        published: 'Pubblicato',
+        rejected: 'Respinto',
     };
     const statusDisplay = statusTextMap[article.status] || article.status || 'Stato Sconosciuto';
     const statusEl = document.createElement('span');
     statusEl.className = `my-article-card-status status-${article.status || 'unknown'}`; // Classe specifica per lo stato + generica
     statusEl.textContent = statusDisplay;
     metaInfoDiv.appendChild(statusEl);
-    
+
     const dateEl = document.createElement('span');
     dateEl.className = 'my-article-card-date';
     const dateToDisplay = article.status === 'published' ? article.publishedAt : article.updatedAt;
@@ -248,13 +279,12 @@ function createMyArticleItemElement(article, articleId) {
         reasonEl.innerHTML = `<strong>Motivo:</strong> ${article.rejectionReason}`; // Usiamo innerHTML per il bold
         cardDiv.appendChild(reasonEl);
     }
-    
+
     // Snippet (Opzionale, potremmo aggiungerlo se c'è spazio nella card)
     // const snippetEl = document.createElement('p');
     // snippetEl.className = 'my-article-card-snippet';
     // snippetEl.textContent = (article.snippet || article.contentMarkdown.substring(0, 70) + "...") ; // Esempio
     // cardDiv.appendChild(snippetEl);
-
 
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'my-article-card-actions';
@@ -266,7 +296,7 @@ function createMyArticleItemElement(article, articleId) {
         editButton.className = 'game-button my-article-action-button'; // Classe per bottoni azione card
         editButton.textContent = 'Modifica';
         actionsDiv.appendChild(editButton);
-        
+
         const deleteButton = document.createElement('button');
         deleteButton.className = 'game-button my-article-action-button delete'; // Classe specifica per delete
         deleteButton.textContent = 'Elimina';
@@ -275,23 +305,23 @@ function createMyArticleItemElement(article, articleId) {
     } else if (article.status === 'pendingReview') {
         const previewButton = document.createElement('a');
         previewButton.href = `view-article.html?id=${articleId}&preview=true`;
-        previewButton.target = "_blank";
+        previewButton.target = '_blank';
         previewButton.className = 'game-button my-article-action-button';
         previewButton.textContent = 'Anteprima';
         actionsDiv.appendChild(previewButton);
     } else if (article.status === 'published') {
         const viewButton = document.createElement('a');
         viewButton.href = `view-article.html?id=${articleId}`;
-        viewButton.target = "_blank";
+        viewButton.target = '_blank';
         viewButton.className = 'game-button my-article-action-button';
         viewButton.textContent = 'Visualizza';
         actionsDiv.appendChild(viewButton);
     } else if (article.status === 'rejected') {
         const resubmitButton = document.createElement('a');
-        resubmitButton.href = `submit-article.html`; 
+        resubmitButton.href = `submit-article.html`;
         resubmitButton.className = 'game-button my-article-action-button';
         resubmitButton.textContent = 'Nuova Sottomissione';
-        resubmitButton.title = "Crea un nuovo articolo (puoi copiare il contenuto da quello respinto)";
+        resubmitButton.title = 'Crea un nuovo articolo (puoi copiare il contenuto da quello respinto)';
         actionsDiv.appendChild(resubmitButton);
 
         const deleteButton = document.createElement('button');
@@ -307,31 +337,47 @@ function createMyArticleItemElement(article, articleId) {
     return cardDiv;
 }
 
-
 async function loadMyArticles(userId) {
     if (!userId) return;
 
     if (myArticlesSection) myArticlesSection.style.display = 'block';
 
     const articleStatusesToLoad = [
-        { status: 'draft', listDiv: myDraftArticlesListDiv, loadingMsg: myDraftsLoadingMessage, title: "Le Mie Bozze" },
-        { status: 'pendingReview', listDiv: myPendingArticlesListDiv, loadingMsg: myPendingLoadingMessage, title: "Articoli in Revisione" },
-        { status: 'published', listDiv: myPublishedArticlesListDiv, loadingMsg: myPublishedLoadingMessage, title: "Articoli Pubblicati" },
-        { status: 'rejected', listDiv: myRejectedArticlesListDiv, loadingMsg: myRejectedLoadingMessage, title: "Articoli Respinti" }
+        { status: 'draft', listDiv: myDraftArticlesListDiv, loadingMsg: myDraftsLoadingMessage, title: 'Le Mie Bozze' },
+        {
+            status: 'pendingReview',
+            listDiv: myPendingArticlesListDiv,
+            loadingMsg: myPendingLoadingMessage,
+            title: 'Articoli in Revisione',
+        },
+        {
+            status: 'published',
+            listDiv: myPublishedArticlesListDiv,
+            loadingMsg: myPublishedLoadingMessage,
+            title: 'Articoli Pubblicati',
+        },
+        {
+            status: 'rejected',
+            listDiv: myRejectedArticlesListDiv,
+            loadingMsg: myRejectedLoadingMessage,
+            title: 'Articoli Respinti',
+        },
     ];
 
     for (const S of articleStatusesToLoad) {
         const container = S.listDiv?.parentElement; // es. myDraftArticlesListContainer
         if (container && S.listDiv && S.loadingMsg) {
             S.loadingMsg.style.display = 'block';
-            S.listDiv.innerHTML = ''; 
+            S.listDiv.innerHTML = '';
 
             try {
-                const articlesRef = collection(db, "articles");
-                const q = query(articlesRef,
-                                where("authorId", "==", userId),
-                                where("status", "==", S.status),
-                                orderBy("updatedAt", "desc"));
+                const articlesRef = collection(db, 'articles');
+                const q = query(
+                    articlesRef,
+                    where('authorId', '==', userId),
+                    where('status', '==', S.status),
+                    orderBy('updatedAt', 'desc')
+                );
                 const querySnapshot = await getDocs(q);
 
                 S.loadingMsg.style.display = 'none';
@@ -349,12 +395,15 @@ async function loadMyArticles(userId) {
             } catch (error) {
                 console.error(`Errore caricamento articoli utente con stato ${S.status}:`, error);
                 S.loadingMsg.style.display = 'none';
-                if (S.listDiv) S.listDiv.innerHTML = `<p>Errore nel caricamento degli articoli "${S.status}". Riprova più tardi.</p>`;
+                if (S.listDiv)
+                    S.listDiv.innerHTML = `<p>Errore nel caricamento degli articoli "${S.status}". Riprova più tardi.</p>`;
             }
         } else {
-            console.warn(`Elementi DOM per lo stato "${S.status}" non trovati o non configurati in profile.js. Sezione non caricata.`);
-            if(S.loadingMsg) S.loadingMsg.style.display = 'none'; // Nascondi comunque il messaggio di caricamento
-            if(S.listDiv) S.listDiv.innerHTML = `<p>Sezione articoli "${S.status}" non caricata (errore config).</p>`;
+            console.warn(
+                `Elementi DOM per lo stato "${S.status}" non trovati o non configurati in profile.js. Sezione non caricata.`
+            );
+            if (S.loadingMsg) S.loadingMsg.style.display = 'none'; // Nascondi comunque il messaggio di caricamento
+            if (S.listDiv) S.listDiv.innerHTML = `<p>Sezione articoli "${S.status}" non caricata (errore config).</p>`;
         }
     }
 }
@@ -366,13 +415,13 @@ onAuthStateChanged(auth, (user) => {
         if (profileContent && profileLoadingMessage && profileLoginMessage) {
             loadProfileData(user.uid);
             if (myArticlesSection) {
-                 myArticlesSection.style.display = 'block';
-                 loadMyArticles(user.uid);
+                myArticlesSection.style.display = 'block';
+                loadMyArticles(user.uid);
             } else {
-                console.warn("profile.js: Elemento myArticlesSection non trovato nel DOM.");
+                console.warn('profile.js: Elemento myArticlesSection non trovato nel DOM.');
             }
         } else {
-            console.error("profile.js - Auth listener: Elementi UI principali del profilo non trovati.");
+            console.error('profile.js - Auth listener: Elementi UI principali del profilo non trovati.');
         }
     } else {
         currentUser = null;
@@ -380,22 +429,26 @@ onAuthStateChanged(auth, (user) => {
         if (profileContent) profileContent.style.display = 'none';
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
         if (profileLoginMessage) profileLoginMessage.style.display = 'block';
-        
+
         if (myArticlesSection) myArticlesSection.style.display = 'none';
-        
+
         const articleListsToClear = [
-            myDraftArticlesListDiv, myPendingArticlesListDiv, 
-            myPublishedArticlesListDiv, myRejectedArticlesListDiv
+            myDraftArticlesListDiv,
+            myPendingArticlesListDiv,
+            myPublishedArticlesListDiv,
+            myRejectedArticlesListDiv,
         ];
-        articleListsToClear.forEach(listDiv => {
+        articleListsToClear.forEach((listDiv) => {
             if (listDiv) listDiv.innerHTML = '';
         });
         const loadingMessagesToHide = [
-            myDraftsLoadingMessage, myPendingLoadingMessage,
-            myPublishedLoadingMessage, myRejectedLoadingMessage
+            myDraftsLoadingMessage,
+            myPendingLoadingMessage,
+            myPublishedLoadingMessage,
+            myRejectedLoadingMessage,
         ];
-        loadingMessagesToHide.forEach(msgEl => {
-            if(msgEl) msgEl.style.display = 'none';
+        loadingMessagesToHide.forEach((msgEl) => {
+            if (msgEl) msgEl.style.display = 'none';
         });
     }
 });
@@ -403,5 +456,5 @@ onAuthStateChanged(auth, (user) => {
 if (profileUpdateForm) {
     profileUpdateForm.addEventListener('submit', handleProfileUpdate);
 } else {
-     console.warn("profile.js - Form profileUpdateForm non trovato.");
+    console.warn('profile.js - Form profileUpdateForm non trovato.');
 }

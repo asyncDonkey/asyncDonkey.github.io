@@ -1,6 +1,6 @@
-# DEVELOPMENT PLAN (v3.8.13 - Revisione e Prossimi Passi) 🚀
+# DEVELOPMENT PLAN (v3.8.14 - Linter/Formatter e Prossimi Passi) 🚀
 
-**Stato del Progetto:** Implementati i like per articoli e commenti (con visualizzazione likers). Editor Markdown funzionante. Pagine `contribute.html` e `admin-dashboard.html` create e operative. Funzionalità admin per articoli complete (inclusa gestione `rejectionReason`). Sistema base di tracciamento issue implementato e funzionalità di upvote corretta. Avatar e bandierina autore aggiunti alle card articoli sulla homepage. Implementata la logica client-side completa per la gestione delle bozze articolo e visualizzazione di tutti gli stati in "I Miei Articoli". Notifiche Toast implementate.
+**Stato del Progetto:** Implementati i like per articoli e commenti (con visualizzazione likers). Editor Markdown funzionante. Pagine `contribute.html` e `admin-dashboard.html` create e operative. Funzionalità admin per articoli complete (inclusa gestione `rejectionReason`). Sistema base di tracciamento issue implementato e funzionalità di upvote corretta. Avatar e bandierina autore aggiunti alle card articoli sulla homepage. Implementata la logica client-side completa per la gestione delle bozze articolo e visualizzazione di tutti gli stati in "I Miei Articoli". Notifiche Toast implementate. **ESLint e Prettier configurati nel progetto con file di configurazione specifici (`eslint.config.mjs`, `.prettierrc.json`) e file `.gitignore` aggiunto.**
 
 ---
 
@@ -69,6 +69,12 @@
         - `[ ]` 🆕 Sub-task D.2.5: Regole Firestore per `allow delete` sui commenti e gestione `commentCount` (valutare Cloud Function se l'aggiornamento del contatore diventa complesso o critico per la sicurezza).
 - **Task D.3: Ottimizzazioni del Codice**
     - `[x]` Refactoring JS (NON VERRA' EFFETTUATO)
+    - `[x]` **Sub-task D.3.A (Nuovo): Configurazione Linter (ESLint) e Formatter (Prettier).**
+        - `[x]` Installazione dipendenze (`eslint`, `prettier`, `eslint-config-prettier`, `eslint-plugin-jsonc`, `eslint-plugin-markdown`, `globals`, `@eslint/js`).
+        - `[x]` Creazione e configurazione di `eslint.config.mjs` (Flat Config).
+        - `[x]` Creazione e configurazione di `.prettierrc.json`.
+        - `[x]` Creazione di `.gitignore` (per `node_modules/` ecc.).
+        - `[ ]` Applicare linting e formattazione a tutto il codebase esistente.
     - `[ ]` Aggiungere commenti dettagliati e documentazione JSDoc alle funzioni e sezioni complesse.
         - `[ ]` 🆕 Sub-task D.3.1: Iniziare con JSDoc per funzioni pubbliche/esportate e logica complessa.
         - `[ ]` 🆕 Sub-task D.3.2: Aggiungere commenti inline per passaggi logici non ovvi.
@@ -106,19 +112,22 @@
     - `[ ]` 🆕 **Bundle Size:** Anche se non si usa un bundler complesso, tenere d'occhio la dimensione totale degli script JS. Se il progetto crescesse molto, considerare tecniche di code splitting o caricamento dinamico di moduli se supportato nativamente dai browser in modo efficiente.
 - **Documentazione del Codice (D.3):** Fondamentale per la manutenibilità. JSDoc aiuta a definire contratti chiari per le funzioni.
 - **Repository GitHub:**
+    - `[x]` **Configurazione `.gitignore`**: Aggiunto per escludere `node_modules/` e altri file non necessari.
     - `[ ]` 🆕 **Issue Templates:** Verificare che i template per le issue su GitHub (`.github/ISSUE_TEMPLATE/`) siano chiari e utili per chi vuole segnalare bug o proporre feature.
     - `[ ]` 🆕 **Contributing Guidelines:** Considerare un file `CONTRIBUTING.md` nel repository se si vuole incoraggiare contributi esterni in modo più strutturato.
 - `[ ]` 🆕 **UI Consistente:** Mantenere coerenza stilistica e funzionale tra le varie sezioni (es. bottoni, form, modali). Le variabili CSS aiutano molto in questo.
 - `[ ]` 🆕 **Revisione UX Admin Dashboard:** Con l'aggiunta di più sezioni (bozze, respinti, issue), assicurarsi che la dashboard admin rimanga navigabile e non sovraccarica. Potrebbe essere utile raggruppare le funzionalità o usare tab/sezioni collassabili in modo più esteso.
+- **Linting e Formattazione Codice:** La configurazione di ESLint e Prettier aiuterà a mantenere uno stile di codice consistente e a identificare potenziali problemi prima. È importante applicare questi strumenti a tutto il codebase esistente.
 
 ---
 
 ## Prossimi Passi Immediati Suggeriti (da discutere e ordinare per priorità) 🎯
 
-1.  **Migliorare UI Admin per `rejectionReason` (A.4.2.6.A):** Sostituire `prompt()` con un campo `textarea` in `admin-dashboard.html` per una migliore UX admin.
-2.  **Pre-popolamento Form per Articoli Respinti (A.4.2.7):** Migliora significativamente l'UX per l'autore.
-3.  **Modifica Nazionalità dal profilo utente (D.2.1, D.2.2):** Funzionalità relativamente contenuta e utile per la completezza del profilo.
-4.  **Documentazione Codice (D.3):** Iniziare a commentare le parti più complesse o recentemente modificate.
-5.  **Test e QA (D.4.1, D.4.2):** Definire e iniziare a eseguire un primo ciclo di test manuali sulle funzionalità principali.
+1.  **Applicare Linting/Formattazione al Codebase Esistente (Sub-task D.3.A):** Eseguire `npx eslint . --fix` e `npx prettier . --write` per uniformare il codice esistente. Potrebbe richiedere alcune correzioni manuali.
+2.  **Migliorare UI Admin per `rejectionReason` (A.4.2.6.A):** Sostituire `prompt()` con un campo `textarea` in `admin-dashboard.html` per una migliore UX admin.
+3.  **Pre-popolamento Form per Articoli Respinti (A.4.2.7):** Migliora significativamente l'UX per l'autore.
+4.  **Modifica Nazionalità dal profilo utente (D.2.1, D.2.2):** Funzionalità relativamente contenuta e utile per la completezza del profilo.
+5.  **Documentazione Codice (D.3):** Iniziare a commentare le parti più complesse o recentemente modificate.
+6.  **Test e QA (D.4.1, D.4.2):** Definire e iniziare a eseguire un primo ciclo di test manuali sulle funzionalità principali.
 
 ---

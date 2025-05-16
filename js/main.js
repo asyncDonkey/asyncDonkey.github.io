@@ -1,26 +1,41 @@
 // js/main.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
-    getFirestore, doc, getDoc, setDoc, serverTimestamp,
-    collection, query, where, orderBy, limit, getDocs,
-    updateDoc, increment, arrayUnion, arrayRemove
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp,
+    collection,
+    query,
+    where,
+    orderBy,
+    limit,
+    getDocs,
+    updateDoc,
+    increment,
+    arrayUnion,
+    arrayRemove,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
-    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
 
 // --- Firebase Config ---
 const firebaseConfig = {
-    apiKey: "AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk", // Sostituisci se necessario
-    authDomain: "asyncdonkey.firebaseapp.com",
-    projectId: "asyncdonkey",
-    storageBucket: "asyncdonkey.appspot.com",
-    messagingSenderId: "939854468396",
-    appId: "1:939854468396:web:9646d4f51737add7704889",
-    measurementId: "G-EQDBKQM3YE"
+    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', // Sostituisci se necessario
+    authDomain: 'asyncdonkey.firebaseapp.com',
+    projectId: 'asyncdonkey',
+    storageBucket: 'asyncdonkey.appspot.com',
+    messagingSenderId: '939854468396',
+    appId: '1:939854468396:web:9646d4f51737add7704889',
+    measurementId: 'G-EQDBKQM3YE',
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,7 +45,7 @@ const auth = getAuth(app);
 // --- Utility Functions ---
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
     if (typeof createIcon !== 'function') {
-        console.error("createIcon from Blockies non importata!");
+        console.error('createIcon from Blockies non importata!');
         return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${imgSize}' height='${imgSize}' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E`;
     }
     try {
@@ -45,10 +60,10 @@ export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
         if (canvasElement && typeof canvasElement.toDataURL === 'function') {
             return canvasElement.toDataURL();
         } else {
-            throw new Error("createIcon non ha restituito un canvas valido.");
+            throw new Error('createIcon non ha restituito un canvas valido.');
         }
     } catch (e) {
-        console.error("Errore generazione avatar Blockie:", e, "Seed:", seed);
+        console.error('Errore generazione avatar Blockie:', e, 'Seed:', seed);
         return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${imgSize}' height='${imgSize}' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E`;
     }
 }
@@ -82,7 +97,7 @@ async function loadUserProfile(user) {
         headerUserAvatarElement.style.display = 'none';
     };
 
-    const userProfileRef = doc(db, "userProfiles", user.uid);
+    const userProfileRef = doc(db, 'userProfiles', user.uid);
     try {
         const docSnap = await getDoc(userProfileRef);
         if (docSnap.exists()) {
@@ -91,7 +106,7 @@ async function loadUserProfile(user) {
         userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
         headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
     } catch (error) {
-        console.error("Errore caricamento profilo utente per navbar:", error);
+        console.error('Errore caricamento profilo utente per navbar:', error);
     }
 }
 
@@ -108,18 +123,22 @@ function updateAuthUI(user) {
         { el: authContainer, showWhenLoggedOut: true, displayType: 'flex' },
         { el: userProfileContainer, showWhenLoggedOut: false, displayType: 'flex' },
         { el: profileNavLink, showWhenLoggedOut: false, displayType: 'list-item' },
-        { el: writeArticleNavLink, showWhenLoggedOut: false, displayType: 'list-item' }
+        { el: writeArticleNavLink, showWhenLoggedOut: false, displayType: 'list-item' },
     ];
 
-    elementsToToggleBasedOnLogin.forEach(item => {
+    elementsToToggleBasedOnLogin.forEach((item) => {
         if (item.el) {
-            const displayStyle = user ?
-                                 (item.showWhenLoggedOut ? 'none' : item.displayType) :
-                                 (item.showWhenLoggedOut ? item.displayType : 'none');
+            const displayStyle = user
+                ? item.showWhenLoggedOut
+                    ? 'none'
+                    : item.displayType
+                : item.showWhenLoggedOut
+                  ? item.displayType
+                  : 'none';
             item.el.style.display = displayStyle;
         }
     });
-    
+
     const userDisplayName = document.getElementById('userDisplayName');
     const headerUserAvatar = document.getElementById('headerUserAvatar');
 
@@ -135,21 +154,20 @@ function updateAuthUI(user) {
     }
 }
 
-
 export { db, auth };
 
 async function loadHomeMiniLeaderboard() {
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
     if (!leaderboardListElement) return;
     if (!db) {
-        console.error("DB instance non disponibile per mini-leaderboard homepage.");
+        console.error('DB instance non disponibile per mini-leaderboard homepage.');
         leaderboardListElement.innerHTML = '<li>Errore DB.</li>';
         return;
     }
     leaderboardListElement.innerHTML = '<li>Caricamento...</li>';
     try {
-        const scoresCollectionRef = collection(db, "leaderboardScores");
-        const q = query(scoresCollectionRef, where("gameId", "==", "donkeyRunner"), orderBy("score", "desc"), limit(5));
+        const scoresCollectionRef = collection(db, 'leaderboardScores');
+        const q = query(scoresCollectionRef, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), limit(5));
         const querySnapshot = await getDocs(q);
         leaderboardListElement.innerHTML = '';
         if (querySnapshot.empty) {
@@ -170,13 +188,18 @@ async function loadHomeMiniLeaderboard() {
             avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
             avatarImg.alt = `Avatar`;
             avatarImg.style.backgroundColor = 'transparent';
-            avatarImg.onerror = () => { avatarImg.style.backgroundColor = '#ddd'; avatarImg.alt='Err'; avatarImg.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";};
+            avatarImg.onerror = () => {
+                avatarImg.style.backgroundColor = '#ddd';
+                avatarImg.alt = 'Err';
+                avatarImg.src =
+                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+            };
             listItem.appendChild(avatarImg);
             const playerInfoSpan = document.createElement('span');
             playerInfoSpan.className = 'player-info';
             const nameSpan = document.createElement('span');
             nameSpan.className = 'player-name';
-            if (entry.nationalityCode && entry.nationalityCode !== "OTHER" && entry.nationalityCode.length === 2) {
+            if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
                 const flagIconSpan = document.createElement('span');
                 flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
                 flagIconSpan.style.marginRight = '5px';
@@ -197,7 +220,7 @@ async function loadHomeMiniLeaderboard() {
             rank++;
         });
     } catch (error) {
-        console.error("Errore caricamento mini-leaderboard homepage:", error);
+        console.error('Errore caricamento mini-leaderboard homepage:', error);
         leaderboardListElement.innerHTML = '<li>Errore caricamento.</li>';
         if (error.code === 'failed-precondition') {
             leaderboardListElement.innerHTML += '<li>(Indice DB mancante)</li>';
@@ -216,7 +239,7 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
     }
 
     try {
-        const articleRef = doc(db, "articles", articleId);
+        const articleRef = doc(db, 'articles', articleId);
         const docSnap = await getDoc(articleRef);
 
         if (docSnap.exists()) {
@@ -226,13 +249,13 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
                 if (likeCountSpan) likeCountSpan.textContent = articleData.likeCount || 0;
                 buttonElement.innerHTML = `🤍`;
                 buttonElement.disabled = true;
-                buttonElement.title = "Articolo non disponibile per like";
+                buttonElement.title = 'Articolo non disponibile per like';
                 buttonElement.classList.remove('liked');
-                return; 
+                return;
             }
 
             const likes = articleData.likeCount || 0;
-            const likedByUsers = articleData.likedByUsers || []; 
+            const likedByUsers = articleData.likedByUsers || [];
 
             if (likeCountSpan) {
                 likeCountSpan.textContent = likes;
@@ -242,29 +265,29 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
                 buttonElement.disabled = false;
                 const userHasLiked = Array.isArray(likedByUsers) && likedByUsers.includes(currentUser.uid);
                 if (userHasLiked) {
-                    buttonElement.innerHTML = `💙`; 
+                    buttonElement.innerHTML = `💙`;
                     buttonElement.classList.add('liked');
                     buttonElement.title = "Hai messo 'Mi piace' (vedi articolo per cambiare)";
                 } else {
-                    buttonElement.innerHTML = `🤍`; 
+                    buttonElement.innerHTML = `🤍`;
                     buttonElement.classList.remove('liked');
                     buttonElement.title = "Metti 'Mi piace' (vedi articolo)";
                 }
             } else {
-                buttonElement.innerHTML = `🤍`; 
+                buttonElement.innerHTML = `🤍`;
                 buttonElement.disabled = true;
-                buttonElement.title = "Fai login per mettere like";
+                buttonElement.title = 'Fai login per mettere like';
                 buttonElement.classList.remove('liked');
             }
         } else {
             console.warn(`Articolo "${articleId}" non trovato in Firestore.`);
-            if (likeCountSpan) likeCountSpan.textContent = "0";
+            if (likeCountSpan) likeCountSpan.textContent = '0';
             buttonElement.innerHTML = `🤍`;
             buttonElement.disabled = true;
         }
     } catch (error) {
         console.error(`Errore Firestore aggiornamento UI like per articolo "${articleId}":`, error);
-        if (likeCountSpan) likeCountSpan.textContent = "Err";
+        if (likeCountSpan) likeCountSpan.textContent = 'Err';
         buttonElement.innerHTML = `🤍`;
         buttonElement.disabled = true;
     }
@@ -280,7 +303,7 @@ async function handleHomepageArticleLike(event) {
         return;
     }
     if (!articleId) {
-        console.error("ArticleId mancante nel dataset del bottone like homepage.");
+        console.error('ArticleId mancante nel dataset del bottone like homepage.');
         return;
     }
     window.location.href = `view-article.html?id=${articleId}#articleLikesContainer`;
@@ -289,18 +312,18 @@ async function handleHomepageArticleLike(event) {
 async function updateHomepageCommentCountUI(countSpanElement, articleId) {
     if (!countSpanElement || !articleId) return;
     try {
-        const articleRef = doc(db, "articles", articleId);
+        const articleRef = doc(db, 'articles', articleId);
         const docSnap = await getDoc(articleRef);
         if (docSnap.exists() && docSnap.data().status === 'published') {
             const articleData = docSnap.data();
             const comments = articleData.commentCount || 0;
             countSpanElement.textContent = comments;
         } else {
-            countSpanElement.textContent = "0";
+            countSpanElement.textContent = '0';
         }
     } catch (error) {
         console.error(`Errore aggiornamento UI conteggio commenti per ${articleId}:`, error);
-        countSpanElement.textContent = "Err";
+        countSpanElement.textContent = 'Err';
     }
 }
 
@@ -347,18 +370,18 @@ export async function initializeHomepageArticleInteractions(currentUser) {
 
 function traduireErroreFirebase(codiceErrore) {
     const errors = {
-        "auth/invalid-email": "L'indirizzo email non è valido.",
-        "auth/user-disabled": "Questo account utente è stato disabilitato.",
-        "auth/user-not-found": "Nessun utente trovato con questa email.",
-        "auth/wrong-password": "Password errata.",
-        "auth/email-already-in-use": "L'indirizzo email è già utilizzato da un altro account.",
-        "auth/operation-not-allowed": "Operazione non permessa (controlla config Firebase Auth).",
-        "auth/weak-password": "La password è troppo debole (minimo 6 caratteri)."
+        'auth/invalid-email': "L'indirizzo email non è valido.",
+        'auth/user-disabled': 'Questo account utente è stato disabilitato.',
+        'auth/user-not-found': 'Nessun utente trovato con questa email.',
+        'auth/wrong-password': 'Password errata.',
+        'auth/email-already-in-use': "L'indirizzo email è già utilizzato da un altro account.",
+        'auth/operation-not-allowed': 'Operazione non permessa (controlla config Firebase Auth).',
+        'auth/weak-password': 'La password è troppo debole (minimo 6 caratteri).',
     };
     return errors[codiceErrore] || `Errore (${codiceErrore}).`;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // console.log("DOMContentLoaded eseguito.");
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
@@ -375,8 +398,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Definizioni inline per semplicità, potrebbero essere spostate se diventano complesse
     function setupSmoothScrolling() {
-        document.querySelectorAll('header nav a[href^="#"]').forEach(link => {
-            link.addEventListener('click', function(e) {
+        document.querySelectorAll('header nav a[href^="#"]').forEach((link) => {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
                 try {
@@ -384,31 +407,71 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                } catch (error) { /* Gestisci errore selettore */ }
+                } catch (error) {
+                    /* Gestisci errore selettore */
+                }
             });
         });
     }
-    function setupScrollToTopButton() { if (!scrollToTopBtn) return; window.addEventListener('scroll', () => { scrollToTopBtn.classList.toggle('show', window.pageYOffset > 200); }); scrollToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); }); }
-    function setupInteractiveSkills() { 
+    function setupScrollToTopButton() {
+        if (!scrollToTopBtn) return;
+        window.addEventListener('scroll', () => {
+            scrollToTopBtn.classList.toggle('show', window.pageYOffset > 200);
+        });
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+    function setupInteractiveSkills() {
         const skillBadges = document.querySelectorAll('#skills ul li[data-skill-name]');
         const skillDetailsContainer = document.getElementById('skillDetails');
         if (!skillDetailsContainer || skillBadges.length === 0) return;
         let currentlyActiveSkillBadge = null;
-        skillBadges.forEach(badge => {
-            badge.addEventListener('click', function() {
+        skillBadges.forEach((badge) => {
+            badge.addEventListener('click', function () {
                 if (currentlyActiveSkillBadge) {
                     currentlyActiveSkillBadge.classList.remove('active-skill');
                 }
                 this.classList.add('active-skill');
                 currentlyActiveSkillBadge = this;
-                const skillName = this.dataset.skillName || "Skill";
-                const skillDescription = this.dataset.description || "Nessun dettaglio disponibile.";
+                const skillName = this.dataset.skillName || 'Skill';
+                const skillDescription = this.dataset.description || 'Nessun dettaglio disponibile.';
                 skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
             });
         });
     }
-    function setupThemeSwitcher() { if (!themeToggleBtn || !bodyElement) return; const moonIcon = '🌙'; const sunIcon = '☀️'; function applyTheme(theme) { bodyElement.classList.toggle('dark-mode', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? sunIcon : moonIcon; localStorage.setItem('theme', theme); } const savedTheme = localStorage.getItem('theme'); const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; applyTheme(savedTheme || (prefersDark ? 'dark' : 'light')); themeToggleBtn.addEventListener('click', () => { applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark'); }); }
-    function setupModalControls() { const openModal = (modal) => { if (modal) modal.style.display = 'block'; }; const closeModal = (modal) => { if (modal) modal.style.display = 'none'; }; if (showLoginBtn && loginModal) showLoginBtn.addEventListener('click', () => openModal(loginModal)); if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal)); if (closeLoginBtn) closeLoginBtn.addEventListener('click', () => closeModal(loginModal)); if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal)); window.addEventListener('click', (event) => { if (event.target === loginModal) closeModal(loginModal); if (event.target === signupModal) closeModal(signupModal); }); }
+    function setupThemeSwitcher() {
+        if (!themeToggleBtn || !bodyElement) return;
+        const moonIcon = '🌙';
+        const sunIcon = '☀️';
+        function applyTheme(theme) {
+            bodyElement.classList.toggle('dark-mode', theme === 'dark');
+            themeToggleBtn.textContent = theme === 'dark' ? sunIcon : moonIcon;
+            localStorage.setItem('theme', theme);
+        }
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+        themeToggleBtn.addEventListener('click', () => {
+            applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
+        });
+    }
+    function setupModalControls() {
+        const openModal = (modal) => {
+            if (modal) modal.style.display = 'block';
+        };
+        const closeModal = (modal) => {
+            if (modal) modal.style.display = 'none';
+        };
+        if (showLoginBtn && loginModal) showLoginBtn.addEventListener('click', () => openModal(loginModal));
+        if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal));
+        if (closeLoginBtn) closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
+        if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
+        window.addEventListener('click', (event) => {
+            if (event.target === loginModal) closeModal(loginModal);
+            if (event.target === signupModal) closeModal(signupModal);
+        });
+    }
 
     setupSmoothScrolling();
     setupScrollToTopButton();
@@ -420,14 +483,17 @@ document.addEventListener('DOMContentLoaded', function() {
         loadHomeMiniLeaderboard();
     }
     if (document.getElementById('articlesSection')) {
-        displayArticlesSection().then(() => {
-            // console.log("displayArticlesSection completata. Inizializzo interazioni se utente già loggato.");
-            if (auth.currentUser) { // Controlla se l'utente è già noto
-                 initializeHomepageArticleInteractions(auth.currentUser);
-            }
-        }).catch(error => {
-            console.error("Errore durante displayArticlesSection in DOMContentLoaded:", error);
-        });
+        displayArticlesSection()
+            .then(() => {
+                // console.log("displayArticlesSection completata. Inizializzo interazioni se utente già loggato.");
+                if (auth.currentUser) {
+                    // Controlla se l'utente è già noto
+                    initializeHomepageArticleInteractions(auth.currentUser);
+                }
+            })
+            .catch((error) => {
+                console.error('Errore durante displayArticlesSection in DOMContentLoaded:', error);
+            });
     }
     if (document.getElementById('glitchzillaDefeatedBanner')) {
         displayGlitchzillaBanner();
@@ -442,7 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 await signInWithEmailAndPassword(auth, email, password);
                 loginForm.reset();
             } catch (error) {
-                showToast("Errore Login: " + traduireErroreFirebase(error.code));
+                showToast('Errore Login: ' + traduireErroreFirebase(error.code));
             }
         });
     }
@@ -453,8 +519,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = signupForm.signupPassword.value;
             const nickname = signupForm.signupNickname.value.trim();
             const selectedNationalityCode = signupForm.signupNationality.value;
-            if (password.length < 6) { showToast("Password min. 6 caratteri."); return; }
-            if (nickname.length < 3 || nickname.length > 25) { showToast("Nickname 3-25 caratteri."); return; }
+            if (password.length < 6) {
+                showToast('Password min. 6 caratteri.');
+                return;
+            }
+            if (nickname.length < 3 || nickname.length > 25) {
+                showToast('Nickname 3-25 caratteri.');
+                return;
+            }
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
@@ -463,14 +535,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     nickname: nickname,
                     createdAt: serverTimestamp(),
                 };
-                if (selectedNationalityCode && selectedNationalityCode !== "") {
+                if (selectedNationalityCode && selectedNationalityCode !== '') {
                     userProfileData.nationalityCode = selectedNationalityCode;
                 }
-                await setDoc(doc(db, "userProfiles", user.uid), userProfileData);
+                await setDoc(doc(db, 'userProfiles', user.uid), userProfileData);
                 signupForm.reset();
-                showToast("Registrazione avvenuta con successo!");
+                showToast('Registrazione avvenuta con successo!');
             } catch (authError) {
-                showToast("Errore Registrazione: " + traduireErroreFirebase(authError.code));
+                showToast('Errore Registrazione: ' + traduireErroreFirebase(authError.code));
             }
         });
     }
@@ -479,16 +551,16 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 await signOut(auth);
             } catch (error) {
-                showToast("Errore logout: " + error.message);
+                showToast('Errore logout: ' + error.message);
             }
         });
     }
 });
 
 onAuthStateChanged(auth, (user) => {
-    console.log('main.js - Auth state changed. User:', user ? user.uid : "null");
+    console.log('main.js - Auth state changed. User:', user ? user.uid : 'null');
     updateAuthUI(user);
-    
+
     // Altra logica che dipende dallo stato dell'utente, es. per la homepage
     const articlesGridElement = document.getElementById('articlesGrid');
     if (articlesGridElement && typeof initializeHomepageArticleInteractions === 'function') {
