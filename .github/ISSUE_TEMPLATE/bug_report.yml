@@ -1,78 +1,78 @@
 # .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🐛 Bug Report
 description: Create a report to help us improve the project. # <-- CHIAVE CORRETTA
-title: "[BUG] - Brief description of the bug"
-labels: ["bug", "needs-triage"]
-assignees: ["your-github-username"]
+title: '[BUG] - Brief description of the bug'
+labels: ['bug', 'needs-triage']
+assignees: ['your-github-username']
 body:
-  - type: markdown
-    attributes:
-      value: |
-        **Thank you for reporting a bug!** Please provide as much detail as possible to help us diagnose and fix the issue.
-  - type: textarea
-    id: description
-    attributes:
-      label: Detailed Description
-      description: Describe the bug clearly and concisely. What happened? What did you expect?
-    validations:
-      required: true
-  - type: textarea
-    id: steps-to-reproduce
-    attributes:
-      label: Steps to Reproduce
-      description: Provide a clear, numbered list of steps to trigger the bug.
-      placeholder: |
-        1. Go to '...'
-        2. Click on '....'
-        3. Scroll down to '....'
-        4. See error
-      render: markdown # Puoi anche usare 'text' se preferisci testo semplice
-    validations:
-      required: true
-  - type: textarea
-    id: expected-behavior
-    attributes:
-      label: Expected Behavior
-      description: Describe what you expected to happen when performing the steps above.
-    validations:
-      required: true
-  - type: textarea
-    id: actual-behavior
-    attributes:
-      label: Actual Behavior
-      description: Describe what actually happened. Include screenshots or copy/paste full error messages below using code blocks.
-      placeholder: "Provide error messages or describe the incorrect behavior..."
-      render: text # Utile per log o output non formattato
-    validations:
-      required: true
-  - type: markdown
-    attributes:
-      value: "## Environment / Context"
-  - type: input
-    id: os
-    attributes:
-      label: Operating System
-      placeholder: "e.g., Windows 11, macOS Sonoma 14.4, Ubuntu 22.04"
-    validations:
-      required: false # Rendi 'true' se è sempre necessario
-  - type: input
-    id: project-version
-    attributes:
-      label: Project Version
-      placeholder: "e.g., v1.2.3, commit hash `abcdef1`"
-    validations:
-      required: false
-  - type: input
-    id: browser
-    attributes:
-      label: Browser (if applicable)
-      placeholder: "e.g., Chrome 124, Firefox 125"
-    validations:
-      required: false
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: Additional Context (Optional)
-      description: Add any other context, links, configuration details, or potential solutions you might have.
-    validations:
-      required: false
+    - type: markdown
+      attributes:
+          value: |
+              **Thank you for reporting a bug!** Please provide as much detail as possible to help us diagnose and fix the issue.
+    - type: textarea
+      id: description
+      attributes:
+          label: Detailed Description
+          description: Describe the bug clearly and concisely. What happened? What did you expect?
+      validations:
+          required: true
+    - type: textarea
+      id: steps-to-reproduce
+      attributes:
+          label: Steps to Reproduce
+          description: Provide a clear, numbered list of steps to trigger the bug.
+          placeholder: |
+              1. Go to '...'
+              2. Click on '....'
+              3. Scroll down to '....'
+              4. See error
+          render: markdown # Puoi anche usare 'text' se preferisci testo semplice
+      validations:
+          required: true
+    - type: textarea
+      id: expected-behavior
+      attributes:
+          label: Expected Behavior
+          description: Describe what you expected to happen when performing the steps above.
+      validations:
+          required: true
+    - type: textarea
+      id: actual-behavior
+      attributes:
+          label: Actual Behavior
+          description: Describe what actually happened. Include screenshots or copy/paste full error messages below using code blocks.
+          placeholder: 'Provide error messages or describe the incorrect behavior...'
+          render: text # Utile per log o output non formattato
+      validations:
+          required: true
+    - type: markdown
+      attributes:
+          value: '## Environment / Context'
+    - type: input
+      id: os
+      attributes:
+          label: Operating System
+          placeholder: 'e.g., Windows 11, macOS Sonoma 14.4, Ubuntu 22.04'
+      validations:
+          required: false # Rendi 'true' se è sempre necessario
+    - type: input
+      id: project-version
+      attributes:
+          label: Project Version
+          placeholder: 'e.g., v1.2.3, commit hash `abcdef1`'
+      validations:
+          required: false
+    - type: input
+      id: browser
+      attributes:
+          label: Browser (if applicable)
+          placeholder: 'e.g., Chrome 124, Firefox 125'
+      validations:
+          required: false
+    - type: textarea
+      id: additional-context
+      attributes:
+          label: Additional Context (Optional)
+          description: Add any other context, links, configuration details, or potential solutions you might have.
+      validations:
+          required: false

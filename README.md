@@ -1,58 +1,144 @@
-# Umberto Trombetta's Personal Portfolio ✨
+# asyncDonkey.io | Project Hub & Tech Portfolio ✨
 
-Welcome to the GitHub repository for my personal portfolio website! This site showcases my journey as a Civil Engineering student transitioning into Full-Stack Engineering, documenting my learning process and projects.
+Welcome to the GitHub repository for asyncDonkey.io, a personal project hub and technology portfolio. This site documents a learning and development journey focused on Full-Stack technologies, showcasing practical applications, games, and technical articles.
 
 **🚀 Live Demo:** [**https://asyncDonkey.github.io/**](https://asyncDonkey.github.io/)
 
-![asyncDonkey-export](https://github.com/user-attachments/assets/dc7eedbf-c9fa-49ac-b723-56f52c86e118)
+---
+
+## 📖 About This Project
+
+asyncDonkey.io was initiated as a platform to apply and consolidate web development skills, with an initial emphasis on frontend technologies and an expansion towards full-stack functionalities using Firebase. The site aims to combine analytical problem-solving with the creation of interactive and engaging web solutions.
 
 ---
 
-## 📖 About This Portfolio
+## ✨ Key Implemented Features
 
-This website serves as a practical application of my web development learning, focusing initially on core frontend technologies. It reflects my background in Civil Engineering and my growing passion for software development, aiming to bridge analytical thinking with creative web solutions.
----
+This project includes several dynamic and interactive features, such as:
 
-## ✨ Features
-
-This portfolio website includes several interactive features implemented with JavaScript:
-
-* **Smooth Scrolling:** Seamless navigation between sections via the header links.
-* **Scroll to Top Button:** Easily return to the top of the page with a smooth animation.
-* **Interactive Skills Section:** Click on skill badges to view descriptions and details.
-* **Light/Dark Mode Theme Switcher:** Toggle between light and dark visual themes. Your preference is saved locally in your browser!
-* **Responsive Design:** Adapts to different screen sizes for optimal viewing on desktops, tablets, and mobile devices.
+- **User Authentication System:**
+    - User registration and login via Firebase Authentication.
+    - Dedicated registration page with clear information (nickname and nationality set upon registration).
+    - Email verification (to be implemented).
+    - User session management and conditional content display.
+- **User Profiles:**
+    - Public profile viewing (`profile.html?userId=xxx`).
+    - Viewing one's own profile with dedicated sections.
+    - Dynamically generated Blockie avatars based on user ID.
+    - (Future) Ability to set a "Status/Mood" and link external content.
+- **Article System (Blog):**
+    - Article submission by users via a Markdown editor (EasyMDE).
+    - Admin moderation workflow (`pendingReview`, `published`, `rejected`) with feedback (`rejectionReason`).
+    - Article display with Markdown parsing.
+    - "Like" functionality for articles and comments, with a "likers" display.
+    - Comment section for each article.
+    - Personal draft management and display of all article statuses for the author.
+    - Pre-population of the submission form based on rejected articles.
+- **Game "CodeDash! Runner":**
+    - Endless runner game developed in vanilla JavaScript with `<canvas>`.
+    - Score saving to Firebase Firestore.
+    - Global leaderboard and homepage mini-leaderboard.
+    - Power-up system.
+    - (Future) "Glitchzilla" boss.
+- **General Guestbook:**
+    - Allows users (logged in and anonymous) to leave comments on the platform.
+    - "Like" functionality for guestbook comments.
+- **Issue/Suggestion Tracking System:**
+    - `contribute.html` page for submitting reports or suggestions.
+    - Issue display and filtering.
+    - "Upvote" functionality for issues.
+    - Admin moderation of issue statuses.
+- **Admin Dashboard (`admin-dashboard.html`):**
+    - Full article lifecycle management (review, approval, editing, rejection).
+    - Moderation of user-submitted issues.
+    - Viewing drafts and rejected articles.
+- **General UI/UX Enhancements:**
+    - Light/Dark Mode theme with local persistence.
+    - "Scroll to Top" button.
+    - Toast notifications for user feedback.
+    - Responsive design.
+    - Intuitive navigation.
+- **Content Sharing:**
+    - (To be Implemented) Buttons to share articles and scores.
 
 ---
 
 ## 🛠️ Technologies Used
 
-* **Core:** HTML5, CSS3, JavaScript (ES6+)
-* **Layout:** Flexbox, CSS Grid
-* **Styling Features:** CSS Variables (for theming)
-* **Development Environment:** GitHub Codespaces & Dev Containers (Node.js based)
-* **Version Control:** Git & GitHub
-* **Deployment:** GitHub Pages
+- **Frontend:**
+    - HTML5 (semantic and accessible)
+    - CSS3 (Flexbox, Grid, CSS Variables for theming, responsive design)
+    - JavaScript (ES6+ modules, asynchronous programming, DOM manipulation)
+- **Backend & Database (BaaS):**
+    - Firebase Platform:
+        - Firestore (NoSQL Database for articles, comments, profiles, leaderboards, issues)
+        - Firebase Authentication (Email/Password)
+        - Firebase Hosting
+        - Firestore Security Rules (for data protection)
+- **Key JavaScript Libraries:**
+    - [EasyMDE](https://github.com/Ionaru/easy-markdown-editor): Markdown editor for article submission.
+    - [Marked.js](https://github.com/markedjs/marked): Markdown parser for article display.
+    - [Blockies (Ethereum)](https://github.com/ethereum/blockies): "Identicon" avatar generation based on seed.
+    - [Flag Icons (Lipis)](https://github.com/lipis/flag-icons): For nationality flags.
+- **Development Tooling & Code Quality:**
+    - Git & GitHub (Version Control)
+    - [ESLint](https://eslint.org/): JavaScript Linter (with "flat config" `eslint.config.mjs`).
+    - [Prettier](https://prettier.io/): Code formatter (with `.prettierrc.json`).
+    - `.gitignore`: To exclude unnecessary files from version control.
+- **Development Environment:**
+    - GitHub Codespaces / VS Code Dev Containers (Node.js)
 
 ---
 
 ## 🚀 Getting Started / Development
 
-This project is configured to run in a **Dev Container**, providing a consistent development environment.
+This project is best configured to run within a **Dev Container**, which provides a consistent and pre-configured development environment.
 
 **Using GitHub Codespaces (Recommended):**
-1.  Click the "Code" button on the repository page.
-2.  Select the "Codespaces" tab.
-3.  Click "Create codespace on main".
-4.  The environment will automatically set up based on the `.devcontainer/devcontainer.json` configuration.
 
-**Using VS Code Locally:**
-1.  Ensure you have [Docker](https://www.docker.com/) installed and running.
+1.  Navigate to the repository page on GitHub.
+2.  Click the "Code" button.
+3.  Select the "Codespaces" tab.
+4.  Click "Create codespace on [branch-name]".
+5.  The environment will automatically set up based on the `.devcontainer/devcontainer.json` file (which includes Node.js, ESLint, Prettier, and recommended VS Code extensions).
+
+**Using VS Code Locally with Dev Containers:**
+
+1.  Ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
 2.  Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) in VS Code.
 3.  Clone the repository: `git clone https://github.com/asyncDonkey/asyncDonkey.github.io.git`
 4.  Open the cloned folder in VS Code.
-5.  VS Code should detect the `.devcontainer` folder and prompt you to "Reopen in Container". Click it.
-6.  Once the container is built and running, you can use the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension (already included in the dev container config) to preview the website.
+5.  VS Code should detect the `.devcontainer` folder and prompt you to "Reopen in Container." Click this option.
+6.  Once the container is built and running, you can use the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension (already included in the dev container configuration) to preview the website. Right-click on `index.html` and select "Open with Live Server."
+
+---
+
+## 🗺️ Roadmap and Next Steps
+
+The project is continuously evolving. Current priorities include:
+
+1.  **Finalizing the new centralized registration flow and simplifying user profiles.**
+2.  **Enhancements to the user profile page (Status/Mood, External Links, Public Profile).**
+3.  **Implementation of sharing buttons.**
+4.  **In-depth documentation of the code and data structures.**
+5.  **Ongoing testing and Quality Assurance.**
+
+For a detailed view of future tasks and progress, please refer to the [DEVELOPMENT_PLAN.md](documentation/DEVELOPMENT_PLAN.md) file (or the latest development plan file in the `documentation/` folder).
+
+---
+
+## 🤝 Contributing
+
+Feedback and contributions are welcome! If you want to report a bug, suggest a new feature, or contribute to the code:
+
+1.  **Reports and Suggestions:** Visit the [Contribute](https://asyncdonkey.github.io/contribute.html) page on the website to submit feedback via the integrated issue tracking system.
+2.  **GitHub Issues:** For more technical matters or to see open issues, visit the [Issues section](https://github.com/asyncDonkey/asyncDonkey.github.io/issues) of this repository. Please use the provided templates for bug reports or feature requests.
+3.  **Pull Requests:** If you wish to contribute code directly, please:
+    - Fork the repository.
+    - Create a new branch for your changes (`git checkout -b feature/FeatureName` or `bugfix/BugDescription`).
+    - Commit your changes.
+    - Ensure your code is formatted with Prettier and that ESLint reports no errors (`npx eslint .` and `npx prettier . --check`).
+    - Open a Pull Request to the `main` branch (or the current development branch) of the original repository, clearly describing the changes made.
 
 ---
 
@@ -60,10 +146,10 @@ This project is configured to run in a **Dev Container**, providing a consistent
 
 Let's connect!
 
-* **Email:** `asyncdonkey@proton.me`
-* **LinkedIn:** [Umberto Trombetta](https://www.linkedin.com/in/umberto-trombetta)
-* **GitHub:** [asyncDonkey](https://github.com/asyncDonkey)
+- **Email:** `asyncdonkey@proton.me`
+- **LinkedIn:** [Umberto Trombetta](https://www.linkedin.com/in/umberto-trombetta)
+- **GitHub:** [asyncDonkey](https://github.com/asyncDonkey) (You are here!)
 
 ---
 
-Thanks for checking out my portfolio repository!
+Thanks for checking out the asyncDonkey.io repository!

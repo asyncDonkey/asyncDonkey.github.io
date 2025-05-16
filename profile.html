@@ -1,127 +1,315 @@
-<!DOCTYPE html>
-<html lang="en"> <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - asyncDonkey</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
+<!doctype html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Il Mio Profilo - asyncDonkey.io</title>
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap"
+            rel="stylesheet"
+        />
+        <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
     </head>
-<body>
-
-<header>
-    <div class="header-content" style="padding: 10px 5%; align-items: center; display: flex; justify-content: space-between; flex-wrap: wrap;">
-        <a href="index.html" style="text-decoration: none;">
-            <h1 style="font-size: 1.8em; margin:0;">asyncDonkey.io</h1>
-        </a>
-        <nav>
-    <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 20px;">
-        <li><a href="index.html" class="auth-button" style="text-decoration:none;">Home</a></li>
-        <li><a href="about.html" class="auth-button" style="text-decoration:none;">.Dev</a></li>
-        <li><a href="contribute.html" class="auth-button" style="text-decoration:none;" id="navContributeLink">Contribuisci</a></li> <li><a href="donkeyRunner.html" class="auth-button" style="text-decoration:none;">codeDash!</a></li>
-        <li><a href="leaderboard.html" class="auth-button" style="text-decoration:none;">Leaderboard</a></li>
-        <li id="profileNav" style="display: none;"><a href="profile.html" class="auth-button" style="text-decoration:none;">Profile</a></li>
-        <li id="navWriteArticle" style="display: none;"><a href="submit-article.html" class="auth-button" style="text-decoration:none;">Scrivi Articolo</a></li>
-    </ul>
-</nav>
-        <div class="header-controls" style="display: flex; align-items: center; gap: 10px;">
-            <div id="authContainer">
-                <button id="showLoginBtn" class="auth-button">Login</button>
-                <button id="showSignupBtn" class="auth-button">Register</button>
+    <body>
+        <header>
+            <div
+                class="header-content"
+                style="
+                    padding: 10px 5%;
+                    align-items: center;
+                    display: flex;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                "
+            >
+                <a href="index.html" style="text-decoration: none">
+                    <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
+                </a>
+                <nav>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 20px">
+                        <li><a href="index.html" class="auth-button" style="text-decoration: none">Home</a></li>
+                        <li><a href="about.html" class="auth-button" style="text-decoration: none">.Dev</a></li>
+                        <li>
+                            <a
+                                href="contribute.html"
+                                class="auth-button"
+                                style="text-decoration: none"
+                                id="navContributeLink"
+                                >Contribuisci</a
+                            >
+                        </li>
+                        <li>
+                            <a href="donkeyRunner.html" class="auth-button" style="text-decoration: none">codeDash!</a>
+                        </li>
+                        <li>
+                            <a href="leaderboard.html" class="auth-button" style="text-decoration: none">Leaderboard</a>
+                        </li>
+                        <li id="profileNav" style="display: none">
+                            <a href="profile.html" class="auth-button" style="text-decoration: none">Profile</a>
+                        </li>
+                        <li id="navWriteArticle" style="display: none">
+                            <a href="submit-article.html" class="auth-button" style="text-decoration: none"
+                                >Scrivi Articolo</a
+                            >
+                        </li>
+                    </ul>
+                </nav>
+                <div class="header-controls" style="display: flex; align-items: center; gap: 10px">
+                    <div id="authContainer">
+                        <button id="showLoginBtn" class="auth-button">Login</button>
+                        <a href="register.html" id="showSignupBtn" class="auth-button" style="text-decoration: none"
+                            >Register</a
+                        >
+                    </div>
+                    <div id="userProfileContainer" style="display: none; align-items: center">
+                        <img id="headerUserAvatar" src="" alt="Avatar Utente" />
+                        <span id="userDisplayName"></span>
+                        <button id="logoutButton" class="auth-button">Logout</button>
+                    </div>
+                    <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+                </div>
             </div>
-            <div id="userProfileContainer" style="display: none; align-items: center;">
-                <img id="headerUserAvatar" src="" alt="Avatar">
-                <span id="userDisplayName"></span>
-                <button id="logoutButton" class="auth-button">Logout</button>
+        </header>
+
+        <main>
+            <section id="profile">
+                <h2>Dettagli Profilo</h2>
+                <div id="profileContent" style="display: none">
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px">
+                        <img
+                            id="profileAvatar"
+                            src=""
+                            alt="User Avatar"
+                            width="80"
+                            height="80"
+                            style="
+                                border-radius: 4px;
+                                image-rendering: pixelated;
+                                background-color: #eee;
+                                border: 1px solid var(--border-color-secondary);
+                            "
+                        />
+                        <div id="profileDetailsDisplay" style="flex-grow: 1">
+                            <p style="margin-bottom: 8px; font-size: 1.05em">
+                                <strong>Email:</strong> <span id="profileEmail">Caricamento...</span>
+                            </p>
+                            <p style="margin-bottom: 8px; font-size: 1.05em">
+                                <strong>Nickname:</strong> <span id="currentNickname">Caricamento...</span>
+                            </p>
+                            <p style="margin-bottom: 8px; font-size: 1.05em">
+                                <strong>Nazionalità:</strong> <span id="profileNationality">Caricamento...</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="statusMessageSection" style="display: none">
+                        <h3 style="margin-bottom: 10px">Stato d'Animo:</h3>
+                        <div id="statusMessageDisplay">Caricamento stato...</div>
+                        <form id="updateStatusForm" style="margin-top: 10px">
+                            <input
+                                type="text"
+                                id="statusMessageInput"
+                                name="statusMessageInput"
+                                placeholder="Come ti senti oggi?"
+                                maxlength="150"
+                            />
+                            <button type="submit" id="updateStatusBtn" class="game-button" style="padding: 10px 15px">
+                                Aggiorna
+                            </button>
+                        </form>
+                        <div id="statusUpdateMessage"></div>
+                    </div>
+
+                    <div id="externalLinksSection" style="display: none">
+                        <h3 style="margin-bottom: 10px">Link Esterni (Max 5):</h3>
+                        <ul id="externalLinksList" class="external-links-list">
+                            <li
+                                id="noExternalLinksMessage"
+                                style="display: none; background-color: transparent; padding: 0"
+                            >
+                                <p style="color: var(--text-color-muted)">Nessun link esterno aggiunto.</p>
+                            </li>
+                        </ul>
+
+                        <div id="manageExternalLinksUI" style="margin-top: 15px">
+                            <button type="button" id="toggleAddLinkFormBtn" class="game-button">
+                                Aggiungi Nuovo Link
+                            </button>
+
+                            <div id="externalLinkFormContainer" style="display: none; margin-top: 15px">
+                                <h4 id="externalLinkFormTitle">Aggiungi Nuovo Link</h4>
+                                <form id="externalLinkForm">
+                                    <input type="hidden" id="editingLinkIndex" value="-1" />
+                                    <div>
+                                        <label for="externalLinkTitle"
+                                            >Titolo del Link:<span class="required-indicator">*</span></label
+                                        >
+                                        <input
+                                            type="text"
+                                            id="externalLinkTitle"
+                                            name="externalLinkTitle"
+                                            required
+                                            maxlength="50"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label for="externalLinkUrl"
+                                            >URL Completo (es. https://...):<span class="required-indicator"
+                                                >*</span
+                                            ></label
+                                        >
+                                        <input
+                                            type="url"
+                                            id="externalLinkUrl"
+                                            name="externalLinkUrl"
+                                            required
+                                            placeholder="https://esempio.com"
+                                        />
+                                    </div>
+                                    <div id="externalLinkError" class="error-message"></div>
+                                    <div class="form-actions-links">
+                                        <button type="submit" id="saveExternalLinkBtn" class="game-button">
+                                            Salva Link
+                                        </button>
+                                        <button
+                                            type="button"
+                                            id="cancelEditExtLinkBtn"
+                                            class="game-button"
+                                            style="background-color: var(--text-color-muted); display: none"
+                                        >
+                                            Annulla Modifica
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        id="emailVerificationBanner"
+                        class="info-section"
+                        style="display: none; margin-top: 20px; border-left-color: orange"
+                    >
+                        <p>
+                            La tua email non è ancora stata verificata. Controlla la tua casella di posta (e la cartella
+                            spam) per il link di verifica.
+                        </p>
+                        <p>
+                            Non hai ricevuto l'email?
+                            <button
+                                id="resendVerificationEmailBtn"
+                                class="game-button"
+                                style="padding: 6px 10px; font-size: 0.9em"
+                            >
+                                Invia di nuovo email di verifica
+                            </button>
+                        </p>
+                        <div id="resendEmailMessage" style="font-size: 0.9em; margin-top: 8px"></div>
+                    </div>
+                </div>
+                <div id="profileLoadingMessage">
+                    <p>Caricamento profilo...</p>
+                </div>
+                <div id="profileLoginMessage" style="display: none">
+                    <p>Devi essere loggato per visualizzare il tuo profilo.</p>
+                    <p><a href="index.html">Torna alla Homepage per Accedere</a></p>
+                    <p>Non hai un account? <a href="register.html">Registrati qui</a>.</p>
+                </div>
+            </section>
+
+            <section id="myArticlesSection" style="margin-top: 40px; display: none">
+                <h2>I Miei Articoli</h2>
+                <div class="my-articles-subsection">
+                    <h3
+                        style="
+                            color: var(--heading-color);
+                            border-bottom: 1px solid var(--border-color-secondary);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        Bozze
+                    </h3>
+                    <div id="myDraftArticlesListContainer">
+                        <p id="myDraftsLoadingMessage">Caricamento bozze...</p>
+                        <div id="myDraftArticlesList" class="my-articles-grid-container"></div>
+                    </div>
+                </div>
+                <div class="my-articles-subsection" style="margin-top: 30px">
+                    <h3
+                        style="
+                            color: var(--heading-color);
+                            border-bottom: 1px solid var(--border-color-secondary);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        In Revisione
+                    </h3>
+                    <div id="myPendingArticlesListContainer">
+                        <p id="myPendingLoadingMessage">Caricamento articoli in revisione...</p>
+                        <div id="myPendingArticlesList" class="my-articles-grid-container"></div>
+                    </div>
+                </div>
+                <div class="my-articles-subsection" style="margin-top: 30px">
+                    <h3
+                        style="
+                            color: var(--heading-color);
+                            border-bottom: 1px solid var(--border-color-secondary);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        Pubblicati
+                    </h3>
+                    <div id="myPublishedArticlesListContainer">
+                        <p id="myPublishedLoadingMessage">Caricamento articoli pubblicati...</p>
+                        <div id="myPublishedArticlesList" class="my-articles-grid-container"></div>
+                    </div>
+                </div>
+                <div class="my-articles-subsection" style="margin-top: 30px">
+                    <h3
+                        style="
+                            color: var(--heading-color);
+                            border-bottom: 1px solid var(--border-color-secondary);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        Respinti
+                    </h3>
+                    <div id="myRejectedArticlesListContainer">
+                        <p id="myRejectedLoadingMessage">Caricamento articoli respinti...</p>
+                        <div id="myRejectedArticlesList" class="my-articles-grid-container"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div style="text-align: center; margin-top: 30px">
+                <a href="index.html" style="color: var(--link-color); text-decoration: underline"
+                    >&larr; Torna alla Homepage</a
+                >
             </div>
-            <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
-        </div>
-    </div>
-</header>
+        </main>
 
-<main>
-    <section id="profile">
-        <h2>Profile Details</h2>
-        <div id="profileContent" style="display: none;">
-            <img id="profileAvatar" src="" alt="User Avatar" width="80" height="80" style="border-radius: 4px; image-rendering: pixelated; background-color: #eee; vertical-align: middle; margin-bottom: 15px;">
+        <footer style="margin-top: 40px">
+            <p>&copy; <span id="currentYear">2025</span> asyncDonkey.io.</p>
+            <p style="font-size: 0.8em; margin-top: 5px">
+                Avatars by
+                <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT
+                License).
+            </p>
+        </footer>
 
-            <div id="profileDetailsDisplay" style="display: inline-block; vertical-align: middle; margin-left: 15px;">
-                 <p style="margin-bottom: 5px;"><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
-                 <p style="margin-bottom: 5px;"><strong>Current Nickname:</strong> <span id="currentNickname">Loading...</span></p>
+        <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
-                 <p style="margin-bottom: 5px;"><strong>Nazionalità:</strong> <span id="profileNationality">N/D</span></p>
-            </div>
-            <hr style="margin: 20px 0;">
-            <h3>Update Profile</h3>
-            <form id="profileUpdateForm">
-                <div>
-                    <label for="profileNicknameInput">New Nickname:</label>
-                    <input type="text" id="profileNicknameInput" name="profileNicknameInput" required minlength="3" maxlength="50">
-                </div>
-                <button type="submit" id="saveProfileBtn" class="game-button">Save Changes</button>
-            </form>
-            <p id="profileMessage" style="margin-top: 15px; font-weight: bold;"></p>
-        </div>
-         <div id="profileLoadingMessage"> <p>Loading profile...</p> </div>
-         <div id="profileLoginMessage" style="display: none;">
-             <p>You need to be logged in to view your profile.</p>
-             <p><a href="index.html">Go to Homepage to Log In</a></p>
-         </div>
-    </section>
-
-    <section id="myArticlesSection" style="margin-top: 40px;">
-    <h2>I Miei Articoli</h2>
-
-    <div id="myArticlesTabs" style="margin-bottom: 20px; border-bottom: 1px solid var(--border-color-primary);">
-        <h3 style="margin-bottom: 10px; color: var(--heading-color);">Le Mie Bozze</h3>
-    </div>
-
-    <div id="myDraftArticlesListContainer">
-    <p id="myDraftsLoadingMessage">Caricamento bozze...</p>
-    <div id="myDraftArticlesList" class="my-articles-grid-container"> </div>
-</div>
-
-    </section>
-    <div class="my-articles-subsection" style="margin-top: 30px;">
-        <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 5px; margin-bottom: 15px;">In Revisione</h3>
-        <div id="myPendingArticlesListContainer">
-            <p id="myPendingLoadingMessage">Caricamento articoli in revisione...</p>
-            <div id="myPendingArticlesList" class="my-articles-grid-container">
-                </div>
-        </div>
-    </div>
-
-    <div class="my-articles-subsection" style="margin-top: 30px;">
-        <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 5px; margin-bottom: 15px;">Pubblicati</h3>
-        <div id="myPublishedArticlesListContainer">
-            <p id="myPublishedLoadingMessage">Caricamento articoli pubblicati...</p>
-            <div id="myPublishedArticlesList" class="my-articles-grid-container">
-                </div>
-        </div>
-    </div>
-
-    <div class="my-articles-subsection" style="margin-top: 30px;">
-        <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 5px; margin-bottom: 15px;">Respinti</h3>
-        <div id="myRejectedArticlesListContainer">
-            <p id="myRejectedLoadingMessage">Caricamento articoli respinti...</p>
-            <div id="myRejectedArticlesList" class="my-articles-grid-container">
-                </div>
-        </div>
-    </div>
-    
-    <div style="text-align: center; margin-top: 30px;">
-         <a href="index.html" style="color: var(--link-color); text-decoration: underline;">&larr; Back to Homepage</a>
-    </div>
-</main>
-
-<footer style="margin-top: 40px;">
-    <p>&copy; 2025 asyncDonkey.io.</p>
-    <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
-</footer>
-
-<div id="toast-container" aria-live="assertive" aria-atomic="true">
-    </div>
-
-<script src="js/profile.js" type="module"></script>
-<script src="js/main.js" type="module"></script>
-</body>
+        <script>
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        </script>
+        <script src="js/main.js" type="module"></script>
+        <script src="js/profile.js" type="module"></script>
+    </body>
 </html>

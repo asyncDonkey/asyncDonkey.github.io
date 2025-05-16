@@ -1,0 +1,10 @@
+node_modules/
+*.min.js
+images/
+audio/
+.devcontainer/
+package-lock.json
+*.svg
+*.png
+*.jpg
+*.ico

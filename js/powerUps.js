@@ -1,123 +1,187 @@
 // js/powerUps.js
-import { Animation } from './animation.js';
 
 export const POWERUP_TYPE = {
-    TRIPLE_SHOT: 'TRIPLE_SHOT',
-    SHIELD: 'SHIELD',
-    SMART_BOMB: 'SMART_BOMB',
-    DEBUG_MODE: 'DEBUG_MODE',     // Proiettili potenziati
-    FIREWALL: 'FIREWALL',         // Immunità agli ostacoli (codeBlock)
-    BLOCK_BREAKER: 'BLOCK_BREAKER' // Permette di rompere i codeBlock con i proiettili
+    TRIPLE_SHOT: 'triple_shot',
+    SHIELD: 'shield',
+    SMART_BOMB: 'smart_bomb',
+    DEBUG_MODE: 'debug_mode',
+    FIREWALL: 'firewall',
+    BLOCK_BREAKER: 'block_breaker',
 };
 
-export const POWERUP_DURATION = { // In secondi
-    TRIPLE_SHOT: 6,
-    SHIELD: 5,
-    DEBUG_MODE: 8,
-    FIREWALL: 7,
-    BLOCK_BREAKER: 10
+export const POWERUP_DURATION = {
+    TRIPLE_SHOT: 10,
+    SHIELD: 10,
+    DEBUG_MODE: 10,
+    FIREWALL: 8,
+    BLOCK_BREAKER: 12,
 };
 
-const POWERUP_SPRITE_SCALE_FACTOR = 1.5;
-const POWERUP_ACTUAL_FRAME_WIDTH = 32;
-const POWERUP_ACTUAL_FRAME_HEIGHT = 32;
-const POWERUP_NUM_FRAMES = 4;
-const POWERUP_ANIMATION_SPEED = 0.15;
+const POWER_UP_SPRITE_SCALE = 1.5;
 
-export const POWERUP_TARGET_WIDTH = POWERUP_ACTUAL_FRAME_WIDTH * POWERUP_SPRITE_SCALE_FACTOR;
-export const POWERUP_TARGET_HEIGHT = POWERUP_ACTUAL_FRAME_HEIGHT * POWERUP_SPRITE_SCALE_FACTOR;
-
-export const POWERUP_COLORS = {
-    [POWERUP_TYPE.TRIPLE_SHOT]: '#FFFF00', // Giallo
-    [POWERUP_TYPE.SHIELD]: '#00FFFF',    // Ciano
-    [POWERUP_TYPE.SMART_BOMB]: '#FF00FF',  // Magenta
-    [POWERUP_TYPE.DEBUG_MODE]: '#32CD32', // LimeGreen (Sprite proiettile potenziato)
-    [POWERUP_TYPE.FIREWALL]: '#008000',    // Verde (Aura quadrata verde)
-    [POWERUP_TYPE.BLOCK_BREAKER]: '#FFA500' // Arancione (Rompere codeBlock)
+export const POWERUP_CONFIGS = {
+    [POWERUP_TYPE.TRIPLE_SHOT]: {
+        spriteKey: 'powerUpTripleShot',
+        src: 'images/tripleShotPowerUp.png', // Path immagine
+        actualFrameWidth: 32,
+        actualFrameHeight: 32,
+        numFrames: 1, // Assumendo sprite statici per ora
+        targetWidth: 32 * POWER_UP_SPRITE_SCALE,
+        targetHeight: 32 * POWER_UP_SPRITE_SCALE,
+    },
+    [POWERUP_TYPE.SHIELD]: {
+        spriteKey: 'powerUpShield',
+        src: 'images/shieldPowerUp.png', // Path immagine
+        actualFrameWidth: 32,
+        actualFrameHeight: 32,
+        numFrames: 1,
+        targetWidth: 32 * POWER_UP_SPRITE_SCALE,
+        targetHeight: 32 * POWER_UP_SPRITE_SCALE,
+    },
+    [POWERUP_TYPE.SMART_BOMB]: {
+        spriteKey: 'powerUpSmartBomb',
+        src: 'images/bombPowerUp.png', // Path immagine
+        actualFrameWidth: 32,
+        actualFrameHeight: 32,
+        numFrames: 1,
+        targetWidth: 32 * POWER_UP_SPRITE_SCALE,
+        targetHeight: 32 * POWER_UP_SPRITE_SCALE,
+    },
+    [POWERUP_TYPE.DEBUG_MODE]: {
+        spriteKey: 'powerUpDebugMode',
+        src: 'images/powerUpDebugMode.png', // Path immagine
+        actualFrameWidth: 32,
+        actualFrameHeight: 32,
+        numFrames: 1,
+        targetWidth: 32 * POWER_UP_SPRITE_SCALE,
+        targetHeight: 32 * POWER_UP_SPRITE_SCALE,
+    },
+    [POWERUP_TYPE.FIREWALL]: {
+        spriteKey: 'powerUpFirewall',
+        src: 'images/powerUpFirewall.png', // Path immagine
+        actualFrameWidth: 32,
+        actualFrameHeight: 32,
+        numFrames: 1,
+        targetWidth: 32 * POWER_UP_SPRITE_SCALE,
+        targetHeight: 32 * POWER_UP_SPRITE_SCALE,
+    },
+    [POWERUP_TYPE.BLOCK_BREAKER]: {
+        spriteKey: 'powerUpBlockBreaker',
+        src: 'images/powerUpBlockBreaker.png', // Path immagine
+        actualFrameWidth: 32,
+        actualFrameHeight: 32,
+        numFrames: 1,
+        targetWidth: 32 * POWER_UP_SPRITE_SCALE,
+        targetHeight: 32 * POWER_UP_SPRITE_SCALE,
+    },
 };
 
 export class PowerUpItem {
-    constructor(x, y, type, imagesRef, gameSpeedRef) {
+    constructor(x, y, type, imagesRef) {
         this.x = x;
         this.y = y;
-        this.width = POWERUP_TARGET_WIDTH;
-        this.height = POWERUP_TARGET_HEIGHT;
         this.type = type;
-        this.images = imagesRef;
-        this.gameSpeedValue = gameSpeedRef;
 
-        this.sprite = null;
-        this.animation = null;
-        this.fallbackColor = POWERUP_COLORS[this.type] || '#FFFFFF';
+        this.config = POWERUP_CONFIGS[this.type];
 
-        let tempSprite = null;
-        switch (this.type) {
-            case POWERUP_TYPE.TRIPLE_SHOT:
-                tempSprite = this.images['powerUpTripleShot'];
-                break;
-            case POWERUP_TYPE.SHIELD:
-                tempSprite = this.images['powerUpShield'];
-                break;
-            case POWERUP_TYPE.SMART_BOMB:
-                tempSprite = this.images['powerUpBomb'];
-                break;
-            case POWERUP_TYPE.DEBUG_MODE:
-                tempSprite = this.images['powerUpDebugMode']; // Assicurati di aggiungere POWERUP_DEBUG_MODE_SRC
-                break;
-            case POWERUP_TYPE.FIREWALL:
-                tempSprite = this.images['powerUpFirewall'];   // Assicurati di aggiungere POWERUP_FIREWALL_SRC
-                break;
-            case POWERUP_TYPE.BLOCK_BREAKER:
-                tempSprite = this.images['powerUpBlockBreaker']; // Assicurati di aggiungere POWERUP_BLOCK_BREAKER_SRC
-                break;
+        if (!this.config) {
+            console.error(`Configurazione non trovata per il power-up di tipo: ${this.type}`);
+            // Imposta valori di fallback se la configurazione non è trovata
+            this.width = 32;
+            this.height = 32;
+            this.sprite = null;
+            this.animation = null;
+            return; // Esce dal costruttore se la configurazione non è valida
         }
 
-        if (tempSprite && tempSprite.complete && tempSprite.naturalWidth !== 0) {
-            this.sprite = tempSprite;
-            if (POWERUP_NUM_FRAMES > 1) {
-                this.animation = new Animation(
-                    this.sprite,
-                    POWERUP_ACTUAL_FRAME_WIDTH,
-                    POWERUP_ACTUAL_FRAME_HEIGHT,
-                    POWERUP_NUM_FRAMES,
-                    POWERUP_ANIMATION_SPEED
-                );
-            }
+        this.width = this.config.targetWidth;
+        this.height = this.config.targetHeight;
+
+        if (imagesRef && this.config.spriteKey && imagesRef[this.config.spriteKey]) {
+            this.sprite = imagesRef[this.config.spriteKey];
         } else {
-            if (tempSprite) {
-                 console.warn(`Sprite per PowerUp ${this.type} (${tempSprite.src}) non è utilizzabile. Verrà usato colore fallback.`);
-            } else {
-                 console.warn(`Sprite per PowerUp ${this.type} non trovato in imagesRef. Verrà usato colore fallback.`);
-            }
-            this.sprite = null;
+            console.warn(
+                `Sprite non trovato in imagesRef per spriteKey: ${this.config.spriteKey} (tipo: ${this.type}). Verifica che sia in imagesToLoad.`
+            );
+            this.sprite = null; // Imposta a null se lo sprite non è disponibile
+        }
+
+        this.animation = null;
+        // Assicurati che 'Animation' sia definita globalmente o importata correttamente in donkeyRunner.js
+        if (
+            this.sprite &&
+            this.sprite.complete &&
+            this.sprite.naturalWidth > 0 &&
+            this.config.numFrames > 1 &&
+            typeof Animation !== 'undefined'
+        ) {
+            this.animation = new Animation(
+                this.sprite,
+                this.config.actualFrameWidth,
+                this.config.actualFrameHeight,
+                this.config.numFrames,
+                0.1
+            );
         }
     }
 
-    update(dt) {
-        const currentSpeed = typeof this.gameSpeedValue === 'function' ? this.gameSpeedValue() : this.gameSpeedValue;
-        this.x -= currentSpeed * dt * 0.8; // Power-ups si muovono un po' più lentamente del gioco
-
+    update(dt, gameSpeed) {
+        this.x -= gameSpeed * dt * 0.5;
         if (this.animation) {
             this.animation.update(dt);
         }
     }
 
     draw(ctx) {
-        if (this.animation && this.sprite) {
-            const frame = this.animation.getFrame();
-            ctx.drawImage(this.sprite, frame.sx, frame.sy, frame.sWidth, frame.sHeight, this.x, this.y, this.width, this.height);
-        } else if (this.sprite) {
-            ctx.drawImage(
-                this.sprite,
-                0, 0,
-                POWERUP_ACTUAL_FRAME_WIDTH, POWERUP_ACTUAL_FRAME_HEIGHT,
-                this.x, this.y, this.width, this.height
-            );
+        if (!this.config || !this.sprite) {
+            // Non disegnare se la configurazione o lo sprite mancano
+            // Potresti disegnare un placeholder di errore qui se vuoi
+            // console.warn(`Tentativo di disegnare PowerUpItem senza config o sprite valido: ${this.type}`);
+            return;
+        }
+
+        const spriteToDraw = this.sprite;
+        // Verifica aggiuntiva che lo sprite sia effettivamente un'immagine caricata
+        const spriteUsable =
+            spriteToDraw instanceof HTMLImageElement && spriteToDraw.complete && spriteToDraw.naturalWidth > 0;
+
+        if (spriteUsable) {
+            if (this.animation) {
+                const frame = this.animation.getFrame();
+                ctx.drawImage(
+                    spriteToDraw,
+                    frame.sx,
+                    frame.sy,
+                    this.config.actualFrameWidth,
+                    this.config.actualFrameHeight,
+                    this.x,
+                    this.y,
+                    this.width,
+                    this.height
+                );
+            } else {
+                ctx.drawImage(
+                    spriteToDraw,
+                    0,
+                    0,
+                    this.sprite.naturalWidth / (this.config.numFrames || 1), // Usa naturalWidth/numFrames per il frame width sorgente
+                    this.sprite.naturalHeight, // Usa naturalHeight per il frame height sorgente
+                    this.x,
+                    this.y,
+                    this.width,
+                    this.height
+                );
+            }
         } else {
-            ctx.fillStyle = this.fallbackColor;
+            // Fallback se lo sprite non è valido o non caricato
+            ctx.fillStyle = 'gold';
             ctx.fillRect(this.x, this.y, this.width, this.height);
-            ctx.strokeStyle = '#000';
+            ctx.strokeStyle = 'black';
             ctx.strokeRect(this.x, this.y, this.width, this.height);
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.font = '10px Arial';
+            ctx.fillText('P!', this.x + this.width / 2, this.y + this.height / 2 + 4);
         }
     }
 }

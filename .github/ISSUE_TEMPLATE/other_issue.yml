@@ -1,40 +1,40 @@
 # .github/ISSUE_TEMPLATE/other_issue.yml
 name: ❓ General Issue / Question
 description: Use this for issues or questions that don't fit other categories.
-title: "[General] - Brief description"
-labels: ["question", "needs-triage"] # O altre label generiche che usi
-assignees: ["your-github-username"] # Personalizza o lascia vuoto
+title: '[General] - Brief description'
+labels: ['question', 'needs-triage'] # O altre label generiche che usi
+assignees: ['your-github-username'] # Personalizza o lascia vuoto
 body:
-  - type: markdown
-    attributes:
-      value: |
-        **Have a general question or an issue that doesn't fit the other categories?**
-        Please describe it below.
-  - type: textarea
-    id: description
-    attributes:
-      label: Detailed Description
-      description: Please describe your issue, question, or suggestion in detail. Provide as much context as possible.
-    validations:
-      required: true
-  - type: textarea
-    id: context
-    attributes:
-      label: Relevant Context (Optional)
-      description: Include any relevant environment details, links, error messages, screenshots, or other context.
-    validations:
-      required: false
-  - type: dropdown
-    id: issue-type-guess
-    attributes:
-      label: Closest Issue Type (Optional)
-      description: If you had to guess, which category does this fall closest to? Helps us triage.
-      options:
-        - Bug
-        - Feature Idea
-        - Documentation
-        - Question
-        - Configuration Help
-        - Other
-    validations:
-      required: false # Opzionale per aiutare nel triage
+    - type: markdown
+      attributes:
+          value: |
+              **Have a general question or an issue that doesn't fit the other categories?**
+              Please describe it below.
+    - type: textarea
+      id: description
+      attributes:
+          label: Detailed Description
+          description: Please describe your issue, question, or suggestion in detail. Provide as much context as possible.
+      validations:
+          required: true
+    - type: textarea
+      id: context
+      attributes:
+          label: Relevant Context (Optional)
+          description: Include any relevant environment details, links, error messages, screenshots, or other context.
+      validations:
+          required: false
+    - type: dropdown
+      id: issue-type-guess
+      attributes:
+          label: Closest Issue Type (Optional)
+          description: If you had to guess, which category does this fall closest to? Helps us triage.
+          options:
+              - Bug
+              - Feature Idea
+              - Documentation
+              - Question
+              - Configuration Help
+              - Other
+      validations:
+          required: false # Opzionale per aiutare nel triage

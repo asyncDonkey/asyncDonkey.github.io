@@ -6,20 +6,19 @@ blank_issues_enabled: false
 
 # Link a risorse esterne utili (appaiono nel chooser "New Issue").
 contact_links:
-  - name: 🤔 Ask a Question / Fai una Domanda (Discussions)
-    # URL per aprire una nuova discussione nella categoria Q&A del tuo repository
-    url: https://github.com/asyncDonkey/asyncDonkey.github.io/discussions/new?category=q-a
-    about: Per domande generali, supporto o discussioni, usa le GitHub Discussions. Preferibile per la visibilità pubblica.
+    - name: 🤔 Ask a Question / Fai una Domanda (Discussions)
+      # URL per aprire una nuova discussione nella categoria Q&A del tuo repository
+      url: https://github.com/asyncDonkey/asyncDonkey.github.io/discussions/new?category=q-a
+      about: Per domande generali, supporto o discussioni, usa le GitHub Discussions. Preferibile per la visibilità pubblica.
 
-  - name: 📧 Contact Lead Developer / Contatta lo Sviluppatore Principale
-    # Link diretto alla tua email
-    url: mailto:asyncdonkey@proton.me
-    about: Per questioni specifiche, sensibili o che non sono adatte a una discussione pubblica. Usa le Discussions per domande tecniche generali.
+    - name: 📧 Contact Lead Developer / Contatta lo Sviluppatore Principale
+      # Link diretto alla tua email
+      url: mailto:asyncdonkey@proton.me
+      about: Per questioni specifiche, sensibili o che non sono adatte a una discussione pubblica. Usa le Discussions per domande tecniche generali.
 
-  - name: 📖 Project Documentation / Documentazione del Progetto
-    # Mantieni questo come placeholder, da aggiornare quando avrai l'URL
-    url: https://your-project-docs-url.com
-    about: Controlla la documentazione per guide all'uso e riferimenti (URL da aggiornare).
-
+    - name: 📖 Project Documentation / Documentazione del Progetto
+      # Mantieni questo come placeholder, da aggiornare quando avrai l'URL
+      url: https://your-project-docs-url.com
+      about: Controlla la documentazione per guide all'uso e riferimenti (URL da aggiornare).
 # Nota: Le definizioni dei template (nome, descrizione, ecc.) sono gestite
 # principalmente tramite YAML front matter nei file .md dei template individuali.
