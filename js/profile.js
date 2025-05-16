@@ -1,58 +1,50 @@
 // js/profile.js
-
 import { db, auth, generateBlockieAvatar } from './main.js';
 import {
     doc,
     getDoc,
-    updateDoc,
+    // updateDoc, // Non più necessario per il nickname
     collection,
     query,
     where,
     getDocs,
     orderBy,
     deleteDoc,
-    Timestamp,
+    // Timestamp, // Già importato in profile.js
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
 
-// --- DEFINIZIONE COSTANTI ELEMENTI DOM (ESISTENTI) ---
+// --- RIFERIMENTI DOM (Aggiornati) ---
 const profileContent = document.getElementById('profileContent');
-const profileDetailsDisplay = document.getElementById('profileDetailsDisplay');
+const profileDetailsDisplay = document.getElementById('profileDetailsDisplay'); // Il contenitore dei dettagli
 const profileAvatarImg = document.getElementById('profileAvatar');
 const profileEmailSpan = document.getElementById('profileEmail');
 const currentNicknameSpan = document.getElementById('currentNickname');
 const profileNationalitySpan = document.getElementById('profileNationality');
-const profileUpdateForm = document.getElementById('profileUpdateForm');
-const profileNicknameInput = document.getElementById('profileNicknameInput');
-const saveProfileBtn = document.getElementById('saveProfileBtn');
-const profileMessage = document.getElementById('profileMessage');
 const profileLoadingMessage = document.getElementById('profileLoadingMessage');
 const profileLoginMessage = document.getElementById('profileLoginMessage');
 
-// --- RIFERIMENTI DOM per "I Miei Articoli" ---
-const myArticlesSection = document.getElementById('myArticlesSection');
+// Riferimenti DOM per il banner di verifica email
+const emailVerificationBanner = document.getElementById('emailVerificationBanner');
+const resendVerificationEmailBtn = document.getElementById('resendVerificationEmailBtn');
+const resendEmailMessage = document.getElementById('resendEmailMessage');
 
-// Bozze
+
+// --- RIFERIMENTI DOM per "I Miei Articoli" (esistenti) ---
+const myArticlesSection = document.getElementById('myArticlesSection');
 const myDraftsLoadingMessage = document.getElementById('myDraftsLoadingMessage');
 const myDraftArticlesListDiv = document.getElementById('myDraftArticlesList');
-
-// In Revisione
 const myPendingLoadingMessage = document.getElementById('myPendingLoadingMessage');
 const myPendingArticlesListDiv = document.getElementById('myPendingArticlesList');
-
-// Pubblicati
 const myPublishedLoadingMessage = document.getElementById('myPublishedLoadingMessage');
 const myPublishedArticlesListDiv = document.getElementById('myPublishedArticlesList');
-
-// Respinti
 const myRejectedLoadingMessage = document.getElementById('myRejectedLoadingMessage');
 const myRejectedArticlesListDiv = document.getElementById('myRejectedArticlesList');
 
-let currentUser = null;
-let currentUserProfile = null;
+let currentUserForProfilePage = null; // Rinominato per chiarezza in questo scope
+let currentUserProfileData = null;  // Rinominato
 
-// --- Funzioni Esistenti (loadProfileData, handleProfileUpdate) ---
 async function loadProfileData(uid) {
     console.log('profile.js - Loading profile for UID:', uid);
     if (
@@ -62,9 +54,7 @@ async function loadProfileData(uid) {
         !profileAvatarImg ||
         !profileNationalitySpan ||
         !profileEmailSpan ||
-        !currentNicknameSpan ||
-        !profileNicknameInput ||
-        !profileMessage
+        !currentNicknameSpan
     ) {
         console.error('Profile page DOM elements (for profile data) missing! Check IDs.');
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
@@ -77,123 +67,83 @@ async function loadProfileData(uid) {
     profileLoadingMessage.style.display = 'block';
     profileContent.style.display = 'none';
     profileLoginMessage.style.display = 'none';
-    if (profileMessage) profileMessage.textContent = '';
+
+    // Reset campi
     profileAvatarImg.src = '';
     profileAvatarImg.alt = 'Loading avatar...';
     profileAvatarImg.style.backgroundColor = '#eee';
-    profileEmailSpan.textContent = 'Loading...';
-    currentNicknameSpan.textContent = 'Loading...';
-    profileNationalitySpan.textContent = 'Loading...';
-    profileNicknameInput.value = '';
+    profileEmailSpan.textContent = 'Caricamento...';
+    currentNicknameSpan.textContent = 'Caricamento...';
+    profileNationalitySpan.textContent = 'Caricamento...';
 
     const userProfileRef = doc(db, 'userProfiles', uid);
     try {
         const docSnap = await getDoc(userProfileRef);
         if (docSnap.exists()) {
-            currentUserProfile = docSnap.data();
-            profileEmailSpan.textContent = currentUserProfile.email || 'N/A';
-            currentNicknameSpan.textContent = currentUserProfile.nickname || 'Non impostato';
-            profileNicknameInput.value = currentUserProfile.nickname || '';
+            currentUserProfileData = docSnap.data();
+            profileEmailSpan.textContent = currentUserProfileData.email || 'N/A';
+            currentNicknameSpan.textContent = currentUserProfileData.nickname || 'Non impostato';
+
             if (profileNationalitySpan) {
-                if (currentUserProfile.nationalityCode && currentUserProfile.nationalityCode !== 'OTHER') {
-                    const countryCodeOriginal = currentUserProfile.nationalityCode.toUpperCase();
+                if (currentUserProfileData.nationalityCode && currentUserProfileData.nationalityCode !== 'OTHER') {
+                    const countryCodeOriginal = currentUserProfileData.nationalityCode.toUpperCase();
                     const countryCodeForLibrary = countryCodeOriginal.toLowerCase();
-                    profileNationalitySpan.innerHTML = '';
+                    profileNationalitySpan.innerHTML = ''; // Pulisci prima
                     const flagIconSpan = document.createElement('span');
                     flagIconSpan.classList.add('fi', `fi-${countryCodeForLibrary}`);
                     flagIconSpan.style.marginRight = '8px';
                     const codeTextNode = document.createTextNode(countryCodeOriginal);
                     profileNationalitySpan.appendChild(flagIconSpan);
                     profileNationalitySpan.appendChild(codeTextNode);
-                } else if (currentUserProfile.nationalityCode === 'OTHER') {
+                } else if (currentUserProfileData.nationalityCode === 'OTHER') {
                     profileNationalitySpan.textContent = 'Altro / Non specificato';
                 } else {
                     profileNationalitySpan.textContent = 'Non specificata';
                 }
             }
             if (profileAvatarImg) {
-                const seedForAvatar = uid;
+                const seedForAvatar = uid; // Usa l'UID del profilo visualizzato
                 profileAvatarImg.src = generateBlockieAvatar(seedForAvatar, 80, { size: 8 });
-                profileAvatarImg.alt = `${currentUserProfile.nickname || 'User'}'s Blockie Avatar`;
+                profileAvatarImg.alt = `${currentUserProfileData.nickname || 'User'}'s Blockie Avatar`;
                 profileAvatarImg.style.backgroundColor = 'transparent';
                 profileAvatarImg.onerror = () => {
                     profileAvatarImg.style.backgroundColor = '#eee';
                     profileAvatarImg.alt = 'Error loading avatar';
                 };
             }
+
+            // Gestione banner verifica email
+            if (currentUserForProfilePage && currentUserForProfilePage.uid === uid && emailVerificationBanner) { // Mostra solo se è il profilo dell'utente loggato
+                if (!currentUserForProfilePage.emailVerified) {
+                    emailVerificationBanner.style.display = 'block';
+                    if (resendEmailMessage) resendEmailMessage.textContent = '';
+                } else {
+                    emailVerificationBanner.style.display = 'none';
+                }
+            }
+
+
             profileLoadingMessage.style.display = 'none';
             profileContent.style.display = 'block';
         } else {
             console.warn('profile.js - No profile document found for user:', uid);
             profileLoadingMessage.style.display = 'none';
             profileLoginMessage.style.display = 'block';
-            profileLoginMessage.innerHTML = '<p>Error: Could not find profile data.</p>';
+            profileLoginMessage.innerHTML = '<p>Errore: Impossibile trovare i dati del profilo.</p>';
+            if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
         }
     } catch (error) {
         console.error('profile.js - Error loading profile data:', error);
         profileLoadingMessage.style.display = 'none';
         profileLoginMessage.style.display = 'block';
-        profileLoginMessage.innerHTML = `<p>Error loading profile: ${error.message}</p>`;
+        profileLoginMessage.innerHTML = `<p>Errore caricamento profilo: ${error.message}</p>`;
+        if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
     }
 }
 
-async function handleProfileUpdate(event) {
-    event.preventDefault();
-    if (!currentUser) {
-        if (profileMessage) {
-            profileMessage.textContent = 'Errore: Utente non autenticato.';
-            profileMessage.style.color = 'red';
-        }
-        return;
-    }
-    if (!profileNicknameInput || !saveProfileBtn || !profileMessage || !currentNicknameSpan) {
-        console.error("profile.js - Elementi DOM per l'aggiornamento del profilo mancanti.");
-        showToast("Errore nell'interfaccia utente. Impossibile salvare.");
-        return;
-    }
-    const newNickname = profileNicknameInput.value.trim();
-    if (newNickname.length < 3 || newNickname.length > 50) {
-        profileMessage.textContent = 'Il nickname deve avere tra 3 e 50 caratteri.';
-        profileMessage.style.color = 'red';
-        return;
-    }
-    const currentStoredNickname = currentUserProfile ? currentUserProfile.nickname : '';
-    if (newNickname === (currentStoredNickname || '')) {
-        profileMessage.textContent = 'Nessuna modifica rilevata nel nickname.';
-        profileMessage.style.color = 'orange';
-        return;
-    }
-    saveProfileBtn.disabled = true;
-    saveProfileBtn.textContent = 'Saving...';
-    profileMessage.textContent = '';
-    const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
-    const dataToUpdate = { nickname: newNickname };
-    try {
-        await updateDoc(userProfileRef, dataToUpdate);
-        showToast('Profilo aggiornato con successo!', 'success'); // Esempio chiamata
-        currentNicknameSpan.textContent = newNickname;
-        if (currentUserProfile) currentUserProfile.nickname = newNickname;
-        const userDisplayNameElement = document.getElementById('userDisplayName');
-        if (userDisplayNameElement) userDisplayNameElement.textContent = `Ciao, ${newNickname}`;
-        const headerUserAvatarElement = document.getElementById('headerUserAvatar');
-        if (headerUserAvatarElement) headerUserAvatarElement.alt = `Avatar di ${newNickname}`;
-    } catch (error) {
-        console.error('profile.js - Error updating profile:', error);
-        profileMessage.textContent = `Errore aggiornamento profilo: ${error.message}`;
-        profileMessage.style.color = 'red';
-        if (error.code === 'permission-denied') {
-            //showToast(friendlyErrorMessage, ' (Controlla le Regole Firestore)'); // Esempio chiamata
-        }
-    } finally {
-        if (saveProfileBtn) {
-            saveProfileBtn.disabled = false;
-            saveProfileBtn.textContent = 'Salva Modifiche';
-        }
-    }
-}
+// RIMOSSA: Funzione handleProfileUpdate (non più necessaria per nickname/nazionalità)
 
-// --- Funzioni per "I Miei Articoli" ---
-
+// --- Funzioni per "I Miei Articoli" (esistenti, non modificate in questo step) ---
 function formatMyArticleTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
         return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
@@ -219,33 +169,27 @@ async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
     try {
         const articleRef = doc(db, 'articles', articleId);
         await deleteDoc(articleRef);
-        // alert(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`); // VECCHIO
         showToast(
-            `${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato con successo.`,
+            `${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${
+                articleTitle || 'Senza Titolo'
+            }" eliminato con successo.`,
             'success'
-        ); // NUOVO
-        if (currentUser) {
-            loadMyArticles(currentUser.uid);
+        );
+        if (currentUserForProfilePage) { // Usa la variabile corretta
+            loadMyArticles(currentUserForProfilePage.uid);
         }
     } catch (error) {
-        console.error(`Errore durante l'eliminazione di ${statusText}:`, error); // Log dell'errore
-        // alert(`Si è verificato un errore durante l'eliminazione. Riprova.`); // VECCHIO
-        showToast(`Si è verificato un errore durante l'eliminazione. Riprova.`, 'error'); // NUOVO
+        console.error(`Errore durante l'eliminazione di ${statusText}:`, error);
+        showToast(`Si è verificato un errore durante l'eliminazione. Riprova.`, 'error');
     }
 }
 
-/**
- * Crea un elemento DOM CARD per un articolo dell'utente.
- * @param {object} article - L'oggetto dati dell'articolo.
- * @param {string} articleId - L'ID dell'articolo.
- * @returns {HTMLElement} L'elemento div (card) per l'articolo.
- */
 function createMyArticleItemElement(article, articleId) {
     const cardDiv = document.createElement('div');
-    cardDiv.className = 'my-article-profile-card'; // Nuova classe per la card
+    cardDiv.className = 'my-article-profile-card';
     cardDiv.setAttribute('data-id', articleId);
 
-    const titleEl = document.createElement('h4'); // Usiamo h4 per il titolo della card
+    const titleEl = document.createElement('h4');
     titleEl.className = 'my-article-card-title';
     titleEl.textContent = article.title || `Articolo senza titolo (ID: ${articleId.substring(0, 6)}...)`;
     cardDiv.appendChild(titleEl);
@@ -261,7 +205,7 @@ function createMyArticleItemElement(article, articleId) {
     };
     const statusDisplay = statusTextMap[article.status] || article.status || 'Stato Sconosciuto';
     const statusEl = document.createElement('span');
-    statusEl.className = `my-article-card-status status-${article.status || 'unknown'}`; // Classe specifica per lo stato + generica
+    statusEl.className = `my-article-card-status status-${article.status || 'unknown'}`;
     statusEl.textContent = statusDisplay;
     metaInfoDiv.appendChild(statusEl);
 
@@ -274,37 +218,30 @@ function createMyArticleItemElement(article, articleId) {
     cardDiv.appendChild(metaInfoDiv);
 
     if (article.status === 'rejected' && article.rejectionReason) {
-        const reasonEl = document.createElement('p'); // Usiamo <p> per il motivo
+        const reasonEl = document.createElement('p');
         reasonEl.className = 'my-article-card-rejection-reason';
-        reasonEl.innerHTML = `<strong>Motivo:</strong> ${article.rejectionReason}`; // Usiamo innerHTML per il bold
+        reasonEl.innerHTML = `<strong>Motivo:</strong> ${article.rejectionReason}`;
         cardDiv.appendChild(reasonEl);
     }
-
-    // Snippet (Opzionale, potremmo aggiungerlo se c'è spazio nella card)
-    // const snippetEl = document.createElement('p');
-    // snippetEl.className = 'my-article-card-snippet';
-    // snippetEl.textContent = (article.snippet || article.contentMarkdown.substring(0, 70) + "...") ; // Esempio
-    // cardDiv.appendChild(snippetEl);
 
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'my-article-card-actions';
 
-    // Azioni specifiche per stato (logica esistente, adattata per card)
     if (article.status === 'draft') {
         const editButton = document.createElement('a');
         editButton.href = `submit-article.html?draftId=${articleId}`;
-        editButton.className = 'game-button my-article-action-button'; // Classe per bottoni azione card
+        editButton.className = 'game-button my-article-action-button';
         editButton.textContent = 'Modifica';
         actionsDiv.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
-        deleteButton.className = 'game-button my-article-action-button delete'; // Classe specifica per delete
+        deleteButton.className = 'game-button my-article-action-button delete';
         deleteButton.textContent = 'Elimina';
         deleteButton.addEventListener('click', () => handleDeleteArticle(articleId, article.title, 'draft'));
         actionsDiv.appendChild(deleteButton);
     } else if (article.status === 'pendingReview') {
         const previewButton = document.createElement('a');
-        previewButton.href = `view-article.html?id=${articleId}&preview=true`;
+        previewButton.href = `view-article.html?id=${articleId}&preview=true`; // Potremmo implementare una vera anteprima
         previewButton.target = '_blank';
         previewButton.className = 'game-button my-article-action-button';
         previewButton.textContent = 'Anteprima';
@@ -318,10 +255,8 @@ function createMyArticleItemElement(article, articleId) {
         actionsDiv.appendChild(viewButton);
     } else if (article.status === 'rejected') {
         const resubmitBasedOnButton = document.createElement('a');
-        // MODIFICA: Aggiunto il parametro URL rejectedArticleId
         resubmitBasedOnButton.href = `submit-article.html?rejectedArticleId=${articleId}`;
         resubmitBasedOnButton.className = 'game-button my-article-action-button';
-        // MODIFICA: Testo del pulsante più esplicito
         resubmitBasedOnButton.textContent = 'Crea da Questo Articolo';
         resubmitBasedOnButton.title =
             'Crea una nuova sottomissione pre-compilata con il contenuto di questo articolo respinto';
@@ -329,7 +264,7 @@ function createMyArticleItemElement(article, articleId) {
 
         const deleteButton = document.createElement('button');
         deleteButton.className = 'game-button my-article-action-button delete';
-        deleteButton.textContent = 'Elimina Respinto'; // Testo leggermente più specifico
+        deleteButton.textContent = 'Elimina Respinto';
         deleteButton.addEventListener('click', () => handleDeleteArticle(articleId, article.title, 'rejected'));
         actionsDiv.appendChild(deleteButton);
     }
@@ -368,8 +303,7 @@ async function loadMyArticles(userId) {
     ];
 
     for (const S of articleStatusesToLoad) {
-        const container = S.listDiv?.parentElement; // es. myDraftArticlesListContainer
-        if (container && S.listDiv && S.loadingMsg) {
+        if (S.listDiv && S.loadingMsg) {
             S.loadingMsg.style.display = 'block';
             S.listDiv.innerHTML = '';
 
@@ -401,22 +335,16 @@ async function loadMyArticles(userId) {
                 if (S.listDiv)
                     S.listDiv.innerHTML = `<p>Errore nel caricamento degli articoli "${S.status}". Riprova più tardi.</p>`;
             }
-        } else {
-            console.warn(
-                `Elementi DOM per lo stato "${S.status}" non trovati o non configurati in profile.js. Sezione non caricata.`
-            );
-            if (S.loadingMsg) S.loadingMsg.style.display = 'none'; // Nascondi comunque il messaggio di caricamento
-            if (S.listDiv) S.listDiv.innerHTML = `<p>Sezione articoli "${S.status}" non caricata (errore config).</p>`;
         }
     }
 }
 
 // --- INIZIALIZZAZIONE ---
 onAuthStateChanged(auth, (user) => {
+    currentUserForProfilePage = user; // Aggiorna la variabile globale del modulo
     if (user) {
-        currentUser = user;
         if (profileContent && profileLoadingMessage && profileLoginMessage) {
-            loadProfileData(user.uid);
+            loadProfileData(user.uid); // Carica i dati del profilo dell'utente loggato
             if (myArticlesSection) {
                 myArticlesSection.style.display = 'block';
                 loadMyArticles(user.uid);
@@ -427,14 +355,14 @@ onAuthStateChanged(auth, (user) => {
             console.error('profile.js - Auth listener: Elementi UI principali del profilo non trovati.');
         }
     } else {
-        currentUser = null;
-        currentUserProfile = null;
+        currentUserProfileData = null;
         if (profileContent) profileContent.style.display = 'none';
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
         if (profileLoginMessage) profileLoginMessage.style.display = 'block';
+        if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
+
 
         if (myArticlesSection) myArticlesSection.style.display = 'none';
-
         const articleListsToClear = [
             myDraftArticlesListDiv,
             myPendingArticlesListDiv,
@@ -456,8 +384,41 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-if (profileUpdateForm) {
-    profileUpdateForm.addEventListener('submit', handleProfileUpdate);
-} else {
-    console.warn('profile.js - Form profileUpdateForm non trovato.');
+// RIMOSSO: Event listener per profileUpdateForm
+
+// NUOVO: Event listener per il pulsante "Invia di nuovo email di verifica"
+if (resendVerificationEmailBtn) {
+    resendVerificationEmailBtn.addEventListener('click', async () => {
+        if (currentUserForProfilePage && !currentUserForProfilePage.emailVerified) {
+            try {
+                resendVerificationEmailBtn.disabled = true;
+                resendVerificationEmailBtn.textContent = 'Invio...';
+                if (resendEmailMessage) resendEmailMessage.textContent = '';
+
+                await sendEmailVerification(currentUserForProfilePage);
+                showToast('Email di verifica inviata nuovamente! Controlla la tua casella di posta.', 'success', 6000);
+                if (resendEmailMessage) {
+                    resendEmailMessage.textContent = 'Email inviata. Potrebbe volerci qualche minuto.';
+                    resendEmailMessage.style.color = 'green';
+                }
+            } catch (error) {
+                console.error('Errore invio nuova email di verifica:', error);
+                showToast('Errore durante l\'invio dell\'email di verifica. Riprova più tardi.', 'error');
+                if (resendEmailMessage) {
+                    resendEmailMessage.textContent = `Errore: ${error.message}`;
+                    resendEmailMessage.style.color = 'red';
+                }
+            } finally {
+                setTimeout(() => { // Riabilita il pulsante dopo un po' per evitare spam
+                    if (resendVerificationEmailBtn) {
+                        resendVerificationEmailBtn.disabled = false;
+                        resendVerificationEmailBtn.textContent = 'Invia di nuovo email di verifica';
+                    }
+                }, 30000); // Es. 30 secondi
+            }
+        } else if (currentUserForProfilePage && currentUserForProfilePage.emailVerified) {
+            showToast('La tua email è già verificata.', 'info');
+            if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
+        }
+    });
 }
