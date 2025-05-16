@@ -106,7 +106,8 @@
                         </div>
                     </div>
 
-                    <div id="statusMessageSection" style="display: none;"> <h3 style="margin-bottom: 10px;">Stato d'Animo:</h3>
+                    <div id="statusMessageSection" style="display: none;">
+                        <h3 style="margin-bottom: 10px;">Stato d'Animo:</h3>
                         <div id="statusMessageDisplay">Caricamento stato...</div>
                         <form id="updateStatusForm" style="margin-top: 10px;">
                             <input type="text" id="statusMessageInput" name="statusMessageInput" placeholder="Come ti senti oggi?" maxlength="150">
@@ -114,12 +115,43 @@
                         </form>
                         <div id="statusUpdateMessage"></div>
                     </div>
+
+                    <div id="externalLinksSection" style="display: none;"> <h3 style="margin-bottom: 10px;">Link Esterni (Max 5):</h3>
+                        <ul id="externalLinksList" class="external-links-list">
+                            <li id="noExternalLinksMessage" style="display:none; background-color: transparent; padding: 0;">
+                                <p style="color: var(--text-color-muted);">Nessun link esterno aggiunto.</p>
+                            </li>
+                        </ul>
+
+                        <div id="manageExternalLinksUI" style="margin-top:15px;"> <button type="button" id="toggleAddLinkFormBtn" class="game-button">Aggiungi Nuovo Link</button>
+                            
+                            <div id="externalLinkFormContainer" style="display:none; margin-top: 15px;">
+                                <h4 id="externalLinkFormTitle">Aggiungi Nuovo Link</h4>
+                                <form id="externalLinkForm">
+                                    <input type="hidden" id="editingLinkIndex" value="-1">
+                                    <div>
+                                        <label for="externalLinkTitle">Titolo del Link:<span class="required-indicator">*</span></label>
+                                        <input type="text" id="externalLinkTitle" name="externalLinkTitle" required maxlength="50">
+                                    </div>
+                                    <div>
+                                        <label for="externalLinkUrl">URL Completo (es. https://...):<span class="required-indicator">*</span></label>
+                                        <input type="url" id="externalLinkUrl" name="externalLinkUrl" required placeholder="https://esempio.com">
+                                    </div>
+                                    <div id="externalLinkError" class="error-message"></div>
+                                    <div class="form-actions-links">
+                                        <button type="submit" id="saveExternalLinkBtn" class="game-button">Salva Link</button>
+                                        <button type="button" id="cancelEditExtLinkBtn" class="game-button" style="background-color: var(--text-color-muted); display:none;">Annulla Modifica</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     <div
                         id="emailVerificationBanner"
                         class="info-section"
                         style="display: none; margin-top: 20px; border-left-color: orange"
                     >
-                        <p>
+                         <p>
                             La tua email non è ancora stata verificata. Controlla la tua casella di posta (e la cartella spam) per il link di verifica.
                         </p>
                         <p>
