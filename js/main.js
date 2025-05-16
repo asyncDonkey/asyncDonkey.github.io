@@ -4,7 +4,7 @@ import {
     getFirestore,
     doc,
     getDoc,
-    setDoc,
+    setDoc, // MANTENUTO - Usato nel blocco signupForm se rimane attivo
     serverTimestamp,
     collection,
     query,
@@ -18,14 +18,15 @@ import {
     arrayRemove,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
-    getAuth,
-    createUserWithEmailAndPassword,
+    getAuth, // MANTENUTO - Essenziale per inizializzare auth
+    createUserWithEmailAndPassword, // MANTENUTO - Usato nel blocco signupForm se rimane attivo
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
+import { showToast } from './toastNotifications.js'; // Assicurati che showToast sia importato
 
 // --- Firebase Config ---
 const firebaseConfig = {
@@ -40,7 +41,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
+const auth = getAuth(app); // CORRETTO - getAuth è necessario
 
 // --- Utility Functions ---
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
@@ -113,11 +114,8 @@ async function loadUserProfile(user) {
 function updateAuthUI(user) {
     const authContainer = document.getElementById('authContainer');
     const userProfileContainer = document.getElementById('userProfileContainer');
-    // const logoutButton = document.getElementById('logoutButton'); // Già gestito da userProfileContainer
     const profileNavLink = document.getElementById('profileNav');
-    const writeArticleNavLink = document.getElementById('navWriteArticle'); // Per "Scrivi Articolo"
-
-    // Il link "Contribuisci" non ha bisogno di essere gestito qui perché è sempre visibile.
+    const writeArticleNavLink = document.getElementById('navWriteArticle');
 
     const elementsToToggleBasedOnLogin = [
         { el: authContainer, showWhenLoggedOut: true, displayType: 'flex' },
@@ -146,11 +144,13 @@ function updateAuthUI(user) {
         if (userDisplayName) userDisplayName.textContent = '';
         if (headerUserAvatar) headerUserAvatar.style.display = 'none';
     } else {
-        loadUserProfile(user); // Funzione che carica nome e avatar
+        loadUserProfile(user);
         const loginModal = document.getElementById('loginModal');
-        const signupModal = document.getElementById('signupModal');
+        // const signupModal = document.getElementById('signupModal'); // RIMOSSO RIFERIMENTO ALLA MODALE SIGNUP
+
         if (loginModal && loginModal.style.display === 'block') loginModal.style.display = 'none';
-        if (signupModal && signupModal.style.display === 'block') signupModal.style.display = 'none';
+        // La riga sotto che chiudeva signupModal non è più necessaria se la modale HTML è stata rimossa
+        // if (signupModal && signupModal.style.display === 'block') signupModal.style.display = 'none';
     }
 }
 
@@ -230,7 +230,6 @@ async function loadHomeMiniLeaderboard() {
 
 async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser) {
     if (!buttonElement || !articleId) {
-        // console.log(`Chiamata a updateHomepageLikeButtonUI INTERROTTA: buttonElement o articleId mancante. ArticleId: ${articleId}`);
         return;
     }
     const likeCountSpan = buttonElement.nextElementSibling;
@@ -245,7 +244,6 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
         if (docSnap.exists()) {
             const articleData = docSnap.data();
             if (articleData.status !== 'published') {
-                // console.warn(`Articolo "${articleId}" non pubblicato. Like UI non aggiornata come 'liked'.`);
                 if (likeCountSpan) likeCountSpan.textContent = articleData.likeCount || 0;
                 buttonElement.innerHTML = `🤍`;
                 buttonElement.disabled = true;
@@ -328,17 +326,13 @@ async function updateHomepageCommentCountUI(countSpanElement, articleId) {
 }
 
 export async function initializeHomepageArticleInteractions(currentUser) {
-    // console.log("Chiamata a initializeHomepageArticleInteractions. Utente:", currentUser ? currentUser.uid : "Nessuno");
     const articlesGrid = document.getElementById('articlesGrid');
     if (!articlesGrid) {
-        // console.warn("#articlesGrid non trovato. Impossibile inizializzare interazioni.");
         return;
     }
     const articleCards = articlesGrid.querySelectorAll('.article-card');
-    // console.log(`Trovate ${articleCards.length} .article-card.`);
 
     if (articleCards.length === 0) {
-        // console.log("Nessuna card articolo trovata, possibile attesa rendering...");
         return;
     }
 
@@ -347,25 +341,17 @@ export async function initializeHomepageArticleInteractions(currentUser) {
         const likeButton = card.querySelector('.homepage-like-btn');
         const commentCountSpan = card.querySelector('.homepage-comment-count');
 
-        // console.log(`Processo card per articolo ID: ${articleId}`);
-
         if (articleId) {
             if (likeButton) {
-                // console.log(`Trovato bottone like per ${articleId}. Chiamo updateHomepageLikeButtonUI.`);
                 await updateHomepageLikeButtonUI(likeButton, articleId, currentUser);
                 likeButton.removeEventListener('click', handleHomepageArticleLike);
                 likeButton.addEventListener('click', handleHomepageArticleLike);
-            } else {
-                // console.warn(`Bottone like NON trovato per articolo ID: ${articleId} in card:`, card);
             }
             if (commentCountSpan) {
                 await updateHomepageCommentCountUI(commentCountSpan, articleId);
             }
-        } else {
-            // console.warn("Card articolo senza data-article-id:", card);
         }
     }
-    // console.log("Fine initializeHomepageArticleInteractions.");
 }
 
 function traduireErroreFirebase(codiceErrore) {
@@ -378,25 +364,23 @@ function traduireErroreFirebase(codiceErrore) {
         'auth/operation-not-allowed': 'Operazione non permessa (controlla config Firebase Auth).',
         'auth/weak-password': 'La password è troppo debole (minimo 6 caratteri).',
     };
-    return errors[codiceErrore] || `Errore (${codiceErrore}).`;
+    return errors[codiceErrore] || `Errore (${codiceErrore}). Riprova.`; // Modificato il fallback
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    // console.log("DOMContentLoaded eseguito.");
     const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
+    const signupForm = document.getElementById('signupForm'); // Questo riferimento potrebbe essere rimosso se il form non è più qui
     const logoutButton = document.getElementById('logoutButton');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const bodyElement = document.body;
     const loginModal = document.getElementById('loginModal');
-    const signupModal = document.getElementById('signupModal');
+    // const signupModal = document.getElementById('signupModal'); // RIMOSSO - La modale signup è stata eliminata
     const showLoginBtn = document.getElementById('showLoginBtn');
-    const showSignupBtn = document.getElementById('showSignupBtn');
+    // const showSignupBtn = document.getElementById('showSignupBtn'); // RIMOSSO - Ora è un link diretto in HTML, non apre modale
     const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
-    const closeSignupBtn = signupModal ? signupModal.querySelector('.closeSignupBtn') : null;
+    // const closeSignupBtn = signupModal ? signupModal.querySelector('.closeSignupBtn') : null; // RIMOSSO
 
-    // Definizioni inline per semplicità, potrebbero essere spostate se diventano complesse
     function setupSmoothScrolling() {
         document.querySelectorAll('header nav a[href^="#"]').forEach((link) => {
             link.addEventListener('click', function (e) {
@@ -436,7 +420,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 currentlyActiveSkillBadge = this;
                 const skillName = this.dataset.skillName || 'Skill';
                 const skillDescription = this.dataset.description || 'Nessun dettaglio disponibile.';
-                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
+                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(
+                    skillDescription
+                )}</p>`;
             });
         });
     }
@@ -456,6 +442,7 @@ document.addEventListener('DOMContentLoaded', function () {
             applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
         });
     }
+
     function setupModalControls() {
         const openModal = (modal) => {
             if (modal) modal.style.display = 'block';
@@ -463,19 +450,27 @@ document.addEventListener('DOMContentLoaded', function () {
         const closeModal = (modal) => {
             if (modal) modal.style.display = 'none';
         };
-        if (showLoginBtn && loginModal) showLoginBtn.addEventListener('click', () => openModal(loginModal));
-        if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal));
-        if (closeLoginBtn) closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
-        if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
+
+        if (showLoginBtn && loginModal) {
+            showLoginBtn.addEventListener('click', () => openModal(loginModal));
+        }
+
+        // RIMOSSO: if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal));
+
+        if (closeLoginBtn) {
+            closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
+        }
+        // RIMOSSO: if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
+
         window.addEventListener('click', (event) => {
             if (event.target === loginModal) closeModal(loginModal);
-            if (event.target === signupModal) closeModal(signupModal);
+            // RIMOSSO: if (event.target === signupModal) closeModal(signupModal);
         });
     }
 
     setupSmoothScrolling();
     setupScrollToTopButton();
-    setupInteractiveSkills(); // Chiamata se la sezione skills è presente
+    setupInteractiveSkills();
     setupThemeSwitcher();
     setupModalControls();
 
@@ -485,9 +480,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('articlesSection')) {
         displayArticlesSection()
             .then(() => {
-                // console.log("displayArticlesSection completata. Inizializzo interazioni se utente già loggato.");
                 if (auth.currentUser) {
-                    // Controlla se l'utente è già noto
                     initializeHomepageArticleInteractions(auth.currentUser);
                 }
             })
@@ -508,11 +501,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 await signInWithEmailAndPassword(auth, email, password);
                 loginForm.reset();
             } catch (error) {
-                showToast('Errore Login: ' + traduireErroreFirebase(error.code));
+                const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
+                const friendlyError = traduireErroreFirebase(error.code);
+                if (loginModalErrorDiv) {
+                    loginModalErrorDiv.textContent = friendlyError;
+                    loginModalErrorDiv.style.display = 'block';
+                } else {
+                    showToast('Errore Login: ' + friendlyError, 'error');
+                }
             }
         });
     }
-    if (signupForm) {
+
+    // RIMOSSO: Blocco if (signupForm) { ... }
+    // L'event listener per il signupForm è ora gestito in js/register.js
+    // Se il signupForm è ancora referenziato qui, è un residuo e dovrebbe essere rimosso
+    // dato che la modale di signup non esiste più in questo contesto.
+    // Per sicurezza, lo commento invece di rimuoverlo completamente se hai ancora
+    // un elemento con id="signupForm" in qualche pagina per altri scopi (improbabile).
+    /*
+    if (signupForm) { // QUESTO BLOCCO VA RIMOSSO SE signupForm ERA SOLO PER LA MODALE
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = signupForm.signupEmail.value;
@@ -546,12 +554,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+    */
+
     if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
+                showToast('Logout effettuato con successo!', 'info');
+                if (window.location.pathname.includes('profile.html') || window.location.pathname.includes('admin-dashboard.html') || window.location.pathname.includes('submit-article.html')) {
+                    window.location.href = 'index.html';
+                }
             } catch (error) {
-                showToast('Errore logout: ' + error.message);
+                showToast('Errore logout: ' + error.message, 'error');
             }
         });
     }
@@ -561,7 +575,6 @@ onAuthStateChanged(auth, (user) => {
     console.log('main.js - Auth state changed. User:', user ? user.uid : 'null');
     updateAuthUI(user);
 
-    // Altra logica che dipende dallo stato dell'utente, es. per la homepage
     const articlesGridElement = document.getElementById('articlesGrid');
     if (articlesGridElement && typeof initializeHomepageArticleInteractions === 'function') {
         setTimeout(() => {
@@ -569,5 +582,23 @@ onAuthStateChanged(auth, (user) => {
                 initializeHomepageArticleInteractions(user);
             }
         }, 250);
+    }
+
+    if (user && user.emailVerified) {
+        const isNewlyRegistered = sessionStorage.getItem('newlyRegistered');
+        if (isNewlyRegistered) {
+             getDoc(doc(db, 'userProfiles', user.uid)).then(profileSnap => {
+                if (profileSnap.exists()) {
+                    const nickname = profileSnap.data().nickname || user.email.split('@')[0];
+                    showToast(`Benvenuto/a su asyncDonkey.io, ${nickname}!`, 'success', 7000);
+                } else {
+                    showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
+                }
+                sessionStorage.removeItem('newlyRegistered');
+            }).catch(() => {
+                showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
+                sessionStorage.removeItem('newlyRegistered');
+            });
+        }
     }
 });

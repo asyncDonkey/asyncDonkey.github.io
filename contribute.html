@@ -89,7 +89,7 @@
                 <div class="header-controls" style="display: flex; align-items: center; gap: 10px">
                     <div id="authContainer">
                         <button id="showLoginBtn" class="auth-button">Login</button>
-                        <button id="showSignupBtn" class="auth-button">Register</button>
+                        <a href="register.html" id="showSignupBtn" class="auth-button" style="text-decoration: none;">Register</a>
                     </div>
                     <div id="userProfileContainer" style="display: none; align-items: center">
                         <img id="headerUserAvatar" src="" alt="User Avatar" />
@@ -346,49 +346,6 @@
                         ><input type="password" id="loginPassword" name="loginPassword" required />
                     </div>
                     <button type="submit" class="game-button">Login</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="signupModal" class="modal">
-            <div class="modal-content">
-                <span class="closeSignupBtn">&times;</span>
-                <h3>Registrati</h3>
-                <form id="signupForm">
-                    <div>
-                        <label for="signupEmail">Email:</label
-                        ><input type="email" id="signupEmail" name="signupEmail" required />
-                    </div>
-                    <div>
-                        <label for="signupPassword">Password (min. 6 caratteri):</label
-                        ><input type="password" id="signupPassword" name="signupPassword" required minlength="6" />
-                    </div>
-                    <div>
-                        <label for="signupNickname">Nickname:</label>
-                        <input
-                            type="text"
-                            id="signupNickname"
-                            name="signupNickname"
-                            required
-                            minlength="3"
-                            maxlength="25"
-                        />
-                    </div>
-                    <div>
-                        <label for="signupNationality">Nazionalità:</label>
-                        <select id="signupNationality" name="signupNationality">
-                            <option value="">Seleziona Nazionalità...</option>
-                            <option value="IT">Italia (IT)</option>
-                            <option value="US">Stati Uniti (US)</option>
-                            <option value="GB">Regno Unito (GB)</option>
-                            <option value="DE">Germania (DE)</option>
-                            <option value="FR">Francia (FR)</option>
-                            <option value="ES">Spagna (ES)</option>
-                            <option value="JP">Giappone (JP)</option>
-                            <option value="OTHER">Altro / Preferisco non specificare</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="game-button">Registrati</button>
                 </form>
             </div>
         </div>

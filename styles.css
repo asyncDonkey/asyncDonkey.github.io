@@ -2731,3 +2731,72 @@ footer a {
         font-size: 1.1em;
     }
 }
+
+/* Stili specifici per register.html, se necessario */
+            main section {
+                max-width: 600px; /* Larghezza massima per il form */
+            }
+            .form-field div {
+                margin-bottom: 20px;
+            }
+            .form-field label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                color: var(--text-color-primary);
+            }
+            .form-field input[type='email'],
+            .form-field input[type='password'],
+            .form-field input[type='text'],
+            .form-field select {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid var(--border-color-primary);
+                border-radius: 4px;
+                background-color: var(--bg-color);
+                color: var(--text-color-primary);
+                font-size: 1em;
+                font-family: inherit;
+            }
+            .form-field input:focus,
+            .form-field select:focus {
+                outline: none;
+                border-color: var(--link-color);
+                box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25);
+            }
+            .info-section {
+                background-color: var(--surface-bg-secondary);
+                padding: 15px;
+                border-radius: 6px;
+                margin-top: 10px;
+                margin-bottom: 20px;
+                font-size: 0.9em;
+                border-left: 4px solid var(--link-color);
+            }
+            .info-section p {
+                margin-bottom: 8px;
+                color: var(--text-color-secondary);
+            }
+            .info-section p:last-child {
+                margin-bottom: 0;
+            }
+            .error-message {
+                color: red;
+                font-size: 0.85em;
+                margin-top: 5px;
+                display: none; /* Nascosto di default */
+            }
+            .required-indicator {
+                color: red;
+                margin-left: 2px;
+            }
+            .form-actions {
+                margin-top: 25px;
+                text-align: center;
+            }
+            .password-requirements {
+                font-size: 0.8em;
+                color: var(--text-color-muted);
+                margin-top: 5px;
+                margin-bottom: 10px;
+            }
