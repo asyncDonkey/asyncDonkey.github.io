@@ -1219,33 +1219,42 @@ img.comment-avatar-img {
     left: 0;
     z-index: 10; /* Sopra il canvas */
 }
+body.game-fullscreen-active.game-fullscreen-landscape #mobileControlsInternal .control-button {
+    flex-basis: auto; /* Lascia che la larghezza sia determinata dal contenuto e dal padding */
+    padding: 10px;    /* Padding più piccolo per landscape */
+    font-size: 1em;   /* Font più piccolo per landscape */
+    min-width: 60px;  /* Riduci min-width se necessario */
+}
+
+body.game-fullscreen-active.game-fullscreen-landscape #mobileControlsInternal {
+    justify-content: space-between; /* Spinge i pulsanti ai lati estremi del contenitore */
+}
 .donkey-runner-page #mobileControlsInternal {
     display: flex;
-    justify-content: space-around; /* Buono per distanziare i pulsanti */
+    justify-content: space-around; /* o space-between se preferisci i pulsanti ai lati */
     align-items: center;
-    width: 90%;
-    max-width: 400px; /* Limita la larghezza dei controlli stessi */
-    margin: 0 auto; /* Centra i controlli interni */
+    width: 100%; /* Fai in modo che usi tutta la larghezza di #mobileControls */
+    /* max-width: 400px; /* Potresti rimuovere questo se #mobileControls ha già un max-width */
+    margin: 0 auto; 
 }
-.donkey-runner-page .control-button {
-    background-color: var(--game-button-bg);
-    color: var(--game-button-text);
-    border: 2px solid var(--game-button-border);
-    border-radius: 10px;
-    padding: 15px 20px;
-    font-size: 1.3em;
-    font-weight: bold;
-    font-family: 'Source Code Pro', monospace;
-    cursor: pointer;
-    outline: none;
-    flex-grow: 0;
-    flex-basis: 45%; /* I pulsanti occupano quasi metà dello spazio disponibile ciascuno */
-    margin: 0 5px;
-    text-align: center;
-    transition:
-        background-color 0.2s,
-        border-color 0.2s,
-        transform 0.1s;
+.donkey-runner-page .control-button { /* Pulsanti JMP e SHT */
+    background-color: var(--game-button-bg, #4CAF50);
+    color: var(--game-button-text, white);
+    border: 2px solid var(--game-button-border, #388E3C);
+    padding: 15px 10px; /* Leggermente meno padding orizzontale per guadagnare spazio */
+    font-size: 1.2em;  /* Leggermente più piccolo se necessario */
+    border-radius: 8px;
+    box-shadow: 3px 3px 0px var(--game-button-shadow, #2E7D32);
+    
+    flex-grow: 1;     /* Permetti ai pulsanti di crescere per riempire lo spazio */
+    flex-shrink: 1;   /* Permetti ai pulsanti di restringersi se necessario */
+    flex-basis: 0;    /* Distribuisci lo spazio equamente partendo da 0 */
+    /* In alternativa a flex-basis: 0, potresti usare una % più piccola tipo 40% */
+    /* flex-basis: 40%; */
+
+    margin: 0 5px;    /* Mantieni un piccolo margine */
+    text-align: center; /* Assicura che il testo sia centrato nel pulsante */
+    min-width: 80px; /* Aggiungi una larghezza minima per evitare che diventino troppo piccoli */
 }
 .donkey-runner-page .control-button:active {
     background-color: var(--game-button-active-bg);
