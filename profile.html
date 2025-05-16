@@ -61,7 +61,7 @@
                 <div class="header-controls" style="display: flex; align-items: center; gap: 10px">
                     <div id="authContainer">
                         <button id="showLoginBtn" class="auth-button">Login</button>
-                        <a href="register.html" id="showSignupBtn" class="auth-button" style="text-decoration: none;"
+                        <a href="register.html" id="showSignupBtn" class="auth-button" style="text-decoration: none"
                             >Register</a
                         >
                     </div>
@@ -106,41 +106,83 @@
                         </div>
                     </div>
 
-                    <div id="statusMessageSection" style="display: none;">
-                        <h3 style="margin-bottom: 10px;">Stato d'Animo:</h3>
+                    <div id="statusMessageSection" style="display: none">
+                        <h3 style="margin-bottom: 10px">Stato d'Animo:</h3>
                         <div id="statusMessageDisplay">Caricamento stato...</div>
-                        <form id="updateStatusForm" style="margin-top: 10px;">
-                            <input type="text" id="statusMessageInput" name="statusMessageInput" placeholder="Come ti senti oggi?" maxlength="150">
-                            <button type="submit" id="updateStatusBtn" class="game-button" style="padding: 10px 15px;">Aggiorna</button>
+                        <form id="updateStatusForm" style="margin-top: 10px">
+                            <input
+                                type="text"
+                                id="statusMessageInput"
+                                name="statusMessageInput"
+                                placeholder="Come ti senti oggi?"
+                                maxlength="150"
+                            />
+                            <button type="submit" id="updateStatusBtn" class="game-button" style="padding: 10px 15px">
+                                Aggiorna
+                            </button>
                         </form>
                         <div id="statusUpdateMessage"></div>
                     </div>
 
-                    <div id="externalLinksSection" style="display: none;"> <h3 style="margin-bottom: 10px;">Link Esterni (Max 5):</h3>
+                    <div id="externalLinksSection" style="display: none">
+                        <h3 style="margin-bottom: 10px">Link Esterni (Max 5):</h3>
                         <ul id="externalLinksList" class="external-links-list">
-                            <li id="noExternalLinksMessage" style="display:none; background-color: transparent; padding: 0;">
-                                <p style="color: var(--text-color-muted);">Nessun link esterno aggiunto.</p>
+                            <li
+                                id="noExternalLinksMessage"
+                                style="display: none; background-color: transparent; padding: 0"
+                            >
+                                <p style="color: var(--text-color-muted)">Nessun link esterno aggiunto.</p>
                             </li>
                         </ul>
 
-                        <div id="manageExternalLinksUI" style="margin-top:15px;"> <button type="button" id="toggleAddLinkFormBtn" class="game-button">Aggiungi Nuovo Link</button>
-                            
-                            <div id="externalLinkFormContainer" style="display:none; margin-top: 15px;">
+                        <div id="manageExternalLinksUI" style="margin-top: 15px">
+                            <button type="button" id="toggleAddLinkFormBtn" class="game-button">
+                                Aggiungi Nuovo Link
+                            </button>
+
+                            <div id="externalLinkFormContainer" style="display: none; margin-top: 15px">
                                 <h4 id="externalLinkFormTitle">Aggiungi Nuovo Link</h4>
                                 <form id="externalLinkForm">
-                                    <input type="hidden" id="editingLinkIndex" value="-1">
+                                    <input type="hidden" id="editingLinkIndex" value="-1" />
                                     <div>
-                                        <label for="externalLinkTitle">Titolo del Link:<span class="required-indicator">*</span></label>
-                                        <input type="text" id="externalLinkTitle" name="externalLinkTitle" required maxlength="50">
+                                        <label for="externalLinkTitle"
+                                            >Titolo del Link:<span class="required-indicator">*</span></label
+                                        >
+                                        <input
+                                            type="text"
+                                            id="externalLinkTitle"
+                                            name="externalLinkTitle"
+                                            required
+                                            maxlength="50"
+                                        />
                                     </div>
                                     <div>
-                                        <label for="externalLinkUrl">URL Completo (es. https://...):<span class="required-indicator">*</span></label>
-                                        <input type="url" id="externalLinkUrl" name="externalLinkUrl" required placeholder="https://esempio.com">
+                                        <label for="externalLinkUrl"
+                                            >URL Completo (es. https://...):<span class="required-indicator"
+                                                >*</span
+                                            ></label
+                                        >
+                                        <input
+                                            type="url"
+                                            id="externalLinkUrl"
+                                            name="externalLinkUrl"
+                                            required
+                                            placeholder="https://esempio.com"
+                                        />
                                     </div>
                                     <div id="externalLinkError" class="error-message"></div>
                                     <div class="form-actions-links">
-                                        <button type="submit" id="saveExternalLinkBtn" class="game-button">Salva Link</button>
-                                        <button type="button" id="cancelEditExtLinkBtn" class="game-button" style="background-color: var(--text-color-muted); display:none;">Annulla Modifica</button>
+                                        <button type="submit" id="saveExternalLinkBtn" class="game-button">
+                                            Salva Link
+                                        </button>
+                                        <button
+                                            type="button"
+                                            id="cancelEditExtLinkBtn"
+                                            class="game-button"
+                                            style="background-color: var(--text-color-muted); display: none"
+                                        >
+                                            Annulla Modifica
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -151,8 +193,9 @@
                         class="info-section"
                         style="display: none; margin-top: 20px; border-left-color: orange"
                     >
-                         <p>
-                            La tua email non è ancora stata verificata. Controlla la tua casella di posta (e la cartella spam) per il link di verifica.
+                        <p>
+                            La tua email non è ancora stata verificata. Controlla la tua casella di posta (e la cartella
+                            spam) per il link di verifica.
                         </p>
                         <p>
                             Non hai ricevuto l'email?
@@ -180,28 +223,64 @@
             <section id="myArticlesSection" style="margin-top: 40px; display: none">
                 <h2>I Miei Articoli</h2>
                 <div class="my-articles-subsection">
-                    <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; margin-bottom: 15px;">Bozze</h3>
+                    <h3
+                        style="
+                            color: var(--heading-color);
+                            border-bottom: 1px solid var(--border-color-secondary);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        Bozze
+                    </h3>
                     <div id="myDraftArticlesListContainer">
                         <p id="myDraftsLoadingMessage">Caricamento bozze...</p>
                         <div id="myDraftArticlesList" class="my-articles-grid-container"></div>
                     </div>
                 </div>
                 <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; margin-bottom: 15px;">In Revisione</h3>
+                    <h3
+                        style="
+                            color: var(--heading-color);
+                            border-bottom: 1px solid var(--border-color-secondary);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        In Revisione
+                    </h3>
                     <div id="myPendingArticlesListContainer">
                         <p id="myPendingLoadingMessage">Caricamento articoli in revisione...</p>
                         <div id="myPendingArticlesList" class="my-articles-grid-container"></div>
                     </div>
                 </div>
                 <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; margin-bottom: 15px;">Pubblicati</h3>
+                    <h3
+                        style="
+                            color: var(--heading-color);
+                            border-bottom: 1px solid var(--border-color-secondary);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        Pubblicati
+                    </h3>
                     <div id="myPublishedArticlesListContainer">
                         <p id="myPublishedLoadingMessage">Caricamento articoli pubblicati...</p>
                         <div id="myPublishedArticlesList" class="my-articles-grid-container"></div>
                     </div>
                 </div>
                 <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; margin-bottom: 15px;">Respinti</h3>
+                    <h3
+                        style="
+                            color: var(--heading-color);
+                            border-bottom: 1px solid var(--border-color-secondary);
+                            padding-bottom: 8px;
+                            margin-bottom: 15px;
+                        "
+                    >
+                        Respinti
+                    </h3>
                     <div id="myRejectedArticlesListContainer">
                         <p id="myRejectedLoadingMessage">Caricamento articoli respinti...</p>
                         <div id="myRejectedArticlesList" class="my-articles-grid-container"></div>

@@ -2800,112 +2800,112 @@ main section {
     margin-top: 5px;
     margin-bottom: 10px;
 }
-            /* Stili aggiuntivi per la sezione Stato d'Animo */
-            #statusMessageSection {
-                margin-top: 20px;
-                padding-top: 20px;
-                border-top: 1px dashed var(--border-color-secondary);
-            }
-            #statusMessageDisplay {
-                font-style: italic;
-                color: var(--text-color-secondary);
-                margin-bottom: 10px;
-                padding: 10px;
-                background-color: var(--surface-bg-secondary);
-                border-radius: 4px;
-                min-height: 2em; /* Per dare spazio anche se vuoto */
-            }
-            #statusMessageDisplay:empty::before {
-                content: 'Nessuno stato d\'animo impostato.';
-                color: var(--text-color-muted);
-            }
-            #updateStatusForm {
-                display: flex;
-                gap: 10px;
-                align-items: center;
-            }
-            #statusMessageInput {
-                flex-grow: 1;
-                padding: 10px;
-                border: 1px solid var(--border-color-primary);
-                border-radius: 4px;
-                background-color: var(--bg-color);
-                color: var(--text-color-primary);
-            }
-            #statusUpdateMessage {
-                font-size: 0.9em;
-                margin-top: 5px;
-            }
+/* Stili aggiuntivi per la sezione Stato d'Animo */
+#statusMessageSection {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border-color-secondary);
+}
+#statusMessageDisplay {
+    font-style: italic;
+    color: var(--text-color-secondary);
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: var(--surface-bg-secondary);
+    border-radius: 4px;
+    min-height: 2em; /* Per dare spazio anche se vuoto */
+}
+#statusMessageDisplay:empty::before {
+    content: "Nessuno stato d'animo impostato.";
+    color: var(--text-color-muted);
+}
+#updateStatusForm {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+#statusMessageInput {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color-primary);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color-primary);
+}
+#statusUpdateMessage {
+    font-size: 0.9em;
+    margin-top: 5px;
+}
 
-            /* NUOVI STILI PER LINK ESTERNI */
-            #externalLinksSection {
-                margin-top: 20px;
-                padding-top: 20px;
-                border-top: 1px dashed var(--border-color-secondary);
-            }
-            .external-links-list {
-                list-style: none;
-                padding: 0;
-                margin-top: 10px;
-            }
-            .external-links-list li {
-                background-color: var(--surface-bg-secondary);
-                padding: 10px 15px;
-                border-radius: 4px;
-                margin-bottom: 8px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap; /* Per responsività */
-            }
-            .external-links-list .link-display a {
-                font-weight: 500;
-                color: var(--link-color);
-                text-decoration: none;
-            }
-            .external-links-list .link-display a:hover {
-                text-decoration: underline;
-            }
-            .external-links-list .link-url {
-                font-size: 0.85em;
-                color: var(--text-color-muted);
-                margin-left: 10px;
-                word-break: break-all; /* Per URL lunghi */
-            }
-            .external-links-list .link-actions button {
-                margin-left: 8px;
-                padding: 4px 8px;
-                font-size: 0.85em;
-            }
-            #externalLinkFormContainer {
-                background-color: var(--surface-bg-secondary);
-                padding: 15px;
-                border-radius: 6px;
-                margin-top: 15px;
-                border: 1px solid var(--border-color-primary);
-            }
-             #externalLinkFormContainer div {
-                margin-bottom: 10px;
-            }
-            #externalLinkFormContainer label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: 500;
-            }
-            #externalLinkFormContainer input[type="text"],
-            #externalLinkFormContainer input[type="url"] {
-                width: 100%;
-                padding: 8px;
-                border: 1px solid var(--border-color-primary);
-                border-radius: 4px;
-            }
-            #externalLinkError {
-                color: red;
-                font-size: 0.9em;
-                margin-top:5px;
-            }
-            .form-actions-links {
-                margin-top:10px;
-                display:flex;
-                gap: 10px;
-            }
+/* NUOVI STILI PER LINK ESTERNI */
+#externalLinksSection {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border-color-secondary);
+}
+.external-links-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+.external-links-list li {
+    background-color: var(--surface-bg-secondary);
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Per responsività */
+}
+.external-links-list .link-display a {
+    font-weight: 500;
+    color: var(--link-color);
+    text-decoration: none;
+}
+.external-links-list .link-display a:hover {
+    text-decoration: underline;
+}
+.external-links-list .link-url {
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    margin-left: 10px;
+    word-break: break-all; /* Per URL lunghi */
+}
+.external-links-list .link-actions button {
+    margin-left: 8px;
+    padding: 4px 8px;
+    font-size: 0.85em;
+}
+#externalLinkFormContainer {
+    background-color: var(--surface-bg-secondary);
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+    border: 1px solid var(--border-color-primary);
+}
+#externalLinkFormContainer div {
+    margin-bottom: 10px;
+}
+#externalLinkFormContainer label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+#externalLinkFormContainer input[type='text'],
+#externalLinkFormContainer input[type='url'] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color-primary);
+    border-radius: 4px;
+}
+#externalLinkError {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+.form-actions-links {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
