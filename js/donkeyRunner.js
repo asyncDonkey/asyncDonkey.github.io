@@ -1505,28 +1505,113 @@ async function handleSaveDonkeyScore() {
 }
 
 function processGameOver() {
+    // Ottieni i riferimenti agli elementi del form QUI
+    const localScoreInputContainer = document.getElementById('scoreInputContainerDonkey'); // Rinomina per evitare shadowing se scoreInputContainerDonkey è globale
+    const localPlayerInitialsInput = document.getElementById('playerInitialsDonkey');
+    const localSaveScoreBtn = document.getElementById('saveScoreBtnDonkey');
+    // const localRestartGameBtnInsideForm = document.getElementById('restartGameBtnDonkey'); // Il restart DENTRO il form
+    const localFinalScoreDisplay = document.getElementById('finalScoreDisplayDonkey');
+
+    console.log('processGameOver CHIAMATA. finalScore (prima di floor):', score);
     gameOverTrigger = false;
     currentGameState = GAME_STATE.GAME_OVER;
-    finalScore = Math.floor(score); // Punteggio finale intero
+    finalScore = Math.floor(score); // Calcola finalScore qui
+    console.log('finalScore (dopo floor):', finalScore);
+
     AudioManager.stopMusic();
     AudioManager.playSound('gameOverSound');
 
-    if (scoreInputContainerDonkey && playerInitialsDonkeyInput && saveScoreBtnDonkey && restartGameBtnDonkey) {
-        if (shouldShowDonkeyScoreInput(finalScore)) {
-            if(document.getElementById('finalScoreDisplayDonkey')) document.getElementById('finalScoreDisplayDonkey').textContent = finalScore;
-            scoreInputContainerDonkey.style.display = 'flex'; // Assicurati che sia flex
-            playerInitialsDonkeyInput.value = '';
-            playerInitialsDonkeyInput.focus();
-            saveScoreBtnDonkey.disabled = false;
-            saveScoreBtnDonkey.textContent = 'Salva Punteggio';
-        } else {
-            scoreInputContainerDonkey.style.display = 'none';
+    console.log('Elementi del form punteggio cercati DENTRO processGameOver:', {
+        container: !!localScoreInputContainer,
+        initialsInput: !!localPlayerInitialsInput,
+        saveBtn: !!localSaveScoreBtn,
+        // restartBtnInForm: !!localRestartGameBtnInsideForm, // Non è più strettamente necessario per mostrare il form
+        scoreDisplay: !!localFinalScoreDisplay
+    });
+
+    if (localScoreInputContainer) { // Verifica solo il container principale per la logica di visualizzazione
+        const shouldShow = shouldShowDonkeyScoreInput(finalScore);
+        console.log('shouldShowDonkeyScoreInput restituisce:', shouldShow);
+
+        if (shouldShow) {
+            if (localFinalScoreDisplay) {
+                localFinalScoreDisplay.textContent = finalScore;
+                console.log('finalScoreDisplayDonkey aggiornato a:', finalScore);
+            } else {
+                console.error("Elemento finalScoreDisplayDonkey non trovato!");
+            }
+            
+            localScoreInputContainer.style.display = 'flex';
+            console.log('scoreInputContainerDonkey.style.display impostato a flex');
+            
+            if (localPlayerInitialsInput) {
+                localPlayerInitialsInput.value = '';
+                // Non mettere il focus qui se l'utente è loggato e le iniziali non servono
+                const currentUser = auth.currentUser;
+                const playerNameInputArea = document.getElementById('playerNameInputArea'); // Contenitore per input/span nome
+                const loggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay');
+
+                if (playerNameInputArea && loggedInUserNameDisplay) {
+                    if (currentUser) {
+                        // Utente loggato, mostra il suo nome e nascondi input iniziali
+                        getDoc(doc(db, 'userProfiles', currentUser.uid)).then(profileSnap => {
+                            if (profileSnap.exists()) {
+                                loggedInUserNameDisplay.textContent = profileSnap.data().nickname || currentUser.email.split('@')[0];
+                            } else {
+                                loggedInUserNameDisplay.textContent = currentUser.email.split('@')[0];
+                            }
+                            loggedInUserNameDisplay.style.display = 'inline'; // O 'block'
+                            if(localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]')) {
+                                localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]').style.display = 'none';
+                            }
+                            localPlayerInitialsInput.style.display = 'none';
+                            localPlayerInitialsInput.required = false;
+                        }).catch(err => {
+                            console.error("Errore recupero nickname per form punteggio:", err);
+                            loggedInUserNameDisplay.textContent = currentUser.email.split('@')[0];
+                            loggedInUserNameDisplay.style.display = 'inline';
+                            if(localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]')) {
+                                localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]').style.display = 'none';
+                            }
+                            localPlayerInitialsInput.style.display = 'none';
+                            localPlayerInitialsInput.required = false;
+                        });
+                    } else {
+                        // Utente non loggato, mostra input iniziali
+                        loggedInUserNameDisplay.style.display = 'none';
+                        if(localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]')) {
+                            localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]').style.display = 'block';
+                        }
+                        localPlayerInitialsInput.style.display = 'block';
+                        localPlayerInitialsInput.required = true;
+                        localPlayerInitialsInput.focus();
+                    }
+                }
+
+
+            } else { // shouldShow è false (punteggio 0)
+                localScoreInputContainer.style.display = 'none';
+                console.log('shouldShowDonkeyScoreInput è false, scoreInputContainerDonkey nascosto.');
+            }
+            
+            // Abilita/disabilita il pulsante salva se esiste
+            if (localSaveScoreBtn) {
+                localSaveScoreBtn.disabled = false;
+                localSaveScoreBtn.textContent = 'Salva Punteggio';
+            } else {
+                 console.error("localSaveScoreBtn NON TROVATO DENTRO processGameOver");
+            }
+
+        } else { // localScoreInputContainer non trovato
+            console.error('ERRORE CRITICO: scoreInputContainerDonkey non trovato nel DOM!');
         }
     }
-     // Mostra il pulsante "Rigioca" su mobile se presente
+    
+    // Gestione del pulsante "RIGIOCA" globale per mobile
     if (isTouchDevice && mobileStartButton) {
         mobileStartButton.textContent = 'RIGIOCA';
-        mobileStartButton.style.display = 'block'; // Assicurati sia visibile
+        mobileStartButton.style.display = 'block';
+        console.log('mobileStartButton impostato a RIGIOCA e display block.');
     }
 }
 

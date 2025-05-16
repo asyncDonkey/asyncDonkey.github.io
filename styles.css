@@ -1182,14 +1182,20 @@ img.comment-avatar-img {
     box-sizing: border-box;
 }
 .donkey-runner-page #gameContainer {
-    position: relative;
-    width: 100%;
-    max-width: 800px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 20px 0;
-}
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid var(--game-border-color, #00b9be);
+                border-radius: 8px;
+                padding: 10px; 
+                background-color: var(--game-container-bg, #1c1c1c);
+                box-shadow: 0 0 15px rgba(0, 185, 190, 0.5);
+                max-width: 800px; 
+                width: 100%; 
+                box-sizing: border-box;
+                position: relative; 
+            }
 .donkey-runner-page canvas#gameCanvas {
     display: block;
     image-rendering: pixelated;
@@ -1258,7 +1264,9 @@ img.comment-avatar-img {
     top: 10px;
     right: 10px;
     z-index: 20;
-    display: none;
+    /* display: none; */ /* COMMENTA O RIMUOVI QUESTO se vuoi che sia visibile di default e gestito solo da JS per nasconderlo */
+                        /* OPPURE, se vuoi che sia nascosto di default e il JS lo mostri solo su touch: */
+    display: none;    /* MANTIENI QUESTO e assicurati che il JS lo imposti a 'block' quando isTouchDevice è true */
     transition:
         background-color 0.2s,
         color 0.2s;
