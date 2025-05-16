@@ -188,41 +188,25 @@
                 </div>
 
                 <div id="articleCommentsSectionContainer">
-                    <h3>Lascia un Commento</h3>
-                    <div id="articleCommentFormContainer" class="comment-form-container">
-                        <form id="articleCommentForm">
-                            <div id="articleCommentNameSection">
-                                <label for="articleCommentName">Nome:</label>
-                                <input
-                                    type="text"
-                                    id="articleCommentName"
-                                    name="articleCommentName"
-                                    required
-                                    maxlength="50"
-                                />
-                            </div>
-                            <div>
-                                <label for="articleCommentMessage">Messaggio:</label>
-                                <textarea
-                                    id="articleCommentMessage"
-                                    name="articleCommentMessage"
-                                    rows="4"
-                                    required
-                                    maxlength="1000"
-                                ></textarea>
-                            </div>
-                            <button type="submit" id="submitArticleCommentBtn" class="game-button">
-                                Invia Commento
-                            </button>
-                        </form>
-                    </div>
+    <h3>Lascia un Commento</h3>
 
-                    <div id="articleCommentsListContainer">
-                        <h4>Commenti Recenti:</h4>
-                        <div id="articleCommentsList" class="comments-list"><p>Caricamento commenti...</p></div>
-                    </div>
-                </div>
-            </section>
+    <div id="articleCommentFormContainer" class="comment-form-container">
+        <form id="articleCommentForm">
+            <div>
+                <label for="articleCommentMessage">Messaggio:</label>
+                <textarea id="articleCommentMessage" name="articleCommentMessage" rows="4" required maxlength="1000"></textarea>
+            </div>
+            <button type="submit" id="submitArticleCommentBtn" class="game-button">Invia Commento</button>
+        </form>
+    </div>
+
+    <div id="articleCommentsListContainer">
+        <h4>Commenti Recenti:</h4>
+        <div id="articleCommentsList" class="comments-list"><p>Caricamento commenti...</p></div>
+    </div>
+</div>
+                            
+                    
 
             <div class="back-to-home-link">
                 <a href="index.html#articlesSection">&larr; Torna agli Articoli</a>
