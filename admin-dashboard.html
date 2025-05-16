@@ -295,13 +295,32 @@
                     </div>
                 </div>
             </section>
-        </main>
+        <div class="admin-section" id="rejectReasonModal" class="modal" style="display:none;">
+                <div class="modal-content" style="max-width: 500px;">
+                    <span class="close-modal-btn" id="closeRejectReasonModalBtn">&times;</span>
+                    <h3 id="rejectReasonModalTitle">Motivo del Rifiuto</h3>
+                    <form id="rejectReasonForm">
+                        <input type="hidden" id="rejectingArticleId">
+                        <div>
+                            <label for="rejectionReasonTextarea">Inserisci il motivo per cui l'articolo viene respinto (visibile all'autore):</label>
+                            <textarea id="rejectionReasonTextarea" rows="5" style="width:100%; margin-top: 5px;" placeholder="Sii chiaro e costruttivo..."></textarea>
+                        </div>
+                        <div style="margin-top:15px; text-align: right;">
+                            <button type="button" id="cancelRejectReasonBtn" class="game-button" style="background-color: var(--text-color-muted); margin-right: 10px;">Annulla</button>
+                            <button type="submit" id="submitRejectReasonBtn" class="game-button" style="background-color: #dc3545; color: white;">Conferma Rifiuto</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-        <footer></footer>
+        </section> </main>
 
-        <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+    <footer>
+        </footer>
 
-        <script src="js/main.js" type="module"></script>
-        <script src="js/adminDashboard.js" type="module"></script>
-    </body>
+    <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+    <script src="js/main.js" type="module"></script>
+    <script src="js/adminDashboard.js" type="module"></script>
+</body>
 </html>
