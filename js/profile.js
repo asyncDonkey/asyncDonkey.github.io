@@ -317,16 +317,19 @@ function createMyArticleItemElement(article, articleId) {
         viewButton.textContent = 'Visualizza';
         actionsDiv.appendChild(viewButton);
     } else if (article.status === 'rejected') {
-        const resubmitButton = document.createElement('a');
-        resubmitButton.href = `submit-article.html`;
-        resubmitButton.className = 'game-button my-article-action-button';
-        resubmitButton.textContent = 'Nuova Sottomissione';
-        resubmitButton.title = 'Crea un nuovo articolo (puoi copiare il contenuto da quello respinto)';
-        actionsDiv.appendChild(resubmitButton);
+        const resubmitBasedOnButton = document.createElement('a');
+        // MODIFICA: Aggiunto il parametro URL rejectedArticleId
+        resubmitBasedOnButton.href = `submit-article.html?rejectedArticleId=${articleId}`;
+        resubmitBasedOnButton.className = 'game-button my-article-action-button';
+        // MODIFICA: Testo del pulsante più esplicito
+        resubmitBasedOnButton.textContent = 'Crea da Questo Articolo';
+        resubmitBasedOnButton.title =
+            'Crea una nuova sottomissione pre-compilata con il contenuto di questo articolo respinto';
+        actionsDiv.appendChild(resubmitBasedOnButton);
 
         const deleteButton = document.createElement('button');
         deleteButton.className = 'game-button my-article-action-button delete';
-        deleteButton.textContent = 'Elimina';
+        deleteButton.textContent = 'Elimina Respinto'; // Testo leggermente più specifico
         deleteButton.addEventListener('click', () => handleDeleteArticle(articleId, article.title, 'rejected'));
         actionsDiv.appendChild(deleteButton);
     }
