@@ -62,15 +62,13 @@ if (commentsListContainer && commentsListContainer.dataset.pageId) {
 function formatFirebaseTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp?.toDate) return 'Date unavailable';
     try {
-        return firebaseTimestamp
-            .toDate()
-            .toLocaleString('it-IT', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-            });
+        return firebaseTimestamp.toDate().toLocaleString('it-IT', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
     } catch (e) {
         return 'Date format error';
     }
