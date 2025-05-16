@@ -19,7 +19,6 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
     getAuth, // MANTENUTO - Essenziale per inizializzare auth
-    createUserWithEmailAndPassword, // MANTENUTO - Usato nel blocco signupForm se rimane attivo
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
@@ -369,7 +368,7 @@ function traduireErroreFirebase(codiceErrore) {
 
 document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm'); // Questo riferimento potrebbe essere rimosso se il form non è più qui
+
     const logoutButton = document.getElementById('logoutButton');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
     const themeToggleBtn = document.getElementById('themeToggleBtn');

@@ -171,7 +171,7 @@ const shootButton = document.getElementById('shootButton');
 const mobileControlsDiv = document.getElementById('mobileControls');
 const fullscreenButton = document.getElementById('fullscreenButton');
 const scoreInputContainerDonkey = document.getElementById('scoreInputContainerDonkey');
-const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
+
 const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
 const restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey');
 const mobileStartButton = document.getElementById('mobileStartButton'); // NUOVO RIFERIMENTO
