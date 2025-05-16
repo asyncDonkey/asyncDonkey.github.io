@@ -4,6 +4,12 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Articolo - asyncDonkey.io</title>
+        <meta property="og:title" content="Titolo Articolo Placeholder" />
+        <meta property="og:description" content="Descrizione articolo placeholder..." />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content="URL_CANONICO_DELL_ARTICOLO_PLACEHOLDER" />
+        <meta property="og:image" content="URL_IMMAGINE_COPERTINA_PLACEHOLDER" />
+
         <link rel="stylesheet" href="styles.css" />
         <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -93,6 +99,74 @@
                         </div>
                     </header>
 
+                    <section id="articleShareSection" style="display: none">
+                        <h4>Condividi questo articolo:</h4>
+                        <div class="share-buttons-container">
+                            <button id="nativeShareBtn" class="share-button native-share-btn" style="display: none">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    height="1em"
+                                    viewBox="0 0 448 512"
+                                    fill="currentColor"
+                                    style="margin-right: 6px"
+                                >
+                                    <path
+                                        d="M448 248L288 96v80c-153.6 16.27-224 101.6-224 202.7 0 17.03 5.188 33.06 13.12 47.03 1.625 2.844 5.312 3.875 8.281 2.312 100.4-52.5 159.3-126.7 202.6-193.5V352L448 248zM320 0v0c-17.67 0-32 14.33-32 32v0c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v-96c0-17.67-14.33-32-32-32h-96zM416 336c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h0c17.67 0 32-14.33 32-32v-96c0-17.67-14.33-32-32-32h0zM32 320v0c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v0c0-17.67-14.33-32-32-32h-96zM32 144v0c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v0c0-17.67-14.33-32-32-32h-96z"
+                                    />
+                                </svg>
+                                Condividi...
+                            </button>
+                            <button id="copyLinkBtn" class="share-button copy-link-btn">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    height="1em"
+                                    viewBox="0 0 448 512"
+                                    fill="currentColor"
+                                    style="margin-right: 6px"
+                                >
+                                    <path
+                                        d="M320 64H32C14.33 64 0 78.33 0 96v320c0 17.67 14.33 32 32 32h288c17.67 0 32-14.33 32-32V96c0-17.67-14.33-32-32-32zM192 399.1c-17.03 0-31.84-11.53-37.38-28H64v-192h256v92.62c9.469-1.891 19.22-2.922 29.19-3.125L352 128H64V96h256L320 96zM416 192h-96c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v-96c0-17.67-14.33-32-32-32z"
+                                    />
+                                </svg>
+                                Copia Link
+                            </button>
+                            <div id="fallbackShareButtons" class="share-buttons-container" style="display: contents">
+                                <a
+                                    href="#"
+                                    id="shareToX"
+                                    class="share-button social-x"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    >X (Twitter)</a
+                                >
+                                <a
+                                    href="#"
+                                    id="shareToFacebook"
+                                    class="share-button social-facebook"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    >Facebook</a
+                                >
+                                <a
+                                    href="#"
+                                    id="shareToLinkedIn"
+                                    class="share-button social-linkedin"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    >LinkedIn</a
+                                >
+                                <a
+                                    href="#"
+                                    id="shareToWhatsApp"
+                                    class="share-button social-whatsapp"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    >WhatsApp</a
+                                >
+                                <a href="#" id="shareViaEmail" class="share-button social-email">Email</a>
+                            </div>
+                        </div>
+                    </section>
                     <div id="articleDisplayContent">
                         <p>Contenuto dell'articolo in caricamento...</p>
                     </div>
@@ -156,7 +230,7 @@
         </main>
 
         <footer>
-            <p>&copy; 2025 asyncDonkey.io.</p>
+            <p>&copy; <span id="currentYear">2025</span> asyncDonkey.io.</p>
             <p style="font-size: 0.8em; margin-top: 5px">
                 Avatars by
                 <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT
@@ -198,11 +272,10 @@
 
         <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
+        <script>
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        </script>
         <script src="js/main.js" type="module"></script>
-        <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> 
-    <script>
-    console.log('Verifica marked dopo inclusione:', typeof marked);
-    </script> -->
         <script src="js/articleViewer.js" type="module"></script>
     </body>
 </html>
