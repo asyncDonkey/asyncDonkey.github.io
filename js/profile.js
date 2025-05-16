@@ -3,21 +3,21 @@ import { db, auth, generateBlockieAvatar } from './main.js';
 import {
     doc,
     getDoc,
-    // updateDoc, // Non più necessario per il nickname
+    updateDoc, // Ri-aggiunto per aggiornare lo statusMessage
     collection,
     query,
     where,
     getDocs,
     orderBy,
     deleteDoc,
-    // Timestamp, // Già importato in profile.js
+    serverTimestamp, // Necessario per updatedAt
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
 
 // --- RIFERIMENTI DOM (Aggiornati) ---
 const profileContent = document.getElementById('profileContent');
-const profileDetailsDisplay = document.getElementById('profileDetailsDisplay'); // Il contenitore dei dettagli
+const profileDetailsDisplay = document.getElementById('profileDetailsDisplay');
 const profileAvatarImg = document.getElementById('profileAvatar');
 const profileEmailSpan = document.getElementById('profileEmail');
 const currentNicknameSpan = document.getElementById('currentNickname');
@@ -29,6 +29,14 @@ const profileLoginMessage = document.getElementById('profileLoginMessage');
 const emailVerificationBanner = document.getElementById('emailVerificationBanner');
 const resendVerificationEmailBtn = document.getElementById('resendVerificationEmailBtn');
 const resendEmailMessage = document.getElementById('resendEmailMessage');
+
+// NUOVI RIFERIMENTI DOM per lo Stato d'Animo
+const statusMessageSection = document.getElementById('statusMessageSection');
+const statusMessageDisplay = document.getElementById('statusMessageDisplay');
+const updateStatusForm = document.getElementById('updateStatusForm');
+const statusMessageInput = document.getElementById('statusMessageInput');
+const updateStatusBtn = document.getElementById('updateStatusBtn'); // Se si vuole manipolare direttamente il bottone
+const statusUpdateMessage = document.getElementById('statusUpdateMessage');
 
 
 // --- RIFERIMENTI DOM per "I Miei Articoli" (esistenti) ---
@@ -42,8 +50,8 @@ const myPublishedArticlesListDiv = document.getElementById('myPublishedArticlesL
 const myRejectedLoadingMessage = document.getElementById('myRejectedLoadingMessage');
 const myRejectedArticlesListDiv = document.getElementById('myRejectedArticlesList');
 
-let currentUserForProfilePage = null; // Rinominato per chiarezza in questo scope
-let currentUserProfileData = null;  // Rinominato
+let currentUserForProfilePage = null;
+let currentUserProfileData = null;
 
 async function loadProfileData(uid) {
     console.log('profile.js - Loading profile for UID:', uid);
@@ -54,9 +62,11 @@ async function loadProfileData(uid) {
         !profileAvatarImg ||
         !profileNationalitySpan ||
         !profileEmailSpan ||
-        !currentNicknameSpan
+        !currentNicknameSpan ||
+        !statusMessageSection || // NUOVO: Controllo per la nuova sezione
+        !statusMessageDisplay
     ) {
-        console.error('Profile page DOM elements (for profile data) missing! Check IDs.');
+        console.error('Profile page DOM elements missing! Check IDs.');
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
         if (profileLoginMessage) {
             profileLoginMessage.style.display = 'block';
@@ -67,14 +77,18 @@ async function loadProfileData(uid) {
     profileLoadingMessage.style.display = 'block';
     profileContent.style.display = 'none';
     profileLoginMessage.style.display = 'none';
+    statusMessageSection.style.display = 'none'; // Nascondi la sezione stato inizialmente
 
-    // Reset campi
     profileAvatarImg.src = '';
     profileAvatarImg.alt = 'Loading avatar...';
     profileAvatarImg.style.backgroundColor = '#eee';
     profileEmailSpan.textContent = 'Caricamento...';
     currentNicknameSpan.textContent = 'Caricamento...';
     profileNationalitySpan.textContent = 'Caricamento...';
+    statusMessageDisplay.textContent = 'Caricamento stato...'; // Testo placeholder
+    if(statusMessageInput) statusMessageInput.value = '';
+    if(statusUpdateMessage) statusUpdateMessage.textContent = '';
+
 
     const userProfileRef = doc(db, 'userProfiles', uid);
     try {
@@ -88,7 +102,7 @@ async function loadProfileData(uid) {
                 if (currentUserProfileData.nationalityCode && currentUserProfileData.nationalityCode !== 'OTHER') {
                     const countryCodeOriginal = currentUserProfileData.nationalityCode.toUpperCase();
                     const countryCodeForLibrary = countryCodeOriginal.toLowerCase();
-                    profileNationalitySpan.innerHTML = ''; // Pulisci prima
+                    profileNationalitySpan.innerHTML = '';
                     const flagIconSpan = document.createElement('span');
                     flagIconSpan.classList.add('fi', `fi-${countryCodeForLibrary}`);
                     flagIconSpan.style.marginRight = '8px';
@@ -102,48 +116,123 @@ async function loadProfileData(uid) {
                 }
             }
             if (profileAvatarImg) {
-                const seedForAvatar = uid; // Usa l'UID del profilo visualizzato
+                const seedForAvatar = uid;
                 profileAvatarImg.src = generateBlockieAvatar(seedForAvatar, 80, { size: 8 });
                 profileAvatarImg.alt = `${currentUserProfileData.nickname || 'User'}'s Blockie Avatar`;
                 profileAvatarImg.style.backgroundColor = 'transparent';
-                profileAvatarImg.onerror = () => {
-                    profileAvatarImg.style.backgroundColor = '#eee';
-                    profileAvatarImg.alt = 'Error loading avatar';
-                };
             }
 
-            // Gestione banner verifica email
-            if (currentUserForProfilePage && currentUserForProfilePage.uid === uid && emailVerificationBanner) { // Mostra solo se è il profilo dell'utente loggato
-                if (!currentUserForProfilePage.emailVerified) {
-                    emailVerificationBanner.style.display = 'block';
+            // NUOVO: Carica e visualizza lo statusMessage
+            if (statusMessageDisplay) {
+                statusMessageDisplay.textContent = currentUserProfileData.statusMessage || ''; // Mostra stringa vuota se non c'è, lo stile CSS gestirà il placeholder
+            }
+            if (statusMessageInput && currentUserForProfilePage && currentUserForProfilePage.uid === uid) { // Pre-compila l'input solo se è il proprio profilo
+                statusMessageInput.value = currentUserProfileData.statusMessage || '';
+            }
+
+
+            // Gestione banner verifica email e visibilità sezione stato
+            if (currentUserForProfilePage && currentUserForProfilePage.uid === uid) { // Logica solo per il proprietario del profilo
+                if (emailVerificationBanner) {
+                    emailVerificationBanner.style.display = !currentUserForProfilePage.emailVerified ? 'block' : 'none';
                     if (resendEmailMessage) resendEmailMessage.textContent = '';
-                } else {
-                    emailVerificationBanner.style.display = 'none';
+                }
+                if (statusMessageSection) { // Mostra la sezione stato
+                    statusMessageSection.style.display = 'block';
+                }
+            } else { // Se si visualizza il profilo di un altro utente
+                if (emailVerificationBanner) emailVerificationBanner.style.display = 'none'; // Nascondi banner verifica
+                if (statusMessageSection) { // Mostra la sezione stato ma senza il form di modifica
+                    statusMessageSection.style.display = 'block';
+                    if(updateStatusForm) updateStatusForm.style.display = 'none';
                 }
             }
-
 
             profileLoadingMessage.style.display = 'none';
             profileContent.style.display = 'block';
         } else {
+            // ... (gestione profilo non trovato come prima) ...
             console.warn('profile.js - No profile document found for user:', uid);
             profileLoadingMessage.style.display = 'none';
             profileLoginMessage.style.display = 'block';
             profileLoginMessage.innerHTML = '<p>Errore: Impossibile trovare i dati del profilo.</p>';
             if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
+            if (statusMessageSection) statusMessageSection.style.display = 'none';
         }
     } catch (error) {
+        // ... (gestione errore caricamento come prima) ...
         console.error('profile.js - Error loading profile data:', error);
         profileLoadingMessage.style.display = 'none';
         profileLoginMessage.style.display = 'block';
         profileLoginMessage.innerHTML = `<p>Errore caricamento profilo: ${error.message}</p>`;
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
+        if (statusMessageSection) statusMessageSection.style.display = 'none';
     }
 }
 
-// RIMOSSA: Funzione handleProfileUpdate (non più necessaria per nickname/nazionalità)
+// NUOVA FUNZIONE: handleStatusMessageUpdate
+async function handleStatusMessageUpdate(event) {
+    event.preventDefault();
+    if (!currentUserForProfilePage) {
+        showToast('Devi essere loggato per aggiornare il tuo stato.', 'error');
+        return;
+    }
+    if (!statusMessageInput || !updateStatusBtn || !statusUpdateMessage || !statusMessageDisplay) {
+        console.error('Elementi DOM per aggiornamento stato mancanti.');
+        showToast('Errore interfaccia utente. Impossibile aggiornare lo stato.', 'error');
+        return;
+    }
 
-// --- Funzioni per "I Miei Articoli" (esistenti, non modificate in questo step) ---
+    const newStatus = statusMessageInput.value.trim();
+    // Validazione (max 150 caratteri come da piano, ma il campo HTML ha già maxlength)
+    if (newStatus.length > 150) { // Doppia sicurezza
+        statusUpdateMessage.textContent = 'Lo stato non può superare i 150 caratteri.';
+        statusUpdateMessage.style.color = 'red';
+        showToast('Stato troppo lungo (max 150 caratteri).', 'warning');
+        return;
+    }
+
+    // Non fare nulla se lo stato non è cambiato
+    if (currentUserProfileData && newStatus === (currentUserProfileData.statusMessage || '')) {
+        statusUpdateMessage.textContent = 'Nessuna modifica rilevata.';
+        statusUpdateMessage.style.color = 'orange';
+        showToast('Nessuna modifica allo stato.', 'info');
+        return;
+    }
+
+    updateStatusBtn.disabled = true;
+    updateStatusBtn.textContent = 'Aggiornamento...';
+    statusUpdateMessage.textContent = '';
+
+    const userProfileRef = doc(db, 'userProfiles', currentUserForProfilePage.uid);
+    try {
+        await updateDoc(userProfileRef, {
+        statusMessage: newStatus,
+        updatedAt: serverTimestamp(), // <-- AGGIUNGI QUESTO
+    });
+    showToast('Stato d\'animo aggiornato con successo!', 'success');
+        statusMessageDisplay.textContent = newStatus; // Aggiorna visualizzazione
+        if (currentUserProfileData) currentUserProfileData.statusMessage = newStatus; // Aggiorna dati locali
+        statusUpdateMessage.textContent = 'Stato aggiornato!';
+        statusUpdateMessage.style.color = 'green';
+        setTimeout(() => { if(statusUpdateMessage) statusUpdateMessage.textContent = ''; }, 3000);
+
+    } catch (error) {
+        console.error('Errore aggiornamento stato d\'animo:', error);
+        statusUpdateMessage.textContent = `Errore: ${error.message}`;
+        statusUpdateMessage.style.color = 'red';
+        showToast('Errore durante l\'aggiornamento dello stato.', 'error');
+    } finally {
+        if (updateStatusBtn) {
+            updateStatusBtn.disabled = false;
+            updateStatusBtn.textContent = 'Aggiorna';
+        }
+    }
+}
+
+
+// --- Funzioni per "I Miei Articoli" (esistenti) ---
+// ... (codice loadMyArticles, createMyArticleItemElement, handleDeleteArticle, formatMyArticleTimestamp come prima) ...
 function formatMyArticleTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
         return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
@@ -175,7 +264,7 @@ async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
             }" eliminato con successo.`,
             'success'
         );
-        if (currentUserForProfilePage) { // Usa la variabile corretta
+        if (currentUserForProfilePage) {
             loadMyArticles(currentUserForProfilePage.uid);
         }
     } catch (error) {
@@ -241,7 +330,7 @@ function createMyArticleItemElement(article, articleId) {
         actionsDiv.appendChild(deleteButton);
     } else if (article.status === 'pendingReview') {
         const previewButton = document.createElement('a');
-        previewButton.href = `view-article.html?id=${articleId}&preview=true`; // Potremmo implementare una vera anteprima
+        previewButton.href = `view-article.html?id=${articleId}&preview=true`;
         previewButton.target = '_blank';
         previewButton.className = 'game-button my-article-action-button';
         previewButton.textContent = 'Anteprima';
@@ -341,25 +430,25 @@ async function loadMyArticles(userId) {
 
 // --- INIZIALIZZAZIONE ---
 onAuthStateChanged(auth, (user) => {
-    currentUserForProfilePage = user; // Aggiorna la variabile globale del modulo
+    currentUserForProfilePage = user;
     if (user) {
         if (profileContent && profileLoadingMessage && profileLoginMessage) {
-            loadProfileData(user.uid); // Carica i dati del profilo dell'utente loggato
+            loadProfileData(user.uid);
             if (myArticlesSection) {
                 myArticlesSection.style.display = 'block';
                 loadMyArticles(user.uid);
-            } else {
-                console.warn('profile.js: Elemento myArticlesSection non trovato nel DOM.');
             }
         } else {
             console.error('profile.js - Auth listener: Elementi UI principali del profilo non trovati.');
         }
     } else {
+        // ... (logica per utente non loggato come prima) ...
         currentUserProfileData = null;
         if (profileContent) profileContent.style.display = 'none';
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
         if (profileLoginMessage) profileLoginMessage.style.display = 'block';
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
+        if (statusMessageSection) statusMessageSection.style.display = 'none'; // Nascondi sezione stato se non loggato
 
 
         if (myArticlesSection) myArticlesSection.style.display = 'none';
@@ -384,9 +473,17 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// RIMOSSO: Event listener per profileUpdateForm
+// NUOVO: Event listener per il form di aggiornamento dello stato
+if (updateStatusForm) {
+    updateStatusForm.addEventListener('submit', handleStatusMessageUpdate);
+} else {
+    // Questo warning potrebbe apparire se la pagina viene caricata da un utente non proprietario del profilo,
+    // dove il form potrebbe non essere visibile/necessario. Lo rendiamo meno invasivo.
+    // console.debug('profile.js - Form updateStatusForm non trovato (potrebbe essere normale se si visualizza il profilo di un altro utente).');
+}
 
-// NUOVO: Event listener per il pulsante "Invia di nuovo email di verifica"
+
+// Event listener per il pulsante "Invia di nuovo email di verifica" (esistente)
 if (resendVerificationEmailBtn) {
     resendVerificationEmailBtn.addEventListener('click', async () => {
         if (currentUserForProfilePage && !currentUserForProfilePage.emailVerified) {
@@ -409,12 +506,12 @@ if (resendVerificationEmailBtn) {
                     resendEmailMessage.style.color = 'red';
                 }
             } finally {
-                setTimeout(() => { // Riabilita il pulsante dopo un po' per evitare spam
+                setTimeout(() => {
                     if (resendVerificationEmailBtn) {
                         resendVerificationEmailBtn.disabled = false;
                         resendVerificationEmailBtn.textContent = 'Invia di nuovo email di verifica';
                     }
-                }, 30000); // Es. 30 secondi
+                }, 30000);
             }
         } else if (currentUserForProfilePage && currentUserForProfilePage.emailVerified) {
             showToast('La tua email è già verificata.', 'info');

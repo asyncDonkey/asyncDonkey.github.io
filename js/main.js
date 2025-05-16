@@ -561,7 +561,11 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 await signOut(auth);
                 showToast('Logout effettuato con successo!', 'info');
-                if (window.location.pathname.includes('profile.html') || window.location.pathname.includes('admin-dashboard.html') || window.location.pathname.includes('submit-article.html')) {
+                if (
+                    window.location.pathname.includes('profile.html') ||
+                    window.location.pathname.includes('admin-dashboard.html') ||
+                    window.location.pathname.includes('submit-article.html')
+                ) {
                     window.location.href = 'index.html';
                 }
             } catch (error) {
@@ -587,18 +591,20 @@ onAuthStateChanged(auth, (user) => {
     if (user && user.emailVerified) {
         const isNewlyRegistered = sessionStorage.getItem('newlyRegistered');
         if (isNewlyRegistered) {
-             getDoc(doc(db, 'userProfiles', user.uid)).then(profileSnap => {
-                if (profileSnap.exists()) {
-                    const nickname = profileSnap.data().nickname || user.email.split('@')[0];
-                    showToast(`Benvenuto/a su asyncDonkey.io, ${nickname}!`, 'success', 7000);
-                } else {
+            getDoc(doc(db, 'userProfiles', user.uid))
+                .then((profileSnap) => {
+                    if (profileSnap.exists()) {
+                        const nickname = profileSnap.data().nickname || user.email.split('@')[0];
+                        showToast(`Benvenuto/a su asyncDonkey.io, ${nickname}!`, 'success', 7000);
+                    } else {
+                        showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
+                    }
+                    sessionStorage.removeItem('newlyRegistered');
+                })
+                .catch(() => {
                     showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
-                }
-                sessionStorage.removeItem('newlyRegistered');
-            }).catch(() => {
-                showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
-                sessionStorage.removeItem('newlyRegistered');
-            });
+                    sessionStorage.removeItem('newlyRegistered');
+                });
         }
     }
 });

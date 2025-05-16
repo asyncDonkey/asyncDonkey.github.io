@@ -83,7 +83,7 @@ function validateRegistrationForm() {
 
     // Validazione Email
     if (!emailInput.value.trim()) {
-        showFieldError(emailErrorDiv, 'L\'email è obbligatoria.');
+        showFieldError(emailErrorDiv, "L'email è obbligatoria.");
         isValid = false;
     } else if (!/^\S+@\S+\.\S+$/.test(emailInput.value.trim())) {
         showFieldError(emailErrorDiv, 'Inserisci un indirizzo email valido.');
@@ -121,10 +121,12 @@ function validateRegistrationForm() {
         showFieldError(nicknameErrorDiv, 'Il nickname deve avere tra 3 e 25 caratteri.');
         isValid = false;
     } else if (!/^[a-zA-Z0-9_.-]*$/.test(nickname)) {
-        showFieldError(nicknameErrorDiv, 'Il nickname può contenere solo lettere, numeri, underscore, punto o trattino.');
+        showFieldError(
+            nicknameErrorDiv,
+            'Il nickname può contenere solo lettere, numeri, underscore, punto o trattino.'
+        );
         isValid = false;
     }
-
 
     // Validazione Nazionalità
     if (!nationalitySelect.value) {
@@ -174,17 +176,17 @@ async function handleRegistration(event) {
         // Modificato per inviare solo i campi permessi dalla regola di creazione (+ createdAt)
         const userProfileRef = doc(db, 'userProfiles', user.uid);
         const userProfileData = {
-    email: user.email, // Già corretto, user.email è l'email dell'utente autenticato
-    nickname: nickname,
-    nationalityCode: nationalityCode, // JS già gestisce "" a null
-    isAdmin: false,
-    createdAt: serverTimestamp(),
-    statusMessage: '',
-    externalLinks: [],
-    earnedBadges: [],
-    bio: '',
-};
-        
+            email: user.email, // Già corretto, user.email è l'email dell'utente autenticato
+            nickname: nickname,
+            nationalityCode: nationalityCode, // JS già gestisce "" a null
+            isAdmin: false,
+            createdAt: serverTimestamp(),
+            statusMessage: '',
+            externalLinks: [],
+            earnedBadges: [],
+            bio: '',
+        };
+
         // Se nationalityCode è null, non lo includiamo nell'oggetto per far scattare correttamente
         // request.resource.data.get('nationalityCode', null) == null nella regola.
         // Tuttavia, la regola sulle chiavi si aspetta 'nationalityCode'.
@@ -196,7 +198,6 @@ async function handleRegistration(event) {
 
         if (registrationForm) registrationForm.style.display = 'none';
         if (registrationSuccessMessageDiv) registrationSuccessMessageDiv.style.display = 'block';
-
     } catch (error) {
         console.error('Errore durante la registrazione:', error);
         const friendlyErrorMessage = translateFirebaseError(error.code); // Funzione definita in register.js
@@ -218,11 +219,11 @@ async function handleRegistration(event) {
 function translateFirebaseError(errorCode) {
     switch (errorCode) {
         case 'auth/email-already-in-use':
-            return 'L\'indirizzo email è già utilizzato da un altro account.';
+            return "L'indirizzo email è già utilizzato da un altro account.";
         case 'auth/invalid-email':
-            return 'L\'indirizzo email non è valido.';
+            return "L'indirizzo email non è valido.";
         case 'auth/operation-not-allowed':
-            return 'Operazione non permessa. Contatta l\'amministratore.';
+            return "Operazione non permessa. Contatta l'amministratore.";
         case 'auth/weak-password':
             return 'La password fornita è troppo debole.';
         default:
@@ -254,7 +255,6 @@ if (loginModal) {
     });
 }
 
-
 if (loginFormModal) {
     loginFormModal.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -280,7 +280,6 @@ if (loginFormModal) {
             const urlParams = new URLSearchParams(window.location.search);
             const redirectUrl = urlParams.get('redirect') || 'profile.html'; // Default a profile.html
             window.location.href = redirectUrl;
-
         } catch (error) {
             console.error('Errore login da modale:', error);
             const friendlyErrorMessage = translateFirebaseError(error.code); // Usa la stessa funzione di traduzione
@@ -295,7 +294,6 @@ if (loginFormModal) {
     });
 }
 
-
 // --- EVENT LISTENERS ---
 if (registrationForm) {
     registrationForm.addEventListener('submit', handleRegistration);
@@ -304,8 +302,10 @@ if (registrationForm) {
 // Aggiungi event listener per pulire gli errori mentre l'utente scrive (opzionale ma buona UX)
 if (emailInput && emailErrorDiv) emailInput.addEventListener('input', () => clearFieldError(emailErrorDiv));
 if (passwordInput && passwordErrorDiv) passwordInput.addEventListener('input', () => clearFieldError(passwordErrorDiv));
-if (confirmPasswordInput && confirmPasswordErrorDiv) confirmPasswordInput.addEventListener('input', () => clearFieldError(confirmPasswordErrorDiv));
+if (confirmPasswordInput && confirmPasswordErrorDiv)
+    confirmPasswordInput.addEventListener('input', () => clearFieldError(confirmPasswordErrorDiv));
 if (nicknameInput && nicknameErrorDiv) nicknameInput.addEventListener('input', () => clearFieldError(nicknameErrorDiv));
-if (nationalitySelect && nationalityErrorDiv) nationalitySelect.addEventListener('change', () => clearFieldError(nationalityErrorDiv));
+if (nationalitySelect && nationalityErrorDiv)
+    nationalitySelect.addEventListener('change', () => clearFieldError(nationalityErrorDiv));
 
 console.log('js/register.js caricato e inizializzato.');

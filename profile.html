@@ -3,8 +3,10 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Il Mio Profilo - asyncDonkey.io</title> <link rel="stylesheet" href="styles.css" />
-        <link rel="icon" href="images/favicon.svg" type="image/svg+xml" /> <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <title>Il Mio Profilo - asyncDonkey.io</title>
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap"
@@ -81,7 +83,7 @@
                         <img
                             id="profileAvatar"
                             src=""
-                            alt="Avatar Utente"
+                            alt="User Avatar"
                             width="80"
                             height="80"
                             style="
@@ -101,17 +103,24 @@
                             <p style="margin-bottom: 8px; font-size: 1.05em">
                                 <strong>Nazionalità:</strong> <span id="profileNationality">Caricamento...</span>
                             </p>
-                            </div>
+                        </div>
                     </div>
 
+                    <div id="statusMessageSection" style="display: none;"> <h3 style="margin-bottom: 10px;">Stato d'Animo:</h3>
+                        <div id="statusMessageDisplay">Caricamento stato...</div>
+                        <form id="updateStatusForm" style="margin-top: 10px;">
+                            <input type="text" id="statusMessageInput" name="statusMessageInput" placeholder="Come ti senti oggi?" maxlength="150">
+                            <button type="submit" id="updateStatusBtn" class="game-button" style="padding: 10px 15px;">Aggiorna</button>
+                        </form>
+                        <div id="statusUpdateMessage"></div>
+                    </div>
                     <div
                         id="emailVerificationBanner"
                         class="info-section"
                         style="display: none; margin-top: 20px; border-left-color: orange"
                     >
                         <p>
-                            La tua email non è ancora stata verificata. Controlla la tua casella di posta (e la
-                            cartella spam) per il link di verifica.
+                            La tua email non è ancora stata verificata. Controlla la tua casella di posta (e la cartella spam) per il link di verifica.
                         </p>
                         <p>
                             Non hai ricevuto l'email?
@@ -138,79 +147,36 @@
 
             <section id="myArticlesSection" style="margin-top: 40px; display: none">
                 <h2>I Miei Articoli</h2>
-
                 <div class="my-articles-subsection">
-                    <h3
-                        style="
-                            color: var(--heading-color);
-                            border-bottom: 1px solid var(--border-color-secondary);
-                            padding-bottom: 8px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        Bozze
-                    </h3>
+                    <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; margin-bottom: 15px;">Bozze</h3>
                     <div id="myDraftArticlesListContainer">
                         <p id="myDraftsLoadingMessage">Caricamento bozze...</p>
-                        <div id="myDraftArticlesList" class="my-articles-grid-container">
-                            </div>
+                        <div id="myDraftArticlesList" class="my-articles-grid-container"></div>
                     </div>
                 </div>
-
                 <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3
-                        style="
-                            color: var(--heading-color);
-                            border-bottom: 1px solid var(--border-color-secondary);
-                            padding-bottom: 8px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        In Revisione
-                    </h3>
+                    <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; margin-bottom: 15px;">In Revisione</h3>
                     <div id="myPendingArticlesListContainer">
                         <p id="myPendingLoadingMessage">Caricamento articoli in revisione...</p>
-                        <div id="myPendingArticlesList" class="my-articles-grid-container">
-                            </div>
+                        <div id="myPendingArticlesList" class="my-articles-grid-container"></div>
                     </div>
                 </div>
-
                 <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3
-                        style="
-                            color: var(--heading-color);
-                            border-bottom: 1px solid var(--border-color-secondary);
-                            padding-bottom: 8px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        Pubblicati
-                    </h3>
+                    <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; margin-bottom: 15px;">Pubblicati</h3>
                     <div id="myPublishedArticlesListContainer">
                         <p id="myPublishedLoadingMessage">Caricamento articoli pubblicati...</p>
-                        <div id="myPublishedArticlesList" class="my-articles-grid-container">
-                            </div>
+                        <div id="myPublishedArticlesList" class="my-articles-grid-container"></div>
                     </div>
                 </div>
-
                 <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3
-                        style="
-                            color: var(--heading-color);
-                            border-bottom: 1px solid var(--border-color-secondary);
-                            padding-bottom: 8px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        Respinti
-                    </h3>
+                    <h3 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color-secondary); padding-bottom: 8px; margin-bottom: 15px;">Respinti</h3>
                     <div id="myRejectedArticlesListContainer">
                         <p id="myRejectedLoadingMessage">Caricamento articoli respinti...</p>
-                        <div id="myRejectedArticlesList" class="my-articles-grid-container">
-                            </div>
+                        <div id="myRejectedArticlesList" class="my-articles-grid-container"></div>
                     </div>
                 </div>
             </section>
+
             <div style="text-align: center; margin-top: 30px">
                 <a href="index.html" style="color: var(--link-color); text-decoration: underline"
                     >&larr; Torna alla Homepage</a
@@ -230,9 +196,9 @@
         <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
         <script>
-            // Script per aggiornare l'anno nel footer
             document.getElementById('currentYear').textContent = new Date().getFullYear();
         </script>
+        <script src="js/main.js" type="module"></script>
         <script src="js/profile.js" type="module"></script>
-        <script src="js/main.js" type="module"></script> </body>
+    </body>
 </html>

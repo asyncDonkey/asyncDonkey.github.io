@@ -2733,70 +2733,107 @@ footer a {
 }
 
 /* Stili specifici per register.html, se necessario */
-            main section {
-                max-width: 600px; /* Larghezza massima per il form */
+main section {
+    max-width: 600px; /* Larghezza massima per il form */
+}
+.form-field div {
+    margin-bottom: 20px;
+}
+.form-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color-primary);
+}
+.form-field input[type='email'],
+.form-field input[type='password'],
+.form-field input[type='text'],
+.form-field select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color-primary);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color-primary);
+    font-size: 1em;
+    font-family: inherit;
+}
+.form-field input:focus,
+.form-field select:focus {
+    outline: none;
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25);
+}
+.info-section {
+    background-color: var(--surface-bg-secondary);
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    border-left: 4px solid var(--link-color);
+}
+.info-section p {
+    margin-bottom: 8px;
+    color: var(--text-color-secondary);
+}
+.info-section p:last-child {
+    margin-bottom: 0;
+}
+.error-message {
+    color: red;
+    font-size: 0.85em;
+    margin-top: 5px;
+    display: none; /* Nascosto di default */
+}
+.required-indicator {
+    color: red;
+    margin-left: 2px;
+}
+.form-actions {
+    margin-top: 25px;
+    text-align: center;
+}
+.password-requirements {
+    font-size: 0.8em;
+    color: var(--text-color-muted);
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+            /* Stili aggiuntivi per la sezione Stato d'Animo */
+            #statusMessageSection {
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px dashed var(--border-color-secondary);
             }
-            .form-field div {
-                margin-bottom: 20px;
+            #statusMessageDisplay {
+                font-style: italic;
+                color: var(--text-color-secondary);
+                margin-bottom: 10px;
+                padding: 10px;
+                background-color: var(--surface-bg-secondary);
+                border-radius: 4px;
+                min-height: 2em; /* Per dare spazio anche se vuoto */
             }
-            .form-field label {
-                display: block;
-                margin-bottom: 8px;
-                font-weight: 500;
-                color: var(--text-color-primary);
+            #statusMessageDisplay:empty::before {
+                content: 'Nessuno stato d\'animo impostato.';
+                color: var(--text-color-muted);
             }
-            .form-field input[type='email'],
-            .form-field input[type='password'],
-            .form-field input[type='text'],
-            .form-field select {
-                width: 100%;
-                padding: 12px;
+            #updateStatusForm {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+            #statusMessageInput {
+                flex-grow: 1;
+                padding: 10px;
                 border: 1px solid var(--border-color-primary);
                 border-radius: 4px;
                 background-color: var(--bg-color);
                 color: var(--text-color-primary);
-                font-size: 1em;
-                font-family: inherit;
             }
-            .form-field input:focus,
-            .form-field select:focus {
-                outline: none;
-                border-color: var(--link-color);
-                box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25);
-            }
-            .info-section {
-                background-color: var(--surface-bg-secondary);
-                padding: 15px;
-                border-radius: 6px;
-                margin-top: 10px;
-                margin-bottom: 20px;
+            #statusUpdateMessage {
                 font-size: 0.9em;
-                border-left: 4px solid var(--link-color);
-            }
-            .info-section p {
-                margin-bottom: 8px;
-                color: var(--text-color-secondary);
-            }
-            .info-section p:last-child {
-                margin-bottom: 0;
-            }
-            .error-message {
-                color: red;
-                font-size: 0.85em;
                 margin-top: 5px;
-                display: none; /* Nascosto di default */
             }
-            .required-indicator {
-                color: red;
-                margin-left: 2px;
-            }
-            .form-actions {
-                margin-top: 25px;
-                text-align: center;
-            }
-            .password-requirements {
-                font-size: 0.8em;
-                color: var(--text-color-muted);
-                margin-top: 5px;
-                margin-bottom: 10px;
-            }
+
