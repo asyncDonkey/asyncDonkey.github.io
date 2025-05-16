@@ -22,7 +22,7 @@
                 flex-direction: column;
                 min-height: 100vh;
                 margin: 0;
-                overflow-x: hidden; 
+                overflow-x: hidden;
                 overflow-y: auto;
             }
 
@@ -31,21 +31,26 @@
                 background-color: var(--game-header-footer-bg, #222);
                 padding: 10px 20px;
                 text-align: center;
-                flex-shrink: 0; 
+                flex-shrink: 0;
             }
-            .donkey-runner-page header a { color: var(--link-color); }
-            .donkey-runner-page footer p { margin: 5px 0; font-size: 0.9em; }
+            .donkey-runner-page header a {
+                color: var(--link-color);
+            }
+            .donkey-runner-page footer p {
+                margin: 5px 0;
+                font-size: 0.9em;
+            }
 
             .donkey-runner-page main {
                 flex-grow: 1;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: center; 
-                padding: 10px; 
+                justify-content: center;
+                padding: 10px;
                 width: 100%;
                 box-sizing: border-box;
-                position: relative; 
+                position: relative;
             }
 
             .donkey-runner-page #gameContainer {
@@ -55,13 +60,13 @@
                 justify-content: center;
                 border: 2px solid var(--game-border-color, #00b9be);
                 border-radius: 8px;
-                padding: 10px; 
+                padding: 10px;
                 background-color: var(--game-container-bg, #1c1c1c);
                 box-shadow: 0 0 15px rgba(0, 185, 190, 0.5);
-                max-width: 800px; 
-                width: 100%; 
+                max-width: 800px;
+                width: 100%;
                 box-sizing: border-box;
-                position: relative;  /* Necessario per posizionare i figli absolute */
+                position: relative; /* Necessario per posizionare i figli absolute */
             }
 
             .donkey-runner-page canvas#gameCanvas {
@@ -69,25 +74,25 @@
                 image-rendering: pixelated;
                 image-rendering: -moz-crisp-edges;
                 image-rendering: crisp-edges;
-                width: 100%; 
-                height: auto; 
-                max-height: calc(100vh - 220px); 
+                width: 100%;
+                height: auto;
+                max-height: calc(100vh - 220px);
                 border: 3px solid var(--game-border-color, #00b9be);
                 border-radius: 5px;
-                background-color: #000; 
-                box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+                background-color: #000;
+                box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
             }
-             @media (max-width: 768px) { 
+            @media (max-width: 768px) {
                 .donkey-runner-page canvas#gameCanvas {
-                    max-height: calc(100vh - 180px); 
+                    max-height: calc(100vh - 180px);
                 }
             }
-             @media (max-width: 480px) { 
+            @media (max-width: 480px) {
                 .donkey-runner-page canvas#gameCanvas {
                     max-height: calc(100vh - 160px);
                 }
             }
-            
+
             .donkey-runner-page #fullscreenButton {
                 /* Stili per il pulsante fullscreen sono principalmente in styles.css */
                 /* Qui assicuriamo solo che sia posizionato correttamente rispetto a gameContainer */
@@ -98,7 +103,8 @@
                 display: none; /* Gestito da JS per isTouchDevice */
             }
 
-            .donkey-runner-page .game-controls-panel { /* Sezione non più usata per JMP/SHT, ma per il pulsante start */
+            .donkey-runner-page .game-controls-panel {
+                /* Sezione non più usata per JMP/SHT, ma per il pulsante start */
                 display: flex;
                 justify-content: space-around;
                 align-items: center;
@@ -120,7 +126,9 @@
                 text-transform: uppercase;
                 border-radius: 5px;
                 box-shadow: 2px 2px 0px var(--button-shadow-color);
-                transition: transform 0.1s, box-shadow 0.1s;
+                transition:
+                    transform 0.1s,
+                    box-shadow 0.1s;
                 user-select: none;
                 -webkit-user-select: none;
             }
@@ -136,51 +144,52 @@
 
             .donkey-runner-page #mobileControls {
                 display: none; /* Gestito da JS */
-                width: 100%;   /* Occupa tutta la larghezza del suo parent (#gameContainer) */
+                width: 100%; /* Occupa tutta la larghezza del suo parent (#gameContainer) */
                 padding: 10px 0;
                 box-sizing: border-box;
                 user-select: none;
                 -webkit-user-select: none;
-                position: absolute; 
-                bottom: 10px;    
+                position: absolute;
+                bottom: 10px;
                 left: 0;
-                z-index: 10;     
+                z-index: 10;
             }
             .donkey-runner-page #mobileControlsInternal {
                 display: flex;
                 justify-content: space-around;
                 align-items: center;
-                width: 90%;      /* Larghezza relativa a #mobileControls */
+                width: 90%; /* Larghezza relativa a #mobileControls */
                 max-width: 400px; /* Limite massimo */
-                margin: 0 auto;   /* Centra #mobileControlsInternal dentro #mobileControls */
+                margin: 0 auto; /* Centra #mobileControlsInternal dentro #mobileControls */
             }
 
-            .donkey-runner-page .control-button { /* Pulsanti JMP e SHT */
-                background-color: var(--game-button-bg, #4CAF50);
+            .donkey-runner-page .control-button {
+                /* Pulsanti JMP e SHT */
+                background-color: var(--game-button-bg, #4caf50);
                 color: var(--game-button-text, white);
-                border: 2px solid var(--game-button-border, #388E3C);
+                border: 2px solid var(--game-button-border, #388e3c);
                 padding: 15px 20px;
                 font-size: 1.3em;
                 border-radius: 8px;
-                box-shadow: 3px 3px 0px var(--game-button-shadow, #2E7D32);
-                flex-grow: 0; 
-                flex-basis: 45%; 
+                box-shadow: 3px 3px 0px var(--game-button-shadow, #2e7d32);
+                flex-grow: 0;
+                flex-basis: 45%;
                 margin: 0 5px;
             }
-             @media (max-width: 480px) {
+            @media (max-width: 480px) {
                 .donkey-runner-page .control-button {
                     padding: 10px 12px;
                     font-size: 1.1em;
                 }
             }
-            
+
             .donkey-runner-page #mobileStartButton {
                 display: none; /* Gestito da JS, appare al centro */
                 position: absolute; /* Rispetto a #gameContainer */
-                top: 60%; 
+                top: 60%;
                 left: 50%;
                 transform: translate(-50%, -50%); /* Centra il pulsante stesso */
-                z-index: 100; 
+                z-index: 100;
                 padding: 15px 30px;
                 font-size: 1.5em;
                 /* Aggiungi qui stili per renderlo più "arcade" se vuoi */
@@ -192,24 +201,24 @@
                 align-items: center;
                 gap: 10px;
                 padding: 20px;
-                background-color: rgba(0, 0, 0, 0.85); 
+                background-color: rgba(0, 0, 0, 0.85);
                 border-radius: 8px;
                 position: absolute; /* Rispetto a #gameContainer */
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                z-index: 150; 
+                z-index: 150;
                 border: 2px solid var(--game-border-color);
                 box-shadow: 0 0 20px rgba(0, 185, 190, 0.7);
                 width: auto;
-                min-width: 280px; 
+                min-width: 280px;
                 max-width: 90%;
             }
             .donkey-runner-page #scoreInputContainerDonkey label,
             .donkey-runner-page #scoreInputContainerDonkey p {
                 font-size: 1.1em;
                 margin-bottom: 5px;
-                color: var(--game-text-color, #fff); 
+                color: var(--game-text-color, #fff);
             }
             .donkey-runner-page #playerInitialsDonkey,
             .donkey-runner-page #loggedInUserNameDisplay {
@@ -224,10 +233,10 @@
                 margin-bottom: 10px;
             }
             .donkey-runner-page #playerInitialsDonkey {
-                width: 120px; 
+                width: 120px;
                 text-transform: uppercase;
             }
-             .donkey-runner-page #loggedInUserNameDisplay {
+            .donkey-runner-page #loggedInUserNameDisplay {
                 background-color: transparent;
                 border: none;
                 font-weight: bold;
@@ -241,7 +250,7 @@
 
             .donkey-runner-page #miniLeaderboardContainer {
                 width: 100%;
-                max-width: 400px; 
+                max-width: 400px;
                 margin-top: 20px;
                 padding: 15px;
                 background-color: var(--surface-bg-secondary);
@@ -281,7 +290,7 @@
                 border-radius: 3px;
                 margin-right: 8px;
                 image-rendering: pixelated;
-                background-color: #eee; 
+                background-color: #eee;
             }
             .donkey-runner-page .player-info {
                 flex-grow: 1;
@@ -303,7 +312,7 @@
                 color: var(--accent-color-secondary);
                 font-size: 1.1em;
             }
-             @media (max-width: 576px) {
+            @media (max-width: 576px) {
                 .donkey-runner-page #miniLeaderboardContainer {
                     max-width: 100%;
                     padding: 10px;
@@ -336,66 +345,68 @@
 
             body.game-fullscreen-active.game-fullscreen-landscape #gameCanvas {
                 width: 100%; /* Occupa la larghezza del gameContainer (che è 100vw) */
-                height: 100%;/* Occupa l'altezza del gameContainer (che è 100vh) */
-                object-fit: cover; 
-                border: none !important; 
-                border-radius: 0 !important; 
-                box-shadow: none !important; 
-                max-height: none !important; 
+                height: 100%; /* Occupa l'altezza del gameContainer (che è 100vh) */
+                object-fit: cover;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                max-height: none !important;
             }
 
-            body.game-fullscreen-active #mobileControls { /* Rimosso .game-fullscreen-landscape per applicarlo sempre in fullscreen */
+            body.game-fullscreen-active #mobileControls {
+                /* Rimosso .game-fullscreen-landscape per applicarlo sempre in fullscreen */
                 position: fixed; /* Fisso rispetto al viewport */
-                bottom: 10px; 
+                bottom: 10px;
                 left: 50%;
                 transform: translateX(-50%); /* Centra orizzontalmente */
                 width: 90%; /* Larghezza massima del contenitore dei controlli */
                 max-width: 400px; /* Non troppo largo su schermi grandi */
-                padding: 5px 0; 
+                padding: 5px 0;
                 box-sizing: border-box;
                 z-index: 200; /* Sopra il canvas e il form punteggio */
             }
             /* Non serve più .game-fullscreen-landscape #mobileControlsInternal se #mobileControls è fixed e centrato */
 
-            body.game-fullscreen-active .control-button { /* Rimosso .game-fullscreen-landscape */
-                padding: 12px 18px; 
+            body.game-fullscreen-active .control-button {
+                /* Rimosso .game-fullscreen-landscape */
+                padding: 12px 18px;
                 font-size: 1.1em;
                 background-color: rgba(0, 50, 80, 0.7); /* Leggermente più trasparenti */
                 border-color: rgba(90, 185, 168, 0.8);
             }
-            body.game-fullscreen-active .control-button:active { /* Rimosso .game-fullscreen-landscape */
+            body.game-fullscreen-active .control-button:active {
+                /* Rimosso .game-fullscreen-landscape */
                 background-color: rgba(0, 70, 100, 0.9);
             }
-            
+
             body.game-fullscreen-active header,
             body.game-fullscreen-active footer,
             body.game-fullscreen-active #miniLeaderboardContainer,
             body.game-fullscreen-active #guestbook,
             body.game-fullscreen-active #bugReportSection,
             body.game-fullscreen-active #featureRequestSection, /* Non dovrebbe esserci in questa pagina */
-            body.game-fullscreen-active main > div#gameInstructions
-            {
+            body.game-fullscreen-active main > div#gameInstructions {
                 display: none !important;
             }
-            
-            body.game-fullscreen-active #scoreInputContainerDonkey[style*="display: flex"] {
-                display: flex !important; 
-                position: fixed !important; 
+
+            body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
+                display: flex !important;
+                position: fixed !important;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: auto; 
-                max-width: 90%; 
+                width: auto;
+                max-width: 90%;
                 z-index: 250 !important; /* Più alto di #mobileControls */
             }
 
-            body.game-fullscreen-active #mobileStartButton[style*="display: block"] {
-                 display: block !important;
-                 position: fixed !important; 
-                 top: 50%; 
-                 left: 50%;
-                 transform: translate(-50%, -50%); 
-                 z-index: 220 !important; /* Sopra mobileControls ma sotto scoreInput */
+            body.game-fullscreen-active #mobileStartButton[style*='display: block'] {
+                display: block !important;
+                position: fixed !important;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 220 !important; /* Sopra mobileControls ma sotto scoreInput */
             }
 
             /* Per il main in fullscreen, assicurati che prenda tutto lo spazio */
@@ -404,7 +415,7 @@
                 margin: 0 !important;
                 width: 100vw;
                 height: 100vh;
-                display: flex; 
+                display: flex;
                 align-items: center;
                 justify-content: center;
                 overflow: hidden; /* Nasconde eventuali scrollbar del body */
@@ -413,7 +424,7 @@
     </head>
     <body class="donkey-runner-page">
         <header>
-             <div
+            <div
                 class="header-content"
                 style="
                     padding: 10px 5%;
@@ -458,7 +469,9 @@
                 <div class="header-controls" style="display: flex; align-items: center; gap: 10px">
                     <div id="authContainer">
                         <button id="showLoginBtn" class="auth-button">Login</button>
-                         <a href="register.html" id="showSignupBtn" class="auth-button" style="text-decoration: none;">Register</a>
+                        <a href="register.html" id="showSignupBtn" class="auth-button" style="text-decoration: none"
+                            >Register</a
+                        >
                     </div>
                     <div id="userProfileContainer" style="display: none; align-items: center">
                         <img id="headerUserAvatar" src="" alt="Avatar Utente" />
@@ -471,28 +484,23 @@
         </header>
 
         <main>
-            <div id="gameInstructions" style="text-align: center; margin-bottom: 15px;">
+            <div id="gameInstructions" style="text-align: center; margin-bottom: 15px">
                 <p>Premi SPAZIO o FRECCIA SU per Saltare. CTRL o X per Sparare.</p>
                 <p>Su mobile, usa i controlli touch o il pulsante START.</p>
             </div>
 
             <div id="gameContainer">
-                <button 
-                    id="fullscreenButton" 
-                    class="game-button" 
-                    title="Toggle Fullscreen">
-                    FULLSCREEN
-                </button>
-                
+                <button id="fullscreenButton" class="game-button" title="Toggle Fullscreen">FULLSCREEN</button>
+
                 <canvas id="gameCanvas"></canvas>
-                
+
                 <div id="scoreInputContainerDonkey">
                     <h3>Game Over!</h3>
                     <p>Punteggio Finale: <span id="finalScoreDisplayDonkey">0</span></p>
                     <div id="playerNameInputArea">
                         <label for="playerInitialsDonkey" id="playerInitialsLabel">Tue Iniziali (1-5 char):</label>
                         <input type="text" id="playerInitialsDonkey" name="playerInitialsDonkey" maxlength="5" />
-                        <span id="loggedInUserNameDisplay" style="display:none;"></span>
+                        <span id="loggedInUserNameDisplay" style="display: none"></span>
                     </div>
                     <div class="score-buttons">
                         <button id="saveScoreBtnDonkey" class="game-button">Salva Punteggio</button>
@@ -501,7 +509,7 @@
                 </div>
 
                 <button id="mobileStartButton" class="game-button">START GAME</button>
-                
+
                 <div id="mobileControls">
                     <div id="mobileControlsInternal">
                         <button id="jumpButton" class="control-button">JMP</button>
@@ -509,67 +517,86 @@
                     </div>
                 </div>
             </div>
-            
+
             <div id="miniLeaderboardContainer">
                 <h3>Mini Classifica Donkey Runner</h3>
                 <ul id="miniLeaderboardList">
                     <li>Caricamento...</li>
                 </ul>
-                <p style="text-align: center; margin-top: 10px;">
-                    <a href="leaderboard.html?game=donkeyRunner" style="color: var(--link-color);">Vedi classifica completa &rarr;</a>
+                <p style="text-align: center; margin-top: 10px">
+                    <a href="leaderboard.html?game=donkeyRunner" style="color: var(--link-color)"
+                        >Vedi classifica completa &rarr;</a
+                    >
                 </p>
             </div>
 
-            <section id="guestbook" style="margin-top: 30px; max-width: 700px; width:100%; margin-left: auto; margin-right: auto;">
-                <h2 style="text-align: center;">Guestbook Donkey Runner</h2>
-                <div id="donkeyRunnerGameComments" data-page-id="donkeyRunnerGuestbook">
-                    </div>
+            <section
+                id="guestbook"
+                style="margin-top: 30px; max-width: 700px; width: 100%; margin-left: auto; margin-right: auto"
+            >
+                <h2 style="text-align: center">Guestbook Donkey Runner</h2>
+                <div id="commentsListContainer" data-page-id="donkeyRunnerGuestbook">
+                    <h3>Commenti Recenti:</h3>
+                    <div id="commentsList"><p>Caricamento commenti...</p></div>
+                </div>
             </section>
 
-            <section id="bugReportSection" style="margin-top: 30px; max-width: 700px; width:100%; margin-left: auto; margin-right: auto;">
-                 <h2 style="text-align: center;">Segnala un Bug / Suggerisci Miglioramento</h2>
+            <section
+                id="bugReportSection"
+                style="margin-top: 30px; max-width: 700px; width: 100%; margin-left: auto; margin-right: auto"
+            >
+                <h2 style="text-align: center">Segnala un Bug / Suggerisci Miglioramento</h2>
                 <div id="donkeyRunnerGameIssueTracker">
-                     <form id="bugReportForm" class="comment-form-container">
+                    <form id="bugReportForm" class="comment-form-container">
                         <h4>Segnala Bug per Donkey Runner</h4>
-                        <div id="bugReportUserEmailSection" style="display:none;">
+                        <div id="bugReportUserEmailSection" style="display: none">
                             <label for="userEmailBug">La tua Email (opzionale, per ricontattarti):</label>
-                            <input type="email" id="userEmailBug" name="userEmailBug">
+                            <input type="email" id="userEmailBug" name="userEmailBug" />
                         </div>
                         <div>
                             <label for="bugDescription">Descrizione del Bug:*</label>
                             <textarea id="bugDescription" name="bugDescription" rows="4" required></textarea>
                         </div>
-                        <button type="submit" id="submitBugReportBtn" class="game-button">Invia Segnalazione Bug</button>
-                        <div id="bugReportMessage" style="margin-top:10px;"></div>
+                        <button type="submit" id="submitBugReportBtn" class="game-button">
+                            Invia Segnalazione Bug
+                        </button>
+                        <div id="bugReportMessage" style="margin-top: 10px"></div>
                     </form>
 
-                    <form id="featureRequestForm" class="comment-form-container" style="margin-top:20px;">
+                    <form id="featureRequestForm" class="comment-form-container" style="margin-top: 20px">
                         <h4>Suggerisci Miglioramento per Donkey Runner</h4>
                         <div>
                             <label for="featureTitle">Titolo Idea (opzionale):</label>
-                            <input type="text" id="featureTitle" name="featureTitle">
+                            <input type="text" id="featureTitle" name="featureTitle" />
                         </div>
                         <div>
                             <label for="featureDescription">Descrivi la tua idea:*</label>
                             <textarea id="featureDescription" name="featureDescription" rows="4" required></textarea>
                         </div>
-                        <button type="submit" id="submitFeatureRequestBtn" class="game-button">Invia Suggerimento</button>
-                        <div id="featureRequestMessage" style="margin-top:10px;"></div>
+                        <button type="submit" id="submitFeatureRequestBtn" class="game-button">
+                            Invia Suggerimento
+                        </button>
+                        <div id="featureRequestMessage" style="margin-top: 10px"></div>
                     </form>
                 </div>
             </section>
-
         </main>
 
         <footer>
             <p>&copy; <span id="currentYear"></span> asyncDonkey.io. Donkey Runner Game.</p>
-             <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
+            <p style="font-size: 0.8em; margin-top: 5px">
+                Avatars by
+                <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT
+                License).
+            </p>
         </footer>
 
         <div id="loginModal" class="modal">
             <div class="modal-content">
-                <span class="closeLoginBtn" id="mainCloseLoginModalBtn">&times;</span> <h3>Login</h3>
-                <form id="loginFormModalMain"> <div>
+                <span class="closeLoginBtn" id="mainCloseLoginModalBtn">&times;</span>
+                <h3>Login</h3>
+                <form id="loginFormModalMain">
+                    <div>
                         <label for="loginEmailModalMain">Email:</label>
                         <input type="email" id="loginEmailModalMain" name="loginEmailModalMain" required />
                     </div>
@@ -577,12 +604,16 @@
                         <label for="loginPasswordModalMain">Password:</label>
                         <input type="password" id="loginPasswordModalMain" name="loginPasswordModalMain" required />
                     </div>
-                    <div id="loginModalErrorMain" class="error-message" style="text-align: center; margin-bottom: 10px;"></div>
+                    <div
+                        id="loginModalErrorMain"
+                        class="error-message"
+                        style="text-align: center; margin-bottom: 10px"
+                    ></div>
                     <button type="submit" class="game-button">Login</button>
                 </form>
             </div>
         </div>
-        
+
         <div id="likedByModal" class="modal" style="display: none">
             <div class="modal-content">
                 <span class="close-modal-btn" id="closeLikedByModalBtn">&times;</span>
@@ -598,8 +629,10 @@
         </div>
 
         <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
-        
-        <script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
+
+        <script>
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        </script>
         <script src="js/main.js" type="module"></script>
         <script src="js/comments.js" type="module"></script>
         <script src="js/bugReports.js" type="module"></script>

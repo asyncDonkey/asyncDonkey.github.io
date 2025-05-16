@@ -4,7 +4,7 @@ import {
     PowerUpItem,
     POWERUP_TYPE,
     POWERUP_DURATION,
-    POWERUP_CONFIGS // Importa POWERUP_CONFIGS
+    POWERUP_CONFIGS, // Importa POWERUP_CONFIGS
 } from './powerUps.js';
 import * as AudioManager from './audioManager.js';
 import { db, auth, generateBlockieAvatar } from './main.js';
@@ -81,7 +81,10 @@ async function loadDonkeyLeaderboard() {
         if (error.code === 'failed-precondition') {
             miniLeaderboardListEl.innerHTML =
                 '<li>Indice Firestore mancante. Controlla la console per il link per crearlo.</li>';
-            console.error("Potrebbe essere necessario un indice composito in Firestore. L'errore originale è:", error.message);
+            console.error(
+                "Potrebbe essere necessario un indice composito in Firestore. L'errore originale è:",
+                error.message
+            );
         } else {
             if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Errore caricamento punteggi.</li>';
         }
@@ -114,7 +117,8 @@ function displayDonkeyLeaderboard(leaderboardData) {
         avatarImg.onerror = () => {
             avatarImg.style.backgroundColor = '#ddd';
             avatarImg.alt = 'Error loading avatar';
-            avatarImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+            avatarImg.src =
+                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
         };
         li.appendChild(avatarImg);
         const playerInfoDiv = document.createElement('div');
@@ -405,7 +409,6 @@ for (const type in POWERUP_CONFIGS) {
     }
 }
 
-
 let imagesLoadedCount = 0;
 let allImagesLoaded = false;
 let resourcesInitialized = false;
@@ -490,7 +493,9 @@ async function loadAllAssets() {
     if (allImagesLoaded) {
         console.log('TUTTE le immagini dichiarate sono state processate (caricate o errore gestito).');
     } else {
-        console.warn('Attenzione: Alcune immagini potrebbero non essersi processate correttamente o il conteggio è errato.');
+        console.warn(
+            'Attenzione: Alcune immagini potrebbero non essersi processate correttamente o il conteggio è errato.'
+        );
     }
 
     resourcesInitialized = true;
@@ -512,7 +517,8 @@ async function loadAllAssets() {
 
 function loadImage(name, src) {
     return new Promise((resolve) => {
-        if (!src) { // Controllo per src undefined
+        if (!src) {
+            // Controllo per src undefined
             console.error(`ERRORE: src mancante per l'immagine '${name}'. Impossibile caricare.`);
             imagesLoadedCount++;
             if (imagesLoadedCount === imagesToLoad.length) {
@@ -770,15 +776,24 @@ class Player {
     activateSmartBomb() {
         console.log('BOMBA Intelligente ATTIVATA!');
         let enemiesCleared = 0;
-        const allEnemyLists = [enemies, fastEnemies, armoredEnemies, shootingEnemies, flyingEnemies, armoredShootingEnemies, toughBasicEnemies, dangerousFlyingEnemies];
-        allEnemyLists.forEach(enemyList => {
+        const allEnemyLists = [
+            enemies,
+            fastEnemies,
+            armoredEnemies,
+            shootingEnemies,
+            flyingEnemies,
+            armoredShootingEnemies,
+            toughBasicEnemies,
+            dangerousFlyingEnemies,
+        ];
+        allEnemyLists.forEach((enemyList) => {
             for (let i = enemyList.length - 1; i >= 0; i--) {
                 enemyList.splice(i, 1);
                 score += 15;
                 enemiesCleared++;
             }
         });
-        if(activeMiniboss){
+        if (activeMiniboss) {
             activeMiniboss.takeDamage(5);
             console.log('Smart Bomb ha danneggiato Glitchzilla!');
         }
@@ -788,7 +803,7 @@ class Player {
             score += 5;
             obstaclesCleared++;
         }
-        if(enemiesCleared > 0 || obstaclesCleared > 0) AudioManager.playSound('enemyExplode', false, 0.9);
+        if (enemiesCleared > 0 || obstaclesCleared > 0) AudioManager.playSound('enemyExplode', false, 0.9);
         if (enemiesCleared > 0) console.log(`${enemiesCleared} nemici distrutti dalla bomba!`);
         if (obstaclesCleared > 0) console.log(`${obstaclesCleared} ostacoli distrutti dalla bomba!`);
         this.activePowerUp = null;
@@ -807,7 +822,12 @@ class Obstacle {
         this.health = OBSTACLE_HEALTH;
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0) {
             if (OBSTACLE_NUM_FRAMES > 1) {
-                this.animation = new Animation(this.sprite, OBSTACLE_ACTUAL_FRAME_WIDTH, OBSTACLE_ACTUAL_FRAME_HEIGHT, OBSTACLE_NUM_FRAMES);
+                this.animation = new Animation(
+                    this.sprite,
+                    OBSTACLE_ACTUAL_FRAME_WIDTH,
+                    OBSTACLE_ACTUAL_FRAME_HEIGHT,
+                    OBSTACLE_NUM_FRAMES
+                );
             }
         } else {
             console.warn(`Sprite ostacolo non caricato o rotto. Sprite: ${this.sprite}`);
@@ -821,9 +841,29 @@ class Obstacle {
         const spriteUsable = this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0;
         if (this.animation && spriteUsable) {
             const f = this.animation.getFrame();
-            ctx.drawImage(this.sprite, f.sx, f.sy, OBSTACLE_ACTUAL_FRAME_WIDTH, OBSTACLE_ACTUAL_FRAME_HEIGHT, this.x, this.y, this.width, this.height);
+            ctx.drawImage(
+                this.sprite,
+                f.sx,
+                f.sy,
+                OBSTACLE_ACTUAL_FRAME_WIDTH,
+                OBSTACLE_ACTUAL_FRAME_HEIGHT,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
         } else if (spriteUsable) {
-            ctx.drawImage(this.sprite, 0, 0, OBSTACLE_ACTUAL_FRAME_WIDTH, OBSTACLE_ACTUAL_FRAME_HEIGHT, this.x, this.y, this.width, this.height);
+            ctx.drawImage(
+                this.sprite,
+                0,
+                0,
+                OBSTACLE_ACTUAL_FRAME_WIDTH,
+                OBSTACLE_ACTUAL_FRAME_HEIGHT,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
         } else {
             ctx.fillStyle = '#8B4513';
             ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -853,7 +893,13 @@ class Projectile {
         this.sprite = this.isUpgraded ? images['playerUpgradedProjectile'] : images['playerProjectile'];
         this.animation = null;
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
-            this.animation = new Animation(this.sprite, PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH, PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT, PLAYER_PROJECTILE_NUM_FRAMES, PLAYER_PROJECTILE_ANIMATION_SPEED);
+            this.animation = new Animation(
+                this.sprite,
+                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                PLAYER_PROJECTILE_NUM_FRAMES,
+                PLAYER_PROJECTILE_ANIMATION_SPEED
+            );
         }
     }
     update(dt) {
@@ -864,9 +910,29 @@ class Projectile {
         const spriteUsable = this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0;
         if (this.animation && spriteUsable) {
             const frame = this.animation.getFrame();
-            ctx.drawImage(this.sprite, frame.sx, frame.sy, PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH, PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT, this.x, this.y, this.width, this.height);
+            ctx.drawImage(
+                this.sprite,
+                frame.sx,
+                frame.sy,
+                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
         } else if (spriteUsable) {
-             ctx.drawImage(this.sprite, 0, 0, PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH, PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT, this.x, this.y, this.width, this.height);
+            ctx.drawImage(
+                this.sprite,
+                0,
+                0,
+                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
         } else {
             ctx.fillStyle = this.isUpgraded ? PALETTE.BRIGHT_GREEN_TEAL : PALETTE.BRIGHT_TEAL;
             ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -875,7 +941,20 @@ class Projectile {
 }
 
 class BaseEnemy {
-    constructor(x, y, targetW, targetH, spriteNameKey, frameW, frameH, numFrames, speedMult, hp = 1, fallbackColor = '#ccc', scoreValue = 25) {
+    constructor(
+        x,
+        y,
+        targetW,
+        targetH,
+        spriteNameKey,
+        frameW,
+        frameH,
+        numFrames,
+        speedMult,
+        hp = 1,
+        fallbackColor = '#ccc',
+        scoreValue = 25
+    ) {
         this.x = x;
         this.y = y;
         this.width = targetW;
@@ -905,7 +984,10 @@ class BaseEnemy {
                 this.sprite = spriteInstance;
             }
         } else {
-            console.warn(`BaseEnemy.loadAnimation FALLITO per sprite key '${spriteNameKeyToLoad}' (anim key: ${animationKey}). Sprite:`, spriteInstance);
+            console.warn(
+                `BaseEnemy.loadAnimation FALLITO per sprite key '${spriteNameKeyToLoad}' (anim key: ${animationKey}). Sprite:`,
+                spriteInstance
+            );
             this.animations[animationKey] = null;
             if (animationKey === 'base' && !this.animation) this.animation = null;
         }
@@ -958,9 +1040,34 @@ class BaseEnemy {
 
 class ArmoredEnemy extends BaseEnemy {
     constructor(x, y) {
-        super(x, y, ENEMY_THREE_TARGET_WIDTH, ENEMY_THREE_TARGET_HEIGHT, 'enemyThreeBase', ENEMY_THREE_ACTUAL_FRAME_WIDTH, ENEMY_THREE_ACTUAL_FRAME_HEIGHT, ENEMY_THREE_NUM_FRAMES, armoredEnemySpeedMultiplier, ARMORED_ENEMY_HEALTH, '#A9A9A9', 50);
-        this.loadAnimation('enemyThreeDmg1', ENEMY_THREE_ACTUAL_FRAME_WIDTH, ENEMY_THREE_ACTUAL_FRAME_HEIGHT, ENEMY_THREE_NUM_FRAMES, '2');
-        this.loadAnimation('enemyThreeDmg2', ENEMY_THREE_ACTUAL_FRAME_WIDTH, ENEMY_THREE_ACTUAL_FRAME_HEIGHT, ENEMY_THREE_NUM_FRAMES, '1');
+        super(
+            x,
+            y,
+            ENEMY_THREE_TARGET_WIDTH,
+            ENEMY_THREE_TARGET_HEIGHT,
+            'enemyThreeBase',
+            ENEMY_THREE_ACTUAL_FRAME_WIDTH,
+            ENEMY_THREE_ACTUAL_FRAME_HEIGHT,
+            ENEMY_THREE_NUM_FRAMES,
+            armoredEnemySpeedMultiplier,
+            ARMORED_ENEMY_HEALTH,
+            '#A9A9A9',
+            50
+        );
+        this.loadAnimation(
+            'enemyThreeDmg1',
+            ENEMY_THREE_ACTUAL_FRAME_WIDTH,
+            ENEMY_THREE_ACTUAL_FRAME_HEIGHT,
+            ENEMY_THREE_NUM_FRAMES,
+            '2'
+        );
+        this.loadAnimation(
+            'enemyThreeDmg2',
+            ENEMY_THREE_ACTUAL_FRAME_WIDTH,
+            ENEMY_THREE_ACTUAL_FRAME_HEIGHT,
+            ENEMY_THREE_NUM_FRAMES,
+            '1'
+        );
         this.updateCurrentAnimation();
     }
     updateCurrentAnimation() {
@@ -978,7 +1085,20 @@ class ArmoredEnemy extends BaseEnemy {
 
 class ShootingEnemy extends BaseEnemy {
     constructor(x, y) {
-        super(x, y, ENEMY_FOUR_TARGET_WIDTH, ENEMY_FOUR_TARGET_HEIGHT, 'enemyFourIdle', ENEMY_FOUR_ACTUAL_FRAME_WIDTH, ENEMY_FOUR_ACTUAL_FRAME_HEIGHT, ENEMY_FOUR_IDLE_NUM_FRAMES, 0.5, 1, '#FF69B4', 40);
+        super(
+            x,
+            y,
+            ENEMY_FOUR_TARGET_WIDTH,
+            ENEMY_FOUR_TARGET_HEIGHT,
+            'enemyFourIdle',
+            ENEMY_FOUR_ACTUAL_FRAME_WIDTH,
+            ENEMY_FOUR_ACTUAL_FRAME_HEIGHT,
+            ENEMY_FOUR_IDLE_NUM_FRAMES,
+            0.5,
+            1,
+            '#FF69B4',
+            40
+        );
         this.shootTimer = Math.random() * SHOOTING_ENEMY_SHOOT_INTERVAL + 1.5;
         this.projectileSpriteName = 'enemyFourProjectile';
         this.projectileFrameWidth = ENEMY_FOUR_PROJECTILE_ACTUAL_FRAME_WIDTH;
@@ -992,15 +1112,28 @@ class ShootingEnemy extends BaseEnemy {
         if (this.isWarning) {
             this.warningTimer += dt;
             if (this.warningTimer >= WARNING_DURATION) {
-                this.isWarning = false; this.warningTimer = 0;
-                enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, this.y + this.height / 2 - this.projectileTargetHeight / 2, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight));
+                this.isWarning = false;
+                this.warningTimer = 0;
+                enemyProjectiles.push(
+                    new EnemyProjectile(
+                        this.x - this.projectileTargetWidth,
+                        this.y + this.height / 2 - this.projectileTargetHeight / 2,
+                        this.projectileSpriteName,
+                        this.projectileFrameWidth,
+                        this.projectileFrameHeight,
+                        this.projectileNumFrames,
+                        this.projectileTargetWidth,
+                        this.projectileTargetHeight
+                    )
+                );
                 AudioManager.playSound('enemyShootLight');
                 this.shootTimer = 0;
             }
         } else {
             this.shootTimer += dt;
             if (this.shootTimer >= SHOOTING_ENEMY_SHOOT_INTERVAL) {
-                this.isWarning = true; this.warningTimer = 0;
+                this.isWarning = true;
+                this.warningTimer = 0;
             }
         }
     }
@@ -1029,7 +1162,10 @@ class EnemyProjectile {
             const f = this.animation.getFrame();
             ctx.drawImage(this.sprite, f.sx, f.sy, f.sWidth, f.sHeight, this.x, this.y, this.width, this.height);
         } else if (spriteUsable) {
-            const sourceFrameW = this.animation ? this.animation.frameWidth : (this.sprite.naturalWidth / (this.animation && this.animation.numFrames > 0 ? this.animation.numFrames : 1));
+            const sourceFrameW = this.animation
+                ? this.animation.frameWidth
+                : this.sprite.naturalWidth /
+                  (this.animation && this.animation.numFrames > 0 ? this.animation.numFrames : 1);
             const sourceFrameH = this.animation ? this.animation.frameHeight : this.sprite.naturalHeight;
             ctx.drawImage(this.sprite, 0, 0, sourceFrameW, sourceFrameH, this.x, this.y, this.width, this.height);
         } else {
@@ -1041,7 +1177,20 @@ class EnemyProjectile {
 
 class FlyingEnemy extends BaseEnemy {
     constructor(x, y) {
-        super(x, y, ENEMY_FIVE_TARGET_WIDTH, ENEMY_FIVE_TARGET_HEIGHT, 'enemyFive', ENEMY_FIVE_ACTUAL_FRAME_WIDTH, ENEMY_FIVE_ACTUAL_FRAME_HEIGHT, ENEMY_FIVE_NUM_FRAMES, 0.6 + Math.random() * 0.3, 1, '#FFFF00', flyingEnemyScoreValue);
+        super(
+            x,
+            y,
+            ENEMY_FIVE_TARGET_WIDTH,
+            ENEMY_FIVE_TARGET_HEIGHT,
+            'enemyFive',
+            ENEMY_FIVE_ACTUAL_FRAME_WIDTH,
+            ENEMY_FIVE_ACTUAL_FRAME_HEIGHT,
+            ENEMY_FIVE_NUM_FRAMES,
+            0.6 + Math.random() * 0.3,
+            1,
+            '#FFFF00',
+            flyingEnemyScoreValue
+        );
         this.initialY = y;
         this.angle = Math.random() * Math.PI * 2;
         this.amplitude = 20 + Math.random() * 20;
@@ -1056,11 +1205,42 @@ class FlyingEnemy extends BaseEnemy {
 
 class ArmoredShootingEnemy extends BaseEnemy {
     constructor(x, y) {
-        super(x, y, ENEMY_SIX_TARGET_WIDTH, ENEMY_SIX_TARGET_HEIGHT, 'enemySixBase', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 0.4, ARMORED_SHOOTING_ENEMY_HEALTH, '#D2691E', 60);
+        super(
+            x,
+            y,
+            ENEMY_SIX_TARGET_WIDTH,
+            ENEMY_SIX_TARGET_HEIGHT,
+            'enemySixBase',
+            ENEMY_SIX_ACTUAL_FRAME_WIDTH,
+            ENEMY_SIX_ACTUAL_FRAME_HEIGHT,
+            ENEMY_SIX_IDLE_NUM_FRAMES,
+            0.4,
+            ARMORED_SHOOTING_ENEMY_HEALTH,
+            '#D2691E',
+            60
+        );
         this.shootTimer = Math.random() * ARMORED_SHOOTING_ENEMY_SHOOT_INTERVAL + 2.0;
-        this.loadAnimation('enemySixDmg1', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 'dmg1');
-        this.loadAnimation('enemySixDmg2', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 'dmg2');
-        this.loadAnimation('enemySixDmg3', ENEMY_SIX_ACTUAL_FRAME_WIDTH, ENEMY_SIX_ACTUAL_FRAME_HEIGHT, ENEMY_SIX_IDLE_NUM_FRAMES, 'dmg3');
+        this.loadAnimation(
+            'enemySixDmg1',
+            ENEMY_SIX_ACTUAL_FRAME_WIDTH,
+            ENEMY_SIX_ACTUAL_FRAME_HEIGHT,
+            ENEMY_SIX_IDLE_NUM_FRAMES,
+            'dmg1'
+        );
+        this.loadAnimation(
+            'enemySixDmg2',
+            ENEMY_SIX_ACTUAL_FRAME_WIDTH,
+            ENEMY_SIX_ACTUAL_FRAME_HEIGHT,
+            ENEMY_SIX_IDLE_NUM_FRAMES,
+            'dmg2'
+        );
+        this.loadAnimation(
+            'enemySixDmg3',
+            ENEMY_SIX_ACTUAL_FRAME_WIDTH,
+            ENEMY_SIX_ACTUAL_FRAME_HEIGHT,
+            ENEMY_SIX_IDLE_NUM_FRAMES,
+            'dmg3'
+        );
         this.updateCurrentAnimation();
         this.projectileSpriteName = 'enemySixProjectile';
         this.projectileFrameWidth = ENEMY_SIX_PROJECTILE_ACTUAL_FRAME_WIDTH;
@@ -1088,16 +1268,29 @@ class ArmoredShootingEnemy extends BaseEnemy {
         if (this.isWarning) {
             this.warningTimer += dt;
             if (this.warningTimer >= WARNING_DURATION) {
-                this.isWarning = false; this.warningTimer = 0;
+                this.isWarning = false;
+                this.warningTimer = 0;
                 const projectileY = this.y + this.height - this.projectileTargetHeight - 5;
-                enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight));
+                enemyProjectiles.push(
+                    new EnemyProjectile(
+                        this.x - this.projectileTargetWidth,
+                        projectileY,
+                        this.projectileSpriteName,
+                        this.projectileFrameWidth,
+                        this.projectileFrameHeight,
+                        this.projectileNumFrames,
+                        this.projectileTargetWidth,
+                        this.projectileTargetHeight
+                    )
+                );
                 AudioManager.playSound('enemyShootHeavy');
                 this.shootTimer = 0;
             }
         } else {
             this.shootTimer += dt;
             if (this.shootTimer >= ARMORED_SHOOTING_ENEMY_SHOOT_INTERVAL) {
-                this.isWarning = true; this.warningTimer = 0;
+                this.isWarning = true;
+                this.warningTimer = 0;
             }
         }
     }
@@ -1105,8 +1298,27 @@ class ArmoredShootingEnemy extends BaseEnemy {
 
 class ToughBasicEnemy extends BaseEnemy {
     constructor(x, y) {
-        super(x, y, ENEMY_SEVEN_TARGET_WIDTH, ENEMY_SEVEN_TARGET_HEIGHT, 'enemySevenBase', ENEMY_SEVEN_ACTUAL_FRAME_WIDTH, ENEMY_SEVEN_ACTUAL_FRAME_HEIGHT, ENEMY_SEVEN_NUM_FRAMES, 0.6, TOUGH_BASIC_ENEMY_HEALTH, '#2E8B57', 30);
-        this.loadAnimation('enemySevenDmg1', ENEMY_SEVEN_ACTUAL_FRAME_WIDTH, ENEMY_SEVEN_ACTUAL_FRAME_HEIGHT, ENEMY_SEVEN_NUM_FRAMES, 'dmg1');
+        super(
+            x,
+            y,
+            ENEMY_SEVEN_TARGET_WIDTH,
+            ENEMY_SEVEN_TARGET_HEIGHT,
+            'enemySevenBase',
+            ENEMY_SEVEN_ACTUAL_FRAME_WIDTH,
+            ENEMY_SEVEN_ACTUAL_FRAME_HEIGHT,
+            ENEMY_SEVEN_NUM_FRAMES,
+            0.6,
+            TOUGH_BASIC_ENEMY_HEALTH,
+            '#2E8B57',
+            30
+        );
+        this.loadAnimation(
+            'enemySevenDmg1',
+            ENEMY_SEVEN_ACTUAL_FRAME_WIDTH,
+            ENEMY_SEVEN_ACTUAL_FRAME_HEIGHT,
+            ENEMY_SEVEN_NUM_FRAMES,
+            'dmg1'
+        );
         this.updateCurrentAnimation();
     }
     updateCurrentAnimation() {
@@ -1131,7 +1343,13 @@ class DangerousFlyingEnemy extends FlyingEnemy {
         this.scoreValue = 150;
         this.fallbackColor = '#DC143C';
         this.animations = {};
-        this.loadAnimation(this.baseSpriteName, DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_WIDTH, DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_HEIGHT, DANGEROUS_FLYING_ENEMY_NUM_FRAMES, 'base');
+        this.loadAnimation(
+            this.baseSpriteName,
+            DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_WIDTH,
+            DANGEROUS_FLYING_ENEMY_ACTUAL_FRAME_HEIGHT,
+            DANGEROUS_FLYING_ENEMY_NUM_FRAMES,
+            'base'
+        );
         this.animation = this.animations['base'];
         this.isDangerousFlyer = true;
     }
@@ -1139,13 +1357,54 @@ class DangerousFlyingEnemy extends FlyingEnemy {
 
 class Glitchzilla extends BaseEnemy {
     constructor(x, y) {
-        super(x, y, GLITCHZILLA_TARGET_WIDTH, GLITCHZILLA_TARGET_HEIGHT, 'glitchzillaBase', GLITCHZILLA_ACTUAL_FRAME_WIDTH, GLITCHZILLA_ACTUAL_FRAME_HEIGHT, GLITCHZILLA_NUM_FRAMES, 0.2, GLITCHZILLA_HEALTH, '#FF00FF', GLITCHZILLA_SCORE_VALUE);
-        this.loadAnimation('glitchzillaDmg1', GLITCHZILLA_ACTUAL_FRAME_WIDTH, GLITCHZILLA_ACTUAL_FRAME_HEIGHT, GLITCHZILLA_NUM_FRAMES, 'dmg1');
-        this.loadAnimation('glitchzillaDmg2', GLITCHZILLA_ACTUAL_FRAME_WIDTH, GLITCHZILLA_ACTUAL_FRAME_HEIGHT, GLITCHZILLA_NUM_FRAMES, 'dmg2');
-        this.loadAnimation('glitchzillaDmg3', GLITCHZILLA_ACTUAL_FRAME_WIDTH, GLITCHZILLA_ACTUAL_FRAME_HEIGHT, GLITCHZILLA_NUM_FRAMES, 'dmg3');
+        super(
+            x,
+            y,
+            GLITCHZILLA_TARGET_WIDTH,
+            GLITCHZILLA_TARGET_HEIGHT,
+            'glitchzillaBase',
+            GLITCHZILLA_ACTUAL_FRAME_WIDTH,
+            GLITCHZILLA_ACTUAL_FRAME_HEIGHT,
+            GLITCHZILLA_NUM_FRAMES,
+            0.2,
+            GLITCHZILLA_HEALTH,
+            '#FF00FF',
+            GLITCHZILLA_SCORE_VALUE
+        );
+        this.loadAnimation(
+            'glitchzillaDmg1',
+            GLITCHZILLA_ACTUAL_FRAME_WIDTH,
+            GLITCHZILLA_ACTUAL_FRAME_HEIGHT,
+            GLITCHZILLA_NUM_FRAMES,
+            'dmg1'
+        );
+        this.loadAnimation(
+            'glitchzillaDmg2',
+            GLITCHZILLA_ACTUAL_FRAME_WIDTH,
+            GLITCHZILLA_ACTUAL_FRAME_HEIGHT,
+            GLITCHZILLA_NUM_FRAMES,
+            'dmg2'
+        );
+        this.loadAnimation(
+            'glitchzillaDmg3',
+            GLITCHZILLA_ACTUAL_FRAME_WIDTH,
+            GLITCHZILLA_ACTUAL_FRAME_HEIGHT,
+            GLITCHZILLA_NUM_FRAMES,
+            'dmg3'
+        );
         this.updateCurrentAnimation();
         this.spawnTime = Date.now();
-        this.attackSequence = ['warn_high', 'high', 'pause_short', 'warn_medium', 'medium', 'pause_short', 'warn_low', 'low', 'pause_long'];
+        this.attackSequence = [
+            'warn_high',
+            'high',
+            'pause_short',
+            'warn_medium',
+            'medium',
+            'pause_short',
+            'warn_low',
+            'low',
+            'pause_long',
+        ];
         this.attackSequenceIndex = 0;
         this.currentAttackPhaseDuration = 0;
         this.shotFiredInPhase = false;
@@ -1188,27 +1447,51 @@ class Glitchzilla extends BaseEnemy {
         const currentPhase = this.attackSequence[this.attackSequenceIndex];
         let phaseComplete = false;
         switch (currentPhase) {
-            case 'warn_high': case 'warn_medium': case 'warn_low':
+            case 'warn_high':
+            case 'warn_medium':
+            case 'warn_low':
                 this.isWarning = true;
-                if (this.currentAttackPhaseDuration >= WARNING_DURATION) { phaseComplete = true; this.isWarning = false; }
+                if (this.currentAttackPhaseDuration >= WARNING_DURATION) {
+                    phaseComplete = true;
+                    this.isWarning = false;
+                }
                 break;
-            case 'high': case 'medium': case 'low':
+            case 'high':
+            case 'medium':
+            case 'low':
                 if (!this.shotFiredInPhase) {
                     let projectileY;
-                    if (currentPhase === 'high') projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
-                    else if (currentPhase === 'medium') projectileY = this.y + this.height * 0.65 - this.projectileTargetHeight / 2;
+                    if (currentPhase === 'high')
+                        projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
+                    else if (currentPhase === 'medium')
+                        projectileY = this.y + this.height * 0.65 - this.projectileTargetHeight / 2;
                     else projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight));
+                    enemyProjectiles.push(
+                        new EnemyProjectile(
+                            this.x - this.projectileTargetWidth,
+                            projectileY,
+                            this.projectileSpriteName,
+                            this.projectileFrameWidth,
+                            this.projectileFrameHeight,
+                            this.projectileNumFrames,
+                            this.projectileTargetWidth,
+                            this.projectileTargetHeight
+                        )
+                    );
                     AudioManager.playSound('glitchzillaAttack');
                     this.shotFiredInPhase = true;
                 }
                 phaseComplete = true;
                 break;
             case 'pause_short':
-                if (this.currentAttackPhaseDuration >= this.pauseShortDuration) { phaseComplete = true; }
+                if (this.currentAttackPhaseDuration >= this.pauseShortDuration) {
+                    phaseComplete = true;
+                }
                 break;
             case 'pause_long':
-                if (this.currentAttackPhaseDuration >= this.pauseLongDuration) { phaseComplete = true; }
+                if (this.currentAttackPhaseDuration >= this.pauseLongDuration) {
+                    phaseComplete = true;
+                }
                 break;
         }
         if (phaseComplete) {
@@ -1236,7 +1519,7 @@ function drawGround() {
 }
 
 function calculateNextObstacleSpawnTime() {
-    return 0.8 + Math.random() * 1.2; 
+    return 0.8 + Math.random() * 1.2;
 }
 nextObstacleSpawnTime = calculateNextObstacleSpawnTime();
 
@@ -1260,7 +1543,7 @@ function updateObstacles(dt) {
 }
 
 function drawObstacles() {
-    obstacles.forEach(obstacle => obstacle.draw());
+    obstacles.forEach((obstacle) => obstacle.draw());
 }
 
 function updateProjectiles(dt) {
@@ -1279,8 +1562,8 @@ function updateProjectiles(dt) {
 }
 
 function drawProjectiles() {
-    projectiles.forEach(p => p.draw());
-    enemyProjectiles.forEach(ep => ep.draw());
+    projectiles.forEach((p) => p.draw());
+    enemyProjectiles.forEach((ep) => ep.draw());
 }
 
 function updateShootCooldown(dt) {
@@ -1293,20 +1576,39 @@ function updateShootCooldown(dt) {
     }
 }
 
-function calculateNextEnemyBaseSpawnTime() { return 2.5 + Math.random() * 2.0; }
+function calculateNextEnemyBaseSpawnTime() {
+    return 2.5 + Math.random() * 2.0;
+}
 nextEnemyBaseSpawnTime = calculateNextEnemyBaseSpawnTime();
 
 function spawnEnemyBaseIfNeeded(dt) {
     enemyBaseSpawnTimer += dt;
     if (enemyBaseSpawnTimer >= nextEnemyBaseSpawnTime) {
         const enemyY = canvas.height - groundHeight - ENEMY_ONE_TARGET_HEIGHT;
-        enemies.push(new BaseEnemy(canvas.width, enemyY, ENEMY_ONE_TARGET_WIDTH, ENEMY_ONE_TARGET_HEIGHT, 'enemyOne', ENEMY_ONE_ACTUAL_FRAME_WIDTH, ENEMY_ONE_ACTUAL_FRAME_HEIGHT, ENEMY_ONE_NUM_FRAMES, 0.8, 1, '#FF0000', 20));
+        enemies.push(
+            new BaseEnemy(
+                canvas.width,
+                enemyY,
+                ENEMY_ONE_TARGET_WIDTH,
+                ENEMY_ONE_TARGET_HEIGHT,
+                'enemyOne',
+                ENEMY_ONE_ACTUAL_FRAME_WIDTH,
+                ENEMY_ONE_ACTUAL_FRAME_HEIGHT,
+                ENEMY_ONE_NUM_FRAMES,
+                0.8,
+                1,
+                '#FF0000',
+                20
+            )
+        );
         enemyBaseSpawnTimer = 0;
         nextEnemyBaseSpawnTime = calculateNextEnemyBaseSpawnTime();
     }
 }
 
-function calculateNextFlyingEnemySpawnTime() { return 3.5 + Math.random() * 3; }
+function calculateNextFlyingEnemySpawnTime() {
+    return 3.5 + Math.random() * 3;
+}
 nextFlyingEnemySpawnTime = calculateNextFlyingEnemySpawnTime();
 
 function spawnFlyingEnemyIfNeeded(dt) {
@@ -1319,14 +1621,31 @@ function spawnFlyingEnemyIfNeeded(dt) {
     }
 }
 
-function calculateNextGenericEnemySpawnTime(min, max) { return min + Math.random() * (max - min); }
+function calculateNextGenericEnemySpawnTime(min, max) {
+    return min + Math.random() * (max - min);
+}
 
 function spawnFastEnemyIfNeeded(dt) {
     if (score < SCORE_THRESHOLD_FAST_ENEMY) return;
     fastEnemySpawnTimer += dt;
     if (fastEnemySpawnTimer >= nextFastEnemySpawnTime) {
         const enemyY = canvas.height - groundHeight - ENEMY_TWO_TARGET_HEIGHT;
-        fastEnemies.push(new BaseEnemy(canvas.width, enemyY, ENEMY_TWO_TARGET_WIDTH, ENEMY_TWO_TARGET_HEIGHT, 'enemyTwo', ENEMY_TWO_ACTUAL_FRAME_WIDTH, ENEMY_TWO_ACTUAL_FRAME_HEIGHT, ENEMY_TWO_NUM_FRAMES, fastEnemySpeedMultiplier, 1, '#FFA500', 35));
+        fastEnemies.push(
+            new BaseEnemy(
+                canvas.width,
+                enemyY,
+                ENEMY_TWO_TARGET_WIDTH,
+                ENEMY_TWO_TARGET_HEIGHT,
+                'enemyTwo',
+                ENEMY_TWO_ACTUAL_FRAME_WIDTH,
+                ENEMY_TWO_ACTUAL_FRAME_HEIGHT,
+                ENEMY_TWO_NUM_FRAMES,
+                fastEnemySpeedMultiplier,
+                1,
+                '#FFA500',
+                35
+            )
+        );
         fastEnemySpawnTimer = 0;
         nextFastEnemySpawnTime = calculateNextGenericEnemySpawnTime(4, 6);
     }
@@ -1390,11 +1709,13 @@ function spawnGlitchzillaIfNeeded() {
         const bossY = canvas.height - groundHeight - GLITCHZILLA_TARGET_HEIGHT;
         activeMiniboss = new Glitchzilla(canvas.width, bossY);
         hasGlitchzillaSpawnedThisGame = true;
-        console.log("GLITCHZILLA È APPARSO!");
+        console.log('GLITCHZILLA È APPARSO!');
     }
 }
 
-function calculateNextPowerUpAmbientSpawnTime() { return 10 + Math.random() * 10; }
+function calculateNextPowerUpAmbientSpawnTime() {
+    return 10 + Math.random() * 10;
+}
 nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
 
 function spawnPowerUpAmbientIfNeeded(dt) {
@@ -1419,74 +1740,128 @@ function updatePowerUpItems(dt) {
 }
 
 function drawPowerUpItems() {
-    powerUpItems.forEach(item => item.draw(ctx));
+    powerUpItems.forEach((item) => item.draw(ctx));
 }
 
 function updateAllEnemyTypes(dt) {
-    enemies.forEach(e => e.update(dt));
-    flyingEnemies.forEach(e => e.update(dt));
-    fastEnemies.forEach(e => e.update(dt));
-    armoredEnemies.forEach(e => e.update(dt));
-    shootingEnemies.forEach(e => e.update(dt));
-    armoredShootingEnemies.forEach(e => e.update(dt));
-    toughBasicEnemies.forEach(e => e.update(dt));
-    dangerousFlyingEnemies.forEach(e => e.update(dt));
+    enemies.forEach((e) => e.update(dt));
+    flyingEnemies.forEach((e) => e.update(dt));
+    fastEnemies.forEach((e) => e.update(dt));
+    armoredEnemies.forEach((e) => e.update(dt));
+    shootingEnemies.forEach((e) => e.update(dt));
+    armoredShootingEnemies.forEach((e) => e.update(dt));
+    toughBasicEnemies.forEach((e) => e.update(dt));
+    dangerousFlyingEnemies.forEach((e) => e.update(dt));
     if (activeMiniboss) activeMiniboss.update(dt);
 }
 
 function drawAllEnemyTypes() {
-    enemies.forEach(e => e.draw());
-    flyingEnemies.forEach(e => e.draw());
-    fastEnemies.forEach(e => e.draw());
-    armoredEnemies.forEach(e => e.draw());
-    shootingEnemies.forEach(e => e.draw());
-    armoredShootingEnemies.forEach(e => e.draw());
-    toughBasicEnemies.forEach(e => e.draw());
-    dangerousFlyingEnemies.forEach(e => e.draw());
+    enemies.forEach((e) => e.draw());
+    flyingEnemies.forEach((e) => e.draw());
+    fastEnemies.forEach((e) => e.draw());
+    armoredEnemies.forEach((e) => e.draw());
+    shootingEnemies.forEach((e) => e.draw());
+    armoredShootingEnemies.forEach((e) => e.draw());
+    toughBasicEnemies.forEach((e) => e.draw());
+    dangerousFlyingEnemies.forEach((e) => e.draw());
     if (activeMiniboss) activeMiniboss.draw();
 }
 
 function shouldShowDonkeyScoreInput(currentScore) {
+    // console.log('Controllo shouldShowDonkeyScoreInput con score:', currentScore);
     return currentScore > 0;
 }
 
 async function handleSaveDonkeyScore() {
-    if (!playerInitialsDonkeyInput || !saveScoreBtnDonkey) return;
-    const initials = playerInitialsDonkeyInput.value.trim().toUpperCase();
-    if (initials.length < 1 || initials.length > 5) {
-        showToast('Inserisci da 1 a 5 caratteri per le iniziali.', 'warning');
+    const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
+    const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
+    const loggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay'); // Per prendere il nome se loggato
+
+    if (!saveScoreBtnDonkey) {
+        showToast('Errore: pulsante Salva non trovato.', 'error');
+        console.error('ERRORE in handleSaveDonkeyScore: saveScoreBtnDonkey non trovato.');
         return;
     }
+
+    const currentUser = auth.currentUser;
+    let initialsForSave = '';
+    let userNameForDb = '';
+
+    if (!currentUser) {
+        // Utente NON loggato
+        if (!playerInitialsDonkeyInput) {
+            showToast('Errore: campo iniziali non trovato.', 'error');
+            console.error(
+                'ERRORE in handleSaveDonkeyScore (utente non loggato): playerInitialsDonkeyInput non trovato.'
+            );
+            saveScoreBtnDonkey.disabled = false; // Riabilita il pulsante
+            return;
+        }
+        initialsForSave = playerInitialsDonkeyInput.value.trim().toUpperCase();
+        if (initialsForSave.length < 1 || initialsForSave.length > 5) {
+            showToast('Inserisci da 1 a 5 caratteri per le iniziali.', 'warning');
+            saveScoreBtnDonkey.disabled = false; // Riabilita il pulsante
+            return;
+        }
+        userNameForDb = initialsForSave;
+    } else {
+        // Utente LOGGATO
+        // Recupera il nome visualizzato (nickname o email part)
+        // e usalo per generare le 'initials' se necessario dalle regole,
+        // e imposta userNameForDb.
+        let displayNameForScore = loggedInUserNameDisplay
+            ? loggedInUserNameDisplay.textContent
+            : currentUser.email.split('@')[0];
+
+        // Tentativo di recupero profilo per nome più accurato e nazionalità
+        try {
+            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
+            const docSnap = await getDoc(userProfileRef);
+            if (docSnap.exists() && docSnap.data().nickname) {
+                displayNameForScore = docSnap.data().nickname;
+            }
+        } catch (profileError) {
+            console.warn('handleSaveDonkeyScore: Errore recupero nickname, usando fallback.', profileError);
+        }
+
+        userNameForDb = displayNameForScore;
+        // Le regole richiedono 'initials'. Deriviamole da userNameForDb.
+        initialsForSave = userNameForDb.substring(0, 5).toUpperCase();
+        if (initialsForSave.length === 0) initialsForSave = 'USER'; // Fallback se userName fosse vuoto
+    }
+
     saveScoreBtnDonkey.disabled = true;
     saveScoreBtnDonkey.textContent = 'Salvataggio...';
-    const user = auth.currentUser;
+
     let scoreData = {
         gameId: 'donkeyRunner',
-        score: Math.floor(finalScore), // Salva punteggio intero
-        initials: initials,
-        userName: initials,
+        score: Math.floor(finalScore),
+        initials: initialsForSave, // Ora sempre presente
+        userName: userNameForDb,
         timestamp: serverTimestamp(),
-        glitchzillaDefeated: hasGlitchzillaSpawnedThisGame && activeMiniboss === null && (Math.floor(finalScore) >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD + GLITCHZILLA_SCORE_VALUE)
+        glitchzillaDefeated:
+            hasGlitchzillaSpawnedThisGame &&
+            activeMiniboss === null &&
+            Math.floor(finalScore) >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD + GLITCHZILLA_SCORE_VALUE,
     };
-    if (user) {
-        scoreData.userId = user.uid;
+
+    if (currentUser) {
+        scoreData.userId = currentUser.uid;
+        // La nazionalità viene aggiunta se presente nel profilo (già gestito dalla logica di recupero sopra)
         try {
-            const userProfileRef = doc(db, 'userProfiles', user.uid);
+            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
             const docSnap = await getDoc(userProfileRef);
-            if (docSnap.exists()) {
-                const profile = docSnap.data();
-                scoreData.userName = profile.nickname || initials;
-                if (profile.nationalityCode) {
-                    scoreData.nationalityCode = profile.nationalityCode;
-                }
-            } else {
-                scoreData.userName = initials;
+            if (docSnap.exists() && docSnap.data().nationalityCode) {
+                scoreData.nationalityCode = docSnap.data().nationalityCode;
             }
         } catch (error) {
-            console.error("Errore nel recuperare il profilo utente per il punteggio:", error);
-            scoreData.userName = initials;
+            console.warn('handleSaveDonkeyScore: Errore recupero nationalityCode', error);
         }
     }
+    // Per utenti non loggati, nationalityCode non viene inviato (le regole lo gestiscono con .get('nationalityCode', null))
+
+    console.log('Dati punteggio pronti per il salvataggio:', scoreData);
+
     try {
         const leaderboardCollectionRef = collection(db, 'leaderboardScores');
         await addDoc(leaderboardCollectionRef, scoreData);
@@ -1494,8 +1869,8 @@ async function handleSaveDonkeyScore() {
         if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
         loadDonkeyLeaderboard();
     } catch (error) {
-        console.error('Errore salvataggio punteggio:', error);
-        showToast('Errore nel salvare il punteggio. Riprova.', 'error');
+        console.error('Errore salvataggio punteggio:', error); // Qui vedrai "Missing or insufficient permissions" se il problema persiste
+        showToast('Errore nel salvare il punteggio. Riprova. (' + error.code + ')', 'error');
     } finally {
         if (saveScoreBtnDonkey) {
             saveScoreBtnDonkey.disabled = false;
@@ -1505,113 +1880,101 @@ async function handleSaveDonkeyScore() {
 }
 
 function processGameOver() {
-    // Ottieni i riferimenti agli elementi del form QUI
-    const localScoreInputContainer = document.getElementById('scoreInputContainerDonkey'); // Rinomina per evitare shadowing se scoreInputContainerDonkey è globale
+    const localScoreInputContainer = document.getElementById('scoreInputContainerDonkey');
     const localPlayerInitialsInput = document.getElementById('playerInitialsDonkey');
     const localSaveScoreBtn = document.getElementById('saveScoreBtnDonkey');
-    // const localRestartGameBtnInsideForm = document.getElementById('restartGameBtnDonkey'); // Il restart DENTRO il form
     const localFinalScoreDisplay = document.getElementById('finalScoreDisplayDonkey');
+    const localLoggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay');
+    const localPlayerInitialsLabel = document.getElementById('playerInitialsLabel');
 
     console.log('processGameOver CHIAMATA. finalScore (prima di floor):', score);
     gameOverTrigger = false;
     currentGameState = GAME_STATE.GAME_OVER;
-    finalScore = Math.floor(score); // Calcola finalScore qui
+    finalScore = Math.floor(score);
     console.log('finalScore (dopo floor):', finalScore);
 
     AudioManager.stopMusic();
-    AudioManager.playSound('gameOverSound');
+    AudioManager.playSound('gameOverSound'); // Ricorda di aggiungere il file audio mancante
 
     console.log('Elementi del form punteggio cercati DENTRO processGameOver:', {
         container: !!localScoreInputContainer,
         initialsInput: !!localPlayerInitialsInput,
         saveBtn: !!localSaveScoreBtn,
-        // restartBtnInForm: !!localRestartGameBtnInsideForm, // Non è più strettamente necessario per mostrare il form
-        scoreDisplay: !!localFinalScoreDisplay
+        scoreDisplay: !!localFinalScoreDisplay,
+        loggedInNameDisplay: !!localLoggedInUserNameDisplay,
+        initialsLabel: !!localPlayerInitialsLabel,
     });
 
-    if (localScoreInputContainer) { // Verifica solo il container principale per la logica di visualizzazione
+    if (localScoreInputContainer) {
         const shouldShow = shouldShowDonkeyScoreInput(finalScore);
         console.log('shouldShowDonkeyScoreInput restituisce:', shouldShow);
 
         if (shouldShow) {
             if (localFinalScoreDisplay) {
                 localFinalScoreDisplay.textContent = finalScore;
-                console.log('finalScoreDisplayDonkey aggiornato a:', finalScore);
             } else {
-                console.error("Elemento finalScoreDisplayDonkey non trovato!");
+                console.error('Elemento finalScoreDisplayDonkey non trovato!');
             }
-            
+
             localScoreInputContainer.style.display = 'flex';
             console.log('scoreInputContainerDonkey.style.display impostato a flex');
-            
-            if (localPlayerInitialsInput) {
-                localPlayerInitialsInput.value = '';
-                // Non mettere il focus qui se l'utente è loggato e le iniziali non servono
-                const currentUser = auth.currentUser;
-                const playerNameInputArea = document.getElementById('playerNameInputArea'); // Contenitore per input/span nome
-                const loggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay');
 
-                if (playerNameInputArea && loggedInUserNameDisplay) {
-                    if (currentUser) {
-                        // Utente loggato, mostra il suo nome e nascondi input iniziali
-                        getDoc(doc(db, 'userProfiles', currentUser.uid)).then(profileSnap => {
-                            if (profileSnap.exists()) {
-                                loggedInUserNameDisplay.textContent = profileSnap.data().nickname || currentUser.email.split('@')[0];
-                            } else {
-                                loggedInUserNameDisplay.textContent = currentUser.email.split('@')[0];
+            const currentUser = auth.currentUser;
+            if (localPlayerInitialsInput && localLoggedInUserNameDisplay && localPlayerInitialsLabel) {
+                if (currentUser) {
+                    getDoc(doc(db, 'userProfiles', currentUser.uid))
+                        .then((profileSnap) => {
+                            let displayName = currentUser.email.split('@')[0]; // Fallback
+                            if (profileSnap.exists() && profileSnap.data().nickname) {
+                                displayName = profileSnap.data().nickname;
                             }
-                            loggedInUserNameDisplay.style.display = 'inline'; // O 'block'
-                            if(localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]')) {
-                                localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]').style.display = 'none';
-                            }
+                            localLoggedInUserNameDisplay.textContent = displayName;
+                            localLoggedInUserNameDisplay.style.display = 'inline'; // o 'block'
+                            localPlayerInitialsLabel.style.display = 'none';
                             localPlayerInitialsInput.style.display = 'none';
                             localPlayerInitialsInput.required = false;
-                        }).catch(err => {
-                            console.error("Errore recupero nickname per form punteggio:", err);
-                            loggedInUserNameDisplay.textContent = currentUser.email.split('@')[0];
-                            loggedInUserNameDisplay.style.display = 'inline';
-                            if(localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]')) {
-                                localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]').style.display = 'none';
-                            }
+                            localPlayerInitialsInput.value = ''; // Pulisci per sicurezza
+                        })
+                        .catch((err) => {
+                            console.error('Errore recupero nickname per form punteggio:', err);
+                            localLoggedInUserNameDisplay.textContent = currentUser.email.split('@')[0];
+                            localLoggedInUserNameDisplay.style.display = 'inline';
+                            localPlayerInitialsLabel.style.display = 'none';
                             localPlayerInitialsInput.style.display = 'none';
                             localPlayerInitialsInput.required = false;
+                            localPlayerInitialsInput.value = '';
                         });
-                    } else {
-                        // Utente non loggato, mostra input iniziali
-                        loggedInUserNameDisplay.style.display = 'none';
-                        if(localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]')) {
-                            localPlayerInitialsInput.parentElement.querySelector('label[for="playerInitialsDonkey"]').style.display = 'block';
-                        }
-                        localPlayerInitialsInput.style.display = 'block';
-                        localPlayerInitialsInput.required = true;
-                        localPlayerInitialsInput.focus();
-                    }
+                } else {
+                    // Utente non loggato
+                    localLoggedInUserNameDisplay.style.display = 'none';
+                    localPlayerInitialsLabel.style.display = 'block'; // O 'inline'
+                    localPlayerInitialsInput.style.display = 'block'; // O 'inline-block'
+                    localPlayerInitialsInput.required = true;
+                    localPlayerInitialsInput.value = ''; // Resetta per nuovo input
+                    localPlayerInitialsInput.focus();
                 }
-
-
-            } else { // shouldShow è false (punteggio 0)
-                localScoreInputContainer.style.display = 'none';
-                console.log('shouldShowDonkeyScoreInput è false, scoreInputContainerDonkey nascosto.');
+            } else {
+                console.error('Mancano elementi UI per la gestione del nome/iniziali nel form punteggio.');
             }
-            
-            // Abilita/disabilita il pulsante salva se esiste
+
             if (localSaveScoreBtn) {
                 localSaveScoreBtn.disabled = false;
                 localSaveScoreBtn.textContent = 'Salva Punteggio';
             } else {
-                 console.error("localSaveScoreBtn NON TROVATO DENTRO processGameOver");
+                console.error('localSaveScoreBtn NON TROVATO DENTRO processGameOver');
             }
-
-        } else { // localScoreInputContainer non trovato
-            console.error('ERRORE CRITICO: scoreInputContainerDonkey non trovato nel DOM!');
+        } else {
+            // shouldShow è false (punteggio 0)
+            localScoreInputContainer.style.display = 'none';
+            console.log('shouldShowDonkeyScoreInput è false, scoreInputContainerDonkey nascosto.');
         }
+    } else {
+        console.error('ERRORE CRITICO: scoreInputContainerDonkey non trovato nel DOM!');
     }
-    
-    // Gestione del pulsante "RIGIOCA" globale per mobile
+
     if (isTouchDevice && mobileStartButton) {
         mobileStartButton.textContent = 'RIGIOCA';
         mobileStartButton.style.display = 'block';
-        console.log('mobileStartButton impostato a RIGIOCA e display block.');
     }
 }
 
@@ -1621,13 +1984,17 @@ function checkCollisions() {
         x: asyncDonkey.x + asyncDonkey.colliderOffsetX,
         y: asyncDonkey.y + asyncDonkey.colliderOffsetY,
         width: asyncDonkey.colliderWidth,
-        height: asyncDonkey.colliderHeight
+        height: asyncDonkey.colliderHeight,
     };
 
     for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
-        if (playerRect.x < obs.x + obs.width && playerRect.x + playerRect.width > obs.x &&
-            playerRect.y < obs.y + obs.height && playerRect.y + playerRect.height > obs.y) {
+        if (
+            playerRect.x < obs.x + obs.width &&
+            playerRect.x + playerRect.width > obs.x &&
+            playerRect.y < obs.y + obs.height &&
+            playerRect.y + playerRect.height > obs.y
+        ) {
             if (asyncDonkey.isFirewallActive) {
                 obstacles.splice(i, 1);
                 score += 10;
@@ -1640,19 +2007,33 @@ function checkCollisions() {
                 AudioManager.playSound('shieldBlock');
                 continue;
             }
-            gameOverTrigger = true; return;
+            gameOverTrigger = true;
+            return;
         }
     }
 
-    const allEnemyArrays = [enemies, flyingEnemies, fastEnemies, armoredEnemies, shootingEnemies, armoredShootingEnemies, toughBasicEnemies, dangerousFlyingEnemies];
+    const allEnemyArrays = [
+        enemies,
+        flyingEnemies,
+        fastEnemies,
+        armoredEnemies,
+        shootingEnemies,
+        armoredShootingEnemies,
+        toughBasicEnemies,
+        dangerousFlyingEnemies,
+    ];
     if (activeMiniboss) allEnemyArrays.push([activeMiniboss]);
 
     for (const enemyArray of allEnemyArrays) {
         for (let i = enemyArray.length - 1; i >= 0; i--) {
             const enemy = enemyArray[i];
             if (!enemy) continue;
-            if (playerRect.x < enemy.x + enemy.width && playerRect.x + playerRect.width > enemy.x &&
-                playerRect.y < enemy.y + enemy.height && playerRect.y + playerRect.height > enemy.y) {
+            if (
+                playerRect.x < enemy.x + enemy.width &&
+                playerRect.x + playerRect.width > enemy.x &&
+                playerRect.y < enemy.y + enemy.height &&
+                playerRect.y + playerRect.height > enemy.y
+            ) {
                 if (asyncDonkey.isShieldActive) {
                     asyncDonkey.isShieldActive = false;
                     enemyArray.splice(i, 1);
@@ -1660,7 +2041,8 @@ function checkCollisions() {
                     score += enemy.scoreValue || 10;
                     continue;
                 }
-                gameOverTrigger = true; return;
+                gameOverTrigger = true;
+                return;
             }
         }
     }
@@ -1673,8 +2055,12 @@ function checkCollisions() {
             for (let j = enemyArray.length - 1; j >= 0; j--) {
                 const enemy = enemyArray[j];
                 if (!enemy) continue;
-                if (proj.x < enemy.x + enemy.width && proj.x + proj.width > enemy.x &&
-                    proj.y < enemy.y + enemy.height && proj.y + proj.height > enemy.y) {
+                if (
+                    proj.x < enemy.x + enemy.width &&
+                    proj.x + proj.width > enemy.x &&
+                    proj.y < enemy.y + enemy.height &&
+                    proj.y + proj.height > enemy.y
+                ) {
                     enemy.takeDamage(proj.damage);
                     AudioManager.playSound('enemyHit');
                     projectiles.splice(i, 1);
@@ -1686,7 +2072,14 @@ function checkCollisions() {
                         if (enemy.isDangerousFlyer && Math.random() < POWER_UP_DROP_CHANCE_FROM_FLYING_ENEMY) {
                             const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
                             const randomType = Object.values(POWERUP_TYPE)[randomTypeIndex];
-                            powerUpItems.push(new PowerUpItem(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, randomType, images));
+                            powerUpItems.push(
+                                new PowerUpItem(
+                                    enemy.x + enemy.width / 2,
+                                    enemy.y + enemy.height / 2,
+                                    randomType,
+                                    images
+                                )
+                            );
                         }
                     }
                     break;
@@ -1696,8 +2089,12 @@ function checkCollisions() {
         if (asyncDonkey && asyncDonkey.isBlockBreakerActive && !projectileRemoved) {
             for (let k = obstacles.length - 1; k >= 0; k--) {
                 const obs = obstacles[k];
-                if (proj.x < obs.x + obs.width && proj.x + proj.width > obs.x &&
-                    proj.y < obs.y + obs.height && proj.y + proj.height > obs.y) {
+                if (
+                    proj.x < obs.x + obs.width &&
+                    proj.x + proj.width > obs.x &&
+                    proj.y < obs.y + obs.height &&
+                    proj.y + proj.height > obs.y
+                ) {
                     if (obs.takeDamage(proj.damage)) {
                         obstacles.splice(k, 1);
                         score += 10;
@@ -1712,22 +2109,31 @@ function checkCollisions() {
 
     for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
         const eProj = enemyProjectiles[i];
-        if (playerRect.x < eProj.x + eProj.width && playerRect.x + playerRect.width > eProj.x &&
-            playerRect.y < eProj.y + eProj.height && playerRect.y + playerRect.height > eProj.y) {
+        if (
+            playerRect.x < eProj.x + eProj.width &&
+            playerRect.x + playerRect.width > eProj.x &&
+            playerRect.y < eProj.y + eProj.height &&
+            playerRect.y + playerRect.height > eProj.y
+        ) {
             enemyProjectiles.splice(i, 1);
             if (asyncDonkey.isShieldActive) {
                 asyncDonkey.isShieldActive = false;
                 AudioManager.playSound('shieldBlock');
                 continue;
             }
-            gameOverTrigger = true; return;
+            gameOverTrigger = true;
+            return;
         }
     }
 
     for (let i = powerUpItems.length - 1; i >= 0; i--) {
         const item = powerUpItems[i];
-        if (playerRect.x < item.x + item.width && playerRect.x + playerRect.width > item.x &&
-            playerRect.y < item.y + item.height && playerRect.y + playerRect.height > item.y) {
+        if (
+            playerRect.x < item.x + item.width &&
+            playerRect.x + playerRect.width > item.x &&
+            playerRect.y < item.y + item.height &&
+            playerRect.y + playerRect.height > item.y
+        ) {
             asyncDonkey.activatePowerUp(item.type);
             powerUpItems.splice(i, 1);
         }
@@ -1767,27 +2173,27 @@ function resetGame() {
     flyingEnemySpawnTimer = 0;
     nextFlyingEnemySpawnTime = calculateNextFlyingEnemySpawnTime();
     fastEnemySpawnTimer = 0;
-    nextFastEnemySpawnTime = calculateNextGenericEnemySpawnTime(4,6);
+    nextFastEnemySpawnTime = calculateNextGenericEnemySpawnTime(4, 6);
     armoredEnemySpawnTimer = 0;
-    nextArmoredEnemySpawnTime = calculateNextGenericEnemySpawnTime(6,9);
+    nextArmoredEnemySpawnTime = calculateNextGenericEnemySpawnTime(6, 9);
     shootingEnemySpawnTimer = 0;
-    nextShootingEnemySpawnTime = calculateNextGenericEnemySpawnTime(5,8);
+    nextShootingEnemySpawnTime = calculateNextGenericEnemySpawnTime(5, 8);
     armoredShootingEnemySpawnTimer = 0;
     nextArmoredShootingEnemySpawnTime = calculateNextGenericEnemySpawnTime(8, 12);
     toughBasicEnemySpawnTimer = 0;
-    nextToughBasicEnemySpawnTime = calculateNextGenericEnemySpawnTime(3,5);
+    nextToughBasicEnemySpawnTime = calculateNextGenericEnemySpawnTime(3, 5);
     dangerousFlyingEnemySpawnTimer = 0;
-    nextDangerousFlyingEnemySpawnTime = calculateNextGenericEnemySpawnTime(7,10);
+    nextDangerousFlyingEnemySpawnTime = calculateNextGenericEnemySpawnTime(7, 10);
     powerUpSpawnTimer = 0;
     nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
-    if(scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-    if(isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none'; // Nascondi il pulsante start/rigioca mobile
+    if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+    if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none'; // Nascondi il pulsante start/rigioca mobile
     console.log('Gioco resettato.');
 }
 
 function drawTerminalBackgroundEffects() {
     const lines = 30;
-    const chars = "01";
+    const chars = '01';
     ctx.font = '12px "Source Code Pro", monospace';
     for (let i = 0; i < lines; i++) {
         if (Math.random() < 0.3) {
@@ -1795,7 +2201,7 @@ function drawTerminalBackgroundEffects() {
             ctx.fillRect(0, (canvas.height / lines) * i, canvas.width, 1);
         }
         if (Math.random() < 0.05) {
-            let randomText = "";
+            let randomText = '';
             for (let j = 0; j < 20; j++) {
                 randomText += chars.charAt(Math.floor(Math.random() * chars.length));
             }
@@ -1809,7 +2215,17 @@ function drawTerminalBackgroundEffects() {
     }
 }
 
-function drawGlitchText(text, x, y, fontSize, primaryColor, glitchColor1, glitchColor2, glitchOffsetX = 2, glitchOffsetY = 1) {
+function drawGlitchText(
+    text,
+    x,
+    y,
+    fontSize,
+    primaryColor,
+    glitchColor1,
+    glitchColor2,
+    glitchOffsetX = 2,
+    glitchOffsetY = 1
+) {
     ctx.font = `${fontSize}px "Source Code Pro", "Press Start 2P", monospace`;
     ctx.textAlign = 'center';
     if (Math.random() < 0.1) {
@@ -1828,19 +2244,43 @@ function drawMenuScreen() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawTerminalBackgroundEffects();
     drawGround();
-    drawGlitchText('asyncDonkey Runner', canvas.width / 2, canvas.height / 2 - 60, 48, PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE, 5, 3);
-    
+    drawGlitchText(
+        'asyncDonkey Runner',
+        canvas.width / 2,
+        canvas.height / 2 - 60,
+        48,
+        PALETTE.BRIGHT_GREEN_TEAL,
+        PALETTE.MEDIUM_TEAL,
+        PALETTE.DARK_TEAL_BLUE,
+        5,
+        3
+    );
+
     if (isTouchDevice && mobileStartButton) {
         mobileStartButton.textContent = 'START GAME';
         mobileStartButton.style.display = 'block'; // Mostra il pulsante start su mobile
     } else {
-        drawGlitchText('Premi INVIO per Iniziare', canvas.width / 2, canvas.height / 2 + 20, 28, PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 3, 2);
+        drawGlitchText(
+            'Premi INVIO per Iniziare',
+            canvas.width / 2,
+            canvas.height / 2 + 20,
+            28,
+            PALETTE.BRIGHT_TEAL,
+            PALETTE.MEDIUM_PURPLE,
+            PALETTE.DARK_TEAL_BLUE,
+            3,
+            2
+        );
     }
 
     ctx.fillStyle = PALETTE.MEDIUM_TEAL;
     ctx.font = '16px "Source Code Pro", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('Controlli: SPAZIO/FRECCIA SU per Saltare, CTRL/X per Sparare', canvas.width / 2, canvas.height - groundHeight - 180);
+    ctx.fillText(
+        'Controlli: SPAZIO/FRECCIA SU per Saltare, CTRL/X per Sparare',
+        canvas.width / 2,
+        canvas.height - groundHeight - 180
+    );
 }
 
 function updatePlaying(dt) {
@@ -1895,10 +2335,33 @@ function drawGameOverScreen() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawGlitchText('GAME OVER', canvas.width / 2, canvas.height / 2 - 80, 60, 'red', '#FF5555', '#AA0000', 6, 3);
-    drawGlitchText('Punteggio Finale: ' + Math.floor(finalScore), canvas.width / 2, canvas.height / 2, 32, PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE, 4, 2);
-    
-    if (!shouldShowDonkeyScoreInput(finalScore) && (!isTouchDevice || !mobileStartButton || mobileStartButton.style.display === 'none')) {
-        drawGlitchText('Premi INVIO per Riprovare', canvas.width / 2, canvas.height / 2 + 60, 24, PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 3, 1);
+    drawGlitchText(
+        'Punteggio Finale: ' + Math.floor(finalScore),
+        canvas.width / 2,
+        canvas.height / 2,
+        32,
+        PALETTE.BRIGHT_GREEN_TEAL,
+        PALETTE.MEDIUM_TEAL,
+        PALETTE.DARK_TEAL_BLUE,
+        4,
+        2
+    );
+
+    if (
+        !shouldShowDonkeyScoreInput(finalScore) &&
+        (!isTouchDevice || !mobileStartButton || mobileStartButton.style.display === 'none')
+    ) {
+        drawGlitchText(
+            'Premi INVIO per Riprovare',
+            canvas.width / 2,
+            canvas.height / 2 + 60,
+            24,
+            PALETTE.BRIGHT_TEAL,
+            PALETTE.MEDIUM_PURPLE,
+            PALETTE.DARK_TEAL_BLUE,
+            3,
+            1
+        );
     }
     // Il form per salvare il punteggio è gestito da HTML/CSS.
     // Il pulsante "Rigioca" mobile è gestito da processGameOver -> mobileStartButton.
@@ -1939,32 +2402,36 @@ let isFullscreenActive = false;
 
 async function toggleFullscreen() {
     if (!gameContainer) return;
-    const isCurrentlyFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+    const isCurrentlyFullscreen =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
 
     if (!isCurrentlyFullscreen) {
         try {
             if (gameContainer.requestFullscreen) await gameContainer.requestFullscreen();
             else if (gameContainer.webkitRequestFullscreen) await gameContainer.webkitRequestFullscreen();
             else if (gameContainer.msRequestFullscreen) await gameContainer.msRequestFullscreen();
-            
+
             if (isTouchDevice && screen.orientation && typeof screen.orientation.lock === 'function') {
                 try {
                     await screen.orientation.lock('landscape-primary');
                     console.log('Orientamento bloccato in landscape.');
                 } catch (err) {
-                    console.warn('Impossibile bloccare l\'orientamento:', err.name, err.message);
+                    console.warn("Impossibile bloccare l'orientamento:", err.name, err.message);
                 }
             }
         } catch (err) {
             console.error(`Errore attivazione fullscreen: ${err.message} (${err.name})`);
-            showToast("Impossibile attivare la modalità fullscreen.", "error");
+            showToast('Impossibile attivare la modalità fullscreen.', 'error');
         }
     } else {
         try {
             if (document.exitFullscreen) await document.exitFullscreen();
             else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
             else if (document.msExitFullscreen) await document.msExitFullscreen();
-            
+
             if (screen.orientation && typeof screen.orientation.unlock === 'function') {
                 screen.orientation.unlock();
                 console.log('Orientamento sbloccato.');
@@ -1976,11 +2443,19 @@ async function toggleFullscreen() {
 }
 
 function handleFullscreenChange() {
-    isFullscreenActive = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-    
+    isFullscreenActive = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+    );
+
     if (isFullscreenActive) {
         document.body.classList.add('game-fullscreen-active');
-        if (isTouchDevice && (screen.orientation.type.startsWith('landscape') || window.innerWidth > window.innerHeight)) {
+        if (
+            isTouchDevice &&
+            (screen.orientation.type.startsWith('landscape') || window.innerWidth > window.innerHeight)
+        ) {
             document.body.classList.add('game-fullscreen-landscape');
         } else {
             document.body.classList.remove('game-fullscreen-landscape');
@@ -2015,12 +2490,32 @@ if (screen.orientation) {
 
 // Event Listeners per Input
 if (jumpButton) {
-    jumpButton.addEventListener('click', (e) => { e.preventDefault(); if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.jump(); });
-    jumpButton.addEventListener('touchstart', (e) => { e.preventDefault(); if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.jump(); }, { passive: false });
+    jumpButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.jump();
+    });
+    jumpButton.addEventListener(
+        'touchstart',
+        (e) => {
+            e.preventDefault();
+            if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.jump();
+        },
+        { passive: false }
+    );
 }
 if (shootButton) {
-    shootButton.addEventListener('click', (e) => { e.preventDefault(); if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.shoot(); });
-    shootButton.addEventListener('touchstart', (e) => { e.preventDefault(); if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.shoot(); }, { passive: false });
+    shootButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.shoot();
+    });
+    shootButton.addEventListener(
+        'touchstart',
+        (e) => {
+            e.preventDefault();
+            if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.shoot();
+        },
+        { passive: false }
+    );
 }
 
 if (fullscreenButton) {
@@ -2042,7 +2537,9 @@ if (mobileStartButton) {
     mobileStartButton.addEventListener('click', (e) => {
         e.preventDefault();
         if (AudioManager.audioContext && AudioManager.audioContext.state === 'suspended') {
-            AudioManager.audioContext.resume().catch((err) => console.error('Errore nel riprendere AudioContext:', err));
+            AudioManager.audioContext
+                .resume()
+                .catch((err) => console.error('Errore nel riprendere AudioContext:', err));
         }
         if (currentGameState === GAME_STATE.MENU || currentGameState === GAME_STATE.GAME_OVER) {
             AudioManager.playMusic(false);
@@ -2053,7 +2550,6 @@ if (mobileStartButton) {
         }
     });
 }
-
 
 window.addEventListener('keydown', (e) => {
     if (!resourcesInitialized) return;
@@ -2071,13 +2567,22 @@ window.addEventListener('keydown', (e) => {
             break;
         case GAME_STATE.PLAYING:
             if (asyncDonkey) {
-                if (e.code === 'Space' || e.key === 'ArrowUp') { e.preventDefault(); asyncDonkey.jump(); }
-                if (e.code === 'ControlLeft' || e.key === 'x' || e.key === 'X' || e.key === 'ControlRight') { e.preventDefault(); asyncDonkey.shoot(); }
+                if (e.code === 'Space' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    asyncDonkey.jump();
+                }
+                if (e.code === 'ControlLeft' || e.key === 'x' || e.key === 'X' || e.key === 'ControlRight') {
+                    e.preventDefault();
+                    asyncDonkey.shoot();
+                }
             }
             break;
         case GAME_STATE.GAME_OVER:
-             // Permetti il riavvio con Invio solo se il form del punteggio NON è visibile
-            if (e.key === 'Enter' && (!scoreInputContainerDonkey || scoreInputContainerDonkey.style.display === 'none')) {
+            // Permetti il riavvio con Invio solo se il form del punteggio NON è visibile
+            if (
+                e.key === 'Enter' &&
+                (!scoreInputContainerDonkey || scoreInputContainerDonkey.style.display === 'none')
+            ) {
                 currentGameState = GAME_STATE.PLAYING;
                 resetGame();
                 AudioManager.playMusic(false);
@@ -2089,4 +2594,3 @@ window.addEventListener('keydown', (e) => {
 
 loadAllAssets();
 console.log('Fine script donkeyRunner.js (esecuzione iniziale). In attesa caricamento assets...');
-

@@ -1182,20 +1182,20 @@ img.comment-avatar-img {
     box-sizing: border-box;
 }
 .donkey-runner-page #gameContainer {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                border: 2px solid var(--game-border-color, #00b9be);
-                border-radius: 8px;
-                padding: 10px; 
-                background-color: var(--game-container-bg, #1c1c1c);
-                box-shadow: 0 0 15px rgba(0, 185, 190, 0.5);
-                max-width: 800px; 
-                width: 100%; 
-                box-sizing: border-box;
-                position: relative; 
-            }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--game-border-color, #00b9be);
+    border-radius: 8px;
+    padding: 10px;
+    background-color: var(--game-container-bg, #1c1c1c);
+    box-shadow: 0 0 15px rgba(0, 185, 190, 0.5);
+    max-width: 800px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
 .donkey-runner-page canvas#gameCanvas {
     display: block;
     image-rendering: pixelated;
@@ -1215,9 +1215,9 @@ img.comment-avatar-img {
     user-select: none;
     -webkit-user-select: none;
     position: absolute; /* Chiave per il posizionamento */
-    bottom: 10px;    /* Distanza dal fondo */
+    bottom: 10px; /* Distanza dal fondo */
     left: 0;
-    z-index: 10;     /* Sopra il canvas */
+    z-index: 10; /* Sopra il canvas */
 }
 .donkey-runner-page #mobileControlsInternal {
     display: flex;
@@ -1225,7 +1225,7 @@ img.comment-avatar-img {
     align-items: center;
     width: 90%;
     max-width: 400px; /* Limita la larghezza dei controlli stessi */
-    margin: 0 auto;   /* Centra i controlli interni */
+    margin: 0 auto; /* Centra i controlli interni */
 }
 .donkey-runner-page .control-button {
     background-color: var(--game-button-bg);
@@ -1265,8 +1265,8 @@ img.comment-avatar-img {
     right: 10px;
     z-index: 20;
     /* display: none; */ /* COMMENTA O RIMUOVI QUESTO se vuoi che sia visibile di default e gestito solo da JS per nasconderlo */
-                        /* OPPURE, se vuoi che sia nascosto di default e il JS lo mostri solo su touch: */
-    display: none;    /* MANTIENI QUESTO e assicurati che il JS lo imposti a 'block' quando isTouchDevice è true */
+    /* OPPURE, se vuoi che sia nascosto di default e il JS lo mostri solo su touch: */
+    display: none; /* MANTIENI QUESTO e assicurati che il JS lo imposti a 'block' quando isTouchDevice è true */
     transition:
         background-color 0.2s,
         color 0.2s;
@@ -1796,14 +1796,14 @@ footer a {
         padding: 6px 8px;
     }
     .donkey-runner-page canvas#gameCanvas {
-    display: block;
-    image-rendering: pixelated; /* ...altri image-rendering... */
-    width: 100%; /* FA SI CHE IL CANVAS OCCUPI LA LARGHEZZA DEL CONTENITORE */
-    height: auto; /* MANTIENE LE PROPORZIONI BASATE SULLA LARGHEZZA */
-    max-height: calc(100vh - 220px); /* Limite per non sovrapporsi ai controlli/header/footer */
-    border: 3px solid var(--game-border-color, #00b9be);
-    /* ... */
-}
+        display: block;
+        image-rendering: pixelated; /* ...altri image-rendering... */
+        width: 100%; /* FA SI CHE IL CANVAS OCCUPI LA LARGHEZZA DEL CONTENITORE */
+        height: auto; /* MANTIENE LE PROPORZIONI BASATE SULLA LARGHEZZA */
+        max-height: calc(100vh - 220px); /* Limite per non sovrapporsi ai controlli/header/footer */
+        border: 3px solid var(--game-border-color, #00b9be);
+        /* ... */
+    }
 }
 
 @media (max-width: 480px) {
@@ -3015,7 +3015,6 @@ main section {
     margin-right: 5px;
 }
 
-
 /* Stili quando il gioco è in fullscreen (generale) */
 body.game-fullscreen-active #gameContainer {
     /* Il gameContainer è l'elemento che va in fullscreen */
@@ -3068,7 +3067,6 @@ body.game-fullscreen-active.game-fullscreen-landscape .control-button:active {
     background-color: rgba(0, 70, 100, 0.8);
 }
 
-
 /* Nascondi header e footer quando il gioco è in fullscreen */
 body.game-fullscreen-active header,
 body.game-fullscreen-active footer,
@@ -3076,8 +3074,7 @@ body.game-fullscreen-active #miniLeaderboardContainer,
 body.game-fullscreen-active #guestbook,
 body.game-fullscreen-active #bugReportSection,
 body.game-fullscreen-active #featureRequestSection,
-body.game-fullscreen-active main > div[style*="text-align: center"] /* Nasconde le istruzioni e link "vedi classifica completa" */
- {
+body.game-fullscreen-active main > div[style*="text-align: center"] /* Nasconde le istruzioni e link "vedi classifica completa" */ {
     display: none !important;
 }
 
