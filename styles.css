@@ -1202,24 +1202,24 @@ img.comment-avatar-img {
     box-shadow: 0 0 15px rgba(var(--game-border-color-rgb), 0.5);
 }
 .donkey-runner-page #mobileControls {
-    display: none;
+    display: none; /* Gestito da JS */
     width: 100%;
     padding: 10px 0;
     box-sizing: border-box;
     user-select: none;
     -webkit-user-select: none;
-    position: absolute;
-    bottom: 10px;
+    position: absolute; /* Chiave per il posizionamento */
+    bottom: 10px;    /* Distanza dal fondo */
     left: 0;
-    z-index: 10;
+    z-index: 10;     /* Sopra il canvas */
 }
 .donkey-runner-page #mobileControlsInternal {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-around; /* Buono per distanziare i pulsanti */
     align-items: center;
     width: 90%;
-    max-width: 400px;
-    margin: 0 auto;
+    max-width: 400px; /* Limita la larghezza dei controlli stessi */
+    margin: 0 auto;   /* Centra i controlli interni */
 }
 .donkey-runner-page .control-button {
     background-color: var(--game-button-bg);
@@ -1233,7 +1233,7 @@ img.comment-avatar-img {
     cursor: pointer;
     outline: none;
     flex-grow: 0;
-    flex-basis: 45%;
+    flex-basis: 45%; /* I pulsanti occupano quasi metà dello spazio disponibile ciascuno */
     margin: 0 5px;
     text-align: center;
     transition:
@@ -1788,8 +1788,14 @@ footer a {
         padding: 6px 8px;
     }
     .donkey-runner-page canvas#gameCanvas {
-        max-height: calc(100vh - 170px);
-    }
+    display: block;
+    image-rendering: pixelated; /* ...altri image-rendering... */
+    width: 100%; /* FA SI CHE IL CANVAS OCCUPI LA LARGHEZZA DEL CONTENITORE */
+    height: auto; /* MANTIENE LE PROPORZIONI BASATE SULLA LARGHEZZA */
+    max-height: calc(100vh - 220px); /* Limite per non sovrapporsi ai controlli/header/footer */
+    border: 3px solid var(--game-border-color, #00b9be);
+    /* ... */
+}
 }
 
 @media (max-width: 480px) {
@@ -2999,4 +3005,81 @@ main section {
 .share-button svg,
 .share-button i {
     margin-right: 5px;
+}
+
+
+/* Stili quando il gioco è in fullscreen (generale) */
+body.game-fullscreen-active #gameContainer {
+    /* Il gameContainer è l'elemento che va in fullscreen */
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0;
+    margin: 0;
+    /* Rimuove eventuali stili che potrebbero limitarlo */
+}
+
+/* Stili specifici per fullscreen E landscape */
+body.game-fullscreen-active.game-fullscreen-landscape #gameCanvas {
+    width: 100vw; /* Occupa tutta la larghezza del viewport */
+    height: 100vh; /* Occupa tutta l'altezza del viewport */
+    object-fit: cover; /* Mantiene l'aspect ratio del contenuto del canvas (800x450),
+                           lo scala per coprire l'area e ritaglia l'eccesso. */
+    border: none !important; /* Rimuovi i bordi in fullscreen */
+    border-radius: 0 !important; /* Rimuovi angoli arrotondati */
+    box-shadow: none !important; /* Rimuovi ombra */
+    max-height: none !important; /* Sovrascrivi il max-height precedente */
+}
+
+body.game-fullscreen-active.game-fullscreen-landscape #mobileControls {
+    /* Posiziona i controlli molto in basso, potenzialmente sovrapposti */
+    bottom: 5px; /* O anche 0 se preferisci, o un valore negativo piccolo per farli "entrare" un po' */
+    left: 0;
+    right: 0;
+    width: 100%; /* Occupa tutta la larghezza */
+    padding: 5px 10px; /* Padding ridotto per i lati */
+    box-sizing: border-box;
+    z-index: 20; /* Assicura che siano sopra il canvas */
+}
+
+body.game-fullscreen-active.game-fullscreen-landscape #mobileControlsInternal {
+    max-width: 100%; /* Permetti ai controlli interni di usare tutta la larghezza */
+    width: auto; /* O 100% se vuoi che i pulsanti si distanzino di più */
+    justify-content: space-between; /* Spinge i pulsanti ai lati */
+}
+
+body.game-fullscreen-active.game-fullscreen-landscape .control-button {
+    /* Potresti voler rendere i pulsanti leggermente più piccoli o più trasparenti in fullscreen */
+    padding: 12px 18px; /* Leggermente più piccoli */
+    font-size: 1.1em;
+    background-color: rgba(0, 50, 80, 0.6); /* Leggermente più trasparenti */
+    border-color: rgba(90, 185, 168, 0.7);
+}
+body.game-fullscreen-active.game-fullscreen-landscape .control-button:active {
+    background-color: rgba(0, 70, 100, 0.8);
+}
+
+
+/* Nascondi header e footer quando il gioco è in fullscreen */
+body.game-fullscreen-active header,
+body.game-fullscreen-active footer,
+body.game-fullscreen-active #miniLeaderboardContainer,
+body.game-fullscreen-active #guestbook,
+body.game-fullscreen-active #bugReportSection,
+body.game-fullscreen-active #featureRequestSection,
+body.game-fullscreen-active main > div[style*="text-align: center"] /* Nasconde le istruzioni e link "vedi classifica completa" */
+ {
+    display: none !important;
+}
+
+/* Assicura che il canvas e il suo contenitore non abbiano padding/margin che interferiscono */
+body.game-fullscreen-active main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    display: flex; /* Per centrare #gameContainer se non lo è già */
+    align-items: center;
+    justify-content: center;
 }
