@@ -219,21 +219,34 @@ async function loadComments() {
             avatarImg.alt = `${altTextForBlockie}'s Blockie Avatar`;
             commentElement.appendChild(avatarImg);
 
-            const commentContent = document.createElement('div');
-            commentContent.classList.add('comment-content');
-            const nameEl = document.createElement('strong');
-            let commenterNameDisplay = commentData.userId
-                ? commentData.userName || 'Utente Registrato'
-                : (commentData.name || 'Anonimo') + ' (Ospite)';
+            
 
-            // Aggiungi bandierina se presente
-            if (commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
-                const flagIconSpan = document.createElement('span');
-                flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
-                flagIconSpan.style.marginRight = '5px';
-                flagIconSpan.style.verticalAlign = 'middle';
-                nameEl.appendChild(flagIconSpan);
-            }
+            const commentContent = document.createElement('div');
+commentContent.classList.add('comment-content');
+
+const nameEl = document.createElement('strong'); // o span, a seconda dello stile
+let commenterNameDisplay = commentData.userId ? (commentData.userName || 'Utente Registrato') : (commentData.name || 'Anonimo') + ' (Ospite)'; // Vecchia logica nome
+
+// Aggiungi bandierina se utente loggato e ha nationalityCode
+if (commentData.userId && commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
+    const flagIconSpan = document.createElement('span');
+    flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
+    flagIconSpan.style.marginRight = '5px';
+    flagIconSpan.style.verticalAlign = 'middle';
+    nameEl.appendChild(flagIconSpan); // Appendi la bandiera all'elemento 'nameEl'
+}
+
+// Gestisci il nome utente e il link
+if (commentData.userId) {
+    const userProfileLink = document.createElement('a');
+    userProfileLink.href = `profile.html?userId=${commentData.userId}`;
+    userProfileLink.textContent = commentData.userName || 'Utente Registrato'; // Usa userName se disponibile
+    // userProfileLink.classList.add('user-profile-link'); // Stile opzionale
+    nameEl.appendChild(userProfileLink);
+} else {
+    // Utente ospite
+    nameEl.appendChild(document.createTextNode((commentData.name || 'Anonimo') + ' (Ospite)'));
+}
 
             nameEl.appendChild(document.createTextNode(commenterNameDisplay));
             const dateEl = document.createElement('small');

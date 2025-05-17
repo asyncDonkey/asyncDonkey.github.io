@@ -513,16 +513,27 @@ async function loadArticleComments() {
             commentElement.appendChild(avatarImg);
             const commentContentDiv = document.createElement('div');
             commentContentDiv.classList.add('comment-content');
-            const nameEl = document.createElement('strong');
-            let commenterNameDisplay = commentData.userName || 'Utente (Dati Profilo Mancanti)';
+            const nameEl = document.createElement('strong'); // o span, a seconda dello stile desiderato
+let commenterNameDisplay = commentData.userName || 'Utente (Dati Profilo Mancanti)';
 
-            if (commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
-                const flagIconSpan = document.createElement('span');
-                flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
-                flagIconSpan.style.marginRight = '5px';
-                flagIconSpan.style.verticalAlign = 'middle';
-                nameEl.appendChild(flagIconSpan);
-            }
+// Aggiungi la bandierina PRIMA del nome/link, se presente
+if (commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
+    const flagIconSpan = document.createElement('span');
+    flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
+    flagIconSpan.style.marginRight = '5px';
+    flagIconSpan.style.verticalAlign = 'middle';
+    nameEl.appendChild(flagIconSpan); // Aggiungi la bandiera al contenitore del nome
+}
+
+if (commentData.userId) { // Se l'ID utente esiste, crea un link
+    const userProfileLink = document.createElement('a');
+    userProfileLink.href = `profile.html?userId=${commentData.userId}`;
+    userProfileLink.textContent = commenterNameDisplay;
+    // userProfileLink.classList.add('user-profile-link'); // Aggiungi classe per stile se necessario
+    nameEl.appendChild(userProfileLink);
+} else { // Altrimenti, solo testo
+    nameEl.appendChild(document.createTextNode(commenterNameDisplay));
+}
             nameEl.appendChild(document.createTextNode(commenterNameDisplay));
             const dateEl = document.createElement('small');
             dateEl.classList.add('comment-date');
