@@ -535,11 +535,25 @@
                 style="margin-top: 30px; max-width: 700px; width: 100%; margin-left: auto; margin-right: auto"
             >
                 <h2 style="text-align: center">Guestbook Donkey Runner</h2>
+                 <form id="commentForm" class="comment-form-container" style="margin-top: 20px;">
+                    <h4>Lascia un Commento sul Gioco</h4>
+                    <div id="commentNameSection" style="display: none;"> {/* Gestito da JS in base al login */}
+                        <label for="commentName">Nome (se non loggato):</label>
+                        <input type="text" id="commentName" name="commentName" maxlength="50" />
+                    </div>
+                    <div>
+                        <label for="commentMessage">Messaggio:</label>
+                        <textarea id="commentMessage" name="commentMessage" rows="4" required maxlength="500"></textarea>
+                    </div>
+                    <button type="submit" id="submitCommentBtn" class="game-button">Invia Commento</button>
+                </form>
                 <div id="commentsListContainer" data-page-id="donkeyRunnerGame">
                     <h3>Commenti Recenti:</h3>
                     <div id="commentsList"><p>Caricamento commenti...</p></div>
                 </div>
             </section>
+
+            
 
             <section
                 id="bugReportSection"
