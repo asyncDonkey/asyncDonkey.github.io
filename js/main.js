@@ -143,102 +143,99 @@ function toggleMobileMenu() {
 }
 
 function populateMobileMenu() {
-    const navbarLinksContainer = document.querySelector('.desktop-nav > ul'); 
-    const mobileMenuTarget = document.getElementById('mobileNavMenu'); 
+    const navbarLinksContainer = document.querySelector('.desktop-nav > ul');
+    const mobileMenuTarget = document.getElementById('mobileNavMenu');
 
-    console.log('[populateMobileMenu] Inizio...');
+    // console.log('[populateMobileMenu] Inizio...'); // DEBUG
 
     if (!navbarLinksContainer) {
-        console.error('[populateMobileMenu] Contenitore link desktop (.desktop-nav > ul) NON TROVATO.');
+        // console.error('[populateMobileMenu] Contenitore link desktop (.desktop-nav > ul) NON TROVATO.');
         return;
-    } else {
-        console.log('[populateMobileMenu] Contenitore link desktop TROVATO:', navbarLinksContainer);
     }
-
     if (!mobileMenuTarget) {
-        console.error('[populateMobileMenu] Target menu mobile (mobileNavMenu) NON TROVATO.');
+        // console.error('[populateMobileMenu] Target menu mobile (mobileNavMenu) NON TROVATO.');
         return;
-    } else {
-        console.log('[populateMobileMenu] Target menu mobile TROVATO:', mobileMenuTarget);
     }
 
-    mobileMenuTarget.innerHTML = ''; 
+    mobileMenuTarget.innerHTML = ''; // Pulisci prima di ripopolare
     const mobileUl = document.createElement('ul');
-    mobileUl.className = 'mobile-menu-list'; 
+    mobileUl.className = 'mobile-menu-list';
     mobileUl.style.listStyle = 'none';
     mobileUl.style.padding = '0';
     mobileUl.style.margin = '0';
-    console.log('[populateMobileMenu] mobileUl (.mobile-menu-list) creato.');
+    // console.log('[populateMobileMenu] mobileUl (.mobile-menu-list) creato.'); // DEBUG
 
     const desktopListItems = navbarLinksContainer.querySelectorAll(':scope > li');
-    console.log(`[populateMobileMenu] Trovati ${desktopListItems.length} elementi <li> diretti nel menu desktop.`);
+    // console.log(`[populateMobileMenu] Trovati ${desktopListItems.length} elementi <li> diretti nel menu desktop.`); // DEBUG
 
-    desktopListItems.forEach((desktopLi, index) => {
-        console.log(`[populateMobileMenu] Iterazione ${index + 1}/${desktopListItems.length} su desktopLi:`, desktopLi);
-        
+    desktopListItems.forEach((desktopLi) => { // Rimosso 'index' non usato
+        // console.log(`[populateMobileMenu] Processo desktopLi:`, desktopLi); // DEBUG
+
         const isDropdownContainer = desktopLi.classList.contains('nav-dropdown-container');
         let linkToProcess;
 
         if (isDropdownContainer) {
-            // Per il contenitore del dropdown, il "link" principale è il suo bottone toggle
             linkToProcess = desktopLi.querySelector('button.dropdown-toggle#communityDropdownToggle');
-            console.log(`[populateMobileMenu] desktopLi ${index + 1} è Dropdown Container. linkToProcess (button#communityDropdownToggle):`, linkToProcess);
+            // console.log(`[populateMobileMenu] desktopLi è Dropdown Container. linkToProcess:`, linkToProcess); // DEBUG
         } else {
-            // Per i link normali, prendi il tag <a>
             linkToProcess = desktopLi.querySelector('a');
-            console.log(`[populateMobileMenu] desktopLi ${index + 1} è Link Normale. linkToProcess (a):`, linkToProcess);
+            // console.log(`[populateMobileMenu] desktopLi è Link Normale. linkToProcess:`, linkToProcess); // DEBUG
         }
-        
+
         if (!linkToProcess) {
-             console.warn(`[populateMobileMenu] desktopLi ${index + 1} SKIPPATO (no suitable <a> o button#communityDropdownToggle trovato):`, desktopLi);
-             return; 
+            // console.warn(`[populateMobileMenu] desktopLi SKIPPATO (no suitable <a> o button#communityDropdownToggle):`, desktopLi); // DEBUG
+            return; // Salta questo <li> se non c'è un link o bottone primario
         }
-        
-        const dynamicTopLevelLiIds = ['profile-link-li', 'logout-link-li', 'login-link-li', 'submit-article-link-li'];
-        if (dynamicTopLevelLiIds.includes(desktopLi.id)) {
-            console.log(`[populateMobileMenu] desktopLi ${index + 1} (ID: ${desktopLi.id}) SKIPPATO perché è un placeholder per un link dinamico di primo livello.`);
-            return; 
+
+        // NON clonare gli <li> che sono placeholder per link dinamici gestiti da updateLoginLogoutLinks
+        // Questi ID sono per gli elementi LI che verranno creati dinamicamente.
+        const dynamicDesktopLiIds = ['profile-link-li', 'logout-link-li', 'login-link-li'];
+        if (dynamicDesktopLiIds.includes(desktopLi.id)) {
+            // console.log(`[populateMobileMenu] desktopLi (ID: ${desktopLi.id}) SKIPPATO perché è un placeholder dinamico desktop.`); // DEBUG
+            return;
         }
-        
+
         if (isDropdownContainer && linkToProcess && linkToProcess.id === 'communityDropdownToggle') {
-            console.log(`[populateMobileMenu] Processo Dropdown 'Community' (desktopLi ${index + 1})...`);
+            // console.log(`[populateMobileMenu] Processo Dropdown 'Community'...`); // DEBUG
             const mobileDropdownLi = document.createElement('li');
             mobileDropdownLi.classList.add('nav-item', 'mobile-dropdown');
 
-            const mobileDropdownToggle = document.createElement('a'); 
-            mobileDropdownToggle.href = '#';
-            mobileDropdownToggle.innerHTML = linkToProcess.innerHTML; 
-            mobileDropdownToggle.classList.add('dropdown-toggle'); 
+            const mobileDropdownToggle = document.createElement('a');
+            mobileDropdownToggle.href = '#'; // I link del menu mobile per toggle non navigano
+            mobileDropdownToggle.innerHTML = linkToProcess.innerHTML;
+            mobileDropdownToggle.classList.add('dropdown-toggle');
             mobileDropdownToggle.setAttribute('aria-expanded', 'false');
 
             const mobileSubmenu = document.createElement('ul');
             mobileSubmenu.classList.add('mobile-submenu');
             mobileSubmenu.style.display = 'none';
-            mobileSubmenu.style.listStyle = 'none'; 
-            mobileSubmenu.style.paddingLeft = '20px'; 
+            mobileSubmenu.style.listStyle = 'none';
+            mobileSubmenu.style.paddingLeft = '20px';
 
-            const desktopSubmenuItems = desktopLi.querySelectorAll('.dropdown-menu li'); 
-            console.log(`[populateMobileMenu] Trovati ${desktopSubmenuItems.length} voci <li> nel sottomenu Community desktop.`);
+            const desktopSubmenuItems = desktopLi.querySelectorAll('.dropdown-menu li');
+            // console.log(`[populateMobileMenu] Trovati ${desktopSubmenuItems.length} voci <li> nel sottomenu Community desktop.`); // DEBUG
 
             desktopSubmenuItems.forEach(subItemLi => {
                 const subItemLink = subItemLi.querySelector('a');
                 if (subItemLink) {
                     const mobileSubmenuItemLi = document.createElement('li');
-                    if (subItemLi.id === 'navWriteArticleDropdown') {
-                        mobileSubmenuItemLi.id = 'mobile-navWriteArticleDropdown'; 
+                    if (subItemLi.id === 'navWriteArticleDropdown') { // ID del LI nel dropdown desktop
+                        mobileSubmenuItemLi.id = 'mobile-navWriteArticleDropdown'; // ID per il LI nel sottomenu mobile
+                        mobileSubmenuItemLi.style.display = 'none'; // Inizia nascosto, gestito da updateLoginLogoutLinks
+                        // console.log(`[populateMobileMenu] Creato LI per "Scrivi Articolo" mobile con ID: mobile-navWriteArticleDropdown`); // DEBUG
                     }
 
                     const mobileSubmenuLink = document.createElement('a');
                     mobileSubmenuLink.href = subItemLink.href;
-                    mobileSubmenuLink.innerHTML = subItemLink.innerHTML;
-                    mobileSubmenuLink.classList.add('nav-item'); 
+                    mobileSubmenuLink.innerHTML = subItemLink.innerHTML; // Copia tutto l'HTML interno (icona + testo)
+                    mobileSubmenuLink.classList.add('nav-item'); // Applica classe per stile uniforme
                     if (subItemLink.target === '_blank') {
                         mobileSubmenuLink.target = '_blank';
                         mobileSubmenuLink.rel = 'noopener noreferrer';
                     }
                     mobileSubmenuItemLi.appendChild(mobileSubmenuLink);
                     mobileSubmenu.appendChild(mobileSubmenuItemLi);
-                    console.log(`[populateMobileMenu] Aggiunto sottomenu item '${subItemLink.textContent.trim()}' al dropdown Community mobile.`);
+                    // console.log(`[populateMobileMenu] Aggiunto sottomenu item '${subItemLink.textContent.trim()}' al dropdown Community mobile.`); // DEBUG
                 }
             });
 
@@ -247,43 +244,40 @@ function populateMobileMenu() {
                 const isExpanded = mobileSubmenu.style.display === 'block';
                 mobileSubmenu.style.display = isExpanded ? 'none' : 'block';
                 mobileDropdownToggle.setAttribute('aria-expanded', String(!isExpanded));
-                const icon = mobileDropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow'); // Assumendo che l'icona freccia abbia la classe 'dropdown-arrow'
-                if (icon) icon.textContent = isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'; // Cambia icona
+                const icon = mobileDropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow');
+                if (icon) icon.textContent = !isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'; // Invertito per logica corretta
             });
 
             mobileDropdownLi.appendChild(mobileDropdownToggle);
             mobileDropdownLi.appendChild(mobileSubmenu);
-            mobileUl.appendChild(mobileDropdownLi); 
-            console.log('[populateMobileMenu] Dropdown Community mobile AGGIUNTO a mobileUl.');
-        } else if (!isDropdownContainer && linkToProcess) { 
+            mobileUl.appendChild(mobileDropdownLi);
+            // console.log('[populateMobileMenu] Dropdown Community mobile AGGIUNTO a mobileUl.'); // DEBUG
+        } else if (!isDropdownContainer && linkToProcess) { // Link statico di primo livello
             const itemText = (linkToProcess.textContent || "SENZA TESTO").trim();
-            console.log(`[populateMobileMenu] Processo Link Statico '${itemText}' (desktopLi ${index + 1})...`);
+            // console.log(`[populateMobileMenu] Processo Link Statico '${itemText}'...`); // DEBUG
             const mobileListItem = document.createElement('li');
             const mobileLink = document.createElement('a');
-            mobileLink.href = linkToProcess.href || '#'; 
-            mobileLink.innerHTML = linkToProcess.innerHTML;
-            mobileLink.classList.add('nav-item');
+            mobileLink.href = linkToProcess.href || '#';
+            mobileLink.innerHTML = linkToProcess.innerHTML; // Copia tutto l'HTML interno (icona + testo)
+            mobileLink.classList.add('nav-item'); // Applica classe per stile uniforme
             if (linkToProcess.target === '_blank') {
                 mobileLink.target = '_blank';
                 mobileLink.rel = 'noopener noreferrer';
             }
             mobileListItem.appendChild(mobileLink);
-            mobileUl.appendChild(mobileListItem); 
-            console.log(`[populateMobileMenu] Link statico '${itemText}' AGGIUNTO a mobileUl.`);
-        } else {
-            console.warn(`[populateMobileMenu] desktopLi ${index + 1} non processato (né dropdown community né link statico valido). linkToProcess:`, linkToProcess);
+            mobileUl.appendChild(mobileListItem);
+            // console.log(`[populateMobileMenu] Link statico '${itemText}' AGGIUNTO a mobileUl.`); // DEBUG
         }
     });
 
     if (mobileUl.hasChildNodes()) {
         mobileMenuTarget.appendChild(mobileUl);
-        console.log('[populateMobileMenu] mobileUl (.mobile-menu-list) appeso a #mobileNavMenu. Contenuto mobileUl:', mobileUl.innerHTML);
+        // console.log('[populateMobileMenu] mobileUl (.mobile-menu-list) appeso a #mobileNavMenu.'); // DEBUG
     } else {
-        console.warn('[populateMobileMenu] mobileUl è VUOTO. Nessun elemento statico o dropdown community è stato aggiunto.');
+        // console.warn('[populateMobileMenu] mobileUl è VUOTO.'); // DEBUG
     }
-    console.log('[populateMobileMenu] Fine.');
+    // console.log('[populateMobileMenu] Fine.'); // DEBUG
 }
-
 function setupDesktopCommunityDropdown() {
     const dropdownToggle = document.getElementById('communityDropdownToggle'); 
     const dropdownMenu = document.getElementById('communityDropdownMenu');   
@@ -345,97 +339,65 @@ async function getUserProfile(userId) {
 }
 
 async function updateLoginLogoutLinks(user) {
-    console.log('[updateLoginLogoutLinks] Inizio. Utente:', user ? user.uid : 'Nessuno');
-    const navbarLinksContainer = document.querySelector('.desktop-nav > ul'); 
     const mobileMenuNode = document.getElementById('mobileNavMenu');
     const mobileMenuContainer = mobileMenuNode ? mobileMenuNode.querySelector('.mobile-menu-list') : null;
 
-    const navWriteArticleDropdownLiDesktop = document.getElementById('navWriteArticleDropdown'); 
-    if (navWriteArticleDropdownLiDesktop) {
-        navWriteArticleDropdownLiDesktop.style.display = user ? 'list-item' : 'none';
-        // console.log(`[updateLoginLogoutLinks] Visibilità 'Scrivi Articolo' (Desktop Dropdown - #navWriteArticleDropdown) impostata a: ${user ? 'list-item' : 'none'}`);
-    } else {
-        // Questo log potrebbe essere normale se la pagina non ha il dropdown community, o se l'ID è errato.
-        // console.warn("[updateLoginLogoutLinks] Elemento <li> 'navWriteArticleDropdown' (per Scrivi Articolo nel dropdown desktop) NON TROVATO.");
-    }
-    
+    // Gestione Visibilità "Scrivi Articolo" (nel sottomenu mobile)
     const navWriteArticleDropdownLiMobile = document.getElementById('mobile-navWriteArticleDropdown');
     if (navWriteArticleDropdownLiMobile) {
         navWriteArticleDropdownLiMobile.style.display = user ? 'list-item' : 'none';
-        console.log(`[updateLoginLogoutLinks] Visibilità 'Scrivi Articolo' (Mobile Dropdown - #mobile-navWriteArticleDropdown) impostata a: ${user ? 'list-item' : 'none'}`);
+    }
+    // E per desktop (nel dropdown community)
+    const navWriteArticleDropdownLiDesktop = document.getElementById('navWriteArticleDropdown');
+    if (navWriteArticleDropdownLiDesktop) {
+        navWriteArticleDropdownLiDesktop.style.display = user ? 'list-item' : 'none';
     }
 
 
-    if (!navbarLinksContainer) {
-         console.error('[updateLoginLogoutLinks] Contenitore link desktop (.desktop-nav > ul) NON TROVATO.');
-         return;
-    }
-    if(!mobileMenuContainer) {
-        console.error('[updateLoginLogoutLinks] Contenitore lista menu mobile (.mobile-menu-list) NON TROVATO dentro #mobileNavMenu.');
+    if (!mobileMenuContainer) {
         return;
     }
-    console.log('[updateLoginLogoutLinks] Contenitori desktop e mobile TROVATI.');
 
-    const dynamicTopLevelDesktopLiIds = ['login-link-li', 'profile-link-li', 'logout-link-li']; 
-    const dynamicTopLevelMobileLiIds = ['mobile-login-link-li', 'mobile-profile-link-li', 'mobile-logout-link-li', 'mobile-submit-article-link-li'];
-
-    dynamicTopLevelDesktopLiIds.forEach(id => {
+    // Rimuovi SEMPRE i link dinamici di sessione dal menu mobile prima di aggiungerli
+    // Questo previene duplicati se la funzione viene chiamata più volte.
+    const dynamicMobileLiIds = ['mobile-profile-link-li', 'mobile-logout-link-li', 'mobile-login-link-li'];
+    dynamicMobileLiIds.forEach(id => {
         const el = document.getElementById(id);
-        if(el) {
+        if (el && el.parentNode === mobileMenuContainer) {
             el.remove();
-            console.log(`[updateLoginLogoutLinks] Rimosso LI desktop di primo livello: ${id}`);
-        }
-    });
-    dynamicTopLevelMobileLiIds.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) {
-            el.remove();
-            console.log(`[updateLoginLogoutLinks] Rimosso LI mobile di primo livello: ${id}`);
         }
     });
 
     if (user) {
-        console.log('[updateLoginLogoutLinks] Utente LOGGATO. Aggiungo link Profilo, Logout, Scrivi Articolo (mobile di primo livello).');
         let userProfile = await getUserProfile(user.uid);
         let userNickname = userProfile?.nickname || (user.email ? user.email.split('@')[0] : 'Utente');
-        if (userNickname.length > 15) userNickname = userNickname.substring(0, 12) + '...';
+        // Non troncare il nickname per il menu mobile, c'è più spazio verticale
+        // if (userNickname.length > 15) userNickname = userNickname.substring(0, 12) + '...';
 
-        const profileHTML = `<span class="material-symbols-rounded">account_circle</span> <span class="navbar-nickname">${escapeHTML(userNickname)}</span>`;
-        navbarLinksContainer.appendChild(createNavLinkItem('profile-link-li', 'profile-link', 'profile.html', profileHTML));
-        mobileMenuContainer.appendChild(createNavLinkItem('mobile-profile-link-li', 'mobile-profile-link', 'profile.html', profileHTML));
-        console.log('[updateLoginLogoutLinks] Link Profilo (primo livello) AGGIUNTI (desktop e mobile).');
+        // Voce "My Profile" per il menu mobile
+        const profileHTMLMobile = `<span class="material-symbols-rounded">account_circle</span> <span class="nav-text">My Profile (${escapeHTML(userNickname)})</span>`;
+        mobileMenuContainer.appendChild(createNavLinkItem('mobile-profile-link-li', 'mobile-profile-link', 'profile.html', profileHTMLMobile, ['nav-item']));
 
-        // "Scrivi Articolo" solo per MOBILE come link di primo livello
-        // Se "Scrivi Articolo" è nel dropdown mobile, questo blocco non serve.
-        // Ma se è un requisito averlo anche top-level su mobile, allora va bene.
-        const submitArticleHTMLMobile = `<span class="material-symbols-rounded">edit</span> Scrivi Articolo`;
-        mobileMenuContainer.appendChild(createNavLinkItem('mobile-submit-article-link-li', 'mobile-submit-article-link', 'submit-article.html', submitArticleHTMLMobile));
-        console.log('[updateLoginLogoutLinks] Link Scrivi Articolo (MOBILE di primo livello) AGGIUNTO.');
-        
-        const logoutHandler = async (e) => {
-            e.preventDefault();
-            try {
-                await signOut(auth); 
-                showToast('Logout effettuato con successo.', 'success');
-                window.location.reload(); 
-            } catch (error) {
-                console.error('Errore durante il logout:', error);
-                showToast(`Errore logout: ${error.message}`, 'error');
-            }
-        };
-        const logoutHTML = `<span class="material-symbols-rounded">logout</span> Logout`;
-        navbarLinksContainer.appendChild(createNavLinkItem('logout-link-li', 'logout-link', '#', logoutHTML, ['nav-item'], logoutHandler));
-        mobileMenuContainer.appendChild(createNavLinkItem('mobile-logout-link-li', 'mobile-logout-link', '#', logoutHTML, ['nav-item'], logoutHandler));
-        console.log('[updateLoginLogoutLinks] Link Logout (primo livello) AGGIUNTI (desktop e mobile).');
+        // Voce "Logout" per il menu mobile
+        const logoutHandler = async (e) => { /* ... (come prima) ... */ };
+        const logoutHTMLMobile = `<span class="material-symbols-rounded">logout</span> <span class="nav-text">Logout</span>`;
+        mobileMenuContainer.appendChild(createNavLinkItem('mobile-logout-link-li', 'mobile-logout-link', '#', logoutHTMLMobile, ['nav-item'], logoutHandler));
 
-    } else {
-        console.log('[updateLoginLogoutLinks] Utente NON LOGGATO. Aggiungo link Login (primo livello).');
-        const loginHTML = `<span class="material-symbols-rounded">login</span> Login`;
-        navbarLinksContainer.appendChild(createNavLinkItem('login-link-li', 'login-link', 'register.html?form=login', loginHTML));
-        mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', 'register.html?form=login', loginHTML));
-        console.log('[updateLoginLogoutLinks] Link Login (primo livello) AGGIUNTI (desktop e mobile).');
+    } else { // Utente non loggato
+        // Voce "Login" per il menu mobile
+        const loginHTMLMobile = `<span class="material-symbols-rounded">login</span> <span class="nav-text">Login / Register</span>`;
+        mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', 'register.html', loginHTMLMobile, ['nav-item']));
+        // Nota: Questo link porta a register.html. Se vuoi che apra la modale di login,
+        // dovrai cambiare href a '#' e aggiungere l'event listener per aprire la modale,
+        // come avevamo discusso per il link Login nel menu mobile precedentemente.
+        // Esempio per aprire modale:
+        // mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', '#', loginHTMLMobile, ['nav-item'], (e) => {
+        //    e.preventDefault();
+        //    const loginModalEl = document.getElementById('loginModal');
+        //    if(loginModalEl) loginModalEl.style.display = 'block';
+        //    if(mobileMenuNode.classList.contains('active')) toggleMobileMenu(); // Chiudi menu mobile
+        // }));
     }
-    console.log('[updateLoginLogoutLinks] Fine.');
 }
 
 async function updateAdminDashboardLink(user) {

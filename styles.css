@@ -161,7 +161,14 @@ header .header-content {
     align-items: center;
     justify-content: space-between;
     flex-grow: 1;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 20px;    
+}
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
     gap: 20px;
 }
 header h1 {
@@ -205,13 +212,14 @@ header nav a:hover {
     gap: 8px;
 }
 #userProfileContainer {
-    display: none;
-    align-items: center;
-} /* JS gestirà la visibilità */
+    display: flex;
+    align-items: center; /* Già presente, ma per chiarezza */
+    gap: 8px; /* Spazio tra avatar, nome, e bottoni profilo/logout */
+}/* JS gestirà la visibilità */
 #userProfileContainer span {
     color: var(--text-color-primary);
-    font-size: 0.9em;
-    margin-right: 10px;
+    font-size: 1.2rem;
+    margin-right: 0px;
     white-space: nowrap;
 }
 #headerUserAvatar {
@@ -224,24 +232,35 @@ header nav a:hover {
     vertical-align: middle;
     object-fit: cover;
     border: 1px solid var(--border-color-secondary);
+    flex-shrink: 0;
 }
 .auth-button {
-    /* Stile generico per bottoni Login/Register/Logout e link nav */
     background-color: transparent;
     border: 1px solid var(--text-color-muted);
     color: var(--text-color-secondary);
-    padding: 6px 12px;
+    padding: 6px 12px; /* Padding di default */
     border-radius: 20px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.9em; /* ~14.4px se base è 16px */
     transition: all 0.2s ease;
-    white-space: nowrap;
-    text-decoration: none; /* Assicura che non sia sottolineato se è un <a> */
+    text-decoration: none;
+
+    /* Proprietà Flex per centrare il contenuto INTERNO */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle; /* Aggiunto per coerenza con altri bottoni nav */
+    box-sizing: border-box;
+    white-space: nowrap; /* Evita che testo+icona vada a capo se c'è */
 }
 .auth-button:hover {
     border-color: var(--link-color);
     color: var(--link-color);
     text-decoration: none;
+}
+
+header .auth-button.nav-link-icon-text .material-symbols-rounded {
+     margin-right: 6px; /* Spazio tra icona e testo per bottoni con testo */
 }
 
 /* ===== Main Content & Generic Section Styles ===== */
@@ -1612,17 +1631,9 @@ body.touch-enabled .game-instructions {
 
 /* ===== Testo Neon Arcade (usato in index.html e .glitchzilla-banner) ===== */
 .testo-neon-arcade {
-    /* Usato nella card gioco in index.html */
-    font-size: 1.5em;
-    text-align: center;
-    padding: 0.5rem;
-    margin-top: 10px;
-    border-width: 2px;
-    border-style: solid;
-    text-shadow:
-        0 0 5px rgba(255, 255, 255, 0.5),
-        0 0 10px currentColor;
-    animation: cambio-colore-neon 1.5s infinite steps(1, end); /* Usa l'animazione globale */
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 8px currentColor;
+    animation: cambio-colore-neon 1.5s infinite steps(1, end);
+    font-weight: bold;
 }
 
 /* ===== Footer Styles ===== */
@@ -1650,9 +1661,13 @@ footer a {
         padding: 15px 3%;
     }
     header .header-content {
-        width: 100%;
-        justify-content: center;
-    }
+        width: auto;
+       display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 20px;
+}
     header .header-controls {
         width: 100%;
         flex-direction: column;
@@ -3483,14 +3498,32 @@ header .desktop-nav {
     align-items: center; /* Aggiunto per allineare verticalmente i link se hanno altezze diverse */
 }
 
+
+
 /* Stili base per Material Symbols nella navbar */
-.auth-button .material-symbols-rounded { /* CAMBIATO QUI */
-    vertical-align: middle;
-    font-size: 1.5em; /* Adegua dimensione icona */
-    line-height: 1; /* Per un miglior allineamento verticale */
-    /* Google consiglia di non impostare display: block/inline-block direttamente sull'icona
-       ma di gestire il layout tramite il contenitore.
-       Assicurati che il font-weight, fill, opsz, GRAD siano impostati nel link del font o qui se necessario */
+.auth-button .material-symbols-rounded {
+    /*
+        La dimensione dell'icona è critica.
+        Material Symbols di default può prendere la dimensione del font del suo genitore.
+        Se .auth-button ha font-size: 0.9em, e l'icona ha font-size: 1.5em,
+        l'icona sarà 1.5 * (0.9em del font-size del *contenitore* di .auth-button).
+        Assicuriamoci che l'icona sia abbastanza grande da essere visibile e centrabile.
+    */
+    font-size: 1rem; /* Prova una dimensione FISSA IN PIXEL per l'icona */
+                     /* Se .auth-button.nav-link-icon-only è 38x38px, un'icona da 22-24px dovrebbe centrarsi bene */
+    line-height: 1;  /* Molto importante per il centraggio verticale dei font icona */
+    margin: 0;       /* Nessun margine sull'icona stessa */
+    padding: 0;      /* Nessun padding sull'icona stessa */
+    /* vertical-align: middle; -- non necessario se il genitore è flex e usa align-items */
+    /* display: block; -- non necessario se il genitore è flex e usa align-items/justify-content */
+}
+
+.auth-button.nav-link-icon-only {
+    padding: 0; /* Sovrascrivi il padding per un controllo preciso */
+    width: 2rem;  /* Adatta questa dimensione! Deve essere sufficiente per l'icona + un po' di respiro */
+    height: 2rem; /* Uguale a width per un cerchio/quadrato */
+    border-radius: 50%; /* Per renderlo circolare */
+    /* justify-content: center; e align-items: center; sono ereditati da .auth-button */
 }
 
 header .nav-link-icon-text .material-symbols-rounded {
@@ -3536,36 +3569,83 @@ header .nav-link-icon-only .material-symbols-rounded {
     transform: rotate(180deg);
 }
 
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: calc(100% + 5px); /* Sotto il bottone toggle, con 5px di spazio */
-    left: 0;
-    background-color: var(--surface-bg-primary);
-    border: 1px solid var(--border-color-secondary);
-    list-style: none;
-    padding: 5px 0; /* Padding verticale per il menu */
-    margin: 0; /* Rimosso margin-top, gestito da top */
-    z-index: 1000;
-    border-radius: 4px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    min-width: 220px; /* Aumentato per link più lunghi con icone */
+
+/* Potrebbe essere necessario assicurarsi che l'icona stessa non abbia margini che la spingono */
+.auth-button .material-symbols-rounded {
+    font-size: 1.5em;  /* Icona sarà 1.5 * (font-size di .auth-button = 0.9em) */
+                        /* Se font-size base è 16px -> 0.9*16 = 14.4px. Icona = 1.5 * 14.4px = 21.6px */
+    line-height: 1;    /* Evita spazio extra verticale */
+    margin: 0;         /* Assicura che non ci siano margini sull'icona stessa */
+    /* vertical-align: middle; non più strettamente necessario con flex, ma può rimanere per sicurezza */
 }
+
+.auth-button.nav-link-icon-only .visually-hidden {
+    display: none !important; /* Forza la non visualizzazione se .visually-hidden standard non basta */
+}
+
+.article-like-btn {
+    padding-top: 0.5em; /* Per centrare verticalmente l'icona */
+    padding-bottom: 0.1em; /* Per centrare verticalmente l'icona */
+    padding-left: 0.5em; /* Per centrare verticalmente l'icona */   
+    padding-right: 0.5em; /* Per centrare verticalmente l'icona */
+}
+
+.dropdown-menu {
+    display: none; /* Gestito da JS */
+    position: absolute;
+    top: calc(100% + 5px); /* Posizionamento sotto il bottone toggle */
+    left: 0;
+    z-index: 1000;
+
+    /* Rendi il contenitore UL completamente trasparente e senza stili propri evidenti */
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0; /* Il padding sarà sugli item individuali */
+    margin: 0;
+    list-style: none;
+    min-width: auto; /* Lascia che la larghezza sia determinata dagli item */
+}
+
+.dropdown-menu li {
+    margin: 0; /* Rimuovi margini di default */
+    padding: 0; /* Rimuovi padding di default */
+    /* Puoi aggiungere un piccolo margine inferiore qui se vuoi più spazio verticale TRA le "pillole" */
+    margin-bottom: 3px; /* Esempio: piccolo spazio tra un link e l'altro */
+}
+
+.dropdown-menu li:last-child {
+    margin-bottom: 0; /* Rimuovi margine dall'ultimo item */
+}
+
 .dropdown-menu li a.dropdown-item {
-    display: flex;
+    display: flex; /* Per allineare icona e testo */
     align-items: center;
-    padding: 10px 15px;
+    padding: 10px 15px; /* Padding interno al link */
     text-decoration: none;
     color: var(--text-color-primary);
-    white-space: nowrap;
+    white-space: nowrap; /* Evita che il testo del link vada a capo */
+
+    /* Applica qui lo stile "pillola" */
+    background-color: var(--surface-bg-primary); /* Sfondo per ogni item */
+    border: 1px solid var(--border-color-secondary); /* Bordo per ogni item */
+    border-radius: 4px; /* Angoli arrotondati per ogni item */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07); /* Ombra leggera per ogni item */
+
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
+
 .dropdown-menu li a.dropdown-item:hover {
     background-color: var(--surface-bg-secondary);
     color: var(--link-hover-color);
+    border-color: var(--link-color); /* Opzionale: cambia colore bordo su hover */
 }
+
 .dropdown-menu li a.dropdown-item .material-symbols-rounded { /* CAMBIATO QUI */
     margin-right: 10px;
 }
+
+
 
 /* Pulsante Hamburger e Menu Mobile */
 .navbar-toggler {
@@ -3734,6 +3814,7 @@ header .nav-link-icon-only .material-symbols-rounded {
     }
     #userProfileContainer #userDisplayName {
         display: none;
+        white-space: nowrap;
     }
     /* Qui potresti voler aggiungere stili specifici per #mobileNavMenu se necessario,
        ma le regole generali sopra dovrebbero già funzionare. */
