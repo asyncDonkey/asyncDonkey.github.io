@@ -147,6 +147,7 @@ header {
     transition:
         background-color 0.3s,
         border-color 0.3s;
+    position: relative; /* <-- AGGIUNGI QUESTO! */
 }
 header .avatar img {
     width: 50px;
@@ -3587,18 +3588,7 @@ header .nav-link-icon-only .material-symbols-rounded {
 }
 
 
-.mobile-nav-menu {
-    display: none;
-    width: 100%;
-    background-color: var(--surface-bg-primary);
-    border-top: 1px solid var(--border-color-primary);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: absolute;
-    top: 100%; /* Assicurati che l'header abbia una posizione (es. relative, sticky) per questo */
-    left: 0;
-    right: 0;
-    z-index: 999;
-}
+
 .mobile-nav-menu ul {
     list-style: none;
     padding: 0;
@@ -3638,22 +3628,118 @@ header .nav-link-icon-only .material-symbols-rounded {
     border: 0;
 }
 
-/* Breakpoint per mostrare l'hamburger e nascondere la nav desktop */
-@media (max-width: 991px) { /* Adatta se necessario */
+/* --- Mobile Navigation Menu --- */
+
+/* Stile base per il contenitore del menu mobile (#mobileNavMenu) */
+.mobile-nav-menu { /* Questo è l'ID #mobileNavMenu nel tuo HTML */
+    display: none; /* Nascosto di default */
+    position: absolute;
+    top: 100%; /* Si posiziona sotto l'header (grazie a position:relative sull'header) */
+    left: 0;
+    right: 0;
+    background-color: var(--surface-bg-primary, #fff); /* Usa var, fallback a bianco */
+    z-index: 1000; /* Sopra gli altri contenuti */
+    border-top: 1px solid var(--border-color-primary, #ddd);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: calc(100vh - 70px); /* Altezza massima (viewport meno un po' per l'header) */
+    overflow-y: auto; /* Scroll se il contenuto è troppo lungo */
+}
+
+/* Quando il menu mobile è attivo (classe .active aggiunta da JS) */
+.mobile-nav-menu.active {
+    display: block; /* Rende visibile il menu */
+}
+
+/* Stile per la lista UL generata da JS dentro #mobileNavMenu */
+.mobile-nav-menu .mobile-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Stile per ogni elemento LI e LINK A dentro la lista mobile */
+.mobile-nav-menu .mobile-menu-list li a,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle { /* Stile anche per i toggle dei sottomenu */
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: var(--text-color-primary, #333); /* Colore testo primario */
+    border-bottom: 1px solid var(--border-color-secondary, #eee); /* Separatore */
+    gap: 12px; /* Spazio tra icona e testo */
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.mobile-nav-menu .mobile-menu-list li a .material-symbols-rounded,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle .material-symbols-rounded {
+    font-size: 1.4em; /* Dimensione icone */
+}
+
+
+.mobile-nav-menu .mobile-menu-list li a:hover,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle:hover {
+    background-color: var(--surface-bg-secondary, #f5f5f5);
+    color: var(--link-hover-color, #0056b3);
+}
+
+.mobile-nav-menu .mobile-menu-list li:last-child > a,
+.mobile-nav-menu .mobile-menu-list li:last-child > .dropdown-toggle {
+    border-bottom: none; /* Rimuovi bordo per l'ultimo elemento di primo livello */
+}
+
+/* Stile per il sottomenu del dropdown "Community" mobile */
+.mobile-nav-menu .mobile-menu-list .mobile-submenu {
+    list-style: none;
+    padding-left: 20px; /* Indentazione */
+    margin: 0;
+    background-color: var(--bg-color, #f9f9f9); /* Sfondo leggermente diverso */
+    /* display: none; è gestito da JavaScript per il toggle */
+}
+
+.mobile-nav-menu .mobile-menu-list .mobile-submenu li a {
+    padding: 12px 20px 12px 15px; /* Padding aggiustato per sottomenu */
+    border-bottom: 1px solid var(--border-color-secondary, #f0f0f0); /* Separatore più leggero */
+    font-size: 0.95em; /* Testo leggermente più piccolo per sottomenu */
+}
+
+.mobile-nav-menu .mobile-menu-list .mobile-submenu li a:last-child {
+    border-bottom: none; /* Rimuovi il bordo dall'ultimo item del sottomenu */
+}
+
+/* Assicurati che il testo del link sia visibile e non solo l'icona se c'è .nav-text */
+.mobile-nav-menu .nav-text {
+    display: inline; /* O flex-grow: 1; se vuoi che occupi lo spazio rimanente */
+}
+.mobile-nav-menu .visually-hidden {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0 0 0 8px; /* Aggiungi margine a sinistra se vuoi spazio dopo l'icona */
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    display: inline; 
+}
+
+
+/* Il tuo CSS esistente per i breakpoint */
+@media (max-width: 991px) {
     header .desktop-nav {
         display: none;
     }
     header .navbar-toggler {
-        display: inline-flex; /* Per allineare l'icona dentro il bottone */
+        display: inline-flex; 
         align-items: center;
         justify-content: center;
     }
-    /* Potresti voler nascondere userDisplayName su schermi più piccoli per fare spazio */
     #userProfileContainer #userDisplayName {
         display: none;
     }
+    /* Qui potresti voler aggiungere stili specifici per #mobileNavMenu se necessario,
+       ma le regole generali sopra dovrebbero già funzionare. */
 }
 
+/* Il tuo CSS per breakpoint più piccoli, potrebbe sovrascrivere o aggiungere dettagli */
 @media (max-width: 576px) {
     .header-content h1 {
         font-size: 1.5em;
@@ -3664,19 +3750,22 @@ header .nav-link-icon-only .material-symbols-rounded {
     .header-controls .auth-button {
         padding: 6px 8px;
     }
-    .header-controls .material-symbols-rounded { /* CAMBIATO QUI */
-        font-size: 1.3em; /* O 1.4em se preferisci */
+    .header-controls .material-symbols-rounded { 
+        font-size: 1.3em; 
     }
-    .mobile-nav-menu ul li a {
-        padding: 10px 15px;
+
+    /* Questa regola potrebbe essere già coperta o necessitare di aggiustamenti
+       rispetto a .mobile-nav-menu .mobile-menu-list li a sopra */
+    .mobile-nav-menu ul li a { /* Potresti voler rendere questo più specifico: .mobile-nav-menu .mobile-menu-list li a */
+        padding: 10px 15px; 
     }
-     /* Assicurati che l'icona dell'avatar utente e il logout non siano troppo grandi */
+
     #userProfileContainer #headerUserAvatar {
         width: 28px;
         height: 28px;
         margin-right: 5px;
     }
-    #userProfileContainer .auth-button .material-symbols-rounded { /* CAMBIATO QUI */
+    #userProfileContainer .auth-button .material-symbols-rounded { 
         font-size: 1.3em;
     }
 }

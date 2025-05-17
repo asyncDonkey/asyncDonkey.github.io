@@ -4,32 +4,35 @@ import {
     getFirestore,
     doc,
     getDoc,
-    setDoc, // MANTENUTO - Usato nel blocco signupForm se rimane attivo
-    serverTimestamp,
+    // setDoc, 
+    serverTimestamp, 
     collection,
     query,
     where,
     orderBy,
     limit,
     getDocs,
-    updateDoc,
-    increment,
-    arrayUnion,
-    arrayRemove,
+    // updateDoc, 
+    // increment,
+    // arrayUnion,
+    // arrayRemove,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
-    getAuth, // MANTENUTO - Essenziale per inizializzare auth
+    getAuth,
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
+    // createUserWithEmailAndPassword, 
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+// Importazioni locali
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
-import { showToast } from './toastNotifications.js'; // Assicurati che showToast sia importato
+import { showToast } from './toastNotifications.js';
 
 // --- Firebase Config ---
 const firebaseConfig = {
-    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', // Sostituisci se necessario
+    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', 
     authDomain: 'asyncdonkey.firebaseapp.com',
     projectId: 'asyncdonkey',
     storageBucket: 'asyncdonkey.appspot.com',
@@ -40,9 +43,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app); // CORRETTO - getAuth è necessario
+const auth = getAuth(app);
 
-// --- Utility Functions ---
+// --- Funzioni Utility Esistenti ---
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
     if (typeof createIcon !== 'function') {
         console.error('createIcon from Blockies non importata!');
@@ -75,113 +78,396 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 
-async function loadUserProfile(user) {
-    const userDisplayNameElement = document.getElementById('userDisplayName');
-    const headerUserAvatarElement = document.getElementById('headerUserAvatar');
+async function loadHeaderUserProfileDisplay(user) {
+    const userDisplayNameElement = document.getElementById('userDisplayName'); 
+    const headerUserAvatarElement = document.getElementById('headerUserAvatar'); 
 
-    if (!user || !userDisplayNameElement || !headerUserAvatarElement) {
-        if (userDisplayNameElement) userDisplayNameElement.textContent = '';
-        if (headerUserAvatarElement) headerUserAvatarElement.style.display = 'none';
+    if (!userDisplayNameElement || !headerUserAvatarElement) {
+        return;
+    }
+    if (!user) {
+        userDisplayNameElement.textContent = '';
+        headerUserAvatarElement.style.display = 'none';
+        return;
+    }
+    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente'; 
+    const seedForAvatar = user.uid;
+    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
+    headerUserAvatarElement.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 }); 
+    headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
+    headerUserAvatarElement.style.display = 'inline-block';
+    headerUserAvatarElement.style.backgroundColor = 'transparent';
+    headerUserAvatarElement.onerror = () => {
+        headerUserAvatarElement.style.display = 'none'; 
+    };
+    try {
+        const userProfileRef = doc(db, 'userProfiles', user.uid);
+        const docSnap = await getDoc(userProfileRef);
+        if (docSnap.exists() && docSnap.data().nickname) {
+            nicknameToShow = docSnap.data().nickname;
+        }
+    } catch (error) {
+        console.error('Errore caricamento profilo utente per display header:', error);
+    }
+    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
+    headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
+}
+
+function updateHeaderAuthContainersVisibility(user) {
+    const authContainer = document.getElementById('authContainer'); 
+    const userProfileContainer = document.getElementById('userProfileContainer'); 
+    if (authContainer) authContainer.style.display = user ? 'none' : 'flex';
+    if (userProfileContainer) userProfileContainer.style.display = user ? 'flex' : 'none';
+}
+
+// --- NUOVA LOGICA NAVBAR ---
+function toggleMobileMenu() {
+    const mobileMenuContainer = document.getElementById('mobileNavMenu'); 
+    const mobileMenuButton = document.getElementById('navbarToggler');   
+    
+    if (!mobileMenuContainer || !mobileMenuButton) {
+        console.error('[toggleMobileMenu] Elementi del menu mobile non trovati. ID HTML attesi: mobileNavMenu, navbarToggler.');
+        return;
+    }
+    const burgerIcon = mobileMenuButton.querySelector('.material-symbols-rounded'); 
+
+    if (!burgerIcon) {
+        console.error('[toggleMobileMenu] Icona burger non trovata dentro navbarToggler.');
         return;
     }
 
-    let nicknameToShow = user.email ? user.email.split('@')[0] : 'User';
-    const seedForAvatar = user.uid;
+    const isActive = mobileMenuContainer.classList.toggle('active'); 
+    mobileMenuButton.setAttribute('aria-expanded', isActive.toString());
+    burgerIcon.textContent = isActive ? 'close' : 'menu';
+    console.log(`[toggleMobileMenu] Menu mobile ${isActive ? 'APERTO' : 'CHIUSO'}. Classe 'active' su #mobileNavMenu: ${isActive}`);
+}
 
-    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-    headerUserAvatarElement.style.setProperty('display', 'inline-block', 'important');
-    headerUserAvatarElement.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
-    headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
-    headerUserAvatarElement.style.backgroundColor = 'transparent';
-    headerUserAvatarElement.onerror = () => {
-        headerUserAvatarElement.style.display = 'none';
-    };
+function populateMobileMenu() {
+    const navbarLinksContainer = document.querySelector('.desktop-nav > ul'); 
+    const mobileMenuTarget = document.getElementById('mobileNavMenu'); 
 
-    const userProfileRef = doc(db, 'userProfiles', user.uid);
+    console.log('[populateMobileMenu] Inizio...');
+
+    if (!navbarLinksContainer) {
+        console.error('[populateMobileMenu] Contenitore link desktop (.desktop-nav > ul) NON TROVATO.');
+        return;
+    } else {
+        console.log('[populateMobileMenu] Contenitore link desktop TROVATO:', navbarLinksContainer);
+    }
+
+    if (!mobileMenuTarget) {
+        console.error('[populateMobileMenu] Target menu mobile (mobileNavMenu) NON TROVATO.');
+        return;
+    } else {
+        console.log('[populateMobileMenu] Target menu mobile TROVATO:', mobileMenuTarget);
+    }
+
+    mobileMenuTarget.innerHTML = ''; 
+    const mobileUl = document.createElement('ul');
+    mobileUl.className = 'mobile-menu-list'; 
+    mobileUl.style.listStyle = 'none';
+    mobileUl.style.padding = '0';
+    mobileUl.style.margin = '0';
+    console.log('[populateMobileMenu] mobileUl (.mobile-menu-list) creato.');
+
+    const desktopListItems = navbarLinksContainer.querySelectorAll(':scope > li');
+    console.log(`[populateMobileMenu] Trovati ${desktopListItems.length} elementi <li> diretti nel menu desktop.`);
+
+    desktopListItems.forEach((desktopLi, index) => {
+        console.log(`[populateMobileMenu] Iterazione ${index + 1}/${desktopListItems.length} su desktopLi:`, desktopLi);
+        
+        const isDropdownContainer = desktopLi.classList.contains('nav-dropdown-container');
+        let linkToProcess;
+
+        if (isDropdownContainer) {
+            // Per il contenitore del dropdown, il "link" principale è il suo bottone toggle
+            linkToProcess = desktopLi.querySelector('button.dropdown-toggle#communityDropdownToggle');
+            console.log(`[populateMobileMenu] desktopLi ${index + 1} è Dropdown Container. linkToProcess (button#communityDropdownToggle):`, linkToProcess);
+        } else {
+            // Per i link normali, prendi il tag <a>
+            linkToProcess = desktopLi.querySelector('a');
+            console.log(`[populateMobileMenu] desktopLi ${index + 1} è Link Normale. linkToProcess (a):`, linkToProcess);
+        }
+        
+        if (!linkToProcess) {
+             console.warn(`[populateMobileMenu] desktopLi ${index + 1} SKIPPATO (no suitable <a> o button#communityDropdownToggle trovato):`, desktopLi);
+             return; 
+        }
+        
+        const dynamicTopLevelLiIds = ['profile-link-li', 'logout-link-li', 'login-link-li', 'submit-article-link-li'];
+        if (dynamicTopLevelLiIds.includes(desktopLi.id)) {
+            console.log(`[populateMobileMenu] desktopLi ${index + 1} (ID: ${desktopLi.id}) SKIPPATO perché è un placeholder per un link dinamico di primo livello.`);
+            return; 
+        }
+        
+        if (isDropdownContainer && linkToProcess && linkToProcess.id === 'communityDropdownToggle') {
+            console.log(`[populateMobileMenu] Processo Dropdown 'Community' (desktopLi ${index + 1})...`);
+            const mobileDropdownLi = document.createElement('li');
+            mobileDropdownLi.classList.add('nav-item', 'mobile-dropdown');
+
+            const mobileDropdownToggle = document.createElement('a'); 
+            mobileDropdownToggle.href = '#';
+            mobileDropdownToggle.innerHTML = linkToProcess.innerHTML; 
+            mobileDropdownToggle.classList.add('dropdown-toggle'); 
+            mobileDropdownToggle.setAttribute('aria-expanded', 'false');
+
+            const mobileSubmenu = document.createElement('ul');
+            mobileSubmenu.classList.add('mobile-submenu');
+            mobileSubmenu.style.display = 'none';
+            mobileSubmenu.style.listStyle = 'none'; 
+            mobileSubmenu.style.paddingLeft = '20px'; 
+
+            const desktopSubmenuItems = desktopLi.querySelectorAll('.dropdown-menu li'); 
+            console.log(`[populateMobileMenu] Trovati ${desktopSubmenuItems.length} voci <li> nel sottomenu Community desktop.`);
+
+            desktopSubmenuItems.forEach(subItemLi => {
+                const subItemLink = subItemLi.querySelector('a');
+                if (subItemLink) {
+                    const mobileSubmenuItemLi = document.createElement('li');
+                    if (subItemLi.id === 'navWriteArticleDropdown') {
+                        mobileSubmenuItemLi.id = 'mobile-navWriteArticleDropdown'; 
+                    }
+
+                    const mobileSubmenuLink = document.createElement('a');
+                    mobileSubmenuLink.href = subItemLink.href;
+                    mobileSubmenuLink.innerHTML = subItemLink.innerHTML;
+                    mobileSubmenuLink.classList.add('nav-item'); 
+                    if (subItemLink.target === '_blank') {
+                        mobileSubmenuLink.target = '_blank';
+                        mobileSubmenuLink.rel = 'noopener noreferrer';
+                    }
+                    mobileSubmenuItemLi.appendChild(mobileSubmenuLink);
+                    mobileSubmenu.appendChild(mobileSubmenuItemLi);
+                    console.log(`[populateMobileMenu] Aggiunto sottomenu item '${subItemLink.textContent.trim()}' al dropdown Community mobile.`);
+                }
+            });
+
+            mobileDropdownToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isExpanded = mobileSubmenu.style.display === 'block';
+                mobileSubmenu.style.display = isExpanded ? 'none' : 'block';
+                mobileDropdownToggle.setAttribute('aria-expanded', String(!isExpanded));
+                const icon = mobileDropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow'); // Assumendo che l'icona freccia abbia la classe 'dropdown-arrow'
+                if (icon) icon.textContent = isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'; // Cambia icona
+            });
+
+            mobileDropdownLi.appendChild(mobileDropdownToggle);
+            mobileDropdownLi.appendChild(mobileSubmenu);
+            mobileUl.appendChild(mobileDropdownLi); 
+            console.log('[populateMobileMenu] Dropdown Community mobile AGGIUNTO a mobileUl.');
+        } else if (!isDropdownContainer && linkToProcess) { 
+            const itemText = (linkToProcess.textContent || "SENZA TESTO").trim();
+            console.log(`[populateMobileMenu] Processo Link Statico '${itemText}' (desktopLi ${index + 1})...`);
+            const mobileListItem = document.createElement('li');
+            const mobileLink = document.createElement('a');
+            mobileLink.href = linkToProcess.href || '#'; 
+            mobileLink.innerHTML = linkToProcess.innerHTML;
+            mobileLink.classList.add('nav-item');
+            if (linkToProcess.target === '_blank') {
+                mobileLink.target = '_blank';
+                mobileLink.rel = 'noopener noreferrer';
+            }
+            mobileListItem.appendChild(mobileLink);
+            mobileUl.appendChild(mobileListItem); 
+            console.log(`[populateMobileMenu] Link statico '${itemText}' AGGIUNTO a mobileUl.`);
+        } else {
+            console.warn(`[populateMobileMenu] desktopLi ${index + 1} non processato (né dropdown community né link statico valido). linkToProcess:`, linkToProcess);
+        }
+    });
+
+    if (mobileUl.hasChildNodes()) {
+        mobileMenuTarget.appendChild(mobileUl);
+        console.log('[populateMobileMenu] mobileUl (.mobile-menu-list) appeso a #mobileNavMenu. Contenuto mobileUl:', mobileUl.innerHTML);
+    } else {
+        console.warn('[populateMobileMenu] mobileUl è VUOTO. Nessun elemento statico o dropdown community è stato aggiunto.');
+    }
+    console.log('[populateMobileMenu] Fine.');
+}
+
+function setupDesktopCommunityDropdown() {
+    const dropdownToggle = document.getElementById('communityDropdownToggle'); 
+    const dropdownMenu = document.getElementById('communityDropdownMenu');   
+
+    if (dropdownToggle && dropdownMenu) {
+        dropdownToggle.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation(); 
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', String(!isExpanded));
+            dropdownMenu.style.display = isExpanded ? 'none' : 'block';
+            const icon = this.querySelector('.material-symbols-rounded.dropdown-arrow');
+            if (icon) icon.textContent = isExpanded ? 'arrow_drop_down' : 'arrow_drop_up';
+        });
+        document.addEventListener('click', function (event) { 
+            if (dropdownMenu.style.display === 'block' &&
+                !dropdownToggle.contains(event.target) &&
+                !dropdownMenu.contains(event.target)) {
+                dropdownMenu.style.display = 'none';
+                dropdownToggle.setAttribute('aria-expanded', 'false');
+                const icon = dropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow');
+                if (icon) icon.textContent = 'arrow_drop_down';
+            }
+        });
+    }
+}
+
+function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], onClickHandler = null) {
+    const listItem = document.createElement('li');
+    listItem.id = liId;
+    const link = document.createElement('a');
+    link.id = aId;
+    link.href = href;
+    link.innerHTML = innerHTML; 
+    aClasses.forEach(cls => link.classList.add(cls));
+    if (onClickHandler) {
+        link.addEventListener('click', onClickHandler);
+    }
+    listItem.appendChild(link);
+    return listItem;
+}
+
+async function getUserProfile(userId) {
+    if (!db) { 
+        console.error('Firestore (db) non inizializzato (getUserProfile).');
+        return { nickname: 'Errore DB' };
+    }
     try {
-        const docSnap = await getDoc(userProfileRef);
-        if (docSnap.exists()) {
-            nicknameToShow = docSnap.data().nickname || nicknameToShow;
+        const userProfileDoc = await getDoc(doc(db, 'userProfiles', userId));
+        if (userProfileDoc.exists()) {
+            return userProfileDoc.data();
+        } else {
+            return { nickname: 'Utente' }; 
         }
-        userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-        headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
     } catch (error) {
-        console.error('Errore caricamento profilo utente per navbar:', error);
+        console.error(`Errore durante il recupero del profilo utente (${userId}):`, error);
+        return { nickname: 'Errore Profilo' }; 
     }
 }
 
-function updateAuthUI(user) {
-    const authContainer = document.getElementById('authContainer');
-    const userProfileContainer = document.getElementById('userProfileContainer');
+async function updateLoginLogoutLinks(user) {
+    console.log('[updateLoginLogoutLinks] Inizio. Utente:', user ? user.uid : 'Nessuno');
+    const navbarLinksContainer = document.querySelector('.desktop-nav > ul'); 
+    const mobileMenuNode = document.getElementById('mobileNavMenu');
+    const mobileMenuContainer = mobileMenuNode ? mobileMenuNode.querySelector('.mobile-menu-list') : null;
+
+    const navWriteArticleDropdownLiDesktop = document.getElementById('navWriteArticleDropdown'); 
+    if (navWriteArticleDropdownLiDesktop) {
+        navWriteArticleDropdownLiDesktop.style.display = user ? 'list-item' : 'none';
+        // console.log(`[updateLoginLogoutLinks] Visibilità 'Scrivi Articolo' (Desktop Dropdown - #navWriteArticleDropdown) impostata a: ${user ? 'list-item' : 'none'}`);
+    } else {
+        // Questo log potrebbe essere normale se la pagina non ha il dropdown community, o se l'ID è errato.
+        // console.warn("[updateLoginLogoutLinks] Elemento <li> 'navWriteArticleDropdown' (per Scrivi Articolo nel dropdown desktop) NON TROVATO.");
+    }
     
-    // Link "Scrivi Articolo" nel dropdown desktop
-    const navWriteArticleLinkDropdown = document.getElementById('navWriteArticleDropdown'); 
-    // Link "Profilo" (l'icona separata) - la sua visibilità è gestita da userProfileContainer
-    const profileNavIconLink = document.getElementById('profileNavIconLink');
-
-
-    // Gestione visibilità base login/logout containers
-    if (authContainer) authContainer.style.display = user ? 'none' : 'flex';
-    if (userProfileContainer) userProfileContainer.style.display = user ? 'flex' : 'none';
-
-    // Gestione link condizionali nel dropdown "Community"
-    if (navWriteArticleLinkDropdown) {
-        navWriteArticleLinkDropdown.style.display = user ? 'list-item' : 'none';
+    const navWriteArticleDropdownLiMobile = document.getElementById('mobile-navWriteArticleDropdown');
+    if (navWriteArticleDropdownLiMobile) {
+        navWriteArticleDropdownLiMobile.style.display = user ? 'list-item' : 'none';
+        console.log(`[updateLoginLogoutLinks] Visibilità 'Scrivi Articolo' (Mobile Dropdown - #mobile-navWriteArticleDropdown) impostata a: ${user ? 'list-item' : 'none'}`);
     }
-    // Il link #profileNavIconLink è già dentro #userProfileContainer, quindi la sua visibilità
-    // è già gestita. Non c'è un #profileNav (<li>) separato nella nuova struttura desktop.
 
-    if (!user) {
-        const userDisplayNameElement = document.getElementById('userDisplayName');
-        const headerUserAvatarElement = document.getElementById('headerUserAvatar');
-        if (userDisplayNameElement) userDisplayNameElement.textContent = '';
-        if (headerUserAvatarElement) headerUserAvatarElement.style.display = 'none';
 
-        // Se il menu mobile era aperto e l'utente fa logout, aggiornalo
-        if (mobileNavMenu && mobileNavMenu.style.display === 'block' && desktopNavElement) {
-            populateMobileMenu(null); // Passa null per l'utente
+    if (!navbarLinksContainer) {
+         console.error('[updateLoginLogoutLinks] Contenitore link desktop (.desktop-nav > ul) NON TROVATO.');
+         return;
+    }
+    if(!mobileMenuContainer) {
+        console.error('[updateLoginLogoutLinks] Contenitore lista menu mobile (.mobile-menu-list) NON TROVATO dentro #mobileNavMenu.');
+        return;
+    }
+    console.log('[updateLoginLogoutLinks] Contenitori desktop e mobile TROVATI.');
+
+    const dynamicTopLevelDesktopLiIds = ['login-link-li', 'profile-link-li', 'logout-link-li']; 
+    const dynamicTopLevelMobileLiIds = ['mobile-login-link-li', 'mobile-profile-link-li', 'mobile-logout-link-li', 'mobile-submit-article-link-li'];
+
+    dynamicTopLevelDesktopLiIds.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            el.remove();
+            console.log(`[updateLoginLogoutLinks] Rimosso LI desktop di primo livello: ${id}`);
         }
+    });
+    dynamicTopLevelMobileLiIds.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            el.remove();
+            console.log(`[updateLoginLogoutLinks] Rimosso LI mobile di primo livello: ${id}`);
+        }
+    });
+
+    if (user) {
+        console.log('[updateLoginLogoutLinks] Utente LOGGATO. Aggiungo link Profilo, Logout, Scrivi Articolo (mobile di primo livello).');
+        let userProfile = await getUserProfile(user.uid);
+        let userNickname = userProfile?.nickname || (user.email ? user.email.split('@')[0] : 'Utente');
+        if (userNickname.length > 15) userNickname = userNickname.substring(0, 12) + '...';
+
+        const profileHTML = `<span class="material-symbols-rounded">account_circle</span> <span class="navbar-nickname">${escapeHTML(userNickname)}</span>`;
+        navbarLinksContainer.appendChild(createNavLinkItem('profile-link-li', 'profile-link', 'profile.html', profileHTML));
+        mobileMenuContainer.appendChild(createNavLinkItem('mobile-profile-link-li', 'mobile-profile-link', 'profile.html', profileHTML));
+        console.log('[updateLoginLogoutLinks] Link Profilo (primo livello) AGGIUNTI (desktop e mobile).');
+
+        // "Scrivi Articolo" solo per MOBILE come link di primo livello
+        // Se "Scrivi Articolo" è nel dropdown mobile, questo blocco non serve.
+        // Ma se è un requisito averlo anche top-level su mobile, allora va bene.
+        const submitArticleHTMLMobile = `<span class="material-symbols-rounded">edit</span> Scrivi Articolo`;
+        mobileMenuContainer.appendChild(createNavLinkItem('mobile-submit-article-link-li', 'mobile-submit-article-link', 'submit-article.html', submitArticleHTMLMobile));
+        console.log('[updateLoginLogoutLinks] Link Scrivi Articolo (MOBILE di primo livello) AGGIUNTO.');
+        
+        const logoutHandler = async (e) => {
+            e.preventDefault();
+            try {
+                await signOut(auth); 
+                showToast('Logout effettuato con successo.', 'success');
+                window.location.reload(); 
+            } catch (error) {
+                console.error('Errore durante il logout:', error);
+                showToast(`Errore logout: ${error.message}`, 'error');
+            }
+        };
+        const logoutHTML = `<span class="material-symbols-rounded">logout</span> Logout`;
+        navbarLinksContainer.appendChild(createNavLinkItem('logout-link-li', 'logout-link', '#', logoutHTML, ['nav-item'], logoutHandler));
+        mobileMenuContainer.appendChild(createNavLinkItem('mobile-logout-link-li', 'mobile-logout-link', '#', logoutHTML, ['nav-item'], logoutHandler));
+        console.log('[updateLoginLogoutLinks] Link Logout (primo livello) AGGIUNTI (desktop e mobile).');
 
     } else {
-        loadUserProfile(user); // Carica i dati del profilo per l'header
-        const loginModal = document.getElementById('loginModal');
-        if (loginModal && loginModal.style.display === 'block') loginModal.style.display = 'none';
+        console.log('[updateLoginLogoutLinks] Utente NON LOGGATO. Aggiungo link Login (primo livello).');
+        const loginHTML = `<span class="material-symbols-rounded">login</span> Login`;
+        navbarLinksContainer.appendChild(createNavLinkItem('login-link-li', 'login-link', 'register.html?form=login', loginHTML));
+        mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', 'register.html?form=login', loginHTML));
+        console.log('[updateLoginLogoutLinks] Link Login (primo livello) AGGIUNTI (desktop e mobile).');
+    }
+    console.log('[updateLoginLogoutLinks] Fine.');
+}
 
-        // Se il menu mobile era aperto e l'utente fa login, aggiornalo
-         if (mobileNavMenu && mobileNavMenu.style.display === 'block' && desktopNavElement) {
-            populateMobileMenu(user); // Passa l'utente
+async function updateAdminDashboardLink(user) {
+    const adminDashboardLinkFooter = document.getElementById('admin-dashboard-footer-link');
+    if (!adminDashboardLinkFooter) return;
+    if (user) {
+        try {
+            const idTokenResult = await user.getIdTokenResult();
+            adminDashboardLinkFooter.style.display = idTokenResult.claims.admin ? '' : 'none';
+        } catch (error) {
+            console.error("Errore nel verificare i custom claims dell'admin:", error);
+            adminDashboardLinkFooter.style.display = 'none';
         }
+    } else {
+        adminDashboardLinkFooter.style.display = 'none';
     }
 }
 
-    const userDisplayName = document.getElementById('userDisplayName');
-    const headerUserAvatar = document.getElementById('headerUserAvatar');
-
-    if (!user) {
-        if (userDisplayName) userDisplayName.textContent = '';
-        if (headerUserAvatar) headerUserAvatar.style.display = 'none';
+function initializeNewNavbar() {
+    const mobileMenuButton = document.getElementById('navbarToggler'); 
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', toggleMobileMenu);
     } else {
-        loadUserProfile(user);
-        const loginModal = document.getElementById('loginModal');
-        // const signupModal = document.getElementById('signupModal'); // RIMOSSO RIFERIMENTO ALLA MODALE SIGNUP
-
-        if (loginModal && loginModal.style.display === 'block') loginModal.style.display = 'none';
-        // La riga sotto che chiudeva signupModal non è più necessaria se la modale HTML è stata rimossa
-        // if (signupModal && signupModal.style.display === 'block') signupModal.style.display = 'none';
+        console.error('[initializeNewNavbar] Pulsante menu mobile (navbarToggler) NON TROVATO.');
     }
-
-    const navWriteArticleLinkDesktop = document.getElementById('navWriteArticle'); // Assumendo che questo sia il <li>
-    const navWriteArticleLinkDropdown = document.getElementById('navWriteArticleDropdown');
-
-    if (navWriteArticleLinkDesktop) {
-    navWriteArticleLinkDesktop.style.display = user ? 'list-item' : 'none';
-    }
-    if (navWriteArticleLinkDropdown) {
-    navWriteArticleLinkDropdown.style.display = user ? 'list-item' : 'none';
+    populateMobileMenu(); 
+    setupDesktopCommunityDropdown(); 
+    console.log('[initializeNewNavbar] Nuova navbar inizializzata.');
 }
 
-
-export { db, auth };
+// --- Funzioni Homepage Esistenti ---
+export { db, auth }; 
 
 async function loadHomeMiniLeaderboard() {
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
@@ -194,7 +480,6 @@ async function loadHomeMiniLeaderboard() {
     leaderboardListElement.innerHTML = '<li>Caricamento...</li>';
     try {
         const scoresCollectionRef = collection(db, 'leaderboardScores');
-        // La query dovrebbe già essere corretta per prendere i dati necessari (incluso userId)
         const q = query(scoresCollectionRef, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), limit(5));
         const querySnapshot = await getDocs(q);
         leaderboardListElement.innerHTML = '';
@@ -206,29 +491,22 @@ async function loadHomeMiniLeaderboard() {
         querySnapshot.forEach((docSnapshot) => {
             const entry = docSnapshot.data();
             const listItem = document.createElement('li');
-
             const rankSpan = document.createElement('span');
             rankSpan.className = 'player-rank';
             rankSpan.textContent = `${rank}.`;
             listItem.appendChild(rankSpan);
-
             const avatarImg = document.createElement('img');
             avatarImg.className = 'player-avatar';
             const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-home-${docSnapshot.id}`;
             avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
             avatarImg.alt = `Avatar`;
-            avatarImg.style.backgroundColor = 'transparent'; // Già presente
-            avatarImg.onerror = () => { /* ... gestione errore avatar ... */ };
+            avatarImg.style.backgroundColor = 'transparent';
+            avatarImg.onerror = () => { /* gestione errore avatar */ };
             listItem.appendChild(avatarImg);
-
             const playerInfoSpan = document.createElement('span');
-            playerInfoSpan.className = 'player-info'; // Contenitore per nome e bandiera
-
-            // Elemento per il nome (potrebbe essere un link o testo semplice)
+            playerInfoSpan.className = 'player-info';
             const nameElementContainer = document.createElement('span');
-            nameElementContainer.className = 'player-name'; // Mantieni la classe per lo stile
-
-            // Aggiungi la bandierina prima del nome/link
+            nameElementContainer.className = 'player-name';
             if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
                 const flagIconSpan = document.createElement('span');
                 flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
@@ -236,33 +514,23 @@ async function loadHomeMiniLeaderboard() {
                 flagIconSpan.style.verticalAlign = 'middle';
                 nameElementContainer.appendChild(flagIconSpan);
             }
-
             let displayName = entry.userName || entry.initials || 'Anonimo';
-
-            if (entry.userId) { // Utente Registrato -> Crea Link
+            if (entry.userId) {
                 const profileLink = document.createElement('a');
                 profileLink.href = `profile.html?userId=${entry.userId}`;
-                profileLink.textContent = displayName;
-                // Aggiungi eventuali classi CSS specifiche per i link nei profili se necessario
-                // profileLink.classList.add('leaderboard-profile-link');
+                profileLink.textContent = escapeHTML(displayName);
                 nameElementContainer.appendChild(profileLink);
-            } else { // Utente Ospite -> Testo Semplice
-                if (entry.initials) {
-                    displayName = entry.initials + ' (Ospite)';
-                } else {
-                    displayName += ' (Ospite)';
-                }
-                nameElementContainer.appendChild(document.createTextNode(displayName));
+            } else {
+                if (entry.initials) displayName = entry.initials + ' (Ospite)';
+                else displayName += ' (Ospite)';
+                nameElementContainer.appendChild(document.createTextNode(escapeHTML(displayName)));
             }
-
-            playerInfoSpan.appendChild(nameElementContainer); // Aggiungi il contenitore del nome (con link o testo)
+            playerInfoSpan.appendChild(nameElementContainer);
             listItem.appendChild(playerInfoSpan);
-
             const scoreSpan = document.createElement('span');
             scoreSpan.className = 'player-score';
             scoreSpan.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
             listItem.appendChild(scoreSpan);
-
             leaderboardListElement.appendChild(listItem);
             rank++;
         });
@@ -276,64 +544,54 @@ async function loadHomeMiniLeaderboard() {
 }
 
 async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser) {
-    if (!buttonElement || !articleId) {
-        return;
-    }
+    if (!buttonElement || !articleId) return;
     const likeCountSpan = buttonElement.nextElementSibling;
-    if (!likeCountSpan || !likeCountSpan.classList.contains('homepage-like-count')) {
-        console.warn(`Span conteggio like non trovato o errato per articleId: ${articleId}.`);
+     if (!likeCountSpan || !likeCountSpan.classList.contains('homepage-like-count')) {
+        // console.warn(`Span conteggio like non trovato o errato per articleId: ${articleId}.`);
     }
-
     try {
         const articleRef = doc(db, 'articles', articleId);
         const docSnap = await getDoc(articleRef);
-
         if (docSnap.exists()) {
             const articleData = docSnap.data();
             if (articleData.status !== 'published') {
                 if (likeCountSpan) likeCountSpan.textContent = articleData.likeCount || 0;
-                buttonElement.innerHTML = `🤍`;
+                buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`; 
                 buttonElement.disabled = true;
                 buttonElement.title = 'Articolo non disponibile per like';
                 buttonElement.classList.remove('liked');
                 return;
             }
-
             const likes = articleData.likeCount || 0;
             const likedByUsers = articleData.likedByUsers || [];
-
-            if (likeCountSpan) {
-                likeCountSpan.textContent = likes;
-            }
-
+            if (likeCountSpan) likeCountSpan.textContent = likes;
             if (currentUser) {
                 buttonElement.disabled = false;
                 const userHasLiked = Array.isArray(likedByUsers) && likedByUsers.includes(currentUser.uid);
                 if (userHasLiked) {
-                    buttonElement.innerHTML = `💙`;
+                    buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite</span>`; 
                     buttonElement.classList.add('liked');
                     buttonElement.title = "Hai messo 'Mi piace' (vedi articolo per cambiare)";
                 } else {
-                    buttonElement.innerHTML = `🤍`;
+                    buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`; 
                     buttonElement.classList.remove('liked');
                     buttonElement.title = "Metti 'Mi piace' (vedi articolo)";
                 }
             } else {
-                buttonElement.innerHTML = `🤍`;
+                buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`; 
                 buttonElement.disabled = true;
                 buttonElement.title = 'Fai login per mettere like';
                 buttonElement.classList.remove('liked');
             }
         } else {
-            console.warn(`Articolo "${articleId}" non trovato in Firestore.`);
             if (likeCountSpan) likeCountSpan.textContent = '0';
-            buttonElement.innerHTML = `🤍`;
+            buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
             buttonElement.disabled = true;
         }
     } catch (error) {
         console.error(`Errore Firestore aggiornamento UI like per articolo "${articleId}":`, error);
         if (likeCountSpan) likeCountSpan.textContent = 'Err';
-        buttonElement.innerHTML = `🤍`;
+        buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
         buttonElement.disabled = true;
     }
 }
@@ -341,8 +599,7 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
 async function handleHomepageArticleLike(event) {
     const button = event.currentTarget;
     const articleId = button.dataset.articleId;
-    const currentUser = auth.currentUser;
-
+    const currentUser = auth.currentUser; 
     if (!currentUser) {
         showToast("Devi essere loggato per interagire con i like. Puoi mettere like dalla pagina dell'articolo.");
         return;
@@ -357,7 +614,7 @@ async function handleHomepageArticleLike(event) {
 async function updateHomepageCommentCountUI(countSpanElement, articleId) {
     if (!countSpanElement || !articleId) return;
     try {
-        const articleRef = doc(db, 'articles', articleId);
+        const articleRef = doc(db, 'articles', articleId); 
         const docSnap = await getDoc(articleRef);
         if (docSnap.exists() && docSnap.data().status === 'published') {
             const articleData = docSnap.data();
@@ -374,24 +631,17 @@ async function updateHomepageCommentCountUI(countSpanElement, articleId) {
 
 export async function initializeHomepageArticleInteractions(currentUser) {
     const articlesGrid = document.getElementById('articlesGrid');
-    if (!articlesGrid) {
-        return;
-    }
+    if (!articlesGrid) return;
     const articleCards = articlesGrid.querySelectorAll('.article-card');
-
-    if (articleCards.length === 0) {
-        return;
-    }
-
+    if (articleCards.length === 0) return;
     for (const card of articleCards) {
         const articleId = card.dataset.articleId;
         const likeButton = card.querySelector('.homepage-like-btn');
         const commentCountSpan = card.querySelector('.homepage-comment-count');
-
         if (articleId) {
             if (likeButton) {
                 await updateHomepageLikeButtonUI(likeButton, articleId, currentUser);
-                likeButton.removeEventListener('click', handleHomepageArticleLike);
+                likeButton.removeEventListener('click', handleHomepageArticleLike); 
                 likeButton.addEventListener('click', handleHomepageArticleLike);
             }
             if (commentCountSpan) {
@@ -411,25 +661,22 @@ function traduireErroreFirebase(codiceErrore) {
         'auth/operation-not-allowed': 'Operazione non permessa (controlla config Firebase Auth).',
         'auth/weak-password': 'La password è troppo debole (minimo 6 caratteri).',
     };
-    return errors[codiceErrore] || `Errore (${codiceErrore}). Riprova.`; // Modificato il fallback
+    return errors[codiceErrore] || `Errore (${codiceErrore}). Riprova.`;
 }
 
+// --- DOMContentLoaded ---
 document.addEventListener('DOMContentLoaded', function () {
+    initializeNewNavbar(); 
     const loginForm = document.getElementById('loginForm');
-
-    const logoutButton = document.getElementById('logoutButton');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
-    const bodyElement = document.body;
     const loginModal = document.getElementById('loginModal');
-    // const signupModal = document.getElementById('signupModal'); // RIMOSSO - La modale signup è stata eliminata
-    const showLoginBtn = document.getElementById('showLoginBtn');
-    // const showSignupBtn = document.getElementById('showSignupBtn'); // RIMOSSO - Ora è un link diretto in HTML, non apre modale
+    const showLoginBtn = document.getElementById('showLoginBtn'); 
     const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
-    // const closeSignupBtn = signupModal ? signupModal.querySelector('.closeSignupBtn') : null; // RIMOSSO
+    const openModal = (modal) => { if (modal) modal.style.display = 'block'; };
+    const closeModal = (modal) => { if (modal) modal.style.display = 'none'; };
 
     function setupSmoothScrolling() {
-        document.querySelectorAll('header nav a[href^="#"]').forEach((link) => {
+        document.querySelectorAll('header nav a[href^="#"]').forEach((link) => { 
             link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
@@ -438,9 +685,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                } catch (error) {
-                    /* Gestisci errore selettore */
-                }
+                } catch (error) { /* Gestisci errore selettore */ }
             });
         });
     }
@@ -467,63 +712,43 @@ document.addEventListener('DOMContentLoaded', function () {
                 currentlyActiveSkillBadge = this;
                 const skillName = this.dataset.skillName || 'Skill';
                 const skillDescription = this.dataset.description || 'Nessun dettaglio disponibile.';
-                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(
-                    skillDescription
-                )}</p>`;
+                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
             });
         });
     }
-    // Aggiornamento UI per Tema Toggle (usa .textContent per cambiare l'icona)
-function setupThemeSwitcher() { // Assicurati che questa funzione sia chiamata
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
-    if (!themeToggleBtn) return;
-    const bodyElement = document.body;
-    const moonIconName = 'dark_mode'; // Nome icona Material Symbols
-    const sunIconName = 'light_mode'; // Nome icona Material Symbols
-    const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded'); // Seleziona lo span dell'icona
-
-    function applyTheme(theme) {
-        bodyElement.classList.toggle('dark-mode', theme === 'dark');
-        if (iconSpan) { // Aggiorna il nome dell'icona dentro lo span
-            iconSpan.textContent = theme === 'dark' ? sunIconName : moonIconName;
+    function setupThemeSwitcher() {
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        if (!themeToggleBtn) return;
+        const bodyElement = document.body;
+        const moonIconName = 'dark_mode';
+        const sunIconName = 'light_mode';
+        const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded');
+        function applyTheme(theme) {
+            bodyElement.classList.toggle('dark-mode', theme === 'dark');
+            if (iconSpan) iconSpan.textContent = theme === 'dark' ? sunIconName : moonIconName;
+            localStorage.setItem('theme', theme);
+            themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
+            themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
         }
-        localStorage.setItem('theme', theme);
-        // Aggiorna anche l'aria-label se vuoi che cambi dinamicamente
-        themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
-        themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+        themeToggleBtn.addEventListener('click', () => {
+            applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
+        });
     }
-
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
-
-    themeToggleBtn.addEventListener('click', () => {
-        applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
-    });
-}
-
     function setupModalControls() {
-        const openModal = (modal) => {
-            if (modal) modal.style.display = 'block';
-        };
-        const closeModal = (modal) => {
-            if (modal) modal.style.display = 'none';
-        };
-
-        if (showLoginBtn && loginModal) {
-            showLoginBtn.addEventListener('click', () => openModal(loginModal));
+        if (showLoginBtn && loginModal) { 
+            showLoginBtn.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                openModal(loginModal);
+            });
         }
-
-        // RIMOSSO: if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal));
-
         if (closeLoginBtn) {
             closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
         }
-        // RIMOSSO: if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
-
         window.addEventListener('click', (event) => {
             if (event.target === loginModal) closeModal(loginModal);
-            // RIMOSSO: if (event.target === signupModal) closeModal(signupModal);
         });
     }
 
@@ -538,11 +763,7 @@ function setupThemeSwitcher() { // Assicurati che questa funzione sia chiamata
     }
     if (document.getElementById('articlesSection')) {
         displayArticlesSection()
-            .then(() => {
-                if (auth.currentUser) {
-                    initializeHomepageArticleInteractions(auth.currentUser);
-                }
-            })
+            .then(() => { /* Interazioni inizializzate da onAuthStateChanged */ })
             .catch((error) => {
                 console.error('Errore durante displayArticlesSection in DOMContentLoaded:', error);
             });
@@ -550,17 +771,19 @@ function setupThemeSwitcher() { // Assicurati che questa funzione sia chiamata
     if (document.getElementById('glitchzillaDefeatedBanner')) {
         displayGlitchzillaBanner();
     }
-
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = loginForm.loginEmail.value;
             const password = loginForm.loginPassword.value;
+            const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
+            if (loginModalErrorDiv) loginModalErrorDiv.style.display = 'none'; 
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                await signInWithEmailAndPassword(auth, email, password); 
                 loginForm.reset();
+                closeModal(loginModal); 
+                showToast('Login effettuato con successo!', 'success');
             } catch (error) {
-                const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
                 const friendlyError = traduireErroreFirebase(error.code);
                 if (loginModalErrorDiv) {
                     loginModalErrorDiv.textContent = friendlyError;
@@ -571,235 +794,42 @@ function setupThemeSwitcher() { // Assicurati che questa funzione sia chiamata
             }
         });
     }
-
-    const navbarToggler = document.getElementById('navbarToggler');
-const mobileNavMenu = document.getElementById('mobileNavMenu');
-// Assicurati che '.desktop-nav' sia la classe del NAV tag che contiene i link desktop
-const desktopNavElement = document.querySelector('header nav.desktop-nav');
-
-    if (navbarToggler && mobileNavMenu && desktopNavElement) {
-    const desktopNavUl = desktopNavElement.querySelector('ul'); // Prendi l'UL dentro .desktop-nav
-    function populateMobileMenu(currentUser) { // Passa currentUser per decidere la visibilità
-        if (!desktopNavUl) return; // Salvaguardia
-        mobileNavMenu.innerHTML = ''; // Pulisci il contenuto precedente
-
-        const mobileUl = document.createElement('ul'); // Crea un nuovo UL per il menu mobile
-
-        // 1. Clona i link diretti (non nel dropdown)
-        desktopNavUl.querySelectorAll(':scope > li:not(.nav-dropdown-container)').forEach(desktopLi => {
-            const clonedLi = desktopLi.cloneNode(true);
-            const link = clonedLi.querySelector('a');
-            if (link) {
-                const iconSpan = link.querySelector('.material-symbols-rounded');
-                let textSpan = link.querySelector('.nav-text, .nav-text-desktop');
-                const visuallyHidden = link.querySelector('.visually-hidden');
-
-                if (iconSpan && !textSpan && visuallyHidden) { // Link solo icona con testo nascosto
-                    textSpan = document.createElement('span');
-                    textSpan.className = 'nav-text';
-                    textSpan.textContent = visuallyHidden.textContent;
-                    link.appendChild(textSpan);
-                    link.classList.remove('nav-link-icon-only');
-                    link.classList.add('nav-link-icon-text');
-                } else if (iconSpan && textSpan) { // Icona e testo già presenti
-                     link.classList.remove('nav-link-icon-only');
-                     link.classList.add('nav-link-icon-text');
-                     textSpan.style.display = 'inline'; // Assicura che il testo sia visibile
-                     const desktopTextOnlySpan = link.querySelector('.nav-text-desktop');
-                     if (desktopTextOnlySpan && desktopTextOnlySpan !== textSpan) {
-                         desktopTextOnlySpan.style.display = 'none'; // Nascondi testo solo desktop
-                     }
-                }
-            }
-            mobileUl.appendChild(clonedLi);
-        });
-
-        // 2. Gestisci i link del dropdown "Community" appiattendoli
-        const desktopDropdownContainer = desktopNavUl.querySelector('.nav-dropdown-container');
-        if (desktopDropdownContainer) {
-            const dropdownLinks = desktopDropdownContainer.querySelectorAll('.dropdown-menu .dropdown-item');
-            dropdownLinks.forEach(desktopLink => {
-                const clonedLi = document.createElement('li');
-                const clonedLink = desktopLink.cloneNode(true); // Clona il link del dropdown
-                
-                clonedLink.classList.remove('dropdown-item'); // Rimuovi classe specifica dropdown
-                clonedLink.style.display = 'flex';
-                clonedLink.style.padding = '12px 20px'; // Adatta padding per menu mobile
-
-                // Gestione visibilità link condizionali (Profile, Scrivi Articolo)
-                // Questo si basa sull'ID dell'elemento LI originale nel dropdown,
-                // che è stato definito nell'HTML dell'header.
-                const originalLiParent = desktopLink.closest('li'); // Trova il <li> originale
-                if (originalLiParent && originalLiParent.id === 'navWriteArticleDropdown') {
-                    clonedLi.style.display = currentUser ? 'list-item' : 'none';
-                }
-                // Aggiungi qui logica simile se "Profile" fosse nel dropdown e condizionale
-
-                clonedLi.appendChild(clonedLink);
-                mobileUl.appendChild(clonedLi);
-            });
-        }
-        
-        // Gestisci il link "Profile" se è un'icona separata (al di fuori della nav principale)
-        // e deve essere aggiunto al menu mobile.
-        const profileNavIconLinkDesktop = document.getElementById('profileNavIconLink');
-        if (profileNavIconLinkDesktop && currentUser) {
-            const profileLiMobile = document.createElement('li');
-            const profileLinkMobile = profileNavIconLinkDesktop.cloneNode(true); // Clona il link dell'icona
-            profileLinkMobile.classList.remove('nav-link-icon-only');
-            profileLinkMobile.classList.add('nav-link-icon-text');
-            
-            const profileTextSpan = document.createElement('span');
-            profileTextSpan.className = 'nav-text';
-            profileTextSpan.textContent = profileLinkMobile.title || 'Profilo'; // Usa il title o un default
-            profileLinkMobile.appendChild(profileTextSpan);
-            
-            // Rimuovi lo span .visually-hidden se presente, dato che ora c'è .nav-text
-            const visuallyHiddenProfile = profileLinkMobile.querySelector('.visually-hidden');
-            if (visuallyHiddenProfile) visuallyHiddenProfile.remove();
-
-            profileLiMobile.appendChild(profileLinkMobile);
-            mobileUl.appendChild(profileLiMobile);
-        }
-
-
-        mobileNavMenu.appendChild(mobileUl);
-    }
-
-    navbarToggler.addEventListener('click', () => {
-        const isExpanded = mobileNavMenu.style.display === 'block';
-        if (!isExpanded) {
-            populateMobileMenu(auth.currentUser); // Passa l'utente corrente
-        }
-        mobileNavMenu.style.display = isExpanded ? 'none' : 'block';
-        navbarToggler.setAttribute('aria-expanded', String(!isExpanded));
-        mobileNavMenu.setAttribute('aria-hidden', String(isExpanded));
-    });
-
-    mobileNavMenu.addEventListener('click', (event) => {
-        if (event.target.tagName === 'A' || event.target.closest('a')) {
-            mobileNavMenu.style.display = 'none';
-            navbarToggler.setAttribute('aria-expanded', 'false');
-            mobileNavMenu.setAttribute('aria-hidden', 'true');
-        }
-    });
-}
-
-
-// Logica per il dropdown "Community" (invariata, ma assicurati che gli ID siano corretti)
-const communityDropdownToggle = document.getElementById('communityDropdownToggle');
-const communityDropdownMenu = document.getElementById('communityDropdownMenu');
-
-if (communityDropdownToggle && communityDropdownMenu) {
-    communityDropdownToggle.addEventListener('click', function(event) {
-        event.stopPropagation();
-        const isExpanded = communityDropdownToggle.getAttribute('aria-expanded') === 'true' || false;
-        communityDropdownToggle.setAttribute('aria-expanded', !isExpanded);
-        communityDropdownMenu.style.display = isExpanded ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', function(event) {
-        if (communityDropdownMenu.style.display === 'block' && 
-            !communityDropdownToggle.contains(event.target) && 
-            !communityDropdownMenu.contains(event.target)) {
-            communityDropdownToggle.setAttribute('aria-expanded', 'false');
-            communityDropdownMenu.style.display = 'none';
-        }
-    });
-}
-
-    // RIMOSSO: Blocco if (signupForm) { ... }
-    // L'event listener per il signupForm è ora gestito in js/register.js
-    // Se il signupForm è ancora referenziato qui, è un residuo e dovrebbe essere rimosso
-    // dato che la modale di signup non esiste più in questo contesto.
-    // Per sicurezza, lo commento invece di rimuoverlo completamente se hai ancora
-    // un elemento con id="signupForm" in qualche pagina per altri scopi (improbabile).
-    /*
-    if (signupForm) { // QUESTO BLOCCO VA RIMOSSO SE signupForm ERA SOLO PER LA MODALE
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = signupForm.signupEmail.value;
-            const password = signupForm.signupPassword.value;
-            const nickname = signupForm.signupNickname.value.trim();
-            const selectedNationalityCode = signupForm.signupNationality.value;
-            if (password.length < 6) {
-                showToast('Password min. 6 caratteri.');
-                return;
-            }
-            if (nickname.length < 3 || nickname.length > 25) {
-                showToast('Nickname 3-25 caratteri.');
-                return;
-            }
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                const userProfileData = {
-                    email: user.email,
-                    nickname: nickname,
-                    createdAt: serverTimestamp(),
-                };
-                if (selectedNationalityCode && selectedNationalityCode !== '') {
-                    userProfileData.nationalityCode = selectedNationalityCode;
-                }
-                await setDoc(doc(db, 'userProfiles', user.uid), userProfileData);
-                signupForm.reset();
-                showToast('Registrazione avvenuta con successo!');
-            } catch (authError) {
-                showToast('Errore Registrazione: ' + traduireErroreFirebase(authError.code));
-            }
-        });
-    }
-    */
-
-    if (logoutButton) {
-        logoutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                showToast('Logout effettuato con successo!', 'info');
-                if (
-                    window.location.pathname.includes('profile.html') ||
-                    window.location.pathname.includes('admin-dashboard.html') ||
-                    window.location.pathname.includes('submit-article.html')
-                ) {
-                    window.location.href = 'index.html';
-                }
-            } catch (error) {
-                showToast('Errore logout: ' + error.message, 'error');
-            }
-        });
-    }
 });
 
-onAuthStateChanged(auth, (user) => {
-    console.log('main.js - Auth state changed. User:', user ? user.uid : 'null');
-    updateAuthUI(user);
+// --- onAuthStateChanged ---
+onAuthStateChanged(auth, async (user) => { 
+    console.log('[onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? `'${user.uid}'` : 'null');
 
-    const articlesGridElement = document.getElementById('articlesGrid');
-    if (articlesGridElement && typeof initializeHomepageArticleInteractions === 'function') {
-        setTimeout(() => {
-            if (articlesGridElement.querySelector('.article-card')) {
-                initializeHomepageArticleInteractions(user);
-            }
-        }, 250);
+    updateHeaderAuthContainersVisibility(user);
+    if (user) {
+        await loadHeaderUserProfileDisplay(user);
+    } else {
+        loadHeaderUserProfileDisplay(null); 
     }
+    await updateLoginLogoutLinks(user); 
+    await updateAdminDashboardLink(user);
 
-    if (user && user.emailVerified) {
+    if (document.getElementById('articlesGrid')) { 
+         setTimeout(async () => { 
+            await initializeHomepageArticleInteractions(user);
+        }, 100); 
+    }
+    if (user && user.emailVerified) { 
         const isNewlyRegistered = sessionStorage.getItem('newlyRegistered');
         if (isNewlyRegistered) {
-            getDoc(doc(db, 'userProfiles', user.uid))
-                .then((profileSnap) => {
-                    if (profileSnap.exists()) {
-                        const nickname = profileSnap.data().nickname || user.email.split('@')[0];
-                        showToast(`Benvenuto/a su asyncDonkey.io, ${nickname}!`, 'success', 7000);
-                    } else {
-                        showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
-                    }
-                    sessionStorage.removeItem('newlyRegistered');
-                })
-                .catch(() => {
-                    showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
-                    sessionStorage.removeItem('newlyRegistered');
-                });
+            try {
+                const profileSnap = await getDoc(doc(db, 'userProfiles', user.uid));
+                let nickname = user.email.split('@')[0];
+                if (profileSnap.exists() && profileSnap.data().nickname) {
+                    nickname = profileSnap.data().nickname;
+                }
+                showToast(`Benvenuto/a su asyncDonkey.io, ${escapeHTML(nickname)}!`, 'success', 7000);
+            } catch (e) {
+                showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
+            } finally {
+                sessionStorage.removeItem('newlyRegistered');
+            }
         }
     }
+    console.log('[onAuthStateChanged] Aggiornamento UI completato.');
 });
