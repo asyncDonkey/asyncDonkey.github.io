@@ -113,28 +113,46 @@ async function loadUserProfile(user) {
 function updateAuthUI(user) {
     const authContainer = document.getElementById('authContainer');
     const userProfileContainer = document.getElementById('userProfileContainer');
-    const profileNavLink = document.getElementById('profileNav');
-    const writeArticleNavLink = document.getElementById('navWriteArticle');
+    
+    // Link "Scrivi Articolo" nel dropdown desktop
+    const navWriteArticleLinkDropdown = document.getElementById('navWriteArticleDropdown'); 
+    // Link "Profilo" (l'icona separata) - la sua visibilità è gestita da userProfileContainer
+    const profileNavIconLink = document.getElementById('profileNavIconLink');
 
-    const elementsToToggleBasedOnLogin = [
-        { el: authContainer, showWhenLoggedOut: true, displayType: 'flex' },
-        { el: userProfileContainer, showWhenLoggedOut: false, displayType: 'flex' },
-        { el: profileNavLink, showWhenLoggedOut: false, displayType: 'list-item' },
-        { el: writeArticleNavLink, showWhenLoggedOut: false, displayType: 'list-item' },
-    ];
 
-    elementsToToggleBasedOnLogin.forEach((item) => {
-        if (item.el) {
-            const displayStyle = user
-                ? item.showWhenLoggedOut
-                    ? 'none'
-                    : item.displayType
-                : item.showWhenLoggedOut
-                  ? item.displayType
-                  : 'none';
-            item.el.style.display = displayStyle;
+    // Gestione visibilità base login/logout containers
+    if (authContainer) authContainer.style.display = user ? 'none' : 'flex';
+    if (userProfileContainer) userProfileContainer.style.display = user ? 'flex' : 'none';
+
+    // Gestione link condizionali nel dropdown "Community"
+    if (navWriteArticleLinkDropdown) {
+        navWriteArticleLinkDropdown.style.display = user ? 'list-item' : 'none';
+    }
+    // Il link #profileNavIconLink è già dentro #userProfileContainer, quindi la sua visibilità
+    // è già gestita. Non c'è un #profileNav (<li>) separato nella nuova struttura desktop.
+
+    if (!user) {
+        const userDisplayNameElement = document.getElementById('userDisplayName');
+        const headerUserAvatarElement = document.getElementById('headerUserAvatar');
+        if (userDisplayNameElement) userDisplayNameElement.textContent = '';
+        if (headerUserAvatarElement) headerUserAvatarElement.style.display = 'none';
+
+        // Se il menu mobile era aperto e l'utente fa logout, aggiornalo
+        if (mobileNavMenu && mobileNavMenu.style.display === 'block' && desktopNavElement) {
+            populateMobileMenu(null); // Passa null per l'utente
         }
-    });
+
+    } else {
+        loadUserProfile(user); // Carica i dati del profilo per l'header
+        const loginModal = document.getElementById('loginModal');
+        if (loginModal && loginModal.style.display === 'block') loginModal.style.display = 'none';
+
+        // Se il menu mobile era aperto e l'utente fa login, aggiornalo
+         if (mobileNavMenu && mobileNavMenu.style.display === 'block' && desktopNavElement) {
+            populateMobileMenu(user); // Passa l'utente
+        }
+    }
+}
 
     const userDisplayName = document.getElementById('userDisplayName');
     const headerUserAvatar = document.getElementById('headerUserAvatar');
@@ -151,7 +169,17 @@ function updateAuthUI(user) {
         // La riga sotto che chiudeva signupModal non è più necessaria se la modale HTML è stata rimossa
         // if (signupModal && signupModal.style.display === 'block') signupModal.style.display = 'none';
     }
+
+    const navWriteArticleLinkDesktop = document.getElementById('navWriteArticle'); // Assumendo che questo sia il <li>
+    const navWriteArticleLinkDropdown = document.getElementById('navWriteArticleDropdown');
+
+    if (navWriteArticleLinkDesktop) {
+    navWriteArticleLinkDesktop.style.display = user ? 'list-item' : 'none';
+    }
+    if (navWriteArticleLinkDropdown) {
+    navWriteArticleLinkDropdown.style.display = user ? 'list-item' : 'none';
 }
+
 
 export { db, auth };
 
@@ -445,22 +473,34 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-    function setupThemeSwitcher() {
-        if (!themeToggleBtn || !bodyElement) return;
-        const moonIcon = '🌙';
-        const sunIcon = '☀️';
-        function applyTheme(theme) {
-            bodyElement.classList.toggle('dark-mode', theme === 'dark');
-            themeToggleBtn.textContent = theme === 'dark' ? sunIcon : moonIcon;
-            localStorage.setItem('theme', theme);
+    // Aggiornamento UI per Tema Toggle (usa .textContent per cambiare l'icona)
+function setupThemeSwitcher() { // Assicurati che questa funzione sia chiamata
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    if (!themeToggleBtn) return;
+    const bodyElement = document.body;
+    const moonIconName = 'dark_mode'; // Nome icona Material Symbols
+    const sunIconName = 'light_mode'; // Nome icona Material Symbols
+    const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded'); // Seleziona lo span dell'icona
+
+    function applyTheme(theme) {
+        bodyElement.classList.toggle('dark-mode', theme === 'dark');
+        if (iconSpan) { // Aggiorna il nome dell'icona dentro lo span
+            iconSpan.textContent = theme === 'dark' ? sunIconName : moonIconName;
         }
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
-        themeToggleBtn.addEventListener('click', () => {
-            applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
-        });
+        localStorage.setItem('theme', theme);
+        // Aggiorna anche l'aria-label se vuoi che cambi dinamicamente
+        themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
+        themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
     }
+
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+
+    themeToggleBtn.addEventListener('click', () => {
+        applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
+    });
+}
 
     function setupModalControls() {
         const openModal = (modal) => {
@@ -531,6 +571,142 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    const navbarToggler = document.getElementById('navbarToggler');
+const mobileNavMenu = document.getElementById('mobileNavMenu');
+// Assicurati che '.desktop-nav' sia la classe del NAV tag che contiene i link desktop
+const desktopNavElement = document.querySelector('header nav.desktop-nav');
+
+    if (navbarToggler && mobileNavMenu && desktopNavElement) {
+    const desktopNavUl = desktopNavElement.querySelector('ul'); // Prendi l'UL dentro .desktop-nav
+    function populateMobileMenu(currentUser) { // Passa currentUser per decidere la visibilità
+        if (!desktopNavUl) return; // Salvaguardia
+        mobileNavMenu.innerHTML = ''; // Pulisci il contenuto precedente
+
+        const mobileUl = document.createElement('ul'); // Crea un nuovo UL per il menu mobile
+
+        // 1. Clona i link diretti (non nel dropdown)
+        desktopNavUl.querySelectorAll(':scope > li:not(.nav-dropdown-container)').forEach(desktopLi => {
+            const clonedLi = desktopLi.cloneNode(true);
+            const link = clonedLi.querySelector('a');
+            if (link) {
+                const iconSpan = link.querySelector('.material-symbols-rounded');
+                let textSpan = link.querySelector('.nav-text, .nav-text-desktop');
+                const visuallyHidden = link.querySelector('.visually-hidden');
+
+                if (iconSpan && !textSpan && visuallyHidden) { // Link solo icona con testo nascosto
+                    textSpan = document.createElement('span');
+                    textSpan.className = 'nav-text';
+                    textSpan.textContent = visuallyHidden.textContent;
+                    link.appendChild(textSpan);
+                    link.classList.remove('nav-link-icon-only');
+                    link.classList.add('nav-link-icon-text');
+                } else if (iconSpan && textSpan) { // Icona e testo già presenti
+                     link.classList.remove('nav-link-icon-only');
+                     link.classList.add('nav-link-icon-text');
+                     textSpan.style.display = 'inline'; // Assicura che il testo sia visibile
+                     const desktopTextOnlySpan = link.querySelector('.nav-text-desktop');
+                     if (desktopTextOnlySpan && desktopTextOnlySpan !== textSpan) {
+                         desktopTextOnlySpan.style.display = 'none'; // Nascondi testo solo desktop
+                     }
+                }
+            }
+            mobileUl.appendChild(clonedLi);
+        });
+
+        // 2. Gestisci i link del dropdown "Community" appiattendoli
+        const desktopDropdownContainer = desktopNavUl.querySelector('.nav-dropdown-container');
+        if (desktopDropdownContainer) {
+            const dropdownLinks = desktopDropdownContainer.querySelectorAll('.dropdown-menu .dropdown-item');
+            dropdownLinks.forEach(desktopLink => {
+                const clonedLi = document.createElement('li');
+                const clonedLink = desktopLink.cloneNode(true); // Clona il link del dropdown
+                
+                clonedLink.classList.remove('dropdown-item'); // Rimuovi classe specifica dropdown
+                clonedLink.style.display = 'flex';
+                clonedLink.style.padding = '12px 20px'; // Adatta padding per menu mobile
+
+                // Gestione visibilità link condizionali (Profile, Scrivi Articolo)
+                // Questo si basa sull'ID dell'elemento LI originale nel dropdown,
+                // che è stato definito nell'HTML dell'header.
+                const originalLiParent = desktopLink.closest('li'); // Trova il <li> originale
+                if (originalLiParent && originalLiParent.id === 'navWriteArticleDropdown') {
+                    clonedLi.style.display = currentUser ? 'list-item' : 'none';
+                }
+                // Aggiungi qui logica simile se "Profile" fosse nel dropdown e condizionale
+
+                clonedLi.appendChild(clonedLink);
+                mobileUl.appendChild(clonedLi);
+            });
+        }
+        
+        // Gestisci il link "Profile" se è un'icona separata (al di fuori della nav principale)
+        // e deve essere aggiunto al menu mobile.
+        const profileNavIconLinkDesktop = document.getElementById('profileNavIconLink');
+        if (profileNavIconLinkDesktop && currentUser) {
+            const profileLiMobile = document.createElement('li');
+            const profileLinkMobile = profileNavIconLinkDesktop.cloneNode(true); // Clona il link dell'icona
+            profileLinkMobile.classList.remove('nav-link-icon-only');
+            profileLinkMobile.classList.add('nav-link-icon-text');
+            
+            const profileTextSpan = document.createElement('span');
+            profileTextSpan.className = 'nav-text';
+            profileTextSpan.textContent = profileLinkMobile.title || 'Profilo'; // Usa il title o un default
+            profileLinkMobile.appendChild(profileTextSpan);
+            
+            // Rimuovi lo span .visually-hidden se presente, dato che ora c'è .nav-text
+            const visuallyHiddenProfile = profileLinkMobile.querySelector('.visually-hidden');
+            if (visuallyHiddenProfile) visuallyHiddenProfile.remove();
+
+            profileLiMobile.appendChild(profileLinkMobile);
+            mobileUl.appendChild(profileLiMobile);
+        }
+
+
+        mobileNavMenu.appendChild(mobileUl);
+    }
+
+    navbarToggler.addEventListener('click', () => {
+        const isExpanded = mobileNavMenu.style.display === 'block';
+        if (!isExpanded) {
+            populateMobileMenu(auth.currentUser); // Passa l'utente corrente
+        }
+        mobileNavMenu.style.display = isExpanded ? 'none' : 'block';
+        navbarToggler.setAttribute('aria-expanded', String(!isExpanded));
+        mobileNavMenu.setAttribute('aria-hidden', String(isExpanded));
+    });
+
+    mobileNavMenu.addEventListener('click', (event) => {
+        if (event.target.tagName === 'A' || event.target.closest('a')) {
+            mobileNavMenu.style.display = 'none';
+            navbarToggler.setAttribute('aria-expanded', 'false');
+            mobileNavMenu.setAttribute('aria-hidden', 'true');
+        }
+    });
+}
+
+
+// Logica per il dropdown "Community" (invariata, ma assicurati che gli ID siano corretti)
+const communityDropdownToggle = document.getElementById('communityDropdownToggle');
+const communityDropdownMenu = document.getElementById('communityDropdownMenu');
+
+if (communityDropdownToggle && communityDropdownMenu) {
+    communityDropdownToggle.addEventListener('click', function(event) {
+        event.stopPropagation();
+        const isExpanded = communityDropdownToggle.getAttribute('aria-expanded') === 'true' || false;
+        communityDropdownToggle.setAttribute('aria-expanded', !isExpanded);
+        communityDropdownMenu.style.display = isExpanded ? 'none' : 'block';
+    });
+
+    document.addEventListener('click', function(event) {
+        if (communityDropdownMenu.style.display === 'block' && 
+            !communityDropdownToggle.contains(event.target) && 
+            !communityDropdownMenu.contains(event.target)) {
+            communityDropdownToggle.setAttribute('aria-expanded', 'false');
+            communityDropdownMenu.style.display = 'none';
+        }
+    });
+}
 
     // RIMOSSO: Blocco if (signupForm) { ... }
     // L'event listener per il signupForm è ora gestito in js/register.js

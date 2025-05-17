@@ -3475,3 +3475,208 @@ body.game-fullscreen-active main {
     justify-content: center;
     overflow: hidden; /* Nasconde eventuali scrollbar del body */
 }
+
+/* === Navbar Styles === */
+header .desktop-nav {
+    display: flex;
+    align-items: center; /* Aggiunto per allineare verticalmente i link se hanno altezze diverse */
+}
+
+/* Stili base per Material Symbols nella navbar */
+.auth-button .material-symbols-rounded { /* CAMBIATO QUI */
+    vertical-align: middle;
+    font-size: 1.5em; /* Adegua dimensione icona */
+    line-height: 1; /* Per un miglior allineamento verticale */
+    /* Google consiglia di non impostare display: block/inline-block direttamente sull'icona
+       ma di gestire il layout tramite il contenitore.
+       Assicurati che il font-weight, fill, opsz, GRAD siano impostati nel link del font o qui se necessario */
+}
+
+header .nav-link-icon-text .material-symbols-rounded {
+    margin-right: 6px; /* Spazio tra icona e testo */
+}
+
+/* Nasconde il testo per i link solo-icona, ma lo span .visually-hidden rimane per screen reader */
+header .nav-link-icon-only .nav-text,
+header .nav-link-icon-only .nav-text-desktop {
+    display: none;
+}
+header .nav-link-icon-only .material-symbols-rounded {
+    margin-right: 0; /* Nessun margine se solo icona */
+}
+
+
+/* Stile per nascondere testo di "Home" su desktop se vuoi solo icona */
+@media (min-width: 992px) {
+    header .desktop-nav a[href="index.html"].nav-link-icon-only .nav-text-desktop {
+        /* Se avevi uno span specifico per il testo desktop di home, nascondilo */
+        /* display: none; */
+    }
+     /* Se il link Home è nav-link-icon-only, il testo è già nascosto dalla regola generale sopra.
+        Non serve altro per nascondere il testo, ma potresti voler forzare la non visualizzazione
+        di .nav-text se per errore fosse presente e visibile */
+    header .desktop-nav a[href="index.html"].nav-link-icon-only .nav-text {
+        display: none;
+    }
+}
+
+/* Dropdown Desktop "Community" */
+.nav-dropdown-container {
+    position: relative;
+}
+
+.dropdown-toggle .dropdown-arrow {
+    font-size: 1.5em; /* Adatta se l'icona arrow_drop_down sembra troppo piccola/grande */
+    vertical-align: middle;
+    transition: transform 0.2s ease-in-out;
+}
+
+.dropdown-toggle[aria-expanded="true"] .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 5px); /* Sotto il bottone toggle, con 5px di spazio */
+    left: 0;
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-secondary);
+    list-style: none;
+    padding: 5px 0; /* Padding verticale per il menu */
+    margin: 0; /* Rimosso margin-top, gestito da top */
+    z-index: 1000;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    min-width: 220px; /* Aumentato per link più lunghi con icone */
+}
+.dropdown-menu li a.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--text-color-primary);
+    white-space: nowrap;
+}
+.dropdown-menu li a.dropdown-item:hover {
+    background-color: var(--surface-bg-secondary);
+    color: var(--link-hover-color);
+}
+.dropdown-menu li a.dropdown-item .material-symbols-rounded { /* CAMBIATO QUI */
+    margin-right: 10px;
+}
+
+/* Pulsante Hamburger e Menu Mobile */
+.navbar-toggler {
+    display: none; /* Nascosto su desktop */
+    background: none;
+    border: none;
+    color: var(--text-color-primary);
+    font-size: 2em;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1; /* Per centrare meglio l'icona hamburger */
+}
+.navbar-toggler:hover, .navbar-toggler:focus {
+    background-color: var(--surface-bg-secondary);
+}
+.navbar-toggler .material-symbols-rounded { /* CAMBIATO QUI */
+    font-size: 1em; /* L'icona erediterà la dimensione dal font-size del bottone */
+    vertical-align: middle;
+}
+
+
+.mobile-nav-menu {
+    display: none;
+    width: 100%;
+    background-color: var(--surface-bg-primary);
+    border-top: 1px solid var(--border-color-primary);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: absolute;
+    top: 100%; /* Assicurati che l'header abbia una posizione (es. relative, sticky) per questo */
+    left: 0;
+    right: 0;
+    z-index: 999;
+}
+.mobile-nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.mobile-nav-menu ul li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--text-color-primary);
+    border-bottom: 1px solid var(--border-color-secondary);
+}
+.mobile-nav-menu ul li a:hover {
+    background-color: var(--surface-bg-secondary);
+    color: var(--link-hover-color);
+}
+.mobile-nav-menu ul li a .material-symbols-rounded { /* CAMBIATO QUI */
+    margin-right: 12px;
+    font-size: 1.4em;
+    vertical-align: middle;
+}
+.mobile-nav-menu ul li:last-child a {
+    border-bottom: none;
+}
+
+/* Stile per nascondere elementi solo visivamente per screen reader */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Breakpoint per mostrare l'hamburger e nascondere la nav desktop */
+@media (max-width: 991px) { /* Adatta se necessario */
+    header .desktop-nav {
+        display: none;
+    }
+    header .navbar-toggler {
+        display: inline-flex; /* Per allineare l'icona dentro il bottone */
+        align-items: center;
+        justify-content: center;
+    }
+    /* Potresti voler nascondere userDisplayName su schermi più piccoli per fare spazio */
+    #userProfileContainer #userDisplayName {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-content h1 {
+        font-size: 1.5em;
+    }
+    .header-controls {
+        gap: 5px;
+    }
+    .header-controls .auth-button {
+        padding: 6px 8px;
+    }
+    .header-controls .material-symbols-rounded { /* CAMBIATO QUI */
+        font-size: 1.3em; /* O 1.4em se preferisci */
+    }
+    .mobile-nav-menu ul li a {
+        padding: 10px 15px;
+    }
+     /* Assicurati che l'icona dell'avatar utente e il logout non siano troppo grandi */
+    #userProfileContainer #headerUserAvatar {
+        width: 28px;
+        height: 28px;
+        margin-right: 5px;
+    }
+    #userProfileContainer .auth-button .material-symbols-rounded { /* CAMBIATO QUI */
+        font-size: 1.3em;
+    }
+}
