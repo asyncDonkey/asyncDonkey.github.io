@@ -258,16 +258,35 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         tdPlayer.appendChild(avatarImg);
 
         const nameSpan = document.createElement('span');
-        nameSpan.className = 'player-name';
-        if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
-            const flagIconSpan = document.createElement('span');
-            flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
-            nameSpan.appendChild(flagIconSpan);
-        }
-        let displayName = entry.userName || entry.initials || 'Giocatore Anonimo';
+    nameSpan.className = 'player-name'; // Mantieni la classe per lo stile
+
+    // Aggiungi la bandierina prima del nome/link
+    if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
+        const flagIconSpan = document.createElement('span');
+        flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
+        // Applica eventuali stili per la bandierina se necessario qui o via CSS
+        flagIconSpan.style.marginRight = '8px'; // Esempio
+        flagIconSpan.style.verticalAlign = 'middle';
+        nameSpan.appendChild(flagIconSpan);
+    }
+
+    let displayName = entry.userName || entry.initials || 'Giocatore Anonimo';
+
+    if (entry.userId) { // Utente Registrato
+        const profileLink = document.createElement('a');
+        profileLink.href = `profile.html?userId=${entry.userId}`;
+        profileLink.textContent = displayName;
+        // Potresti aggiungere una classe CSS specifica per i link ai profili se vuoi stili diversi
+        // profileLink.classList.add('profile-link-leaderboard');
+        nameSpan.appendChild(profileLink);
+    } else { // Utente Ospite
+        if (!entry.initials) displayName += ' (Ospite)'; // Se non ci sono initials, rendi più esplicito che è ospite
+        else if (entry.initials) displayName = entry.initials + ' (Ospite)'; // Se ci sono initials, usa quelle + (Ospite)
+        nameSpan.appendChild(document.createTextNode(displayName));
+    }
         if (!entry.userId && !entry.initials) displayName += ' (Ospite)';
         else if (!entry.userId && entry.initials) displayName = entry.initials + ' (Ospite)';
-        nameSpan.appendChild(document.createTextNode(displayName));
+        
         tdPlayer.appendChild(nameSpan);
         tr.appendChild(tdPlayer);
 

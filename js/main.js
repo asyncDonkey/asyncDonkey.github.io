@@ -166,6 +166,7 @@ async function loadHomeMiniLeaderboard() {
     leaderboardListElement.innerHTML = '<li>Caricamento...</li>';
     try {
         const scoresCollectionRef = collection(db, 'leaderboardScores');
+        // La query dovrebbe già essere corretta per prendere i dati necessari (incluso userId)
         const q = query(scoresCollectionRef, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), limit(5));
         const querySnapshot = await getDocs(q);
         leaderboardListElement.innerHTML = '';
@@ -177,44 +178,63 @@ async function loadHomeMiniLeaderboard() {
         querySnapshot.forEach((docSnapshot) => {
             const entry = docSnapshot.data();
             const listItem = document.createElement('li');
+
             const rankSpan = document.createElement('span');
             rankSpan.className = 'player-rank';
             rankSpan.textContent = `${rank}.`;
             listItem.appendChild(rankSpan);
+
             const avatarImg = document.createElement('img');
             avatarImg.className = 'player-avatar';
-            const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${docSnapshot.id}`;
+            const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-home-${docSnapshot.id}`;
             avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
             avatarImg.alt = `Avatar`;
-            avatarImg.style.backgroundColor = 'transparent';
-            avatarImg.onerror = () => {
-                avatarImg.style.backgroundColor = '#ddd';
-                avatarImg.alt = 'Err';
-                avatarImg.src =
-                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
-            };
+            avatarImg.style.backgroundColor = 'transparent'; // Già presente
+            avatarImg.onerror = () => { /* ... gestione errore avatar ... */ };
             listItem.appendChild(avatarImg);
+
             const playerInfoSpan = document.createElement('span');
-            playerInfoSpan.className = 'player-info';
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'player-name';
+            playerInfoSpan.className = 'player-info'; // Contenitore per nome e bandiera
+
+            // Elemento per il nome (potrebbe essere un link o testo semplice)
+            const nameElementContainer = document.createElement('span');
+            nameElementContainer.className = 'player-name'; // Mantieni la classe per lo stile
+
+            // Aggiungi la bandierina prima del nome/link
             if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
                 const flagIconSpan = document.createElement('span');
                 flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
                 flagIconSpan.style.marginRight = '5px';
-                flagIconSpan.style.fontSize = '1em';
                 flagIconSpan.style.verticalAlign = 'middle';
-                nameSpan.appendChild(flagIconSpan);
+                nameElementContainer.appendChild(flagIconSpan);
             }
+
             let displayName = entry.userName || entry.initials || 'Anonimo';
-            if (!entry.userId && entry.initials) displayName = entry.initials;
-            nameSpan.appendChild(document.createTextNode(displayName));
-            playerInfoSpan.appendChild(nameSpan);
+
+            if (entry.userId) { // Utente Registrato -> Crea Link
+                const profileLink = document.createElement('a');
+                profileLink.href = `profile.html?userId=${entry.userId}`;
+                profileLink.textContent = displayName;
+                // Aggiungi eventuali classi CSS specifiche per i link nei profili se necessario
+                // profileLink.classList.add('leaderboard-profile-link');
+                nameElementContainer.appendChild(profileLink);
+            } else { // Utente Ospite -> Testo Semplice
+                if (entry.initials) {
+                    displayName = entry.initials + ' (Ospite)';
+                } else {
+                    displayName += ' (Ospite)';
+                }
+                nameElementContainer.appendChild(document.createTextNode(displayName));
+            }
+
+            playerInfoSpan.appendChild(nameElementContainer); // Aggiungi il contenitore del nome (con link o testo)
             listItem.appendChild(playerInfoSpan);
+
             const scoreSpan = document.createElement('span');
             scoreSpan.className = 'player-score';
             scoreSpan.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
             listItem.appendChild(scoreSpan);
+
             leaderboardListElement.appendChild(listItem);
             rank++;
         });
