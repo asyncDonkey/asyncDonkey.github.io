@@ -193,7 +193,18 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
                 const displayDate = articleDataFromDb.publishedAt || articleDataFromDb.createdAt;
                 articleDisplayDate.textContent = formatArticleDateForViewer(displayDate);
             }
-            if (articleDisplayAuthor) articleDisplayAuthor.textContent = articleDataFromDb.authorName || 'N/D';
+            if (articleDisplayAuthor) {
+    articleDisplayAuthor.innerHTML = ''; // Pulisci prima
+    if (articleDataFromDb.authorId) {
+        const authorLink = document.createElement('a');
+        authorLink.href = `profile.html?userId=${articleDataFromDb.authorId}`;
+        authorLink.textContent = articleDataFromDb.authorName || 'Autore Sconosciuto';
+        // authorLink.classList.add('user-profile-link'); // Stile opzionale
+        articleDisplayAuthor.appendChild(authorLink);
+    } else {
+        articleDisplayAuthor.textContent = articleDataFromDb.authorName || 'N/D';
+    }
+}
 
             if (articleDisplayTagsContainer) {
                 articleDisplayTagsContainer.innerHTML = '';

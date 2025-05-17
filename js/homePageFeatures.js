@@ -75,10 +75,21 @@ function createArticleCard(articleData, articleId, gridContainer) {
     }
 
     // Author Name
-    const authorNameSpanElement = document.createElement('span');
-    authorNameSpanElement.className = 'article-author-name';
-    authorNameSpanElement.textContent = articleData.authorName || 'Autore Sconosciuto';
-    authorInfoSpan.appendChild(authorNameSpanElement);
+    const authorNameContainer = document.createElement('span'); // Contenitore generico
+authorNameContainer.className = 'article-author-name'; // Mantieni la classe per lo stile
+
+if (articleData.authorId) {
+    const authorLink = document.createElement('a');
+    authorLink.href = `profile.html?userId=${articleData.authorId}`;
+    authorLink.textContent = articleData.authorName || 'Autore Sconosciuto';
+    // Potresti aggiungere uno stile specifico per i link utente se necessario
+    // authorLink.classList.add('user-profile-link'); 
+    authorNameContainer.appendChild(authorLink);
+} else {
+    authorNameContainer.textContent = articleData.authorName || 'Autore Sconosciuto';
+}
+// authorInfoSpan.appendChild(authorNameSpanElement); // Rimuovi la vecchia riga
+authorInfoSpan.appendChild(authorNameContainer); // Aggiungi il nuovo contenitore
 
     // D.7.2: Author Nationality Flag
     if (
