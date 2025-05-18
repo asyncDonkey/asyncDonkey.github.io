@@ -1,5 +1,4 @@
 // js/comments.js
-
 import { db, auth, generateBlockieAvatar } from './main.js';
 import {
     collection,
@@ -16,19 +15,13 @@ import {
     where,
     arrayUnion,
     arrayRemove,
-    Timestamp, // Aggiunto Timestamp se non già presente
+    Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { showToast } from './toastNotifications.js'; // Assicurati sia importato se lo usi qui
 
-// --- INIZIO MODIFICHE ---
-
-// Riferimenti DOM per la modale "Liked By" (da usare per i commenti del guestbook)
-// Questi ID devono corrispondere a quelli della modale copiata in about.html e donkeyRunner.html
+// Riferimenti DOM per la modale "Liked By" (devono essere presenti nell'HTML della pagina che usa comments.js)
 let likedByModal, closeLikedByModalBtn, likedByModalTitle, likedByModalList, likedByModalLoading, likedByModalNoLikes;
-
-// Costanti per emoji dei like ai commenti (già presenti, ma le spostiamo per chiarezza)
-const INITIAL_GUESTBOOK_COMMENT_LIKE_EMOJI = '🤍'; // Cuore bianco
-const LIKED_GUESTBOOK_COMMENT_EMOJI = '💙'; // Cuore blu
 
 let guestbookCollection;
 if (db) {
@@ -37,30 +30,24 @@ if (db) {
     console.error('comments.js: DB instance not valid!');
 }
 
-const commentForm = document.getElementById('commentForm');
-const commentNameInput = document.getElementById('commentName');
-const commentMessageInput = document.getElementById('commentMessage');
-const submitCommentBtn = document.getElementById('submitCommentBtn');
-const commentsListDiv = document.getElementById('commentsList');
+// Riferimenti DOM specifici per il form e la lista dei commenti del guestbook
+let commentForm,
+    commentNameInput,
+    commentMessageInput,
+    submitCommentBtn,
+    commentsListDiv,
+    commentNameSection,
+    commentsListContainer; // Questo è il contenitore che ha data-page-id
 
-const commentNameSection = document.getElementById('commentNameSection');
-const commentsListContainer = document.getElementById('commentsListContainer');
+let currentPageId = 'default'; // Fallback
 
-const MAX_COMMENTS_DISPLAYED = 20;
-
-let currentPageId = 'default';
-if (commentsListContainer && commentsListContainer.dataset.pageId) {
-    currentPageId = commentsListContainer.dataset.pageId;
-    console.log(`comments.js: Initialized for pageId: ${currentPageId}`);
-} else {
-    console.warn(
-        'comments.js: commentsListContainer o data-page-id non trovato. Verrà usato il pageId di fallback "default".'
-    );
-}
-
-/** Formats Firestore Timestamp */
+/**
+ * Formatta un timestamp di Firestore per la visualizzazione.
+ * @param {object|null|undefined} firebaseTimestamp - Timestamp di Firestore.
+ * @returns {string} Data e ora formattate o messaggio di fallback.
+ */
 function formatFirebaseTimestamp(firebaseTimestamp) {
-    if (!firebaseTimestamp?.toDate) return 'Date unavailable';
+    if (!firebaseTimestamp?.toDate) return 'Data non disponibile';
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
             year: 'numeric',
@@ -70,7 +57,8 @@ function formatFirebaseTimestamp(firebaseTimestamp) {
             minute: '2-digit',
         });
     } catch (e) {
-        return 'Date format error';
+        console.error("Errore formattazione timestamp commento:", e);
+        return 'Formato data errato';
     }
 }
 
@@ -80,11 +68,11 @@ function formatFirebaseTimestamp(firebaseTimestamp) {
  */
 async function handleGuestbookCommentLike(event) {
     const button = event.currentTarget;
-    const commentId = button.dataset.commentId; // Assicurati che il data-attribute sia 'data-comment-id'
+    const commentId = button.dataset.commentId;
     const currentUser = auth.currentUser;
 
     if (!commentId || !guestbookCollection) {
-        console.error('handleGuestbookCommentLike: commentId o guestbookCollection mancante.');
+        console.error('[comments.js] handleGuestbookCommentLike: commentId o guestbookCollection mancante.');
         return;
     }
     if (!currentUser) {
@@ -98,7 +86,7 @@ async function handleGuestbookCommentLike(event) {
     try {
         const commentSnap = await getDoc(commentDocRef);
         if (!commentSnap.exists()) {
-            console.error('Commento del guestbook non trovato:', commentId);
+            console.error('[comments.js] Commento del guestbook non trovato:', commentId);
             showToast('Errore: commento non trovato.');
             button.disabled = false;
             return;
@@ -108,24 +96,18 @@ async function handleGuestbookCommentLike(event) {
         const likedByUsers = commentData.likedBy || [];
         const userHasLiked = likedByUsers.includes(currentUser.uid);
 
-        // Determina l'operazione e l'aggiornamento dell'array
         let newLikesCountOp = userHasLiked ? increment(-1) : increment(1);
         let userArrayUpdateOp = userHasLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid);
 
-        // Logica per evitare conteggio negativo se non dovrebbe succedere
         if (userHasLiked && (commentData.likes || 0) <= 0) {
             if (!likedByUsers.includes(currentUser.uid)) {
-                // L'utente non era tra i likers ma il conteggio era <=0
                 console.warn(
-                    `Inconsistenza dati per commento ${commentId}: l'utente non ha messo like ma il conteggio è <=0.`
+                    `[comments.js] Inconsistenza dati per commento ${commentId}: l'utente non ha messo like ma il conteggio è <=0.`
                 );
-                button.disabled = false; // Riabilita e non fare nulla
-                return; // Evita l'operazione
+                button.disabled = false;
+                return;
             }
-            // Se l'utente ha messo like ma il conteggio è già 0 o negativo, non decrementare ulteriormente.
-            // Questo previene che 'likes' diventi negativo se c'è un'incoerenza.
-            // Si limita a rimuovere l'utente da likedBy.
-            if ((commentData.likes || 0) <= 0) newLikesCountOp = increment(0); // Non cambiare il conteggio se già a zero o meno
+            if ((commentData.likes || 0) <= 0) newLikesCountOp = increment(0);
         }
 
         await updateDoc(commentDocRef, {
@@ -140,53 +122,59 @@ async function handleGuestbookCommentLike(event) {
             const currentLikesCount = updatedCommentData.likes || 0;
             const userNowHasLiked = updatedCommentData.likedBy && updatedCommentData.likedBy.includes(currentUser.uid);
 
-            // Aggiorna il conteggio numerico (se esiste come span separato o dentro il bottone)
-            // Questa parte assume che il conteggio sia dentro il bottone, come per i commenti articolo
-            const likeCountSpanInsideButton = button.querySelector('.like-count'); // Cerca uno span .like-count DENTRO il bottone
+            const iconName = userNowHasLiked ? 'favorite' : 'favorite_border';
+            button.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikesCount}</span>`;
+            console.log(`[comments.js] handleGuestbookCommentLike - Pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikesCount}`);
+            
+            button.classList.toggle('liked', userNowHasLiked);
+            button.title = userNowHasLiked ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
+            
+            // Aggiorna la cliccabilità del conteggio
+            const likeCountSpanInsideButton = button.querySelector('.like-count');
             if (likeCountSpanInsideButton) {
-                likeCountSpanInsideButton.textContent = currentLikesCount;
-            } else {
-                // Se lo span è FRATELLO del bottone (come nella versione precedente di `comments.js`)
-                const likeCountSpanSibling = button.nextElementSibling;
-                if (likeCountSpanSibling && likeCountSpanSibling.classList.contains('like-count')) {
-                    likeCountSpanSibling.textContent = `${currentLikesCount}`;
+                const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
+                if (oldListener) {
+                    likeCountSpanInsideButton.removeEventListener('click', oldListener);
                 }
-            }
-
-            // Aggiorna l'emoji del bottone
-            // Assumiamo che l'emoji sia il primo nodo figlio del bottone e sia un nodo di testo
-            const emojiNode = button.childNodes[0];
-            if (emojiNode && emojiNode.nodeType === Node.TEXT_NODE) {
-                emojiNode.nodeValue = `${userNowHasLiked ? LIKED_GUESTBOOK_COMMENT_EMOJI : INITIAL_GUESTBOOK_COMMENT_LIKE_EMOJI} `; // Spazio per separare dall'eventuale span
-            }
-
-            if (userNowHasLiked) {
-                button.classList.add('liked');
-                button.title = "Togli il 'Mi piace' a questo commento";
-            } else {
-                button.classList.remove('liked');
-                button.title = "Metti 'Mi piace' a questo commento";
+                if (currentLikesCount > 0) {
+                    likeCountSpanInsideButton.classList.add('clickable-comment-like-count');
+                    likeCountSpanInsideButton.title = 'Vedi a chi piace questo commento';
+                    const newListener = (e) => {
+                        e.stopPropagation();
+                        openGuestbookLikedByListModal(commentId);
+                    };
+                    likeCountSpanInsideButton.addEventListener('click', newListener);
+                    likeCountSpanInsideButton.handleLikeCountClick = newListener;
+                } else {
+                    likeCountSpanInsideButton.classList.remove('clickable-comment-like-count');
+                    likeCountSpanInsideButton.style.cursor = 'default';
+                    likeCountSpanInsideButton.style.textDecoration = 'none';
+                    likeCountSpanInsideButton.title = '';
+                    delete likeCountSpanInsideButton.handleLikeCountClick;
+                }
             }
         }
         button.disabled = false;
     } catch (error) {
-        console.error("comments.js - Errore durante l'aggiornamento del like al commento guestbook:", error);
+        console.error("[comments.js] Errore durante l'aggiornamento del like al commento guestbook:", error);
         showToast("Si è verificato un errore durante l'aggiornamento del like. Riprova.");
         button.disabled = false;
-        // Potrebbe essere utile ricaricare i commenti per riflettere lo stato corretto
-        if (commentsListDiv && guestbookCollection && currentPageId) {
-            await loadComments();
-        }
+        // Considera se ricaricare i commenti qui in caso di errore per UI consistente
+        // if (commentsListDiv && guestbookCollection && currentPageId) {
+        // await loadComments();
+        // }
     }
 }
 
-/** Loads and displays comments based on currentPageId */
+/**
+ * Carica e visualizza i commenti del guestbook per la pagina corrente.
+ */
 async function loadComments() {
     if (!commentsListDiv || !guestbookCollection) {
-        if (commentsListDiv) commentsListDiv.innerHTML = '<p>Error: Database connection or DOM element missing.</p>';
+        if (commentsListDiv) commentsListDiv.innerHTML = '<p>Errore: Connessione al DB o elemento DOM mancante.</p>';
         return;
     }
-    commentsListDiv.innerHTML = `<p>Loading comments for ${currentPageId}...</p>`;
+    commentsListDiv.innerHTML = `<p>Caricamento commenti per ${currentPageId}...</p>`;
 
     const currentUser = auth.currentUser;
 
@@ -195,15 +183,15 @@ async function loadComments() {
             guestbookCollection,
             where('pageId', '==', currentPageId),
             orderBy('timestamp', 'desc'),
-            limit(MAX_COMMENTS_DISPLAYED)
+            limit(20) // MAX_COMMENTS_DISPLAYED
         );
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            commentsListDiv.innerHTML = '<p>Nessun commento per questa pagina. Sii il primo!</p>';
+            commentsListDiv.innerHTML = `<p>Nessun commento per "${currentPageId}". Sii il primo!</p>`;
             return;
         }
-        commentsListDiv.innerHTML = '';
+        commentsListDiv.innerHTML = ''; // Pulisci
         querySnapshot.forEach((docSnapshot) => {
             const commentData = docSnapshot.data();
             const commentId = docSnapshot.id;
@@ -211,60 +199,56 @@ async function loadComments() {
             commentElement.classList.add('comment-item');
 
             const avatarImg = document.createElement('img');
-            avatarImg.classList.add('comment-avatar-img'); // Usa la classe CSS
+            avatarImg.classList.add('comment-avatar-img');
             const seedForBlockie =
                 commentData.userId || commentData.userName || commentData.name || `anon-g-${commentId}`;
-            let altTextForBlockie = commentData.userName || commentData.name || 'Anonymous';
             avatarImg.src = generateBlockieAvatar(seedForBlockie, 40, { size: 8 });
-            avatarImg.alt = `${altTextForBlockie}'s Blockie Avatar`;
+            avatarImg.alt = 'Avatar';
             commentElement.appendChild(avatarImg);
 
+            const commentContentDiv = document.createElement('div');
+            commentContentDiv.classList.add('comment-content');
+
+            const nameEl = document.createElement('strong');
+            let commenterNameDisplay = commentData.userId 
+                ? (commentData.userName || 'Utente Registrato') 
+                : (commentData.name || 'Anonimo') + (commentData.userId === null || typeof commentData.userId === 'undefined' ? ' (Ospite)' : '');
+
+
+            if (commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
+                const flagIconSpan = document.createElement('span');
+                flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
+                flagIconSpan.style.marginRight = '5px';
+                flagIconSpan.style.verticalAlign = 'middle';
+                nameEl.appendChild(flagIconSpan);
+            }
+
+            if (commentData.userId) {
+                const userProfileLink = document.createElement('a');
+                userProfileLink.href = `profile.html?userId=${commentData.userId}`;
+                userProfileLink.textContent = commenterNameDisplay;
+                nameEl.appendChild(userProfileLink);
+            } else {
+                nameEl.appendChild(document.createTextNode(commenterNameDisplay));
+            }
             
-
-            const commentContent = document.createElement('div');
-commentContent.classList.add('comment-content');
-
-const nameEl = document.createElement('strong'); // o span, a seconda dello stile
-let commenterNameDisplay = commentData.userId ? (commentData.userName || 'Utente Registrato') : (commentData.name || 'Anonimo') + ' (Ospite)'; // Vecchia logica nome
-
-// Aggiungi bandierina se utente loggato e ha nationalityCode
-if (commentData.userId && commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
-    const flagIconSpan = document.createElement('span');
-    flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
-    flagIconSpan.style.marginRight = '5px';
-    flagIconSpan.style.verticalAlign = 'middle';
-    nameEl.appendChild(flagIconSpan); // Appendi la bandiera all'elemento 'nameEl'
-}
-
-// Gestisci il nome utente e il link
-if (commentData.userId) {
-    const userProfileLink = document.createElement('a');
-    userProfileLink.href = `profile.html?userId=${commentData.userId}`;
-    userProfileLink.textContent = commentData.userName || 'Utente Registrato'; // Usa userName se disponibile
-    // userProfileLink.classList.add('user-profile-link'); // Stile opzionale
-    nameEl.appendChild(userProfileLink);
-} else {
-    // Utente ospite
-    nameEl.appendChild(document.createTextNode((commentData.name || 'Anonimo') + ' (Ospite)'));
-}
-
-            nameEl.appendChild(document.createTextNode(commenterNameDisplay));
             const dateEl = document.createElement('small');
             dateEl.classList.add('comment-date');
             dateEl.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
+            
             const messageEl = document.createElement('p');
             messageEl.textContent = commentData.message
                 ? String(commentData.message).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 : '';
-            commentContent.appendChild(nameEl);
-            commentContent.appendChild(dateEl);
-            commentContent.appendChild(messageEl);
+            
+            commentContentDiv.appendChild(nameEl);
+            commentContentDiv.appendChild(dateEl);
+            commentContentDiv.appendChild(messageEl);
 
-            // --- Sezione Like per commenti Guestbook ---
             const likesContainer = document.createElement('div');
             likesContainer.classList.add('likes-container');
             const likeButton = document.createElement('button');
-            likeButton.classList.add('like-btn'); // Classe generica per stile bottone like
+            likeButton.classList.add('like-btn');
             likeButton.setAttribute('data-comment-id', commentId);
 
             const currentLikes = commentData.likes || 0;
@@ -273,66 +257,68 @@ if (commentData.userId) {
                 userHasLikedThisComment = true;
             }
 
-            // Mettiamo l'emoji e lo span del conteggio DENTRO al bottone
-            likeButton.innerHTML = `${userHasLikedThisComment ? LIKED_GUESTBOOK_COMMENT_EMOJI : INITIAL_GUESTBOOK_COMMENT_LIKE_EMOJI} <span class="like-count">${currentLikes}</span>`;
+            const iconName = userHasLikedThisComment ? 'favorite' : 'favorite_border';
+            likeButton.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikes}</span>`;
+            console.log(`[comments.js] loadComments - Creato pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikes}`);
 
-            if (userHasLikedThisComment) {
-                likeButton.classList.add('liked'); // Per stilizzare il bottone "liked"
-            }
+            likeButton.classList.toggle('liked', userHasLikedThisComment);
             likeButton.title = userHasLikedThisComment ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
-            likeButton.disabled = !currentUser; // Disabilita se utente non loggato
-
+            likeButton.disabled = !currentUser;
             likeButton.addEventListener('click', handleGuestbookCommentLike);
-            likesContainer.appendChild(likeButton);
 
-            // Rendi il conteggio dei like cliccabile per aprire la modale
-            const likeCountSpanInButton = likeButton.querySelector('.like-count');
-            if (likeCountSpanInButton) {
-                // Verifica che lo span esista
+            const likeCountSpanInsideButton = likeButton.querySelector('.like-count');
+            if (likeCountSpanInsideButton) {
+                const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
+                if (oldListener) {
+                    likeCountSpanInsideButton.removeEventListener('click', oldListener);
+                }
                 if (currentLikes > 0) {
-                    likeCountSpanInButton.classList.add('clickable-comment-like-count'); // Aggiungi per stile CSS
-                    likeCountSpanInButton.title = 'Vedi a chi piace questo commento';
-
-                    likeCountSpanInButton.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Evita che il click si propaghi al bottone like
-                        openGuestbookLikedByListModal(commentId); // Apri modale per questo commento
-                    });
+                    likeCountSpanInsideButton.classList.add('clickable-comment-like-count');
+                    likeCountSpanInsideButton.title = 'Vedi a chi piace questo commento';
+                    const newListener = (e) => {
+                        e.stopPropagation();
+                        openGuestbookLikedByListModal(commentId);
+                    };
+                    likeCountSpanInsideButton.addEventListener('click', newListener);
+                    likeCountSpanInsideButton.handleLikeCountClick = newListener;
                 } else {
-                    // Se non ci sono like, non rendere cliccabile e rimuovi eventuali stili
-                    likeCountSpanInButton.classList.remove('clickable-comment-like-count');
-                    likeCountSpanInButton.style.cursor = 'default';
-                    likeCountSpanInButton.style.textDecoration = 'none';
-                    likeCountSpanInButton.title = '';
+                    likeCountSpanInsideButton.classList.remove('clickable-comment-like-count');
+                    likeCountSpanInsideButton.style.cursor = 'default';
+                    likeCountSpanInsideButton.style.textDecoration = 'none';
+                    likeCountSpanInsideButton.title = '';
+                    delete likeCountSpanInsideButton.handleLikeCountClick;
                 }
             }
 
-            commentContent.appendChild(likesContainer);
-            // --- Fine Sezione Like ---
-
-            commentElement.appendChild(commentContent);
+            likesContainer.appendChild(likeButton);
+            commentContentDiv.appendChild(likesContainer);
+            commentElement.appendChild(commentContentDiv);
             commentsListDiv.appendChild(commentElement);
         });
     } catch (error) {
-        console.error(`comments.js - Error loading comments for pageId ${currentPageId}: `, error);
+        console.error(`[comments.js] Errore caricamento commenti per pageId ${currentPageId}: `, error);
         if (error.code === 'failed-precondition' && commentsListDiv) {
-            commentsListDiv.innerHTML = `<p>Errore: Indice Firestore mancante per filtrare i commenti. Controlla la console del browser per il link per crearlo.</p>`;
+            commentsListDiv.innerHTML = `<p>Errore: Indice Firestore mancante per filtrare i commenti. Controlla la console.</p>`;
         } else if (commentsListDiv) {
             commentsListDiv.innerHTML = '<p>Errore caricamento commenti. Riprova più tardi.</p>';
         }
     }
 }
 
-/** Handles comment form submission */
+/**
+ * Gestisce l'invio di un nuovo commento al guestbook.
+ * @param {Event} event - L'evento di submit del form.
+ */
 async function handleCommentSubmit(event) {
     event.preventDefault();
     if (!guestbookCollection || !commentMessageInput || !submitCommentBtn || !commentsListDiv) {
-        console.error('comments.js - Elementi DOM del form commenti mancanti.');
+        console.error('[comments.js] Elementi DOM del form commenti mancanti.');
         showToast('Errore interfaccia. Riprova.');
         return;
     }
     const message = commentMessageInput.value.trim();
     if (!message) {
-        showToast('Please enter a message.');
+        showToast('Per favore, inserisci un messaggio.');
         return;
     }
 
@@ -349,65 +335,63 @@ async function handleCommentSubmit(event) {
             const docSnap = await getDoc(userProfileRef);
             if (docSnap.exists()) {
                 const profileData = docSnap.data();
-                userNameForDb = profileData.nickname || (user.email ? user.email.split('@')[0] : 'Registered User');
+                userNameForDb = profileData.nickname || (user.email ? user.email.split('@')[0] : 'Utente Registrato');
                 if (profileData.nationalityCode) {
                     userNationalityCode = profileData.nationalityCode;
                 }
             } else {
-                userNameForDb = user.email ? user.email.split('@')[0] : 'Registered User';
+                userNameForDb = user.email ? user.email.split('@')[0] : 'Utente Registrato';
             }
         } catch (profileError) {
-            console.error('comments.js - Error loading profile for comment:', profileError);
-            userNameForDb = user.email ? user.email.split('@')[0] : 'Registered User';
+            console.error('[comments.js] Errore caricamento profilo per commento:', profileError);
+            userNameForDb = user.email ? user.email.split('@')[0] : 'Utente Registrato';
         }
     } else {
         if (!commentNameInput || !commentNameSection) {
-            console.error('comments.js - Elementi DOM per nome anonimo mancanti.');
+            console.error('[comments.js] Elementi DOM per nome anonimo mancanti.');
             showToast('Errore interfaccia. Riprova.');
             return;
         }
         nameForDb = commentNameInput.value.trim();
         if (!nameForDb) {
-            showToast('Please enter your name or log in.');
+            showToast('Per favore, inserisci il tuo nome o effettua il login.');
             return;
         }
     }
 
     submitCommentBtn.disabled = true;
-    submitCommentBtn.textContent = 'Submitting...';
+    submitCommentBtn.textContent = 'Invio...';
     try {
         const commentDataPayload = {
-            // Rinominato per chiarezza
             message: message,
             timestamp: serverTimestamp(),
-            likes: 0, // Sub-task G.1.1: Inizializza likes a 0
-            likedBy: [], // Sub-task G.1.1: Inizializza likedBy a array vuoto
+            likes: 0,
+            likedBy: [],
             pageId: currentPageId,
         };
         if (userIdToSave) {
             commentDataPayload.userId = userIdToSave;
             commentDataPayload.userName = userNameForDb;
             if (userNationalityCode) {
-                // Salva anche la nazionalità per gli utenti loggati
                 commentDataPayload.nationalityCode = userNationalityCode;
             }
         } else {
             commentDataPayload.name = nameForDb;
-            // Per gli utenti anonimi, la nazionalità non è richiesta/gestita nel form base
         }
 
         await addDoc(guestbookCollection, commentDataPayload);
 
         if (commentMessageInput) commentMessageInput.value = '';
-        if (commentNameInput && !user) commentNameInput.value = ''; // Pulisci nome solo se utente non loggato
+        if (commentNameInput && !user) commentNameInput.value = '';
         await loadComments();
+        showToast('Commento inviato con successo!', 'success');
     } catch (error) {
-        console.error('comments.js - Error submitting comment:', error);
-        showToast('Error submitting comment. Please try again.');
+        console.error('[comments.js] Errore invio commento:', error);
+        showToast('Errore invio commento. Riprova.');
     } finally {
         if (submitCommentBtn) {
             submitCommentBtn.disabled = false;
-            submitCommentBtn.textContent = 'Submit Comment';
+            submitCommentBtn.textContent = 'Invia Commento';
         }
     }
 }
@@ -425,12 +409,13 @@ function closeGuestbookLikedByListModal() {
 
 async function openGuestbookLikedByListModal(commentId) {
     if (!likedByModal) {
-        console.error('Elemento likedByModal non trovato per i commenti del guestbook.');
+        console.error('[comments.js] Elemento likedByModal non trovato per i commenti del guestbook.');
         return;
     }
-    // Non serve controllare auth.currentUser qui, perché il conteggio cliccabile
-    // non dovrebbe essere visibile o la modale non dovrebbe aprirsi se non ci sono like.
-    // La logica di chi può vedere è più a livello di UI che impedisce l'azione.
+    if (!auth.currentUser) {
+        showToast('Devi essere loggato per vedere i like.', 'info');
+        return;
+    }
 
     if (likedByModalList) likedByModalList.innerHTML = '';
     if (likedByModalNoLikes) likedByModalNoLikes.style.display = 'none';
@@ -446,21 +431,21 @@ async function openGuestbookLikedByListModal(commentId) {
 
 async function populateGuestbookLikedByListModal(commentId) {
     if (!likedByModalList || !likedByModalLoading || !likedByModalNoLikes || !db) {
-        console.error('Elementi modale o DB mancanti per populateGuestbookLikedByListModal');
+        console.error('[comments.js] Elementi modale o DB mancanti per populateGuestbookLikedByListModal');
         if (likedByModalLoading) likedByModalLoading.style.display = 'none';
         if (likedByModalList) likedByModalList.innerHTML = '<li>Errore critico.</li>';
         return;
     }
 
     try {
-        const commentDocRef = doc(db, 'guestbookEntries', commentId); // Usa la collezione corretta
+        const commentDocRef = doc(db, 'guestbookEntries', commentId);
         const commentSnap = await getDoc(commentDocRef);
 
         let likedByUsersIds = [];
         if (commentSnap.exists()) {
             likedByUsersIds = commentSnap.data().likedBy || [];
         } else {
-            console.warn(`Commento guestbook non trovato ID: ${commentId}`);
+            console.warn(`[comments.js] Commento guestbook non trovato ID: ${commentId}`);
             likedByModalList.innerHTML = '<li>Errore: commento non trovato.</li>';
             if (likedByModalLoading) likedByModalLoading.style.display = 'none';
             return;
@@ -468,23 +453,23 @@ async function populateGuestbookLikedByListModal(commentId) {
 
         if (likedByUsersIds.length === 0) {
             if (likedByModalNoLikes) likedByModalNoLikes.style.display = 'block';
-            likedByModalList.innerHTML = ''; // Assicurati che la lista sia vuota
+            likedByModalList.innerHTML = '';
         } else {
             const userProfilePromises = likedByUsersIds.map((userId) => getDoc(doc(db, 'userProfiles', userId)));
             const userProfileSnapshots = await Promise.all(userProfilePromises);
 
-            likedByModalList.innerHTML = ''; // Pulisci prima di popolare
+            likedByModalList.innerHTML = '';
             userProfileSnapshots.forEach((userSnap) => {
                 const li = document.createElement('li');
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
                     const avatarImg = document.createElement('img');
-                    avatarImg.className = 'liked-by-avatar'; // Usa la classe CSS per lo stile avatar
+                    avatarImg.className = 'liked-by-avatar';
                     avatarImg.src = generateBlockieAvatar(userSnap.id, 32, { size: 8 });
                     avatarImg.alt = `Avatar di ${userData.nickname || 'Utente'}`;
 
                     const nameSpan = document.createElement('span');
-                    nameSpan.className = 'liked-by-name'; // Usa la classe CSS per lo stile nome
+                    nameSpan.className = 'liked-by-name';
                     nameSpan.textContent = userData.nickname || 'Utente Sconosciuto';
 
                     li.appendChild(avatarImg);
@@ -493,17 +478,15 @@ async function populateGuestbookLikedByListModal(commentId) {
                     if (userData.nationalityCode && userData.nationalityCode !== 'OTHER') {
                         const flagSpan = document.createElement('span');
                         flagSpan.className = `fi fi-${userData.nationalityCode.toLowerCase()}`;
-                        flagSpan.title = userData.nationalityCode; // Tooltip con il codice paese
-                        // Potresti aggiungere stili direttamente qui o via CSS per il flagSpan
-                        flagSpan.style.marginLeft = '8px'; // Esempio di stile
+                        flagSpan.title = userData.nationalityCode;
+                        flagSpan.style.marginLeft = '8px';
                         li.appendChild(flagSpan);
                     }
                 } else {
-                    // Utente potrebbe essere stato cancellato o ID non valido
-                    console.warn(`Profilo utente non trovato per ID: ${userSnap.id} (liker di commento guestbook)`);
+                    console.warn(`[comments.js] Profilo utente non trovato per ID: ${userSnap.id} (liker di commento guestbook)`);
                     const avatarImg = document.createElement('img');
                     avatarImg.className = 'liked-by-avatar';
-                    avatarImg.src = generateBlockieAvatar(userSnap.id || 'unknown', 32, { size: 8 }); // Avatar generico
+                    avatarImg.src = generateBlockieAvatar(userSnap.id || 'unknown', 32, { size: 8 });
                     avatarImg.alt = 'Avatar Utente Sconosciuto';
                     const nameSpan = document.createElement('span');
                     nameSpan.className = 'liked-by-name';
@@ -515,21 +498,30 @@ async function populateGuestbookLikedByListModal(commentId) {
             });
         }
     } catch (error) {
-        console.error(`Errore nel popolare la lista "Liked By" per commento guestbook:`, error);
+        console.error(`[comments.js] Errore nel popolare la lista "Liked By" per commento guestbook:`, error);
         likedByModalList.innerHTML = '<li>Errore durante il caricamento della lista.</li>';
     } finally {
         if (likedByModalLoading) likedByModalLoading.style.display = 'none';
     }
 }
 
-// --- Initialization ---
+
+// --- INIZIALIZZAZIONE ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Inizializzazione dei riferimenti DOM per la modale
-    // Questi ID DEVONO CORRISPONDERE a quelli nell'HTML copiato in about.html e donkeyRunner.html
-    likedByModal = document.getElementById('likedByModal'); // Assumiamo ID generico per la modale
+    console.log('[comments.js] DOMContentLoaded');
+    // Assegnazione riferimenti DOM
+    commentForm = document.getElementById('commentForm');
+    commentNameInput = document.getElementById('commentName');
+    commentMessageInput = document.getElementById('commentMessage');
+    submitCommentBtn = document.getElementById('submitCommentBtn');
+    commentsListDiv = document.getElementById('commentsList');
+    commentNameSection = document.getElementById('commentNameSection');
+    commentsListContainer = document.getElementById('commentsListContainer'); // Questo è il contenitore che ha data-page-id
+
+    // Inizializzazione dei riferimenti DOM per la modale "Liked By"
+    likedByModal = document.getElementById('likedByModal'); // ID generico della modale
     if (likedByModal) {
-        // Solo se la modale esiste nella pagina corrente
-        closeLikedByModalBtn = likedByModal.querySelector('#closeLikedByModalBtn'); // Cerca all'interno della modale
+        closeLikedByModalBtn = likedByModal.querySelector('#closeLikedByModalBtn'); // Cerca all'interno
         likedByModalTitle = likedByModal.querySelector('#likedByModalTitle');
         likedByModalList = likedByModal.querySelector('#likedByModalList');
         likedByModalLoading = likedByModal.querySelector('#likedByModalLoading');
@@ -538,16 +530,47 @@ document.addEventListener('DOMContentLoaded', () => {
         if (closeLikedByModalBtn) {
             closeLikedByModalBtn.addEventListener('click', closeGuestbookLikedByListModal);
         }
-        // Event listener per chiudere la modale cliccando sullo sfondo
         likedByModal.addEventListener('click', (event) => {
             if (event.target === likedByModal) {
-                // Se il click è direttamente sullo sfondo della modale
                 closeGuestbookLikedByListModal();
             }
         });
     } else {
-        // console.warn("La modale 'likedByModal' non è presente in questa pagina. Le funzionalità di visualizzazione likers per i commenti guestbook potrebbero non essere attive.");
+        // console.warn("[comments.js] La modale 'likedByModal' non è presente in questa pagina.");
     }
+
+    // Determina il currentPageId
+    if (commentsListContainer && commentsListContainer.dataset.pageId) {
+        currentPageId = commentsListContainer.dataset.pageId;
+        console.log(`[comments.js] Inizializzato per pageId: ${currentPageId}`);
+    } else {
+        console.warn(
+            '[comments.js] commentsListContainer o data-page-id non trovato. Verrà usato il pageId di fallback "default". Questo potrebbe causare problemi se la pagina si aspetta un ID specifico.'
+        );
+    }
+    
+    // CORREZIONE: Lista degli elementi DOM essenziali per comments.js
+    const essentialGuestbookElements = [
+        commentForm,
+        commentMessageInput,
+        submitCommentBtn,
+        commentsListDiv,
+        commentsListContainer,
+        // commentNameInput e commentNameSection sono opzionali se l'utente è sempre loggato
+        // per lasciare commenti, ma li includiamo per completezza se la logica li usa.
+        commentNameInput, // Può essere null se non presente nella pagina
+        commentNameSection // Può essere null se non presente nella pagina
+    ];
+
+    // Verifica se gli elementi essenziali per il guestbook sono presenti
+    // Nota: commentNameInput e commentNameSection sono gestiti con controlli di esistenza nel codice,
+    // quindi non blocchiamo l'esecuzione se mancano.
+    if (!commentForm || !commentMessageInput || !submitCommentBtn || !commentsListDiv || !commentsListContainer) {
+        console.error('[comments.js] Uno o più Elementi DOM essenziali per la funzionalità guestbook sono mancanti. Controllare gli ID: commentForm, commentMessageInput, submitCommentBtn, commentsListDiv, commentsListContainer.');
+        // Non fare return qui, così il resto dello script (es. onAuthStateChanged) può ancora girare
+        // per gestire la visibilità del form nome se l'utente è loggato/sloggato.
+    }
+
 
     const user = auth.currentUser;
     if (commentNameSection && commentNameInput) {
@@ -556,33 +579,39 @@ document.addEventListener('DOMContentLoaded', () => {
             commentNameInput.required = false;
         } else {
             commentNameSection.style.display = 'block';
-            commentNameInput.required = true;
+            commentNameInput.required = true; // Potrebbe essere opzionale
         }
     }
-    if (commentForm) commentForm.addEventListener('submit', handleCommentSubmit);
+
+    if (commentForm) {
+        commentForm.addEventListener('submit', handleCommentSubmit);
+    }
+
     if (commentsListDiv && db && currentPageId) {
         loadComments();
     } else if (!db && commentsListDiv) {
-        commentsListDiv.innerHTML = '<p>Error: Cannot connect to database.</p>';
+        commentsListDiv.innerHTML = '<p>Errore: Impossibile connettersi al database.</p>';
     } else if (!currentPageId && commentsListDiv) {
-        commentsListDiv.innerHTML = '<p>Error: Page context for comments not defined.</p>';
+        // Questo caso dovrebbe essere già gestito dal console.warn sopra
+        commentsListDiv.innerHTML = '<p>Errore: Contesto pagina per i commenti non definito.</p>';
     }
 });
 
 onAuthStateChanged(auth, (user) => {
-    console.log('comments.js - Auth state changed. User:', user ? user.uid : 'null');
+    console.log('[comments.js] Auth state changed. User:', user ? user.uid : 'null');
+    // Aggiorna la visibilità della sezione nome
     if (commentNameSection && commentNameInput) {
         if (user) {
             commentNameSection.style.display = 'none';
             commentNameInput.required = false;
         } else {
             commentNameSection.style.display = 'block';
-            commentNameInput.required = true;
+            commentNameInput.required = true; // O false se il nome è opzionale per gli anonimi
         }
     }
+    // Ricarica i commenti per aggiornare lo stato dei like e l'UI
     if (commentsListDiv && db && currentPageId) {
-        console.log('Auth state changed, reloading comments for like status and UI update (guestbook).');
-        loadComments(); // Ricarica per aggiornare lo stato dei like
+        console.log('[comments.js] Auth state changed, ricaricamento commenti per aggiornare UI like.');
+        loadComments();
     }
 });
-// --- FINE MODIFICHE ---

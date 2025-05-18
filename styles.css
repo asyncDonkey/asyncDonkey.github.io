@@ -1879,6 +1879,8 @@ footer a {
     color: var(--link-color);
 }
 
+
+
 .article-like-btn.liked {
     /* Stile per quando l'utente ha messo like */
     background-color: var(--link-color); /* O un colore specifico per "liked" */
@@ -3857,3 +3859,45 @@ header .nav-link-icon-only .material-symbols-rounded {
 .dev-text-content ul li {
     margin-bottom: 0.5em; /* Spazio tra gli elementi della lista */
 }
+
+.like-btn .material-symbols-rounded,
+#likeArticleButton .material-symbols-rounded {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20; /* Default: icona vuota */
+    font-size: 1.2em; /* Puoi aggiustare la dimensione */
+    vertical-align: middle; /* Buon allineamento di base */
+    /* margin-right: 4px; /* Spazio se c'è testo dopo l'icona, potrebbe non servire se usi gap */
+    transition: font-variation-settings 0.15s ease-in-out; /* Transizione per l'effetto di riempimento */
+}
+
+/* Quando un pulsante con classe .like-btn o l'ID #likeArticleButton 
+   HA ANCHE la classe .liked, l'icona Material Symbol al suo interno diventa piena. */
+.like-btn.liked .material-symbols-rounded,
+#likeArticleButton.liked .material-symbols-rounded {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20; /* Forza il riempimento dell'icona */
+    /* Potresti voler cambiare il colore dell'icona quando è "liked" */
+    /* color: var(--link-color); */
+}
+
+/* Stili specifici per i bottoni like nelle card della homepage (classe .article-like-btn) */
+.article-like-btn .material-symbols-rounded {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 18; /* Default: vuoto, leggermente più piccolo */
+    font-size: 1em; /* Adatta alla dimensione del testo del bottone */
+    vertical-align: middle;
+    /* Non serve margin-right se il testo "Like" è gestito separatamente o con gap */
+    transition: font-variation-settings 0.15s ease-in-out;
+}
+
+.article-like-btn.liked .material-symbols-rounded {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 18; /* Forza il riempimento */
+}
+
+/* Assicurati che i bottoni di like siano flex per un buon allineamento icona-testo,
+   se non lo sono già attraverso altre regole. */
+#likeArticleButton,
+.like-btn, /* Per i commenti */
+.article-like-btn /* Per la homepage */ {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em; /* Spazio tra icona e testo/conteggio */
+}
+

@@ -21,13 +21,10 @@ import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/f
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@5.0.1/lib/marked.esm.js';
 import { showToast } from './toastNotifications.js';
 
-const INITIAL_COMMENT_LIKE_EMOJI = '🤍';
-const LIKED_COMMENT_EMOJI = '💙';
-
 let articleIdInternal = null;
-let currentArticleData = null;
+let currentArticleData = null; // Contiene i dati dell'articolo attualmente visualizzato
 
-// Riferimenti DOM principali (verranno assegnati in DOMContentLoaded)
+// Riferimenti DOM principali
 let articleDisplayLoading,
     articleContentContainer,
     articleDisplayTitle,
@@ -36,18 +33,20 @@ let articleDisplayLoading,
     articleDisplayTagsContainer,
     articleDisplayContent,
     articleInteractionsSection,
-    likeArticleButton,
-    articleLikeCountSpan,
-    commentsListDiv,
-    articleCommentFormContainer,
-    articleCommentForm,
-    articleCommentMessageInput,
-    submitArticleCommentBtn,
-    articleLoginToCommentMessage;
+    likeArticleButton, // Pulsante like per l'articolo
+    articleLikeCountSpan, // Span per il conteggio dei like dell'articolo
+    commentsListDiv, // Contenitore per la lista dei commenti
+    articleCommentFormContainer, // Contenitore del form per i commenti
+    articleCommentForm, // Form per i commenti
+    articleCommentMessageInput, // Textarea per il messaggio del commento
+    submitArticleCommentBtn, // Pulsante di invio commento
+    articleLoginToCommentMessage; // Messaggio per utenti non loggati
 
+// Riferimenti DOM per la modale "Liked By"
 let likedByModal, closeLikedByModalBtn, likedByModalTitle, likedByModalList, likedByModalLoading, likedByModalNoLikes;
-let articleLikeCountClickListenerFunction = null;
+let articleLikeCountClickListenerFunction = null; // Per gestire il listener del conteggio like articolo
 
+// Riferimenti DOM per i pulsanti di condivisione
 let articleShareSection,
     nativeShareBtn,
     copyLinkBtn,
@@ -58,7 +57,11 @@ let articleShareSection,
     shareToWhatsAppBtn,
     shareViaEmailBtn;
 
-// Funzioni di formattazione e utility (invariate rispetto alla tua versione)
+/**
+ * Formatta un timestamp di Firestore in una stringa data leggibile.
+ * @param {object|string|null|undefined} dateInput - Timestamp di Firestore o stringa data.
+ * @returns {string} Data formattata o messaggio di fallback.
+ */
 function formatArticleDateForViewer(dateInput) {
     if (!dateInput) return 'Data non disponibile';
     try {
@@ -72,10 +75,16 @@ function formatArticleDateForViewer(dateInput) {
         } else return 'Formato data sconosciuto';
         return date.toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
     } catch (e) {
+        console.error("Errore formattazione data articolo:", e);
         return 'Errore data';
     }
 }
 
+/**
+ * Formatta un timestamp di Firestore per i commenti.
+ * @param {object|null|undefined} firebaseTimestamp - Timestamp di Firestore.
+ * @returns {string} Data e ora formattate o messaggio di fallback.
+ */
 function formatCommentTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp?.toDate) return 'Data non disponibile';
     try {
@@ -87,10 +96,14 @@ function formatCommentTimestamp(firebaseTimestamp) {
             minute: '2-digit',
         });
     } catch (e) {
+        console.error("Errore formattazione timestamp commento:", e);
         return 'Errore data';
     }
 }
 
+/**
+ * Configura i pulsanti di condivisione dell'articolo.
+ */
 function setupShareButtons() {
     if (!currentArticleData || !articleShareSection) {
         if (articleShareSection) articleShareSection.style.display = 'none';
@@ -103,25 +116,29 @@ function setupShareButtons() {
         (currentArticleData.contentMarkdown
             ? currentArticleData.contentMarkdown.substring(0, 100) + '...'
             : 'Leggi questo interessante articolo!');
-    articleShareSection.style.display = 'block';
+    articleShareSection.style.display = 'block'; // Mostra la sezione condivisione
+
+    // Gestione Share API nativa
     if (navigator.share && nativeShareBtn) {
         nativeShareBtn.style.display = 'inline-flex';
-        if (fallbackShareButtonsDiv) fallbackShareButtonsDiv.style.display = 'none';
+        if (fallbackShareButtonsDiv) fallbackShareButtonsDiv.style.display = 'none'; // Nascondi fallback
         nativeShareBtn.onclick = async () => {
             try {
                 await navigator.share({ title: articleTitle, text: articleSnippet, url: articleUrl });
                 showToast('Articolo condiviso!', 'success');
             } catch (err) {
-                if (err.name !== 'AbortError') {
+                if (err.name !== 'AbortError') { // Non mostrare errore se l'utente annulla la condivisione
                     showToast('Errore durante la condivisione.', 'error');
-                    if (fallbackShareButtonsDiv) fallbackShareButtonsDiv.style.display = 'contents';
+                    if (fallbackShareButtonsDiv) fallbackShareButtonsDiv.style.display = 'contents'; // Mostra fallback in caso di errore
                 }
             }
         };
-    } else {
+    } else { // Se Share API non è supportata, mostra i fallback
         if (nativeShareBtn) nativeShareBtn.style.display = 'none';
         if (fallbackShareButtonsDiv) fallbackShareButtonsDiv.style.display = 'contents';
     }
+
+    // Pulsante Copia Link
     if (copyLinkBtn) {
         copyLinkBtn.onclick = () => {
             navigator.clipboard
@@ -130,6 +147,8 @@ function setupShareButtons() {
                 .catch(() => showToast('Errore nel copiare il link.', 'error'));
         };
     }
+
+    // Link di fallback per social
     const encodedUrl = encodeURIComponent(articleUrl);
     const encodedTitle = encodeURIComponent(articleTitle);
     if (shareToXBtn) shareToXBtn.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
@@ -142,6 +161,10 @@ function setupShareButtons() {
         shareViaEmailBtn.href = `mailto:?subject=${encodedTitle}&body=Leggi questo articolo:%20${encodedUrl}`;
 }
 
+/**
+ * Aggiorna i meta tag Open Graph per la condivisione social.
+ * @param {object} articleData - Dati dell'articolo.
+ */
 function updateOpenGraphMetaTags(articleData) {
     if (!articleData) return;
     const setMetaTag = (property, content) => {
@@ -168,10 +191,11 @@ function updateOpenGraphMetaTags(articleData) {
     );
 }
 
+/**
+ * Carica e visualizza un articolo da Firestore.
+ * @param {string} articleId - ID dell'articolo da caricare.
+ */
 async function loadAndDisplayArticleFromFirestore(articleId) {
-    // ... (corpo della funzione come nella tua ultima versione, senza modifiche qui)
-    // Assicurati che all'interno di questa funzione, prima di chiamare loadArticleComments o setupShareButtons,
-    // la variabile currentArticleData sia stata effettivamente popolata se docSnap.exists().
     if (articleDisplayLoading) articleDisplayLoading.style.display = 'block';
     if (articleContentContainer) articleContentContainer.style.display = 'none';
     if (articleInteractionsSection) articleInteractionsSection.style.display = 'none';
@@ -194,17 +218,16 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
                 articleDisplayDate.textContent = formatArticleDateForViewer(displayDate);
             }
             if (articleDisplayAuthor) {
-    articleDisplayAuthor.innerHTML = ''; // Pulisci prima
-    if (articleDataFromDb.authorId) {
-        const authorLink = document.createElement('a');
-        authorLink.href = `profile.html?userId=${articleDataFromDb.authorId}`;
-        authorLink.textContent = articleDataFromDb.authorName || 'Autore Sconosciuto';
-        // authorLink.classList.add('user-profile-link'); // Stile opzionale
-        articleDisplayAuthor.appendChild(authorLink);
-    } else {
-        articleDisplayAuthor.textContent = articleDataFromDb.authorName || 'N/D';
-    }
-}
+                articleDisplayAuthor.innerHTML = '';
+                if (articleDataFromDb.authorId) {
+                    const authorLink = document.createElement('a');
+                    authorLink.href = `profile.html?userId=${articleDataFromDb.authorId}`;
+                    authorLink.textContent = articleDataFromDb.authorName || 'Autore Sconosciuto';
+                    articleDisplayAuthor.appendChild(authorLink);
+                } else {
+                    articleDisplayAuthor.textContent = articleDataFromDb.authorName || 'N/D';
+                }
+            }
 
             if (articleDisplayTagsContainer) {
                 articleDisplayTagsContainer.innerHTML = '';
@@ -284,17 +307,14 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
 }
 
 /**
- * Aggiorna la visibilità del form commenti e del messaggio di login.
- * @param {firebase.User|null} user - L'utente Firebase autenticato o null.
+ * Aggiorna l'UI del form per i commenti in base allo stato di login.
+ * @param {firebase.User|null} user - L'utente Firebase autenticato.
  */
 function updateArticleCommentFormUI(user) {
-    // Assicurati che i riferimenti DOM siano validi PRIMA di usarli.
-    // Questa funzione potrebbe essere chiamata da onAuthStateChanged prima che DOMContentLoaded completi l'assegnazione.
     const currentFormContainer = document.getElementById('articleCommentFormContainer');
     let currentLoginMessage = document.getElementById('articleLoginToCommentMessage');
     const nameSectionLegacy = document.getElementById('articleCommentNameSection');
 
-    // Se il messaggio di login non esiste e il container del form sì, crea il messaggio
     if (!currentLoginMessage && currentFormContainer && currentFormContainer.parentNode) {
         currentLoginMessage = document.createElement('div');
         currentLoginMessage.id = 'articleLoginToCommentMessage';
@@ -307,20 +327,16 @@ function updateArticleCommentFormUI(user) {
         currentFormContainer.parentNode.insertBefore(currentLoginMessage, currentFormContainer);
     }
 
-    // Ora procedi con la logica di visualizzazione
     if (currentFormContainer && currentLoginMessage) {
         if (user) {
-            // Utente Loggato
             currentFormContainer.style.display = 'block';
             currentLoginMessage.style.display = 'none';
             if (nameSectionLegacy) {
-                // Nascondi la vecchia sezione nome se presente
                 nameSectionLegacy.style.display = 'none';
                 const nameInput = document.getElementById('articleCommentName');
                 if (nameInput) nameInput.required = false;
             }
         } else {
-            // Utente Non Loggato
             currentFormContainer.style.display = 'none';
             currentLoginMessage.style.display = 'block';
             const loginLink = currentLoginMessage.querySelector('#loginLinkFromArticleComment');
@@ -333,17 +349,15 @@ function updateArticleCommentFormUI(user) {
                 loginLink.setAttribute('data-listener-attached', 'true');
             }
         }
-    } else {
-        // Se i contenitori principali non sono ancora pronti, non fare nulla.
-        // Verranno gestiti quando DOMContentLoaded li definisce e chiama di nuovo questa funzione.
-        // console.warn('[articleViewer] updateArticleCommentFormUI chiamata prima che i container fossero pronti.');
     }
 }
 
+/**
+ * Gestisce l'invio di un nuovo commento all'articolo.
+ * @param {Event} event - L'evento di submit del form.
+ */
 async function handleArticleCommentSubmit(event) {
     event.preventDefault();
-    // I riferimenti DOM articleCommentMessageInput e submitArticleCommentBtn sono globali al modulo
-    // e dovrebbero essere stati inizializzati in DOMContentLoaded.
     if (!articleCommentMessageInput || !submitArticleCommentBtn || !articleIdInternal) {
         showToast('Errore: elementi del form commenti mancanti.', 'error');
         return;
@@ -401,7 +415,7 @@ async function handleArticleCommentSubmit(event) {
             }
         }
         articleCommentMessageInput.value = '';
-        await loadArticleComments(); // Ricarica i commenti per visualizzare quello nuovo
+        await loadArticleComments();
         showToast('Commento inviato con successo!', 'success');
     } catch (error) {
         console.error('Errore durante invio commento:', error);
@@ -414,8 +428,11 @@ async function handleArticleCommentSubmit(event) {
     }
 }
 
+/**
+ * Gestisce il click sul pulsante "Like" di un commento.
+ * @param {Event} event - L'evento click.
+ */
 async function handleArticleCommentLike(event) {
-    // ... (invariato rispetto alla tua ultima versione)
     const button = event.currentTarget;
     const commentId = button.dataset.commentId;
     const currentUser = auth.currentUser;
@@ -429,7 +446,7 @@ async function handleArticleCommentLike(event) {
     try {
         const commentSnap = await getDoc(commentRef);
         if (!commentSnap.exists()) {
-            console.error('Commento non trovato:', commentId);
+            console.error('[articleViewer.js] Commento non trovato:', commentId);
             showToast('Errore: commento non trovato.', 'error');
             button.disabled = false;
             return;
@@ -439,47 +456,70 @@ async function handleArticleCommentLike(event) {
         const userHasLiked = likedByUsers.includes(currentUser.uid);
         let newLikesCountOp = userHasLiked ? increment(-1) : increment(1);
         let userArrayUpdateOp = userHasLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid);
+
         if (userHasLiked && (commentData.likes || 0) <= 0) {
             if (!likedByUsers.includes(currentUser.uid)) {
-                // Doppia verifica
                 button.disabled = false;
                 return;
             }
-            if ((commentData.likes || 0) <= 0) newLikesCountOp = increment(0); // Non andare sotto zero
+            if ((commentData.likes || 0) <= 0) newLikesCountOp = increment(0);
         }
+
         await updateDoc(commentRef, { likes: newLikesCountOp, likedBy: userArrayUpdateOp });
-        const updatedCommentSnap = await getDoc(commentRef); // Rileggi per UI
+        
+        // Ricarica i dati del commento per aggiornare l'UI
+        const updatedCommentSnap = await getDoc(commentRef);
         if (updatedCommentSnap.exists()) {
             const updatedCommentData = updatedCommentSnap.data();
             const currentLikesCount = updatedCommentData.likes || 0;
             const userNowHasLiked = updatedCommentData.likedBy && updatedCommentData.likedBy.includes(currentUser.uid);
-            const likeCountSpanInsideButton = button.querySelector('.like-count');
-            if (likeCountSpanInsideButton) {
-                likeCountSpanInsideButton.textContent = currentLikesCount;
-            }
-            const emojiNode = button.childNodes[0]; // Assumendo che emoji sia il primo nodo di testo
-            if (emojiNode && emojiNode.nodeType === Node.TEXT_NODE) {
-                emojiNode.nodeValue = `${userNowHasLiked ? LIKED_COMMENT_EMOJI : INITIAL_COMMENT_LIKE_EMOJI} `;
-            }
-            if (userNowHasLiked) {
-                button.classList.add('liked');
-                button.title = 'Togli il like a questo commento';
-            } else {
-                button.classList.remove('liked');
-                button.title = 'Metti like a questo commento';
+            
+            const iconName = userNowHasLiked ? 'favorite' : 'favorite_border';
+            button.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikesCount}</span>`;
+            console.log(`[articleViewer.js] handleArticleCommentLike - Pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikesCount}`);
+            
+            button.classList.toggle('liked', userNowHasLiked);
+            button.title = userNowHasLiked ? 'Togli il like a questo commento' : 'Metti like a questo commento';
+
+            // Aggiorna la cliccabilità del conteggio
+            const commentLikeCountSpanInButton = button.querySelector('.like-count');
+            if (commentLikeCountSpanInButton) {
+                const oldListener = commentLikeCountSpanInButton.handleLikeCountClick;
+                if (oldListener) {
+                    commentLikeCountSpanInButton.removeEventListener('click', oldListener);
+                }
+                if (currentLikesCount > 0) {
+                    commentLikeCountSpanInButton.classList.add('clickable-comment-like-count');
+                    commentLikeCountSpanInButton.title = 'Vedi a chi piace questo commento';
+                    const newListener = (e) => {
+                        e.stopPropagation();
+                        openLikedByListModal(commentId, 'articleComment');
+                    };
+                    commentLikeCountSpanInButton.addEventListener('click', newListener);
+                    commentLikeCountSpanInButton.handleLikeCountClick = newListener; 
+                } else {
+                    commentLikeCountSpanInButton.classList.remove('clickable-comment-like-count');
+                    commentLikeCountSpanInButton.style.cursor = 'default';
+                    commentLikeCountSpanInButton.style.textDecoration = 'none';
+                    commentLikeCountSpanInButton.title = '';
+                    delete commentLikeCountSpanInButton.handleLikeCountClick;
+                }
             }
         }
         button.disabled = false;
     } catch (error) {
-        console.error('Errore like/unlike commento articolo:', error);
+        console.error('[articleViewer.js] Errore like/unlike commento articolo:', error);
         showToast('Si è verificato un errore durante il like/unlike del commento. Riprova.', 'error');
         button.disabled = false;
-        if (commentsListDiv && articleIdInternal) await loadArticleComments(); // Ricarica in caso di errore per UI consistente
+        // Non ricaricare l'intera lista commenti qui per evitare sfarfallio,
+        // l'aggiornamento del singolo pulsante dovrebbe essere sufficiente.
     }
 }
 
+/**
+ * Carica e visualizza i commenti per l'articolo corrente.
+ */
 async function loadArticleComments() {
-    // ... (invariato rispetto alla tua ultima versione)
     if (!commentsListDiv || !articleIdInternal) {
         if (commentsListDiv) commentsListDiv.innerHTML = '<p>Impossibile caricare i commenti.</p>';
         return;
@@ -494,7 +534,7 @@ async function loadArticleComments() {
             limit(25)
         );
         const querySnapshot = await getDocs(q);
-        commentsListDiv.innerHTML = '';
+        commentsListDiv.innerHTML = ''; // Pulisci prima di aggiungere
         if (querySnapshot.empty) {
             commentsListDiv.innerHTML = '<p>Nessun commento. Sii il primo!</p>';
             return;
@@ -505,207 +545,240 @@ async function loadArticleComments() {
             const commentId = docSnapshot.id;
             const commentElement = document.createElement('div');
             commentElement.classList.add('comment-item');
+            // ... (creazione avatar, nome, data, messaggio come prima) ...
             const avatarImg = document.createElement('img');
             avatarImg.classList.add('comment-avatar-img');
             const seedForBlockie = commentData.userId || commentData.userName || `anon-articlecomment-${commentId}`;
             avatarImg.src = generateBlockieAvatar(seedForBlockie, 40, { size: 8 });
             avatarImg.alt = 'Avatar';
             commentElement.appendChild(avatarImg);
+
             const commentContentDiv = document.createElement('div');
             commentContentDiv.classList.add('comment-content');
-            const nameEl = document.createElement('strong'); // o span, a seconda dello stile desiderato
-let commenterNameDisplay = commentData.userName || 'Utente (Dati Profilo Mancanti)';
 
-// Aggiungi la bandierina PRIMA del nome/link, se presente
-if (commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
-    const flagIconSpan = document.createElement('span');
-    flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
-    flagIconSpan.style.marginRight = '5px';
-    flagIconSpan.style.verticalAlign = 'middle';
-    nameEl.appendChild(flagIconSpan); // Aggiungi la bandiera al contenitore del nome
-}
-
-if (commentData.userId) { // Se l'ID utente esiste, crea un link
-    const userProfileLink = document.createElement('a');
-    userProfileLink.href = `profile.html?userId=${commentData.userId}`;
-    userProfileLink.textContent = commenterNameDisplay;
-    // userProfileLink.classList.add('user-profile-link'); // Aggiungi classe per stile se necessario
-    nameEl.appendChild(userProfileLink);
-} else { // Altrimenti, solo testo
-    nameEl.appendChild(document.createTextNode(commenterNameDisplay));
-}
-            nameEl.appendChild(document.createTextNode(commenterNameDisplay));
+            const nameEl = document.createElement('strong');
+            let commenterNameDisplay = commentData.userName || 'Utente (Dati Profilo Mancanti)';
+            if (commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
+                const flagIconSpan = document.createElement('span');
+                flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
+                flagIconSpan.style.marginRight = '5px';
+                flagIconSpan.style.verticalAlign = 'middle';
+                nameEl.appendChild(flagIconSpan);
+            }
+            if (commentData.userId) {
+                const userProfileLink = document.createElement('a');
+                userProfileLink.href = `profile.html?userId=${commentData.userId}`;
+                userProfileLink.textContent = commenterNameDisplay;
+                nameEl.appendChild(userProfileLink);
+            } else {
+                nameEl.appendChild(document.createTextNode(commenterNameDisplay));
+            }
+            
             const dateEl = document.createElement('small');
             dateEl.classList.add('comment-date');
             dateEl.textContent = ` - ${formatCommentTimestamp(commentData.timestamp)}`;
+            
             const messageEl = document.createElement('p');
             messageEl.textContent = commentData.message;
+            
             commentContentDiv.appendChild(nameEl);
             commentContentDiv.appendChild(dateEl);
             commentContentDiv.appendChild(messageEl);
+
+            // Sezione Like per il commento
             const commentLikesContainer = document.createElement('div');
             commentLikesContainer.classList.add('likes-container');
             const commentLikeButton = document.createElement('button');
             commentLikeButton.classList.add('like-btn');
             commentLikeButton.setAttribute('data-comment-id', commentId);
+
             const currentLikes = commentData.likes || 0;
             let userHasLikedThisComment = false;
             if (currentUser && commentData.likedBy && commentData.likedBy.includes(currentUser.uid)) {
                 userHasLikedThisComment = true;
             }
-            commentLikeButton.innerHTML = `${userHasLikedThisComment ? LIKED_COMMENT_EMOJI : INITIAL_COMMENT_LIKE_EMOJI} <span class="like-count">${currentLikes}</span>`;
-            if (userHasLikedThisComment) {
-                commentLikeButton.classList.add('liked');
-            }
+
+            const iconName = userHasLikedThisComment ? 'favorite' : 'favorite_border';
+            commentLikeButton.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikes}</span>`;
+            console.log(`[articleViewer.js] loadArticleComments - Creato pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikes}`);
+            
+            commentLikeButton.classList.toggle('liked', userHasLikedThisComment);
             commentLikeButton.title = userHasLikedThisComment ? 'Togli il like' : 'Metti like';
             commentLikeButton.disabled = !currentUser;
             commentLikeButton.addEventListener('click', handleArticleCommentLike);
+            
             const commentLikeCountSpanInButton = commentLikeButton.querySelector('.like-count');
             if (commentLikeCountSpanInButton) {
+                const oldListener = commentLikeCountSpanInButton.handleLikeCountClick;
+                 if (oldListener) {
+                    commentLikeCountSpanInButton.removeEventListener('click', oldListener);
+                 }
                 if (currentLikes > 0) {
                     commentLikeCountSpanInButton.classList.add('clickable-comment-like-count');
                     commentLikeCountSpanInButton.title = 'Vedi a chi piace questo commento';
-                    commentLikeCountSpanInButton.addEventListener('click', (e) => {
+                    const newListener = (e) => { 
                         e.stopPropagation();
                         openLikedByListModal(commentId, 'articleComment');
-                    });
+                    };
+                    commentLikeCountSpanInButton.addEventListener('click', newListener);
+                    commentLikeCountSpanInButton.handleLikeCountClick = newListener; 
                 } else {
                     commentLikeCountSpanInButton.classList.remove('clickable-comment-like-count');
                     commentLikeCountSpanInButton.style.cursor = 'default';
                     commentLikeCountSpanInButton.style.textDecoration = 'none';
                     commentLikeCountSpanInButton.title = '';
+                    delete commentLikeCountSpanInButton.handleLikeCountClick;
                 }
             }
+
             commentLikesContainer.appendChild(commentLikeButton);
             commentContentDiv.appendChild(commentLikesContainer);
             commentElement.appendChild(commentContentDiv);
             commentsListDiv.appendChild(commentElement);
         });
     } catch (error) {
-        console.error(`Errore caricamento commenti:`, error);
+        console.error(`[articleViewer.js] Errore caricamento commenti:`, error);
         if (commentsListDiv) commentsListDiv.innerHTML = '<p>Errore caricamento commenti.</p>';
     }
 }
 
+/**
+ * Carica e visualizza lo stato dei like per l'articolo.
+ * @param {string} articleId - ID dell'articolo.
+ */
 async function loadAndDisplayArticleLikes(articleId) {
-    // ... (invariato rispetto alla tua ultima versione)
-    const localArticleLikeCountSpan = document.getElementById('articleLikeCount');
-    const localLikeArticleButton = document.getElementById('likeArticleButton');
-    if (!localLikeArticleButton || !localArticleLikeCountSpan || !articleId) {
-        if (localArticleLikeCountSpan) localArticleLikeCountSpan.textContent = 'N/A';
-        if (localLikeArticleButton) {
-            localLikeArticleButton.innerHTML = `🤍 Like`;
-            localLikeArticleButton.disabled = true;
+    if (!likeArticleButton || !articleLikeCountSpan || !articleId) {
+        if (articleLikeCountSpan) articleLikeCountSpan.textContent = 'N/A';
+        if (likeArticleButton) {
+            likeArticleButton.innerHTML = `<span class="material-symbols-rounded">favorite_border</span> Like`;
+            likeArticleButton.disabled = true;
         }
         return;
     }
-    if (articleLikeCountClickListenerFunction && localArticleLikeCountSpan) {
-        localArticleLikeCountSpan.removeEventListener('click', articleLikeCountClickListenerFunction);
+
+    if (articleLikeCountClickListenerFunction && articleLikeCountSpan) {
+        articleLikeCountSpan.removeEventListener('click', articleLikeCountClickListenerFunction);
         articleLikeCountClickListenerFunction = null;
     }
-    localArticleLikeCountSpan.style.cursor = 'default';
-    localArticleLikeCountSpan.style.textDecoration = 'none';
-    localArticleLikeCountSpan.title = '';
-    localArticleLikeCountSpan.classList.remove('clickable-like-count');
+    articleLikeCountSpan.style.cursor = 'default';
+    articleLikeCountSpan.style.textDecoration = 'none';
+    articleLikeCountSpan.title = '';
+    articleLikeCountSpan.classList.remove('clickable-like-count');
+    
     const articleRef = doc(db, 'articles', articleId);
     try {
         const docSnap = await getDoc(articleRef);
         if (docSnap.exists()) {
-            currentArticleData = docSnap.data();
+            currentArticleData = docSnap.data(); // Aggiorna currentArticleData
             const likes = currentArticleData.likeCount || 0;
             const likedByUsers = currentArticleData.likedByUsers || [];
-            localArticleLikeCountSpan.textContent = likes;
+            articleLikeCountSpan.textContent = likes;
+
             if (likes > 0) {
-                localArticleLikeCountSpan.classList.add('clickable-like-count');
-                localArticleLikeCountSpan.title = 'Vedi a chi piace questo articolo';
-                articleLikeCountClickListenerFunction = () => {
+                articleLikeCountSpan.classList.add('clickable-like-count');
+                articleLikeCountSpan.title = 'Vedi a chi piace questo articolo';
+                const newListener = () => { 
                     openLikedByListModal(articleId, 'article');
                 };
-                localArticleLikeCountSpan.addEventListener('click', articleLikeCountClickListenerFunction);
+                articleLikeCountSpan.addEventListener('click', newListener);
+                articleLikeCountClickListenerFunction = newListener; 
             }
+
             const currentUser = auth.currentUser;
             if (currentUser) {
-                localLikeArticleButton.disabled = false;
-                if (likedByUsers.includes(currentUser.uid)) {
-                    localLikeArticleButton.innerHTML = `💙 Liked`;
-                    localLikeArticleButton.classList.add('liked');
-                    localLikeArticleButton.title = 'Unlike this article';
-                } else {
-                    localLikeArticleButton.innerHTML = `🤍 Like`;
-                    localLikeArticleButton.classList.remove('liked');
-                    localLikeArticleButton.title = 'Like this article';
-                }
+                likeArticleButton.disabled = false;
+                const userHasLikedArticle = likedByUsers.includes(currentUser.uid);
+                const iconNameArticle = userHasLikedArticle ? 'favorite' : 'favorite_border';
+                const buttonTextArticle = userHasLikedArticle ? 'Liked' : 'Like';
+                
+                likeArticleButton.innerHTML = `<span class="material-symbols-rounded">${iconNameArticle}</span> ${buttonTextArticle}`;
+                console.log(`[articleViewer.js] loadAndDisplayArticleLikes - Articolo ID: ${articleId}, Icona: ${iconNameArticle}, Testo: ${buttonTextArticle}`);
+                
+                likeArticleButton.classList.toggle('liked', userHasLikedArticle);
+                likeArticleButton.title = userHasLikedArticle ? 'Unlike this article' : 'Like this article';
             } else {
-                localLikeArticleButton.innerHTML = `🤍 Like`;
-                localLikeArticleButton.disabled = true;
-                localLikeArticleButton.title = 'Login to like this article';
-                localLikeArticleButton.classList.remove('liked');
+                likeArticleButton.innerHTML = `<span class="material-symbols-rounded">favorite_border</span> Like`;
+                likeArticleButton.disabled = true;
+                likeArticleButton.title = 'Login to like this article';
+                likeArticleButton.classList.remove('liked');
             }
         } else {
-            console.warn(`Articolo ${articleId} non trovato per likes.`);
-            if (localArticleLikeCountSpan) localArticleLikeCountSpan.textContent = '0';
-            if (localLikeArticleButton) {
-                localLikeArticleButton.innerHTML = `🤍 Like`;
-                localLikeArticleButton.disabled = true;
+            console.warn(`[articleViewer.js] Articolo ${articleId} non trovato per likes.`);
+            if (articleLikeCountSpan) articleLikeCountSpan.textContent = '0';
+            if (likeArticleButton) {
+                likeArticleButton.innerHTML = `<span class="material-symbols-rounded">favorite_border</span> Like`;
+                likeArticleButton.disabled = true;
             }
-            currentArticleData = { title: 'Articolo non trovato', status: 'not_found' };
+            // Non sovrascrivere currentArticleData con null qui se l'articolo esiste ma non ha dati like
         }
     } catch (error) {
-        console.error('Errore caricamento likes articolo:', error);
-        if (localArticleLikeCountSpan) localArticleLikeCountSpan.textContent = 'Err';
-        if (localLikeArticleButton) {
-            localLikeArticleButton.disabled = true;
-            localLikeArticleButton.innerHTML = `🤍 Like`;
+        console.error('[articleViewer.js] Errore caricamento likes articolo:', error);
+        if (articleLikeCountSpan) articleLikeCountSpan.textContent = 'Err';
+        if (likeArticleButton) {
+            likeArticleButton.disabled = true;
+            likeArticleButton.innerHTML = `<span class="material-symbols-rounded">favorite_border</span> Like`;
         }
-        currentArticleData = null;
     }
 }
 
+/**
+ * Gestisce il click sul pulsante "Like" dell'articolo.
+ */
 async function handleArticleLike() {
-    // ... (invariato rispetto alla tua ultima versione)
     if (!articleIdInternal || !auth.currentUser) {
         showToast('Devi essere loggato per mettere like.', 'error');
         return;
     }
-    const localLikeArticleButton = document.getElementById('likeArticleButton');
-    if (!localLikeArticleButton) {
-        console.error('Bottone Like articolo non trovato nel DOM.');
+    if (!likeArticleButton) {
+        console.error('[articleViewer.js] Bottone Like articolo non trovato nel DOM.');
         return;
     }
-    if (!currentArticleData || !Object.prototype.hasOwnProperty.call(currentArticleData, 'likeCount')) {
+    // Assicurati che currentArticleData sia aggiornato prima di procedere
+    if (!currentArticleData || typeof currentArticleData.likeCount === 'undefined') {
         showToast('Dati articolo non completamente caricati. Riprova tra un momento.', 'warning');
+        // Prova a ricaricare i dati dei like prima di uscire
         if (articleIdInternal) await loadAndDisplayArticleLikes(articleIdInternal);
-        if (!currentArticleData || !Object.prototype.hasOwnProperty.call(currentArticleData, 'likeCount')) return;
+        // Se ancora non ci sono, esci
+        if (!currentArticleData || typeof currentArticleData.likeCount === 'undefined') return;
     }
 
-    localLikeArticleButton.disabled = true;
+    likeArticleButton.disabled = true; // Disabilita subito per prevenire doppi click
+
     const articleRef = doc(db, 'articles', articleIdInternal);
     const userId = auth.currentUser.uid;
     const userHasLiked = currentArticleData.likedByUsers && currentArticleData.likedByUsers.includes(userId);
-    let likeUpdateOperation = userHasLiked ? increment(-1) : increment(1);
-    let userArrayUpdateOperation = userHasLiked ? arrayRemove(userId) : arrayUnion(userId);
-    if (userHasLiked && (currentArticleData.likeCount || 0) <= 0) {
-        if ((currentArticleData.likeCount || 0) <= 0) likeUpdateOperation = increment(0);
-    }
+    
+    console.log(`[articleViewer.js] handleArticleLike - Stato prima dell'azione: User ${userId} hasLiked: ${userHasLiked}`);
+    
+    const likeUpdateOperation = userHasLiked ? increment(-1) : increment(1);
+    const userArrayUpdateOperation = userHasLiked ? arrayRemove(userId) : arrayUnion(userId);
+
     const updatePayload = {
         likeCount: likeUpdateOperation,
         likedByUsers: userArrayUpdateOperation,
         updatedAt: serverTimestamp(),
     };
+
     try {
         await updateDoc(articleRef, updatePayload);
+        console.log(`[articleViewer.js] handleArticleLike - Like per articolo ${articleIdInternal} aggiornato in Firestore.`);
+        // Non è necessario un toast qui, l'UI si aggiornerà con la chiamata successiva
     } catch (error) {
-        console.error('Errore aggiornamento like articolo:', error);
+        console.error('[articleViewer.js] Errore aggiornamento like articolo:', error);
         showToast("Errore nell'aggiornare il like. Riprova.", 'error');
     } finally {
+        // Ricarica sempre lo stato dei like per aggiornare l'UI correttamente,
+        // questo include l'aggiornamento di currentArticleData.
         if (articleIdInternal) {
             await loadAndDisplayArticleLikes(articleIdInternal);
         }
+        // Il pulsante viene riabilitato (o mantenuto disabilitato se utente non loggato)
+        // da loadAndDisplayArticleLikes.
     }
 }
 
+// --- FUNZIONI MODALE LIKEDBY (INVARIATE) ---
 function closeLikedByListModal() {
-    // ... (invariato rispetto alla tua ultima versione)
     if (likedByModal) {
         likedByModal.style.display = 'none';
     }
@@ -715,9 +788,8 @@ function closeLikedByListModal() {
 }
 
 async function openLikedByListModal(contentId, contentType) {
-    // ... (invariato rispetto alla tua ultima versione)
     if (!likedByModal) {
-        console.error('Elemento likedByModal non trovato.');
+        console.error('[articleViewer.js] Elemento likedByModal non trovato.');
         return;
     }
     if (!auth.currentUser) {
@@ -736,7 +808,6 @@ async function openLikedByListModal(contentId, contentType) {
 }
 
 async function populateLikedByListModal(contentId, contentType) {
-    // ... (invariato rispetto alla tua ultima versione)
     if (!likedByModalList || !likedByModalLoading || !likedByModalNoLikes || !db) return;
     try {
         let likedByUsersIds = [];
@@ -747,7 +818,7 @@ async function populateLikedByListModal(contentId, contentType) {
             const data = docSnap.data();
             likedByUsersIds = (contentType === 'article' ? data.likedByUsers : data.likedBy) || [];
         } else {
-            console.warn(`Doc non trovato in ${collectionName} ID: ${contentId}`);
+            console.warn(`[articleViewer.js] Doc non trovato in ${collectionName} ID: ${contentId}`);
             likedByModalList.innerHTML = '<li>Errore: contenuto non trovato.</li>';
             if (likedByModalLoading) likedByModalLoading.style.display = 'none';
             return;
@@ -780,7 +851,7 @@ async function populateLikedByListModal(contentId, contentType) {
                     }
                     likedByModalList.appendChild(li);
                 } else {
-                    console.warn(`Profilo utente non trovato: ${userSnap.id}`);
+                    console.warn(`[articleViewer.js] Profilo utente non trovato: ${userSnap.id}`);
                     const li = document.createElement('li');
                     const avatarImg = document.createElement('img');
                     avatarImg.className = 'liked-by-avatar';
@@ -796,13 +867,14 @@ async function populateLikedByListModal(contentId, contentType) {
             });
         }
     } catch (error) {
-        console.error(`Errore popola lista "Liked By":`, error);
+        console.error(`[articleViewer.js] Errore popola lista "Liked By":`, error);
         likedByModalList.innerHTML = '<li>Errore caricamento lista.</li>';
     } finally {
         if (likedByModalLoading) likedByModalLoading.style.display = 'none';
     }
 }
 
+// --- INIZIALIZZAZIONE ---
 document.addEventListener('DOMContentLoaded', () => {
     // Assegnazione riferimenti DOM
     articleDisplayLoading = document.getElementById('articleDisplayLoading');
@@ -822,7 +894,6 @@ document.addEventListener('DOMContentLoaded', () => {
     submitArticleCommentBtn = document.getElementById('submitArticleCommentBtn');
 
     articleLoginToCommentMessage = document.getElementById('articleLoginToCommentMessage');
-    // Se articleLoginToCommentMessage non esiste, crealo dinamicamente e inseriscilo
     if (!articleLoginToCommentMessage && articleCommentFormContainer && articleCommentFormContainer.parentNode) {
         articleLoginToCommentMessage = document.createElement('div');
         articleLoginToCommentMessage.id = 'articleLoginToCommentMessage';
@@ -832,10 +903,8 @@ document.addEventListener('DOMContentLoaded', () => {
         articleLoginToCommentMessage.style.borderRadius = '4px';
         articleLoginToCommentMessage.style.marginTop = '10px';
         articleLoginToCommentMessage.innerHTML = `<p>Devi essere <a href="#" id="loginLinkFromArticleComment" style="color: var(--link-color); text-decoration: underline;">loggato</a> per lasciare un commento.</p>`;
-        // Inserisci il messaggio prima del contenitore del form dei commenti
         articleCommentFormContainer.parentNode.insertBefore(articleLoginToCommentMessage, articleCommentFormContainer);
     }
-    // Nascondi la sezione del nome (legacy) se ancora presente nell'HTML
     const nameSectionLegacy = document.getElementById('articleCommentNameSection');
     if (nameSectionLegacy) {
         nameSectionLegacy.style.display = 'none';
@@ -866,34 +935,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const essentialElementsCheck = [
-        // Rinominato per evitare conflitto di scope se essentialElements fosse globale
-        articleContentContainer,
-        articleDisplayTitle,
-        articleDisplayDate,
-        articleDisplayAuthor,
-        articleDisplayTagsContainer,
-        articleDisplayContent,
-        articleDisplayLoading,
-        articleInteractionsSection,
-        likeArticleButton,
-        articleLikeCountSpan,
-        commentsListDiv,
-        articleCommentFormContainer,
-        articleCommentForm, // articleCommentNameSection non è più essenziale qui
-        likedByModal,
-        closeLikedByModalBtn,
-        likedByModalTitle,
-        likedByModalList,
-        likedByModalLoading,
-        likedByModalNoLikes,
-        articleShareSection,
-        nativeShareBtn,
-        copyLinkBtn,
+        articleContentContainer, articleDisplayTitle, articleDisplayDate, articleDisplayAuthor,
+        articleDisplayTagsContainer, articleDisplayContent, articleDisplayLoading,
+        articleInteractionsSection, likeArticleButton, articleLikeCountSpan, commentsListDiv,
+        articleCommentFormContainer, articleCommentForm, likedByModal, closeLikedByModalBtn,
+        likedByModalTitle, likedByModalList, likedByModalLoading, likedByModalNoLikes,
+        articleShareSection, nativeShareBtn, copyLinkBtn,
     ];
 
     if (essentialElementsCheck.some((el) => !el)) {
-        console.error('Uno o più Elementi DOM essenziali per view-article.html sono mancanti.');
-        // ... (gestione errore come prima)
+        console.error('[articleViewer.js] Uno o più Elementi DOM essenziali per view-article.html sono mancanti.');
         return;
     }
 
@@ -913,11 +964,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    updateArticleCommentFormUI(auth.currentUser); // Chiamata iniziale allo stato corrente
+    updateArticleCommentFormUI(auth.currentUser); // Chiamata iniziale
     loadAndDisplayArticleFromFirestore(articleIdInternal);
 
     onAuthStateChanged(auth, (user) => {
-        console.log('[articleViewer] Auth state changed. User:', user ? user.uid : null);
+        console.log('[articleViewer.js] Auth state changed. User:', user ? user.uid : null);
         updateArticleCommentFormUI(user);
         if (articleIdInternal) {
             loadAndDisplayArticleLikes(articleIdInternal); // Ricarica per aggiornare stato like pulsante articolo
