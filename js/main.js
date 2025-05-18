@@ -4,8 +4,7 @@ import {
     getFirestore,
     doc,
     getDoc,
-    // setDoc, 
-    serverTimestamp, 
+    serverTimestamp,
     collection,
     query,
     where,
@@ -22,17 +21,15 @@ import {
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
-    // createUserWithEmailAndPassword, 
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-// Importazioni locali
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
 import { showToast } from './toastNotifications.js';
 
 // --- Firebase Config ---
 const firebaseConfig = {
-    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', 
+    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk',
     authDomain: 'asyncdonkey.firebaseapp.com',
     projectId: 'asyncdonkey',
     storageBucket: 'asyncdonkey.appspot.com',
@@ -45,16 +42,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-/**
- * Mostra una modale di conferma personalizzata e restituisce una Promise.
- * La Promise si risolve in `true` se l'utente conferma (clicca "Sì"),
- * o in `false` se l'utente annulla (clicca "No" o chiude la modale).
- * Assicurati che l'HTML per la modale con ID 'confirmationModal' esista nella pagina.
- * @param {string} [title="Conferma Azione"] Titolo della modale.
- * @param {string} [message="Sei sicuro di voler procedere?"] Messaggio di conferma.
- * @returns {Promise<boolean>} Promise che si risolve con la scelta dell'utente.
- */
 export function showConfirmationModal(title = "Conferma Azione", message = "Sei sicuro di voler procedere?") {
+    // ... (codice invariato, come da versione precedente)
     return new Promise((resolve) => {
         const modal = document.getElementById('confirmationModal');
         const modalTitleEl = document.getElementById('confirmationModalTitle');
@@ -66,7 +55,6 @@ export function showConfirmationModal(title = "Conferma Azione", message = "Sei 
             console.error(
                 "Elementi della modale di conferma (confirmationModal, confirmationModalTitle, etc.) non trovati nel DOM."
             );
-            // Fallback al confirm nativo del browser se gli elementi della modale non sono presenti
             const userConfirmation = window.confirm(`${title}\n${message}`);
             resolve(userConfirmation);
             return;
@@ -75,45 +63,33 @@ export function showConfirmationModal(title = "Conferma Azione", message = "Sei 
         modalTitleEl.textContent = title;
         modalMessageEl.textContent = message;
 
-        // Funzione interna per chiudere la modale e risolvere la Promise
         const closeAndResolve = (value) => {
             modal.style.display = 'none';
-            // Rimuovi gli event listener specifici per questa istanza della modale
-            // per evitare accumuli se la funzione viene chiamata più volte.
-            // Clonare i nodi è un modo efficace per rimuovere tutti i listener.
             const newYesBtn = yesBtn.cloneNode(true);
             yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
-
             const newNoBtn = noBtn.cloneNode(true);
             noBtn.parentNode.replaceChild(newNoBtn, noBtn);
-            
-            // Rimuovi anche il listener per il click esterno, se aggiunto
             modal.removeEventListener('click', handleModalOutsideClick);
-
             resolve(value);
         };
         
-        // Funzione per gestire il click esterno (sullo sfondo della modale)
         const handleModalOutsideClick = (event) => {
             if (event.target === modal) {
-                closeAndResolve(false); // Risolve con 'false' come se si premesse "No"
+                closeAndResolve(false); 
             }
         };
 
-        // Assegna i nuovi listener ai bottoni (ora clonati, quindi quelli nel DOM)
         document.getElementById('confirmModalYesBtn').onclick = () => closeAndResolve(true);
         document.getElementById('confirmModalNoBtn').onclick = () => closeAndResolve(false);
-        
-        // Aggiungi il listener per il click esterno
         modal.addEventListener('click', handleModalOutsideClick);
 
         modal.style.display = 'block';
-        if (yesBtn) yesBtn.focus(); // Opzionale: metti il focus sul pulsante "Sì"
+        if (yesBtn) yesBtn.focus();
     });
 }
 
-// --- Funzioni Utility Esistenti ---
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
+    // ... (codice invariato)
     if (typeof createIcon !== 'function') {
         console.error('createIcon from Blockies non importata!');
         return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${imgSize}' height='${imgSize}' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E`;
@@ -139,6 +115,7 @@ export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
 }
 
 function escapeHTML(str) {
+    // ... (codice invariato)
     if (str === null || str === undefined) return '';
     const div = document.createElement('div');
     div.textContent = str;
@@ -146,6 +123,7 @@ function escapeHTML(str) {
 }
 
 async function loadHeaderUserProfileDisplay(user) {
+    // ... (codice invariato)
     const userDisplayNameElement = document.getElementById('userDisplayName'); 
     const headerUserAvatarElement = document.getElementById('headerUserAvatar'); 
 
@@ -181,6 +159,7 @@ async function loadHeaderUserProfileDisplay(user) {
 }
 
 function updateHeaderAuthContainersVisibility(user) {
+    // ... (codice invariato)
     const authContainer = document.getElementById('authContainer'); 
     const userProfileContainer = document.getElementById('userProfileContainer'); 
     if (authContainer) authContainer.style.display = user ? 'none' : 'flex';
@@ -189,86 +168,95 @@ function updateHeaderAuthContainersVisibility(user) {
 
 // --- NUOVA LOGICA NAVBAR ---
 function toggleMobileMenu() {
-    const mobileMenuContainer = document.getElementById('mobileNavMenu'); 
-    const mobileMenuButton = document.getElementById('navbarToggler');   
-    
+    const mobileMenuContainer = document.getElementById('mobileNavMenu');
+    const mobileMenuButton = document.getElementById('navbarToggler');
+
     if (!mobileMenuContainer || !mobileMenuButton) {
-        console.error('[toggleMobileMenu] Elementi del menu mobile non trovati. ID HTML attesi: mobileNavMenu, navbarToggler.');
+        console.error('[toggleMobileMenu] Elementi del menu mobile non trovati.');
         return;
     }
-    const burgerIcon = mobileMenuButton.querySelector('.material-symbols-rounded'); 
-
+    const burgerIcon = mobileMenuButton.querySelector('.material-symbols-rounded');
     if (!burgerIcon) {
-        console.error('[toggleMobileMenu] Icona burger non trovata dentro navbarToggler.');
+        console.error('[toggleMobileMenu] Icona burger non trovata.');
         return;
     }
 
-    const isActive = mobileMenuContainer.classList.toggle('active'); 
+    const isActive = mobileMenuContainer.classList.toggle('active');
     mobileMenuButton.setAttribute('aria-expanded', isActive.toString());
     burgerIcon.textContent = isActive ? 'close' : 'menu';
-    console.log(`[toggleMobileMenu] Menu mobile ${isActive ? 'APERTO' : 'CHIUSO'}. Classe 'active' su #mobileNavMenu: ${isActive}`);
+
+    if (!isActive) { // Menu CHIUSO
+        mobileMenuContainer.setAttribute('aria-hidden', 'true');
+        // Ritarda leggermente lo spostamento del focus per assicurarsi che il menu sia "andato"
+        // e che il focus non venga "rubato" da un elemento appena nascosto.
+        setTimeout(() => {
+            // Controlla se il focus è ancora su un elemento dentro il menu mobile (che ora è nascosto)
+            // o se è sul body (il che può accadere se l'elemento con focus è stato rimosso).
+            if (document.activeElement === document.body || mobileMenuContainer.contains(document.activeElement)) {
+                // Se sì, sposta il focus sul pulsante che ha aperto/chiuso il menu.
+                mobileMenuButton.focus();
+            }
+            // Altrimenti, il focus potrebbe essere già stato gestito correttamente (es. da un logout)
+            // o spostato altrove dall'utente/browser, quindi non lo forziamo.
+        }, 0);
+    } else { // Menu APERTO
+        mobileMenuContainer.removeAttribute('aria-hidden');
+        // Opzionale: focus sul primo elemento del menu quando si apre
+        const firstFocusableElement = mobileMenuContainer.querySelector('a, button');
+        if (firstFocusableElement) {
+            // firstFocusableElement.focus(); // Commentato per ora, può essere fastidioso
+        }
+    }
+    // console.log(`[main.js toggleMobileMenu] Menu mobile ${isActive ? 'APERTO' : 'CHIUSO'}.`);
 }
 
+
 function populateMobileMenu() {
+    // ... (codice invariato)
     const navbarLinksContainer = document.querySelector('.desktop-nav > ul');
     const mobileMenuTarget = document.getElementById('mobileNavMenu');
 
-    // console.log('[populateMobileMenu] Inizio...'); // DEBUG
-
     if (!navbarLinksContainer) {
-        // console.error('[populateMobileMenu] Contenitore link desktop (.desktop-nav > ul) NON TROVATO.');
         return;
     }
     if (!mobileMenuTarget) {
-        // console.error('[populateMobileMenu] Target menu mobile (mobileNavMenu) NON TROVATO.');
         return;
     }
 
-    mobileMenuTarget.innerHTML = ''; // Pulisci prima di ripopolare
+    mobileMenuTarget.innerHTML = ''; 
     const mobileUl = document.createElement('ul');
     mobileUl.className = 'mobile-menu-list';
     mobileUl.style.listStyle = 'none';
     mobileUl.style.padding = '0';
     mobileUl.style.margin = '0';
-    // console.log('[populateMobileMenu] mobileUl (.mobile-menu-list) creato.'); // DEBUG
 
     const desktopListItems = navbarLinksContainer.querySelectorAll(':scope > li');
-    // console.log(`[populateMobileMenu] Trovati ${desktopListItems.length} elementi <li> diretti nel menu desktop.`); // DEBUG
 
-    desktopListItems.forEach((desktopLi) => { // Rimosso 'index' non usato
-        // console.log(`[populateMobileMenu] Processo desktopLi:`, desktopLi); // DEBUG
-
+    desktopListItems.forEach((desktopLi) => { 
         const isDropdownContainer = desktopLi.classList.contains('nav-dropdown-container');
         let linkToProcess;
 
         if (isDropdownContainer) {
             linkToProcess = desktopLi.querySelector('button.dropdown-toggle#communityDropdownToggle');
-            // console.log(`[populateMobileMenu] desktopLi è Dropdown Container. linkToProcess:`, linkToProcess); // DEBUG
         } else {
             linkToProcess = desktopLi.querySelector('a');
-            // console.log(`[populateMobileMenu] desktopLi è Link Normale. linkToProcess:`, linkToProcess); // DEBUG
         }
 
         if (!linkToProcess) {
-            // console.warn(`[populateMobileMenu] desktopLi SKIPPATO (no suitable <a> o button#communityDropdownToggle):`, desktopLi); // DEBUG
-            return; // Salta questo <li> se non c'è un link o bottone primario
+            return; 
         }
 
-        // NON clonare gli <li> che sono placeholder per link dinamici gestiti da updateLoginLogoutLinks
-        // Questi ID sono per gli elementi LI che verranno creati dinamicamente.
         const dynamicDesktopLiIds = ['profile-link-li', 'logout-link-li', 'login-link-li'];
         if (dynamicDesktopLiIds.includes(desktopLi.id)) {
-            // console.log(`[populateMobileMenu] desktopLi (ID: ${desktopLi.id}) SKIPPATO perché è un placeholder dinamico desktop.`); // DEBUG
             return;
         }
 
         if (isDropdownContainer && linkToProcess && linkToProcess.id === 'communityDropdownToggle') {
-            // console.log(`[populateMobileMenu] Processo Dropdown 'Community'...`); // DEBUG
             const mobileDropdownLi = document.createElement('li');
             mobileDropdownLi.classList.add('nav-item', 'mobile-dropdown');
 
             const mobileDropdownToggle = document.createElement('a');
-            mobileDropdownToggle.href = '#'; // I link del menu mobile per toggle non navigano
+            mobileDropdownToggle.href = '#'; 
             mobileDropdownToggle.innerHTML = linkToProcess.innerHTML;
             mobileDropdownToggle.classList.add('dropdown-toggle');
             mobileDropdownToggle.setAttribute('aria-expanded', 'false');
@@ -280,29 +268,26 @@ function populateMobileMenu() {
             mobileSubmenu.style.paddingLeft = '20px';
 
             const desktopSubmenuItems = desktopLi.querySelectorAll('.dropdown-menu li');
-            // console.log(`[populateMobileMenu] Trovati ${desktopSubmenuItems.length} voci <li> nel sottomenu Community desktop.`); // DEBUG
 
             desktopSubmenuItems.forEach(subItemLi => {
                 const subItemLink = subItemLi.querySelector('a');
                 if (subItemLink) {
                     const mobileSubmenuItemLi = document.createElement('li');
-                    if (subItemLi.id === 'navWriteArticleDropdown') { // ID del LI nel dropdown desktop
-                        mobileSubmenuItemLi.id = 'mobile-navWriteArticleDropdown'; // ID per il LI nel sottomenu mobile
-                        mobileSubmenuItemLi.style.display = 'none'; // Inizia nascosto, gestito da updateLoginLogoutLinks
-                        // console.log(`[populateMobileMenu] Creato LI per "Scrivi Articolo" mobile con ID: mobile-navWriteArticleDropdown`); // DEBUG
+                    if (subItemLi.id === 'navWriteArticleDropdown') { 
+                        mobileSubmenuItemLi.id = 'mobile-navWriteArticleDropdown'; 
+                        mobileSubmenuItemLi.style.display = 'none'; 
                     }
 
                     const mobileSubmenuLink = document.createElement('a');
                     mobileSubmenuLink.href = subItemLink.href;
-                    mobileSubmenuLink.innerHTML = subItemLink.innerHTML; // Copia tutto l'HTML interno (icona + testo)
-                    mobileSubmenuLink.classList.add('nav-item'); // Applica classe per stile uniforme
+                    mobileSubmenuLink.innerHTML = subItemLink.innerHTML; 
+                    mobileSubmenuLink.classList.add('nav-item'); 
                     if (subItemLink.target === '_blank') {
                         mobileSubmenuLink.target = '_blank';
                         mobileSubmenuLink.rel = 'noopener noreferrer';
                     }
                     mobileSubmenuItemLi.appendChild(mobileSubmenuLink);
                     mobileSubmenu.appendChild(mobileSubmenuItemLi);
-                    // console.log(`[populateMobileMenu] Aggiunto sottomenu item '${subItemLink.textContent.trim()}' al dropdown Community mobile.`); // DEBUG
                 }
             });
 
@@ -312,40 +297,34 @@ function populateMobileMenu() {
                 mobileSubmenu.style.display = isExpanded ? 'none' : 'block';
                 mobileDropdownToggle.setAttribute('aria-expanded', String(!isExpanded));
                 const icon = mobileDropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow');
-                if (icon) icon.textContent = !isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'; // Invertito per logica corretta
+                if (icon) icon.textContent = !isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'; 
             });
 
             mobileDropdownLi.appendChild(mobileDropdownToggle);
             mobileDropdownLi.appendChild(mobileSubmenu);
             mobileUl.appendChild(mobileDropdownLi);
-            // console.log('[populateMobileMenu] Dropdown Community mobile AGGIUNTO a mobileUl.'); // DEBUG
-        } else if (!isDropdownContainer && linkToProcess) { // Link statico di primo livello
-            const itemText = (linkToProcess.textContent || "SENZA TESTO").trim();
-            // console.log(`[populateMobileMenu] Processo Link Statico '${itemText}'...`); // DEBUG
+        } else if (!isDropdownContainer && linkToProcess) { 
             const mobileListItem = document.createElement('li');
             const mobileLink = document.createElement('a');
             mobileLink.href = linkToProcess.href || '#';
-            mobileLink.innerHTML = linkToProcess.innerHTML; // Copia tutto l'HTML interno (icona + testo)
-            mobileLink.classList.add('nav-item'); // Applica classe per stile uniforme
+            mobileLink.innerHTML = linkToProcess.innerHTML; 
+            mobileLink.classList.add('nav-item'); 
             if (linkToProcess.target === '_blank') {
                 mobileLink.target = '_blank';
                 mobileLink.rel = 'noopener noreferrer';
             }
             mobileListItem.appendChild(mobileLink);
             mobileUl.appendChild(mobileListItem);
-            // console.log(`[populateMobileMenu] Link statico '${itemText}' AGGIUNTO a mobileUl.`); // DEBUG
         }
     });
 
     if (mobileUl.hasChildNodes()) {
         mobileMenuTarget.appendChild(mobileUl);
-        // console.log('[populateMobileMenu] mobileUl (.mobile-menu-list) appeso a #mobileNavMenu.'); // DEBUG
-    } else {
-        // console.warn('[populateMobileMenu] mobileUl è VUOTO.'); // DEBUG
     }
-    // console.log('[populateMobileMenu] Fine.'); // DEBUG
 }
+
 function setupDesktopCommunityDropdown() {
+    // ... (codice invariato)
     const dropdownToggle = document.getElementById('communityDropdownToggle'); 
     const dropdownMenu = document.getElementById('communityDropdownMenu');   
 
@@ -373,6 +352,7 @@ function setupDesktopCommunityDropdown() {
 }
 
 function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], onClickHandler = null) {
+    // ... (codice invariato)
     const listItem = document.createElement('li');
     listItem.id = liId;
     const link = document.createElement('a');
@@ -388,6 +368,7 @@ function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], 
 }
 
 async function getUserProfile(userId) {
+    // ... (codice invariato)
     if (!db) { 
         console.error('Firestore (db) non inizializzato (getUserProfile).');
         return { nickname: 'Errore DB' };
@@ -409,28 +390,25 @@ async function updateLoginLogoutLinks(user) {
     const mobileMenuNode = document.getElementById('mobileNavMenu');
     const mobileMenuContainer = mobileMenuNode ? mobileMenuNode.querySelector('.mobile-menu-list') : null;
 
-    // Gestione Visibilità "Scrivi Articolo" (nel sottomenu mobile)
     const navWriteArticleDropdownLiMobile = document.getElementById('mobile-navWriteArticleDropdown');
     if (navWriteArticleDropdownLiMobile) {
         navWriteArticleDropdownLiMobile.style.display = user ? 'list-item' : 'none';
     }
-    // E per desktop (nel dropdown community)
     const navWriteArticleDropdownLiDesktop = document.getElementById('navWriteArticleDropdown');
     if (navWriteArticleDropdownLiDesktop) {
         navWriteArticleDropdownLiDesktop.style.display = user ? 'list-item' : 'none';
     }
 
-
     if (!mobileMenuContainer) {
+        console.warn('[main.js updateLoginLogoutLinks] Contenitore menu mobile non trovato o non ancora popolato.');
         return;
     }
 
-    // Rimuovi SEMPRE i link dinamici di sessione dal menu mobile prima di aggiungerli
-    // Questo previene duplicati se la funzione viene chiamata più volte.
     const dynamicMobileLiIds = ['mobile-profile-link-li', 'mobile-logout-link-li', 'mobile-login-link-li'];
     dynamicMobileLiIds.forEach(id => {
         const el = document.getElementById(id);
         if (el && el.parentNode === mobileMenuContainer) {
+            // console.log(`[main.js updateLoginLogoutLinks] Rimuovo LI mobile: ${id}`); // DEBUG
             el.remove();
         }
     });
@@ -438,36 +416,61 @@ async function updateLoginLogoutLinks(user) {
     if (user) {
         let userProfile = await getUserProfile(user.uid);
         let userNickname = userProfile?.nickname || (user.email ? user.email.split('@')[0] : 'Utente');
-        // Non troncare il nickname per il menu mobile, c'è più spazio verticale
-        // if (userNickname.length > 15) userNickname = userNickname.substring(0, 12) + '...';
 
-        // Voce "My Profile" per il menu mobile
         const profileHTMLMobile = `<span class="material-symbols-rounded">account_circle</span> <span class="nav-text">My Profile (${escapeHTML(userNickname)})</span>`;
         mobileMenuContainer.appendChild(createNavLinkItem('mobile-profile-link-li', 'mobile-profile-link', 'profile.html', profileHTMLMobile, ['nav-item']));
+        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "My Profile" mobile.'); // DEBUG
 
-        // Voce "Logout" per il menu mobile
-        const logoutHandler = async (e) => { /* ... (come prima) ... */ };
+
+        const logoutHandler = async (e) => {
+            e.preventDefault();
+            console.log('[main.js logoutHandler mobile] Logout cliccato!'); // DEBUG
+            const mobileMenuContainerForLogout = document.getElementById('mobileNavMenu'); // Riferimento fresco
+            const isActiveBeforeLogout = mobileMenuContainerForLogout && mobileMenuContainerForLogout.classList.contains('active');
+
+            if (isActiveBeforeLogout) {
+                // console.log('[main.js logoutHandler mobile] Chiusura menu mobile prima del signOut.'); // DEBUG
+                toggleMobileMenu(); // Chiude il menu e dovrebbe spostare il focus sul toggler
+            } else {
+                // console.log('[main.js logoutHandler mobile] Menu mobile non attivo, procedo con signOut.'); // DEBUG
+            }
+        
+            try {
+                console.log('[main.js logoutHandler mobile] Chiamata a signOut...'); // DEBUG
+                await signOut(auth);
+                showToast('Logout effettuato con successo!', 'success');
+                console.log('[main.js logoutHandler mobile] Logout riuscito.'); // DEBUG
+            } catch (error) {
+                console.error('Errore durante il logout (mobile):', error);
+                showToast('Errore durante il logout. Riprova.', 'error');
+            }
+        };
         const logoutHTMLMobile = `<span class="material-symbols-rounded">logout</span> <span class="nav-text">Logout</span>`;
         mobileMenuContainer.appendChild(createNavLinkItem('mobile-logout-link-li', 'mobile-logout-link', '#', logoutHTMLMobile, ['nav-item'], logoutHandler));
+        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "Logout" mobile.'); // DEBUG
 
-    } else { // Utente non loggato
-        // Voce "Login" per il menu mobile
+    } else { 
         const loginHTMLMobile = `<span class="material-symbols-rounded">login</span> <span class="nav-text">Login / Register</span>`;
-        mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', 'register.html', loginHTMLMobile, ['nav-item']));
-        // Nota: Questo link porta a register.html. Se vuoi che apra la modale di login,
-        // dovrai cambiare href a '#' e aggiungere l'event listener per aprire la modale,
-        // come avevamo discusso per il link Login nel menu mobile precedentemente.
-        // Esempio per aprire modale:
-        // mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', '#', loginHTMLMobile, ['nav-item'], (e) => {
-        //    e.preventDefault();
-        //    const loginModalEl = document.getElementById('loginModal');
-        //    if(loginModalEl) loginModalEl.style.display = 'block';
-        //    if(mobileMenuNode.classList.contains('active')) toggleMobileMenu(); // Chiudi menu mobile
-        // }));
+        const loginMobileHandler = (e) => {
+            e.preventDefault();
+            const loginModalEl = document.getElementById('loginModal');
+            if(loginModalEl) loginModalEl.style.display = 'block';
+            const mobileMenuContainerForLogin = document.getElementById('mobileNavMenu');
+            if(mobileMenuContainerForLogin && mobileMenuContainerForLogin.classList.contains('active')) {
+                toggleMobileMenu(); // Chiudi menu mobile
+            }
+        };
+        // mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', 'register.html', loginHTMLMobile, ['nav-item']));
+        mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', '#', loginHTMLMobile, ['nav-item'], loginMobileHandler));
+
+
+        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "Login/Register" mobile.'); // DEBUG
     }
 }
 
+
 async function updateAdminDashboardLink(user) {
+    // ... (codice invariato)
     const adminDashboardLinkFooter = document.getElementById('admin-dashboard-footer-link');
     if (!adminDashboardLinkFooter) return;
     if (user) {
@@ -484,6 +487,7 @@ async function updateAdminDashboardLink(user) {
 }
 
 function initializeNewNavbar() {
+    // ... (codice invariato)
     const mobileMenuButton = document.getElementById('navbarToggler'); 
     if (mobileMenuButton) {
         mobileMenuButton.addEventListener('click', toggleMobileMenu);
@@ -495,10 +499,10 @@ function initializeNewNavbar() {
     console.log('[initializeNewNavbar] Nuova navbar inizializzata.');
 }
 
-// --- Funzioni Homepage Esistenti ---
-export { db, auth }; 
+export { db, auth };
 
 async function loadHomeMiniLeaderboard() {
+    // ... (codice invariato)
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
     if (!leaderboardListElement) return;
     if (!db) {
@@ -573,6 +577,7 @@ async function loadHomeMiniLeaderboard() {
 }
 
 async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser) {
+    // ... (codice invariato, già usa Material Symbols)
     if (!buttonElement || !articleId) return;
     const likeCountSpan = buttonElement.nextElementSibling;
      if (!likeCountSpan || !likeCountSpan.classList.contains('homepage-like-count')) {
@@ -626,6 +631,7 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
 }
 
 async function handleHomepageArticleLike(event) {
+    // ... (codice invariato)
     const button = event.currentTarget;
     const articleId = button.dataset.articleId;
     const currentUser = auth.currentUser; 
@@ -641,6 +647,7 @@ async function handleHomepageArticleLike(event) {
 }
 
 async function updateHomepageCommentCountUI(countSpanElement, articleId) {
+    // ... (codice invariato)
     if (!countSpanElement || !articleId) return;
     try {
         const articleRef = doc(db, 'articles', articleId); 
@@ -659,6 +666,7 @@ async function updateHomepageCommentCountUI(countSpanElement, articleId) {
 }
 
 export async function initializeHomepageArticleInteractions(currentUser) {
+    // ... (codice invariato)
     const articlesGrid = document.getElementById('articlesGrid');
     if (!articlesGrid) return;
     const articleCards = articlesGrid.querySelectorAll('.article-card');
@@ -681,6 +689,7 @@ export async function initializeHomepageArticleInteractions(currentUser) {
 }
 
 function traduireErroreFirebase(codiceErrore) {
+    // ... (codice invariato)
     const errors = {
         'auth/invalid-email': "L'indirizzo email non è valido.",
         'auth/user-disabled': 'Questo account utente è stato disabilitato.',
@@ -693,8 +702,8 @@ function traduireErroreFirebase(codiceErrore) {
     return errors[codiceErrore] || `Errore (${codiceErrore}). Riprova.`;
 }
 
-// --- DOMContentLoaded ---
 document.addEventListener('DOMContentLoaded', function () {
+    // ... (codice invariato, inclusa la chiamata a initializeNewNavbar)
     initializeNewNavbar(); 
     const loginForm = document.getElementById('loginForm');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
@@ -780,9 +789,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target === loginModal) closeModal(loginModal);
         });
     }
-
-    
-
     setupSmoothScrolling();
     setupScrollToTopButton();
     setupInteractiveSkills();
@@ -827,25 +833,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// --- onAuthStateChanged ---
-onAuthStateChanged(auth, async (user) => { 
-    console.log('[onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? `'${user.uid}'` : 'null');
+onAuthStateChanged(auth, async (user) => {
+    console.log('[main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? `'${user.uid}'` : 'null');
 
     updateHeaderAuthContainersVisibility(user);
     if (user) {
         await loadHeaderUserProfileDisplay(user);
     } else {
-        loadHeaderUserProfileDisplay(null); 
+        loadHeaderUserProfileDisplay(null);
     }
-    await updateLoginLogoutLinks(user); 
+    await updateLoginLogoutLinks(user);
     await updateAdminDashboardLink(user);
 
-    if (document.getElementById('articlesGrid')) { 
-         setTimeout(async () => { 
+    if (document.getElementById('articlesGrid')) {
+        setTimeout(async () => {
             await initializeHomepageArticleInteractions(user);
-        }, 100); 
+        }, 100);
     }
-    if (user && user.emailVerified) { 
+    if (user && user.emailVerified) {
         const isNewlyRegistered = sessionStorage.getItem('newlyRegistered');
         if (isNewlyRegistered) {
             try {
@@ -862,5 +867,5 @@ onAuthStateChanged(auth, async (user) => {
             }
         }
     }
-    console.log('[onAuthStateChanged] Aggiornamento UI completato.');
+    console.log('[main.js onAuthStateChanged] Aggiornamento UI completato.');
 });

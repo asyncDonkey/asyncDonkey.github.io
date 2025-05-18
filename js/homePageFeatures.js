@@ -60,38 +60,30 @@ function createArticleCard(articleData, articleId, gridContainer) {
     const metaEl = document.createElement('div');
     metaEl.className = 'article-meta';
 
-    // --- START: Author Info Insertion (Task D.7) ---
     const authorInfoSpan = document.createElement('span');
     authorInfoSpan.className = 'article-author-info';
 
-    // D.7.1: Author Avatar
     if (articleData.authorId) {
         const avatarImg = document.createElement('img');
         avatarImg.className = 'author-avatar-homepage';
-        avatarImg.src = generateBlockieAvatar(articleData.authorId, 24); // Avatar da 24px
+        avatarImg.src = generateBlockieAvatar(articleData.authorId, 24);
         avatarImg.alt = `Avatar di ${articleData.authorName || 'Autore'}`;
-        // Gli stili specifici (border-radius, etc.) saranno gestiti da CSS
         authorInfoSpan.appendChild(avatarImg);
     }
 
-    // Author Name
-    const authorNameContainer = document.createElement('span'); // Contenitore generico
-authorNameContainer.className = 'article-author-name'; // Mantieni la classe per lo stile
+    const authorNameContainer = document.createElement('span');
+    authorNameContainer.className = 'article-author-name';
 
-if (articleData.authorId) {
-    const authorLink = document.createElement('a');
-    authorLink.href = `profile.html?userId=${articleData.authorId}`;
-    authorLink.textContent = articleData.authorName || 'Autore Sconosciuto';
-    // Potresti aggiungere uno stile specifico per i link utente se necessario
-    // authorLink.classList.add('user-profile-link'); 
-    authorNameContainer.appendChild(authorLink);
-} else {
-    authorNameContainer.textContent = articleData.authorName || 'Autore Sconosciuto';
-}
-// authorInfoSpan.appendChild(authorNameSpanElement); // Rimuovi la vecchia riga
-authorInfoSpan.appendChild(authorNameContainer); // Aggiungi il nuovo contenitore
+    if (articleData.authorId) {
+        const authorLink = document.createElement('a');
+        authorLink.href = `profile.html?userId=${articleData.authorId}`;
+        authorLink.textContent = articleData.authorName || 'Autore Sconosciuto';
+        authorNameContainer.appendChild(authorLink);
+    } else {
+        authorNameContainer.textContent = articleData.authorName || 'Autore Sconosciuto';
+    }
+    authorInfoSpan.appendChild(authorNameContainer);
 
-    // D.7.2: Author Nationality Flag
     if (
         articleData.authorNationalityCode &&
         articleData.authorNationalityCode !== 'OTHER' &&
@@ -99,16 +91,14 @@ authorInfoSpan.appendChild(authorNameContainer); // Aggiungi il nuovo contenitor
     ) {
         const flagIcon = document.createElement('span');
         flagIcon.classList.add('fi', `fi-${articleData.authorNationalityCode.toLowerCase()}`);
-        flagIcon.title = articleData.authorNationalityCode; // Mostra il codice del paese al passaggio del mouse
-        // Gli stili specifici (margini, allineamento) saranno gestiti da CSS
+        flagIcon.title = articleData.authorNationalityCode;
         authorInfoSpan.appendChild(flagIcon);
     }
-    metaEl.appendChild(authorInfoSpan); // Aggiungi le info autore come primo elemento del meta container
-    // --- END: Author Info Insertion ---
+    metaEl.appendChild(authorInfoSpan);
 
     const dateEl = document.createElement('span');
     dateEl.className = 'article-date';
-    const dateValueForCard = articleData.publishedAt || articleData.createdAt; // Correzione bug data
+    const dateValueForCard = articleData.publishedAt || articleData.createdAt;
     dateEl.textContent = formatArticleDate(dateValueForCard);
     metaEl.appendChild(dateEl);
 
@@ -130,6 +120,7 @@ authorInfoSpan.appendChild(authorNameContainer); // Aggiungi il nuovo contenitor
     snippetEl.textContent = articleData.snippet || 'Nessun riassunto disponibile.';
     card.appendChild(snippetEl);
 
+    // --- MODIFICHE QUI ---
     const interactionsEl = document.createElement('div');
     interactionsEl.className = 'article-card-interactions';
 
@@ -137,10 +128,11 @@ authorInfoSpan.appendChild(authorNameContainer); // Aggiungi il nuovo contenitor
     const likeContainer = document.createElement('div');
     likeContainer.className = 'interaction-item like-interaction-homepage';
     const likeButton = document.createElement('button');
-    likeButton.className = 'article-like-btn homepage-like-btn';
+    likeButton.className = 'article-like-btn homepage-like-btn'; // Manteniamo le classi esistenti per CSS e JS
     likeButton.setAttribute('data-article-id', articleId);
-    likeButton.innerHTML = `🤍`; // L'UI del like verrà aggiornata da main.js
-    likeButton.title = 'Like this article';
+    // Sostituisci l'emoji con Material Symbol
+    likeButton.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
+    likeButton.title = 'Like this article'; // Il titolo verrà aggiornato dinamicamente
     const likeCountSpan = document.createElement('span');
     likeCountSpan.className = 'article-like-count homepage-like-count';
     likeCountSpan.textContent = `${articleData.likeCount || 0}`;
@@ -152,8 +144,9 @@ authorInfoSpan.appendChild(authorNameContainer); // Aggiungi il nuovo contenitor
     const commentContainer = document.createElement('div');
     commentContainer.className = 'interaction-item comment-interaction-homepage';
     const commentIcon = document.createElement('span');
-    commentIcon.className = 'comment-icon-homepage';
-    commentIcon.innerHTML = '💬';
+    // Applica la classe Material Symbols e usa il nome dell'icona
+    commentIcon.className = 'comment-icon-homepage material-symbols-rounded';
+    commentIcon.innerHTML = 'chat_bubble_outline'; // o 'comment'
     const commentCountSpan = document.createElement('span');
     commentCountSpan.className = 'article-comment-count homepage-comment-count';
     commentCountSpan.textContent = `${articleData.commentCount || 0}`;
@@ -162,10 +155,12 @@ authorInfoSpan.appendChild(authorNameContainer); // Aggiungi il nuovo contenitor
     commentLink.href = `view-article.html?id=${articleId}#articleCommentsSectionContainer`;
     commentLink.textContent = 'Commenta';
     commentLink.title = 'Vedi e aggiungi commenti';
-    commentContainer.appendChild(commentIcon);
-    commentContainer.appendChild(commentCountSpan);
-    commentContainer.appendChild(commentLink);
+    commentContainer.appendChild(commentIcon); // Icona
+    commentContainer.appendChild(commentCountSpan); // Conteggio
+    commentContainer.appendChild(commentLink); // Link testuale "Commenta"
     interactionsEl.appendChild(commentContainer);
+    // --- FINE MODIFICHE ---
+
     card.appendChild(interactionsEl);
 
     const readMoreLinkEl = document.createElement('a');
@@ -181,37 +176,50 @@ authorInfoSpan.appendChild(authorNameContainer); // Aggiungi il nuovo contenitor
  * Visualizza la sezione articoli e l'articolo in evidenza caricandoli da Firestore.
  */
 export async function displayArticlesSection() {
+    // console.log('[homePageFeatures.js] displayArticlesSection chiamata.'); // DEBUG
+
     const articlesSection = document.getElementById('articlesSection');
     const articlesGrid = document.getElementById('articlesGrid');
+
+    // Elementi per l'articolo in evidenza
     const featuredArticleCard = document.getElementById('featuredArticleCard');
     const featuredArticleTitleEl = document.getElementById('featuredArticleActualTitle');
     const featuredArticleSnippetEl = document.getElementById('featuredArticleSnippet');
     const featuredArticleLinkEl = document.getElementById('featuredArticleLink');
 
-    if (
-        !articlesSection ||
-        !articlesGrid ||
-        !featuredArticleCard ||
-        !featuredArticleTitleEl ||
-        !featuredArticleSnippetEl ||
-        !featuredArticleLinkEl
-    ) {
-        console.warn('Elementi DOM per la sezione articoli non trovati in displayArticlesSection.');
-        if (articlesSection) articlesSection.style.display = 'none'; // Nascondi la sezione se incompleta
+    // Verifica elementi essenziali per la griglia articoli
+    if (!articlesSection) {
+        console.error('[homePageFeatures.js] Errore critico: Elemento #articlesSection non trovato. Impossibile continuare.');
+        return;
+    }
+    if (!articlesGrid) {
+        console.error('[homePageFeatures.js] Errore critico: Elemento #articlesGrid non trovato. Impossibile continuare.');
+        articlesSection.style.display = 'block';
+        articlesSection.innerHTML = '<p style="color:red; text-align:center;">Errore di configurazione: contenitore griglia articoli mancante.</p>';
         return;
     }
 
-    if (articlesGrid)
-        articlesGrid.innerHTML =
-            '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli da Firestore...</p>';
-    if (featuredArticleCard) featuredArticleCard.style.display = 'none';
-    // if (articlesSection) articlesSection.style.display = 'block'; // Mostra la sezione con il messaggio di caricamento (rimosso per evitare flash se non ci sono articoli)
+    // Verifica elementi per l'articolo in evidenza.
+    const featuredElementsPresent = featuredArticleCard && featuredArticleTitleEl && featuredArticleSnippetEl && featuredArticleLinkEl;
+    if (!featuredElementsPresent) {
+        console.warn('[homePageFeatures.js] Uno o più elementi DOM per "Articolo in Evidenza" non trovati. La funzionalità Featured Article sarà disabilitata per questa esecuzione.');
+        if (featuredArticleCard) featuredArticleCard.style.display = 'none';
+    }
+
+    // Mostra il messaggio di caricamento nella griglia e rendi visibile la sezione
+    articlesGrid.innerHTML =
+        '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli da Firestore...</p>';
+    articlesSection.style.display = 'block';
+
+    // Nascondi la card dell'articolo in evidenza se gli elementi sono presenti (verrà mostrata se c'è un articolo featured)
+    if (featuredArticleCard && featuredElementsPresent) {
+        featuredArticleCard.style.display = 'none';
+    }
 
     if (!db) {
-        if (articlesGrid)
-            articlesGrid.innerHTML =
-                '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
-        if (articlesSection) articlesSection.style.display = 'block'; // Mostra l'errore
+        console.error('[homePageFeatures.js] Istanza Firestore (db) non disponibile.');
+        articlesGrid.innerHTML =
+            '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
         return;
     }
 
@@ -220,7 +228,7 @@ export async function displayArticlesSection() {
         const q = query(
             articlesCollectionRef,
             where('status', '==', 'published'),
-            orderBy('publishedAt', 'desc'), // Assicurati che questo campo esista e sia indicizzato per l'ordinamento
+            orderBy('publishedAt', 'desc'),
             limit(10)
         );
 
@@ -229,73 +237,67 @@ export async function displayArticlesSection() {
         querySnapshot.forEach((doc) => {
             articlesFromDb.push({ id: doc.id, ...doc.data() });
         });
+        // console.log('[homePageFeatures.js] Articoli fetched:', articlesFromDb.length);
 
-        if (articlesGrid) articlesGrid.innerHTML = ''; // Pulisci la griglia solo una volta prima di popolarla
 
-        let featuredArticleData = null;
+        articlesGrid.innerHTML = ''; // Pulisci la griglia ("Caricamento...")
+
+        let actualFeaturedArticleData = null;
+
         if (articlesFromDb.length > 0) {
-            if (articlesSection) articlesSection.style.display = 'block'; // Mostra la sezione articoli solo se ci sono articoli
+            // Solo se ci sono articoli, gestisci il featured (se gli elementi DOM esistono)
+            if (featuredElementsPresent) {
+                actualFeaturedArticleData = articlesFromDb.find((article) => article.isFeatured === true) || articlesFromDb[0];
 
-            featuredArticleData = articlesFromDb.find((article) => article.isFeatured === true) || articlesFromDb[0]; // Prendi il primo se nessun featured esplicito
-
-            if (featuredArticleData) {
-                const featuredH3TitleEl = document.getElementById('featuredArticleTitle');
-                if (featuredH3TitleEl) featuredH3TitleEl.style.display = 'block'; // Mostra il titolo "Articolo in Evidenza"
-
-                if (featuredArticleTitleEl)
-                    featuredArticleTitleEl.textContent = featuredArticleData.title || 'Titolo non disponibile';
-                if (featuredArticleSnippetEl) {
-                    featuredArticleSnippetEl.textContent =
-                        featuredArticleData.snippet ||
-                        (featuredArticleData.contentMarkdown
-                            ? featuredArticleData.contentMarkdown.substring(0, 150) + '...'
-                            : 'Leggi di più...');
+                if (actualFeaturedArticleData) {
+                    if (featuredArticleTitleEl)
+                        featuredArticleTitleEl.textContent = actualFeaturedArticleData.title || 'Titolo non disponibile';
+                    if (featuredArticleSnippetEl) {
+                        featuredArticleSnippetEl.textContent =
+                            actualFeaturedArticleData.snippet ||
+                            (actualFeaturedArticleData.contentMarkdown
+                                ? actualFeaturedArticleData.contentMarkdown.substring(0, 150) + '...'
+                                : 'Leggi di più...');
+                    }
+                    if (featuredArticleLinkEl)
+                        featuredArticleLinkEl.href = `view-article.html?id=${actualFeaturedArticleData.id}`;
+                    if (featuredArticleCard) featuredArticleCard.style.display = 'flex';
                 }
-                if (featuredArticleLinkEl)
-                    featuredArticleLinkEl.href = `view-article.html?id=${featuredArticleData.id}`;
-                if (featuredArticleCard) featuredArticleCard.style.display = 'flex'; // Mostra la card featured
             }
-        } else {
-            if (articlesSection) articlesSection.style.display = 'block'; // Mostra comunque la section per dare il messaggio
         }
 
         let articlesAddedToGrid = 0;
         articlesFromDb.forEach((articleDataInLoop) => {
-            // Non duplicare l'articolo in evidenza nella griglia generale se è già mostrato separatamente
-            if (!featuredArticleData || articleDataInLoop.id !== featuredArticleData.id) {
+            if (!actualFeaturedArticleData || articleDataInLoop.id !== actualFeaturedArticleData.id) {
                 if (typeof createArticleCard === 'function') {
                     createArticleCard(articleDataInLoop, articleDataInLoop.id, articlesGrid);
                     articlesAddedToGrid++;
                 } else {
-                    console.error('Funzione createArticleCard non definita!');
+                    console.error('[homePageFeatures.js] Funzione createArticleCard non definita!');
                 }
             }
         });
+        // console.log('[homePageFeatures.js] Articoli aggiunti alla griglia (escluso featured):', articlesAddedToGrid);
 
         if (articlesFromDb.length === 0) {
-            if (articlesGrid)
-                articlesGrid.innerHTML =
-                    '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
-            if (featuredArticleCard) featuredArticleCard.style.display = 'none'; // Nascondi se non ci sono articoli
-        } else if (articlesAddedToGrid === 0 && featuredArticleData) {
-            // Caso in cui c'è solo l'articolo featured e nessun altro, la griglia può rimanere vuota o mostrare un messaggio.
-            // Per ora, la lasciamo vuota se l'unico articolo è il featured.
-            if (articlesGrid)
-                articlesGrid.innerHTML =
-                    '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare al momento.</p>';
-        }
-    } catch (error) {
-        console.error('Errore durante il caricamento degli articoli da Firestore (homePageFeatures.js):', error);
-        if (articlesSection) articlesSection.style.display = 'block'; // Mostra la sezione per visualizzare l'errore
-        if (articlesGrid)
             articlesGrid.innerHTML =
-                '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
-        if (error.code === 'failed-precondition' && error.message.includes('index')) {
-            if (articlesGrid)
-                articlesGrid.innerHTML +=
-                    '<p style="text-align:center; color:orange;">Indice Firestore mancante. Controlla la console del browser per il link per crearlo.</p>';
+                '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
+            if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none';
+        } else if (articlesAddedToGrid === 0 && actualFeaturedArticleData) {
+            // Questo caso si verifica se l'unico articolo è quello in evidenza
+            articlesGrid.innerHTML =
+                '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare al momento.</p>';
         }
-        if (featuredArticleCard) featuredArticleCard.style.display = 'none';
+
+    } catch (error) {
+        console.error('[homePageFeatures.js] Errore durante il caricamento degli articoli:', error);
+        articlesGrid.innerHTML =
+            '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
+        if (error.code === 'failed-precondition' && error.message.includes('index')) {
+            articlesGrid.innerHTML +=
+                '<p style="text-align:center; color:orange;">Indice Firestore mancante. Controlla la console del browser per il link per crearlo.</p>';
+        }
+        if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none';
     }
 }
 
