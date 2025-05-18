@@ -45,6 +45,73 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+/**
+ * Mostra una modale di conferma personalizzata e restituisce una Promise.
+ * La Promise si risolve in `true` se l'utente conferma (clicca "Sì"),
+ * o in `false` se l'utente annulla (clicca "No" o chiude la modale).
+ * Assicurati che l'HTML per la modale con ID 'confirmationModal' esista nella pagina.
+ * @param {string} [title="Conferma Azione"] Titolo della modale.
+ * @param {string} [message="Sei sicuro di voler procedere?"] Messaggio di conferma.
+ * @returns {Promise<boolean>} Promise che si risolve con la scelta dell'utente.
+ */
+export function showConfirmationModal(title = "Conferma Azione", message = "Sei sicuro di voler procedere?") {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmationModal');
+        const modalTitleEl = document.getElementById('confirmationModalTitle');
+        const modalMessageEl = document.getElementById('confirmationModalMessage');
+        const yesBtn = document.getElementById('confirmModalYesBtn');
+        const noBtn = document.getElementById('confirmModalNoBtn');
+
+        if (!modal || !modalTitleEl || !modalMessageEl || !yesBtn || !noBtn) {
+            console.error(
+                "Elementi della modale di conferma (confirmationModal, confirmationModalTitle, etc.) non trovati nel DOM."
+            );
+            // Fallback al confirm nativo del browser se gli elementi della modale non sono presenti
+            const userConfirmation = window.confirm(`${title}\n${message}`);
+            resolve(userConfirmation);
+            return;
+        }
+
+        modalTitleEl.textContent = title;
+        modalMessageEl.textContent = message;
+
+        // Funzione interna per chiudere la modale e risolvere la Promise
+        const closeAndResolve = (value) => {
+            modal.style.display = 'none';
+            // Rimuovi gli event listener specifici per questa istanza della modale
+            // per evitare accumuli se la funzione viene chiamata più volte.
+            // Clonare i nodi è un modo efficace per rimuovere tutti i listener.
+            const newYesBtn = yesBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+
+            const newNoBtn = noBtn.cloneNode(true);
+            noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+            
+            // Rimuovi anche il listener per il click esterno, se aggiunto
+            modal.removeEventListener('click', handleModalOutsideClick);
+
+            resolve(value);
+        };
+        
+        // Funzione per gestire il click esterno (sullo sfondo della modale)
+        const handleModalOutsideClick = (event) => {
+            if (event.target === modal) {
+                closeAndResolve(false); // Risolve con 'false' come se si premesse "No"
+            }
+        };
+
+        // Assegna i nuovi listener ai bottoni (ora clonati, quindi quelli nel DOM)
+        document.getElementById('confirmModalYesBtn').onclick = () => closeAndResolve(true);
+        document.getElementById('confirmModalNoBtn').onclick = () => closeAndResolve(false);
+        
+        // Aggiungi il listener per il click esterno
+        modal.addEventListener('click', handleModalOutsideClick);
+
+        modal.style.display = 'block';
+        if (yesBtn) yesBtn.focus(); // Opzionale: metti il focus sul pulsante "Sì"
+    });
+}
+
 // --- Funzioni Utility Esistenti ---
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
     if (typeof createIcon !== 'function') {
@@ -713,6 +780,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target === loginModal) closeModal(loginModal);
         });
     }
+
+    
 
     setupSmoothScrolling();
     setupScrollToTopButton();
