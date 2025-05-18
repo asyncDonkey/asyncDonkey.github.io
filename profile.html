@@ -340,7 +340,12 @@
                     <p>Non hai un account? <a href="register.html">Registrati qui</a>.</p>
                 </div>
             </section>
-
+            <div id="badgesSection" style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color-secondary); display: none;">
+    <h3 style="margin-bottom: 10px;">Riconoscimenti Ottenuti:</h3>
+    <div id="badgesDisplayContainer" style="display: flex; flex-wrap: wrap; gap: 15px;">
+        <p id="noBadgesMessage" style="color: var(--text-color-muted); display: none;">Nessun riconoscimento ancora ottenuto.</p>
+    </div>
+</div>
             <section id="myArticlesSection" style="margin-top: 40px; display: none">
                 <h2>I Miei Articoli</h2>
                 <div class="my-articles-subsection">
@@ -414,6 +419,17 @@
                     >&larr; Torna alla Homepage</a
                 >
             </div>
+            <div id="badgeDetailModal" class="modal" style="display: none;">
+    <div class="modal-content badge-detail-modal-content" style="max-width: 450px;">
+        <span class="close-modal-btn" id="closeBadgeDetailModalBtn">&times;</span>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <span id="badgeDetailModalIcon" class="material-symbols-rounded" style="font-size: 4em; display: block; margin-bottom: 10px;"></span>
+            <h3 id="badgeDetailModalName" style="margin-top: 0;">Nome Badge</h3>
+        </div>
+        <p id="badgeDetailModalDescription" style="font-size: 0.95em; line-height: 1.6; text-align: center;"></p>
+        </div>
+</div>
+
         </main>
 
         <footer>

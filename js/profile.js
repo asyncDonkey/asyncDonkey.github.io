@@ -71,21 +71,55 @@ const bioCharCountDisplay = document.getElementById('bioCharCount');
 const bioCurrentCharsSpan = document.getElementById('bioCurrentChars');
 const bioUpdateMessage = document.getElementById('bioUpdateMessage');
 
+// --- NUOVI RIFERIMENTI DOM per la SEZIONE BADGE ---
+const badgesSection = document.getElementById('badgesSection'); // La section generale dei badge
+const badgesDisplayContainer = document.getElementById('badgesDisplayContainer'); // Il div dove verranno inseriti i badge
+const noBadgesMessage = document.getElementById('noBadgesMessage'); // Il <p> per quando non ci sono badge
+
 let loggedInUser = null;
 let profileDataForDisplay = null;
+let badgeDetailModal, closeBadgeDetailModalBtn, badgeDetailModalIcon, badgeDetailModalName, badgeDetailModalDescription;
 const MAX_EXTERNAL_LINKS = 5;
 const MAX_BIO_CHARS = 300;
+
+// --- DEFINIZIONE BADGE ---
+const BADGE_DEFINITIONS = {
+    "author-rookie": {
+        name: "Autore Debuttante",
+        icon: "school", // Cambiata icona per distinguerla
+        description: "Congratulazioni! Hai pubblicato il tuo primo articolo su asyncDonkey.io, condividendo la tua conoscenza con la community!",
+        color: "var(--bs-teal)", // Un colore diverso, es. teal
+        isNeon: false,
+        isAnimated: true, // Nuovo flag per animazione custom
+        animationClass: "author-rookie-icon-animated" // Classe CSS per l'animazione
+    },
+    "glitchzilla-slayer": {
+        name: "Glitchzilla Slayer",
+        icon: "shield_moon", 
+        description: "Epico! Hai sconfitto il temibile Glitchzilla in CodeDash! Runner, dimostrando la tua abilità e determinazione!",
+        color: "var(--bs-purple)", // Cambiato colore per varietà
+        isNeon: true, // Mantiene l'effetto neon esistente
+        isAnimated: false,
+    },
+    "prolific-commenter": {
+        name: "Commentatore Prolifico",
+        icon: "forum",
+        description: "Grazie per i tuoi numerosi e utili commenti! Hai scritto più di 20 interventi costruttivi.",
+        color: "var(--bs-info)",
+        isNeon: false,
+        isAnimated: false,
+    },
+    // ... altri badge ...
+};
 
 function renderExternalLinks(linksArray, isOwnProfile) {
     if (!externalLinksListUL || !noExternalLinksMessage) return;
     externalLinksListUL.innerHTML = '';
-
     if (!linksArray || linksArray.length === 0) {
         if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'list-item';
         return;
     }
     if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'none';
-
     linksArray.forEach((link, index) => {
         const li = document.createElement('li');
         const linkDisplayDiv = document.createElement('div');
@@ -98,10 +132,9 @@ function renderExternalLinks(linksArray, isOwnProfile) {
         linkDisplayDiv.appendChild(anchor);
         const urlSpan = document.createElement('span');
         urlSpan.className = 'link-url';
-        urlSpan.textContent = ` (${link.url})`; // Aggiunto spazio per separazione
+        urlSpan.textContent = ` (${link.url})`;
         linkDisplayDiv.appendChild(urlSpan);
         li.appendChild(linkDisplayDiv);
-
         if (isOwnProfile) {
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'link-actions';
@@ -128,27 +161,13 @@ function renderExternalLinks(linksArray, isOwnProfile) {
 async function loadProfileData(uidToLoad, isOwnProfile) {
     // console.log(`profile.js - Loading profile for UID: ${uidToLoad}, isOwnProfile: ${isOwnProfile}`);
     if (
-        !profileContent ||
-        !profileLoadingMessage ||
-        !profileLoginMessage ||
-        !profileAvatarImg ||
-        !profileNationalitySpan ||
-        !profileEmailSpan ||
-        !currentNicknameSpan ||
-        !statusMessageSection ||
-        !statusMessageDisplay ||
-        !externalLinksSection ||
-        !manageExternalLinksUI ||
-        !updateStatusForm ||
-        !bioSection ||
-        !bioDisplay ||
-        !updateBioForm ||
-        !bioInput ||
-        !bioCharCountDisplay ||
-        !bioCurrentCharsSpan ||
-        !bioUpdateMessage
+        !profileContent || !profileLoadingMessage || !profileLoginMessage || !profileAvatarImg ||
+        !profileNationalitySpan || !profileEmailSpan || !currentNicknameSpan ||
+        !statusMessageSection || !statusMessageDisplay || !externalLinksSection || !manageExternalLinksUI || !updateStatusForm ||
+        !bioSection || !bioDisplay || !updateBioForm || !bioInput || !bioCharCountDisplay || !bioCurrentCharsSpan || !bioUpdateMessage ||
+        !badgesSection || !badgesDisplayContainer || !noBadgesMessage // Controllo elementi badge
     ) {
-        console.error('Profile page DOM elements (profile, status, links, OR BIO) are missing!');
+        console.error('Profile page DOM elements (profile, status, links, bio, OR BADGES) are missing!');
         if (profileLoadingMessage) profileLoadingMessage.textContent = 'Errore: Elementi della pagina mancanti.';
         return;
     }
@@ -163,6 +182,10 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
     manageExternalLinksUI.style.display = 'none';
     bioSection.style.display = 'none';
     if (updateBioForm) updateBioForm.style.display = 'none';
+    badgesSection.style.display = 'none'; // Nascondi sezione badge
+    if (badgesDisplayContainer) badgesDisplayContainer.innerHTML = ''; // Pulisci
+    if (noBadgesMessage) noBadgesMessage.style.display = 'none';
+
     if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
 
     profileAvatarImg.src = '';
@@ -171,11 +194,17 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
     currentNicknameSpan.textContent = 'Caricamento...';
     profileNationalitySpan.textContent = 'Caricamento...';
     statusMessageDisplay.textContent = 'Caricamento stato...';
-    if (statusMessageInput) statusMessageInput.value = '';
+    if (statusMessageInput) {
+        statusMessageInput.value = '';
+        statusMessageInput.placeholder = "Come ti senti oggi?";
+    }
     if (statusUpdateMessage) statusUpdateMessage.textContent = '';
     if (externalLinksListUL) renderExternalLinks([], isOwnProfile);
     if (bioDisplay) bioDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Caricamento bio...</p>';
-    if (bioInput) bioInput.value = '';
+    if (bioInput) {
+        bioInput.value = '';
+        bioInput.placeholder = "Scrivi qualcosa di te...";
+    }
     if (bioUpdateMessage) bioUpdateMessage.textContent = '';
     if (bioCurrentCharsSpan) bioCurrentCharsSpan.textContent = '0';
 
@@ -184,7 +213,6 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
         const docSnap = await getDoc(userProfileRef);
         if (docSnap.exists()) {
             profileDataForDisplay = { ...docSnap.data(), userId: uidToLoad };
-
             const profileNameForTitle = profileDataForDisplay.nickname || 'Utente';
             document.title = `Profilo di ${profileNameForTitle} - asyncDonkey.io`;
             if (profileSectionTitle)
@@ -213,18 +241,14 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
             if (profileAvatarImg) {
                 profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 });
                 profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Blockie Avatar`;
-                profileAvatarImg.style.backgroundColor = 'transparent';
             }
 
             if (statusMessageDisplay) {
                 statusMessageDisplay.textContent = profileDataForDisplay.statusMessage || '';
                 if (!profileDataForDisplay.statusMessage && isOwnProfile) {
-                    // Mostra un placeholder solo al proprietario se vuoto
-                    statusMessageDisplay.innerHTML =
-                        '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
+                    statusMessageDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
                 } else if (!profileDataForDisplay.statusMessage && !isOwnProfile) {
-                    statusMessageDisplay.innerHTML =
-                        '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
+                    statusMessageDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
                 }
             }
             if (statusMessageSection) statusMessageSection.style.display = 'block';
@@ -243,6 +267,60 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                 }
             }
 
+            // --- LOGICA MODIFICATA PER VISUALIZZARE LE ICONE DEI BADGE ---
+            if (badgesSection && badgesDisplayContainer && noBadgesMessage) {
+                badgesDisplayContainer.innerHTML = ''; 
+                noBadgesMessage.style.display = 'none'; 
+                const earnedBadgesArray = profileDataForDisplay.earnedBadges || [];
+
+                if (earnedBadgesArray.length > 0) {
+                    badgesSection.style.display = 'block';
+                    earnedBadgesArray.forEach(badgeId => {
+                        const badgeInfo = BADGE_DEFINITIONS[badgeId];
+                        if (badgeInfo) {
+                            const badgeIconElement = document.createElement('div');
+                            badgeIconElement.className = 'badge-icon-item';
+                            badgeIconElement.title = `${badgeInfo.name}\n${badgeInfo.description}`; // Tooltip con nome e descrizione
+                            badgeIconElement.setAttribute('role', 'button');
+                            badgeIconElement.setAttribute('tabindex', '0'); // Rende focusabile da tastiera
+                            badgeIconElement.setAttribute('aria-label', `Dettagli badge: ${badgeInfo.name}`);
+                            
+                            const iconSpan = document.createElement('span');
+                            iconSpan.className = 'material-symbols-rounded';
+                            iconSpan.textContent = badgeInfo.icon;
+                            iconSpan.style.color = badgeInfo.color || 'var(--text-color-primary)'; // Colore di default
+
+                            if (badgeInfo.isNeon) {
+                                iconSpan.classList.add('testo-neon-arcade');
+                            } else if (badgeInfo.isAnimated && badgeInfo.animationClass) {
+                                iconSpan.classList.add(badgeInfo.animationClass);
+                            }
+                            
+                            badgeIconElement.appendChild(iconSpan);
+                            badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
+                            badgeIconElement.addEventListener('keydown', (event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    openBadgeDetailsModal(badgeId);
+                                }
+                            });
+                            badgesDisplayContainer.appendChild(badgeIconElement);
+                        } else {
+                            console.warn(`Definizione non trovata per il badge ID: ${badgeId}`);
+                        }
+                    });
+                } else {
+                    if (isOwnProfile) {
+                        badgesSection.style.display = 'block';
+                        noBadgesMessage.textContent = 'Nessun riconoscimento ancora ottenuto. Continua a contribuire e giocare!';
+                        noBadgesMessage.style.display = 'block';
+                    } else {
+                        badgesSection.style.display = 'none';
+                    }
+                }
+            }
+            // --- FINE LOGICA BADGE ---
+
             if (isOwnProfile) {
                 if (emailVerificationBanner && loggedInUser && !loggedInUser.emailVerified) {
                     emailVerificationBanner.style.display = 'block';
@@ -250,23 +328,16 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                 }
                 if (updateStatusForm) updateStatusForm.style.display = 'flex';
                 if (statusMessageInput) {
-                    // statusMessageInput.value = profileDataForDisplay.statusMessage || ''; // RIGA COMMENTATA/RIMOSSA
-                    statusMessageInput.placeholder = profileDataForDisplay.statusMessage
-                        ? 'Modifica il tuo stato attuale...'
-                        : 'Come ti senti oggi?'; // Placeholder dinamico
+                    statusMessageInput.value = ''; // Campo vuoto
+                    statusMessageInput.placeholder = profileDataForDisplay.statusMessage ? "Modifica il tuo stato attuale..." : "Come ti senti oggi?";
                 }
                 if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
-
-                // --- MODIFICHE PER BIO (MODIFICA) ---
                 if (updateBioForm) updateBioForm.style.display = 'block';
                 if (bioInput) {
-                    // bioInput.value = profileDataForDisplay.bio || ''; // RIGA COMMENTATA/RIMOSSA
-                    bioInput.placeholder = profileDataForDisplay.bio
-                        ? 'Modifica la tua bio...'
-                        : 'Scrivi qualcosa di te...'; // Placeholder dinamico
+                    bioInput.value = ''; // Campo vuoto
+                    bioInput.placeholder = profileDataForDisplay.bio ? "Modifica la tua bio..." : "Scrivi qualcosa di te...";
                 }
-                updateBioCharCounter(); // Chiamata per resettare il contatore se l'input è vuoto
-                // --- FINE MODIFICHE PER BIO (MODIFICA) ---
+                updateBioCharCounter();
             }
 
             profileLoadingMessage.style.display = 'none';
@@ -274,7 +345,6 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
         } else {
             document.title = 'Profilo Non Trovato - asyncDonkey.io';
             if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Non Trovato';
-            // console.warn('profile.js - No profile document found for user:', uidToLoad);
             profileLoadingMessage.style.display = 'none';
             profileLoginMessage.style.display = 'block';
             profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
@@ -789,6 +859,33 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
     }
 }
 
+// --- NUOVA FUNZIONE PER APRIRE LA MODALE DETTAGLI BADGE ---
+function openBadgeDetailsModal(badgeId) {
+    if (!badgeDetailModal || !badgeDetailModalIcon || !badgeDetailModalName || !badgeDetailModalDescription) {
+        console.error("Elementi della modale dettagli badge non trovati.");
+        return;
+    }
+    const badgeInfo = BADGE_DEFINITIONS[badgeId];
+    if (!badgeInfo) {
+        console.error(`Dettagli non trovati per il badge ID: ${badgeId}`);
+        return;
+    }
+
+    badgeDetailModalIcon.textContent = badgeInfo.icon;
+    badgeDetailModalIcon.style.color = badgeInfo.color || 'inherit';
+    badgeDetailModalIcon.className = 'material-symbols-rounded'; // Resetta classi
+    if (badgeInfo.isNeon) {
+        badgeDetailModalIcon.classList.add('testo-neon-arcade');
+    } else if (badgeInfo.isAnimated && badgeInfo.animationClass) {
+        badgeDetailModalIcon.classList.add(badgeInfo.animationClass);
+    }
+
+    badgeDetailModalName.textContent = badgeInfo.name;
+    badgeDetailModalDescription.textContent = badgeInfo.description;
+
+    badgeDetailModal.style.display = 'block';
+}
+
 // --- INIZIALIZZAZIONE ed Event Listeners ---
 onAuthStateChanged(auth, (user) => {
     loggedInUser = user;
@@ -816,6 +913,7 @@ onAuthStateChanged(auth, (user) => {
         if (externalLinksSection) externalLinksSection.style.display = 'none';
         if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'none';
         if (bioSection) bioSection.style.display = 'none';
+        if (badgesSection) badgesSection.style.display = 'none'; // Nascondi anche i badge se non loggato
         if (myArticlesSection) myArticlesSection.style.display = 'none';
     }
 });
@@ -895,7 +993,32 @@ if (updateBioForm) {
 // Inizializza il contatore caratteri se l'input è già visibile al caricamento
 // (principalmente per il caso in cui l'utente è già loggato e vede il proprio profilo)
 document.addEventListener('DOMContentLoaded', () => {
-    if (bioInput && bioInput.offsetParent !== null) {
-        updateBioCharCounter();
+    badgeDetailModal = document.getElementById('badgeDetailModal');
+    if (badgeDetailModal) {
+        closeBadgeDetailModalBtn = badgeDetailModal.querySelector('#closeBadgeDetailModalBtn');
+        badgeDetailModalIcon = badgeDetailModal.querySelector('#badgeDetailModalIcon');
+        badgeDetailModalName = badgeDetailModal.querySelector('#badgeDetailModalName');
+        badgeDetailModalDescription = badgeDetailModal.querySelector('#badgeDetailModalDescription');
+
+        if (closeBadgeDetailModalBtn) {
+            closeBadgeDetailModalBtn.addEventListener('click', () => {
+                badgeDetailModal.style.display = 'none';
+            });
+        }
+        badgeDetailModal.addEventListener('click', (event) => {
+            if (event.target === badgeDetailModal) {
+                badgeDetailModal.style.display = 'none';
+            }
+        });
     }
+   if(bioInput && bioInput.offsetParent !== null) { 
+       updateBioCharCounter();
+   }
+   // Aggiungere un titolo di default alla pagina se non viene sovrascritto
+   if (!document.title.includes("Profilo di") && !document.title.includes("Il Mio Profilo")) {
+       const path = window.location.pathname.split("/").pop();
+       if (path === "profile.html") { // Assicurati sia la pagina profilo
+            document.title = "Profilo Utente - asyncDonkey.io";
+       }
+   }
 });

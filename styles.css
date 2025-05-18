@@ -3907,6 +3907,7 @@ header .nav-link-icon-only .material-symbols-rounded {
         'opsz' 18; /* Forza il riempimento */
 }
 
+/* BADGES */
 /* Assicurati che i bottoni di like siano flex per un buon allineamento icona-testo,
    se non lo sono già attraverso altre regole. */
 #likeArticleButton,
@@ -3915,4 +3916,111 @@ header .nav-link-icon-only .material-symbols-rounded {
     display: inline-flex;
     align-items: center;
     gap: 0.3em; /* Spazio tra icona e testo/conteggio */
+}
+
+#badgesSection h3 { /* Stile per il titolo della sezione badge */
+    /* margin-bottom: 15px; è già nel tuo HTML inline */
+}
+
+#badgesDisplayContainer {
+    /* display: flex; flex-wrap: wrap; gap: 15px; è già nel tuo HTML inline */
+    /* Potresti aggiungere padding o altro se necessario */
+}
+
+.badge-item {
+    /* Stili base per ogni badge, alcuni sono già inline nel JS per flessibilità,
+       ma potresti volerli centralizzare qui */
+    transition: transform 0.2s ease-out;
+    cursor: help; /* Indica che c'è un tooltip */
+    /* text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Leggera ombra per il testo */
+}
+
+.badge-item:hover {
+    transform: translateY(-2px);
+    /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */
+}
+
+.badge-item .material-symbols-rounded {
+    font-size: 1.4em; /* Dimensione dell'icona del badge */
+    margin-right: 8px; /* Spazio tra icona e nome badge, già gestito da 'gap' nel JS */
+    vertical-align: middle; /* Buon allineamento se non usi flex */
+}
+
+/* La classe .testo-neon-arcade è già definita e dovrebbe applicare l'effetto neon */
+/* Se vuoi un effetto specifico solo per le icone badge neon: */
+/*
+.badge-item .material-symbols-rounded.neon-badge-icon {
+    animation: cambio-colore-neon 2s infinite steps(1, end);
+    text-shadow: 0 0 3px rgba(255,255,255,0.5), 0 0 6px currentColor; // Esempio ombra neon
+}
+*/
+
+#noBadgesMessage {
+    /* font-style: italic; */
+    /* color: var(--text-color-muted); è già inline nel JS */
+}
+
+/* Stili per la sezione Riconoscimenti/Badge */
+#badgesSection {
+    /* ... eventuali stili per la section ... */
+}
+
+#badgesDisplayContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px; /* Spazio tra le icone dei badge */
+    justify-content: flex-start; /* O 'center' se preferisci */
+    margin-top: 10px;
+}
+
+.badge-icon-item { /* Contenitore per la singola icona badge cliccabile */
+    display: inline-flex; /* Per allineare l'icona se avesse testo (ma non ne avrà) */
+    align-items: center;
+    justify-content: center;
+    padding: 8px; /* Padding attorno all'icona */
+    border-radius: 50%; /* Rende il contenitore circolare */
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-secondary);
+    cursor: pointer;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    min-width: 48px; /* Dimensione minima per il cerchio */
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.badge-icon-item:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.badge-icon-item .material-symbols-rounded {
+    font-size: 2em; /* Dimensione dell'icona del badge */
+    line-height: 1; /* Per un buon allineamento verticale */
+    /* Il colore sarà impostato da BADGE_DEFINITIONS via JS o da classi specifiche */
+}
+
+/* Animazione per badge "Autore Debuttante" (es. un soft pulse o cambio colore) */
+.badge-icon-item .material-symbols-rounded.author-rookie-icon-animated {
+    /* Esempio: animazione di cambio colore "soft" */
+    animation: soft-color-pulse 3s infinite ease-in-out;
+    /* Oppure potresti usare un'altra animazione neon ma con colori diversi */
+}
+
+@keyframes soft-color-pulse {
+    0%, 100% { color: var(--bs-success); /* Colore base del badge */ }
+    50% { color: #a3e4a3; /* Una tonalità leggermente diversa e più chiara del verde */ }
+}
+
+/* La classe .testo-neon-arcade è già definita e si applicherà
+   all'icona Glitchzilla Slayer se specificato in BADGE_DEFINITIONS */
+
+
+/* Stili per la Modale Dettagli Badge */
+.badge-detail-modal-content {
+    /* Puoi personalizzare ulteriormente lo stile della modale qui se necessario */
+    padding: 25px;
+}
+
+#badgeDetailModalIcon.testo-neon-arcade { /* Per applicare il neon anche all'icona grande nella modale */
+    /* Gli stili neon sono già in .testo-neon-arcade */
 }
