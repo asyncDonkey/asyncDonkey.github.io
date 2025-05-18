@@ -12,7 +12,10 @@
             href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap"
             rel="stylesheet"
         />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
         <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
         <style>
             body.donkey-runner-page {
@@ -197,29 +200,29 @@
             }
 
             .donkey-runner-page #scoreInputContainerDonkey {
-    display: none; /* Gestito da JS per mostrare */
-    flex-direction: row; /* DEFAULT: Prova a mettere gli elementi in riga */
-    flex-wrap: wrap; /* Permetti di andare a capo se non c'è spazio */
-    justify-content: space-around; /* Distribuisce spazio */
-    align-items: center; /* Allinea verticalmente */
-    gap: 10px 15px; /* Spazio verticale e orizzontale tra i gruppi */
-    padding: 10px 15px; /* Padding ridotto */
-    background-color: rgba(0, 0, 0, 0.88); /* Sfondo leggermente più scuro */
-    border-radius: 6px; /* Bordi meno arrotondati per compattezza */
-    border: 1px solid var(--game-border-color);
-    box-shadow: 0 0 15px rgba(var(--game-border-color-rgb), 0.6);
+                display: none; /* Gestito da JS per mostrare */
+                flex-direction: row; /* DEFAULT: Prova a mettere gli elementi in riga */
+                flex-wrap: wrap; /* Permetti di andare a capo se non c'è spazio */
+                justify-content: space-around; /* Distribuisce spazio */
+                align-items: center; /* Allinea verticalmente */
+                gap: 10px 15px; /* Spazio verticale e orizzontale tra i gruppi */
+                padding: 10px 15px; /* Padding ridotto */
+                background-color: rgba(0, 0, 0, 0.88); /* Sfondo leggermente più scuro */
+                border-radius: 6px; /* Bordi meno arrotondati per compattezza */
+                border: 1px solid var(--game-border-color);
+                box-shadow: 0 0 15px rgba(var(--game-border-color-rgb), 0.6);
 
-    position: absolute; /* Rispetto a #gameContainer di default */
-    top: 20px; /* POSIZIONAMENTO IN ALTO */
-    left: 50%;
-    transform: translateX(-50%); /* Centra orizzontalmente */
-    z-index: 150;
+                position: absolute; /* Rispetto a #gameContainer di default */
+                top: 20px; /* POSIZIONAMENTO IN ALTO */
+                left: 50%;
+                transform: translateX(-50%); /* Centra orizzontalmente */
+                z-index: 150;
 
-    width: auto; /* Si adatta al contenuto */
-    max-width: 95%; /* Un po' più largo se necessario */
-    min-width: 260px; /* Larghezza minima */
-    box-sizing: border-box;
-}
+                width: auto; /* Si adatta al contenuto */
+                max-width: 95%; /* Un po' più largo se necessario */
+                min-width: 260px; /* Larghezza minima */
+                box-sizing: border-box;
+            }
             .donkey-runner-page #scoreInputContainerDonkey label,
             .donkey-runner-page #scoreInputContainerDonkey p {
                 font-size: 1.1em;
@@ -239,111 +242,110 @@
                 margin-bottom: 10px;
             }
             .donkey-runner-page #scoreInputContainerDonkey h3 {
-    font-size: 1.1em; /* Riduci dimensione titolo */
-    margin: 0 0 5px 0;
-    color: var(--game-text-color, #fff);
-    text-align: center;
-    width: 100%; /* Occupa tutta la larghezza per centrare Game Over! */
-}
+                font-size: 1.1em; /* Riduci dimensione titolo */
+                margin: 0 0 5px 0;
+                color: var(--game-text-color, #fff);
+                text-align: center;
+                width: 100%; /* Occupa tutta la larghezza per centrare Game Over! */
+            }
 
-.donkey-runner-page #scoreInputContainerDonkey .score-display-area p {
-    font-size: 1em; /* Riduci dimensione punteggio */
-    margin: 0;
-    color: var(--game-text-color, #fff);
-    white-space: nowrap;
-}
+            .donkey-runner-page #scoreInputContainerDonkey .score-display-area p {
+                font-size: 1em; /* Riduci dimensione punteggio */
+                margin: 0;
+                color: var(--game-text-color, #fff);
+                white-space: nowrap;
+            }
 
-.donkey-runner-page #scoreInputContainerDonkey #finalScoreDisplayDonkey {
-    font-weight: bold;
-    color: var(--game-button-text, #c4f0c2); /* Colore brillante per il punteggio */
-}
+            .donkey-runner-page #scoreInputContainerDonkey #finalScoreDisplayDonkey {
+                font-weight: bold;
+                color: var(--game-button-text, #c4f0c2); /* Colore brillante per il punteggio */
+            }
 
-.donkey-runner-page #scoreInputContainerDonkey .player-input-area {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+            .donkey-runner-page #scoreInputContainerDonkey .player-input-area {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
 
-.donkey-runner-page #scoreInputContainerDonkey #playerInitialsLabel {
-    font-size: 0.9em;
-    color: var(--game-text-color, #fff);
-    white-space: nowrap;
-}
+            .donkey-runner-page #scoreInputContainerDonkey #playerInitialsLabel {
+                font-size: 0.9em;
+                color: var(--game-text-color, #fff);
+                white-space: nowrap;
+            }
 
-.donkey-runner-page #scoreInputContainerDonkey #playerInitialsDonkey,
-.donkey-runner-page #scoreInputContainerDonkey #loggedInUserNameDisplay {
-    font-family: 'Press Start 2P', monospace;
-    padding: 6px 8px; /* Padding ridotto */
-    font-size: 1em; /* Dimensione font ridotta */
-    text-align: center;
-    border: 1px solid var(--game-border-color-light);
-    background-color: #222; /* Sfondo più scuro per input */
-    color: #fff;
-    border-radius: 3px;
-    margin: 0; /* Rimuovi margini di default */
-}
-.donkey-runner-page #scoreInputContainerDonkey #playerInitialsDonkey {
-    width: 90px; /* Larghezza fissa per input iniziali */
-    text-transform: uppercase;
-}
-.donkey-runner-page #scoreInputContainerDonkey #loggedInUserNameDisplay {
-    background-color: transparent;
-    border: none;
-    font-weight: bold;
-    padding: 8px 0;
-    color: var(--game-button-text, #c4f0c2);
-    white-space: nowrap;
-}
+            .donkey-runner-page #scoreInputContainerDonkey #playerInitialsDonkey,
+            .donkey-runner-page #scoreInputContainerDonkey #loggedInUserNameDisplay {
+                font-family: 'Press Start 2P', monospace;
+                padding: 6px 8px; /* Padding ridotto */
+                font-size: 1em; /* Dimensione font ridotta */
+                text-align: center;
+                border: 1px solid var(--game-border-color-light);
+                background-color: #222; /* Sfondo più scuro per input */
+                color: #fff;
+                border-radius: 3px;
+                margin: 0; /* Rimuovi margini di default */
+            }
+            .donkey-runner-page #scoreInputContainerDonkey #playerInitialsDonkey {
+                width: 90px; /* Larghezza fissa per input iniziali */
+                text-transform: uppercase;
+            }
+            .donkey-runner-page #scoreInputContainerDonkey #loggedInUserNameDisplay {
+                background-color: transparent;
+                border: none;
+                font-weight: bold;
+                padding: 8px 0;
+                color: var(--game-button-text, #c4f0c2);
+                white-space: nowrap;
+            }
 
-.donkey-runner-page #scoreInputContainerDonkey .score-buttons {
-    display: flex;
-    gap: 10px;
-    align-items: center; /* Allinea i bottoni se hanno altezze diverse */
-}
-.donkey-runner-page #scoreInputContainerDonkey .score-buttons .game-button {
-    padding: 8px 12px; /* Padding ridotto per i bottoni */
-    font-size: 0.9em; /* Font ridotto */
-    margin: 0; /* Rimuovi margini di default */
-    min-width: 70px; /* Larghezza minima per "Salva" / "Rigioca" */
-}
+            .donkey-runner-page #scoreInputContainerDonkey .score-buttons {
+                display: flex;
+                gap: 10px;
+                align-items: center; /* Allinea i bottoni se hanno altezze diverse */
+            }
+            .donkey-runner-page #scoreInputContainerDonkey .score-buttons .game-button {
+                padding: 8px 12px; /* Padding ridotto per i bottoni */
+                font-size: 0.9em; /* Font ridotto */
+                margin: 0; /* Rimuovi margini di default */
+                min-width: 70px; /* Larghezza minima per "Salva" / "Rigioca" */
+            }
 
-/* Stile per Fullscreen: Manteniamo il posizionamento in alto */
-body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
-    display: flex !important; /* Sovrascrive lo style inline di JS */
-    position: fixed !important; /* Fisso rispetto al viewport */
-    top: 10px; /* Distanza dall'alto */
-    left: 50%;
-    transform: translateX(-50%); /* Centra orizzontalmente */
-    /* width: auto; già impostato, potrebbe essere necessario un max-width specifico per landscape */
-    max-width: calc(100vw - 20px); /* Esempio: occupa quasi tutta la larghezza meno un po' di margine */
-    z-index: 250 !important;
-    /* flex-direction rimane row di default, il wrap gestirà il resto */
-}
+            /* Stile per Fullscreen: Manteniamo il posizionamento in alto */
+            body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
+                display: flex !important; /* Sovrascrive lo style inline di JS */
+                position: fixed !important; /* Fisso rispetto al viewport */
+                top: 10px; /* Distanza dall'alto */
+                left: 50%;
+                transform: translateX(-50%); /* Centra orizzontalmente */
+                /* width: auto; già impostato, potrebbe essere necessario un max-width specifico per landscape */
+                max-width: calc(100vw - 20px); /* Esempio: occupa quasi tutta la larghezza meno un po' di margine */
+                z-index: 250 !important;
+                /* flex-direction rimane row di default, il wrap gestirà il resto */
+            }
 
-/* Media Query per schermi molto piccoli (es. landscape su mobile)
+            /* Media Query per schermi molto piccoli (es. landscape su mobile)
    dove potremmo forzare un layout a colonna per il form se 'row' non funziona bene. */
-@media (max-width: 480px) and (orientation: landscape) {
-    .donkey-runner-page #scoreInputContainerDonkey,
-    body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
-        flex-direction: column; /* Passa a colonna se lo spazio orizzontale è molto limitato */
-        gap: 8px; /* Riduci il gap verticale */
-        padding: 8px;
-        top: 5px; /* Ancora più in alto */
-        max-width: calc(100vw - 10px);
-    }
-    .donkey-runner-page #scoreInputContainerDonkey h3 {
-        font-size: 1em;
-        margin-bottom: 3px;
-    }
-    .donkey-runner-page #scoreInputContainerDonkey .score-display-area p {
-        font-size: 0.9em;
-    }
-     .donkey-runner-page #scoreInputContainerDonkey .score-buttons {
-        width: 100%;
-        justify-content: space-around;
-    }
-}
-
+            @media (max-width: 480px) and (orientation: landscape) {
+                .donkey-runner-page #scoreInputContainerDonkey,
+                body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
+                    flex-direction: column; /* Passa a colonna se lo spazio orizzontale è molto limitato */
+                    gap: 8px; /* Riduci il gap verticale */
+                    padding: 8px;
+                    top: 5px; /* Ancora più in alto */
+                    max-width: calc(100vw - 10px);
+                }
+                .donkey-runner-page #scoreInputContainerDonkey h3 {
+                    font-size: 1em;
+                    margin-bottom: 3px;
+                }
+                .donkey-runner-page #scoreInputContainerDonkey .score-display-area p {
+                    font-size: 0.9em;
+                }
+                .donkey-runner-page #scoreInputContainerDonkey .score-buttons {
+                    width: 100%;
+                    justify-content: space-around;
+                }
+            }
 
             .donkey-runner-page #playerInitialsDonkey {
                 width: 120px;
@@ -456,8 +458,6 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
                 justify-content: center;
             }
 
-            
-
             body.game-fullscreen-active #mobileControls {
                 /* Rimosso .game-fullscreen-landscape per applicarlo sempre in fullscreen */
                 position: fixed; /* Fisso rispetto al viewport */
@@ -529,90 +529,124 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
     </head>
     <body class="donkey-runner-page">
         <header>
-    <div class="header-content">
-        <a href="index.html" style="text-decoration: none;">
-            <h1 style="font-size: 1.8em; margin:0;">asyncDonkey.io</h1>
-        </a>
+            <div class="header-content">
+                <a href="index.html" style="text-decoration: none">
+                    <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
+                </a>
 
-        <nav class="desktop-nav">
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px;">
-                <li>
-                    <a href="index.html" class="auth-button nav-link-icon-only" title="Home">
-                        <span class="material-symbols-rounded">home</span>
-                        <span class="visually-hidden">Home</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="donkeyRunner.html" class="auth-button nav-link-icon-text" title="Gioca a codeDash!">
-                        <span class="material-symbols-rounded">stadia_controller</span>
-                        <span class="nav-text">codeDash!</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica">
-                        <span class="material-symbols-rounded">leaderboard</span>
-                        <span class="nav-text">Leaderboard</span>
-                    </a>
-                </li>
-                <li class="nav-dropdown-container">
-                    <button class="auth-button nav-link-icon-text dropdown-toggle" id="communityDropdownToggle" aria-expanded="false" aria-controls="communityDropdownMenu">
-                        <span class="material-symbols-rounded">groups</span>
-                        <span class="nav-text">Community</span>
-                        <span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
-                    </button>
-                    <ul class="dropdown-menu" id="communityDropdownMenu">
+                <nav class="desktop-nav">
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px">
                         <li>
-                            <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item">
-                                <span class="material-symbols-rounded">edit_note</span>
-                                <span class="nav-text">Contribuisci</span>
+                            <a href="index.html" class="auth-button nav-link-icon-only" title="Home">
+                                <span class="material-symbols-rounded">home</span>
+                                <span class="visually-hidden">Home</span>
                             </a>
                         </li>
-                        <li id="navWriteArticleDropdown" style="display: none;">
-                            <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item">
-                                <span class="material-symbols-rounded">article</span>
-                                <span class="nav-text">Scrivi Articolo</span>
+                        <li>
+                            <a
+                                href="donkeyRunner.html"
+                                class="auth-button nav-link-icon-text"
+                                title="Gioca a codeDash!"
+                            >
+                                <span class="material-symbols-rounded">stadia_controller</span>
+                                <span class="nav-text">codeDash!</span>
                             </a>
+                        </li>
+                        <li>
+                            <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica">
+                                <span class="material-symbols-rounded">leaderboard</span>
+                                <span class="nav-text">Leaderboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-dropdown-container">
+                            <button
+                                class="auth-button nav-link-icon-text dropdown-toggle"
+                                id="communityDropdownToggle"
+                                aria-expanded="false"
+                                aria-controls="communityDropdownMenu"
+                            >
+                                <span class="material-symbols-rounded">groups</span>
+                                <span class="nav-text">Community</span>
+                                <span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
+                            </button>
+                            <ul class="dropdown-menu" id="communityDropdownMenu">
+                                <li>
+                                    <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item">
+                                        <span class="material-symbols-rounded">edit_note</span>
+                                        <span class="nav-text">Contribuisci</span>
+                                    </a>
+                                </li>
+                                <li id="navWriteArticleDropdown" style="display: none">
+                                    <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item">
+                                        <span class="material-symbols-rounded">article</span>
+                                        <span class="nav-text">Scrivi Articolo</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
-                </li>
-            </ul>
-        </nav>
+                </nav>
 
-        <div class="header-controls" style="display: flex; align-items: center; gap: 10px;">
-            <div id="authContainer">
-                <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login">
-                    <span class="material-symbols-rounded">login</span>
-                    <span class="visually-hidden">Login</span>
-                </a>
-                <a href="register.html" id="showSignupBtn" class="auth-button nav-link-icon-only" title="Registrati">
-                    <span class="material-symbols-rounded">person_add</span>
-                    <span class="visually-hidden">Registrati</span>
-                </a>
+                <div class="header-controls" style="display: flex; align-items: center; gap: 10px">
+                    <div id="authContainer">
+                        <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login">
+                            <span class="material-symbols-rounded">login</span>
+                            <span class="visually-hidden">Login</span>
+                        </a>
+                        <a
+                            href="register.html"
+                            id="showSignupBtn"
+                            class="auth-button nav-link-icon-only"
+                            title="Registrati"
+                        >
+                            <span class="material-symbols-rounded">person_add</span>
+                            <span class="visually-hidden">Registrati</span>
+                        </a>
+                    </div>
+                    <div id="userProfileContainer" style="display: none; align-items: center">
+                        <img
+                            id="headerUserAvatar"
+                            src=""
+                            alt="User Avatar"
+                            style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; display: none"
+                        />
+                        <span id="userDisplayName" style="margin-right: 8px; display: none"></span>
+                        <a
+                            href="profile.html"
+                            id="profileNavIconLink"
+                            class="auth-button nav-link-icon-only"
+                            title="Profilo"
+                            style="text-decoration: none"
+                        >
+                            <span class="material-symbols-rounded">account_circle</span>
+                            <span class="visually-hidden">Profilo</span>
+                        </a>
+                        <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
+                            <span class="material-symbols-rounded">logout</span>
+                            <span class="visually-hidden">Logout</span>
+                        </button>
+                    </div>
+                    <button
+                        id="themeToggleBtn"
+                        aria-label="Toggle Tema Chiaro/Scuro"
+                        title="Toggle Tema"
+                        class="auth-button nav-link-icon-only"
+                    >
+                        <span class="material-symbols-rounded">light_mode</span>
+                    </button>
+                    <button
+                        class="navbar-toggler"
+                        id="navbarToggler"
+                        aria-label="Toggle Navigazione"
+                        aria-expanded="false"
+                        aria-controls="mobileNavMenu"
+                    >
+                        <span class="material-symbols-rounded">menu</span>
+                    </button>
+                </div>
             </div>
-            <div id="userProfileContainer" style="display: none; align-items: center;">
-                <img id="headerUserAvatar" src="" alt="User Avatar" style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; display: none;">
-                <span id="userDisplayName" style="margin-right: 8px; display: none;"></span>
-                <a href="profile.html" id="profileNavIconLink" class="auth-button nav-link-icon-only" title="Profilo" style="text-decoration:none;">
-                     <span class="material-symbols-rounded">account_circle</span>
-                     <span class="visually-hidden">Profilo</span>
-                </a>
-                <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
-                    <span class="material-symbols-rounded">logout</span>
-                    <span class="visually-hidden">Logout</span>
-                </button>
-            </div>
-            <button id="themeToggleBtn" aria-label="Toggle Tema Chiaro/Scuro" title="Toggle Tema" class="auth-button nav-link-icon-only">
-                <span class="material-symbols-rounded">light_mode</span> 
-            </button>
-            <button class="navbar-toggler" id="navbarToggler" aria-label="Toggle Navigazione" aria-expanded="false" aria-controls="mobileNavMenu">
-                <span class="material-symbols-rounded">menu</span>
-            </button>
-        </div>
-    </div>
-    <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true">
-        
-    </nav>
-</header>
+            <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true"></nav>
+        </header>
 
         <main>
             <div id="gameInstructions" style="text-align: center; margin-bottom: 15px">
@@ -625,20 +659,21 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
 
                 <canvas id="gameCanvas"></canvas>
 
-                <div id="scoreInputContainerDonkey" style="display: none;"> <div class="score-display-area">
-        <h3>Game Over!</h3>
-        <p>Punteggio: <span id="finalScoreDisplayDonkey">0</span></p>
-    </div>
-    <div id="playerNameInputArea" class="player-input-area">
-        <label for="playerInitialsDonkey" id="playerInitialsLabel">Iniziali (1-5):</label>
-        <input type="text" id="playerInitialsDonkey" name="playerInitialsDonkey" maxlength="5" />
-        <span id="loggedInUserNameDisplay" style="display: none;"></span>
-    </div>
-    <div class="score-buttons">
-        <button id="saveScoreBtnDonkey" class="game-button">Salva</button>
-        <button id="restartGameBtnDonkey" class="game-button">Rigioca</button>
-    </div>
-</div>
+                <div id="scoreInputContainerDonkey" style="display: none">
+                    <div class="score-display-area">
+                        <h3>Game Over!</h3>
+                        <p>Punteggio: <span id="finalScoreDisplayDonkey">0</span></p>
+                    </div>
+                    <div id="playerNameInputArea" class="player-input-area">
+                        <label for="playerInitialsDonkey" id="playerInitialsLabel">Iniziali (1-5):</label>
+                        <input type="text" id="playerInitialsDonkey" name="playerInitialsDonkey" maxlength="5" />
+                        <span id="loggedInUserNameDisplay" style="display: none"></span>
+                    </div>
+                    <div class="score-buttons">
+                        <button id="saveScoreBtnDonkey" class="game-button">Salva</button>
+                        <button id="restartGameBtnDonkey" class="game-button">Rigioca</button>
+                    </div>
+                </div>
 
                 <button id="mobileStartButton" class="game-button">START GAME</button>
 
@@ -667,15 +702,22 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
                 style="margin-top: 30px; max-width: 700px; width: 100%; margin-left: auto; margin-right: auto"
             >
                 <h2 style="text-align: center">Guestbook Donkey Runner</h2>
-                 <form id="commentForm" class="comment-form-container" style="margin-top: 20px;">
+                <form id="commentForm" class="comment-form-container" style="margin-top: 20px">
                     <h4>Lascia un Commento sul Gioco</h4>
-                    <div id="commentNameSection" style="display: none;"> {/* Gestito da JS in base al login */}
+                    <div id="commentNameSection" style="display: none">
+                        {/* Gestito da JS in base al login */}
                         <label for="commentName">Nome (se non loggato):</label>
                         <input type="text" id="commentName" name="commentName" maxlength="50" />
                     </div>
                     <div>
                         <label for="commentMessage">Messaggio:</label>
-                        <textarea id="commentMessage" name="commentMessage" rows="4" required maxlength="500"></textarea>
+                        <textarea
+                            id="commentMessage"
+                            name="commentMessage"
+                            rows="4"
+                            required
+                            maxlength="500"
+                        ></textarea>
                     </div>
                     <button type="submit" id="submitCommentBtn" class="game-button">Invia Commento</button>
                 </form>
@@ -684,8 +726,6 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
                     <div id="commentsList"><p>Caricamento commenti...</p></div>
                 </div>
             </section>
-
-            
 
             <section
                 id="bugReportSection"
@@ -729,10 +769,14 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
         </main>
 
         <footer>
-    <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>
-    <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
-    <p style="font-size: 0.8em; margin-top: 5px;"><a href="about.html">.Dev Info</a></p> 
-</footer>
+            <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>
+            <p style="font-size: 0.8em; margin-top: 5px">
+                Avatars by
+                <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT
+                License).
+            </p>
+            <p style="font-size: 0.8em; margin-top: 5px"><a href="about.html">.Dev Info</a></p>
+        </footer>
 
         <div id="loginModal" class="modal">
             <div class="modal-content">

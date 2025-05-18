@@ -57,7 +57,7 @@ function formatFirebaseTimestamp(firebaseTimestamp) {
             minute: '2-digit',
         });
     } catch (e) {
-        console.error("Errore formattazione timestamp commento:", e);
+        console.error('Errore formattazione timestamp commento:', e);
         return 'Formato data errato';
     }
 }
@@ -124,11 +124,13 @@ async function handleGuestbookCommentLike(event) {
 
             const iconName = userNowHasLiked ? 'favorite' : 'favorite_border';
             button.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikesCount}</span>`;
-            console.log(`[comments.js] handleGuestbookCommentLike - Pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikesCount}`);
-            
+            console.log(
+                `[comments.js] handleGuestbookCommentLike - Pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikesCount}`
+            );
+
             button.classList.toggle('liked', userNowHasLiked);
             button.title = userNowHasLiked ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
-            
+
             // Aggiorna la cliccabilità del conteggio
             const likeCountSpanInsideButton = button.querySelector('.like-count');
             if (likeCountSpanInsideButton) {
@@ -210,10 +212,10 @@ async function loadComments() {
             commentContentDiv.classList.add('comment-content');
 
             const nameEl = document.createElement('strong');
-            let commenterNameDisplay = commentData.userId 
-                ? (commentData.userName || 'Utente Registrato') 
-                : (commentData.name || 'Anonimo') + (commentData.userId === null || typeof commentData.userId === 'undefined' ? ' (Ospite)' : '');
-
+            let commenterNameDisplay = commentData.userId
+                ? commentData.userName || 'Utente Registrato'
+                : (commentData.name || 'Anonimo') +
+                  (commentData.userId === null || typeof commentData.userId === 'undefined' ? ' (Ospite)' : '');
 
             if (commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
                 const flagIconSpan = document.createElement('span');
@@ -231,16 +233,16 @@ async function loadComments() {
             } else {
                 nameEl.appendChild(document.createTextNode(commenterNameDisplay));
             }
-            
+
             const dateEl = document.createElement('small');
             dateEl.classList.add('comment-date');
             dateEl.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
-            
+
             const messageEl = document.createElement('p');
             messageEl.textContent = commentData.message
                 ? String(commentData.message).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 : '';
-            
+
             commentContentDiv.appendChild(nameEl);
             commentContentDiv.appendChild(dateEl);
             commentContentDiv.appendChild(messageEl);
@@ -259,7 +261,9 @@ async function loadComments() {
 
             const iconName = userHasLikedThisComment ? 'favorite' : 'favorite_border';
             likeButton.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikes}</span>`;
-            console.log(`[comments.js] loadComments - Creato pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikes}`);
+            console.log(
+                `[comments.js] loadComments - Creato pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikes}`
+            );
 
             likeButton.classList.toggle('liked', userHasLikedThisComment);
             likeButton.title = userHasLikedThisComment ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
@@ -483,7 +487,9 @@ async function populateGuestbookLikedByListModal(commentId) {
                         li.appendChild(flagSpan);
                     }
                 } else {
-                    console.warn(`[comments.js] Profilo utente non trovato per ID: ${userSnap.id} (liker di commento guestbook)`);
+                    console.warn(
+                        `[comments.js] Profilo utente non trovato per ID: ${userSnap.id} (liker di commento guestbook)`
+                    );
                     const avatarImg = document.createElement('img');
                     avatarImg.className = 'liked-by-avatar';
                     avatarImg.src = generateBlockieAvatar(userSnap.id || 'unknown', 32, { size: 8 });
@@ -504,7 +510,6 @@ async function populateGuestbookLikedByListModal(commentId) {
         if (likedByModalLoading) likedByModalLoading.style.display = 'none';
     }
 }
-
 
 // --- INIZIALIZZAZIONE ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -548,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
             '[comments.js] commentsListContainer o data-page-id non trovato. Verrà usato il pageId di fallback "default". Questo potrebbe causare problemi se la pagina si aspetta un ID specifico.'
         );
     }
-    
+
     // CORREZIONE: Lista degli elementi DOM essenziali per comments.js
     const essentialGuestbookElements = [
         commentForm,
@@ -559,18 +564,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // commentNameInput e commentNameSection sono opzionali se l'utente è sempre loggato
         // per lasciare commenti, ma li includiamo per completezza se la logica li usa.
         commentNameInput, // Può essere null se non presente nella pagina
-        commentNameSection // Può essere null se non presente nella pagina
+        commentNameSection, // Può essere null se non presente nella pagina
     ];
 
     // Verifica se gli elementi essenziali per il guestbook sono presenti
     // Nota: commentNameInput e commentNameSection sono gestiti con controlli di esistenza nel codice,
     // quindi non blocchiamo l'esecuzione se mancano.
     if (!commentForm || !commentMessageInput || !submitCommentBtn || !commentsListDiv || !commentsListContainer) {
-        console.error('[comments.js] Uno o più Elementi DOM essenziali per la funzionalità guestbook sono mancanti. Controllare gli ID: commentForm, commentMessageInput, submitCommentBtn, commentsListDiv, commentsListContainer.');
+        console.error(
+            '[comments.js] Uno o più Elementi DOM essenziali per la funzionalità guestbook sono mancanti. Controllare gli ID: commentForm, commentMessageInput, submitCommentBtn, commentsListDiv, commentsListContainer.'
+        );
         // Non fare return qui, così il resto dello script (es. onAuthStateChanged) può ancora girare
         // per gestire la visibilità del form nome se l'utente è loggato/sloggato.
     }
-
 
     const user = auth.currentUser;
     if (commentNameSection && commentNameInput) {

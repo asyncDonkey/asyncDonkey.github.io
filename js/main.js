@@ -11,7 +11,7 @@ import {
     orderBy,
     limit,
     getDocs,
-    // updateDoc, 
+    // updateDoc,
     // increment,
     // arrayUnion,
     // arrayRemove,
@@ -42,7 +42,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-export function showConfirmationModal(title = "Conferma Azione", message = "Sei sicuro di voler procedere?") {
+export function showConfirmationModal(title = 'Conferma Azione', message = 'Sei sicuro di voler procedere?') {
     // ... (codice invariato, come da versione precedente)
     return new Promise((resolve) => {
         const modal = document.getElementById('confirmationModal');
@@ -53,7 +53,7 @@ export function showConfirmationModal(title = "Conferma Azione", message = "Sei 
 
         if (!modal || !modalTitleEl || !modalMessageEl || !yesBtn || !noBtn) {
             console.error(
-                "Elementi della modale di conferma (confirmationModal, confirmationModalTitle, etc.) non trovati nel DOM."
+                'Elementi della modale di conferma (confirmationModal, confirmationModalTitle, etc.) non trovati nel DOM.'
             );
             const userConfirmation = window.confirm(`${title}\n${message}`);
             resolve(userConfirmation);
@@ -72,10 +72,10 @@ export function showConfirmationModal(title = "Conferma Azione", message = "Sei 
             modal.removeEventListener('click', handleModalOutsideClick);
             resolve(value);
         };
-        
+
         const handleModalOutsideClick = (event) => {
             if (event.target === modal) {
-                closeAndResolve(false); 
+                closeAndResolve(false);
             }
         };
 
@@ -124,8 +124,8 @@ function escapeHTML(str) {
 
 async function loadHeaderUserProfileDisplay(user) {
     // ... (codice invariato)
-    const userDisplayNameElement = document.getElementById('userDisplayName'); 
-    const headerUserAvatarElement = document.getElementById('headerUserAvatar'); 
+    const userDisplayNameElement = document.getElementById('userDisplayName');
+    const headerUserAvatarElement = document.getElementById('headerUserAvatar');
 
     if (!userDisplayNameElement || !headerUserAvatarElement) {
         return;
@@ -135,15 +135,15 @@ async function loadHeaderUserProfileDisplay(user) {
         headerUserAvatarElement.style.display = 'none';
         return;
     }
-    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente'; 
+    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente';
     const seedForAvatar = user.uid;
     userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-    headerUserAvatarElement.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 }); 
+    headerUserAvatarElement.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
     headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
     headerUserAvatarElement.style.display = 'inline-block';
     headerUserAvatarElement.style.backgroundColor = 'transparent';
     headerUserAvatarElement.onerror = () => {
-        headerUserAvatarElement.style.display = 'none'; 
+        headerUserAvatarElement.style.display = 'none';
     };
     try {
         const userProfileRef = doc(db, 'userProfiles', user.uid);
@@ -160,8 +160,8 @@ async function loadHeaderUserProfileDisplay(user) {
 
 function updateHeaderAuthContainersVisibility(user) {
     // ... (codice invariato)
-    const authContainer = document.getElementById('authContainer'); 
-    const userProfileContainer = document.getElementById('userProfileContainer'); 
+    const authContainer = document.getElementById('authContainer');
+    const userProfileContainer = document.getElementById('userProfileContainer');
     if (authContainer) authContainer.style.display = user ? 'none' : 'flex';
     if (userProfileContainer) userProfileContainer.style.display = user ? 'flex' : 'none';
 }
@@ -185,7 +185,8 @@ function toggleMobileMenu() {
     mobileMenuButton.setAttribute('aria-expanded', isActive.toString());
     burgerIcon.textContent = isActive ? 'close' : 'menu';
 
-    if (!isActive) { // Menu CHIUSO
+    if (!isActive) {
+        // Menu CHIUSO
         mobileMenuContainer.setAttribute('aria-hidden', 'true');
         // Ritarda leggermente lo spostamento del focus per assicurarsi che il menu sia "andato"
         // e che il focus non venga "rubato" da un elemento appena nascosto.
@@ -199,7 +200,8 @@ function toggleMobileMenu() {
             // Altrimenti, il focus potrebbe essere già stato gestito correttamente (es. da un logout)
             // o spostato altrove dall'utente/browser, quindi non lo forziamo.
         }, 0);
-    } else { // Menu APERTO
+    } else {
+        // Menu APERTO
         mobileMenuContainer.removeAttribute('aria-hidden');
         // Opzionale: focus sul primo elemento del menu quando si apre
         const firstFocusableElement = mobileMenuContainer.querySelector('a, button');
@@ -209,7 +211,6 @@ function toggleMobileMenu() {
     }
     // console.log(`[main.js toggleMobileMenu] Menu mobile ${isActive ? 'APERTO' : 'CHIUSO'}.`);
 }
-
 
 function populateMobileMenu() {
     // ... (codice invariato)
@@ -223,7 +224,7 @@ function populateMobileMenu() {
         return;
     }
 
-    mobileMenuTarget.innerHTML = ''; 
+    mobileMenuTarget.innerHTML = '';
     const mobileUl = document.createElement('ul');
     mobileUl.className = 'mobile-menu-list';
     mobileUl.style.listStyle = 'none';
@@ -232,7 +233,7 @@ function populateMobileMenu() {
 
     const desktopListItems = navbarLinksContainer.querySelectorAll(':scope > li');
 
-    desktopListItems.forEach((desktopLi) => { 
+    desktopListItems.forEach((desktopLi) => {
         const isDropdownContainer = desktopLi.classList.contains('nav-dropdown-container');
         let linkToProcess;
 
@@ -243,7 +244,7 @@ function populateMobileMenu() {
         }
 
         if (!linkToProcess) {
-            return; 
+            return;
         }
 
         const dynamicDesktopLiIds = ['profile-link-li', 'logout-link-li', 'login-link-li'];
@@ -256,7 +257,7 @@ function populateMobileMenu() {
             mobileDropdownLi.classList.add('nav-item', 'mobile-dropdown');
 
             const mobileDropdownToggle = document.createElement('a');
-            mobileDropdownToggle.href = '#'; 
+            mobileDropdownToggle.href = '#';
             mobileDropdownToggle.innerHTML = linkToProcess.innerHTML;
             mobileDropdownToggle.classList.add('dropdown-toggle');
             mobileDropdownToggle.setAttribute('aria-expanded', 'false');
@@ -269,19 +270,19 @@ function populateMobileMenu() {
 
             const desktopSubmenuItems = desktopLi.querySelectorAll('.dropdown-menu li');
 
-            desktopSubmenuItems.forEach(subItemLi => {
+            desktopSubmenuItems.forEach((subItemLi) => {
                 const subItemLink = subItemLi.querySelector('a');
                 if (subItemLink) {
                     const mobileSubmenuItemLi = document.createElement('li');
-                    if (subItemLi.id === 'navWriteArticleDropdown') { 
-                        mobileSubmenuItemLi.id = 'mobile-navWriteArticleDropdown'; 
-                        mobileSubmenuItemLi.style.display = 'none'; 
+                    if (subItemLi.id === 'navWriteArticleDropdown') {
+                        mobileSubmenuItemLi.id = 'mobile-navWriteArticleDropdown';
+                        mobileSubmenuItemLi.style.display = 'none';
                     }
 
                     const mobileSubmenuLink = document.createElement('a');
                     mobileSubmenuLink.href = subItemLink.href;
-                    mobileSubmenuLink.innerHTML = subItemLink.innerHTML; 
-                    mobileSubmenuLink.classList.add('nav-item'); 
+                    mobileSubmenuLink.innerHTML = subItemLink.innerHTML;
+                    mobileSubmenuLink.classList.add('nav-item');
                     if (subItemLink.target === '_blank') {
                         mobileSubmenuLink.target = '_blank';
                         mobileSubmenuLink.rel = 'noopener noreferrer';
@@ -297,18 +298,18 @@ function populateMobileMenu() {
                 mobileSubmenu.style.display = isExpanded ? 'none' : 'block';
                 mobileDropdownToggle.setAttribute('aria-expanded', String(!isExpanded));
                 const icon = mobileDropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow');
-                if (icon) icon.textContent = !isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'; 
+                if (icon) icon.textContent = !isExpanded ? 'arrow_drop_up' : 'arrow_drop_down';
             });
 
             mobileDropdownLi.appendChild(mobileDropdownToggle);
             mobileDropdownLi.appendChild(mobileSubmenu);
             mobileUl.appendChild(mobileDropdownLi);
-        } else if (!isDropdownContainer && linkToProcess) { 
+        } else if (!isDropdownContainer && linkToProcess) {
             const mobileListItem = document.createElement('li');
             const mobileLink = document.createElement('a');
             mobileLink.href = linkToProcess.href || '#';
-            mobileLink.innerHTML = linkToProcess.innerHTML; 
-            mobileLink.classList.add('nav-item'); 
+            mobileLink.innerHTML = linkToProcess.innerHTML;
+            mobileLink.classList.add('nav-item');
             if (linkToProcess.target === '_blank') {
                 mobileLink.target = '_blank';
                 mobileLink.rel = 'noopener noreferrer';
@@ -325,23 +326,25 @@ function populateMobileMenu() {
 
 function setupDesktopCommunityDropdown() {
     // ... (codice invariato)
-    const dropdownToggle = document.getElementById('communityDropdownToggle'); 
-    const dropdownMenu = document.getElementById('communityDropdownMenu');   
+    const dropdownToggle = document.getElementById('communityDropdownToggle');
+    const dropdownMenu = document.getElementById('communityDropdownMenu');
 
     if (dropdownToggle && dropdownMenu) {
         dropdownToggle.addEventListener('click', function (event) {
             event.preventDefault();
-            event.stopPropagation(); 
+            event.stopPropagation();
             const isExpanded = this.getAttribute('aria-expanded') === 'true';
             this.setAttribute('aria-expanded', String(!isExpanded));
             dropdownMenu.style.display = isExpanded ? 'none' : 'block';
             const icon = this.querySelector('.material-symbols-rounded.dropdown-arrow');
             if (icon) icon.textContent = isExpanded ? 'arrow_drop_down' : 'arrow_drop_up';
         });
-        document.addEventListener('click', function (event) { 
-            if (dropdownMenu.style.display === 'block' &&
+        document.addEventListener('click', function (event) {
+            if (
+                dropdownMenu.style.display === 'block' &&
                 !dropdownToggle.contains(event.target) &&
-                !dropdownMenu.contains(event.target)) {
+                !dropdownMenu.contains(event.target)
+            ) {
                 dropdownMenu.style.display = 'none';
                 dropdownToggle.setAttribute('aria-expanded', 'false');
                 const icon = dropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow');
@@ -358,8 +361,8 @@ function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], 
     const link = document.createElement('a');
     link.id = aId;
     link.href = href;
-    link.innerHTML = innerHTML; 
-    aClasses.forEach(cls => link.classList.add(cls));
+    link.innerHTML = innerHTML;
+    aClasses.forEach((cls) => link.classList.add(cls));
     if (onClickHandler) {
         link.addEventListener('click', onClickHandler);
     }
@@ -369,7 +372,7 @@ function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], 
 
 async function getUserProfile(userId) {
     // ... (codice invariato)
-    if (!db) { 
+    if (!db) {
         console.error('Firestore (db) non inizializzato (getUserProfile).');
         return { nickname: 'Errore DB' };
     }
@@ -378,11 +381,11 @@ async function getUserProfile(userId) {
         if (userProfileDoc.exists()) {
             return userProfileDoc.data();
         } else {
-            return { nickname: 'Utente' }; 
+            return { nickname: 'Utente' };
         }
     } catch (error) {
         console.error(`Errore durante il recupero del profilo utente (${userId}):`, error);
-        return { nickname: 'Errore Profilo' }; 
+        return { nickname: 'Errore Profilo' };
     }
 }
 
@@ -405,7 +408,7 @@ async function updateLoginLogoutLinks(user) {
     }
 
     const dynamicMobileLiIds = ['mobile-profile-link-li', 'mobile-logout-link-li', 'mobile-login-link-li'];
-    dynamicMobileLiIds.forEach(id => {
+    dynamicMobileLiIds.forEach((id) => {
         const el = document.getElementById(id);
         if (el && el.parentNode === mobileMenuContainer) {
             // console.log(`[main.js updateLoginLogoutLinks] Rimuovo LI mobile: ${id}`); // DEBUG
@@ -418,15 +421,19 @@ async function updateLoginLogoutLinks(user) {
         let userNickname = userProfile?.nickname || (user.email ? user.email.split('@')[0] : 'Utente');
 
         const profileHTMLMobile = `<span class="material-symbols-rounded">account_circle</span> <span class="nav-text">My Profile (${escapeHTML(userNickname)})</span>`;
-        mobileMenuContainer.appendChild(createNavLinkItem('mobile-profile-link-li', 'mobile-profile-link', 'profile.html', profileHTMLMobile, ['nav-item']));
+        mobileMenuContainer.appendChild(
+            createNavLinkItem('mobile-profile-link-li', 'mobile-profile-link', 'profile.html', profileHTMLMobile, [
+                'nav-item',
+            ])
+        );
         // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "My Profile" mobile.'); // DEBUG
-
 
         const logoutHandler = async (e) => {
             e.preventDefault();
             console.log('[main.js logoutHandler mobile] Logout cliccato!'); // DEBUG
             const mobileMenuContainerForLogout = document.getElementById('mobileNavMenu'); // Riferimento fresco
-            const isActiveBeforeLogout = mobileMenuContainerForLogout && mobileMenuContainerForLogout.classList.contains('active');
+            const isActiveBeforeLogout =
+                mobileMenuContainerForLogout && mobileMenuContainerForLogout.classList.contains('active');
 
             if (isActiveBeforeLogout) {
                 // console.log('[main.js logoutHandler mobile] Chiusura menu mobile prima del signOut.'); // DEBUG
@@ -434,7 +441,7 @@ async function updateLoginLogoutLinks(user) {
             } else {
                 // console.log('[main.js logoutHandler mobile] Menu mobile non attivo, procedo con signOut.'); // DEBUG
             }
-        
+
             try {
                 console.log('[main.js logoutHandler mobile] Chiamata a signOut...'); // DEBUG
                 await signOut(auth);
@@ -446,28 +453,43 @@ async function updateLoginLogoutLinks(user) {
             }
         };
         const logoutHTMLMobile = `<span class="material-symbols-rounded">logout</span> <span class="nav-text">Logout</span>`;
-        mobileMenuContainer.appendChild(createNavLinkItem('mobile-logout-link-li', 'mobile-logout-link', '#', logoutHTMLMobile, ['nav-item'], logoutHandler));
+        mobileMenuContainer.appendChild(
+            createNavLinkItem(
+                'mobile-logout-link-li',
+                'mobile-logout-link',
+                '#',
+                logoutHTMLMobile,
+                ['nav-item'],
+                logoutHandler
+            )
+        );
         // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "Logout" mobile.'); // DEBUG
-
-    } else { 
+    } else {
         const loginHTMLMobile = `<span class="material-symbols-rounded">login</span> <span class="nav-text">Login / Register</span>`;
         const loginMobileHandler = (e) => {
             e.preventDefault();
             const loginModalEl = document.getElementById('loginModal');
-            if(loginModalEl) loginModalEl.style.display = 'block';
+            if (loginModalEl) loginModalEl.style.display = 'block';
             const mobileMenuContainerForLogin = document.getElementById('mobileNavMenu');
-            if(mobileMenuContainerForLogin && mobileMenuContainerForLogin.classList.contains('active')) {
+            if (mobileMenuContainerForLogin && mobileMenuContainerForLogin.classList.contains('active')) {
                 toggleMobileMenu(); // Chiudi menu mobile
             }
         };
         // mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', 'register.html', loginHTMLMobile, ['nav-item']));
-        mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', '#', loginHTMLMobile, ['nav-item'], loginMobileHandler));
-
+        mobileMenuContainer.appendChild(
+            createNavLinkItem(
+                'mobile-login-link-li',
+                'mobile-login-link',
+                '#',
+                loginHTMLMobile,
+                ['nav-item'],
+                loginMobileHandler
+            )
+        );
 
         // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "Login/Register" mobile.'); // DEBUG
     }
 }
-
 
 async function updateAdminDashboardLink(user) {
     // ... (codice invariato)
@@ -488,14 +510,14 @@ async function updateAdminDashboardLink(user) {
 
 function initializeNewNavbar() {
     // ... (codice invariato)
-    const mobileMenuButton = document.getElementById('navbarToggler'); 
+    const mobileMenuButton = document.getElementById('navbarToggler');
     if (mobileMenuButton) {
         mobileMenuButton.addEventListener('click', toggleMobileMenu);
     } else {
         console.error('[initializeNewNavbar] Pulsante menu mobile (navbarToggler) NON TROVATO.');
     }
-    populateMobileMenu(); 
-    setupDesktopCommunityDropdown(); 
+    populateMobileMenu();
+    setupDesktopCommunityDropdown();
     console.log('[initializeNewNavbar] Nuova navbar inizializzata.');
 }
 
@@ -534,7 +556,9 @@ async function loadHomeMiniLeaderboard() {
             avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
             avatarImg.alt = `Avatar`;
             avatarImg.style.backgroundColor = 'transparent';
-            avatarImg.onerror = () => { /* gestione errore avatar */ };
+            avatarImg.onerror = () => {
+                /* gestione errore avatar */
+            };
             listItem.appendChild(avatarImg);
             const playerInfoSpan = document.createElement('span');
             playerInfoSpan.className = 'player-info';
@@ -580,7 +604,7 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
     // ... (codice invariato, già usa Material Symbols)
     if (!buttonElement || !articleId) return;
     const likeCountSpan = buttonElement.nextElementSibling;
-     if (!likeCountSpan || !likeCountSpan.classList.contains('homepage-like-count')) {
+    if (!likeCountSpan || !likeCountSpan.classList.contains('homepage-like-count')) {
         // console.warn(`Span conteggio like non trovato o errato per articleId: ${articleId}.`);
     }
     try {
@@ -590,7 +614,7 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
             const articleData = docSnap.data();
             if (articleData.status !== 'published') {
                 if (likeCountSpan) likeCountSpan.textContent = articleData.likeCount || 0;
-                buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`; 
+                buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
                 buttonElement.disabled = true;
                 buttonElement.title = 'Articolo non disponibile per like';
                 buttonElement.classList.remove('liked');
@@ -603,16 +627,16 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
                 buttonElement.disabled = false;
                 const userHasLiked = Array.isArray(likedByUsers) && likedByUsers.includes(currentUser.uid);
                 if (userHasLiked) {
-                    buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite</span>`; 
+                    buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite</span>`;
                     buttonElement.classList.add('liked');
                     buttonElement.title = "Hai messo 'Mi piace' (vedi articolo per cambiare)";
                 } else {
-                    buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`; 
+                    buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
                     buttonElement.classList.remove('liked');
                     buttonElement.title = "Metti 'Mi piace' (vedi articolo)";
                 }
             } else {
-                buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`; 
+                buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
                 buttonElement.disabled = true;
                 buttonElement.title = 'Fai login per mettere like';
                 buttonElement.classList.remove('liked');
@@ -634,7 +658,7 @@ async function handleHomepageArticleLike(event) {
     // ... (codice invariato)
     const button = event.currentTarget;
     const articleId = button.dataset.articleId;
-    const currentUser = auth.currentUser; 
+    const currentUser = auth.currentUser;
     if (!currentUser) {
         showToast("Devi essere loggato per interagire con i like. Puoi mettere like dalla pagina dell'articolo.");
         return;
@@ -650,7 +674,7 @@ async function updateHomepageCommentCountUI(countSpanElement, articleId) {
     // ... (codice invariato)
     if (!countSpanElement || !articleId) return;
     try {
-        const articleRef = doc(db, 'articles', articleId); 
+        const articleRef = doc(db, 'articles', articleId);
         const docSnap = await getDoc(articleRef);
         if (docSnap.exists() && docSnap.data().status === 'published') {
             const articleData = docSnap.data();
@@ -678,7 +702,7 @@ export async function initializeHomepageArticleInteractions(currentUser) {
         if (articleId) {
             if (likeButton) {
                 await updateHomepageLikeButtonUI(likeButton, articleId, currentUser);
-                likeButton.removeEventListener('click', handleHomepageArticleLike); 
+                likeButton.removeEventListener('click', handleHomepageArticleLike);
                 likeButton.addEventListener('click', handleHomepageArticleLike);
             }
             if (commentCountSpan) {
@@ -704,17 +728,21 @@ function traduireErroreFirebase(codiceErrore) {
 
 document.addEventListener('DOMContentLoaded', function () {
     // ... (codice invariato, inclusa la chiamata a initializeNewNavbar)
-    initializeNewNavbar(); 
+    initializeNewNavbar();
     const loginForm = document.getElementById('loginForm');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
     const loginModal = document.getElementById('loginModal');
-    const showLoginBtn = document.getElementById('showLoginBtn'); 
+    const showLoginBtn = document.getElementById('showLoginBtn');
     const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
-    const openModal = (modal) => { if (modal) modal.style.display = 'block'; };
-    const closeModal = (modal) => { if (modal) modal.style.display = 'none'; };
+    const openModal = (modal) => {
+        if (modal) modal.style.display = 'block';
+    };
+    const closeModal = (modal) => {
+        if (modal) modal.style.display = 'none';
+    };
 
     function setupSmoothScrolling() {
-        document.querySelectorAll('header nav a[href^="#"]').forEach((link) => { 
+        document.querySelectorAll('header nav a[href^="#"]').forEach((link) => {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
@@ -723,7 +751,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                } catch (error) { /* Gestisci errore selettore */ }
+                } catch (error) {
+                    /* Gestisci errore selettore */
+                }
             });
         });
     }
@@ -776,9 +806,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     function setupModalControls() {
-        if (showLoginBtn && loginModal) { 
+        if (showLoginBtn && loginModal) {
             showLoginBtn.addEventListener('click', (e) => {
-                e.preventDefault(); 
+                e.preventDefault();
                 openModal(loginModal);
             });
         }
@@ -800,7 +830,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (document.getElementById('articlesSection')) {
         displayArticlesSection()
-            .then(() => { /* Interazioni inizializzate da onAuthStateChanged */ })
+            .then(() => {
+                /* Interazioni inizializzate da onAuthStateChanged */
+            })
             .catch((error) => {
                 console.error('Errore durante displayArticlesSection in DOMContentLoaded:', error);
             });
@@ -814,11 +846,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const email = loginForm.loginEmail.value;
             const password = loginForm.loginPassword.value;
             const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
-            if (loginModalErrorDiv) loginModalErrorDiv.style.display = 'none'; 
+            if (loginModalErrorDiv) loginModalErrorDiv.style.display = 'none';
             try {
-                await signInWithEmailAndPassword(auth, email, password); 
+                await signInWithEmailAndPassword(auth, email, password);
                 loginForm.reset();
-                closeModal(loginModal); 
+                closeModal(loginModal);
                 showToast('Login effettuato con successo!', 'success');
             } catch (error) {
                 const friendlyError = traduireErroreFirebase(error.code);

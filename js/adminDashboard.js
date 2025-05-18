@@ -212,18 +212,18 @@ async function handleRejectArticleClick(e) {
 
     // Mostra la modale di conferma PRIMA di procedere
     const userConfirmedInitialRejection = await showConfirmationModal(
-        "Conferma Iniziale Rifiuto",
+        'Conferma Iniziale Rifiuto',
         `Sei sicuro di voler avviare il processo di rifiuto per l'articolo ${articleTitleForDisplay}? Potrai inserire un motivo nel passo successivo.`
     );
 
     if (!userConfirmedInitialRejection) {
-        showToast("Processo di rifiuto annullato dall'utente.", "info");
+        showToast("Processo di rifiuto annullato dall'utente.", 'info');
         return; // L'utente ha cliccato "No" o chiuso la modale di conferma
     }
 
     // L'utente ha confermato, procedi con l'apertura della modale per il motivo
     currentArticleIdToReject = articleId; // Salva l'ID per usarlo nel submit del form del motivo
-    
+
     if (rejectingArticleIdInput) {
         rejectingArticleIdInput.value = articleId; // Popola l'input nascosto nel form del motivo
     }

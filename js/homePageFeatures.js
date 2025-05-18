@@ -189,20 +189,28 @@ export async function displayArticlesSection() {
 
     // Verifica elementi essenziali per la griglia articoli
     if (!articlesSection) {
-        console.error('[homePageFeatures.js] Errore critico: Elemento #articlesSection non trovato. Impossibile continuare.');
+        console.error(
+            '[homePageFeatures.js] Errore critico: Elemento #articlesSection non trovato. Impossibile continuare.'
+        );
         return;
     }
     if (!articlesGrid) {
-        console.error('[homePageFeatures.js] Errore critico: Elemento #articlesGrid non trovato. Impossibile continuare.');
+        console.error(
+            '[homePageFeatures.js] Errore critico: Elemento #articlesGrid non trovato. Impossibile continuare.'
+        );
         articlesSection.style.display = 'block';
-        articlesSection.innerHTML = '<p style="color:red; text-align:center;">Errore di configurazione: contenitore griglia articoli mancante.</p>';
+        articlesSection.innerHTML =
+            '<p style="color:red; text-align:center;">Errore di configurazione: contenitore griglia articoli mancante.</p>';
         return;
     }
 
     // Verifica elementi per l'articolo in evidenza.
-    const featuredElementsPresent = featuredArticleCard && featuredArticleTitleEl && featuredArticleSnippetEl && featuredArticleLinkEl;
+    const featuredElementsPresent =
+        featuredArticleCard && featuredArticleTitleEl && featuredArticleSnippetEl && featuredArticleLinkEl;
     if (!featuredElementsPresent) {
-        console.warn('[homePageFeatures.js] Uno o più elementi DOM per "Articolo in Evidenza" non trovati. La funzionalità Featured Article sarà disabilitata per questa esecuzione.');
+        console.warn(
+            '[homePageFeatures.js] Uno o più elementi DOM per "Articolo in Evidenza" non trovati. La funzionalità Featured Article sarà disabilitata per questa esecuzione.'
+        );
         if (featuredArticleCard) featuredArticleCard.style.display = 'none';
     }
 
@@ -239,7 +247,6 @@ export async function displayArticlesSection() {
         });
         // console.log('[homePageFeatures.js] Articoli fetched:', articlesFromDb.length);
 
-
         articlesGrid.innerHTML = ''; // Pulisci la griglia ("Caricamento...")
 
         let actualFeaturedArticleData = null;
@@ -247,11 +254,13 @@ export async function displayArticlesSection() {
         if (articlesFromDb.length > 0) {
             // Solo se ci sono articoli, gestisci il featured (se gli elementi DOM esistono)
             if (featuredElementsPresent) {
-                actualFeaturedArticleData = articlesFromDb.find((article) => article.isFeatured === true) || articlesFromDb[0];
+                actualFeaturedArticleData =
+                    articlesFromDb.find((article) => article.isFeatured === true) || articlesFromDb[0];
 
                 if (actualFeaturedArticleData) {
                     if (featuredArticleTitleEl)
-                        featuredArticleTitleEl.textContent = actualFeaturedArticleData.title || 'Titolo non disponibile';
+                        featuredArticleTitleEl.textContent =
+                            actualFeaturedArticleData.title || 'Titolo non disponibile';
                     if (featuredArticleSnippetEl) {
                         featuredArticleSnippetEl.textContent =
                             actualFeaturedArticleData.snippet ||
@@ -288,7 +297,6 @@ export async function displayArticlesSection() {
             articlesGrid.innerHTML =
                 '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare al momento.</p>';
         }
-
     } catch (error) {
         console.error('[homePageFeatures.js] Errore durante il caricamento degli articoli:', error);
         articlesGrid.innerHTML =

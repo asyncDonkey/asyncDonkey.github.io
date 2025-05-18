@@ -1,5 +1,5 @@
 // js/profile.js
-import { db, auth, generateBlockieAvatar } from './main.js';
+import { db, auth, generateBlockieAvatar, showConfirmationModal } from './main.js';
 import {
     doc,
     getDoc,
@@ -11,14 +11,12 @@ import {
     orderBy,
     deleteDoc,
     serverTimestamp,
-    // arrayUnion, // Non usato direttamente qui, ma in handleExternalLinkFormSubmit
-    // arrayRemove, // Non usato direttamente qui, ma in handleDeleteExternalLink
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
 
 // --- RIFERIMENTI DOM ---
-const profileSectionTitle = document.querySelector('#profile h2'); // Titolo sezione "Dettagli Profilo"
+const profileSectionTitle = document.querySelector('#profile h2');
 const profileContent = document.getElementById('profileContent');
 const profileDetailsDisplay = document.getElementById('profileDetailsDisplay');
 const profileAvatarImg = document.getElementById('profileAvatar');
@@ -34,14 +32,14 @@ const resendEmailMessage = document.getElementById('resendEmailMessage');
 
 const statusMessageSection = document.getElementById('statusMessageSection');
 const statusMessageDisplay = document.getElementById('statusMessageDisplay');
-const updateStatusForm = document.getElementById('updateStatusForm'); // Form per lo stato
+const updateStatusForm = document.getElementById('updateStatusForm');
 const statusMessageInput = document.getElementById('statusMessageInput');
 const statusUpdateMessage = document.getElementById('statusUpdateMessage');
 
 const externalLinksSection = document.getElementById('externalLinksSection');
 const externalLinksListUL = document.getElementById('externalLinksList');
 const noExternalLinksMessage = document.getElementById('noExternalLinksMessage');
-const manageExternalLinksUI = document.getElementById('manageExternalLinksUI'); // Contenitore per pulsante e form link
+const manageExternalLinksUI = document.getElementById('manageExternalLinksUI');
 const toggleAddLinkFormBtn = document.getElementById('toggleAddLinkFormBtn');
 const externalLinkFormContainer = document.getElementById('externalLinkFormContainer');
 const externalLinkFormTitle = document.getElementById('externalLinkFormTitle');
@@ -53,28 +51,37 @@ const externalLinkErrorDiv = document.getElementById('externalLinkError');
 const saveExternalLinkBtn = document.getElementById('saveExternalLinkBtn');
 const cancelEditExtLinkBtn = document.getElementById('cancelEditExtLinkBtn');
 
+// Riferimenti DOM per la sezione "I Miei Articoli"
 const myArticlesSection = document.getElementById('myArticlesSection');
-const myDraftsLoadingMessage = document.getElementById('myDraftsLoadingMessage');
 const myDraftArticlesListDiv = document.getElementById('myDraftArticlesList');
-const myPendingLoadingMessage = document.getElementById('myPendingLoadingMessage');
 const myPendingArticlesListDiv = document.getElementById('myPendingArticlesList');
-const myPublishedLoadingMessage = document.getElementById('myPublishedLoadingMessage');
 const myPublishedArticlesListDiv = document.getElementById('myPublishedArticlesList');
-const myRejectedLoadingMessage = document.getElementById('myRejectedLoadingMessage');
 const myRejectedArticlesListDiv = document.getElementById('myRejectedArticlesList');
+const myDraftsLoadingMessage = document.getElementById('myDraftsLoadingMessage');
+const myPendingLoadingMessage = document.getElementById('myPendingLoadingMessage');
+const myPublishedLoadingMessage = document.getElementById('myPublishedLoadingMessage');
+const myRejectedLoadingMessage = document.getElementById('myRejectedLoadingMessage');
 
-let loggedInUser = null; // Per l'utente attualmente loggato
-let profileDataForDisplay = null; // Per i dati del profilo che stiamo visualizzando
+// --- NUOVI RIFERIMENTI DOM per la BIO ---
+const bioSection = document.getElementById('bioSection');
+const bioDisplay = document.getElementById('bioDisplay');
+const updateBioForm = document.getElementById('updateBioForm');
+const bioInput = document.getElementById('bioInput');
+const bioCharCountDisplay = document.getElementById('bioCharCount');
+const bioCurrentCharsSpan = document.getElementById('bioCurrentChars');
+const bioUpdateMessage = document.getElementById('bioUpdateMessage');
+
+let loggedInUser = null;
+let profileDataForDisplay = null;
 const MAX_EXTERNAL_LINKS = 5;
+const MAX_BIO_CHARS = 300;
 
-// --- Funzione per renderizzare i link esterni ---
-// Modificata per accettare isOwnProfile e mostrare/nascondere controlli
 function renderExternalLinks(linksArray, isOwnProfile) {
     if (!externalLinksListUL || !noExternalLinksMessage) return;
     externalLinksListUL.innerHTML = '';
 
     if (!linksArray || linksArray.length === 0) {
-        if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'list-item'; // list-item per <li>
+        if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'list-item';
         return;
     }
     if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'none';
@@ -91,12 +98,11 @@ function renderExternalLinks(linksArray, isOwnProfile) {
         linkDisplayDiv.appendChild(anchor);
         const urlSpan = document.createElement('span');
         urlSpan.className = 'link-url';
-        urlSpan.textContent = `(${link.url})`;
+        urlSpan.textContent = ` (${link.url})`; // Aggiunto spazio per separazione
         linkDisplayDiv.appendChild(urlSpan);
         li.appendChild(linkDisplayDiv);
 
         if (isOwnProfile) {
-            // Mostra controlli solo se è il profilo del proprietario
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'link-actions';
             const editBtn = document.createElement('button');
@@ -119,10 +125,8 @@ function renderExternalLinks(linksArray, isOwnProfile) {
     });
 }
 
-// Modificata per accettare isOwnProfile e gestire UI di modifica
 async function loadProfileData(uidToLoad, isOwnProfile) {
-    console.log(`profile.js - Loading profile for UID: ${uidToLoad}, isOwnProfile: ${isOwnProfile}`);
-    // ... (controlli DOM esistenti) ...
+    // console.log(`profile.js - Loading profile for UID: ${uidToLoad}, isOwnProfile: ${isOwnProfile}`);
     if (
         !profileContent ||
         !profileLoadingMessage ||
@@ -135,10 +139,17 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
         !statusMessageDisplay ||
         !externalLinksSection ||
         !manageExternalLinksUI ||
-        !updateStatusForm
+        !updateStatusForm ||
+        !bioSection ||
+        !bioDisplay ||
+        !updateBioForm ||
+        !bioInput ||
+        !bioCharCountDisplay ||
+        !bioCurrentCharsSpan ||
+        !bioUpdateMessage
     ) {
-        console.error('Profile page DOM elements for profile data or edit sections are missing!');
-        // ... (gestione errore UI)
+        console.error('Profile page DOM elements (profile, status, links, OR BIO) are missing!');
+        if (profileLoadingMessage) profileLoadingMessage.textContent = 'Errore: Elementi della pagina mancanti.';
         return;
     }
 
@@ -146,14 +157,14 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
     profileContent.style.display = 'none';
     profileLoginMessage.style.display = 'none';
 
-    // Nascondi sezioni specifiche per proprietario di default
     statusMessageSection.style.display = 'none';
     if (updateStatusForm) updateStatusForm.style.display = 'none';
     externalLinksSection.style.display = 'none';
     manageExternalLinksUI.style.display = 'none';
+    bioSection.style.display = 'none';
+    if (updateBioForm) updateBioForm.style.display = 'none';
     if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
 
-    // Reset campi visualizzazione
     profileAvatarImg.src = '';
     profileAvatarImg.alt = 'Caricamento avatar...';
     profileEmailSpan.textContent = 'Caricamento...';
@@ -162,15 +173,18 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
     statusMessageDisplay.textContent = 'Caricamento stato...';
     if (statusMessageInput) statusMessageInput.value = '';
     if (statusUpdateMessage) statusUpdateMessage.textContent = '';
-    if (externalLinksListUL) renderExternalLinks([], isOwnProfile); // Pulisce e setta il messaggio "no links" se necessario
+    if (externalLinksListUL) renderExternalLinks([], isOwnProfile);
+    if (bioDisplay) bioDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Caricamento bio...</p>';
+    if (bioInput) bioInput.value = '';
+    if (bioUpdateMessage) bioUpdateMessage.textContent = '';
+    if (bioCurrentCharsSpan) bioCurrentCharsSpan.textContent = '0';
 
     const userProfileRef = doc(db, 'userProfiles', uidToLoad);
     try {
         const docSnap = await getDoc(userProfileRef);
         if (docSnap.exists()) {
-            profileDataForDisplay = { ...docSnap.data(), userId: uidToLoad }; // Conserva i dati del profilo visualizzato
+            profileDataForDisplay = { ...docSnap.data(), userId: uidToLoad };
 
-            // Aggiorna titolo della pagina e della sezione
             const profileNameForTitle = profileDataForDisplay.nickname || 'Utente';
             document.title = `Profilo di ${profileNameForTitle} - asyncDonkey.io`;
             if (profileSectionTitle)
@@ -179,7 +193,6 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
             profileEmailSpan.textContent = profileDataForDisplay.email || 'N/A';
             currentNicknameSpan.textContent = profileDataForDisplay.nickname || 'Non impostato';
 
-            // ... (logica per nazionalità e avatar come prima, usando uidToLoad e profileDataForDisplay)
             if (profileNationalitySpan) {
                 if (profileDataForDisplay.nationalityCode && profileDataForDisplay.nationalityCode !== 'OTHER') {
                     const countryCodeOriginal = profileDataForDisplay.nationalityCode.toUpperCase();
@@ -203,25 +216,57 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                 profileAvatarImg.style.backgroundColor = 'transparent';
             }
 
-            // Visualizza statusMessage
-            if (statusMessageDisplay) statusMessageDisplay.textContent = profileDataForDisplay.statusMessage || '';
+            if (statusMessageDisplay) {
+                statusMessageDisplay.textContent = profileDataForDisplay.statusMessage || '';
+                if (!profileDataForDisplay.statusMessage && isOwnProfile) {
+                    // Mostra un placeholder solo al proprietario se vuoto
+                    statusMessageDisplay.innerHTML =
+                        '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
+                } else if (!profileDataForDisplay.statusMessage && !isOwnProfile) {
+                    statusMessageDisplay.innerHTML =
+                        '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
+                }
+            }
+            if (statusMessageSection) statusMessageSection.style.display = 'block';
 
-            // Visualizza link esterni
             if (externalLinksSection) {
-                externalLinksSection.style.display = 'block'; // Mostra sempre la sezione se ci sono link o è il proprio profilo
+                externalLinksSection.style.display = 'block';
                 renderExternalLinks(profileDataForDisplay.externalLinks || [], isOwnProfile);
             }
 
-            // Gestione UI specifica per proprietario del profilo
+            if (bioSection) bioSection.style.display = 'block';
+            if (bioDisplay) {
+                if (profileDataForDisplay.bio && profileDataForDisplay.bio.trim() !== '') {
+                    bioDisplay.textContent = profileDataForDisplay.bio;
+                } else {
+                    bioDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuna bio impostata.</p>';
+                }
+            }
+
             if (isOwnProfile) {
                 if (emailVerificationBanner && loggedInUser && !loggedInUser.emailVerified) {
                     emailVerificationBanner.style.display = 'block';
                     if (resendEmailMessage) resendEmailMessage.textContent = '';
                 }
-                if (statusMessageSection) statusMessageSection.style.display = 'block';
-                if (updateStatusForm) updateStatusForm.style.display = 'flex'; // Mostra il form per modificare lo stato
-                if (statusMessageInput) statusMessageInput.value = profileDataForDisplay.statusMessage || '';
-                if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block'; // Mostra UI per gestire link
+                if (updateStatusForm) updateStatusForm.style.display = 'flex';
+                if (statusMessageInput) {
+                    // statusMessageInput.value = profileDataForDisplay.statusMessage || ''; // RIGA COMMENTATA/RIMOSSA
+                    statusMessageInput.placeholder = profileDataForDisplay.statusMessage
+                        ? 'Modifica il tuo stato attuale...'
+                        : 'Come ti senti oggi?'; // Placeholder dinamico
+                }
+                if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
+
+                // --- MODIFICHE PER BIO (MODIFICA) ---
+                if (updateBioForm) updateBioForm.style.display = 'block';
+                if (bioInput) {
+                    // bioInput.value = profileDataForDisplay.bio || ''; // RIGA COMMENTATA/RIMOSSA
+                    bioInput.placeholder = profileDataForDisplay.bio
+                        ? 'Modifica la tua bio...'
+                        : 'Scrivi qualcosa di te...'; // Placeholder dinamico
+                }
+                updateBioCharCounter(); // Chiamata per resettare il contatore se l'input è vuoto
+                // --- FINE MODIFICHE PER BIO (MODIFICA) ---
             }
 
             profileLoadingMessage.style.display = 'none';
@@ -229,13 +274,12 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
         } else {
             document.title = 'Profilo Non Trovato - asyncDonkey.io';
             if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Non Trovato';
-            console.warn('profile.js - No profile document found for user:', uidToLoad);
+            // console.warn('profile.js - No profile document found for user:', uidToLoad);
             profileLoadingMessage.style.display = 'none';
             profileLoginMessage.style.display = 'block';
             profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
         }
     } catch (error) {
-        // ... (gestione errore)
         document.title = 'Errore Profilo - asyncDonkey.io';
         if (profileSectionTitle) profileSectionTitle.textContent = 'Errore Profilo';
         console.error('profile.js - Error loading profile data:', error);
@@ -245,12 +289,9 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
     }
 }
 
-// --- Funzioni per Gestire Link Esterni (come prima, ma assicurati che usino loggedInUser e profileDataForDisplay) ---
 function openExternalLinkFormForEdit(index) {
-    // Assicurati che profileDataForDisplay sia quello corretto
     if (!profileDataForDisplay || !profileDataForDisplay.externalLinks || !externalLinkFormContainer) return;
     const linkToEdit = profileDataForDisplay.externalLinks[index];
-    // ... (resto come prima) ...
     if (!linkToEdit) return;
 
     if (externalLinkFormTitle) externalLinkFormTitle.textContent = 'Modifica Link Esterno';
@@ -268,12 +309,10 @@ function openExternalLinkFormForEdit(index) {
 
 async function handleExternalLinkFormSubmit(event) {
     event.preventDefault();
-    // Usa loggedInUser per verifiche di autenticazione e permessi
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
         showToast('Azione non permessa o errore interfaccia.', 'error');
         return;
     }
-    // ... (resto della logica come prima, usando profileDataForDisplay.externalLinks) ...
     const title = externalLinkTitleInput.value.trim();
     const url = externalLinkUrlInput.value.trim();
     const editingIndex = parseInt(editingLinkIndexInput.value, 10);
@@ -310,8 +349,10 @@ async function handleExternalLinkFormSubmit(event) {
         currentLinks.push({ title, url });
     }
 
-    if (saveExternalLinkBtn) saveExternalLinkBtn.disabled = true;
-    if (saveExternalLinkBtn) saveExternalLinkBtn.textContent = 'Salvataggio...';
+    if (saveExternalLinkBtn) {
+        saveExternalLinkBtn.disabled = true;
+        saveExternalLinkBtn.textContent = 'Salvataggio...';
+    }
 
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
@@ -321,14 +362,17 @@ async function handleExternalLinkFormSubmit(event) {
         });
         showToast(editingIndex > -1 ? 'Link aggiornato con successo!' : 'Link aggiunto con successo!', 'success');
         profileDataForDisplay.externalLinks = currentLinks;
-        renderExternalLinks(currentLinks, true); // true perché solo il proprietario può arrivare qui
+        renderExternalLinks(currentLinks, true);
         resetAndHideExternalLinkForm();
     } catch (error) {
         console.error('Errore salvataggio link esterno:', error);
         showToast('Errore durante il salvataggio del link.', 'error');
         if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = `Errore: ${error.message}`;
     } finally {
-        if (saveExternalLinkBtn) saveExternalLinkBtn.disabled = false;
+        if (saveExternalLinkBtn) {
+            saveExternalLinkBtn.disabled = false;
+            // Il testo viene resettato in resetAndHideExternalLinkForm
+        }
     }
 }
 
@@ -342,7 +386,6 @@ async function handleDeleteExternalLink(indexToDelete) {
         showToast('Azione non permessa o errore dati.', 'error');
         return;
     }
-    // ... (resto come prima, usando profileDataForDisplay.externalLinks e loggedInUser.uid) ...
     const linkToDelete = profileDataForDisplay.externalLinks[indexToDelete];
     if (!linkToDelete || !confirm(`Sei sicuro di voler eliminare il link "${linkToDelete.title || 'Senza titolo'}"?`)) {
         return;
@@ -359,7 +402,7 @@ async function handleDeleteExternalLink(indexToDelete) {
         });
         showToast('Link eliminato con successo!', 'success');
         profileDataForDisplay.externalLinks = currentLinks;
-        renderExternalLinks(currentLinks, true); // true perché solo il proprietario può arrivare qui
+        renderExternalLinks(currentLinks, true);
         if (
             externalLinkFormContainer.style.display === 'block' &&
             parseInt(editingLinkIndexInput.value, 10) === indexToDelete
@@ -373,7 +416,6 @@ async function handleDeleteExternalLink(indexToDelete) {
 }
 
 function resetAndHideExternalLinkForm() {
-    // ... (come prima) ...
     if (externalLinkForm) externalLinkForm.reset();
     if (editingLinkIndexInput) editingLinkIndexInput.value = '-1';
     if (externalLinkFormTitle) externalLinkFormTitle.textContent = 'Aggiungi Nuovo Link';
@@ -393,14 +435,13 @@ function isValidHttpUrl(string) {
     }
     return url.protocol === 'http:' || url.protocol === 'https:';
 }
-// --- Funzione Status Message (come prima, ma assicurati che usi loggedInUser e profileDataForDisplay) ---
+
 async function handleStatusMessageUpdate(event) {
     event.preventDefault();
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
         showToast('Devi essere loggato e sul tuo profilo per aggiornare lo stato.', 'error');
         return;
     }
-    // ... (resto come prima, usando profileDataForDisplay.statusMessage) ...
     if (!statusMessageInput || !statusUpdateMessage || !statusMessageDisplay) {
         console.error('Elementi DOM per aggiornamento stato mancanti.');
         showToast('Errore interfaccia utente. Impossibile aggiornare lo stato.', 'error');
@@ -417,7 +458,7 @@ async function handleStatusMessageUpdate(event) {
 
     if (profileDataForDisplay && newStatus === (profileDataForDisplay.statusMessage || '')) {
         statusUpdateMessage.textContent = 'Nessuna modifica rilevata.';
-        statusUpdateMessage.style.color = 'orange';
+        statusUpdateMessage.style.color = 'var(--text-color-muted)';
         showToast('Nessuna modifica allo stato.', 'info');
         return;
     }
@@ -435,7 +476,16 @@ async function handleStatusMessageUpdate(event) {
             updatedAt: serverTimestamp(),
         });
         showToast("Stato d'animo aggiornato con successo!", 'success');
-        statusMessageDisplay.textContent = newStatus;
+        statusMessageDisplay.textContent = newStatus || ''; // Mostra stringa vuota invece di null/undefined
+        if (!newStatus && profileDataForDisplay.userId === loggedInUser?.uid) {
+            // Mostra placeholder solo al proprietario se vuoto
+            statusMessageDisplay.innerHTML =
+                '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
+        } else if (!newStatus) {
+            statusMessageDisplay.innerHTML =
+                '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
+        }
+
         if (profileDataForDisplay) profileDataForDisplay.statusMessage = newStatus;
         statusUpdateMessage.textContent = 'Stato aggiornato!';
         statusUpdateMessage.style.color = 'green';
@@ -455,8 +505,88 @@ async function handleStatusMessageUpdate(event) {
     }
 }
 
-// --- Funzioni Articoli (invariate) ---
-// ... (formatMyArticleTimestamp, handleDeleteArticle, createMyArticleItemElement, loadMyArticles come prima) ...
+function updateBioCharCounter() {
+    if (bioInput && bioCurrentCharsSpan && bioCharCountDisplay) {
+        const currentLength = bioInput.value.length;
+        bioCurrentCharsSpan.textContent = currentLength;
+        if (currentLength > MAX_BIO_CHARS) {
+            bioCharCountDisplay.style.color = 'red';
+            bioCharCountDisplay.title = `Hai superato il limite di ${MAX_BIO_CHARS} caratteri.`;
+        } else {
+            bioCharCountDisplay.style.color = 'var(--text-color-muted)';
+            bioCharCountDisplay.title = '';
+        }
+    }
+}
+
+async function handleBioUpdate(event) {
+    event.preventDefault();
+    if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
+        showToast('Devi essere loggato e sul tuo profilo per aggiornare la bio.', 'error');
+        return;
+    }
+    if (!bioInput || !bioUpdateMessage || !bioDisplay) {
+        console.error('Elementi DOM per aggiornamento bio mancanti.');
+        showToast('Errore interfaccia utente. Impossibile aggiornare la bio.', 'error');
+        return;
+    }
+
+    const newBio = bioInput.value; // Non fare trim() qui per permettere all'utente di salvare spazi se lo desidera
+    if (newBio.length > MAX_BIO_CHARS) {
+        bioUpdateMessage.textContent = `La bio non può superare i ${MAX_BIO_CHARS} caratteri. Attualmente: ${newBio.length}.`;
+        bioUpdateMessage.style.color = 'red';
+        showToast(`Bio troppo lunga (max ${MAX_BIO_CHARS} caratteri).`, 'warning');
+        return;
+    }
+
+    if (profileDataForDisplay && newBio === (profileDataForDisplay.bio || '')) {
+        bioUpdateMessage.textContent = 'Nessuna modifica rilevata alla bio.';
+        bioUpdateMessage.style.color = 'var(--text-color-muted)';
+        showToast('Nessuna modifica alla bio.', 'info');
+        return;
+    }
+
+    const updateBioBtnElem = updateBioForm.querySelector('button[type="submit"]');
+    if (updateBioBtnElem) {
+        updateBioBtnElem.disabled = true;
+        updateBioBtnElem.textContent = 'Salvataggio Bio...';
+    }
+    bioUpdateMessage.textContent = '';
+
+    const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
+    try {
+        await updateDoc(userProfileRef, {
+            bio: newBio, // Salva la bio così com'è, gli spazi verranno gestiti da pre-wrap
+            updatedAt: serverTimestamp(),
+        });
+        showToast('Bio aggiornata con successo!', 'success');
+        if (profileDataForDisplay) profileDataForDisplay.bio = newBio;
+
+        if (newBio.trim() !== '') {
+            // Usa trim() solo per il controllo del placeholder
+            bioDisplay.textContent = newBio; // textContent preserva gli spazi e va a capo con pre-wrap
+        } else {
+            bioDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuna bio impostata.</p>';
+        }
+
+        bioUpdateMessage.textContent = 'Bio aggiornata!';
+        bioUpdateMessage.style.color = 'green';
+        setTimeout(() => {
+            if (bioUpdateMessage) bioUpdateMessage.textContent = '';
+        }, 3000);
+    } catch (error) {
+        console.error('Errore aggiornamento bio:', error);
+        bioUpdateMessage.textContent = `Errore: ${error.message}`;
+        bioUpdateMessage.style.color = 'red';
+        showToast("Errore durante l'aggiornamento della bio.", 'error');
+    } finally {
+        if (updateBioBtnElem) {
+            updateBioBtnElem.disabled = false;
+            updateBioBtnElem.textContent = 'Salva Bio';
+        }
+    }
+}
+
 function formatMyArticleTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
         return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
@@ -472,13 +602,17 @@ function formatMyArticleTimestamp(firebaseTimestamp) {
 
 async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
     const statusText = currentStatus === 'draft' ? 'bozza' : 'articolo respinto';
-    if (
-        !confirm(
-            `Sei sicuro di voler eliminare ${statusText} "${articleTitle || 'Senza Titolo'}"? L'azione è irreversibile.`
-        )
-    ) {
+    const userConfirmed = await showConfirmationModal(
+        // Usa la modale di conferma
+        `Conferma Eliminazione ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
+        `Sei sicuro di voler eliminare ${statusText} "${articleTitle || 'Senza Titolo'}"? L'azione è irreversibile.`
+    );
+
+    if (!userConfirmed) {
+        showToast('Eliminazione annullata.', 'info');
         return;
     }
+
     try {
         const articleRef = doc(db, 'articles', articleId);
         await deleteDoc(articleRef);
@@ -489,7 +623,6 @@ async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
             'success'
         );
         if (loggedInUser) {
-            // Usa loggedInUser per ricaricare gli articoli del proprietario
             loadMyArticles(loggedInUser.uid);
         }
     } catch (error) {
@@ -499,7 +632,6 @@ async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
 }
 
 function createMyArticleItemElement(article, articleId) {
-    // ... (codice come prima)
     const cardDiv = document.createElement('div');
     cardDiv.className = 'my-article-profile-card';
     cardDiv.setAttribute('data-id', articleId);
@@ -556,7 +688,7 @@ function createMyArticleItemElement(article, articleId) {
         actionsDiv.appendChild(deleteButton);
     } else if (article.status === 'pendingReview') {
         const previewButton = document.createElement('a');
-        previewButton.href = `view-article.html?id=${articleId}&preview=true`;
+        previewButton.href = `view-article.html?id=${articleId}&preview=true`; // Assumendo che view-article gestisca la preview
         previewButton.target = '_blank';
         previewButton.className = 'game-button my-article-action-button';
         previewButton.textContent = 'Anteprima';
@@ -591,47 +723,42 @@ function createMyArticleItemElement(article, articleId) {
 }
 
 async function loadMyArticles(userIdToLoadArticlesFor) {
-    // Rinominato parametro per chiarezza
-    if (!userIdToLoadArticlesFor) {
-        if (myArticlesSection) myArticlesSection.style.display = 'none';
-        return;
-    }
-
-    // Mostra la sezione articoli solo se stiamo visualizzando il profilo dell'utente loggato
-    if (loggedInUser && loggedInUser.uid === userIdToLoadArticlesFor) {
-        if (myArticlesSection) myArticlesSection.style.display = 'block';
-    } else {
-        if (myArticlesSection) myArticlesSection.style.display = 'none';
-        return; // Non caricare articoli per altri utenti
-    }
-    // ... (resto della funzione loadMyArticles come prima, usando userIdToLoadArticlesFor per le query)
     const articleStatusesToLoad = [
-        { status: 'draft', listDiv: myDraftArticlesListDiv, loadingMsg: myDraftsLoadingMessage, title: 'Le Mie Bozze' },
+        { status: 'draft', listDiv: myDraftArticlesListDiv, loadingMsg: myDraftsLoadingMessage, title: 'Bozze' },
         {
             status: 'pendingReview',
             listDiv: myPendingArticlesListDiv,
             loadingMsg: myPendingLoadingMessage,
-            title: 'Articoli in Revisione',
+            title: 'In Revisione',
         },
         {
             status: 'published',
             listDiv: myPublishedArticlesListDiv,
             loadingMsg: myPublishedLoadingMessage,
-            title: 'Articoli Pubblicati',
+            title: 'Pubblicati',
         },
         {
             status: 'rejected',
             listDiv: myRejectedArticlesListDiv,
             loadingMsg: myRejectedLoadingMessage,
-            title: 'Articoli Respinti',
+            title: 'Respinti',
         },
     ];
+    if (!userIdToLoadArticlesFor) {
+        if (myArticlesSection) myArticlesSection.style.display = 'none';
+        return;
+    }
+    if (loggedInUser && loggedInUser.uid === userIdToLoadArticlesFor) {
+        if (myArticlesSection) myArticlesSection.style.display = 'block';
+    } else {
+        if (myArticlesSection) myArticlesSection.style.display = 'none';
+        return;
+    }
 
     for (const S of articleStatusesToLoad) {
         if (S.listDiv && S.loadingMsg) {
             S.loadingMsg.style.display = 'block';
             S.listDiv.innerHTML = '';
-
             try {
                 const articlesRef = collection(db, 'articles');
                 const q = query(
@@ -641,9 +768,7 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
                     orderBy('updatedAt', 'desc')
                 );
                 const querySnapshot = await getDocs(q);
-
                 S.loadingMsg.style.display = 'none';
-
                 if (querySnapshot.empty) {
                     S.listDiv.innerHTML = `<p>Nessun articolo trovato con stato "${S.title}".</p>`;
                 } else {
@@ -666,27 +791,22 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
 
 // --- INIZIALIZZAZIONE ed Event Listeners ---
 onAuthStateChanged(auth, (user) => {
-    loggedInUser = user; // Imposta l'utente loggato globalmente per questo modulo
-
+    loggedInUser = user;
     const urlParams = new URLSearchParams(window.location.search);
     const profileUserIdFromUrl = urlParams.get('userId');
 
     if (profileUserIdFromUrl) {
-        // Stiamo visualizzando un profilo specifico tramite URL
         const isOwn = loggedInUser ? loggedInUser.uid === profileUserIdFromUrl : false;
         loadProfileData(profileUserIdFromUrl, isOwn);
         if (isOwn) {
-            // Mostra "I Miei Articoli" solo se l'URL corrisponde all'utente loggato
             loadMyArticles(profileUserIdFromUrl);
         } else {
             if (myArticlesSection) myArticlesSection.style.display = 'none';
         }
     } else if (loggedInUser) {
-        // Nessun ID nell'URL, ma l'utente è loggato -> mostra il suo profilo
         loadProfileData(loggedInUser.uid, true);
         loadMyArticles(loggedInUser.uid);
     } else {
-        // Nessun ID nell'URL e nessun utente loggato -> mostra messaggio di login
         profileDataForDisplay = null;
         if (profileContent) profileContent.style.display = 'none';
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
@@ -695,28 +815,22 @@ onAuthStateChanged(auth, (user) => {
         if (statusMessageSection) statusMessageSection.style.display = 'none';
         if (externalLinksSection) externalLinksSection.style.display = 'none';
         if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'none';
+        if (bioSection) bioSection.style.display = 'none';
         if (myArticlesSection) myArticlesSection.style.display = 'none';
-        // ... (pulizia liste articoli se necessario, anche se già gestito da display:none su myArticlesSection)
     }
 });
 
-// Event listener per Stato d'Animo (come prima)
 if (updateStatusForm) {
     updateStatusForm.addEventListener('submit', handleStatusMessageUpdate);
 }
 
-// Event listener per reinvio email verifica (come prima)
 if (resendVerificationEmailBtn) {
-    // ... (codice come prima, usando loggedInUser) ...
     resendVerificationEmailBtn.addEventListener('click', async () => {
         if (loggedInUser && !loggedInUser.emailVerified) {
-            // Usa loggedInUser
             try {
-                // ... (resto della logica di reinvio, usando loggedInUser)
                 resendVerificationEmailBtn.disabled = true;
                 resendVerificationEmailBtn.textContent = 'Invio...';
                 if (resendEmailMessage) resendEmailMessage.textContent = '';
-
                 await sendEmailVerification(loggedInUser);
                 showToast('Email di verifica inviata nuovamente! Controlla la tua casella di posta.', 'success', 6000);
                 if (resendEmailMessage) {
@@ -745,7 +859,6 @@ if (resendVerificationEmailBtn) {
     });
 }
 
-// Event Listeners per Link Esterni (come prima)
 if (toggleAddLinkFormBtn) {
     toggleAddLinkFormBtn.addEventListener('click', () => {
         if (externalLinkFormContainer) {
@@ -753,7 +866,7 @@ if (toggleAddLinkFormBtn) {
             externalLinkFormContainer.style.display = isVisible ? 'none' : 'block';
             toggleAddLinkFormBtn.textContent = isVisible ? 'Aggiungi Nuovo Link' : 'Nascondi Form';
             if (!isVisible) {
-                resetAndHideExternalLinkForm(); // Assicura che il form sia resettato per l'aggiunta
+                resetAndHideExternalLinkForm();
                 if (externalLinkTitleInput) externalLinkTitleInput.focus();
             }
         }
@@ -767,3 +880,22 @@ if (externalLinkForm) {
 if (cancelEditExtLinkBtn) {
     cancelEditExtLinkBtn.addEventListener('click', resetAndHideExternalLinkForm);
 }
+
+// Event listener per il contatore caratteri della bio
+if (bioInput && bioCharCountDisplay && bioCurrentCharsSpan) {
+    // Assicurati che tutti gli elementi esistano
+    bioInput.addEventListener('input', updateBioCharCounter);
+}
+
+// Event listener per il submit del form della bio
+if (updateBioForm) {
+    updateBioForm.addEventListener('submit', handleBioUpdate);
+}
+
+// Inizializza il contatore caratteri se l'input è già visibile al caricamento
+// (principalmente per il caso in cui l'utente è già loggato e vede il proprio profilo)
+document.addEventListener('DOMContentLoaded', () => {
+    if (bioInput && bioInput.offsetParent !== null) {
+        updateBioCharCounter();
+    }
+});

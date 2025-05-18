@@ -75,7 +75,7 @@ function formatArticleDateForViewer(dateInput) {
         } else return 'Formato data sconosciuto';
         return date.toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric' });
     } catch (e) {
-        console.error("Errore formattazione data articolo:", e);
+        console.error('Errore formattazione data articolo:', e);
         return 'Errore data';
     }
 }
@@ -96,7 +96,7 @@ function formatCommentTimestamp(firebaseTimestamp) {
             minute: '2-digit',
         });
     } catch (e) {
-        console.error("Errore formattazione timestamp commento:", e);
+        console.error('Errore formattazione timestamp commento:', e);
         return 'Errore data';
     }
 }
@@ -127,13 +127,15 @@ function setupShareButtons() {
                 await navigator.share({ title: articleTitle, text: articleSnippet, url: articleUrl });
                 showToast('Articolo condiviso!', 'success');
             } catch (err) {
-                if (err.name !== 'AbortError') { // Non mostrare errore se l'utente annulla la condivisione
+                if (err.name !== 'AbortError') {
+                    // Non mostrare errore se l'utente annulla la condivisione
                     showToast('Errore durante la condivisione.', 'error');
                     if (fallbackShareButtonsDiv) fallbackShareButtonsDiv.style.display = 'contents'; // Mostra fallback in caso di errore
                 }
             }
         };
-    } else { // Se Share API non è supportata, mostra i fallback
+    } else {
+        // Se Share API non è supportata, mostra i fallback
         if (nativeShareBtn) nativeShareBtn.style.display = 'none';
         if (fallbackShareButtonsDiv) fallbackShareButtonsDiv.style.display = 'contents';
     }
@@ -466,18 +468,20 @@ async function handleArticleCommentLike(event) {
         }
 
         await updateDoc(commentRef, { likes: newLikesCountOp, likedBy: userArrayUpdateOp });
-        
+
         // Ricarica i dati del commento per aggiornare l'UI
         const updatedCommentSnap = await getDoc(commentRef);
         if (updatedCommentSnap.exists()) {
             const updatedCommentData = updatedCommentSnap.data();
             const currentLikesCount = updatedCommentData.likes || 0;
             const userNowHasLiked = updatedCommentData.likedBy && updatedCommentData.likedBy.includes(currentUser.uid);
-            
+
             const iconName = userNowHasLiked ? 'favorite' : 'favorite_border';
             button.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikesCount}</span>`;
-            console.log(`[articleViewer.js] handleArticleCommentLike - Pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikesCount}`);
-            
+            console.log(
+                `[articleViewer.js] handleArticleCommentLike - Pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikesCount}`
+            );
+
             button.classList.toggle('liked', userNowHasLiked);
             button.title = userNowHasLiked ? 'Togli il like a questo commento' : 'Metti like a questo commento';
 
@@ -496,7 +500,7 @@ async function handleArticleCommentLike(event) {
                         openLikedByListModal(commentId, 'articleComment');
                     };
                     commentLikeCountSpanInButton.addEventListener('click', newListener);
-                    commentLikeCountSpanInButton.handleLikeCountClick = newListener; 
+                    commentLikeCountSpanInButton.handleLikeCountClick = newListener;
                 } else {
                     commentLikeCountSpanInButton.classList.remove('clickable-comment-like-count');
                     commentLikeCountSpanInButton.style.cursor = 'default';
@@ -573,14 +577,14 @@ async function loadArticleComments() {
             } else {
                 nameEl.appendChild(document.createTextNode(commenterNameDisplay));
             }
-            
+
             const dateEl = document.createElement('small');
             dateEl.classList.add('comment-date');
             dateEl.textContent = ` - ${formatCommentTimestamp(commentData.timestamp)}`;
-            
+
             const messageEl = document.createElement('p');
             messageEl.textContent = commentData.message;
-            
+
             commentContentDiv.appendChild(nameEl);
             commentContentDiv.appendChild(dateEl);
             commentContentDiv.appendChild(messageEl);
@@ -600,28 +604,30 @@ async function loadArticleComments() {
 
             const iconName = userHasLikedThisComment ? 'favorite' : 'favorite_border';
             commentLikeButton.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikes}</span>`;
-            console.log(`[articleViewer.js] loadArticleComments - Creato pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikes}`);
-            
+            console.log(
+                `[articleViewer.js] loadArticleComments - Creato pulsante commento ${commentId}: Icona=${iconName}, Conteggio=${currentLikes}`
+            );
+
             commentLikeButton.classList.toggle('liked', userHasLikedThisComment);
             commentLikeButton.title = userHasLikedThisComment ? 'Togli il like' : 'Metti like';
             commentLikeButton.disabled = !currentUser;
             commentLikeButton.addEventListener('click', handleArticleCommentLike);
-            
+
             const commentLikeCountSpanInButton = commentLikeButton.querySelector('.like-count');
             if (commentLikeCountSpanInButton) {
                 const oldListener = commentLikeCountSpanInButton.handleLikeCountClick;
-                 if (oldListener) {
+                if (oldListener) {
                     commentLikeCountSpanInButton.removeEventListener('click', oldListener);
-                 }
+                }
                 if (currentLikes > 0) {
                     commentLikeCountSpanInButton.classList.add('clickable-comment-like-count');
                     commentLikeCountSpanInButton.title = 'Vedi a chi piace questo commento';
-                    const newListener = (e) => { 
+                    const newListener = (e) => {
                         e.stopPropagation();
                         openLikedByListModal(commentId, 'articleComment');
                     };
                     commentLikeCountSpanInButton.addEventListener('click', newListener);
-                    commentLikeCountSpanInButton.handleLikeCountClick = newListener; 
+                    commentLikeCountSpanInButton.handleLikeCountClick = newListener;
                 } else {
                     commentLikeCountSpanInButton.classList.remove('clickable-comment-like-count');
                     commentLikeCountSpanInButton.style.cursor = 'default';
@@ -664,7 +670,7 @@ async function loadAndDisplayArticleLikes(articleId) {
     articleLikeCountSpan.style.textDecoration = 'none';
     articleLikeCountSpan.title = '';
     articleLikeCountSpan.classList.remove('clickable-like-count');
-    
+
     const articleRef = doc(db, 'articles', articleId);
     try {
         const docSnap = await getDoc(articleRef);
@@ -677,11 +683,11 @@ async function loadAndDisplayArticleLikes(articleId) {
             if (likes > 0) {
                 articleLikeCountSpan.classList.add('clickable-like-count');
                 articleLikeCountSpan.title = 'Vedi a chi piace questo articolo';
-                const newListener = () => { 
+                const newListener = () => {
                     openLikedByListModal(articleId, 'article');
                 };
                 articleLikeCountSpan.addEventListener('click', newListener);
-                articleLikeCountClickListenerFunction = newListener; 
+                articleLikeCountClickListenerFunction = newListener;
             }
 
             const currentUser = auth.currentUser;
@@ -690,10 +696,12 @@ async function loadAndDisplayArticleLikes(articleId) {
                 const userHasLikedArticle = likedByUsers.includes(currentUser.uid);
                 const iconNameArticle = userHasLikedArticle ? 'favorite' : 'favorite_border';
                 const buttonTextArticle = userHasLikedArticle ? 'Liked' : 'Like';
-                
+
                 likeArticleButton.innerHTML = `<span class="material-symbols-rounded">${iconNameArticle}</span> ${buttonTextArticle}`;
-                console.log(`[articleViewer.js] loadAndDisplayArticleLikes - Articolo ID: ${articleId}, Icona: ${iconNameArticle}, Testo: ${buttonTextArticle}`);
-                
+                console.log(
+                    `[articleViewer.js] loadAndDisplayArticleLikes - Articolo ID: ${articleId}, Icona: ${iconNameArticle}, Testo: ${buttonTextArticle}`
+                );
+
                 likeArticleButton.classList.toggle('liked', userHasLikedArticle);
                 likeArticleButton.title = userHasLikedArticle ? 'Unlike this article' : 'Like this article';
             } else {
@@ -747,9 +755,11 @@ async function handleArticleLike() {
     const articleRef = doc(db, 'articles', articleIdInternal);
     const userId = auth.currentUser.uid;
     const userHasLiked = currentArticleData.likedByUsers && currentArticleData.likedByUsers.includes(userId);
-    
-    console.log(`[articleViewer.js] handleArticleLike - Stato prima dell'azione: User ${userId} hasLiked: ${userHasLiked}`);
-    
+
+    console.log(
+        `[articleViewer.js] handleArticleLike - Stato prima dell'azione: User ${userId} hasLiked: ${userHasLiked}`
+    );
+
     const likeUpdateOperation = userHasLiked ? increment(-1) : increment(1);
     const userArrayUpdateOperation = userHasLiked ? arrayRemove(userId) : arrayUnion(userId);
 
@@ -761,7 +771,9 @@ async function handleArticleLike() {
 
     try {
         await updateDoc(articleRef, updatePayload);
-        console.log(`[articleViewer.js] handleArticleLike - Like per articolo ${articleIdInternal} aggiornato in Firestore.`);
+        console.log(
+            `[articleViewer.js] handleArticleLike - Like per articolo ${articleIdInternal} aggiornato in Firestore.`
+        );
         // Non è necessario un toast qui, l'UI si aggiornerà con la chiamata successiva
     } catch (error) {
         console.error('[articleViewer.js] Errore aggiornamento like articolo:', error);
@@ -935,12 +947,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const essentialElementsCheck = [
-        articleContentContainer, articleDisplayTitle, articleDisplayDate, articleDisplayAuthor,
-        articleDisplayTagsContainer, articleDisplayContent, articleDisplayLoading,
-        articleInteractionsSection, likeArticleButton, articleLikeCountSpan, commentsListDiv,
-        articleCommentFormContainer, articleCommentForm, likedByModal, closeLikedByModalBtn,
-        likedByModalTitle, likedByModalList, likedByModalLoading, likedByModalNoLikes,
-        articleShareSection, nativeShareBtn, copyLinkBtn,
+        articleContentContainer,
+        articleDisplayTitle,
+        articleDisplayDate,
+        articleDisplayAuthor,
+        articleDisplayTagsContainer,
+        articleDisplayContent,
+        articleDisplayLoading,
+        articleInteractionsSection,
+        likeArticleButton,
+        articleLikeCountSpan,
+        commentsListDiv,
+        articleCommentFormContainer,
+        articleCommentForm,
+        likedByModal,
+        closeLikedByModalBtn,
+        likedByModalTitle,
+        likedByModalList,
+        likedByModalLoading,
+        likedByModalNoLikes,
+        articleShareSection,
+        nativeShareBtn,
+        copyLinkBtn,
     ];
 
     if (essentialElementsCheck.some((el) => !el)) {
