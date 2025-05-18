@@ -3019,7 +3019,7 @@ body.game-fullscreen-active #gameContainer {
 body.game-fullscreen-active.game-fullscreen-landscape #gameCanvas {
     width: 100vw; /* Occupa tutta la larghezza del viewport */
     height: 100vh; /* Occupa tutta l'altezza del viewport */
-    object-fit: cover; /* Mantiene l'aspect ratio del contenuto del canvas (800x450),
+    object-fit: contain; /* Mantiene l'aspect ratio del contenuto del canvas (800x450),
                            lo scala per coprire l'area e ritaglia l'eccesso. */
     border: none !important; /* Rimuovi i bordi in fullscreen */
     border-radius: 0 !important; /* Rimuovi angoli arrotondati */
@@ -3414,15 +3414,7 @@ body.game-fullscreen-active #gameContainer {
     justify-content: center;
 }
 
-body.game-fullscreen-active.game-fullscreen-landscape #gameCanvas {
-    width: 100%; /* Occupa la larghezza del gameContainer (che è 100vw) */
-    height: 100%; /* Occupa l'altezza del gameContainer (che è 100vh) */
-    object-fit: cover;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    max-height: none !important;
-}
+
 
 body.game-fullscreen-active #mobileControls {
     /* Rimosso .game-fullscreen-landscape per applicarlo sempre in fullscreen */
