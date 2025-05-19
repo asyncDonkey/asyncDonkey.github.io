@@ -3918,7 +3918,8 @@ header .nav-link-icon-only .material-symbols-rounded {
     gap: 0.3em; /* Spazio tra icona e testo/conteggio */
 }
 
-#badgesSection h3 { /* Stile per il titolo della sezione badge */
+#badgesSection h3 {
+    /* Stile per il titolo della sezione badge */
     /* margin-bottom: 15px; è già nel tuo HTML inline */
 }
 
@@ -3973,7 +3974,8 @@ header .nav-link-icon-only .material-symbols-rounded {
     margin-top: 10px;
 }
 
-.badge-icon-item { /* Contenitore per la singola icona badge cliccabile */
+.badge-icon-item {
+    /* Contenitore per la singola icona badge cliccabile */
     display: inline-flex; /* Per allineare l'icona se avesse testo (ma non ne avrà) */
     align-items: center;
     justify-content: center;
@@ -3982,7 +3984,9 @@ header .nav-link-icon-only .material-symbols-rounded {
     background-color: var(--surface-bg-secondary);
     border: 1px solid var(--border-color-secondary);
     cursor: pointer;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    transition:
+        transform 0.2s ease-out,
+        box-shadow 0.2s ease-out;
     min-width: 48px; /* Dimensione minima per il cerchio */
     min-height: 48px;
     box-sizing: border-box;
@@ -3990,7 +3994,7 @@ header .nav-link-icon-only .material-symbols-rounded {
 
 .badge-icon-item:hover {
     transform: scale(1.1);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
 .badge-icon-item .material-symbols-rounded {
@@ -4007,13 +4011,17 @@ header .nav-link-icon-only .material-symbols-rounded {
 }
 
 @keyframes soft-color-pulse {
-    0%, 100% { color: var(--bs-success); /* Colore base del badge */ }
-    50% { color: #a3e4a3; /* Una tonalità leggermente diversa e più chiara del verde */ }
+    0%,
+    100% {
+        color: var(--bs-success); /* Colore base del badge */
+    }
+    50% {
+        color: #a3e4a3; /* Una tonalità leggermente diversa e più chiara del verde */
+    }
 }
 
 /* La classe .testo-neon-arcade è già definita e si applicherà
    all'icona Glitchzilla Slayer se specificato in BADGE_DEFINITIONS */
-
 
 /* Stili per la Modale Dettagli Badge */
 .badge-detail-modal-content {
@@ -4021,6 +4029,7 @@ header .nav-link-icon-only .material-symbols-rounded {
     padding: 25px;
 }
 
-#badgeDetailModalIcon.testo-neon-arcade { /* Per applicare il neon anche all'icona grande nella modale */
+#badgeDetailModalIcon.testo-neon-arcade {
+    /* Per applicare il neon anche all'icona grande nella modale */
     /* Gli stili neon sono già in .testo-neon-arcade */
 }

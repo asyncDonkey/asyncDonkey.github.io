@@ -43,13 +43,13 @@ export default [
                 ...globals.browser, // Globali del browser (window, document, ecc.)
                 // Aggiungi qui eventuali globali specifici del tuo progetto client-side
                 EasyMDE: 'readonly', // Se usi EasyMDE come globale
-                marked: 'readonly',  // Se usi marked come globale
+                marked: 'readonly', // Se usi marked come globale
                 showToast: 'readonly', // La tua funzione globale per i toast
                 google: 'readonly', // Per Firebase/Google SDK
                 createIcon: 'readonly', // Da blockies.mjs se esposto globalmente
                 firebase: 'readonly', // Oggetto globale Firebase, se usato (anche se di solito si usano import specifici)
                 // Per le classi dei giochi se sono globali (anche se sarebbe meglio fossero moduli)
-                Animation: 'readonly', 
+                Animation: 'readonly',
                 PowerUpItem: 'readonly',
                 Player: 'readonly',
                 Obstacle: 'readonly',
@@ -84,7 +84,7 @@ export default [
             // 'no-prototype-builtins': 'off',
         },
     },
-    
+
     // 2.B Configurazione specifica per eslint.config.mjs (ES Module, ambiente Node)
     {
         files: ['eslint.config.mjs'],
@@ -97,10 +97,9 @@ export default [
         },
         rules: {
             'no-console': 'off', // Permetti console.log nel file di config
-             // Potrebbe essere necessario importare 'js' e 'globals'
-        }
+            // Potrebbe essere necessario importare 'js' e 'globals'
+        },
     },
-
 
     // 3. Configurazione specifica per la cartella 'functions' (Node.js / CommonJS)
     {
@@ -139,21 +138,24 @@ export default [
     },
     // Questa configurazione si applica ai blocchi di codice *dentro* i file Markdown
     {
-        files: ['**/*.md/*.{js,javascript,json,html,css,bash,sh,yaml,yml,jsx,ts,tsx,php,py,rb,go,java,c,cpp,cs,swift,kt,scala,rust,toml,graphql,sql,xml,powershell,dockerfile,Makefile,diff,ignore,properties,ini,bat,cmd,env,http,scss,less,styl,vue,svelte,astro,tf,hcl,bicep,terraform,jsonc,json5,mdx}'], // Estendi con i linguaggi dei tuoi blocchi codice
-        languageOptions: { // Opzioni di linguaggio di default per i blocchi di codice
-             ecmaVersion: 'latest',
-             sourceType: 'module', // Assumiamo moduli ES per JS nei MD, puoi cambiarlo
-             globals: {
-                 ...globals.browser, // Globali comuni per esempi web
-                 ...globals.node,    // Globali comuni per esempi Node
-                 // Aggiungi altri globali comuni per i tuoi esempi se necessario
-             }
+        files: [
+            '**/*.md/*.{js,javascript,json,html,css,bash,sh,yaml,yml,jsx,ts,tsx,php,py,rb,go,java,c,cpp,cs,swift,kt,scala,rust,toml,graphql,sql,xml,powershell,dockerfile,Makefile,diff,ignore,properties,ini,bat,cmd,env,http,scss,less,styl,vue,svelte,astro,tf,hcl,bicep,terraform,jsonc,json5,mdx}',
+        ], // Estendi con i linguaggi dei tuoi blocchi codice
+        languageOptions: {
+            // Opzioni di linguaggio di default per i blocchi di codice
+            ecmaVersion: 'latest',
+            sourceType: 'module', // Assumiamo moduli ES per JS nei MD, puoi cambiarlo
+            globals: {
+                ...globals.browser, // Globali comuni per esempi web
+                ...globals.node, // Globali comuni per esempi Node
+                // Aggiungi altri globali comuni per i tuoi esempi se necessario
+            },
         },
         rules: {
             // Regole più permissive per i blocchi di codice negli esempi Markdown
             'no-console': 'off',
             'no-unused-vars': 'warn', // Avvisa ma non bloccare per variabili non usate negli esempi
-            'no-undef': 'warn',       // Avvisa per non definiti, utile per typo ma non bloccare
+            'no-undef': 'warn', // Avvisa per non definiti, utile per typo ma non bloccare
             'eol-last': 'off',
             indent: 'off', // L'indentazione è spesso difficile da gestire automaticamente nei blocchi MD
             'prettier/prettier': 'off', // Spesso Prettier può avere problemi con i blocchi MD

@@ -13,11 +13,11 @@ import {
     serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-import { 
-    getStorage, 
+import {
+    getStorage,
     ref as storageRef, // Rinomina 'ref' per evitare conflitti con 'ref' di Firestore
-    uploadBytesResumable, 
-    getDownloadURL 
+    uploadBytesResumable,
+    getDownloadURL,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -97,28 +97,30 @@ const storage = getStorage(); // Assumendo che 'app' da initializeApp sia dispon
 
 // --- DEFINIZIONE BADGE ---
 const BADGE_DEFINITIONS = {
-    "author-rookie": {
-        name: "Autore Debuttante",
-        icon: "school", // Cambiata icona per distinguerla
-        description: "Congratulazioni! Hai pubblicato il tuo primo articolo su asyncDonkey.io, condividendo la tua conoscenza con la community!",
-        color: "var(--bs-teal)", // Un colore diverso, es. teal
+    'author-rookie': {
+        name: 'Autore Debuttante',
+        icon: 'school', // Cambiata icona per distinguerla
+        description:
+            'Congratulazioni! Hai pubblicato il tuo primo articolo su asyncDonkey.io, condividendo la tua conoscenza con la community!',
+        color: 'var(--bs-teal)', // Un colore diverso, es. teal
         isNeon: false,
         isAnimated: true, // Nuovo flag per animazione custom
-        animationClass: "author-rookie-icon-animated" // Classe CSS per l'animazione
+        animationClass: 'author-rookie-icon-animated', // Classe CSS per l'animazione
     },
-    "glitchzilla-slayer": {
-        name: "Glitchzilla Slayer",
-        icon: "shield_moon", 
-        description: "Epico! Hai sconfitto il temibile Glitchzilla in CodeDash! Runner, dimostrando la tua abilità e determinazione!",
-        color: "var(--bs-purple)", // Cambiato colore per varietà
+    'glitchzilla-slayer': {
+        name: 'Glitchzilla Slayer',
+        icon: 'shield_moon',
+        description:
+            'Epico! Hai sconfitto il temibile Glitchzilla in CodeDash! Runner, dimostrando la tua abilità e determinazione!',
+        color: 'var(--bs-purple)', // Cambiato colore per varietà
         isNeon: true, // Mantiene l'effetto neon esistente
         isAnimated: false,
     },
-    "prolific-commenter": {
-        name: "Commentatore Prolifico",
-        icon: "forum",
-        description: "Grazie per i tuoi numerosi e utili commenti! Hai scritto più di 20 interventi costruttivi.",
-        color: "var(--bs-info)",
+    'prolific-commenter': {
+        name: 'Commentatore Prolifico',
+        icon: 'forum',
+        description: 'Grazie per i tuoi numerosi e utili commenti! Hai scritto più di 20 interventi costruttivi.',
+        color: 'var(--bs-info)',
         isNeon: false,
         isAnimated: false,
     },
@@ -174,14 +176,38 @@ function renderExternalLinks(linksArray, isOwnProfile) {
 async function loadProfileData(uidToLoad, isOwnProfile) {
     // console.log(`profile.js - Loading profile for UID: ${uidToLoad}, isOwnProfile: ${isOwnProfile}`);
     if (
-        !profileContent || !profileLoadingMessage || !profileLoginMessage || !profileAvatarImg ||
-        !profileNationalitySpan || !profileEmailSpan || !currentNicknameSpan ||
-        !statusMessageSection || !statusMessageDisplay || !externalLinksSection || !manageExternalLinksUI || !updateStatusForm ||
-        !bioSection || !bioDisplay || !updateBioForm || !bioInput || !bioCharCountDisplay || !bioCurrentCharsSpan || !bioUpdateMessage ||
-        !badgesSection || !badgesDisplayContainer || !noBadgesMessage ||// Controllo elementi badge
-    !avatarUploadSection || !avatarUploadInput || !selectAvatarFileBtn || !avatarPreview || 
-        !avatarPreviewPlaceholder || !confirmAvatarUploadBtn || !avatarUploadProgressContainer || 
-        !avatarUploadProgressBar || !avatarUploadProgressText || !avatarUploadStatus
+        !profileContent ||
+        !profileLoadingMessage ||
+        !profileLoginMessage ||
+        !profileAvatarImg ||
+        !profileNationalitySpan ||
+        !profileEmailSpan ||
+        !currentNicknameSpan ||
+        !statusMessageSection ||
+        !statusMessageDisplay ||
+        !externalLinksSection ||
+        !manageExternalLinksUI ||
+        !updateStatusForm ||
+        !bioSection ||
+        !bioDisplay ||
+        !updateBioForm ||
+        !bioInput ||
+        !bioCharCountDisplay ||
+        !bioCurrentCharsSpan ||
+        !bioUpdateMessage ||
+        !badgesSection ||
+        !badgesDisplayContainer ||
+        !noBadgesMessage || // Controllo elementi badge
+        !avatarUploadSection ||
+        !avatarUploadInput ||
+        !selectAvatarFileBtn ||
+        !avatarPreview ||
+        !avatarPreviewPlaceholder ||
+        !confirmAvatarUploadBtn ||
+        !avatarUploadProgressContainer ||
+        !avatarUploadProgressBar ||
+        !avatarUploadProgressText ||
+        !avatarUploadStatus
     ) {
         console.error('Profile page DOM elements for AVATAR UPLOAD are missing!');
         // Non fare return qui se il resto della pagina può funzionare,
@@ -212,14 +238,14 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
     statusMessageDisplay.textContent = 'Caricamento stato...';
     if (statusMessageInput) {
         statusMessageInput.value = '';
-        statusMessageInput.placeholder = "Come ti senti oggi?";
+        statusMessageInput.placeholder = 'Come ti senti oggi?';
     }
     if (statusUpdateMessage) statusUpdateMessage.textContent = '';
     if (externalLinksListUL) renderExternalLinks([], isOwnProfile);
     if (bioDisplay) bioDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Caricamento bio...</p>';
     if (bioInput) {
         bioInput.value = '';
-        bioInput.placeholder = "Scrivi qualcosa di te...";
+        bioInput.placeholder = 'Scrivi qualcosa di te...';
     }
     if (bioUpdateMessage) bioUpdateMessage.textContent = '';
     if (bioCurrentCharsSpan) bioCurrentCharsSpan.textContent = '0';
@@ -262,22 +288,26 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                     profileNationalitySpan.textContent = 'Non specificata';
                 }
             }
-            if (profileAvatarImg) { // #profileAvatar
-    if (profileDataForDisplay.avatarUrls && profileDataForDisplay.avatarUrls.profile) { // Usa la versione 'profile' più grande
-        profileAvatarImg.src = profileDataForDisplay.avatarUrls.profile;
-        profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Custom Avatar`;
-    } else {
-        profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 }); // O la dimensione che usi per il profilo
-        profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Blockie Avatar`;
-    }
-}
+            if (profileAvatarImg) {
+                // #profileAvatar
+                if (profileDataForDisplay.avatarUrls && profileDataForDisplay.avatarUrls.profile) {
+                    // Usa la versione 'profile' più grande
+                    profileAvatarImg.src = profileDataForDisplay.avatarUrls.profile;
+                    profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Custom Avatar`;
+                } else {
+                    profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 }); // O la dimensione che usi per il profilo
+                    profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Blockie Avatar`;
+                }
+            }
 
             if (statusMessageDisplay) {
                 statusMessageDisplay.textContent = profileDataForDisplay.statusMessage || '';
                 if (!profileDataForDisplay.statusMessage && isOwnProfile) {
-                    statusMessageDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
+                    statusMessageDisplay.innerHTML =
+                        '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
                 } else if (!profileDataForDisplay.statusMessage && !isOwnProfile) {
-                    statusMessageDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
+                    statusMessageDisplay.innerHTML =
+                        '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
                 }
             }
             if (statusMessageSection) statusMessageSection.style.display = 'block';
@@ -298,13 +328,13 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
 
             // --- LOGICA MODIFICATA PER VISUALIZZARE LE ICONE DEI BADGE ---
             if (badgesSection && badgesDisplayContainer && noBadgesMessage) {
-                badgesDisplayContainer.innerHTML = ''; 
-                noBadgesMessage.style.display = 'none'; 
+                badgesDisplayContainer.innerHTML = '';
+                noBadgesMessage.style.display = 'none';
                 const earnedBadgesArray = profileDataForDisplay.earnedBadges || [];
 
                 if (earnedBadgesArray.length > 0) {
                     badgesSection.style.display = 'block';
-                    earnedBadgesArray.forEach(badgeId => {
+                    earnedBadgesArray.forEach((badgeId) => {
                         const badgeInfo = BADGE_DEFINITIONS[badgeId];
                         if (badgeInfo) {
                             const badgeIconElement = document.createElement('div');
@@ -313,7 +343,7 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                             badgeIconElement.setAttribute('role', 'button');
                             badgeIconElement.setAttribute('tabindex', '0'); // Rende focusabile da tastiera
                             badgeIconElement.setAttribute('aria-label', `Dettagli badge: ${badgeInfo.name}`);
-                            
+
                             const iconSpan = document.createElement('span');
                             iconSpan.className = 'material-symbols-rounded';
                             iconSpan.textContent = badgeInfo.icon;
@@ -324,7 +354,7 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                             } else if (badgeInfo.isAnimated && badgeInfo.animationClass) {
                                 iconSpan.classList.add(badgeInfo.animationClass);
                             }
-                            
+
                             badgeIconElement.appendChild(iconSpan);
                             badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
                             badgeIconElement.addEventListener('keydown', (event) => {
@@ -339,19 +369,21 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                         }
 
                         if (profileAvatarImg) {
-                if (profileDataForDisplay.avatarUrls && profileDataForDisplay.avatarUrls.profile) { // Assumendo che salveremo l'URL del profilo qui
-                    profileAvatarImg.src = profileDataForDisplay.avatarUrls.profile;
-                    profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Custom Avatar`;
-                } else {
-                    profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 });
-                    profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Blockie Avatar`;
-                }
-            }
+                            if (profileDataForDisplay.avatarUrls && profileDataForDisplay.avatarUrls.profile) {
+                                // Assumendo che salveremo l'URL del profilo qui
+                                profileAvatarImg.src = profileDataForDisplay.avatarUrls.profile;
+                                profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Custom Avatar`;
+                            } else {
+                                profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 });
+                                profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Blockie Avatar`;
+                            }
+                        }
                     });
                 } else {
                     if (isOwnProfile) {
                         badgesSection.style.display = 'block';
-                        noBadgesMessage.textContent = 'Nessun riconoscimento ancora ottenuto. Continua a contribuire e giocare!';
+                        noBadgesMessage.textContent =
+                            'Nessun riconoscimento ancora ottenuto. Continua a contribuire e giocare!';
                         noBadgesMessage.style.display = 'block';
                     } else {
                         badgesSection.style.display = 'none';
@@ -368,16 +400,20 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                 if (updateStatusForm) updateStatusForm.style.display = 'flex';
                 if (statusMessageInput) {
                     statusMessageInput.value = ''; // Campo vuoto
-                    statusMessageInput.placeholder = profileDataForDisplay.statusMessage ? "Modifica il tuo stato attuale..." : "Come ti senti oggi?";
+                    statusMessageInput.placeholder = profileDataForDisplay.statusMessage
+                        ? 'Modifica il tuo stato attuale...'
+                        : 'Come ti senti oggi?';
                 }
                 if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
                 if (updateBioForm) updateBioForm.style.display = 'block';
                 if (bioInput) {
                     bioInput.value = ''; // Campo vuoto
-                    bioInput.placeholder = profileDataForDisplay.bio ? "Modifica la tua bio..." : "Scrivi qualcosa di te...";
+                    bioInput.placeholder = profileDataForDisplay.bio
+                        ? 'Modifica la tua bio...'
+                        : 'Scrivi qualcosa di te...';
                 }
                 updateBioCharCounter();
-            if (avatarUploadSection) avatarUploadSection.style.display = 'block'; // Mostra la sezione upload avatar
+                if (avatarUploadSection) avatarUploadSection.style.display = 'block'; // Mostra la sezione upload avatar
             }
 
             profileLoadingMessage.style.display = 'none';
@@ -389,7 +425,6 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
             profileLoginMessage.style.display = 'block';
             profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
         }
-        
     } catch (error) {
         document.title = 'Errore Profilo - asyncDonkey.io';
         if (profileSectionTitle) profileSectionTitle.textContent = 'Errore Profilo';
@@ -903,7 +938,7 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
 // --- NUOVA FUNZIONE PER APRIRE LA MODALE DETTAGLI BADGE ---
 function openBadgeDetailsModal(badgeId) {
     if (!badgeDetailModal || !badgeDetailModalIcon || !badgeDetailModalName || !badgeDetailModalDescription) {
-        console.error("Elementi della modale dettagli badge non trovati.");
+        console.error('Elementi della modale dettagli badge non trovati.');
         return;
     }
     const badgeInfo = BADGE_DEFINITIONS[badgeId];
@@ -1000,7 +1035,8 @@ async function handleConfirmAvatarUpload() {
 
     const uploadTask = uploadBytesResumable(fileStorageRef, selectedAvatarFile);
 
-    uploadTask.on('state_changed',
+    uploadTask.on(
+        'state_changed',
         (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = progress + '%';
@@ -1015,12 +1051,13 @@ async function handleConfirmAvatarUpload() {
             if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.textContent = 'Conferma e Carica Avatar';
             if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
             selectedAvatarFile = null; // Resetta il file
-             if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta l'input
+            if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta l'input
         },
         () => {
             // Upload completato con successo su Storage
             showToast('Immagine caricata! In attesa di elaborazione finale...', 'info', 7000);
-            if (avatarUploadStatus) avatarUploadStatus.textContent = 'Elaborazione in corso... Riceverai una notifica al termine.';
+            if (avatarUploadStatus)
+                avatarUploadStatus.textContent = 'Elaborazione in corso... Riceverai una notifica al termine.';
             if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'none'; // Nascondi dopo l'invio
             if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta l'input
             // Non serve getDownloadURL qui, la Cloud Function aggiornerà Firestore
@@ -1178,14 +1215,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-   if(bioInput && bioInput.offsetParent !== null) { 
-       updateBioCharCounter();
-   }
-   // Aggiungere un titolo di default alla pagina se non viene sovrascritto
-   if (!document.title.includes("Profilo di") && !document.title.includes("Il Mio Profilo")) {
-       const path = window.location.pathname.split("/").pop();
-       if (path === "profile.html") { // Assicurati sia la pagina profilo
-            document.title = "Profilo Utente - asyncDonkey.io";
-       }
-   }
+    if (bioInput && bioInput.offsetParent !== null) {
+        updateBioCharCounter();
+    }
+    // Aggiungere un titolo di default alla pagina se non viene sovrascritto
+    if (!document.title.includes('Profilo di') && !document.title.includes('Il Mio Profilo')) {
+        const path = window.location.pathname.split('/').pop();
+        if (path === 'profile.html') {
+            // Assicurati sia la pagina profilo
+            document.title = 'Profilo Utente - asyncDonkey.io';
+        }
+    }
 });

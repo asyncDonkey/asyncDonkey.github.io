@@ -22,10 +22,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 // IMPORT PER EMULATORE STORAGE
-import { 
-    getStorage, 
-    connectStorageEmulator 
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+import { getStorage, connectStorageEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
@@ -36,7 +33,7 @@ const firebaseConfig = {
     apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', // Sostituisci con la tua vera chiave se necessario (anche se per gli emulatori non è usata per auth)
     authDomain: 'asyncdonkey.firebaseapp.com',
     projectId: 'asyncdonkey',
-    storageBucket: 'asyncdonkey.appspot.com', // Assicurati sia il bucket corretto
+    storageBucket: 'asyncdonkey.firebasestorage.app', // Assicurati sia il bucket corretto
     messagingSenderId: '939854468396',
     appId: '1:939854468396:web:9646d4f51737add7704889',
     measurementId: 'G-EQDBKQM3YE',
@@ -65,7 +62,7 @@ const storage = getStorage(app); // INIZIALIZZA STORAGE
 //         // Connetti a Storage Emulator (porta 9199, default)
 //         connectStorageEmulator(storage, "localhost", 9199);
 //         console.log("[main.js] Connesso a Storage Emulator su localhost:9199");
-        
+
 //         // Potresti aggiungere connectFunctionsEmulator qui se userai callable functions dal client
 //         // import { getFunctions, connectFunctionsEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 //         // const functions = getFunctions(app);
@@ -81,7 +78,6 @@ const storage = getStorage(app); // INIZIALIZZA STORAGE
 //     console.log("[main.js] Connesso ai servizi Firebase di produzione.");
 // }
 // ----- FINE CODICE PER EMULATORI -----
-
 
 export function showConfirmationModal(title = 'Conferma Azione', message = 'Sei sicuro di voler procedere?') {
     // ... (codice invariato, come da versione precedente)
@@ -202,13 +198,13 @@ async function loadHeaderUserProfileDisplay(user) {
     headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
     headerUserAvatarElement.style.display = 'inline-block';
     headerUserAvatarElement.style.backgroundColor = 'transparent'; // Per evitare sfondo se l'SVG del blockie è trasparente
-    headerUserAvatarElement.onerror = () => { // Fallback se l'URL dell'avatar personalizzato non carica
+    headerUserAvatarElement.onerror = () => {
+        // Fallback se l'URL dell'avatar personalizzato non carica
         console.warn("Errore caricamento avatar personalizzato nell'header, uso Blockie.");
         headerUserAvatarElement.src = generateBlockieAvatar(user.uid, 32, { size: 8 });
         // Non impostare display: none qui, vogliamo mostrare il blockie
     };
 }
-
 
 function updateHeaderAuthContainersVisibility(user) {
     // ... (codice invariato)
