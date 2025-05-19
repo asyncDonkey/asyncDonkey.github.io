@@ -460,6 +460,10 @@ async function handleExternalLinkFormSubmit(event) {
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
         showToast('Azione non permessa o errore interfaccia.', 'error'); return;
     }
+    // Assicurati che externalLinkTitleInput, externalLinkUrlInput, editingLinkIndexInput,
+    // externalLinkErrorDiv, saveExternalLinkBtn siano definite globalmente o passate correttamente.
+    // Dall'analisi del tuo js/profile.js, queste sono definite come costanti globali nel modulo.
+    
     const title = externalLinkTitleInput.value.trim();
     const url = externalLinkUrlInput.value.trim();
     const editingIndex = parseInt(editingLinkIndexInput.value, 10);
@@ -468,7 +472,7 @@ async function handleExternalLinkFormSubmit(event) {
         if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = 'Titolo e URL sono obbligatori.';
         showToast('Titolo e URL sono obbligatori.', 'warning'); return;
     }
-    if (!isValidHttpUrl(url)) {
+    if (!isValidHttpUrl(url)) { // isValidHttpUrl è una funzione helper che dovresti avere nel file
         if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = 'Inserisci un URL valido (http:// o https://).';
         showToast('URL non valido. Deve iniziare con http:// o https://', 'warning'); return;
     }
@@ -476,30 +480,38 @@ async function handleExternalLinkFormSubmit(event) {
 
     let currentLinks = Array.isArray(profileDataForDisplay.externalLinks) ? [...profileDataForDisplay.externalLinks] : [];
     if (editingIndex > -1) { // Modalità Modifica
-        if (editingIndex < currentLinks.length) currentLinks[editingIndex] = { title, url };
-        else { showToast('Errore: indice link da modificare non valido.', 'error'); return; }
+        if (editingIndex < currentLinks.length) {
+            currentLinks[editingIndex] = { title, url };
+        } else { 
+            showToast('Errore: indice link da modificare non valido.', 'error'); return; 
+        }
     } else { // Modalità Aggiungi
-        if (currentLinks.length >= MAX_EXTERNAL_LINKS) {
+        if (currentLinks.length >= MAX_EXTERNAL_LINKS) { // MAX_EXTERNAL_LINKS è una costante (es. 5)
             showToast(`Puoi aggiungere al massimo ${MAX_EXTERNAL_LINKS} link.`, 'warning'); return;
         }
         currentLinks.push({ title, url });
     }
 
     if (saveExternalLinkBtn) { saveExternalLinkBtn.disabled = true; saveExternalLinkBtn.textContent = 'Salvataggio...'; }
+    
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
-        // Includi profileUpdatedAt per triggerare il listener se la CF non lo facesse
-        // per modifiche che non sono l'avatar.
-        await updateDoc(userProfileRef, { externalLinks: currentLinks, profileUpdatedAt: serverTimestamp() });
-        showToast(editingIndex > -1 ? 'Link aggiornato!' : 'Link aggiunto!', 'success');
+        await updateDoc(userProfileRef, { 
+            externalLinks: currentLinks, 
+            updatedAt: serverTimestamp() // <<< MODIFICA CHIAVE: da profileUpdatedAt a updatedAt
+        });
+        showToast(editingIndex > -1 ? 'Link aggiornato con successo!' : 'Link aggiunto con successo!', 'success');
         // onSnapshot dovrebbe aggiornare l'UI, incluso renderExternalLinks
-        resetAndHideExternalLinkForm();
+        resetAndHideExternalLinkForm(); // Funzione helper per resettare e nascondere il form
     } catch (error) {
         console.error('Errore salvataggio link esterno:', error);
         showToast('Errore durante il salvataggio del link.', 'error');
         if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = `Errore: ${error.message}`;
     } finally {
-        if (saveExternalLinkBtn) { saveExternalLinkBtn.disabled = false; /* Testo resettato da resetAndHide... */ }
+        if (saveExternalLinkBtn) { 
+            saveExternalLinkBtn.disabled = false; 
+            // Il testo del bottone viene resettato da resetAndHideExternalLinkForm
+        }
     }
 }
 
@@ -508,24 +520,35 @@ async function handleDeleteExternalLink(indexToDelete) {
         showToast('Azione non permessa o errore dati.', 'error'); return;
     }
     const linkToDelete = profileDataForDisplay.externalLinks[indexToDelete];
-    if (!linkToDelete) { showToast('Link non trovato per eliminazione.', 'error'); return; }
+    if (!linkToDelete) { 
+        showToast('Link non trovato per eliminazione.', 'error'); return; 
+    }
 
+    // Assumendo che showConfirmationModal sia una funzione globale/importata
     const confirmed = await showConfirmationModal('Conferma Eliminazione Link', `Sei sicuro di voler eliminare il link "${linkToDelete.title || 'Senza titolo'}"?`);
-    if (!confirmed) { showToast('Eliminazione link annullata.', 'info'); return; }
+    if (!confirmed) { 
+        showToast('Eliminazione link annullata.', 'info'); return; 
+    }
 
     let currentLinks = [...profileDataForDisplay.externalLinks];
     currentLinks.splice(indexToDelete, 1);
+    
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
-        await updateDoc(userProfileRef, { externalLinks: currentLinks, profileUpdatedAt: serverTimestamp() });
-        showToast('Link eliminato!', 'success');
+        await updateDoc(userProfileRef, { 
+            externalLinks: currentLinks, 
+            updatedAt: serverTimestamp() // <<< MODIFICA CHIAVE: da profileUpdatedAt a updatedAt
+        });
+        showToast('Link eliminato con successo!', 'success');
         // onSnapshot dovrebbe aggiornare l'UI
-        if (externalLinkFormContainer.style.display === 'block' && parseInt(editingLinkIndexInput.value, 10) === indexToDelete) {
+        // Se il form di modifica era aperto per il link eliminato, resettalo
+        if (externalLinkFormContainer && externalLinkFormContainer.style.display === 'block' && 
+            editingLinkIndexInput && parseInt(editingLinkIndexInput.value, 10) === indexToDelete) {
             resetAndHideExternalLinkForm();
         }
     } catch (error) {
         console.error('Errore eliminazione link:', error);
-        showToast("Errore eliminazione link.", 'error');
+        showToast("Errore durante l'eliminazione del link.", 'error');
     }
 }
 
