@@ -63,30 +63,42 @@ This project includes several dynamic and interactive features, such as:
 
 ---
 
+---
+
 ## 🛠️ Technologies Used
 
-- **Frontend:**
-    - HTML5 (semantic and accessible)
-    - CSS3 (Flexbox, Grid, CSS Variables for theming, responsive design)
-    - JavaScript (ES6+ modules, asynchronous programming, DOM manipulation)
-- **Backend & Database (BaaS):**
-    - Firebase Platform:
-        - Firestore (NoSQL Database for articles, comments, profiles, leaderboards, issues)
-        - Firebase Authentication (Email/Password)
-        - Firebase Hosting
-        - Firestore Security Rules (for data protection)
-- **Key JavaScript Libraries:**
-    - [EasyMDE](https://github.com/Ionaru/easy-markdown-editor): Markdown editor for article submission.
-    - [Marked.js](https://github.com/markedjs/marked): Markdown parser for article display.
-    - [Blockies (Ethereum)](https://github.com/ethereum/blockies): "Identicon" avatar generation based on seed.
-    - [Flag Icons (Lipis)](https://github.com/lipis/flag-icons): For nationality flags.
-- **Development Tooling & Code Quality:**
-    - Git & GitHub (Version Control)
-    - [ESLint](https://eslint.org/): JavaScript Linter (with "flat config" `eslint.config.mjs`).
-    - [Prettier](https://prettier.io/): Code formatter (with `.prettierrc.json`).
-    - `.gitignore`: To exclude unnecessary files from version control.
-- **Development Environment:**
-    - GitHub Codespaces / VS Code Dev Containers (Node.js)
+This project leverages a modern web development stack, focusing on vanilla JavaScript for core logic and Firebase for backend services.
+
+-   **Frontend Development:**
+    -   **HTML5:** Semantic markup for structuring web content, ensuring accessibility and SEO best practices.
+    -   **CSS3:** Advanced styling for a responsive and engaging user interface, utilizing Flexbox, Grid, CSS Variables for theming.
+    -   **JavaScript (ES6+ Modules):** Core aclient-side logic, DOM manipulation, event handling, and asynchronous programming (Promises, `async/await`). All custom vanilla JS.
+
+-   **Backend & Database (BaaS - Backend as a Service):**
+    -   **Firebase Platform:**
+        -   **Firestore:** NoSQL, document-based database for storing dynamic data such as user profiles, articles, comments, leaderboard scores, and user-submitted issues.
+        -   **Firebase Authentication:** Secure user registration (dedicated page with email/password) and login, session management.
+        -   **Cloud Functions for Firebase (Node.js):** Serverless functions for backend logic triggered by Firestore events (e.g., updating user profiles based on game achievements or article publications). *(New)*
+        -   **Firestore Security Rules:** Robust, server-side rules to protect data integrity and ensure proper access control.
+        -   **Firebase Hosting (currently via GitHub Pages):** Serving static and dynamic content. (Potresti menzionare che attualmente usi GitHub Pages ma stai esplorando/usando Firebase per le funzioni).
+
+-   **Key JavaScript Libraries & APIs:**
+    -   **EasyMDE:** WYSIWYG Markdown editor for article submission.
+    -   **Marked.js:** Markdown parser for rendering article content.
+    -   **Blockies (Ethereum):** Generation of unique, Ethereum-style "identicon" avatars based on user IDs.
+    -   **Flag Icons (Lipis):** Displaying country flags for user nationalities.
+    -   **Material Symbols (Google):** Modern icon library for UI elements. *(New)*
+    -   **Navigator Share API & Clipboard API:** For content sharing functionalities.
+
+-   **Development Tooling & Code Quality:**
+    -   **Git & GitHub:** Version control and repository management.
+    -   **ESLint:** JavaScript linter for identifying and fixing problems in JavaScript code (using Flat Config: `eslint.config.mjs`).
+    -   **Prettier:** Code formatter for maintaining consistent code style.
+    -   **Firebase CLI & Emulator Suite:** For local development, testing of Cloud Functions and Firestore rules, and deployment. *(New)*
+    -   **`.gitignore`**: To exclude unnecessary files from version control.
+
+-   **Development Environment:**
+    -   Primarily developed using **GitHub Codespaces** and **VS Code with Dev Containers**, ensuring a consistent Node.js-based development environment.
 
 ---
 

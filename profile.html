@@ -157,6 +157,31 @@
                                 border: 1px solid var(--border-color-secondary);
                             "
                         />
+                        <div id="avatarUploadSection" style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color-secondary); display: none;">
+    <h3 style="margin-bottom: 10px;">Cambia il Tuo Avatar</h3>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+        
+        <div style="width: 160px; height: 160px; border: 2px dashed var(--border-color-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px; background-color: var(--surface-bg-secondary);">
+            <img id="avatarPreview" src="#" alt="Anteprima nuovo avatar" style="max-width: 100%; max-height: 100%; display: none; border-radius: 50%; object-fit: cover;">
+            <span id="avatarPreviewPlaceholder" class="material-symbols-rounded" style="font-size: 4em; color: var(--text-color-muted);">add_a_photo</span>
+        </div>
+        
+        <input type="file" id="avatarUploadInput" accept="image/png, image/jpeg, image/webp" style="display: none;">
+        
+        <button type="button" id="selectAvatarFileBtn" class="game-button">Scegli Immagine</button>
+
+        <div id="avatarUploadProgressContainer" style="width: 80%; max-width: 300px; background-color: var(--surface-bg-secondary); border-radius: 4px; display: none; margin-top:5px;">
+            <div id="avatarUploadProgressBar" style="width: 0%; height: 10px; background-color: var(--link-color); border-radius: 4px; text-align: center; line-height: 10px; font-size: 0.7em; color: white;">
+                <span id="avatarUploadProgressText">0%</span>
+            </div>
+        </div>
+        
+        <button type="button" id="confirmAvatarUploadBtn" class="game-button" style="display: none; background-color: var(--bs-success); margin-top:5px;">Conferma e Carica Avatar</button>
+        
+        <div id="avatarUploadStatus" style="font-size: 0.9em; margin-top: 10px; text-align: center;"></div>
+        <p style="font-size: 0.8em; color: var(--text-color-muted); text-align: center;">Max 5MB. Formati: JPG, PNG, WebP.</p>
+    </div>
+</div>
                         <div id="profileDetailsDisplay" style="flex-grow: 1">
                             <p style="margin-bottom: 8px; font-size: 1.05em">
                                 <strong>Email:</strong> <span id="profileEmail">Caricamento...</span>

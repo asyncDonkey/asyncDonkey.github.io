@@ -12,6 +12,14 @@ import {
     deleteDoc,
     serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+import { 
+    getStorage, 
+    ref as storageRef, // Rinomina 'ref' per evitare conflitti con 'ref' di Firestore
+    uploadBytesResumable, 
+    getDownloadURL 
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+
 import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
 
@@ -81,6 +89,11 @@ let profileDataForDisplay = null;
 let badgeDetailModal, closeBadgeDetailModalBtn, badgeDetailModalIcon, badgeDetailModalName, badgeDetailModalDescription;
 const MAX_EXTERNAL_LINKS = 5;
 const MAX_BIO_CHARS = 300;
+let selectedAvatarFile = null; // Per memorizzare il file scelto
+const MAX_AVATAR_SIZE_MB = 5;
+
+// Inizializzazione Storage (una sola volta)
+const storage = getStorage(); // Assumendo che 'app' da initializeApp sia disponibile globalmente o passi l'istanza app
 
 // --- DEFINIZIONE BADGE ---
 const BADGE_DEFINITIONS = {
@@ -165,11 +178,14 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
         !profileNationalitySpan || !profileEmailSpan || !currentNicknameSpan ||
         !statusMessageSection || !statusMessageDisplay || !externalLinksSection || !manageExternalLinksUI || !updateStatusForm ||
         !bioSection || !bioDisplay || !updateBioForm || !bioInput || !bioCharCountDisplay || !bioCurrentCharsSpan || !bioUpdateMessage ||
-        !badgesSection || !badgesDisplayContainer || !noBadgesMessage // Controllo elementi badge
+        !badgesSection || !badgesDisplayContainer || !noBadgesMessage ||// Controllo elementi badge
+    !avatarUploadSection || !avatarUploadInput || !selectAvatarFileBtn || !avatarPreview || 
+        !avatarPreviewPlaceholder || !confirmAvatarUploadBtn || !avatarUploadProgressContainer || 
+        !avatarUploadProgressBar || !avatarUploadProgressText || !avatarUploadStatus
     ) {
-        console.error('Profile page DOM elements (profile, status, links, bio, OR BADGES) are missing!');
-        if (profileLoadingMessage) profileLoadingMessage.textContent = 'Errore: Elementi della pagina mancanti.';
-        return;
+        console.error('Profile page DOM elements for AVATAR UPLOAD are missing!');
+        // Non fare return qui se il resto della pagina può funzionare,
+        // ma la funzionalità di upload avatar non sarà disponibile.
     }
 
     profileLoadingMessage.style.display = 'block';
@@ -208,6 +224,14 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
     if (bioUpdateMessage) bioUpdateMessage.textContent = '';
     if (bioCurrentCharsSpan) bioCurrentCharsSpan.textContent = '0';
 
+    if (avatarUploadSection) avatarUploadSection.style.display = 'none'; // Nascosto di default
+    if (avatarPreview) avatarPreview.style.display = 'none';
+    if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'flex'; // Mostra il placeholder
+    if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'none';
+    if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
+    if (avatarUploadStatus) avatarUploadStatus.textContent = '';
+    selectedAvatarFile = null;
+
     const userProfileRef = doc(db, 'userProfiles', uidToLoad);
     try {
         const docSnap = await getDoc(userProfileRef);
@@ -238,10 +262,15 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                     profileNationalitySpan.textContent = 'Non specificata';
                 }
             }
-            if (profileAvatarImg) {
-                profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 });
-                profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Blockie Avatar`;
-            }
+            if (profileAvatarImg) { // #profileAvatar
+    if (profileDataForDisplay.avatarUrls && profileDataForDisplay.avatarUrls.profile) { // Usa la versione 'profile' più grande
+        profileAvatarImg.src = profileDataForDisplay.avatarUrls.profile;
+        profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Custom Avatar`;
+    } else {
+        profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 }); // O la dimensione che usi per il profilo
+        profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Blockie Avatar`;
+    }
+}
 
             if (statusMessageDisplay) {
                 statusMessageDisplay.textContent = profileDataForDisplay.statusMessage || '';
@@ -308,6 +337,16 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                         } else {
                             console.warn(`Definizione non trovata per il badge ID: ${badgeId}`);
                         }
+
+                        if (profileAvatarImg) {
+                if (profileDataForDisplay.avatarUrls && profileDataForDisplay.avatarUrls.profile) { // Assumendo che salveremo l'URL del profilo qui
+                    profileAvatarImg.src = profileDataForDisplay.avatarUrls.profile;
+                    profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Custom Avatar`;
+                } else {
+                    profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 });
+                    profileAvatarImg.alt = `${profileDataForDisplay.nickname || 'User'}'s Blockie Avatar`;
+                }
+            }
                     });
                 } else {
                     if (isOwnProfile) {
@@ -338,6 +377,7 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
                     bioInput.placeholder = profileDataForDisplay.bio ? "Modifica la tua bio..." : "Scrivi qualcosa di te...";
                 }
                 updateBioCharCounter();
+            if (avatarUploadSection) avatarUploadSection.style.display = 'block'; // Mostra la sezione upload avatar
             }
 
             profileLoadingMessage.style.display = 'none';
@@ -349,6 +389,7 @@ async function loadProfileData(uidToLoad, isOwnProfile) {
             profileLoginMessage.style.display = 'block';
             profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
         }
+        
     } catch (error) {
         document.title = 'Errore Profilo - asyncDonkey.io';
         if (profileSectionTitle) profileSectionTitle.textContent = 'Errore Profilo';
@@ -886,6 +927,114 @@ function openBadgeDetailsModal(badgeId) {
     badgeDetailModal.style.display = 'block';
 }
 
+/**
+ * Gestisce la selezione del file avatar.
+ */
+function handleAvatarFileSelection(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        selectedAvatarFile = null;
+        if (avatarPreview) avatarPreview.style.display = 'none';
+        if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'flex';
+        if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'none';
+        if (avatarUploadStatus) avatarUploadStatus.textContent = '';
+        return;
+    }
+
+    // Validazione Client-Side
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        showToast('Formato file non supportato. Scegli JPG, PNG, o WebP.', 'error');
+        if (avatarUploadStatus) avatarUploadStatus.textContent = 'Formato file non valido.';
+        selectedAvatarFile = null;
+        if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta l'input file
+        return;
+    }
+
+    const maxSize = MAX_AVATAR_SIZE_MB * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        showToast(`File troppo grande. Massimo ${MAX_AVATAR_SIZE_MB}MB.`, 'error');
+        if (avatarUploadStatus) avatarUploadStatus.textContent = `File troppo grande (max ${MAX_AVATAR_SIZE_MB}MB).`;
+        selectedAvatarFile = null;
+        if (avatarUploadInput) avatarUploadInput.value = '';
+        return;
+    }
+
+    selectedAvatarFile = file; // Salva il file valido
+
+    // Mostra Anteprima
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        if (avatarPreview) {
+            avatarPreview.src = e.target.result;
+            avatarPreview.style.display = 'block';
+        }
+        if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+
+    if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'inline-block';
+    if (avatarUploadStatus) avatarUploadStatus.textContent = `File selezionato: ${file.name}`;
+    if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none'; // Nascondi progress bar precedente
+}
+
+/**
+ * Gestisce il click sul pulsante "Conferma e Carica Avatar".
+ */
+async function handleConfirmAvatarUpload() {
+    if (!selectedAvatarFile || !loggedInUser) {
+        showToast('Nessun file selezionato o utente non loggato.', 'warning');
+        return;
+    }
+
+    if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.disabled = true;
+    if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.textContent = 'Caricamento...';
+    if (avatarUploadStatus) avatarUploadStatus.textContent = 'Inizio upload...';
+    if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'block';
+    if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = '0%';
+    if (avatarUploadProgressText) avatarUploadProgressText.textContent = '0%';
+
+    const fileExtension = selectedAvatarFile.name.split('.').pop();
+    const filePath = `user-avatars/${loggedInUser.uid}/original_${Date.now()}.${fileExtension}`;
+    const fileStorageRef = storageRef(storage, filePath);
+
+    const uploadTask = uploadBytesResumable(fileStorageRef, selectedAvatarFile);
+
+    uploadTask.on('state_changed',
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = progress + '%';
+            if (avatarUploadProgressText) avatarUploadProgressText.textContent = Math.round(progress) + '%';
+            // console.log('Upload is ' + progress + '% done');
+        },
+        (error) => {
+            console.error("Errore durante l'upload dell'avatar su Storage:", error);
+            showToast(`Errore upload: ${error.message}`, 'error');
+            if (avatarUploadStatus) avatarUploadStatus.textContent = `Errore upload: ${error.code}`;
+            if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.disabled = false;
+            if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.textContent = 'Conferma e Carica Avatar';
+            if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
+            selectedAvatarFile = null; // Resetta il file
+             if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta l'input
+        },
+        () => {
+            // Upload completato con successo su Storage
+            showToast('Immagine caricata! In attesa di elaborazione finale...', 'info', 7000);
+            if (avatarUploadStatus) avatarUploadStatus.textContent = 'Elaborazione in corso... Riceverai una notifica al termine.';
+            if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'none'; // Nascondi dopo l'invio
+            if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta l'input
+            // Non serve getDownloadURL qui, la Cloud Function aggiornerà Firestore
+            // L'UI del profilo si aggiornerà quando Firestore cambia (o con un refresh manuale per ora)
+            // Potremmo aggiungere un listener a Firestore per l'avatarUrl per un aggiornamento live.
+            if (confirmAvatarUploadBtn) {
+                confirmAvatarUploadBtn.disabled = false;
+                confirmAvatarUploadBtn.textContent = 'Conferma e Carica Avatar';
+            }
+            // selectedAvatarFile = null; // Resetta il file dopo l'invio riuscito
+        }
+    );
+}
+
 // --- INIZIALIZZAZIONE ed Event Listeners ---
 onAuthStateChanged(auth, (user) => {
     loggedInUser = user;
@@ -897,12 +1046,15 @@ onAuthStateChanged(auth, (user) => {
         loadProfileData(profileUserIdFromUrl, isOwn);
         if (isOwn) {
             loadMyArticles(profileUserIdFromUrl);
+            if (avatarUploadSection) avatarUploadSection.style.display = 'block'; // Mostra per proprietario
         } else {
             if (myArticlesSection) myArticlesSection.style.display = 'none';
+            if (avatarUploadSection) avatarUploadSection.style.display = 'none'; // Nascondi per altri
         }
     } else if (loggedInUser) {
         loadProfileData(loggedInUser.uid, true);
         loadMyArticles(loggedInUser.uid);
+        if (avatarUploadSection) avatarUploadSection.style.display = 'block'; // Mostra per proprietario
     } else {
         profileDataForDisplay = null;
         if (profileContent) profileContent.style.display = 'none';
@@ -915,6 +1067,7 @@ onAuthStateChanged(auth, (user) => {
         if (bioSection) bioSection.style.display = 'none';
         if (badgesSection) badgesSection.style.display = 'none'; // Nascondi anche i badge se non loggato
         if (myArticlesSection) myArticlesSection.style.display = 'none';
+        if (avatarUploadSection) avatarUploadSection.style.display = 'none';
     }
 });
 
@@ -988,6 +1141,20 @@ if (bioInput && bioCharCountDisplay && bioCurrentCharsSpan) {
 // Event listener per il submit del form della bio
 if (updateBioForm) {
     updateBioForm.addEventListener('submit', handleBioUpdate);
+}
+
+if (selectAvatarFileBtn && avatarUploadInput) {
+    selectAvatarFileBtn.addEventListener('click', () => {
+        avatarUploadInput.click(); // Apre il selettore file
+    });
+}
+
+if (avatarUploadInput) {
+    avatarUploadInput.addEventListener('change', handleAvatarFileSelection);
+}
+
+if (confirmAvatarUploadBtn) {
+    confirmAvatarUploadBtn.addEventListener('click', handleConfirmAvatarUpload);
 }
 
 // Inizializza il contatore caratteri se l'input è già visibile al caricamento

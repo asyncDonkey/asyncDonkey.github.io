@@ -2,6 +2,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
     getFirestore,
+    connectFirestoreEmulator, // IMPORT PER EMULATORE FIRESTORE
     doc,
     getDoc,
     serverTimestamp,
@@ -11,17 +12,20 @@ import {
     orderBy,
     limit,
     getDocs,
-    // updateDoc,
-    // increment,
-    // arrayUnion,
-    // arrayRemove,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
     getAuth,
+    connectAuthEmulator, // IMPORT PER EMULATORE AUTH
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+// IMPORT PER EMULATORE STORAGE
+import { 
+    getStorage, 
+    connectStorageEmulator 
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
@@ -29,10 +33,10 @@ import { showToast } from './toastNotifications.js';
 
 // --- Firebase Config ---
 const firebaseConfig = {
-    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk',
+    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', // Sostituisci con la tua vera chiave se necessario (anche se per gli emulatori non è usata per auth)
     authDomain: 'asyncdonkey.firebaseapp.com',
     projectId: 'asyncdonkey',
-    storageBucket: 'asyncdonkey.appspot.com',
+    storageBucket: 'asyncdonkey.appspot.com', // Assicurati sia il bucket corretto
     messagingSenderId: '939854468396',
     appId: '1:939854468396:web:9646d4f51737add7704889',
     measurementId: 'G-EQDBKQM3YE',
@@ -41,6 +45,43 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const storage = getStorage(app); // INIZIALIZZA STORAGE
+
+// ----- INIZIO CODICE PER EMULATORI -----
+// Controlla se siamo in un contesto locale (es. localhost o 127.0.0.1)
+// Se l'hostname è vuoto (es. apertura diretta di file:///), gli emulatori non verranno usati.
+if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    try {
+        console.log("[main.js] Tentativo di connessione agli emulatori Firebase...");
+
+        // Connetti a Firestore Emulator (porta 8080, come configurato)
+        connectFirestoreEmulator(db, 'localhost', 8080);
+        console.log("[main.js] Connesso a Firestore Emulator su localhost:8080");
+
+        // Connetti a Auth Emulator (porta 9099, come configurato)
+        connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true }); // disableWarnings è opzionale
+        console.log("[main.js] Connesso a Auth Emulator su http://localhost:9099");
+
+        // Connetti a Storage Emulator (porta 9199, default)
+        connectStorageEmulator(storage, "localhost", 9199);
+        console.log("[main.js] Connesso a Storage Emulator su localhost:9199");
+        
+        // Potresti aggiungere connectFunctionsEmulator qui se userai callable functions dal client
+        // import { getFunctions, connectFunctionsEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+        // const functions = getFunctions(app);
+        // connectFunctionsEmulator(functions, "localhost", 5001); // Porta Functions Emulator
+        // console.log("[main.js] Connesso a Functions Emulator su localhost:5001");
+
+        showToast("Collegato agli emulatori Firebase locali (Auth, Firestore, Storage)!", "info", 7000);
+    } catch (error) {
+        console.error("[main.js] Errore durante la connessione agli emulatori:", error);
+        showToast("Errore connessione emulatori Firebase. Vedi console.", "error", 7000);
+    }
+} else {
+    console.log("[main.js] Connesso ai servizi Firebase di produzione.");
+}
+// ----- FINE CODICE PER EMULATORI -----
+
 
 export function showConfirmationModal(title = 'Conferma Azione', message = 'Sei sicuro di voler procedere?') {
     // ... (codice invariato, come da versione precedente)
@@ -122,8 +163,8 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 
+// Funzione loadHeaderUserProfileDisplay (modificata per caricare avatar personalizzato)
 async function loadHeaderUserProfileDisplay(user) {
-    // ... (codice invariato)
     const userDisplayNameElement = document.getElementById('userDisplayName');
     const headerUserAvatarElement = document.getElementById('headerUserAvatar');
 
@@ -135,28 +176,39 @@ async function loadHeaderUserProfileDisplay(user) {
         headerUserAvatarElement.style.display = 'none';
         return;
     }
+
     let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente';
-    const seedForAvatar = user.uid;
-    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-    headerUserAvatarElement.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
-    headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
-    headerUserAvatarElement.style.display = 'inline-block';
-    headerUserAvatarElement.style.backgroundColor = 'transparent';
-    headerUserAvatarElement.onerror = () => {
-        headerUserAvatarElement.style.display = 'none';
-    };
+    let avatarToDisplay = generateBlockieAvatar(user.uid, 32, { size: 8 }); // Default Blockie
+
     try {
         const userProfileRef = doc(db, 'userProfiles', user.uid);
         const docSnap = await getDoc(userProfileRef);
-        if (docSnap.exists() && docSnap.data().nickname) {
-            nicknameToShow = docSnap.data().nickname;
+        if (docSnap.exists()) {
+            const profileData = docSnap.data();
+            if (profileData.nickname) {
+                nicknameToShow = profileData.nickname;
+            }
+            // Controlla se esiste un URL per l'avatar piccolo
+            if (profileData.avatarUrls && profileData.avatarUrls.small) {
+                avatarToDisplay = profileData.avatarUrls.small;
+            }
         }
     } catch (error) {
         console.error('Errore caricamento profilo utente per display header:', error);
     }
+
     userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
+    headerUserAvatarElement.src = avatarToDisplay;
     headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
+    headerUserAvatarElement.style.display = 'inline-block';
+    headerUserAvatarElement.style.backgroundColor = 'transparent'; // Per evitare sfondo se l'SVG del blockie è trasparente
+    headerUserAvatarElement.onerror = () => { // Fallback se l'URL dell'avatar personalizzato non carica
+        console.warn("Errore caricamento avatar personalizzato nell'header, uso Blockie.");
+        headerUserAvatarElement.src = generateBlockieAvatar(user.uid, 32, { size: 8 });
+        // Non impostare display: none qui, vogliamo mostrare il blockie
+    };
 }
+
 
 function updateHeaderAuthContainersVisibility(user) {
     // ... (codice invariato)
