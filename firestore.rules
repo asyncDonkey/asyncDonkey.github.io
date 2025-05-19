@@ -1,0 +1,421 @@
+rules_version = '2';
+//IssueSTABLE
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin(userId) {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/userProfiles/$(userId)) &&
+             get(/databases/$(database)/documents/userProfiles/$(userId)).data.isAdmin == true;
+    }
+
+    function isValidExternalLinkObject(link) {
+      return link is map &&
+             link.keys().hasAll(['title', 'url']) && link.keys().size() == 2 &&
+             link.title is string && link.title.size() > 0 && link.title.size() <= 50 &&
+             link.url is string && link.url.size() > 0 && link.url.size() <= 2048 &&
+             link.url.matches('^https?://.+');
+    }
+
+    match /userProfiles/{userId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == userId &&
+                        request.resource.data.email == request.auth.token.email &&
+                        request.resource.data.nickname is string &&
+                          request.resource.data.nickname.size() >= 3 && request.resource.data.nickname.size() <= 25 &&
+                        (request.resource.data.get('isAdmin', false) == false) &&
+                        request.resource.data.statusMessage is string &&
+                        request.resource.data.externalLinks is list && request.resource.data.externalLinks.size() == 0 &&
+                        request.resource.data.earnedBadges is list && request.resource.data.earnedBadges.size() == 0 &&
+                        request.resource.data.bio is string && request.resource.data.bio == "" &&
+                        (
+                          request.resource.data.nationalityCode == null ||
+                          (request.resource.data.nationalityCode is string &&
+                            (request.resource.data.nationalityCode.size() == 2 || request.resource.data.nationalityCode == "OTHER"))
+                        ) 
+                        && request.resource.data.hasDefeatedGlitchzilla == false
+                        && request.resource.data.hasPublishedArticles == false
+                        
+                        && request.resource.data.keys().hasOnly([
+                          'email', 'nickname', 'createdAt', 'nationalityCode', 'isAdmin',
+                          'statusMessage', 'externalLinks', 'earnedBadges', 'bio', 'hasPublishedArticles', 'hasDefeatedGlitchzilla'
+                        ])
+                        ;
+      allow update: if request.auth != null && request.auth.uid == userId &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasAny(['statusMessage', 'externalLinks', 'bio', 'updatedAt']) &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['statusMessage', 'externalLinks', 'bio', 'updatedAt']) &&
+                        (request.resource.data.statusMessage == resource.data.statusMessage || 
+                          (request.resource.data.statusMessage is string && request.resource.data.statusMessage.size() <= 150)) &&
+                        (request.resource.data.externalLinks == resource.data.externalLinks ||
+                          (request.resource.data.externalLinks is list &&
+                           request.resource.data.externalLinks.size() <= 5 &&
+                           true // Temporaneamente semplificato
+                          )
+                        ) 
+                        && request.resource.data.hasPublishedArticles == resource.data.hasPublishedArticles
+                        &&
+                        (request.resource.data.bio == resource.data.bio ||
+                          (request.resource.data.bio is string && request.resource.data.bio.size() <= 300)
+                        ) &&
+                        request.resource.data.updatedAt == request.time &&
+                        request.resource.data.email == resource.data.email &&
+                        request.resource.data.nickname == resource.data.nickname &&
+                        request.resource.data.createdAt == resource.data.createdAt &&
+                        request.resource.data.isAdmin == resource.data.isAdmin &&
+                        request.resource.data.nationalityCode == resource.data.nationalityCode &&
+                        request.resource.data.earnedBadges == resource.data.earnedBadges;
+      allow delete: if false;
+    }
+
+    match /leaderboardScores/{scoreId} {
+      allow read: if true;
+      allow create: if request.resource.data.score is number && request.resource.data.score >= 0
+                        && request.resource.data.gameId is string
+                        && request.resource.data.timestamp == request.time
+                        && request.resource.data.initials is string && request.resource.data.initials.size() >= 1 && request.resource.data.initials.size() <= 5
+                        && request.resource.data.userName is string && request.resource.data.userName.size() >= 1 && request.resource.data.userName.size() <= 50
+                        && (request.resource.data.get('nationalityCode', null) == null || (request.resource.data.nationalityCode is string && request.resource.data.nationalityCode.size() == 2))
+                        && (request.resource.data.get('glitchzillaDefeated', null) == null || request.resource.data.glitchzillaDefeated is bool)
+                        && (
+                          (request.auth != null && request.resource.data.userId == request.auth.uid
+                            && request.resource.data.keys().toSet().difference(['score', 'timestamp', 'initials', 'userName', 'gameId', 'userId', 'nationalityCode', 'glitchzillaDefeated'].toSet()).size() == 0)
+                          ||
+                          (request.auth == null
+                            && request.resource.data.get('userId', null) == null && request.resource.data.get('nationalityCode', null) == null
+                            && request.resource.data.keys().toSet().difference(['score', 'timestamp', 'initials', 'userName', 'gameId', 'glitchzillaDefeated'].toSet()).size() == 0)
+                            );
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /guestbookEntries/{commentId} {
+      allow read: if true;
+      allow create: if request.resource.data.message is string && request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 500
+                        && request.resource.data.likes == 0
+                        && request.resource.data.pageId is string && request.resource.data.pageId.size() > 0
+                        && request.resource.data.timestamp == request.time
+                        && request.resource.data.likedBy is list && request.resource.data.likedBy.size() == 0
+                        && (
+                          (request.auth != null && request.resource.data.userId == request.auth.uid && request.resource.data.userName is string && request.resource.data.userName.size() > 0
+                            && (request.resource.data.get('nationalityCode', null) == null || (request.resource.data.nationalityCode is string && (request.resource.data.nationalityCode.size() == 2 || request.resource.data.nationalityCode == "OTHER")))
+                            && request.resource.data.keys().toSet().difference(['message', 'timestamp', 'likes', 'pageId', 'userId', 'userName', 'likedBy', 'nationalityCode'].toSet()).size() == 0
+                          ) ||
+                          (request.auth == null && request.resource.data.get('userId', null) == null && request.resource.data.get('userName', null) == null && request.resource.data.get('nationalityCode', null) == null && request.resource.data.name is string && request.resource.data.name.size() > 0
+                            && request.resource.data.keys().toSet().difference(['message', 'timestamp', 'likes', 'pageId', 'name', 'likedBy'].toSet()).size() == 0
+                          )
+                            );
+      allow update: if request.auth != null
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy'])
+                        && request.resource.data.likes is number
+                        && request.resource.data.likedBy is list
+                        && request.resource.data.message == resource.data.message
+                        && request.resource.data.pageId == resource.data.pageId
+                        && request.resource.data.timestamp == resource.data.timestamp
+                        && request.resource.data.get('userId', null) == resource.data.get('userId', null)
+                        && request.resource.data.get('userName', null) == resource.data.get('userName', null)
+                        && request.resource.data.get('name', null) == resource.data.get('name', null)
+                        && request.resource.data.get('nationalityCode', null) == resource.data.get('nationalityCode', null)
+                        && (
+                          (!resource.data.likedBy.hasAny([request.auth.uid]) && request.resource.data.likedBy.hasAll([request.auth.uid])
+                            && request.resource.data.likedBy.size() == resource.data.likedBy.size() + 1
+                            && request.resource.data.likes == resource.data.likes + 1
+                          ) ||
+                          (resource.data.likedBy.hasAll([request.auth.uid]) && !request.resource.data.likedBy.hasAny([request.auth.uid])
+                            && request.resource.data.likedBy.size() == resource.data.likedBy.size() - 1
+                            && request.resource.data.likes == resource.data.likes - 1
+                            && request.resource.data.likes >= 0
+                          )
+                            );
+      allow delete: if false;
+    }
+
+    match /articleComments/{commentId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                        && request.resource.data.userId == request.auth.uid
+                        && request.resource.data.articleId is string && request.resource.data.articleId.size() > 0
+                        && request.resource.data.message is string && request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 1000
+                        && request.resource.data.userName is string && request.resource.data.userName.size() > 0
+                        && request.resource.data.likes == 0
+                        && request.resource.data.likedBy is list && request.resource.data.likedBy.size() == 0
+                        && request.resource.data.timestamp == request.time
+                        && (request.resource.data.get('nationalityCode', null) == null ||
+                            (request.resource.data.nationalityCode is string &&
+                              (request.resource.data.nationalityCode.size() == 2 || request.resource.data.nationalityCode == "OTHER"))
+                            )
+                        && (request.resource.data.keys().hasOnly(['articleId', 'message', 'likes', 'timestamp', 'likedBy', 'userId', 'userName']) ||
+                            request.resource.data.keys().hasOnly(['articleId', 'message', 'likes', 'timestamp', 'likedBy', 'userId', 'userName', 'nationalityCode'])
+                            );
+      allow update: if request.auth != null
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy'])
+                        && request.resource.data.likes is number && request.resource.data.likedBy is list
+                        && request.resource.data.message == resource.data.message
+                        && request.resource.data.articleId == resource.data.articleId
+                        && request.resource.data.timestamp == resource.data.timestamp
+                        && request.resource.data.userId == resource.data.userId
+                        && request.resource.data.userName == resource.data.userName
+                        && request.resource.data.get('nationalityCode', null) == resource.data.get('nationalityCode', null)
+                        && (
+                          (!resource.data.likedBy.hasAny([request.auth.uid]) && request.resource.data.likedBy.hasAll([request.auth.uid]) && request.resource.data.likes == resource.data.likes + 1 && request.resource.data.likedBy.size() == resource.data.likedBy.size() + 1) ||
+                          (resource.data.likedBy.hasAll([request.auth.uid]) && !request.resource.data.likedBy.hasAny([request.auth.uid]) && request.resource.data.likes == resource.data.likes - 1 && request.resource.data.likedBy.size() == resource.data.likedBy.size() - 1 && request.resource.data.likes >= 0)
+                            );
+      allow delete: if request.auth != null && (isAdmin(request.auth.uid) || request.auth.uid == resource.data.userId);
+    }
+
+    match /articles/{articleId} {
+      allow read: if resource.data.status == 'published'
+                        || (request.auth != null && resource.data.authorId == request.auth.uid)
+                        || (request.auth != null && isAdmin(request.auth.uid));
+      allow create: if request.auth != null
+                        && request.resource.data.authorId == request.auth.uid
+                        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 150
+                        && request.resource.data.contentMarkdown is string && request.resource.data.contentMarkdown.size() > 0
+                        && request.resource.data.createdAt == request.time
+                        && request.resource.data.updatedAt == request.time
+                        && request.resource.data.status is string && (request.resource.data.status == 'draft' || request.resource.data.status == 'pendingReview')
+                        && request.resource.data.likeCount == 0
+                        && request.resource.data.likedByUsers is list && request.resource.data.likedByUsers.size() == 0
+                        && request.resource.data.commentCount == 0
+                        && request.resource.data.snippet is string
+                        && request.resource.data.tags is list
+                        && request.resource.data.isFeatured is bool
+                        && request.resource.data.authorName is string
+                        && (request.resource.data.get('coverImageUrl', null) == null || request.resource.data.coverImageUrl is string)
+                        && (request.resource.data.get('authorNationalityCode', null) == null || (request.resource.data.authorNationalityCode is string && (request.resource.data.authorNationalityCode.size() == 2 || request.resource.data.authorNationalityCode == "OTHER")))
+                        && request.resource.data.get('publishedAt', null) == null
+                        && request.resource.data.keys().toSet().difference(
+                                ['title', 'contentMarkdown', 'tags', 'snippet', 'coverImageUrl',
+                                 'authorId', 'authorName', 'authorNationalityCode',
+                                 'createdAt', 'updatedAt', 'status',
+                                 'likeCount', 'commentCount', 'likedByUsers', 'isFeatured'].toSet()).size() == 0;
+      allow update: if request.auth != null && (
+        (isAdmin(request.auth.uid) &&
+          request.resource.data.updatedAt == request.time &&
+          request.resource.data.authorId == resource.data.authorId && 
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+              ['title', 'contentMarkdown', 'tags', 'snippet', 'coverImageUrl', 'isFeatured', 'status', 'publishedAt', 'updatedAt', 'rejectionReason']
+          ) &&
+          (request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 150) &&
+          (request.resource.data.contentMarkdown is string && request.resource.data.contentMarkdown.size() > 0) &&
+          (request.resource.data.tags is list) &&
+          (request.resource.data.snippet is string && request.resource.data.snippet.size() <= 300) &&
+          (request.resource.data.get('coverImageUrl', null) == null || request.resource.data.coverImageUrl is string) &&
+          (request.resource.data.isFeatured is bool) &&
+          (request.resource.data.status is string && ['draft', 'pendingReview', 'published', 'rejected'].hasAny([request.resource.data.status])) &&
+          (
+            (request.resource.data.status == 'published' && resource.data.status != 'published' && request.resource.data.publishedAt == request.time) || 
+            (request.resource.data.status == 'published' && resource.data.status == 'published' && request.resource.data.publishedAt == resource.data.publishedAt) || 
+            (request.resource.data.status != 'published' && request.resource.data.get('publishedAt', null) == null) 
+          ) &&
+          (request.resource.data.get('rejectionReason', null) == null || request.resource.data.rejectionReason is string) &&
+          request.resource.data.likeCount == resource.data.likeCount &&
+          request.resource.data.commentCount == resource.data.commentCount &&
+          request.resource.data.likedByUsers == resource.data.likedByUsers &&
+          request.resource.data.authorName == resource.data.authorName && 
+          request.resource.data.get('authorNationalityCode', null) == resource.data.get('authorNationalityCode', null)
+        ) ||
+        (
+          request.auth.uid == resource.data.authorId &&
+          resource.data.status == 'draft' && 
+          (request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 150) &&
+          (request.resource.data.contentMarkdown is string && request.resource.data.contentMarkdown.size() > 0) &&
+          (request.resource.data.tags is list) &&
+          (request.resource.data.snippet is string && request.resource.data.snippet.size() <= 300) &&
+          (request.resource.data.get('coverImageUrl', resource.data.coverImageUrl) == null || request.resource.data.coverImageUrl is string) &&
+          (request.resource.data.status == 'draft' || request.resource.data.status == 'pendingReview') &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+            ['title', 'contentMarkdown', 'tags', 'snippet', 'coverImageUrl', 'status', 'updatedAt']
+          ) &&
+          request.resource.data.authorId == resource.data.authorId &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.authorName == resource.data.authorName &&
+          request.resource.data.get('authorNationalityCode', null) == resource.data.get('authorNationalityCode', null) &&
+          request.resource.data.get('publishedAt', null) == null &&      
+          request.resource.data.likeCount == 0 &&                       
+          request.resource.data.commentCount == 0 &&                  
+          request.resource.data.likedByUsers.size() == 0 &&             
+          request.resource.data.isFeatured == false &&                  
+          request.resource.data.get('rejectionReason', null) == null &&  
+          request.resource.data.updatedAt == request.time 
+        ) ||
+        ( request.auth != null &&
+          resource.data.status == 'published' &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedByUsers', 'updatedAt']) &&
+          request.resource.data.likeCount is number &&
+          request.resource.data.likedByUsers is list &&
+          request.resource.data.updatedAt == request.time &&
+          request.resource.data.title == resource.data.title &&
+          request.resource.data.contentMarkdown == resource.data.contentMarkdown &&
+          request.resource.data.tags == resource.data.tags &&
+          request.resource.data.snippet == resource.data.snippet &&
+          request.resource.data.get('coverImageUrl', null) == resource.data.get('coverImageUrl', null) &&
+          request.resource.data.authorId == resource.data.authorId &&
+          request.resource.data.authorName == resource.data.authorName &&
+          request.resource.data.get('authorNationalityCode', null) == resource.data.get('authorNationalityCode', null) &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.status == resource.data.status && 
+          request.resource.data.commentCount == resource.data.commentCount &&
+          request.resource.data.isFeatured == resource.data.isFeatured &&
+          request.resource.data.publishedAt == resource.data.publishedAt && 
+          request.resource.data.get('rejectionReason', null) == resource.data.get('rejectionReason', null) &&
+          (
+            (!resource.data.likedByUsers.hasAny([request.auth.uid]) && request.resource.data.likedByUsers.hasAll([request.auth.uid])
+              && request.resource.data.likedByUsers.size() == resource.data.likedByUsers.size() + 1
+              && request.resource.data.likeCount == resource.data.likeCount + 1
+            ) ||
+            (resource.data.likedByUsers.hasAll([request.auth.uid]) && !request.resource.data.likedByUsers.hasAny([request.auth.uid])
+              && request.resource.data.likedByUsers.size() == resource.data.likedByUsers.size() - 1
+              && request.resource.data.likeCount == resource.data.likeCount - 1
+              && request.resource.data.likeCount >= 0
+            )
+          )
+        ) ||
+        (
+          request.auth != null &&
+          resource.data.status == 'published' &&
+          request.resource.data.commentCount == resource.data.commentCount + 1 &&
+          request.resource.data.updatedAt == request.time &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentCount', 'updatedAt']) &&
+          request.resource.data.title == resource.data.title &&
+          request.resource.data.contentMarkdown == resource.data.contentMarkdown &&
+          request.resource.data.tags == resource.data.tags &&
+          request.resource.data.snippet == resource.data.snippet &&
+          request.resource.data.get('coverImageUrl', null) == resource.data.get('coverImageUrl', null) &&
+          request.resource.data.authorId == resource.data.authorId &&
+          request.resource.data.authorName == resource.data.authorName &&
+          request.resource.data.get('authorNationalityCode', null) == resource.data.get('authorNationalityCode', null) &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.status == resource.data.status && 
+          request.resource.data.likeCount == resource.data.likeCount &&
+          request.resource.data.likedByUsers == resource.data.likedByUsers &&
+          request.resource.data.isFeatured == resource.data.isFeatured &&
+          request.resource.data.publishedAt == resource.data.publishedAt && 
+          request.resource.data.get('rejectionReason', null) == resource.data.get('rejectionReason', null)
+        )
+      );
+      allow delete: if request.auth != null &&
+                        (isAdmin(request.auth.uid) ||
+                         (resource.data.authorId == request.auth.uid && resource.data.status != 'published'));
+    }
+
+    match /bugReports/{reportId} {
+      allow read: if isAdmin(request.auth.uid);
+      allow create: if request.resource.data.description is string && request.resource.data.description.size() > 0 && request.resource.data.description.size() <= 2000
+                          && request.resource.data.timestamp == request.time
+                          && request.resource.data.pageContext is string
+                          && request.resource.data.userAgent is string
+                          && (request.resource.data.get('userId', null) == null || (request.resource.data.userId is string && request.auth != null && request.resource.data.userId == request.auth.uid) )
+                          && (request.resource.data.get('userEmail', null) == null || (request.resource.data.userEmail is string && request.resource.data.userEmail.matches('.+@.+..+')) )
+                          && request.resource.data.status == "new"
+                          && request.resource.data.keys().toSet().difference(['description', 'timestamp', 'pageContext', 'userAgent', 'userId', 'userEmail', 'status'].toSet()).size() == 0;
+      allow update: if isAdmin(request.auth.uid)
+                          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+                          && request.resource.data.status is string
+                          && request.resource.data.updatedAt == request.time;
+      allow delete: if isAdmin(request.auth.uid);
+    }
+
+    match /featureRequests/{requestId} {
+      allow read: if true; 
+      allow create: if
+        request.resource.data.description is string &&
+        request.resource.data.description.size() > 0 && request.resource.data.description.size() <= 2000 &&
+        request.resource.data.timestamp == request.time &&
+        request.resource.data.pageContext is string && (request.resource.data.pageContext == "donkeyRunnerGame") &&
+        request.resource.data.status == "new" &&
+        request.resource.data.upvotes == 0 &&
+        (request.resource.data.get('title', null) == null || (
+            request.resource.data.title is string &&
+            request.resource.data.title.size() >= 0 && 
+            request.resource.data.title.size() <= 150
+        )) &&
+        (
+          (request.auth != null &&
+            request.resource.data.userId == request.auth.uid &&
+            request.resource.data.keys().hasAll(['description', 'timestamp', 'pageContext', 'status', 'upvotes', 'userId']) && 
+            request.resource.data.keys().toSet().difference(['description', 'timestamp', 'pageContext', 'status', 'upvotes', 'title', 'userId'].toSet()).size() == 0 
+          ) ||
+          (request.auth == null &&
+            request.resource.data.get('userId', null) == null &&
+            request.resource.data.keys().hasAll(['description', 'timestamp', 'pageContext', 'status', 'upvotes']) && 
+            request.resource.data.keys().toSet().difference(['description', 'timestamp', 'pageContext', 'status', 'upvotes', 'title'].toSet()).size() == 0
+          )
+        );
+      allow update: if request.auth != null && get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.isAdmin == true &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'title', 'description', 'updatedAt']) && 
+                        (request.resource.data.status is string || request.resource.data.title is string || request.resource.data.description is string) &&
+                        request.resource.data.updatedAt == request.time;
+      allow delete: if request.auth != null && get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+     match /userIssues/{issueId} {
+      allow read: if true;
+      allow create: if request.auth != null // 1. Utente deve essere loggato
+                        && request.resource.data.userId == request.auth.uid // 2. userId corretto
+                        // 3. Campi principali e loro tipi/valori di base
+                        && request.resource.data.description is string && request.resource.data.description.size() > 0
+                        && request.resource.data.type is string // Tipo deve essere una stringa
+                        && request.resource.data.title is string // Titolo deve essere una stringa
+                        && request.resource.data.status == "new"
+                        && request.resource.data.upvotes == 0
+                        && request.resource.data.upvotedBy is list && request.resource.data.upvotedBy.size() == 0
+                        && request.resource.data.timestamp == request.time
+                        // 4. Validazione minima per 'submittedBy'
+                        && request.resource.data.submittedBy is map
+                        && request.resource.data.submittedBy.userId == request.auth.uid
+                        // 5. 'gameId' è opzionale e, se presente, una stringa
+                        && (request.resource.data.get('gameId', null) == null || request.resource.data.gameId is string);
+                        // RIMOSSA QUALSIASI VALIDAZIONE STRETTA SULLE CHIAVI ESATTE (hasOnly, difference, size)
+
+
+      // ... La tua regola 'allow update' con il typo corretto per upvotedBy (come da versioni precedenti) ...
+      allow update: if request.auth != null && (
+        ( // Upvoting
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes', 'upvotedBy', 'updatedAt']) &&
+          request.resource.data.upvotes is number &&
+          request.resource.data.upvotedBy is list &&
+          request.resource.data.updatedAt == request.time &&
+          request.resource.data.title == resource.data.title &&
+          request.resource.data.description == resource.data.description &&
+          request.resource.data.type == resource.data.type &&
+          request.resource.data.submittedBy == resource.data.submittedBy &&
+          request.resource.data.timestamp == resource.data.timestamp &&
+          request.resource.data.status == resource.data.status &&
+          (request.resource.data.get('gameId', null) == resource.data.get('gameId', null)) &&
+          (
+            (!resource.data.upvotedBy.hasAny([request.auth.uid]) &&
+              request.resource.data.upvotedBy.hasAll([request.auth.uid]) &&
+              request.resource.data.upvotedBy.size() == resource.data.upvotedBy.size() + 1 &&
+              request.resource.data.upvotes == resource.data.upvotes + 1)
+            ||
+            (resource.data.upvotedBy.hasAll([request.auth.uid]) &&
+              !request.resource.data.upvotedBy.hasAny([request.auth.uid]) &&
+              request.resource.data.upvotedBy.size() == resource.data.upvotedBy.size() - 1 &&
+              request.resource.data.upvotes == resource.data.upvotes - 1 &&
+              request.resource.data.upvotes >= 0)
+          )
+        ) ||
+        ( // Admin Modifica
+          isAdmin(request.auth.uid) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+              ['title', 'description', 'type', 'gameId', 'status', 'updatedAt']
+          ) &&
+          request.resource.data.submittedBy == resource.data.submittedBy &&
+          request.resource.data.timestamp == resource.data.timestamp &&
+          request.resource.data.upvotes == resource.data.upvotes &&
+          request.resource.data.upvotedBy == resource.data.upvotedBy &&
+          (request.resource.data.get('title', resource.data.title) is string && request.resource.data.get('title', resource.data.title).size() <= 150) &&
+          (request.resource.data.get('description', resource.data.description) is string && request.resource.data.get('description', resource.data.description).size() > 0 && request.resource.data.get('description', resource.data.description).size() <= 2000) &&
+          (request.resource.data.get('type', resource.data.type) is string && (request.resource.data.get('type', resource.data.type) == "generalFeature" || request.resource.data.get('type', resource.data.type) == "newGameRequest" || request.resource.data.get('type', resource.data.type) == "gameIssue")) &&
+          (request.resource.data.get('type', resource.data.type) == "gameIssue" ? (request.resource.data.get('gameId', resource.data.get('gameId', null)) is string && request.resource.data.get('gameId', resource.data.get('gameId', null)).size() > 0) : request.resource.data.get('gameId', null) == null) &&
+          (request.resource.data.get('status', resource.data.status) is string &&
+              ["new", "underConsideration", "accepted", "planned", "inProgress", "completed", "declined"].hasAny([request.resource.data.get('status', resource.data.status)])
+            ) &&
+          request.resource.data.updatedAt == request.time
+        )
+        );
+      allow delete: if isAdmin(request.auth.uid);
+    }
+	}
+}

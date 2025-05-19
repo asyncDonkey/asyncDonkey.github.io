@@ -206,24 +206,34 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         }
     }
 
-    // --- LOGICA AVATAR CON CACHE BUSTING ---
+    // --- LOGICA AVATAR CON CACHE BUSTING (Modificata) ---
     if (profileAvatarImg) {
-        let avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH;
-        let altText = `${profileNameForTitle}'s Default Avatar`;
+        let avatarSrcToSet;
+        let altText;
+        const profileNameForTitle = profileDataForDisplay.nickname || 'Utente'; // Assicurati che profileNameForTitle sia definito
 
         if (profileDataForDisplay.avatarUrls && profileDataForDisplay.avatarUrls.profile) {
             let baseUrl = profileDataForDisplay.avatarUrls.profile;
             altText = `${profileNameForTitle}'s Custom Avatar`;
+            // Applica cache busting se profileUpdatedAt è disponibile
             if (profileDataForDisplay.profileUpdatedAt && profileDataForDisplay.profileUpdatedAt.seconds) {
                 avatarSrcToSet = `${baseUrl}?v=${profileDataForDisplay.profileUpdatedAt.seconds}`;
             } else if (profileDataForDisplay.profileUpdatedAt instanceof Date) {
                 avatarSrcToSet = `${baseUrl}?v=${profileDataForDisplay.profileUpdatedAt.getTime()}`;
             } else {
-                avatarSrcToSet = baseUrl;
+                avatarSrcToSet = baseUrl; // Nessun timestamp per cache busting
             }
-        } else { // Fallback a Blockie se non ci sono avatarUrls.profile
+        } else if (uidLoaded) { // Se non c'è avatar personalizzato, usa Blockie (uidLoaded DEVE essere disponibile)
             avatarSrcToSet = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
             altText = `${profileNameForTitle}'s Blockie Avatar`;
+        } else {
+            // Fallback ESTREMO se uidLoaded non fosse disponibile per qualche motivo qui
+            // In questo caso, DEFAULT_AVATAR_IMAGE_PATH potrebbe essere usato se si aggiunge l'immagine
+            // o si lascia vuoto/un placeholder generico. Per ora, proviamo a evitarlo.
+            // Se si verifica, indica un problema nel flusso di dati a updateProfilePageUI.
+            console.warn('[AthenaDev Debug - UpdateUI] uidLoaded non disponibile per generare Blockie come default diretto.');
+            avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH; // Manteniamo il vecchio default path come estremo fallback
+            altText = `${profileNameForTitle}'s Default Avatar`;
         }
         
         console.log(`[AthenaDev Debug - UpdateUI] Impostazione src avatar: ${avatarSrcToSet}`);
@@ -235,12 +245,24 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         profileAvatarImg.src = avatarSrcToSet;
         profileAvatarImg.alt = altText;
         profileAvatarImg.onerror = () => {
-            console.warn(`[AthenaDev Debug - UpdateUI] Errore caricamento avatar: ${avatarSrcToSet}. Uso Blockie.`);
-            profileAvatarImg.src = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
-            profileAvatarImg.alt = `${profileNameForTitle}'s Blockie Avatar (fallback errore)`;
+            console.warn(`[AthenaDev Debug - UpdateUI] Errore caricamento avatar: ${avatarSrcToSet}. Uso Blockie come fallback finale.`);
+            if (uidLoaded) { // Assicurati che uidLoaded sia disponibile per generare il Blockie di fallback
+                profileAvatarImg.src = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
+                profileAvatarImg.alt = `${profileNameForTitle}'s Blockie Avatar (fallback errore)`;
+            } else {
+                // Se uidLoaded non è disponibile neanche qui, non possiamo generare un Blockie.
+                // Potremmo nascondere l'immagine o usare un placeholder SVG inline o il DEFAULT_AVATAR_IMAGE_PATH
+                // se si decide di aggiungere quel file.
+                console.error("[AthenaDev Debug - UpdateUI] uidLoaded non disponibile per Blockie in onerror.");
+                if (DEFAULT_AVATAR_IMAGE_PATH && profileAvatarImg.src !== DEFAULT_AVATAR_IMAGE_PATH) {
+                    profileAvatarImg.src = DEFAULT_AVATAR_IMAGE_PATH; // Ultimo tentativo se il file esistesse
+                    profileAvatarImg.alt = `${profileNameForTitle}'s Default Avatar (fallback errore critico)`;
+                } else {
+                    profileAvatarImg.style.display = 'none'; // Nascondi se non c'è nulla da mostrare
+                }
+            }
         };
     }
-    // --- FINE LOGICA AVATAR ---
 
     if (statusMessageDisplay) {
         statusMessageDisplay.textContent = profileDataForDisplay.statusMessage || '';
@@ -343,14 +365,20 @@ function loadProfileData(uidToLoad, isOwnProfile) {
     console.log(`[AthenaDev Debug - Load] Inizio loadProfileData per UID: ${uidToLoad}, isOwnProfile: ${isOwnProfile}`);
 
     // Reset UI iniziale (parziale, il resto è gestito da updateProfilePageUI o nascosto se non c'è utente)
-    if (profileLoadingMessage) profileLoadingMessage.style.display = 'block';
-    if (profileContent) profileContent.style.display = 'none';
-    if (profileLoginMessage) profileLoginMessage.style.display = 'none';
-    
     // Pulisci i campi principali in attesa dei dati freschi
     if (profileAvatarImg) {
-        profileAvatarImg.src = DEFAULT_AVATAR_IMAGE_PATH; // Mostra default durante caricamento
-        profileAvatarImg.alt = 'Caricamento avatar...';
+        if (uidToLoad) { // Se uidToLoad è disponibile, usa subito il Blockie come placeholder
+            profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 });
+            profileAvatarImg.alt = 'Caricamento avatar... (Blockie)';
+        } else {
+            // Se uidToLoad non fosse disponibile qui (improbabile se la funzione è chiamata correttamente),
+            // si potrebbe usare il vecchio DEFAULT_AVATAR_IMAGE_PATH (se si aggiunge il file)
+            // o un placeholder neutro.
+            profileAvatarImg.src = ''; // O un'immagine placeholder base64 trasparente, o DEFAULT_AVATAR_IMAGE_PATH
+            profileAvatarImg.alt = 'Caricamento avatar...';
+            console.warn("[AthenaDev Debug - Load] uidToLoad non disponibile per Blockie placeholder iniziale in loadProfileData.");
+        }
+        profileAvatarImg.style.display = 'block'; // Assicurati sia visibile
     }
     if(profileEmailSpan) profileEmailSpan.textContent = 'Caricamento...';
     if(currentNicknameSpan) currentNicknameSpan.textContent = 'Caricamento...';
@@ -523,30 +551,38 @@ async function handleStatusMessageUpdate(event) {
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
         showToast('Devi essere loggato e sul tuo profilo per aggiornare lo stato.', 'error'); return;
     }
-    if (!statusMessageInput || !statusUpdateMessage || !statusMessageDisplay) {
-        console.error('Elementi DOM per aggiornamento stato mancanti.');
-        showToast('Errore interfaccia utente.', 'error'); return;
+    // statusMessageInput è una costante globale definita all'inizio del file js/profile.js
+    if (!statusMessageInput /*|| !statusUpdateMessage || !statusMessageDisplay*/) { // statusUpdateMessage e statusMessageDisplay non sono cruciali per l'update stesso
+        console.error('Elementi DOM per aggiornamento stato mancanti (input).');
+        showToast('Errore interfaccia utente (input stato).', 'error'); return;
     }
     const newStatus = statusMessageInput.value.trim();
     if (newStatus.length > 150) {
-        statusUpdateMessage.textContent = 'Stato max 150 caratteri.';
-        showToast('Stato troppo lungo.', 'warning'); return;
+        if (statusUpdateMessage) statusUpdateMessage.textContent = 'Stato max 150 caratteri.'; // statusUpdateMessage è per i messaggi di errore UI
+        showToast('Stato troppo lungo (max 150 caratteri).', 'warning'); return;
     }
-    if (newStatus === (profileDataForDisplay.statusMessage || '')) { // Confronta con i dati attuali da profileDataForDisplay
+    // Opzionale: Verifica se lo stato è effettivamente cambiato prima di inviare
+    if (newStatus === (profileDataForDisplay.statusMessage || '')) { 
         showToast('Nessuna modifica allo stato.', 'info'); return;
     }
-    const updateBtn = updateStatusForm.querySelector('button[type="submit"]');
+
+    const updateBtn = updateStatusForm ? updateStatusForm.querySelector('button[type="submit"]') : null;
     if (updateBtn) { updateBtn.disabled = true; updateBtn.textContent = 'Aggiornamento...'; }
     
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
-        await updateDoc(userProfileRef, { statusMessage: newStatus, profileUpdatedAt: serverTimestamp() });
+        await updateDoc(userProfileRef, { 
+            statusMessage: newStatus, 
+            updatedAt: serverTimestamp() // << MODIFICA CORRETTA
+        });
         showToast("Stato aggiornato!", 'success');
-        // onSnapshot aggiornerà statusMessageDisplay. statusMessageInput.value = ''; potrebbe essere desiderabile.
         if(statusMessageInput) statusMessageInput.value = ''; // Pulisci input dopo successo
+        if(statusUpdateMessage) statusUpdateMessage.textContent = ''; // Pulisci messaggio errore
+        // onSnapshot dovrebbe aggiornare statusMessageDisplay
     } catch (error) {
         console.error("Errore aggiornamento stato:", error);
-        showToast("Errore aggiornamento stato.", 'error');
+        showToast(`Errore aggiornamento stato: ${error.message}`, 'error');
+        if (statusUpdateMessage) statusUpdateMessage.textContent = `Errore: ${error.message}`;
     } finally {
         if (updateBtn) { updateBtn.disabled = false; updateBtn.textContent = 'Aggiorna'; }
     }
@@ -566,29 +602,38 @@ async function handleBioUpdate(event) {
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
         showToast('Devi essere loggato e sul tuo profilo per aggiornare la bio.', 'error'); return;
     }
-    if (!bioInput || !bioUpdateMessage || !bioDisplay) {
-        console.error('Elementi DOM per aggiornamento bio mancanti.');
-        showToast('Errore interfaccia utente.', 'error'); return;
+    // bioInput è una costante globale definita all'inizio del file js/profile.js
+    if (!bioInput /*|| !bioUpdateMessage || !bioDisplay*/) { // bioUpdateMessage e bioDisplay non sono cruciali per l'update stesso
+        console.error('Elementi DOM per aggiornamento bio mancanti (input).');
+        showToast('Errore interfaccia utente (input bio).', 'error'); return;
     }
-    const newBio = bioInput.value; // Non fare trim() qui per permettere spazi
-    if (newBio.length > MAX_BIO_CHARS) {
+    const newBio = bioInput.value; // Non fare trim() qui per permettere spazi intenzionali, Firestore rules non lo vietano
+    if (newBio.length > MAX_BIO_CHARS) { // MAX_BIO_CHARS è una costante definita nel file (300)
         showToast(`Bio troppo lunga (max ${MAX_BIO_CHARS} caratteri).`, 'warning'); return;
     }
-    if (newBio === (profileDataForDisplay.bio || '')) { // Confronta con i dati attuali
+    // Opzionale: Verifica se la bio è effettivamente cambiata
+    if (newBio === (profileDataForDisplay.bio || '')) { 
         showToast('Nessuna modifica alla bio.', 'info'); return;
     }
-    const updateBtn = updateBioForm.querySelector('button[type="submit"]');
+
+    const updateBtn = updateBioForm ? updateBioForm.querySelector('button[type="submit"]') : null;
     if (updateBtn) { updateBtn.disabled = true; updateBtn.textContent = 'Salvataggio Bio...'; }
 
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
-        await updateDoc(userProfileRef, { bio: newBio, profileUpdatedAt: serverTimestamp() });
+        await updateDoc(userProfileRef, { 
+            bio: newBio, 
+            updatedAt: serverTimestamp() // << MODIFICA CORRETTA
+        });
         showToast('Bio aggiornata!', 'success');
-        // onSnapshot aggiornerà bioDisplay. bioInput.value = ''; potrebbe essere desiderabile.
         if(bioInput) bioInput.value = ''; // Pulisci input dopo successo
+        if(bioUpdateMessage) bioUpdateMessage.textContent = ''; // Pulisci messaggio errore
+        updateBioCharCounter(); // Aggiorna il contatore caratteri
+        // onSnapshot dovrebbe aggiornare bioDisplay
     } catch (error) {
         console.error('Errore aggiornamento bio:', error);
-        showToast("Errore aggiornamento bio.", 'error');
+        showToast(`Errore aggiornamento bio: ${error.message}`, 'error');
+        if (bioUpdateMessage) bioUpdateMessage.textContent = `Errore: ${error.message}`;
     } finally {
         if (updateBtn) { updateBtn.disabled = false; updateBtn.textContent = 'Salva Bio'; }
     }
