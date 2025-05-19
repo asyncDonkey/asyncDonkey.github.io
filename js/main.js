@@ -12,6 +12,7 @@ import {
     orderBy,
     limit,
     getDocs,
+    onSnapshot
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
     getAuth,
@@ -43,6 +44,9 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app); // INIZIALIZZA STORAGE
+
+let currentUserProfileUnsubscribe = null;
+let loggedInUser = null; // Mantieni aggiornato lo stato dell'utente loggato
 
 // ----- INIZIO CODICE PER EMULATORI -----
 // Controlla se siamo in un contesto locale (es. localhost o 127.0.0.1)
@@ -160,49 +164,63 @@ function escapeHTML(str) {
 }
 
 // Funzione loadHeaderUserProfileDisplay (modificata per caricare avatar personalizzato)
-async function loadHeaderUserProfileDisplay(user) {
+async function loadHeaderUserProfileDisplay(user, profileData) { // Modificata per accettare profileData
     const userDisplayNameElement = document.getElementById('userDisplayName');
     const headerUserAvatarElement = document.getElementById('headerUserAvatar');
 
     if (!userDisplayNameElement || !headerUserAvatarElement) {
+        console.warn('[Main.js loadHeaderUserProfileDisplay] Elementi userDisplayName o headerUserAvatar non trovati.');
         return;
     }
-    if (!user) {
+
+    if (!user) { // Se l'utente non è loggato, assicurati che questi siano nascosti (gestito anche da updateHeaderAuthContainersVisibility)
         userDisplayNameElement.textContent = '';
         headerUserAvatarElement.style.display = 'none';
         return;
     }
 
-    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente';
-    let avatarToDisplay = generateBlockieAvatar(user.uid, 32, { size: 8 }); // Default Blockie
+    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente'; // Fallback iniziale
+    let avatarSrcToSet = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 }); // Default Blockie per navbar
+    let altText = `${nicknameToShow}'s Blockie Avatar`;
 
-    try {
-        const userProfileRef = doc(db, 'userProfiles', user.uid);
-        const docSnap = await getDoc(userProfileRef);
-        if (docSnap.exists()) {
-            const profileData = docSnap.data();
-            if (profileData.nickname) {
-                nicknameToShow = profileData.nickname;
-            }
-            // Controlla se esiste un URL per l'avatar piccolo
-            if (profileData.avatarUrls && profileData.avatarUrls.small) {
-                avatarToDisplay = profileData.avatarUrls.small;
-            }
+    if (profileData) { // Se abbiamo i dati del profilo (da onSnapshot)
+        if (profileData.nickname) {
+            nicknameToShow = profileData.nickname;
         }
-    } catch (error) {
-        console.error('Errore caricamento profilo utente per display header:', error);
-    }
+        altText = `${nicknameToShow}'s Avatar`; // Aggiorna alt text con nickname corretto
 
-    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-    headerUserAvatarElement.src = avatarToDisplay;
-    headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
+        if (profileData.avatarUrls && (profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile)) {
+            let baseUrl = profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile; // Preferisci thumbnail
+            
+            // Applica cache busting
+            if (profileData.profileUpdatedAt && profileData.profileUpdatedAt.seconds) {
+                avatarSrcToSet = `${baseUrl}?v=${profileData.profileUpdatedAt.seconds}`;
+            } else if (profileData.profileUpdatedAt instanceof Date) {
+                avatarSrcToSet = `${baseUrl}?v=${profileData.profileUpdatedAt.getTime()}`;
+            } else {
+                avatarSrcToSet = baseUrl; // Nessun timestamp per cache busting
+            }
+            altText = `${nicknameToShow}'s Custom Avatar`;
+        }
+        // Se profileData esiste ma non ci sono avatarUrls, avatarSrcToSet rimane il Blockie generato sopra.
+    }
+    // Se profileData è null (es. profilo non ancora creato o errore nel fetch), 
+    // nicknameToShow e avatarSrcToSet useranno i fallback basati su `user` e Blockie.
+
+    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`; // escapeHTML è già nel tuo codice
+    headerUserAvatarElement.src = avatarSrcToSet;
+    headerUserAvatarElement.alt = altText; // Usa l'alt text determinato
     headerUserAvatarElement.style.display = 'inline-block';
-    headerUserAvatarElement.style.backgroundColor = 'transparent'; // Per evitare sfondo se l'SVG del blockie è trasparente
+    headerUserAvatarElement.style.backgroundColor = 'transparent'; 
+
     headerUserAvatarElement.onerror = () => {
-        // Fallback se l'URL dell'avatar personalizzato non carica
-        console.warn("Errore caricamento avatar personalizzato nell'header, uso Blockie.");
-        headerUserAvatarElement.src = generateBlockieAvatar(user.uid, 32, { size: 8 });
-        // Non impostare display: none qui, vogliamo mostrare il blockie
+        console.warn(`[Main.js Navbar] Errore caricamento avatar: ${headerUserAvatarElement.src}. Fallback finale a Blockie.`);
+        if (user && user.uid) { // Assicurati che user.uid sia ancora accessibile
+            headerUserAvatarElement.src = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 });
+            headerUserAvatarElement.alt = `${nicknameToShow}'s Blockie Avatar (fallback errore)`;
+        } else {
+            headerUserAvatarElement.style.display = 'none'; // Nascondi se non si può generare Blockie
+        }
     };
 }
 
@@ -370,6 +388,12 @@ function populateMobileMenu() {
     if (mobileUl.hasChildNodes()) {
         mobileMenuTarget.appendChild(mobileUl);
     }
+}
+
+function loadContentSpecificFeatures(user) {
+    // console.log('[Main.js] loadContentSpecificFeatures chiamata per utente:', user ? user.uid : null);
+    // TODO: Implementare logica per caricare funzionalità specifiche della pagina
+    // basate sull'utente o sul percorso della pagina corrente.
 }
 
 function setupDesktopCommunityDropdown() {
@@ -567,6 +591,42 @@ function initializeNewNavbar() {
     populateMobileMenu();
     setupDesktopCommunityDropdown();
     console.log('[initializeNewNavbar] Nuova navbar inizializzata.');
+}
+
+function updateUIBasedOnAuthState(user, profileData) {
+    console.log('[Main.js updateUIBasedOnAuthState] Chiamata con utente:', user ? user.uid : null);
+    // console.log('[Main.js updateUIBasedOnAuthState] ProfileData ricevuto:', profileData); 
+
+    // Aggiorna la visibilità dei container principali Login/Profilo nell'header
+    updateHeaderAuthContainersVisibility(user); // Funzione già presente nel tuo codice
+
+    // Aggiorna l'avatar e il nome utente nell'header usando profileData reattivo
+    loadHeaderUserProfileDisplay(user, profileData); // Funzione già presente e corretta nel tuo codice
+
+    // Aggiorna i link dinamici nel menu mobile (es. Profilo, Logout/Login)
+    updateLoginLogoutLinks(user); // Funzione già presente nel tuo codice
+
+    // Aggiorna la visibilità del link "Scrivi Articolo" nella navbar desktop e mobile
+    const navWriteArticleDropdownDesktop = document.getElementById('navWriteArticleDropdown');
+    if (navWriteArticleDropdownDesktop) {
+        navWriteArticleDropdownDesktop.style.display = user ? 'list-item' : 'none';
+    }
+    // (La logica per 'mobile-navWriteArticleDropdown' è già in updateLoginLogoutLinks)
+
+
+    // Aggiorna il link Admin Dashboard nel footer (se l'utente è admin)
+    // La funzione updateAdminDashboardLink gestisce il recupero dei custom claims
+    // e la visualizzazione del link nel footer, puoi chiamarla qui.
+    updateAdminDashboardLink(user); // Funzione già presente nel tuo codice
+
+
+    // Inizializza/aggiorna altre interazioni UI specifiche (es. homepage)
+    // Se initializeHomepageArticleInteractions deve essere chiamata qui:
+    if (document.getElementById('articlesSection')) { // O un altro check per la homepage
+        initializeHomepageArticleInteractions(user); // Funzione già presente nel tuo codice
+    }
+    
+    console.log('[Main.js updateUIBasedOnAuthState] Fine aggiornamenti UI orchestrati.');
 }
 
 export { db, auth };
@@ -853,6 +913,7 @@ document.addEventListener('DOMContentLoaded', function () {
             applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
         });
     }
+
     function setupModalControls() {
         if (showLoginBtn && loginModal) {
             showLoginBtn.addEventListener('click', (e) => {
@@ -913,39 +974,48 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+
+
 onAuthStateChanged(auth, async (user) => {
-    console.log('[main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? `'${user.uid}'` : 'null');
+    console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
+    loggedInUser = user; // Aggiorna lo stato globale dell'utente loggato
 
-    updateHeaderAuthContainersVisibility(user);
+    // Annulla l'iscrizione dal listener del profilo precedente, se esistente
+    if (currentUserProfileUnsubscribe) {
+        console.log('[Main.js onAuthStateChanged] Annullamento iscrizione dal listener profilo navbar precedente.');
+        currentUserProfileUnsubscribe();
+        currentUserProfileUnsubscribe = null;
+    }
+
     if (user) {
-        await loadHeaderUserProfileDisplay(user);
-    } else {
-        loadHeaderUserProfileDisplay(null);
-    }
-    await updateLoginLogoutLinks(user);
-    await updateAdminDashboardLink(user);
+        // Utente loggato: imposta un listener onSnapshot per il suo profilo
+        const userProfileRef = doc(db, 'userProfiles', user.uid);
+        console.log(`[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${user.uid}`);
 
-    if (document.getElementById('articlesGrid')) {
-        setTimeout(async () => {
-            await initializeHomepageArticleInteractions(user);
-        }, 100);
-    }
-    if (user && user.emailVerified) {
-        const isNewlyRegistered = sessionStorage.getItem('newlyRegistered');
-        if (isNewlyRegistered) {
-            try {
-                const profileSnap = await getDoc(doc(db, 'userProfiles', user.uid));
-                let nickname = user.email.split('@')[0];
-                if (profileSnap.exists() && profileSnap.data().nickname) {
-                    nickname = profileSnap.data().nickname;
-                }
-                showToast(`Benvenuto/a su asyncDonkey.io, ${escapeHTML(nickname)}!`, 'success', 7000);
-            } catch (e) {
-                showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
-            } finally {
-                sessionStorage.removeItem('newlyRegistered');
+        currentUserProfileUnsubscribe = onSnapshot(userProfileRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const userProfileData = docSnap.data();
+                console.log('[Main.js onSnapshot Navbar] Dati profilo ricevuti/aggiornati per navbar:', userProfileData);
+                updateUIBasedOnAuthState(user, userProfileData); // Funzione che aggiorna tutta l'UI
+            } else {
+                // Profilo non ancora esistente o errore (es. nuovo utente)
+                console.warn(`[Main.js onSnapshot Navbar] Profilo per UID ${user.uid} non trovato. La navbar userà dati Auth di fallback.`);
+                updateUIBasedOnAuthState(user, null);
             }
-        }
+        }, (error) => {
+            console.error('[Main.js onSnapshot Navbar] Errore nel listener del profilo per navbar:', error);
+            updateUIBasedOnAuthState(user, null); // Usa dati Auth di fallback in caso di errore
+        });
+        
+        // Non chiamare più getDoc qui per userProfile, è gestito da onSnapshot
+        // La chiamata a loadContentSpecificFeatures può rimanere se non dipende da profileData caricato una tantum
+        loadContentSpecificFeatures(user); // Assicurati che questa funzione sappia che profileData arriva reattivamente
+
+    } else {
+        // Utente non loggato
+        console.log('[Main.js onAuthStateChanged] Utente non loggato.');
+        updateUIBasedOnAuthState(null, null);
+        loadContentSpecificFeatures(null);
     }
-    console.log('[main.js onAuthStateChanged] Aggiornamento UI completato.');
+    console.log('[Main.js onAuthStateChanged] Aggiornamento UI basato su AuthState completato (o in corso via onSnapshot).');
 });
