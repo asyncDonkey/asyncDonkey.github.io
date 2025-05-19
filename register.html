@@ -145,21 +145,21 @@
                     Entra a far parte della community di asyncDonkey.io!
                 </p>
 
-                <form id="registrationForm" class="form-field" novalidate>
+                <form id="registerForm" class="form-field" novalidate>
                     <div>
-                        <label for="regEmail">Email<span class="required-indicator">*</span></label>
-                        <input type="email" id="regEmail" name="regEmail" required autocomplete="email" />
+                        <label for="registerEmail">Email<span class="required-indicator">*</span></label>
+                        <input type="email" id="registerEmail" name="registerEmail" required autocomplete="email" />
                         <div id="emailError" class="error-message"></div>
                     </div>
 
                     <div>
-                        <label for="regPassword">Password<span class="required-indicator">*</span></label>
+                        <label for="registerPassword">Password<span class="required-indicator">*</span></label>
                         <input
                             type="password"
-                            id="regPassword"
-                            name="regPassword"
+                            id="registerPassword"
+                            name="registerPassword"
                             required
-                            minlength="8"
+                            minlength="8" 
                             pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                             autocomplete="new-password"
                         />
@@ -170,13 +170,11 @@
                     </div>
 
                     <div>
-                        <label for="regConfirmPassword"
-                            >Conferma Password<span class="required-indicator">*</span></label
-                        >
+                        <label for="registerConfirmPassword">Conferma Password<span class="required-indicator">*</span></label>
                         <input
                             type="password"
-                            id="regConfirmPassword"
-                            name="regConfirmPassword"
+                            id="registerConfirmPassword"
+                            name="registerConfirmPassword"
                             required
                             minlength="8"
                             autocomplete="new-password"
@@ -187,8 +185,8 @@
                     <hr style="margin: 25px 0" />
 
                     <div>
-                        <label for="regNickname">Nickname<span class="required-indicator">*</span></label>
-                        <input type="text" id="regNickname" name="regNickname" required minlength="3" maxlength="25" />
+                        <label for="registerNickname">Nickname<span class="required-indicator">*</span></label>
+                        <input type="text" id="registerNickname" name="registerNickname" required minlength="3" maxlength="25" />
                         <div class="info-section">
                             <p>
                                 Scegli con cura il tuo Nickname. Sarà il tuo identificativo pubblico sul sito.
@@ -202,8 +200,8 @@
                     </div>
 
                     <div>
-                        <label for="regNationality">Nazionalità<span class="required-indicator">*</span></label>
-                        <select id="regNationality" name="regNationality" required>
+                        <label for="registerNationality">Nazionalità<span class="required-indicator">*</span></label>
+                        <select id="registerNationality" name="registerNationality" required>
                             <option value="">Seleziona Nazionalità...</option>
                             <option value="AF">Afghanistan (AF)</option>
                             <option value="ZA">Sudafrica (ZA)</option>
@@ -407,7 +405,7 @@
                                 <strong>Per il momento, non potrà essere modificata</strong> dopo la registrazione.
                             </p>
                         </div>
-                        <div id="nationalityError" class="error-message"></div>
+                        <div id="nationalityError" class="error-message"></div> 
                     </div>
 
                     <hr style="margin: 25px 0" />
