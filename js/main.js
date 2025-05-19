@@ -50,36 +50,36 @@ const storage = getStorage(app); // INIZIALIZZA STORAGE
 // ----- INIZIO CODICE PER EMULATORI -----
 // Controlla se siamo in un contesto locale (es. localhost o 127.0.0.1)
 // Se l'hostname è vuoto (es. apertura diretta di file:///), gli emulatori non verranno usati.
-if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    try {
-        console.log("[main.js] Tentativo di connessione agli emulatori Firebase...");
+// if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+//     try {
+//         console.log("[main.js] Tentativo di connessione agli emulatori Firebase...");
 
-        // Connetti a Firestore Emulator (porta 8080, come configurato)
-        connectFirestoreEmulator(db, 'localhost', 8080);
-        console.log("[main.js] Connesso a Firestore Emulator su localhost:8080");
+//         // Connetti a Firestore Emulator (porta 8080, come configurato)
+//         connectFirestoreEmulator(db, 'localhost', 8080);
+//         console.log("[main.js] Connesso a Firestore Emulator su localhost:8080");
 
-        // Connetti a Auth Emulator (porta 9099, come configurato)
-        connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true }); // disableWarnings è opzionale
-        console.log("[main.js] Connesso a Auth Emulator su http://localhost:9099");
+//         // Connetti a Auth Emulator (porta 9099, come configurato)
+//         connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true }); // disableWarnings è opzionale
+//         console.log("[main.js] Connesso a Auth Emulator su http://localhost:9099");
 
-        // Connetti a Storage Emulator (porta 9199, default)
-        connectStorageEmulator(storage, "localhost", 9199);
-        console.log("[main.js] Connesso a Storage Emulator su localhost:9199");
+//         // Connetti a Storage Emulator (porta 9199, default)
+//         connectStorageEmulator(storage, "localhost", 9199);
+//         console.log("[main.js] Connesso a Storage Emulator su localhost:9199");
         
-        // Potresti aggiungere connectFunctionsEmulator qui se userai callable functions dal client
-        // import { getFunctions, connectFunctionsEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
-        // const functions = getFunctions(app);
-        // connectFunctionsEmulator(functions, "localhost", 5001); // Porta Functions Emulator
-        // console.log("[main.js] Connesso a Functions Emulator su localhost:5001");
+//         // Potresti aggiungere connectFunctionsEmulator qui se userai callable functions dal client
+//         // import { getFunctions, connectFunctionsEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+//         // const functions = getFunctions(app);
+//         // connectFunctionsEmulator(functions, "localhost", 5001); // Porta Functions Emulator
+//         // console.log("[main.js] Connesso a Functions Emulator su localhost:5001");
 
-        showToast("Collegato agli emulatori Firebase locali (Auth, Firestore, Storage)!", "info", 7000);
-    } catch (error) {
-        console.error("[main.js] Errore durante la connessione agli emulatori:", error);
-        showToast("Errore connessione emulatori Firebase. Vedi console.", "error", 7000);
-    }
-} else {
-    console.log("[main.js] Connesso ai servizi Firebase di produzione.");
-}
+//         showToast("Collegato agli emulatori Firebase locali (Auth, Firestore, Storage)!", "info", 7000);
+//     } catch (error) {
+//         console.error("[main.js] Errore durante la connessione agli emulatori:", error);
+//         showToast("Errore connessione emulatori Firebase. Vedi console.", "error", 7000);
+//     }
+// } else {
+//     console.log("[main.js] Connesso ai servizi Firebase di produzione.");
+// }
 // ----- FINE CODICE PER EMULATORI -----
 
 
