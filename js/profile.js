@@ -29,6 +29,7 @@ const profileSectionTitle = document.querySelector('#profile h2');
 const profileContent = document.getElementById('profileContent');
 const profileAvatarImg = document.getElementById('profileAvatar'); // ID corretto
 const profileEmailSpan = document.getElementById('profileEmail');
+const profileEmailRow = document.getElementById('profileEmailRow');
 const currentNicknameSpan = document.getElementById('currentNickname');
 const profileNationalitySpan = document.getElementById('profileNationality');
 const profileLoadingMessage = document.getElementById('profileLoadingMessage');
@@ -141,13 +142,25 @@ const BADGE_DEFINITIONS = {
 function renderExternalLinks(linksArray, isOwnProfile) {
     if (!externalLinksListUL || !noExternalLinksMessage) return;
     externalLinksListUL.innerHTML = '';
+
+    // Mostra la sezione solo se è il profilo dell'utente E ci sono link o si può aggiungere
+    if (!isOwnProfile || !externalLinksSection) { // Se non è il profilo proprio, non mostrare la sezione link esterni
+        if(externalLinksSection) externalLinksSection.style.display = 'none';
+        return;
+    }
+    externalLinksSection.style.display = 'block';
+
+
     if (!linksArray || linksArray.length === 0) {
         if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'list-item';
         return;
     }
     if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'none';
+
     linksArray.forEach((link, index) => {
         const li = document.createElement('li');
+        // ... (resto della logica di renderExternalLinks invariata,
+        // poiché questa funzione viene chiamata solo se isOwnProfile è true e la sezione è visibile)
         const linkDisplayDiv = document.createElement('div');
         linkDisplayDiv.className = 'link-display';
         const anchor = document.createElement('a');
@@ -161,25 +174,25 @@ function renderExternalLinks(linksArray, isOwnProfile) {
         urlSpan.textContent = ` (${link.url})`;
         linkDisplayDiv.appendChild(urlSpan);
         li.appendChild(linkDisplayDiv);
-        if (isOwnProfile) {
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'link-actions';
-            const editBtn = document.createElement('button');
-            editBtn.className = 'game-button edit-link-btn';
-            editBtn.textContent = 'Modifica';
-            editBtn.type = 'button';
-            editBtn.dataset.index = index;
-            editBtn.addEventListener('click', () => openExternalLinkFormForEdit(index));
-            actionsDiv.appendChild(editBtn);
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'game-button delete-link-btn';
-            deleteBtn.textContent = 'Elimina';
-            deleteBtn.type = 'button';
-            deleteBtn.dataset.index = index;
-            deleteBtn.addEventListener('click', () => handleDeleteExternalLink(index));
-            actionsDiv.appendChild(deleteBtn);
-            li.appendChild(actionsDiv);
-        }
+        // I bottoni Modifica/Elimina sono già implicitamente gestiti da isOwnProfile
+        // nel chiamante o nella logica di visualizzazione della sezione manageExternalLinksUI
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'link-actions';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'game-button edit-link-btn';
+        editBtn.textContent = 'Modifica';
+        editBtn.type = 'button';
+        editBtn.dataset.index = index;
+        editBtn.addEventListener('click', () => openExternalLinkFormForEdit(index));
+        actionsDiv.appendChild(editBtn);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'game-button delete-link-btn';
+        deleteBtn.textContent = 'Elimina';
+        deleteBtn.type = 'button';
+        deleteBtn.dataset.index = index;
+        deleteBtn.addEventListener('click', () => handleDeleteExternalLink(index));
+        actionsDiv.appendChild(deleteBtn);
+        li.appendChild(actionsDiv);
         externalLinksListUL.appendChild(li);
     });
 }
@@ -187,131 +200,128 @@ function renderExternalLinks(linksArray, isOwnProfile) {
 /**
  * Aggiorna l'interfaccia utente con i dati del profilo.
  * Questa funzione viene chiamata dal callback di onSnapshot.
+ * @param {object} data - Dati del profilo (da userProfiles o userPublicProfiles).
+ * @param {boolean} isOwnProfile - True se è il profilo dell'utente loggato.
+ * @param {string} uidLoaded - L'UID del profilo caricato.
  */
 function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
-    profileDataForDisplay = { ...data, userId: uidLoaded }; // Aggiorna la cache locale dei dati
+    profileDataForDisplay = { ...data, userId: uidLoaded, isPublicSnapshot: !isOwnProfile };
 
-    const profileNameForTitle = profileDataForDisplay.nickname || 'Utente';
+    const profileNameForTitle = data.nickname || 'Utente';
     document.title = `Profilo di ${profileNameForTitle} - asyncDonkey.io`;
     if (profileSectionTitle) {
         profileSectionTitle.textContent = isOwnProfile ? 'Il Mio Profilo' : `Profilo di ${profileNameForTitle}`;
     }
 
-    if (profileEmailSpan) profileEmailSpan.textContent = profileDataForDisplay.email || 'N/A';
-    if (currentNicknameSpan) currentNicknameSpan.textContent = profileDataForDisplay.nickname || 'Non impostato';
+    if (profileEmailRow) profileEmailRow.style.display = isOwnProfile && data.email ? 'flex' : 'none';
+    if (profileEmailSpan && isOwnProfile) profileEmailSpan.textContent = data.email || 'N/A';
+
+    if (currentNicknameSpan) currentNicknameSpan.textContent = data.nickname || 'Non impostato';
 
     if (profileNationalitySpan) {
-        if (profileDataForDisplay.nationalityCode && profileDataForDisplay.nationalityCode !== 'OTHER') {
-            const countryCodeOriginal = profileDataForDisplay.nationalityCode.toUpperCase();
+        // ... (logica nazionalità invariata)
+        if (data.nationalityCode && data.nationalityCode !== 'OTHER') {
+            const countryCodeOriginal = data.nationalityCode.toUpperCase();
             const countryCodeForLibrary = countryCodeOriginal.toLowerCase();
-            profileNationalitySpan.innerHTML = ''; // Pulisci prima
+            profileNationalitySpan.innerHTML = '';
             const flagIconSpan = document.createElement('span');
             flagIconSpan.classList.add('fi', `fi-${countryCodeForLibrary}`);
             flagIconSpan.style.marginRight = '8px';
             const codeTextNode = document.createTextNode(countryCodeOriginal);
             profileNationalitySpan.appendChild(flagIconSpan);
             profileNationalitySpan.appendChild(codeTextNode);
-        } else if (profileDataForDisplay.nationalityCode === 'OTHER') {
+        } else if (data.nationalityCode === 'OTHER') {
             profileNationalitySpan.textContent = 'Altro / Non specificato';
         } else {
             profileNationalitySpan.textContent = 'Non specificata';
         }
     }
 
-    // --- LOGICA AVATAR CON CACHE BUSTING (Modificata) ---
     if (profileAvatarImg) {
+        // ... (logica avatar invariata dall'ultima versione)
         let avatarSrcToSet;
-        let altText;
-        const profileNameForTitle = profileDataForDisplay.nickname || 'Utente'; // Assicurati che profileNameForTitle sia definito
+        let altText = `${profileNameForTitle}'s Avatar`;
+        let cacheBusterTimestamp = null;
+        let mainAvatarUrl = null;
 
-        if (profileDataForDisplay.avatarUrls && profileDataForDisplay.avatarUrls.profile) {
-            let baseUrl = profileDataForDisplay.avatarUrls.profile;
+        if (isOwnProfile && data.avatarUrls && data.avatarUrls.profile) {
+            mainAvatarUrl = data.avatarUrls.profile;
+            cacheBusterTimestamp = data.profileUpdatedAt;
+        } else if (!isOwnProfile && data.avatarUrls && data.avatarUrls.thumbnail) {
+            mainAvatarUrl = data.avatarUrls.thumbnail;
+            cacheBusterTimestamp = data.profilePublicUpdatedAt;
+        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) {
+             mainAvatarUrl = data.avatarUrls.small;
+             cacheBusterTimestamp = data.profileUpdatedAt;
+        }
+
+        if (mainAvatarUrl) {
             altText = `${profileNameForTitle}'s Custom Avatar`;
-            // Applica cache busting se profileUpdatedAt è disponibile
-            if (profileDataForDisplay.profileUpdatedAt && profileDataForDisplay.profileUpdatedAt.seconds) {
-                avatarSrcToSet = `${baseUrl}?v=${profileDataForDisplay.profileUpdatedAt.seconds}`;
-            } else if (profileDataForDisplay.profileUpdatedAt instanceof Date) {
-                avatarSrcToSet = `${baseUrl}?v=${profileDataForDisplay.profileUpdatedAt.getTime()}`;
+            if (cacheBusterTimestamp && cacheBusterTimestamp.seconds) {
+                avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.seconds}`;
+            } else if (cacheBusterTimestamp instanceof Date) {
+                avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.getTime()}`;
             } else {
-                avatarSrcToSet = baseUrl; // Nessun timestamp per cache busting
+                avatarSrcToSet = mainAvatarUrl;
             }
         } else if (uidLoaded) {
-            // Se non c'è avatar personalizzato, usa Blockie (uidLoaded DEVE essere disponibile)
             avatarSrcToSet = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
             altText = `${profileNameForTitle}'s Blockie Avatar`;
         } else {
-            // Fallback ESTREMO se uidLoaded non fosse disponibile per qualche motivo qui
-            // In questo caso, DEFAULT_AVATAR_IMAGE_PATH potrebbe essere usato se si aggiunge l'immagine
-            // o si lascia vuoto/un placeholder generico. Per ora, proviamo a evitarlo.
-            // Se si verifica, indica un problema nel flusso di dati a updateProfilePageUI.
-            console.warn(
-                '[AthenaDev Debug - UpdateUI] uidLoaded non disponibile per generare Blockie come default diretto.'
-            );
-            avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH; // Manteniamo il vecchio default path come estremo fallback
+            avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH;
             altText = `${profileNameForTitle}'s Default Avatar`;
         }
-
-        console.log(`[AthenaDev Debug - UpdateUI] Impostazione src avatar: ${avatarSrcToSet}`);
-        console.log(`[AthenaDev Debug - UpdateUI] Dati profilo per avatar:`, {
-            avatarUrls: profileDataForDisplay.avatarUrls,
-            profileUpdatedAt: profileDataForDisplay.profileUpdatedAt,
-        });
-
+        
         profileAvatarImg.src = avatarSrcToSet;
         profileAvatarImg.alt = altText;
         profileAvatarImg.onerror = () => {
-            console.warn(
-                `[AthenaDev Debug - UpdateUI] Errore caricamento avatar: ${avatarSrcToSet}. Uso Blockie come fallback finale.`
-            );
+            console.warn(`[AthenaDev Debug - UpdateUI] Errore caricamento avatar: ${avatarSrcToSet}. Fallback.`);
             if (uidLoaded) {
-                // Assicurati che uidLoaded sia disponibile per generare il Blockie di fallback
                 profileAvatarImg.src = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
                 profileAvatarImg.alt = `${profileNameForTitle}'s Blockie Avatar (fallback errore)`;
             } else {
-                // Se uidLoaded non è disponibile neanche qui, non possiamo generare un Blockie.
-                // Potremmo nascondere l'immagine o usare un placeholder SVG inline o il DEFAULT_AVATAR_IMAGE_PATH
-                // se si decide di aggiungere quel file.
-                console.error('[AthenaDev Debug - UpdateUI] uidLoaded non disponibile per Blockie in onerror.');
-                if (DEFAULT_AVATAR_IMAGE_PATH && profileAvatarImg.src !== DEFAULT_AVATAR_IMAGE_PATH) {
-                    profileAvatarImg.src = DEFAULT_AVATAR_IMAGE_PATH; // Ultimo tentativo se il file esistesse
-                    profileAvatarImg.alt = `${profileNameForTitle}'s Default Avatar (fallback errore critico)`;
-                } else {
-                    profileAvatarImg.style.display = 'none'; // Nascondi se non c'è nulla da mostrare
-                }
+                profileAvatarImg.src = DEFAULT_AVATAR_IMAGE_PATH;
+                profileAvatarImg.alt = `${profileNameForTitle}'s Default Avatar (fallback errore critico)`;
             }
+            profileAvatarImg.onerror = null; 
         };
     }
 
-    if (statusMessageDisplay) {
-        statusMessageDisplay.textContent = profileDataForDisplay.statusMessage || '';
-        if (!profileDataForDisplay.statusMessage && isOwnProfile) {
-            statusMessageDisplay.innerHTML =
-                '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
-        } else if (!profileDataForDisplay.statusMessage && !isOwnProfile) {
-            statusMessageDisplay.innerHTML =
-                '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
+    // Gestione Status Message (ORA POTENZIALMENTE PUBBLICO)
+    if (statusMessageSection && statusMessageDisplay) {
+        if (data.statusMessage && data.statusMessage.trim() !== '') {
+            statusMessageSection.style.display = 'block';
+            statusMessageDisplay.textContent = data.statusMessage;
+        } else {
+            // Se è il profilo proprio e non c'è messaggio, mostra l'invito
+            if (isOwnProfile) {
+                statusMessageSection.style.display = 'block';
+                statusMessageDisplay.innerHTML =
+                    '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
+            } else {
+                // Se è il profilo di un altro e non c'è messaggio pubblico, nascondi la sezione
+                statusMessageSection.style.display = 'none';
+            }
         }
     }
-    if (statusMessageSection) statusMessageSection.style.display = 'block';
 
-    if (externalLinksSection) {
-        externalLinksSection.style.display = 'block';
-        renderExternalLinks(profileDataForDisplay.externalLinks || [], isOwnProfile);
-    }
-
+    // Gestione Bio (disponibile sia in userProfiles che userPublicProfiles)
     if (bioSection) bioSection.style.display = 'block';
     if (bioDisplay) {
-        if (profileDataForDisplay.bio && profileDataForDisplay.bio.trim() !== '') {
-            bioDisplay.textContent = profileDataForDisplay.bio;
+        // ... (logica bio invariata)
+        if (data.bio && data.bio.trim() !== '') {
+            bioDisplay.textContent = data.bio;
         } else {
-            bioDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuna bio impostata.</p>';
+            bioDisplay.innerHTML = `<p style="color: var(--text-color-muted);">Nessuna bio impostata.</p>`;
         }
     }
 
+    // Gestione Badges
     if (badgesSection && badgesDisplayContainer && noBadgesMessage) {
+        // ... (logica badges invariata)
         badgesDisplayContainer.innerHTML = '';
         noBadgesMessage.style.display = 'none';
-        const earnedBadgesArray = profileDataForDisplay.earnedBadges || [];
+        const earnedBadgesArray = isOwnProfile ? (data.earnedBadges || []) : [];
         if (earnedBadgesArray.length > 0) {
             badgesSection.style.display = 'block';
             earnedBadgesArray.forEach((badgeId) => {
@@ -339,15 +349,12 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
                         }
                     });
                     badgesDisplayContainer.appendChild(badgeIconElement);
-                } else {
-                    console.warn(`Definizione non trovata per il badge ID: ${badgeId}`);
                 }
             });
         } else {
             if (isOwnProfile) {
                 badgesSection.style.display = 'block';
-                noBadgesMessage.textContent =
-                    'Nessun riconoscimento ancora ottenuto. Continua a contribuire e giocare!';
+                noBadgesMessage.textContent = 'Nessun riconoscimento ancora ottenuto.';
                 noBadgesMessage.style.display = 'block';
             } else {
                 badgesSection.style.display = 'none';
@@ -355,44 +362,49 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         }
     }
 
-    // Mostra/nascondi sezioni e form basati su isOwnProfile
+    // Mostra/nascondi sezioni e form di modifica basati su isOwnProfile
     if (isOwnProfile) {
         if (emailVerificationBanner && loggedInUser && !loggedInUser.emailVerified) {
             emailVerificationBanner.style.display = 'block';
             if (resendEmailMessage) resendEmailMessage.textContent = '';
         }
+        
         if (updateStatusForm) {
             updateStatusForm.style.display = 'flex';
             if (statusMessageInput)
-                statusMessageInput.placeholder = profileDataForDisplay.statusMessage
+                statusMessageInput.placeholder = data.statusMessage
                     ? 'Modifica il tuo stato attuale...'
                     : 'Come ti senti oggi?';
         }
-        if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
         if (updateBioForm) {
             updateBioForm.style.display = 'block';
             if (bioInput)
-                bioInput.placeholder = profileDataForDisplay.bio
+                bioInput.placeholder = data.bio
                     ? 'Modifica la tua bio...'
                     : 'Scrivi qualcosa di te...';
         }
-        updateBioCharCounter(); // Chiamala per inizializzare correttamente
+
+        if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
+        renderExternalLinks(data.externalLinks || [], true);
+        
+        updateBioCharCounter();
         if (avatarUploadSection) avatarUploadSection.style.display = 'block';
+
     } else {
         // Profilo di un altro utente
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
-        if (updateStatusForm) updateStatusForm.style.display = 'none';
-        if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'none';
+        if (updateStatusForm) updateStatusForm.style.display = 'none'; // Form di modifica stato nascosto
         if (updateBioForm) updateBioForm.style.display = 'none';
+        if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'none';
+        if (externalLinksSection) externalLinksSection.style.display = 'none';
         if (avatarUploadSection) avatarUploadSection.style.display = 'none';
     }
 
     if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
     if (profileContent) profileContent.style.display = 'block';
 }
-
 /**
- * Carica i dati del profilo utente e imposta un listener per gli aggiornamenti.
+ * Carica i dati del profilo utente (privato o pubblico) e imposta un listener.
  */
 function loadProfileData(uidToLoad, isOwnProfile) {
     console.log(`[AthenaDev Debug - Load] Inizio loadProfileData per UID: ${uidToLoad}, isOwnProfile: ${isOwnProfile}`);
@@ -430,27 +442,28 @@ function loadProfileData(uidToLoad, isOwnProfile) {
         currentProfileListenerUnsubscribe = null;
     }
 
-    const userProfileRef = doc(db, 'userProfiles', uidToLoad);
+    // MODIFICA CHIAVE: Scegli la collezione da cui leggere
+    const collectionPath = isOwnProfile ? 'userProfiles' : 'userPublicProfiles';
+    const userProfileRef = doc(db, collectionPath, uidToLoad);
+
+    console.log(`[AthenaDev Debug - Load] Ascolto su: ${collectionPath}/${uidToLoad}`);
 
     currentProfileListenerUnsubscribe = onSnapshot(
         userProfileRef,
         (docSnap) => {
-            console.log('[AthenaDev Debug - onSnapshot] Dati profilo ricevuti/aggiornati da Firestore.');
+            console.log(`[AthenaDev Debug - onSnapshot] Dati da ${collectionPath} ricevuti/aggiornati per ${uidToLoad}.`);
             if (docSnap.exists()) {
-                const newProfileData = docSnap.data();
-                console.log('[AthenaDev Debug - onSnapshot] Dati grezzi:', JSON.parse(JSON.stringify(newProfileData)));
-                // console.log('[AthenaDev Debug - onSnapshot] avatarUrls:', newProfileData.avatarUrls);
-                // console.log('[AthenaDev Debug - onSnapshot] profileUpdatedAt:', newProfileData.profileUpdatedAt);
-
-                updateProfilePageUI(newProfileData, isOwnProfile, uidToLoad);
+                const profileData = docSnap.data();
+                // console.log('[AthenaDev Debug - onSnapshot] Dati grezzi:', JSON.parse(JSON.stringify(profileData)));
+                updateProfilePageUI(profileData, isOwnProfile, uidToLoad);
             } else {
-                // Documento profilo non trovato
+                // Documento profilo (privato o pubblico) non trovato
                 document.title = 'Profilo Non Trovato - asyncDonkey.io';
                 if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Non Trovato';
                 if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
                 if (profileLoginMessage) {
                     profileLoginMessage.style.display = 'block';
-                    profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
+                    profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato nella collezione ${collectionPath}.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
                 }
                 if (profileContent) profileContent.style.display = 'none';
                 // Nascondi sezioni specifiche se il profilo non esiste
@@ -465,7 +478,7 @@ function loadProfileData(uidToLoad, isOwnProfile) {
         (error) => {
             document.title = 'Errore Profilo - asyncDonkey.io';
             if (profileSectionTitle) profileSectionTitle.textContent = 'Errore Profilo';
-            console.error('[AthenaDev Debug - onSnapshot] Errore nel listener del profilo:', error);
+            console.error(`[AthenaDev Debug - onSnapshot] Errore nel listener del profilo ${collectionPath}/${uidToLoad}:`, error);
             if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
             if (profileLoginMessage) {
                 profileLoginMessage.style.display = 'block';
@@ -1079,18 +1092,21 @@ onAuthStateChanged(auth, (user) => {
 
     if (profileUserIdFromUrl) {
         const isOwn = loggedInUser ? loggedInUser.uid === profileUserIdFromUrl : false;
-        loadProfileData(profileUserIdFromUrl, isOwn);
+        loadProfileData(profileUserIdFromUrl, isOwn); // Passa isOwn per caricare da userProfiles o userPublicProfiles
         if (isOwn) {
+            if (myArticlesSection) myArticlesSection.style.display = 'block'; // Mostra la sezione articoli se è il profilo proprio
             loadMyArticles(profileUserIdFromUrl);
-            // La visibilità di avatarUploadSection è gestita da updateProfilePageUI
+            // La visibilità di avatarUploadSection e altri form di modifica è gestita da updateProfilePageUI
         } else {
             if (myArticlesSection) myArticlesSection.style.display = 'none';
-            if (avatarUploadSection) avatarUploadSection.style.display = 'none'; // Assicura sia nascosto per altri
+            // avatarUploadSection e altri form di modifica sono nascosti da updateProfilePageUI quando isOwnProfile è false
         }
     } else if (loggedInUser) {
-        loadProfileData(loggedInUser.uid, true);
+        // Nessun userId nell'URL, ma l'utente è loggato -> carica il profilo dell'utente loggato
+        loadProfileData(loggedInUser.uid, true); // È il profilo proprio
+        if (myArticlesSection) myArticlesSection.style.display = 'block';
         loadMyArticles(loggedInUser.uid);
-        // La visibilità di avatarUploadSection è gestita da updateProfilePageUI
+        // La visibilità di avatarUploadSection e altri form di modifica è gestita da updateProfilePageUI
     } else {
         // Utente non loggato e nessun userId nell'URL
         profileDataForDisplay = null; // Resetta dati locali
@@ -1101,6 +1117,7 @@ onAuthStateChanged(auth, (user) => {
             profileLoginMessage.innerHTML =
                 '<p>Per visualizzare o modificare un profilo, <a href="register.html?authAction=login">accedi</a> o <a href="register.html?authAction=signup">registrati</a>.</p>';
         }
+        // Nascondi tutte le sezioni specifiche del profilo
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
         if (statusMessageSection) statusMessageSection.style.display = 'none';
         if (externalLinksSection) externalLinksSection.style.display = 'none';
@@ -1109,6 +1126,7 @@ onAuthStateChanged(auth, (user) => {
         if (badgesSection) badgesSection.style.display = 'none';
         if (myArticlesSection) myArticlesSection.style.display = 'none';
         if (avatarUploadSection) avatarUploadSection.style.display = 'none';
+        
         document.title = 'Profilo Utente - asyncDonkey.io';
         if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Utente';
     }
