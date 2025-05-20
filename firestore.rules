@@ -65,6 +65,22 @@ service cloud.firestore {
                         request.resource.data.nationalityCode == resource.data.nationalityCode &&
                         request.resource.data.earnedBadges == resource.data.earnedBadges;
       allow delete: if false;
+    // REGOLE PER LE NOTIFICHE UTENTE (INSERITE QUI, DENTRO userProfiles/{userId})
+      match /notifications/{notificationId} {
+        // Un utente autenticato può leggere le proprie notifiche (sia un singolo documento che una lista)
+        allow read: if request.auth != null && request.auth.uid == userId;
+
+        // Solo il proprietario della notifica può aggiornarla (es. per marcarla come letta)
+        // Questa regola è specifica: permette solo di cambiare 'read' da false a true.
+        allow update: if request.auth != null && request.auth.uid == userId &&
+                        request.resource.data.read == true && resource.data.read == false &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'updatedAt']) && 
+                        request.resource.data.keys().hasAll(['type', 'title', 'message', 'timestamp', 'read', 'icon']) && // Assicura che i campi obbligatori non vengano rimossi
+                        request.resource.data.updatedAt == request.time; // Forza l'aggiornamento di un timestamp se cambi 'updatedAt'
+
+        // Nessuno (dal client) può creare o cancellare notifiche. Queste sono gestite dal backend (Cloud Functions).
+        allow create, delete: if false;
+      }
     }
 
     match /leaderboardScores/{scoreId} {
