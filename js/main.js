@@ -849,7 +849,8 @@ function setupNotificationBellListener(userId) {
         console.error("Firestore 'db' instance is not available in main.js for notifications.");
         return;
     }
-    if (notificationListener) { // Rimuovi listener precedente se esiste
+    if (notificationListener) {
+        // Rimuovi listener precedente se esiste
         clearNotificationBellListener(); // clearNotificationBellListener si occuperà anche di nascondere il bell
     }
 
@@ -864,37 +865,41 @@ function setupNotificationBellListener(userId) {
             bellLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 // TODO: (A.5.4) Mostra il pannello/dropdown delle notifiche qui
-                console.log("Notification bell clicked! Future: show notifications panel.");
+                console.log('Notification bell clicked! Future: show notifications panel.');
             });
             bellLink.setAttribute('data-listener-attached', 'true');
         }
     } else {
-        console.warn("setupNotificationBellListener: notificationBellContainer non trovato nel DOM.");
+        console.warn('setupNotificationBellListener: notificationBellContainer non trovato nel DOM.');
         return; // Non procedere se il contenitore non c'è
     }
 
-    const notificationsRef = collection(db, "userProfiles", userId, "notifications"); // Uso corretto di collection()
-    const unreadNotificationsQuery = query(notificationsRef, where("read", "==", false));
+    const notificationsRef = collection(db, 'userProfiles', userId, 'notifications'); // Uso corretto di collection()
+    const unreadNotificationsQuery = query(notificationsRef, where('read', '==', false));
 
-    notificationListener = onSnapshot(unreadNotificationsQuery, snapshot => {
-        const unreadCount = snapshot.size;
-        
-        if (counterElement) {
-            if (unreadCount > 0) {
-                counterElement.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                counterElement.style.display = 'inline-block';
-            } else {
-                counterElement.style.display = 'none';
+    notificationListener = onSnapshot(
+        unreadNotificationsQuery,
+        (snapshot) => {
+            const unreadCount = snapshot.size;
+
+            if (counterElement) {
+                if (unreadCount > 0) {
+                    counterElement.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    counterElement.style.display = 'inline-block';
+                } else {
+                    counterElement.style.display = 'none';
+                }
             }
+            if (bellLink) {
+                bellLink.title = unreadCount > 0 ? `${unreadCount} notifiche non lette` : 'Nessuna nuova notifica';
+            }
+        },
+        (error) => {
+            console.error('Errore nel listener delle notifiche: ', error);
+            if (counterElement) counterElement.style.display = 'none'; // Nascondi in caso di errore
         }
-        if (bellLink) {
-            bellLink.title = unreadCount > 0 ? `${unreadCount} notifiche non lette` : 'Nessuna nuova notifica';
-        }
-    }, error => {
-        console.error("Errore nel listener delle notifiche: ", error);
-        if (counterElement) counterElement.style.display = 'none'; // Nascondi in caso di errore
-    });
-    console.log("[Main.js setupNotificationBellListener] Notification listener attached for user:", userId);
+    );
+    console.log('[Main.js setupNotificationBellListener] Notification listener attached for user:', userId);
 }
 
 /**
@@ -904,7 +909,7 @@ function clearNotificationBellListener() {
     if (notificationListener) {
         notificationListener(); // Chiama la funzione di unsubscribe ritornata da onSnapshot
         notificationListener = null;
-        console.log("[Main.js clearNotificationBellListener] Notification listener detached.");
+        console.log('[Main.js clearNotificationBellListener] Notification listener detached.');
     }
     const bellContainer = document.getElementById('notificationBellContainer');
     if (bellContainer) {
@@ -916,7 +921,8 @@ function clearNotificationBellListener() {
         counterElement.style.display = 'none';
     }
     const bellLink = document.getElementById('notificationBellLink');
-    if (bellLink) { // Rimuovi l'attributo per permettere al listener di essere riattaccato
+    if (bellLink) {
+        // Rimuovi l'attributo per permettere al listener di essere riattaccato
         bellLink.removeAttribute('data-listener-attached');
     }
 }
@@ -1064,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // onAuthStateChanged AGGIORNATO
 onAuthStateChanged(auth, async (user) => {
     console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
-    loggedInUser = user; 
+    loggedInUser = user;
 
     if (currentUserProfileUnsubscribe) {
         console.log('[Main.js onAuthStateChanged] Annullamento iscrizione dal listener profilo navbar precedente.');
@@ -1086,7 +1092,7 @@ onAuthStateChanged(auth, async (user) => {
             (docSnap) => {
                 const userProfileData = docSnap.exists() ? docSnap.data() : null;
                 if (docSnap.exists()) {
-                     console.log(
+                    console.log(
                         '[Main.js onSnapshot Navbar] Dati profilo ricevuti/aggiornati per navbar:',
                         userProfileData
                     );
@@ -1096,18 +1102,18 @@ onAuthStateChanged(auth, async (user) => {
                     );
                 }
                 // Chiamata principale per aggiornare tutta l'UI, inclusa la logica della campanella
-                updateUIBasedOnAuthState(user, userProfileData); 
+                updateUIBasedOnAuthState(user, userProfileData);
             },
             (error) => {
                 console.error('[Main.js onSnapshot Navbar] Errore nel listener del profilo per navbar:', error);
                 updateUIBasedOnAuthState(user, null); // Usa dati Auth di fallback in caso di errore
             }
         );
-        
+
         // Configura il listener della campanella delle notifiche
         setupNotificationBellListener(user.uid); // Chiamata qui assicura che sia attiva quando l'utente è loggato
 
-        loadContentSpecificFeatures(user); 
+        loadContentSpecificFeatures(user);
     } else {
         // Utente non loggato
         console.log('[Main.js onAuthStateChanged] Utente non loggato.');

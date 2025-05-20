@@ -16,7 +16,7 @@ import {
     arrayUnion,
     arrayRemove,
     Timestamp,
-    documentId // AGGIUNTO: Necessario per le query 'in'
+    documentId, // AGGIUNTO: Necessario per le query 'in'
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
@@ -52,8 +52,11 @@ function formatFirebaseTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp?.toDate) return 'Data non disponibile';
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
     } catch (e) {
         console.error('Errore formattazione timestamp commento:', e);
@@ -122,10 +125,10 @@ async function handleGuestbookCommentLike(event) {
 
             const iconName = userNowHasLiked ? 'favorite' : 'favorite_border';
             button.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikesCount}</span>`;
-            
+
             button.classList.toggle('liked', userNowHasLiked);
             button.title = userNowHasLiked ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
-            
+
             const likeCountSpanInsideButton = button.querySelector('.like-count');
             if (likeCountSpanInsideButton) {
                 const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
@@ -184,10 +187,11 @@ async function loadComments() {
         }
 
         // --- MODIFICATO: Ottimizzazione recupero profili commentatori con query 'in' ---
-        const commenterIdsToFetch = [...new Set(querySnapshot.docs
-            .map(docSnap => docSnap.data().userId)
-            .filter(id => id) // Filtra userId nulli o indefiniti (per commenti ospiti)
-        )];
+        const commenterIdsToFetch = [
+            ...new Set(
+                querySnapshot.docs.map((docSnap) => docSnap.data().userId).filter((id) => id) // Filtra userId nulli o indefiniti (per commenti ospiti)
+            ),
+        ];
 
         const commenterProfilesMap = new Map();
         if (commenterIdsToFetch.length > 0) {
@@ -201,15 +205,15 @@ async function loadComments() {
             }
             try {
                 const snapshotsArray = await Promise.all(profilePromises);
-                snapshotsArray.forEach(snapshot => {
-                    snapshot.forEach(docSnap => {
+                snapshotsArray.forEach((snapshot) => {
+                    snapshot.forEach((docSnap) => {
                         if (docSnap.exists()) {
                             commenterProfilesMap.set(docSnap.id, docSnap.data());
                         }
                     });
                 });
             } catch (profileError) {
-                console.error("[comments.js] Errore durante il recupero batch dei profili commentatori:", profileError);
+                console.error('[comments.js] Errore durante il recupero batch dei profili commentatori:', profileError);
             }
         }
         // --- FINE OTTIMIZZAZIONE ---
@@ -223,9 +227,9 @@ async function loadComments() {
 
             const avatarImg = document.createElement('img');
             avatarImg.classList.add('comment-avatar-img'); // Applica stili CSS (es. width: 40px, height: 40px, border-radius: 50%)
-            
+
             let commenterAvatarSrc = DEFAULT_AVATAR_COMMENT_PATH;
-            let commenterNameDisplay = commentData.userName || commentData.name || "Anonimo";
+            let commenterNameDisplay = commentData.userName || commentData.name || 'Anonimo';
             let commenterNationalityCode = commentData.nationalityCode || null;
             const commenterProfile = commentData.userId ? commenterProfilesMap.get(commentData.userId) : null;
 
@@ -247,36 +251,42 @@ async function loadComments() {
                     if (commenterProfile.profileUpdatedAt && commenterProfile.profileUpdatedAt.seconds) {
                         commenterAvatarSrc += `?v=${commenterProfile.profileUpdatedAt.seconds}`;
                     }
-                } else if (commentData.userId) { // Profilo trovato ma senza avatarUrls validi
+                } else if (commentData.userId) {
+                    // Profilo trovato ma senza avatarUrls validi
                     commenterAvatarSrc = generateBlockieAvatar(commentData.userId, 40, { size: 8 });
                 }
                 // Se !commenterProfile ma commentData.userId esiste, gestito sotto
-            } else if (commentData.userId) { // userId presente ma profilo non trovato nella map (o errore fetch)
+            } else if (commentData.userId) {
+                // userId presente ma profilo non trovato nella map (o errore fetch)
                 commenterAvatarSrc = generateBlockieAvatar(commentData.userId, 40, { size: 8 });
-            } else { // Commento ospite (senza userId)
+            } else {
+                // Commento ospite (senza userId)
                 const seedForGuestBlockie = commentData.name || `anon-g-${commentId}`;
                 commenterAvatarSrc = generateBlockieAvatar(seedForGuestBlockie, 40, { size: 8 });
             }
-            
+
             avatarImg.src = commenterAvatarSrc;
             avatarImg.alt = `Avatar di ${commenterNameDisplay}`;
-            avatarImg.onerror = () => { avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH; avatarImg.onerror = null; };
-            
+            avatarImg.onerror = () => {
+                avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH;
+                avatarImg.onerror = null;
+            };
+
             // --- Struttura DOM commento (come nel tuo codice, con avatarImg inserito) ---
-            const headerDiv = document.createElement("div");
-            headerDiv.classList.add("comment-header", "d-flex", "align-items-center", "mb-2");
+            const headerDiv = document.createElement('div');
+            headerDiv.classList.add('comment-header', 'd-flex', 'align-items-center', 'mb-2');
             headerDiv.appendChild(avatarImg); // Aggiungi l'avatar all'inizio dell'header
 
             const nameAndDateDiv = document.createElement('div'); // Contenitore per nome e data
             nameAndDateDiv.classList.add('ms-2'); // Aggiungi un po' di margine se avatar e nome sono vicini
 
-            const nameStrong = document.createElement("strong");
-            if (commenterNationalityCode && commenterNationalityCode !== "OTHER") {
-                const flagSpan = document.createElement("span");
+            const nameStrong = document.createElement('strong');
+            if (commenterNationalityCode && commenterNationalityCode !== 'OTHER') {
+                const flagSpan = document.createElement('span');
                 flagSpan.className = `fi fi-${commenterNationalityCode.toLowerCase()} me-1`; // me-1 per spazio
                 nameStrong.appendChild(flagSpan);
             }
-            
+
             // Gestione link al profilo per utenti loggati
             if (commentData.userId) {
                 const userProfileLink = document.createElement('a');
@@ -289,17 +299,19 @@ async function loadComments() {
             }
             nameAndDateDiv.appendChild(nameStrong);
 
-            const dateSmall = document.createElement("small");
-            dateSmall.classList.add("text-muted", "ms-2", "comment-date-text"); // Classe per stile data
+            const dateSmall = document.createElement('small');
+            dateSmall.classList.add('text-muted', 'ms-2', 'comment-date-text'); // Classe per stile data
             dateSmall.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
             nameAndDateDiv.appendChild(dateSmall);
-            
+
             headerDiv.appendChild(nameAndDateDiv);
 
-            const messageP = document.createElement("p");
-            messageP.classList.add("comment-message", "mb-1", "mt-1"); // mt-1 per separare da header
-            messageP.textContent = commentData.message ? String(commentData.message).replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
-            
+            const messageP = document.createElement('p');
+            messageP.classList.add('comment-message', 'mb-1', 'mt-1'); // mt-1 per separare da header
+            messageP.textContent = commentData.message
+                ? String(commentData.message).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                : '';
+
             commentElement.appendChild(headerDiv);
             commentElement.appendChild(messageP);
 
@@ -320,13 +332,13 @@ async function loadComments() {
             likeButton.classList.toggle('liked', userHasLikedThisComment);
             likeButton.title = userHasLikedThisComment ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
             likeButton.disabled = !currentUser;
-            
+
             // Previene l'aggiunta multipla di listener se loadComments viene chiamato più volte
             if (!likeButton.hasAttribute('data-like-listener-attached')) {
                 likeButton.addEventListener('click', handleGuestbookCommentLike);
                 likeButton.setAttribute('data-like-listener-attached', 'true');
             }
-            
+
             const likeCountSpanInsideButton = likeButton.querySelector('.like-count');
             if (likeCountSpanInsideButton) {
                 const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
@@ -334,7 +346,10 @@ async function loadComments() {
                 if (currentLikes > 0) {
                     likeCountSpanInsideButton.classList.add('clickable-comment-like-count');
                     likeCountSpanInsideButton.title = 'Vedi a chi piace questo commento';
-                    const newListener = (e) => { e.stopPropagation(); openGuestbookLikedByListModal(commentId);};
+                    const newListener = (e) => {
+                        e.stopPropagation();
+                        openGuestbookLikedByListModal(commentId);
+                    };
                     likeCountSpanInsideButton.addEventListener('click', newListener);
                     likeCountSpanInsideButton.handleLikeCountClick = newListener;
                 } else {
@@ -455,16 +470,24 @@ async function handleCommentSubmit(event) {
 
 // --- Funzioni per la Modale "Liked By" per i Commenti del Guestbook ---
 // (populateGuestbookLikedByListModal è quella da modificare per gli avatar)
-function closeGuestbookLikedByListModal() { /* ... (codice invariato) ... */ 
+function closeGuestbookLikedByListModal() {
+    /* ... (codice invariato) ... */
     if (likedByModal) likedByModal.style.display = 'none';
     if (likedByModalList) likedByModalList.innerHTML = '';
     if (likedByModalLoading) likedByModalLoading.style.display = 'none';
     if (likedByModalNoLikes) likedByModalNoLikes.style.display = 'none';
 }
 
-async function openGuestbookLikedByListModal(commentId) { /* ... (codice invariato) ... */
-    if (!likedByModal) { console.error('[comments.js] Elemento likedByModal non trovato.'); return; }
-    if (!auth.currentUser) { showToast('Devi essere loggato per vedere i like.', 'info'); return; }
+async function openGuestbookLikedByListModal(commentId) {
+    /* ... (codice invariato) ... */
+    if (!likedByModal) {
+        console.error('[comments.js] Elemento likedByModal non trovato.');
+        return;
+    }
+    if (!auth.currentUser) {
+        showToast('Devi essere loggato per vedere i like.', 'info');
+        return;
+    }
     if (likedByModalList) likedByModalList.innerHTML = '';
     if (likedByModalNoLikes) likedByModalNoLikes.style.display = 'none';
     if (likedByModalLoading) likedByModalLoading.style.display = 'block';
@@ -474,7 +497,9 @@ async function openGuestbookLikedByListModal(commentId) { /* ... (codice invaria
 }
 
 async function populateGuestbookLikedByListModal(commentId) {
-    if (!likedByModalList || !likedByModalLoading || !likedByModalNoLikes || !db) { /* ... errore ... */ return; }
+    if (!likedByModalList || !likedByModalLoading || !likedByModalNoLikes || !db) {
+        /* ... errore ... */ return;
+    }
 
     try {
         const commentDocRef = doc(db, 'guestbookEntries', commentId);
@@ -482,14 +507,16 @@ async function populateGuestbookLikedByListModal(commentId) {
         let likedByUsersIds = [];
         if (commentSnap.exists()) {
             likedByUsersIds = commentSnap.data().likedBy || [];
-        } else { /* ... commento non trovato ... */ 
+        } else {
+            /* ... commento non trovato ... */
             console.warn(`[comments.js] Commento guestbook non trovato ID: ${commentId}`);
             likedByModalList.innerHTML = '<li>Errore: commento non trovato.</li>';
             if (likedByModalLoading) likedByModalLoading.style.display = 'none';
             return;
         }
 
-        if (likedByUsersIds.length === 0) { /* ... nessun like ... */ 
+        if (likedByUsersIds.length === 0) {
+            /* ... nessun like ... */
             if (likedByModalNoLikes) likedByModalNoLikes.style.display = 'block';
             likedByModalList.innerHTML = '';
         } else {
@@ -513,7 +540,8 @@ async function populateGuestbookLikedByListModal(commentId) {
 
                     let chosenAvatarUrl = null;
                     if (userData.avatarUrls) {
-                        if (userData.avatarUrls.small) { // Priorità a 'small' per liste
+                        if (userData.avatarUrls.small) {
+                            // Priorità a 'small' per liste
                             chosenAvatarUrl = userData.avatarUrls.small;
                         } else if (userData.avatarUrls.profile) {
                             chosenAvatarUrl = userData.avatarUrls.profile;
@@ -525,17 +553,21 @@ async function populateGuestbookLikedByListModal(commentId) {
                         if (userData.profileUpdatedAt && userData.profileUpdatedAt.seconds) {
                             userAvatarSrc += `?v=${userData.profileUpdatedAt.seconds}`;
                         }
-                    } else { // Nessun avatar personalizzato, usa Blockie
+                    } else {
+                        // Nessun avatar personalizzato, usa Blockie
                         userAvatarSrc = generateBlockieAvatar(userSnap.id, 32, { size: 8 });
                     }
                 } else {
                     console.warn(`[comments.js] Profilo (likedBy modal) non trovato: ${userSnap.id}`);
                     userAvatarSrc = generateBlockieAvatar(userIdForBlockie, 32, { size: 8 });
                 }
-                
+
                 avatarImg.src = userAvatarSrc;
                 avatarImg.alt = `Avatar di ${userNameDisplay}`;
-                avatarImg.onerror = () => { avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH; avatarImg.onerror = null; };
+                avatarImg.onerror = () => {
+                    avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH;
+                    avatarImg.onerror = null;
+                };
                 li.appendChild(avatarImg);
 
                 const nameSpan = document.createElement('span');
@@ -543,7 +575,11 @@ async function populateGuestbookLikedByListModal(commentId) {
                 nameSpan.textContent = userNameDisplay;
                 li.appendChild(nameSpan);
 
-                if (userSnap.exists() && userSnap.data().nationalityCode && userSnap.data().nationalityCode !== 'OTHER') {
+                if (
+                    userSnap.exists() &&
+                    userSnap.data().nationalityCode &&
+                    userSnap.data().nationalityCode !== 'OTHER'
+                ) {
                     const userDataNC = userSnap.data(); // riaccedi per sicurezza
                     const flagSpan = document.createElement('span');
                     flagSpan.className = `fi fi-${userDataNC.nationalityCode.toLowerCase()}`;
@@ -554,8 +590,9 @@ async function populateGuestbookLikedByListModal(commentId) {
                 likedByModalList.appendChild(li);
             });
         }
-    } catch (error) { /* ... gestione errore ... */ 
-         console.error(`[comments.js] Errore nel popolare la lista "Liked By" per commento guestbook:`, error);
+    } catch (error) {
+        /* ... gestione errore ... */
+        console.error(`[comments.js] Errore nel popolare la lista "Liked By" per commento guestbook:`, error);
         likedByModalList.innerHTML = '<li>Errore durante il caricamento della lista.</li>';
     } finally {
         if (likedByModalLoading) likedByModalLoading.style.display = 'none';
@@ -602,9 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!commentForm || !commentMessageInput || !submitCommentBtn || !commentsListDiv || !commentsListContainer) {
-        console.error(
-            '[comments.js] Uno o più Elementi DOM essenziali per la funzionalità guestbook sono mancanti.'
-        );
+        console.error('[comments.js] Uno o più Elementi DOM essenziali per la funzionalità guestbook sono mancanti.');
     }
 
     const user = auth.currentUser; // Controlla subito lo stato utente
@@ -614,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
             commentNameInput.required = false;
         } else {
             commentNameSection.style.display = 'block';
-            commentNameInput.required = true; 
+            commentNameInput.required = true;
         }
     }
 
@@ -643,7 +678,7 @@ onAuthStateChanged(auth, (user) => {
             commentNameInput.required = false;
         } else {
             commentNameSection.style.display = 'block';
-            commentNameInput.required = true; 
+            commentNameInput.required = true;
         }
     }
     if (commentsListDiv && db && currentPageId) {

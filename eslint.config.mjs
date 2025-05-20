@@ -35,7 +35,7 @@ export default [
     // 2. Configurazione base per file JavaScript Client-Side (ES Modules)
     {
         files: ['js/**/*.js', '*.js', '*.mjs'], // File .js nella cartella js, e .js, .mjs nella root
-        excludedFiles: ['functions/**/*.js', 'eslint.config.mjs'], // Escludi esplicitamente i file delle functions e questo file di config se *.js lo prende
+        ignores: ['functions/**/*.js', 'eslint.config.mjs'], // Escludi esplicitamente i file delle functions e questo file di config se *.js lo prende
         languageOptions: {
             ecmaVersion: 'latest',
             sourceType: 'module',

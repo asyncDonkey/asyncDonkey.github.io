@@ -32,16 +32,16 @@ const BADGE_ID_GLITCHZILLA_SLAYER = 'glitchzilla-slayer';
 // --- CONSTANTS FOR BADGE DETAILS (for Notifications) ---
 const BADGE_DETAILS = {
     [BADGE_ID_AUTORE_DEBUTTANTE]: {
-        name: "Autore Debuttante",
-        description: "Hai pubblicato il tuo primo articolo!",
-        icon: "emoji_events", // Icona specifica per questo badge
-        linkPath: "#badgesSection" // Aggiunto per coerenza, sarà parte di /profile.html?uid=...
+        name: 'Autore Debuttante',
+        description: 'Hai pubblicato il tuo primo articolo!',
+        icon: 'emoji_events', // Icona specifica per questo badge
+        linkPath: '#badgesSection', // Aggiunto per coerenza, sarà parte di /profile.html?uid=...
     },
     [BADGE_ID_GLITCHZILLA_SLAYER]: {
-        name: "Glitchzilla Slayer",
-        description: "Hai sconfitto Glitchzilla nel leggendario Donkey Runner!",
-        icon: "whatshot", // Icona specifica per questo badge
-        linkPath: "#badgesSection"
+        name: 'Glitchzilla Slayer',
+        description: 'Hai sconfitto Glitchzilla nel leggendario Donkey Runner!',
+        icon: 'whatshot', // Icona specifica per questo badge
+        linkPath: '#badgesSection',
     },
 };
 
@@ -53,8 +53,14 @@ const BADGE_DETAILS = {
  * Required fields: type, title, message. Optional: link, icon, relatedItemId.
  */
 async function createNotification(userId, notificationData) {
-    if (!userId || !notificationData || !notificationData.type || !notificationData.title || !notificationData.message) {
-        logger.error("createNotification: Missing required parameters.", { userId, notificationData });
+    if (
+        !userId ||
+        !notificationData ||
+        !notificationData.type ||
+        !notificationData.title ||
+        !notificationData.message
+    ) {
+        logger.error('createNotification: Missing required parameters.', { userId, notificationData });
         return null;
     }
 
@@ -62,13 +68,15 @@ async function createNotification(userId, notificationData) {
         ...notificationData,
         timestamp: FieldValue.serverTimestamp(), // Correct FieldValue usage
         read: false,
-        icon: notificationData.icon || "notifications", // Default icon
+        icon: notificationData.icon || 'notifications', // Default icon
     };
 
     try {
-        const notificationRef = db.collection("userProfiles").doc(userId).collection("notifications").doc();
+        const notificationRef = db.collection('userProfiles').doc(userId).collection('notifications').doc();
         await notificationRef.set(notificationPayload);
-        logger.info(`Notification created for user ${userId}, type: ${notificationPayload.type}, id: ${notificationRef.id}`);
+        logger.info(
+            `Notification created for user ${userId}, type: ${notificationPayload.type}, id: ${notificationRef.id}`
+        );
         return notificationRef.id;
     } catch (error) {
         logger.error(`Error creating notification for user ${userId}:`, error);
@@ -91,46 +99,52 @@ exports.handleArticleStatusNotifications = onDocumentUpdated('articles/{articleI
     const articleId = event.params.articleId;
 
     if (!articleAfter || !articleBefore) {
-        logger.info('handleArticleStatusNotifications: Snapshot data (before or after) is missing. Exiting.', { articleId });
+        logger.info('handleArticleStatusNotifications: Snapshot data (before or after) is missing. Exiting.', {
+            articleId,
+        });
         return;
     }
 
     const authorId = articleAfter.authorId;
     if (!authorId) {
-        logger.error('handleArticleStatusNotifications: authorId missing in article. Cannot send notification.', { articleId });
+        logger.error('handleArticleStatusNotifications: authorId missing in article. Cannot send notification.', {
+            articleId,
+        });
         return;
     }
 
     // Check if status actually changed
     if (articleBefore.status !== articleAfter.status) {
-        logger.info(`handleArticleStatusNotifications: Article ${articleId} status changed from '${articleBefore.status}' to '${articleAfter.status}'.`);
+        logger.info(
+            `handleArticleStatusNotifications: Article ${articleId} status changed from '${articleBefore.status}' to '${articleAfter.status}'.`
+        );
 
         if (articleAfter.status === 'published') {
             await createNotification(authorId, {
-                type: "article_published", // Consistent with your status
-                title: "Articolo Pubblicato!",
+                type: 'article_published', // Consistent with your status
+                title: 'Articolo Pubblicato!',
                 message: `Il tuo articolo "${articleAfter.title || 'Senza titolo'}" è stato pubblicato.`,
                 link: `/view-article.html?id=${articleId}`,
-                icon: "check_circle",
+                icon: 'check_circle',
                 relatedItemId: articleId,
             });
-        } else if (articleAfter.status === 'rejected') { // Using your confirmed status 'rejected'
+        } else if (articleAfter.status === 'rejected') {
+            // Using your confirmed status 'rejected'
             // Using your confirmed field 'rejectionReason'
             const reason = articleAfter.rejectionReason || 'Nessun motivo specificato.';
             // const snippetInfo = articleAfter.snippet ? ` Snippet: "${articleAfter.snippet}"` : ""; // Uncomment if snippet is desired in message
             await createNotification(authorId, {
-                type: "article_rejected",
-                title: "Articolo Respinto",
+                type: 'article_rejected',
+                title: 'Articolo Respinto',
                 message: `Il tuo articolo "${articleAfter.title || 'Senza titolo'}" è stato respinto. Motivo: ${reason}`,
                 link: `/submit-article.html?id=${articleId}`, // Or user's article management page
-                icon: "error",
+                icon: 'error',
                 relatedItemId: articleId,
             });
         }
         // Add other 'else if' blocks here for other status changes needing notifications
     }
 });
-
 
 // --- EXISTING FUNCTION: updateAuthorOnArticlePublish (MODIFIED for Badge Notification) ---
 exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}', async (event) => {
@@ -151,7 +165,7 @@ exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}',
     if (newValue.status === 'published' && previousValue.status !== 'published') {
         const authorId = newValue.authorId;
         if (!authorId) {
-            logger.error("updateAuthorOnArticlePublish: AuthorId missing in the published article:", articleId);
+            logger.error('updateAuthorOnArticlePublish: AuthorId missing in the published article:', articleId);
             return;
         }
 
@@ -170,7 +184,9 @@ exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}',
             // Update 'hasPublishedArticles' flag
             if (userProfileData.hasPublishedArticles !== true) {
                 profileUpdates.hasPublishedArticles = true;
-                logger.info(`updateAuthorOnArticlePublish: Flag 'hasPublishedArticles' will be set to true for user: ${authorId}`);
+                logger.info(
+                    `updateAuthorOnArticlePublish: Flag 'hasPublishedArticles' will be set to true for user: ${authorId}`
+                );
             }
 
             // Award 'Autore Debuttante' badge if not already earned
@@ -179,9 +195,14 @@ exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}',
                 if (FieldValue && typeof FieldValue.arrayUnion === 'function') {
                     profileUpdates.earnedBadges = FieldValue.arrayUnion(BADGE_ID_AUTORE_DEBUTTANTE);
                     newBadgeAwardedId = BADGE_ID_AUTORE_DEBUTTANTE; // Mark for notification
-                    logger.info(`updateAuthorOnArticlePublish: Badge '${BADGE_ID_AUTORE_DEBUTTANTE}' will be awarded to user: ${authorId}`);
+                    logger.info(
+                        `updateAuthorOnArticlePublish: Badge '${BADGE_ID_AUTORE_DEBUTTANTE}' will be awarded to user: ${authorId}`
+                    );
                 } else {
-                    logger.error('updateAuthorOnArticlePublish: CRITICAL ERROR - FieldValue.arrayUnion is not a function!', { fieldValueObject: FieldValue });
+                    logger.error(
+                        'updateAuthorOnArticlePublish: CRITICAL ERROR - FieldValue.arrayUnion is not a function!',
+                        { fieldValueObject: FieldValue }
+                    );
                 }
             }
 
@@ -202,8 +223,8 @@ exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}',
                 if (newBadgeAwardedId && BADGE_DETAILS[newBadgeAwardedId]) {
                     const badgeInfo = BADGE_DETAILS[newBadgeAwardedId];
                     await createNotification(authorId, {
-                        type: "new_badge",
-                        title: "Nuovo Badge Sbloccato!",
+                        type: 'new_badge',
+                        title: 'Nuovo Badge Sbloccato!',
                         message: `Hai ottenuto il badge: ${badgeInfo.name} ${badgeInfo.description}`,
                         link: `/profile.html?uid=${authorId}${badgeInfo.linkPath || ''}`,
                         icon: badgeInfo.icon,
@@ -212,7 +233,11 @@ exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}',
                 }
             }
         } catch (error) {
-            logger.error("updateAuthorOnArticlePublish: Error updating user profile or sending badge notification:", error, { authorId });
+            logger.error(
+                'updateAuthorOnArticlePublish: Error updating user profile or sending badge notification:',
+                error,
+                { authorId }
+            );
         }
     }
 });
@@ -224,7 +249,7 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
         return;
     }
     const scoreData = event.data.data();
-    const scoreId = event.params.scoreId; 
+    const scoreId = event.params.scoreId;
 
     if (scoreData.userId && scoreData.glitchzillaDefeated === true) {
         const userId = scoreData.userId;
@@ -235,7 +260,9 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
         try {
             const userProfileSnap = await userProfileRef.get();
             if (!userProfileSnap.exists) {
-                logger.warn(`awardGlitchzillaSlayer: User profile not found for userId: ${userId} from score ${scoreId}`);
+                logger.warn(
+                    `awardGlitchzillaSlayer: User profile not found for userId: ${userId} from score ${scoreId}`
+                );
                 return;
             }
             const userProfileData = userProfileSnap.data();
@@ -243,18 +270,24 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
             // Update 'hasDefeatedGlitchzilla' flag
             if (userProfileData.hasDefeatedGlitchzilla !== true) {
                 profileUpdatesGlitch.hasDefeatedGlitchzilla = true;
-                logger.info(`awardGlitchzillaSlayer: Flag 'hasDefeatedGlitchzilla' will be set to true for user: ${userId}`);
+                logger.info(
+                    `awardGlitchzillaSlayer: Flag 'hasDefeatedGlitchzilla' will be set to true for user: ${userId}`
+                );
             }
 
             // Award 'Glitchzilla Slayer' badge if not already earned
             const earnedBadges = userProfileData.earnedBadges || [];
             if (!earnedBadges.includes(BADGE_ID_GLITCHZILLA_SLAYER)) {
                 if (FieldValue && typeof FieldValue.arrayUnion === 'function') {
-                     profileUpdatesGlitch.earnedBadges = FieldValue.arrayUnion(BADGE_ID_GLITCHZILLA_SLAYER);
-                     newBadgeAwardedId = BADGE_ID_GLITCHZILLA_SLAYER; // Mark for notification
-                     logger.info(`awardGlitchzillaSlayer: Badge '${BADGE_ID_GLITCHZILLA_SLAYER}' will be awarded to user: ${userId}`);
+                    profileUpdatesGlitch.earnedBadges = FieldValue.arrayUnion(BADGE_ID_GLITCHZILLA_SLAYER);
+                    newBadgeAwardedId = BADGE_ID_GLITCHZILLA_SLAYER; // Mark for notification
+                    logger.info(
+                        `awardGlitchzillaSlayer: Badge '${BADGE_ID_GLITCHZILLA_SLAYER}' will be awarded to user: ${userId}`
+                    );
                 } else {
-                    logger.error('awardGlitchzillaSlayer: CRITICAL ERROR - FieldValue.arrayUnion is not a function!', { fieldValueObject: FieldValue });
+                    logger.error('awardGlitchzillaSlayer: CRITICAL ERROR - FieldValue.arrayUnion is not a function!', {
+                        fieldValueObject: FieldValue,
+                    });
                 }
             }
 
@@ -264,19 +297,22 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
                 } else {
                     logger.error(
                         'awardGlitchzillaSlayer: CRITICAL ERROR - FieldValue.serverTimestamp is not a function! Using Date() as fallback.',
-                         { fieldValueObject: FieldValue }
+                        { fieldValueObject: FieldValue }
                     );
                     profileUpdatesGlitch.updatedAt = new Date();
                 }
                 await userProfileRef.update(profileUpdatesGlitch);
-                logger.info(`awardGlitchzillaSlayer: User profile ${userId} updated with Glitchzilla data:`, profileUpdatesGlitch);
+                logger.info(
+                    `awardGlitchzillaSlayer: User profile ${userId} updated with Glitchzilla data:`,
+                    profileUpdatesGlitch
+                );
 
                 // Send notification for the newly awarded badge, if any
                 if (newBadgeAwardedId && BADGE_DETAILS[newBadgeAwardedId]) {
                     const badgeInfo = BADGE_DETAILS[newBadgeAwardedId];
                     await createNotification(userId, {
-                        type: "new_badge",
-                        title: "Nuovo Badge Sbloccato!",
+                        type: 'new_badge',
+                        title: 'Nuovo Badge Sbloccato!',
                         message: `Hai ottenuto il badge: ${badgeInfo.name} ${badgeInfo.description}`,
                         link: `/profile.html?uid=${userId}${badgeInfo.linkPath || ''}`,
                         icon: badgeInfo.icon,
@@ -285,33 +321,38 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
                 }
             }
         } catch (error) {
-            logger.error("awardGlitchzillaSlayer: Error updating user profile for Glitchzilla or sending badge notification:", error, { userId });
+            logger.error(
+                'awardGlitchzillaSlayer: Error updating user profile for Glitchzilla or sending badge notification:',
+                error,
+                { userId }
+            );
         }
     }
 });
 
-
 // --- EXISTING FUNCTION: processUploadedAvatar (UNCHANGED LOGIC) ---
-const AVATAR_THUMBNAIL_SIZE = 48; 
-const AVATAR_PROFILE_SIZE = 160;  
+const AVATAR_THUMBNAIL_SIZE = 48;
+const AVATAR_PROFILE_SIZE = 160;
 
 exports.processUploadedAvatar = onObjectFinalized(
     {
-        bucket: 'asyncdonkey.firebasestorage.app', 
+        bucket: 'asyncdonkey.firebasestorage.app',
         memory: '512MiB',
         timeoutSeconds: 120,
         cpu: 1,
     },
     async (event) => {
-        const fileObject = event.data; 
+        const fileObject = event.data;
         const filePath = fileObject.name;
         const contentType = fileObject.contentType;
         const bucketName = fileObject.bucket;
 
-        logger.info(`processUploadedAvatar: New file detected: ${filePath} in bucket ${bucketName} with type ${contentType}`);
+        logger.info(
+            `processUploadedAvatar: New file detected: ${filePath} in bucket ${bucketName} with type ${contentType}`
+        );
 
         if (!contentType || !contentType.startsWith('image/')) {
-            logger.log("processUploadedAvatar: Not an image. Exiting.");
+            logger.log('processUploadedAvatar: Not an image. Exiting.');
             return null;
         }
         if (!filePath || !filePath.startsWith('user-avatars/')) {
@@ -323,15 +364,15 @@ exports.processUploadedAvatar = onObjectFinalized(
             return null;
         }
         if (
-            filePath.includes(`avatar_${AVATAR_THUMBNAIL_SIZE}.webp`) || 
-            filePath.includes(`avatar_${AVATAR_PROFILE_SIZE}.webp`)   
+            filePath.includes(`avatar_${AVATAR_THUMBNAIL_SIZE}.webp`) ||
+            filePath.includes(`avatar_${AVATAR_PROFILE_SIZE}.webp`)
         ) {
             logger.log('processUploadedAvatar: File appears to be an already processed version. Exiting.');
             return null;
         }
 
         const parts = filePath.split('/');
-        if (parts.length < 3) { 
+        if (parts.length < 3) {
             logger.error('processUploadedAvatar: Invalid file path, cannot extract userId:', filePath);
             return null;
         }
@@ -342,10 +383,10 @@ exports.processUploadedAvatar = onObjectFinalized(
 
         const bucket = admin.storage().bucket(bucketName);
 
-        const tempLocalOriginalPath = path.join(os.tmpdir(), `original_${userId}_${originalFileName}`); 
+        const tempLocalOriginalPath = path.join(os.tmpdir(), `original_${userId}_${originalFileName}`);
         const tempFileNameBaseForLocal = `${userId}_${Date.now()}`;
-        const tempLocalThumbPath = path.join(os.tmpdir(),`thumb_${tempFileNameBaseForLocal}.webp`);
-        const tempLocalProfilePath = path.join(os.tmpdir(),`profile_${tempFileNameBaseForLocal}.webp`);
+        const tempLocalThumbPath = path.join(os.tmpdir(), `thumb_${tempFileNameBaseForLocal}.webp`);
+        const tempLocalProfilePath = path.join(os.tmpdir(), `profile_${tempFileNameBaseForLocal}.webp`);
 
         try {
             await bucket.file(filePath).download({ destination: tempLocalOriginalPath });
@@ -368,11 +409,11 @@ exports.processUploadedAvatar = onObjectFinalized(
 
             const [thumbUploadResponse] = await bucket.upload(tempLocalThumbPath, {
                 destination: thumbStoragePath,
-                metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' }, 
+                metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' },
             });
             const [profileUploadResponse] = await bucket.upload(tempLocalProfilePath, {
                 destination: profileStoragePath,
-                metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' }, 
+                metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' },
             });
             logger.info('processUploadedAvatar: Processed images uploaded to Storage.');
 
@@ -389,11 +430,11 @@ exports.processUploadedAvatar = onObjectFinalized(
 
             const userProfileRef = db.collection('userProfiles').doc(userId);
             await userProfileRef.update({
-                avatarUrls: { 
+                avatarUrls: {
                     small: thumbUrl,
                     profile: profileUrl,
                 },
-                profileUpdatedAt: FieldValue.serverTimestamp(), 
+                profileUpdatedAt: FieldValue.serverTimestamp(),
             });
             logger.info(`processUploadedAvatar: User profile ${userId} updated with new avatar URLs.`);
 
@@ -407,10 +448,16 @@ exports.processUploadedAvatar = onObjectFinalized(
 
             return null;
         } catch (error) {
-            logger.error("processUploadedAvatar: Error during avatar processing:", error, { userId, filePath });
-            await fs.remove(tempLocalOriginalPath).catch(e => logger.warn('processUploadedAvatar: Error deleting temp original (in catch):', e));
-            await fs.remove(tempLocalThumbPath).catch(e => logger.warn('processUploadedAvatar: Error deleting temp thumb (in catch):', e));
-            await fs.remove(tempLocalProfilePath).catch(e => logger.warn('processUploadedAvatar: Error deleting temp profile (in catch):', e));
+            logger.error('processUploadedAvatar: Error during avatar processing:', error, { userId, filePath });
+            await fs
+                .remove(tempLocalOriginalPath)
+                .catch((e) => logger.warn('processUploadedAvatar: Error deleting temp original (in catch):', e));
+            await fs
+                .remove(tempLocalThumbPath)
+                .catch((e) => logger.warn('processUploadedAvatar: Error deleting temp thumb (in catch):', e));
+            await fs
+                .remove(tempLocalProfilePath)
+                .catch((e) => logger.warn('processUploadedAvatar: Error deleting temp profile (in catch):', e));
             return null;
         }
     }
