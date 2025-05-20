@@ -163,3 +163,39 @@ Collezione per definire i badge disponibili nel sistema.
 | `createdAt`   | timestamp     | Data di creazione della definizione del badge (per amministrazione). |                                                   |
 
 ---
+
+### Sottocollezione: Notifiche Utente (`userNotifications` o simile)
+
+Questa sottocollezione memorizza le notifiche specifiche per un utente.
+
+**Percorso:** `/userProfiles/{userId}/notifications/{notificationId}`
+
+* `{userId}`: ID dell'utente a cui appartiene la notifica.
+* `{notificationId}`: ID univoco autogenerato per la notifica.
+
+**Campi del Documento (`notificationId`):**
+
+| Campo             | Tipo        | Descrizione                                                                                                | Esempio Valore                                      | Note                                                                 |
+| :---------------- | :---------- | :--------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- | :------------------------------------------------------------------- |
+| `type`            | String      | Tipo di notifica (per logica e iconografia).                                                               | `'article_approved'`, `'new_badge_awarded'`         |                                                                      |
+| `title`           | String      | Titolo breve della notifica.                                                                               | `"Articolo Approvato!"`                             | Max ~100 caratteri consigliato.                                      |
+| `message`         | String      | (Opzionale) Messaggio più dettagliato.                                                                     | `"Il tuo articolo 'Storia dei Videogiochi' è online."` | Max ~250 caratteri consigliato.                                      |
+| `link`            | String      | (Opzionale) URL relativo alla risorsa target (es. articolo, profilo).                                      | `"/view-article.html?id=ARTICLE_XYZ"`               |                                                                      |
+| `timestamp`       | Timestamp   | Data e ora di creazione della notifica.                                                                    | `firebase.firestore.FieldValue.serverTimestamp()`   | Usato per ordinare le notifiche.                                     |
+| `isRead`          | Boolean     | Indica se l'utente ha letto/interagito con la notifica.                                                    | `false` (default), `true`                           |                                                                      |
+| `icon`            | String      | (Opzionale) Nome icona (es. Material Symbols) o URL a un'immagine.                                         | `'check_circle'`, `'emoji_events'`                  | Per differenziare visivamente i tipi di notifica.                    |
+| `relatedEntityId` | String      | (Opzionale) ID dell'entità correlata (es. `articleId`, `badgeId`).                                         | `"ARTICLE_XYZ"`                                     | Utile per raggruppare o filtrare notifiche.                          |
+| `userId`          | String      | ID dell'utente a cui è destinata la notifica.                                                              | `"USER_ABC"`                                        | Ridondante (già nel path), ma può semplificare alcune query/regole. |
+
+**Regole di Sicurezza Firestore Esempio (da inserire in `firestore.rules`):**
+
+match /userProfiles/{userId}/notifications/{notificationId} {
+  allow read, list: if request.auth != null && request.auth.uid == userId; // L'utente può leggere solo le proprie notifiche
+  allow create: if false; // Le notifiche dovrebbero essere create solo da Cloud Functions (backend)
+  allow update: if request.auth != null && request.auth.uid == userId &&
+                  request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']) && // L'utente può segnare solo come letta/non letta
+                  request.resource.data.isRead is bool;
+  allow delete: if false; // Le notifiche potrebbero essere cancellate da CF o scadere
+}
+
+---

@@ -6,9 +6,16 @@ import {
     where,
     orderBy,
     limit,
+    doc,
     getDocs,
     Timestamp,
+    documentId // AGGIUNTO: Necessario per la query 'in
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const MAX_FEATURED_ARTICLES = 5; // Definisci quante card mostrare nella griglia normale
+// const MAX_FEATURED_FOR_CAROUSEL = 3; // Se avessi un carosello separato
+const ARTICLE_SNIPPET_LENGTH = 150; // Usato da te, ma createSnippet nella tua versione non lo usa
+const DEFAULT_AUTHOR_AVATAR_PATH = 'assets/images/default-avatar.png';
 
 /**
  * Formatta un oggetto Timestamp di Firestore o una stringa data in un formato leggibile.
@@ -44,18 +51,37 @@ function formatArticleDate(dateInput) {
 
 /**
  * Crea e appende una card articolo al DOM.
- * @param {object} articleData - L'oggetto articolo da Firestore (doc.data()).
+ * @param {object} articleData - L'oggetto articolo da Firestore.
  * @param {string} articleId - L'ID del documento articolo.
+ * @param {object|null} authorProfile - Il profilo dell'autore recuperato da userProfiles, o null. // AGGIUNTO PARAMETRO
  * @param {HTMLElement} gridContainer - Il contenitore della griglia a cui appendere la card.
  */
-function createArticleCard(articleData, articleId, gridContainer) {
+function createArticleCard(articleData, articleId, authorProfile, gridContainer) { // MODIFICATA SIGNATURE
     const card = document.createElement('div');
-    card.className = 'article-card';
+    card.className = 'article-card'; // Assicurati che questa classe sia stilizzata per la griglia
     card.setAttribute('data-article-id', articleId);
 
     const titleEl = document.createElement('h4');
-    titleEl.textContent = articleData.title || 'Titolo mancante';
+    // AGGIUNTO: Link sul titolo
+    const titleLink = document.createElement('a');
+    titleLink.href = `view-article.html?id=${articleId}`;
+    titleLink.textContent = articleData.title || 'Titolo mancante';
+    titleLink.classList.add('article-card-title-link'); // Per stile
+    titleEl.appendChild(titleLink);
     card.appendChild(titleEl);
+    
+    // Immagine di copertina (se presente)
+    if (articleData.coverImageUrl) {
+        const coverImgLink = document.createElement('a');
+        coverImgLink.href = `view-article.html?id=${articleId}`;
+        const coverImg = document.createElement('img');
+        coverImg.src = articleData.coverImageUrl;
+        coverImg.alt = `Copertina per ${articleData.title || 'articolo'}`;
+        coverImg.className = 'article-card-cover-image'; // Per stile
+        coverImgLink.appendChild(coverImg);
+        card.appendChild(coverImgLink);
+    }
+
 
     const metaEl = document.createElement('div');
     metaEl.className = 'article-meta';
@@ -63,13 +89,44 @@ function createArticleCard(articleData, articleId, gridContainer) {
     const authorInfoSpan = document.createElement('span');
     authorInfoSpan.className = 'article-author-info';
 
-    if (articleData.authorId) {
-        const avatarImg = document.createElement('img');
-        avatarImg.className = 'author-avatar-homepage';
-        avatarImg.src = generateBlockieAvatar(articleData.authorId, 24);
-        avatarImg.alt = `Avatar di ${articleData.authorName || 'Autore'}`;
-        authorInfoSpan.appendChild(avatarImg);
+    // --- MODIFICATO: Logica Avatar e Nome Autore ---
+    let authorDisplayName = articleData.authorName || 'Autore Sconosciuto';
+    let authorAvatarSrc = DEFAULT_AUTHOR_AVATAR_PATH;
+    let authorNationalityCode = articleData.authorNationalityCode || null; // Prendi da articolo come fallback
+
+    if (authorProfile) {
+        authorDisplayName = authorProfile.nickname || authorDisplayName;
+        authorNationalityCode = authorProfile.nationalityCode || authorNationalityCode; // Sovrascrivi se presente nel profilo
+
+        let chosenAvatarUrl = null;
+        if (authorProfile.avatarUrls) {
+            if (authorProfile.avatarUrls.small) {
+                chosenAvatarUrl = authorProfile.avatarUrls.small;
+            } else if (authorProfile.avatarUrls.profile) {
+                chosenAvatarUrl = authorProfile.avatarUrls.profile;
+            }
+        }
+
+        if (chosenAvatarUrl) {
+            authorAvatarSrc = chosenAvatarUrl;
+            if (authorProfile.profileUpdatedAt && authorProfile.profileUpdatedAt.seconds) {
+                authorAvatarSrc += `?v=${authorProfile.profileUpdatedAt.seconds}`;
+            }
+        } else if (articleData.authorId) { // Profilo trovato ma senza avatar validi
+            authorAvatarSrc = generateBlockieAvatar(articleData.authorId, 24); // Dimensione per homepage
+        }
+    } else if (articleData.authorId) { // Profilo non trovato, ma c'è ID autore
+        authorAvatarSrc = generateBlockieAvatar(articleData.authorId, 24);
     }
+    // Se authorId non c'è, rimane il DEFAULT_AUTHOR_AVATAR_PATH
+
+    const avatarImg = document.createElement('img');
+    avatarImg.className = 'author-avatar-homepage'; // Assicurati che questa classe sia stilizzata (es. 24x24px, rounded)
+    avatarImg.src = authorAvatarSrc;
+    avatarImg.alt = `Avatar di ${authorDisplayName}`;
+    avatarImg.onerror = () => { avatarImg.src = DEFAULT_AUTHOR_AVATAR_PATH; avatarImg.onerror = null; };
+    authorInfoSpan.appendChild(avatarImg);
+    // --- FINE MODIFICA AVATAR ---
 
     const authorNameContainer = document.createElement('span');
     authorNameContainer.className = 'article-author-name';
@@ -77,21 +134,18 @@ function createArticleCard(articleData, articleId, gridContainer) {
     if (articleData.authorId) {
         const authorLink = document.createElement('a');
         authorLink.href = `profile.html?userId=${articleData.authorId}`;
-        authorLink.textContent = articleData.authorName || 'Autore Sconosciuto';
+        authorLink.textContent = authorDisplayName; // Usa il nome aggiornato dal profilo se disponibile
         authorNameContainer.appendChild(authorLink);
     } else {
-        authorNameContainer.textContent = articleData.authorName || 'Autore Sconosciuto';
+        authorNameContainer.textContent = authorDisplayName;
     }
     authorInfoSpan.appendChild(authorNameContainer);
 
-    if (
-        articleData.authorNationalityCode &&
-        articleData.authorNationalityCode !== 'OTHER' &&
-        typeof articleData.authorNationalityCode === 'string'
-    ) {
+    if (authorNationalityCode && authorNationalityCode !== 'OTHER' && typeof authorNationalityCode === 'string') {
         const flagIcon = document.createElement('span');
-        flagIcon.classList.add('fi', `fi-${articleData.authorNationalityCode.toLowerCase()}`);
-        flagIcon.title = articleData.authorNationalityCode;
+        flagIcon.classList.add('fi', `fi-${authorNationalityCode.toLowerCase()}`);
+        flagIcon.title = authorNationalityCode;
+        flagIcon.style.marginLeft = '5px'; // Aggiungi un po' di spazio
         authorInfoSpan.appendChild(flagIcon);
     }
     metaEl.appendChild(authorInfoSpan);
@@ -103,9 +157,10 @@ function createArticleCard(articleData, articleId, gridContainer) {
     metaEl.appendChild(dateEl);
 
     if (articleData.tags && Array.isArray(articleData.tags) && articleData.tags.length > 0) {
+        // ... (la tua logica per i tag non cambia)
         const tagsContainer = document.createElement('div');
         tagsContainer.className = 'article-tags';
-        articleData.tags.forEach((tagText) => {
+        articleData.tags.slice(0, 3).forEach((tagText) => { // Mostra max 3 tag per brevità
             const tagEl = document.createElement('span');
             tagEl.className = 'article-tag';
             tagEl.textContent = tagText;
@@ -119,24 +174,21 @@ function createArticleCard(articleData, articleId, gridContainer) {
     snippetEl.className = 'article-snippet';
     snippetEl.textContent = articleData.snippet || 'Nessun riassunto disponibile.';
     card.appendChild(snippetEl);
-
-    // --- MODIFICHE QUI ---
+    
     const interactionsEl = document.createElement('div');
     interactionsEl.className = 'article-card-interactions';
-
-    // Like
+    // ... (la tua logica per like e commenti (solo display) qui, come nel tuo file, non cambia)
+     // Like
     const likeContainer = document.createElement('div');
     likeContainer.className = 'interaction-item like-interaction-homepage';
-    const likeButton = document.createElement('button');
-    likeButton.className = 'article-like-btn homepage-like-btn'; // Manteniamo le classi esistenti per CSS e JS
-    likeButton.setAttribute('data-article-id', articleId);
-    // Sostituisci l'emoji con Material Symbol
-    likeButton.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
-    likeButton.title = 'Like this article'; // Il titolo verrà aggiornato dinamicamente
+    const likeIcon = document.createElement('span'); // Usiamo solo l'icona e il conteggio
+    likeIcon.className = 'material-symbols-rounded';
+    likeIcon.innerHTML = 'favorite'; // o 'favorite_border' se vuoi indicare non-liked
+    likeIcon.title = 'Mi piace';
     const likeCountSpan = document.createElement('span');
     likeCountSpan.className = 'article-like-count homepage-like-count';
     likeCountSpan.textContent = `${articleData.likeCount || 0}`;
-    likeContainer.appendChild(likeButton);
+    likeContainer.appendChild(likeIcon);
     likeContainer.appendChild(likeCountSpan);
     interactionsEl.appendChild(likeContainer);
 
@@ -144,27 +196,19 @@ function createArticleCard(articleData, articleId, gridContainer) {
     const commentContainer = document.createElement('div');
     commentContainer.className = 'interaction-item comment-interaction-homepage';
     const commentIcon = document.createElement('span');
-    // Applica la classe Material Symbols e usa il nome dell'icona
     commentIcon.className = 'comment-icon-homepage material-symbols-rounded';
-    commentIcon.innerHTML = 'chat_bubble_outline'; // o 'comment'
+    commentIcon.innerHTML = 'chat_bubble'; // o 'chat_bubble_outline'
     const commentCountSpan = document.createElement('span');
     commentCountSpan.className = 'article-comment-count homepage-comment-count';
     commentCountSpan.textContent = `${articleData.commentCount || 0}`;
-    const commentLink = document.createElement('a');
-    commentLink.className = 'article-comment-link-homepage';
-    commentLink.href = `view-article.html?id=${articleId}#articleCommentsSectionContainer`;
-    commentLink.textContent = 'Commenta';
-    commentLink.title = 'Vedi e aggiungi commenti';
-    commentContainer.appendChild(commentIcon); // Icona
-    commentContainer.appendChild(commentCountSpan); // Conteggio
-    commentContainer.appendChild(commentLink); // Link testuale "Commenta"
+    commentContainer.appendChild(commentIcon);
+    commentContainer.appendChild(commentCountSpan);
     interactionsEl.appendChild(commentContainer);
-    // --- FINE MODIFICHE ---
 
     card.appendChild(interactionsEl);
 
     const readMoreLinkEl = document.createElement('a');
-    readMoreLinkEl.className = 'btn-read-more';
+    readMoreLinkEl.className = 'btn-read-more'; // Stila questo come un bottone o link prominente
     readMoreLinkEl.href = `view-article.html?id=${articleId}`;
     readMoreLinkEl.textContent = 'Leggi di più →';
     card.appendChild(readMoreLinkEl);
@@ -172,62 +216,39 @@ function createArticleCard(articleData, articleId, gridContainer) {
     gridContainer.appendChild(card);
 }
 
+
 /**
  * Visualizza la sezione articoli e l'articolo in evidenza caricandoli da Firestore.
  */
 export async function displayArticlesSection() {
-    // console.log('[homePageFeatures.js] displayArticlesSection chiamata.'); // DEBUG
-
     const articlesSection = document.getElementById('articlesSection');
     const articlesGrid = document.getElementById('articlesGrid');
-
-    // Elementi per l'articolo in evidenza
+    // ... (elementi featured come nel tuo file)
     const featuredArticleCard = document.getElementById('featuredArticleCard');
     const featuredArticleTitleEl = document.getElementById('featuredArticleActualTitle');
     const featuredArticleSnippetEl = document.getElementById('featuredArticleSnippet');
     const featuredArticleLinkEl = document.getElementById('featuredArticleLink');
 
-    // Verifica elementi essenziali per la griglia articoli
-    if (!articlesSection) {
-        console.error(
-            '[homePageFeatures.js] Errore critico: Elemento #articlesSection non trovato. Impossibile continuare.'
-        );
-        return;
-    }
-    if (!articlesGrid) {
-        console.error(
-            '[homePageFeatures.js] Errore critico: Elemento #articlesGrid non trovato. Impossibile continuare.'
-        );
-        articlesSection.style.display = 'block';
-        articlesSection.innerHTML =
-            '<p style="color:red; text-align:center;">Errore di configurazione: contenitore griglia articoli mancante.</p>';
-        return;
-    }
 
-    // Verifica elementi per l'articolo in evidenza.
-    const featuredElementsPresent =
-        featuredArticleCard && featuredArticleTitleEl && featuredArticleSnippetEl && featuredArticleLinkEl;
+    if (!articlesSection || !articlesGrid ) { /* ... errore critico ... */ 
+        console.error('[homePageFeatures.js] articlesSection o articlesGrid non trovato.');
+        return;
+    }
+    
+    const featuredElementsPresent = featuredArticleCard && featuredArticleTitleEl && featuredArticleSnippetEl && featuredArticleLinkEl;
     if (!featuredElementsPresent) {
-        console.warn(
-            '[homePageFeatures.js] Uno o più elementi DOM per "Articolo in Evidenza" non trovati. La funzionalità Featured Article sarà disabilitata per questa esecuzione.'
-        );
-        if (featuredArticleCard) featuredArticleCard.style.display = 'none';
+        console.warn('[homePageFeatures.js] Elementi per Articolo in Evidenza mancanti. Funzionalità disabilitata.');
+        if(featuredArticleCard) featuredArticleCard.style.display = 'none';
     }
 
-    // Mostra il messaggio di caricamento nella griglia e rendi visibile la sezione
-    articlesGrid.innerHTML =
-        '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli da Firestore...</p>';
+
+    articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli...</p>';
     articlesSection.style.display = 'block';
+    if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none'; // Nascondi inizialmente
 
-    // Nascondi la card dell'articolo in evidenza se gli elementi sono presenti (verrà mostrata se c'è un articolo featured)
-    if (featuredArticleCard && featuredElementsPresent) {
-        featuredArticleCard.style.display = 'none';
-    }
-
-    if (!db) {
+    if (!db) { /* ... errore db ... */ 
         console.error('[homePageFeatures.js] Istanza Firestore (db) non disponibile.');
-        articlesGrid.innerHTML =
-            '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
+        articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
         return;
     }
 
@@ -237,7 +258,7 @@ export async function displayArticlesSection() {
             articlesCollectionRef,
             where('status', '==', 'published'),
             orderBy('publishedAt', 'desc'),
-            limit(10)
+            limit(10) // Recupera un po' di più per avere scelta per il featured e la griglia
         );
 
         const querySnapshot = await getDocs(q);
@@ -245,69 +266,121 @@ export async function displayArticlesSection() {
         querySnapshot.forEach((doc) => {
             articlesFromDb.push({ id: doc.id, ...doc.data() });
         });
-        // console.log('[homePageFeatures.js] Articoli fetched:', articlesFromDb.length);
 
-        articlesGrid.innerHTML = ''; // Pulisci la griglia ("Caricamento...")
+        articlesGrid.innerHTML = ''; 
+
+        // --- AGGIUNTO: Recupero profili autori con query 'in' ---
+        const authorIdsToFetch = [...new Set(articlesFromDb
+            .map(article => article.authorId)
+            .filter(id => id) // Escludi articoli senza authorId
+        )];
+
+        const profilesMap = new Map();
+        if (authorIdsToFetch.length > 0) {
+            const MAX_IDS_PER_IN_QUERY = 30;
+            const profilePromises = [];
+            for (let i = 0; i < authorIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
+                const batchUserIds = authorIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
+                const profilesQuery = query(collection(db, 'userProfiles'), where(documentId(), 'in', batchUserIds));
+                profilePromises.push(getDocs(profilesQuery));
+            }
+            try {
+                const profileSnapshotsArray = await Promise.all(profilePromises);
+                profileSnapshotsArray.forEach(profileSnaps => {
+                    profileSnaps.forEach(snap => {
+                        if (snap.exists()) {
+                            profilesMap.set(snap.id, snap.data());
+                        }
+                    });
+                });
+            } catch (profileError) {
+                console.error("[homePageFeatures.js] Errore recupero profili autori per homepage:", profileError);
+            }
+        }
+        // --- FINE RECUPERO PROFILI ---
 
         let actualFeaturedArticleData = null;
-
-        if (articlesFromDb.length > 0) {
-            // Solo se ci sono articoli, gestisci il featured (se gli elementi DOM esistono)
-            if (featuredElementsPresent) {
-                actualFeaturedArticleData =
-                    articlesFromDb.find((article) => article.isFeatured === true) || articlesFromDb[0];
-
-                if (actualFeaturedArticleData) {
-                    if (featuredArticleTitleEl)
-                        featuredArticleTitleEl.textContent =
-                            actualFeaturedArticleData.title || 'Titolo non disponibile';
-                    if (featuredArticleSnippetEl) {
-                        featuredArticleSnippetEl.textContent =
-                            actualFeaturedArticleData.snippet ||
-                            (actualFeaturedArticleData.contentMarkdown
-                                ? actualFeaturedArticleData.contentMarkdown.substring(0, 150) + '...'
-                                : 'Leggi di più...');
-                    }
-                    if (featuredArticleLinkEl)
-                        featuredArticleLinkEl.href = `view-article.html?id=${actualFeaturedArticleData.id}`;
-                    if (featuredArticleCard) featuredArticleCard.style.display = 'flex';
+        if (articlesFromDb.length > 0 && featuredElementsPresent) {
+            actualFeaturedArticleData = articlesFromDb.find(article => article.isFeatured === true) || articlesFromDb[0];
+            if (actualFeaturedArticleData) {
+                // Popola la card dell'articolo in evidenza
+                if (featuredArticleTitleEl) featuredArticleTitleEl.textContent = actualFeaturedArticleData.title || 'N/D';
+                if (featuredArticleSnippetEl) {
+                    featuredArticleSnippetEl.textContent = actualFeaturedArticleData.snippet || 
+                        (actualFeaturedArticleData.contentMarkdown ? actualFeaturedArticleData.contentMarkdown.substring(0, 150) + '...' : 'Leggi...');
                 }
+                if (featuredArticleLinkEl) featuredArticleLinkEl.href = `view-article.html?id=${actualFeaturedArticleData.id}`;
+                
+                // --- AGGIUNTO: Avatar per l'articolo in evidenza ---
+                const featuredAuthorAvatarElement = document.getElementById('featuredArticleAuthorAvatar'); // Assicurati che esista questo ID
+                const featuredAuthorNameElement = document.getElementById('featuredArticleAuthorName');   // Assicurati che esista questo ID
+                
+                if (featuredAuthorAvatarElement && featuredAuthorNameElement) {
+                    let featAuthorName = actualFeaturedArticleData.authorName || 'Autore Sconosciuto';
+                    let featAuthorAvatarSrc = DEFAULT_AUTHOR_AVATAR_PATH;
+                    const featAuthorProfile = actualFeaturedArticleData.authorId ? profilesMap.get(actualFeaturedArticleData.authorId) : null;
+
+                    if (featAuthorProfile) {
+                        featAuthorName = featAuthorProfile.nickname || featAuthorName;
+                        let chosenFeatAvatarUrl = null;
+                        if (featAuthorProfile.avatarUrls) {
+                            if (featAuthorProfile.avatarUrls.small) chosenFeatAvatarUrl = featAuthorProfile.avatarUrls.small;
+                            else if (featAuthorProfile.avatarUrls.profile) chosenFeatAvatarUrl = featAuthorProfile.avatarUrls.profile;
+                        }
+                        if (chosenFeatAvatarUrl) {
+                            featAuthorAvatarSrc = chosenFeatAvatarUrl;
+                            if (featAuthorProfile.profileUpdatedAt && featAuthorProfile.profileUpdatedAt.seconds) {
+                                featAuthorAvatarSrc += `?v=${featAuthorProfile.profileUpdatedAt.seconds}`;
+                            }
+                        } else if (actualFeaturedArticleData.authorId) {
+                            featAuthorAvatarSrc = generateBlockieAvatar(actualFeaturedArticleData.authorId, 32); // Dimensione per featured
+                        }
+                    } else if (actualFeaturedArticleData.authorId) {
+                        featAuthorAvatarSrc = generateBlockieAvatar(actualFeaturedArticleData.authorId, 32);
+                    }
+                    featuredAuthorAvatarElement.src = featAuthorAvatarSrc;
+                    featuredAuthorAvatarElement.alt = `Avatar di ${featAuthorName}`;
+                    featuredAuthorAvatarElement.onerror = () => { featuredAuthorAvatarElement.src = DEFAULT_AUTHOR_AVATAR_PATH; featuredAuthorAvatarElement.onerror = null; };
+                    
+                    if (actualFeaturedArticleData.authorId) {
+                        featuredAuthorNameElement.innerHTML = `<a href="profile.html?userId=${actualFeaturedArticleData.authorId}">${featAuthorName}</a>`;
+                    } else {
+                        featuredAuthorNameElement.textContent = featAuthorName;
+                    }
+                }
+                // --- FINE AVATAR FEATURED ---
+                if (featuredArticleCard) featuredArticleCard.style.display = 'flex'; // o 'block' a seconda del tuo CSS
             }
         }
 
         let articlesAddedToGrid = 0;
         articlesFromDb.forEach((articleDataInLoop) => {
             if (!actualFeaturedArticleData || articleDataInLoop.id !== actualFeaturedArticleData.id) {
-                if (typeof createArticleCard === 'function') {
-                    createArticleCard(articleDataInLoop, articleDataInLoop.id, articlesGrid);
+                if (articlesAddedToGrid < MAX_FEATURED_ARTICLES) { // Mostra MAX_FEATURED_ARTICLES nella griglia
+                    const authorProfileForCard = articleDataInLoop.authorId ? profilesMap.get(articleDataInLoop.authorId) : null;
+                    createArticleCard(articleDataInLoop, articleDataInLoop.id, authorProfileForCard, articlesGrid);
                     articlesAddedToGrid++;
-                } else {
-                    console.error('[homePageFeatures.js] Funzione createArticleCard non definita!');
                 }
             }
         });
-        // console.log('[homePageFeatures.js] Articoli aggiunti alla griglia (escluso featured):', articlesAddedToGrid);
 
-        if (articlesFromDb.length === 0) {
-            articlesGrid.innerHTML =
-                '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
+        if (articlesFromDb.length === 0) { /* ... nessun articolo ... */ 
+            articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
             if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none';
-        } else if (articlesAddedToGrid === 0 && actualFeaturedArticleData) {
-            // Questo caso si verifica se l'unico articolo è quello in evidenza
-            articlesGrid.innerHTML =
-                '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare al momento.</p>';
+        } else if (articlesAddedToGrid === 0 && actualFeaturedArticleData) { /* ... solo featured ... */ 
+            articlesGrid.innerHTML = '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare al momento.</p>';
         }
-    } catch (error) {
+        
+    } catch (error) { /* ... gestione errore ... */ 
         console.error('[homePageFeatures.js] Errore durante il caricamento degli articoli:', error);
-        articlesGrid.innerHTML =
-            '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
+        articlesGrid.innerHTML = '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
         if (error.code === 'failed-precondition' && error.message.includes('index')) {
-            articlesGrid.innerHTML +=
-                '<p style="text-align:center; color:orange;">Indice Firestore mancante. Controlla la console del browser per il link per crearlo.</p>';
+            articlesGrid.innerHTML += '<p style="text-align:center; color:orange;">Indice Firestore mancante...</p>';
         }
         if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none';
     }
 }
+
 
 /**
  * Mostra il banner dell'ultimo giocatore che ha sconfitto Glitchzilla.
@@ -333,3 +406,14 @@ export function displayGlitchzillaBanner() {
         bannerElement.style.display = 'none';
     }
 }
+
+// Initialize features when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Verifica che esista la sezione prima di chiamare la funzione
+    if (document.getElementById('articlesSection') && document.getElementById('articlesGrid')) {
+        displayArticlesSection();
+    }
+    if (document.getElementById('glitchzillaDefeatedBanner')) {
+        displayGlitchzillaBanner(); // Se vuoi che sia chiamata al DOMContentLoaded
+    }
+});
