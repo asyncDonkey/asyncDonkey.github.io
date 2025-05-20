@@ -635,7 +635,7 @@ function updateUIBasedOnAuthState(user, profileData) {
     console.log('[Main.js updateUIBasedOnAuthState] Fine aggiornamenti UI orchestrati.');
 }
 
-export { db, auth };
+export { db, auth, firebaseConfig };
 
 async function loadHomeMiniLeaderboard() {
     // ... (codice invariato)
@@ -1067,24 +1067,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// onAuthStateChanged AGGIORNATO
 onAuthStateChanged(auth, async (user) => {
     console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
-    loggedInUser = user;
+    loggedInUser = user; // Assumendo che loggedInUser sia una variabile a livello di modulo/globale che usi
 
+    // Gestione unsubscribe dal listener del profilo precedente
     if (currentUserProfileUnsubscribe) {
         console.log('[Main.js onAuthStateChanged] Annullamento iscrizione dal listener profilo navbar precedente.');
         currentUserProfileUnsubscribe();
         currentUserProfileUnsubscribe = null;
     }
 
-    // La logica per la campanella delle notifiche viene ora gestita da updateUIBasedOnAuthState
-    // o direttamente qui se l'utente è loggato o meno.
-
     if (user) {
-        const userProfileRef = doc(db, 'userProfiles', user.uid);
+        // Utente AUTENTICATO
+        const userIdForEvent = user.uid; // Variabile locale per chiarezza nell'evento
+        const userProfileRef = doc(db, 'userProfiles', userIdForEvent);
+
         console.log(
-            `[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${user.uid}`
+            `[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${userIdForEvent}`
         );
 
         currentUserProfileUnsubscribe = onSnapshot(
@@ -1098,7 +1098,7 @@ onAuthStateChanged(auth, async (user) => {
                     );
                 } else {
                     console.warn(
-                        `[Main.js onSnapshot Navbar] Profilo per UID ${user.uid} non trovato. La navbar userà dati Auth di fallback.`
+                        `[Main.js onSnapshot Navbar] Profilo per UID ${userIdForEvent} non trovato. La navbar userà dati Auth di fallback.`
                     );
                 }
                 // Chiamata principale per aggiornare tutta l'UI, inclusa la logica della campanella
@@ -1111,15 +1111,36 @@ onAuthStateChanged(auth, async (user) => {
         );
 
         // Configura il listener della campanella delle notifiche
-        setupNotificationBellListener(user.uid); // Chiamata qui assicura che sia attiva quando l'utente è loggato
-
+        setupNotificationBellListener(userIdForEvent);
         loadContentSpecificFeatures(user);
+
+        // ---> INIZIO SEZIONE: INVIA EVENTO userAuthenticated PER UTENTE LOGGATO <---
+        console.log(`[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con userId: ${userIdForEvent}`);
+        document.dispatchEvent(
+            new CustomEvent('userAuthenticated', {
+                detail: { user: user, userId: userIdForEvent }, // Passa l'oggetto user completo e userId
+            })
+        );
+        // ---> FINE SEZIONE: INVIA EVENTO userAuthenticated <---
+
+        console.log('[Main.js onAuthStateChanged] Operazioni per utente autenticato completate.');
     } else {
-        // Utente non loggato
+        // Utente NON AUTENTICATO (logout)
         console.log('[Main.js onAuthStateChanged] Utente non loggato.');
         updateUIBasedOnAuthState(null, null); // Aggiorna l'UI per lo stato di logout
         clearNotificationBellListener(); // Assicurati che il listener e la campanella siano rimossi/nascosti
         loadContentSpecificFeatures(null);
+
+        // ---> INIZIO SEZIONE: INVIA EVENTO userAuthenticated PER LOGOUT <---
+        console.log('[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con utente nullo (logout).');
+        document.dispatchEvent(
+            new CustomEvent('userAuthenticated', {
+                detail: { user: null, userId: null }, // Invia null per indicare il logout
+            })
+        );
+        // ---> FINE SEZIONE: INVIA EVENTO userAuthenticated <---
+
+        console.log('[Main.js onAuthStateChanged] Operazioni per utente non autenticato completate.');
     }
     console.log(
         '[Main.js onAuthStateChanged] Aggiornamento UI di base completato (dettagli profilo via onSnapshot se loggato).'

@@ -4052,7 +4052,6 @@ header .nav-link-icon-only .material-symbols-rounded {
     text-align: center;
 }
 
-
 #notificationBellContainer:hover #notificationIcon {
     color: var(--primary-color, lightblue); /* Esempio di hover */
 }
@@ -4077,7 +4076,10 @@ header .nav-link-icon-only .material-symbols-rounded {
     right: 0;
     width: 360px; /* Or your preferred width */
     max-width: calc(100vw - 32px); /* Prevent overflow on small screens */
-    background-color: var(--dialog-background-color, var(--surface-color, #fff)); /* Fallback if --dialog-background-color is not set */
+    background-color: var(
+        --dialog-background-color,
+        var(--surface-color, #fff)
+    ); /* Fallback if --dialog-background-color is not set */
     border: 1px solid var(--border-color, #ddd);
     border-radius: var(--border-radius-md, 8px);
     box-shadow: var(--box-shadow-medium, 0 4px 12px rgba(0, 0, 0, 0.15));
@@ -4111,7 +4113,7 @@ header .nav-link-icon-only .material-symbols-rounded {
 }
 
 /* #mark-all-as-read-btn:hover { */
-    /* color: var(--button-link-sm-hover-color, var(--accent-color)); */ /* Already handled by .button-link-sm */
+/* color: var(--button-link-sm-hover-color, var(--accent-color)); */ /* Already handled by .button-link-sm */
 /* } */
 
 .notification-list {
@@ -4157,13 +4159,19 @@ header .nav-link-icon-only .material-symbols-rounded {
 }
 
 .notification-item.unread {
-    background-color: var(--primary-color-ultralight, rgba(0, 123, 255, 0.05)); /* Example: very light blue for unread */
+    background-color: var(
+        --primary-color-ultralight,
+        rgba(0, 123, 255, 0.05)
+    ); /* Example: very light blue for unread */
     /* Or use a border indicator: */
     /* border-left: 3px solid var(--primary-color); */
 }
 
 .notification-item:hover {
-    background-color: var(--surface-hover-color, var(--background-color, #f9f9f9)); /* Use a variable for hover on interactive surfaces */
+    background-color: var(
+        --surface-hover-color,
+        var(--background-color, #f9f9f9)
+    ); /* Use a variable for hover on interactive surfaces */
 }
 
 .notification-item-icon {
@@ -4177,11 +4185,15 @@ header .nav-link-icon-only .material-symbols-rounded {
     vertical-align: middle;
 }
 
-
-.notification-item-icon.icon-type-badge { color: var(--accent-color, #ffc107); } /* Example for badge notifications */
-.notification-item-icon.icon-type-article-approved { color: var(--success-color, #28a745); } /* Example */
-.notification-item-icon.icon-type-article-rejected { color: var(--danger-color, #dc3545); } /* Example */
-
+.notification-item-icon.icon-type-badge {
+    color: var(--accent-color, #ffc107);
+} /* Example for badge notifications */
+.notification-item-icon.icon-type-article-approved {
+    color: var(--success-color, #28a745);
+} /* Example */
+.notification-item-icon.icon-type-article-rejected {
+    color: var(--danger-color, #dc3545);
+} /* Example */
 
 .notification-item-content {
     flex-grow: 1;
@@ -4218,7 +4230,6 @@ header .nav-link-icon-only .material-symbols-rounded {
     cursor: pointer;
 }
 
-
 /* Placeholder for when there are no notifications */
 .notification-item-empty {
     padding: 24px 16px;
@@ -4246,7 +4257,9 @@ header .nav-link-icon-only .material-symbols-rounded {
     padding: 6px 12px;
     display: inline-block;
     border-radius: var(--border-radius-sm, 4px);
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    transition:
+        background-color 0.2s ease-in-out,
+        color 0.2s ease-in-out;
 }
 
 #view-all-notifications-link:hover {
