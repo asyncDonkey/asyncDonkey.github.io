@@ -4033,3 +4033,29 @@ header .nav-link-icon-only .material-symbols-rounded {
     /* Per applicare il neon anche all'icona grande nella modale */
     /* Gli stili neon sono già in .testo-neon-arcade */
 }
+
+/* Stile per il badge del contatore notifiche */
+.notification-badge {
+    position: absolute;
+    top: -8px; /* Aggiusta per posizionare sopra l'icona */
+    right: -8px; /* Aggiusta per posizionare a destra dell'icona */
+    background-color: var(--accent-color, red); /* Usa il tuo colore di accento o un rosso standard */
+    color: white;
+    border-radius: 50%;
+    padding: 1px 5px; /* Leggermente più piccolo */
+    font-size: 0.65rem; /* Leggermente più piccolo */
+    font-weight: bold;
+    border: 1px solid var(--background-color, white); /* Bordo per staccare dallo sfondo */
+    display: none; /* Verrà mostrato da JS se il contatore > 0 */
+    line-height: 1; /* Assicura che il testo sia centrato verticalmente */
+    min-width: 16px; /* Larghezza minima per contenere anche un solo numero */
+    text-align: center;
+}
+
+/* Opzionale: stile per l'icona stessa se necessario, o per il contenitore */
+#notificationBellContainer {
+    cursor: pointer;
+}
+#notificationBellContainer:hover #notificationIcon {
+    color: var(--primary-color, lightblue); /* Esempio di hover */
+}

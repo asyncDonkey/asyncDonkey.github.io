@@ -47,6 +47,7 @@ const storage = getStorage(app); // INIZIALIZZA STORAGE
 
 let currentUserProfileUnsubscribe = null;
 let loggedInUser = null; // Mantieni aggiornato lo stato dell'utente loggato
+let notificationListener = null; // Per tenere traccia del listener delle notifiche
 
 // ----- INIZIO CODICE PER EMULATORI -----
 // Controlla se siamo in un contesto locale (es. localhost o 127.0.0.1)
@@ -839,6 +840,87 @@ function traduireErroreFirebase(codiceErrore) {
     return errors[codiceErrore] || `Errore (${codiceErrore}). Riprova.`;
 }
 
+/**
+ * Imposta il listener Firestore per le notifiche non lette dell'utente.
+ * @param {string} userId L'ID dell'utente.
+ */
+function setupNotificationBellListener(userId) {
+    if (typeof db === 'undefined' || !db) {
+        console.error("Firestore 'db' instance is not available in main.js for notifications.");
+        return;
+    }
+    if (notificationListener) { // Rimuovi listener precedente se esiste
+        clearNotificationBellListener(); // clearNotificationBellListener si occuperà anche di nascondere il bell
+    }
+
+    const bellContainer = document.getElementById('notificationBellContainer');
+    const counterElement = document.getElementById('notificationCounter');
+    const bellLink = document.getElementById('notificationBellLink');
+
+    if (bellContainer) {
+        bellContainer.style.display = 'flex'; // o 'inline-flex' o come preferisci per visualizzarlo
+        // Assicurati che il click listener sia aggiunto una sola volta
+        if (bellLink && !bellLink.getAttribute('data-listener-attached')) {
+            bellLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                // TODO: (A.5.4) Mostra il pannello/dropdown delle notifiche qui
+                console.log("Notification bell clicked! Future: show notifications panel.");
+            });
+            bellLink.setAttribute('data-listener-attached', 'true');
+        }
+    } else {
+        console.warn("setupNotificationBellListener: notificationBellContainer non trovato nel DOM.");
+        return; // Non procedere se il contenitore non c'è
+    }
+
+    const notificationsRef = collection(db, "userProfiles", userId, "notifications"); // Uso corretto di collection()
+    const unreadNotificationsQuery = query(notificationsRef, where("read", "==", false));
+
+    notificationListener = onSnapshot(unreadNotificationsQuery, snapshot => {
+        const unreadCount = snapshot.size;
+        
+        if (counterElement) {
+            if (unreadCount > 0) {
+                counterElement.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                counterElement.style.display = 'inline-block';
+            } else {
+                counterElement.style.display = 'none';
+            }
+        }
+        if (bellLink) {
+            bellLink.title = unreadCount > 0 ? `${unreadCount} notifiche non lette` : 'Nessuna nuova notifica';
+        }
+    }, error => {
+        console.error("Errore nel listener delle notifiche: ", error);
+        if (counterElement) counterElement.style.display = 'none'; // Nascondi in caso di errore
+    });
+    console.log("[Main.js setupNotificationBellListener] Notification listener attached for user:", userId);
+}
+
+/**
+ * Rimuove il listener Firestore per le notifiche e nasconde la campanella.
+ */
+function clearNotificationBellListener() {
+    if (notificationListener) {
+        notificationListener(); // Chiama la funzione di unsubscribe ritornata da onSnapshot
+        notificationListener = null;
+        console.log("[Main.js clearNotificationBellListener] Notification listener detached.");
+    }
+    const bellContainer = document.getElementById('notificationBellContainer');
+    if (bellContainer) {
+        bellContainer.style.display = 'none'; // Nascondi sempre la campanella al clear
+    }
+    const counterElement = document.getElementById('notificationCounter');
+    if (counterElement) {
+        counterElement.textContent = '0';
+        counterElement.style.display = 'none';
+    }
+    const bellLink = document.getElementById('notificationBellLink');
+    if (bellLink) { // Rimuovi l'attributo per permettere al listener di essere riattaccato
+        bellLink.removeAttribute('data-listener-attached');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // ... (codice invariato, inclusa la chiamata a initializeNewNavbar)
     initializeNewNavbar();
@@ -979,19 +1061,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+// onAuthStateChanged AGGIORNATO
 onAuthStateChanged(auth, async (user) => {
     console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
-    loggedInUser = user; // Aggiorna lo stato globale dell'utente loggato
+    loggedInUser = user; 
 
-    // Annulla l'iscrizione dal listener del profilo precedente, se esistente
     if (currentUserProfileUnsubscribe) {
         console.log('[Main.js onAuthStateChanged] Annullamento iscrizione dal listener profilo navbar precedente.');
         currentUserProfileUnsubscribe();
         currentUserProfileUnsubscribe = null;
     }
 
+    // La logica per la campanella delle notifiche viene ora gestita da updateUIBasedOnAuthState
+    // o direttamente qui se l'utente è loggato o meno.
+
     if (user) {
-        // Utente loggato: imposta un listener onSnapshot per il suo profilo
         const userProfileRef = doc(db, 'userProfiles', user.uid);
         console.log(
             `[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${user.uid}`
@@ -1000,37 +1084,38 @@ onAuthStateChanged(auth, async (user) => {
         currentUserProfileUnsubscribe = onSnapshot(
             userProfileRef,
             (docSnap) => {
+                const userProfileData = docSnap.exists() ? docSnap.data() : null;
                 if (docSnap.exists()) {
-                    const userProfileData = docSnap.data();
-                    console.log(
+                     console.log(
                         '[Main.js onSnapshot Navbar] Dati profilo ricevuti/aggiornati per navbar:',
                         userProfileData
                     );
-                    updateUIBasedOnAuthState(user, userProfileData); // Funzione che aggiorna tutta l'UI
                 } else {
-                    // Profilo non ancora esistente o errore (es. nuovo utente)
                     console.warn(
                         `[Main.js onSnapshot Navbar] Profilo per UID ${user.uid} non trovato. La navbar userà dati Auth di fallback.`
                     );
-                    updateUIBasedOnAuthState(user, null);
                 }
+                // Chiamata principale per aggiornare tutta l'UI, inclusa la logica della campanella
+                updateUIBasedOnAuthState(user, userProfileData); 
             },
             (error) => {
                 console.error('[Main.js onSnapshot Navbar] Errore nel listener del profilo per navbar:', error);
                 updateUIBasedOnAuthState(user, null); // Usa dati Auth di fallback in caso di errore
             }
         );
+        
+        // Configura il listener della campanella delle notifiche
+        setupNotificationBellListener(user.uid); // Chiamata qui assicura che sia attiva quando l'utente è loggato
 
-        // Non chiamare più getDoc qui per userProfile, è gestito da onSnapshot
-        // La chiamata a loadContentSpecificFeatures può rimanere se non dipende da profileData caricato una tantum
-        loadContentSpecificFeatures(user); // Assicurati che questa funzione sappia che profileData arriva reattivamente
+        loadContentSpecificFeatures(user); 
     } else {
         // Utente non loggato
         console.log('[Main.js onAuthStateChanged] Utente non loggato.');
-        updateUIBasedOnAuthState(null, null);
+        updateUIBasedOnAuthState(null, null); // Aggiorna l'UI per lo stato di logout
+        clearNotificationBellListener(); // Assicurati che il listener e la campanella siano rimossi/nascosti
         loadContentSpecificFeatures(null);
     }
     console.log(
-        '[Main.js onAuthStateChanged] Aggiornamento UI basato su AuthState completato (o in corso via onSnapshot).'
+        '[Main.js onAuthStateChanged] Aggiornamento UI di base completato (dettagli profilo via onSnapshot se loggato).'
     );
 });
