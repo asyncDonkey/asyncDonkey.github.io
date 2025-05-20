@@ -329,6 +329,23 @@
     <a href="#" id="notificationBellLink" title="Notifiche"> <i class="material-symbols-rounded" id="notificationIcon" style="font-size: 28px; color: var(--text-color-navbar); vertical-align: middle;">notifications</i>
     </a>
     <span id="notificationCounter" class="notification-badge" style="display: none;">0</span>
+    </a>
+        <span id="notificationCounter" class="notification-badge" style="display: none;">0</span>
+        <div id="notification-panel" class="notification-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 5px; background-color: var(--background-color); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 360px; z-index: 1050; color: var(--text-color);">
+            <div class="notification-panel-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color);">
+                <h2 style="margin: 0; font-size: 1.1em; font-weight: 600;">Notifiche</h2>
+                <button id="mark-all-as-read-btn" class="button-link-sm" title="Segna tutte come lette" style="display: none; background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 0.9em; padding: 4px 8px;">Segna tutte come lette</button>
+            </div>
+            <ul id="notification-list" class="notification-list" style="list-style: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto;">
+                <li id="no-notifications-placeholder" class="notification-item-empty" style="display: none; padding: 16px; text-align: center; color: var(--text-color-secondary);">
+                    <p style="margin: 0;">Nessuna nuova notifica.</p>
+                </li>
+                </ul>
+            <div class="notification-panel-footer" style="padding: 12px 16px; border-top: 1px solid var(--border-color); text-align: center;">
+                <a href="/all-notifications.html" id="view-all-notifications-link" style="display: none; color: var(--primary-color); text-decoration: none; font-weight: 500; font-size: 0.9em;">Vedi tutte le notifiche</a>
+            </div>
+        </div>
+        </div>
 </div>
                 <img id="headerUserAvatar" src="" alt="User Avatar" style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; display: none;">
                 <span id="userDisplayName" style="margin-right: 8px; display: none;"></span>
