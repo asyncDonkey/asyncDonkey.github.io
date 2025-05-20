@@ -159,7 +159,7 @@
                             id="registerPassword"
                             name="registerPassword"
                             required
-                            minlength="8" 
+                            minlength="8"
                             pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                             autocomplete="new-password"
                         />
@@ -170,7 +170,9 @@
                     </div>
 
                     <div>
-                        <label for="registerConfirmPassword">Conferma Password<span class="required-indicator">*</span></label>
+                        <label for="registerConfirmPassword"
+                            >Conferma Password<span class="required-indicator">*</span></label
+                        >
                         <input
                             type="password"
                             id="registerConfirmPassword"
@@ -186,7 +188,14 @@
 
                     <div>
                         <label for="registerNickname">Nickname<span class="required-indicator">*</span></label>
-                        <input type="text" id="registerNickname" name="registerNickname" required minlength="3" maxlength="25" />
+                        <input
+                            type="text"
+                            id="registerNickname"
+                            name="registerNickname"
+                            required
+                            minlength="3"
+                            maxlength="25"
+                        />
                         <div class="info-section">
                             <p>
                                 Scegli con cura il tuo Nickname. Sarà il tuo identificativo pubblico sul sito.
@@ -405,17 +414,20 @@
                                 <strong>Per il momento, non potrà essere modificata</strong> dopo la registrazione.
                             </p>
                         </div>
-                        <div id="nationalityError" class="error-message"></div> 
+                        <div id="nationalityError" class="error-message"></div>
                     </div>
 
                     <hr style="margin: 25px 0" />
 
                     <div class="info-section">
-    <h4>Informazioni sull'Avatar</h4>
-    <p>
-        Al momento della registrazione, verrà generato automaticamente un avatar univoco (Blockie) basato sul tuo ID utente; questo sarà il tuo avatar predefinito visibile sul sito. Dopo aver completato la registrazione, dalla pagina del tuo profilo, avrai la possibilità di caricare e impostare un'immagine personalizzata.
-    </p>
-</div>
+                        <h4>Informazioni sull'Avatar</h4>
+                        <p>
+                            Al momento della registrazione, verrà generato automaticamente un avatar univoco (Blockie)
+                            basato sul tuo ID utente; questo sarà il tuo avatar predefinito visibile sul sito. Dopo aver
+                            completato la registrazione, dalla pagina del tuo profilo, avrai la possibilità di caricare
+                            e impostare un'immagine personalizzata.
+                        </p>
+                    </div>
                     <div id="generalError" class="error-message" style="text-align: center; margin-bottom: 15px"></div>
 
                     <div class="form-actions">

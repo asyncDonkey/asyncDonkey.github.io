@@ -108,19 +108,31 @@ const storage = getStorage();
 
 const BADGE_DEFINITIONS = {
     'author-rookie': {
-        name: 'Autore Debuttante', icon: 'school',
-        description: 'Congratulazioni! Hai pubblicato il tuo primo articolo su asyncDonkey.io, condividendo la tua conoscenza con la community!',
-        color: 'var(--bs-teal)', isNeon: false, isAnimated: true, animationClass: 'author-rookie-icon-animated',
+        name: 'Autore Debuttante',
+        icon: 'school',
+        description:
+            'Congratulazioni! Hai pubblicato il tuo primo articolo su asyncDonkey.io, condividendo la tua conoscenza con la community!',
+        color: 'var(--bs-teal)',
+        isNeon: false,
+        isAnimated: true,
+        animationClass: 'author-rookie-icon-animated',
     },
     'glitchzilla-slayer': {
-        name: 'Glitchzilla Slayer', icon: 'shield_moon',
-        description: 'Epico! Hai sconfitto il temibile Glitchzilla in CodeDash! Runner, dimostrando la tua abilità e determinazione!',
-        color: 'var(--bs-purple)', isNeon: true, isAnimated: false,
+        name: 'Glitchzilla Slayer',
+        icon: 'shield_moon',
+        description:
+            'Epico! Hai sconfitto il temibile Glitchzilla in CodeDash! Runner, dimostrando la tua abilità e determinazione!',
+        color: 'var(--bs-purple)',
+        isNeon: true,
+        isAnimated: false,
     },
     'prolific-commenter': {
-        name: 'Commentatore Prolifico', icon: 'forum',
+        name: 'Commentatore Prolifico',
+        icon: 'forum',
         description: 'Grazie per i tuoi numerosi e utili commenti! Hai scritto più di 20 interventi costruttivi.',
-        color: 'var(--bs-info)', isNeon: false, isAnimated: false,
+        color: 'var(--bs-info)',
+        isNeon: false,
+        isAnimated: false,
     },
 };
 
@@ -223,7 +235,8 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             } else {
                 avatarSrcToSet = baseUrl; // Nessun timestamp per cache busting
             }
-        } else if (uidLoaded) { // Se non c'è avatar personalizzato, usa Blockie (uidLoaded DEVE essere disponibile)
+        } else if (uidLoaded) {
+            // Se non c'è avatar personalizzato, usa Blockie (uidLoaded DEVE essere disponibile)
             avatarSrcToSet = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
             altText = `${profileNameForTitle}'s Blockie Avatar`;
         } else {
@@ -231,11 +244,13 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             // In questo caso, DEFAULT_AVATAR_IMAGE_PATH potrebbe essere usato se si aggiunge l'immagine
             // o si lascia vuoto/un placeholder generico. Per ora, proviamo a evitarlo.
             // Se si verifica, indica un problema nel flusso di dati a updateProfilePageUI.
-            console.warn('[AthenaDev Debug - UpdateUI] uidLoaded non disponibile per generare Blockie come default diretto.');
+            console.warn(
+                '[AthenaDev Debug - UpdateUI] uidLoaded non disponibile per generare Blockie come default diretto.'
+            );
             avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH; // Manteniamo il vecchio default path come estremo fallback
             altText = `${profileNameForTitle}'s Default Avatar`;
         }
-        
+
         console.log(`[AthenaDev Debug - UpdateUI] Impostazione src avatar: ${avatarSrcToSet}`);
         console.log(`[AthenaDev Debug - UpdateUI] Dati profilo per avatar:`, {
             avatarUrls: profileDataForDisplay.avatarUrls,
@@ -245,15 +260,18 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         profileAvatarImg.src = avatarSrcToSet;
         profileAvatarImg.alt = altText;
         profileAvatarImg.onerror = () => {
-            console.warn(`[AthenaDev Debug - UpdateUI] Errore caricamento avatar: ${avatarSrcToSet}. Uso Blockie come fallback finale.`);
-            if (uidLoaded) { // Assicurati che uidLoaded sia disponibile per generare il Blockie di fallback
+            console.warn(
+                `[AthenaDev Debug - UpdateUI] Errore caricamento avatar: ${avatarSrcToSet}. Uso Blockie come fallback finale.`
+            );
+            if (uidLoaded) {
+                // Assicurati che uidLoaded sia disponibile per generare il Blockie di fallback
                 profileAvatarImg.src = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
                 profileAvatarImg.alt = `${profileNameForTitle}'s Blockie Avatar (fallback errore)`;
             } else {
                 // Se uidLoaded non è disponibile neanche qui, non possiamo generare un Blockie.
                 // Potremmo nascondere l'immagine o usare un placeholder SVG inline o il DEFAULT_AVATAR_IMAGE_PATH
                 // se si decide di aggiungere quel file.
-                console.error("[AthenaDev Debug - UpdateUI] uidLoaded non disponibile per Blockie in onerror.");
+                console.error('[AthenaDev Debug - UpdateUI] uidLoaded non disponibile per Blockie in onerror.');
                 if (DEFAULT_AVATAR_IMAGE_PATH && profileAvatarImg.src !== DEFAULT_AVATAR_IMAGE_PATH) {
                     profileAvatarImg.src = DEFAULT_AVATAR_IMAGE_PATH; // Ultimo tentativo se il file esistesse
                     profileAvatarImg.alt = `${profileNameForTitle}'s Default Avatar (fallback errore critico)`;
@@ -267,9 +285,11 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
     if (statusMessageDisplay) {
         statusMessageDisplay.textContent = profileDataForDisplay.statusMessage || '';
         if (!profileDataForDisplay.statusMessage && isOwnProfile) {
-            statusMessageDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
+            statusMessageDisplay.innerHTML =
+                '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
         } else if (!profileDataForDisplay.statusMessage && !isOwnProfile) {
-            statusMessageDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
+            statusMessageDisplay.innerHTML =
+                '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato.</p>';
         }
     }
     if (statusMessageSection) statusMessageSection.style.display = 'block';
@@ -308,23 +328,30 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
                     iconSpan.textContent = badgeInfo.icon;
                     iconSpan.style.color = badgeInfo.color || 'var(--text-color-primary)';
                     if (badgeInfo.isNeon) iconSpan.classList.add('testo-neon-arcade');
-                    else if (badgeInfo.isAnimated && badgeInfo.animationClass) iconSpan.classList.add(badgeInfo.animationClass);
+                    else if (badgeInfo.isAnimated && badgeInfo.animationClass)
+                        iconSpan.classList.add(badgeInfo.animationClass);
                     badgeIconElement.appendChild(iconSpan);
                     badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
                     badgeIconElement.addEventListener('keydown', (event) => {
                         if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault(); openBadgeDetailsModal(badgeId);
+                            event.preventDefault();
+                            openBadgeDetailsModal(badgeId);
                         }
                     });
                     badgesDisplayContainer.appendChild(badgeIconElement);
-                } else { console.warn(`Definizione non trovata per il badge ID: ${badgeId}`); }
+                } else {
+                    console.warn(`Definizione non trovata per il badge ID: ${badgeId}`);
+                }
             });
         } else {
             if (isOwnProfile) {
                 badgesSection.style.display = 'block';
-                noBadgesMessage.textContent = 'Nessun riconoscimento ancora ottenuto. Continua a contribuire e giocare!';
+                noBadgesMessage.textContent =
+                    'Nessun riconoscimento ancora ottenuto. Continua a contribuire e giocare!';
                 noBadgesMessage.style.display = 'block';
-            } else { badgesSection.style.display = 'none'; }
+            } else {
+                badgesSection.style.display = 'none';
+            }
         }
     }
 
@@ -336,16 +363,23 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         }
         if (updateStatusForm) {
             updateStatusForm.style.display = 'flex';
-            if(statusMessageInput) statusMessageInput.placeholder = profileDataForDisplay.statusMessage ? 'Modifica il tuo stato attuale...' : 'Come ti senti oggi?';
+            if (statusMessageInput)
+                statusMessageInput.placeholder = profileDataForDisplay.statusMessage
+                    ? 'Modifica il tuo stato attuale...'
+                    : 'Come ti senti oggi?';
         }
         if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
         if (updateBioForm) {
             updateBioForm.style.display = 'block';
-            if(bioInput) bioInput.placeholder = profileDataForDisplay.bio ? 'Modifica la tua bio...' : 'Scrivi qualcosa di te...';
+            if (bioInput)
+                bioInput.placeholder = profileDataForDisplay.bio
+                    ? 'Modifica la tua bio...'
+                    : 'Scrivi qualcosa di te...';
         }
         updateBioCharCounter(); // Chiamala per inizializzare correttamente
         if (avatarUploadSection) avatarUploadSection.style.display = 'block';
-    } else { // Profilo di un altro utente
+    } else {
+        // Profilo di un altro utente
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
         if (updateStatusForm) updateStatusForm.style.display = 'none';
         if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'none';
@@ -357,7 +391,6 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
     if (profileContent) profileContent.style.display = 'block';
 }
 
-
 /**
  * Carica i dati del profilo utente e imposta un listener per gli aggiornamenti.
  */
@@ -367,7 +400,8 @@ function loadProfileData(uidToLoad, isOwnProfile) {
     // Reset UI iniziale (parziale, il resto è gestito da updateProfilePageUI o nascosto se non c'è utente)
     // Pulisci i campi principali in attesa dei dati freschi
     if (profileAvatarImg) {
-        if (uidToLoad) { // Se uidToLoad è disponibile, usa subito il Blockie come placeholder
+        if (uidToLoad) {
+            // Se uidToLoad è disponibile, usa subito il Blockie come placeholder
             profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 });
             profileAvatarImg.alt = 'Caricamento avatar... (Blockie)';
         } else {
@@ -376,18 +410,19 @@ function loadProfileData(uidToLoad, isOwnProfile) {
             // o un placeholder neutro.
             profileAvatarImg.src = ''; // O un'immagine placeholder base64 trasparente, o DEFAULT_AVATAR_IMAGE_PATH
             profileAvatarImg.alt = 'Caricamento avatar...';
-            console.warn("[AthenaDev Debug - Load] uidToLoad non disponibile per Blockie placeholder iniziale in loadProfileData.");
+            console.warn(
+                '[AthenaDev Debug - Load] uidToLoad non disponibile per Blockie placeholder iniziale in loadProfileData.'
+            );
         }
         profileAvatarImg.style.display = 'block'; // Assicurati sia visibile
     }
-    if(profileEmailSpan) profileEmailSpan.textContent = 'Caricamento...';
-    if(currentNicknameSpan) currentNicknameSpan.textContent = 'Caricamento...';
-    if(profileNationalitySpan) profileNationalitySpan.textContent = 'Caricamento...';
-    if(statusMessageDisplay) statusMessageDisplay.textContent = 'Caricamento stato...';
-    if(bioDisplay) bioDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Caricamento bio...</p>';
-    if(badgesDisplayContainer) badgesDisplayContainer.innerHTML = ''; // Pulisce i badge vecchi
-    if(noBadgesMessage) noBadgesMessage.style.display = 'none';
-
+    if (profileEmailSpan) profileEmailSpan.textContent = 'Caricamento...';
+    if (currentNicknameSpan) currentNicknameSpan.textContent = 'Caricamento...';
+    if (profileNationalitySpan) profileNationalitySpan.textContent = 'Caricamento...';
+    if (statusMessageDisplay) statusMessageDisplay.textContent = 'Caricamento stato...';
+    if (bioDisplay) bioDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Caricamento bio...</p>';
+    if (badgesDisplayContainer) badgesDisplayContainer.innerHTML = ''; // Pulisce i badge vecchi
+    if (noBadgesMessage) noBadgesMessage.style.display = 'none';
 
     if (currentProfileListenerUnsubscribe) {
         console.log('[AthenaDev Debug - Load] Annullamento iscrizione dal listener precedente.');
@@ -397,44 +432,48 @@ function loadProfileData(uidToLoad, isOwnProfile) {
 
     const userProfileRef = doc(db, 'userProfiles', uidToLoad);
 
-    currentProfileListenerUnsubscribe = onSnapshot(userProfileRef, (docSnap) => {
-        console.log('[AthenaDev Debug - onSnapshot] Dati profilo ricevuti/aggiornati da Firestore.');
-        if (docSnap.exists()) {
-            const newProfileData = docSnap.data();
-            console.log('[AthenaDev Debug - onSnapshot] Dati grezzi:', JSON.parse(JSON.stringify(newProfileData)));
-            // console.log('[AthenaDev Debug - onSnapshot] avatarUrls:', newProfileData.avatarUrls);
-            // console.log('[AthenaDev Debug - onSnapshot] profileUpdatedAt:', newProfileData.profileUpdatedAt);
+    currentProfileListenerUnsubscribe = onSnapshot(
+        userProfileRef,
+        (docSnap) => {
+            console.log('[AthenaDev Debug - onSnapshot] Dati profilo ricevuti/aggiornati da Firestore.');
+            if (docSnap.exists()) {
+                const newProfileData = docSnap.data();
+                console.log('[AthenaDev Debug - onSnapshot] Dati grezzi:', JSON.parse(JSON.stringify(newProfileData)));
+                // console.log('[AthenaDev Debug - onSnapshot] avatarUrls:', newProfileData.avatarUrls);
+                // console.log('[AthenaDev Debug - onSnapshot] profileUpdatedAt:', newProfileData.profileUpdatedAt);
 
-            updateProfilePageUI(newProfileData, isOwnProfile, uidToLoad);
-
-        } else { // Documento profilo non trovato
-            document.title = 'Profilo Non Trovato - asyncDonkey.io';
-            if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Non Trovato';
+                updateProfilePageUI(newProfileData, isOwnProfile, uidToLoad);
+            } else {
+                // Documento profilo non trovato
+                document.title = 'Profilo Non Trovato - asyncDonkey.io';
+                if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Non Trovato';
+                if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
+                if (profileLoginMessage) {
+                    profileLoginMessage.style.display = 'block';
+                    profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
+                }
+                if (profileContent) profileContent.style.display = 'none';
+                // Nascondi sezioni specifiche se il profilo non esiste
+                if (myArticlesSection) myArticlesSection.style.display = 'none';
+                if (avatarUploadSection) avatarUploadSection.style.display = 'none';
+                if (statusMessageSection) statusMessageSection.style.display = 'none';
+                if (externalLinksSection) externalLinksSection.style.display = 'none';
+                if (bioSection) bioSection.style.display = 'none';
+                if (badgesSection) badgesSection.style.display = 'none';
+            }
+        },
+        (error) => {
+            document.title = 'Errore Profilo - asyncDonkey.io';
+            if (profileSectionTitle) profileSectionTitle.textContent = 'Errore Profilo';
+            console.error('[AthenaDev Debug - onSnapshot] Errore nel listener del profilo:', error);
             if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
             if (profileLoginMessage) {
                 profileLoginMessage.style.display = 'block';
-                profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
+                profileLoginMessage.innerHTML = `<p>Errore caricamento profilo: ${error.message}</p>`;
             }
             if (profileContent) profileContent.style.display = 'none';
-            // Nascondi sezioni specifiche se il profilo non esiste
-            if (myArticlesSection) myArticlesSection.style.display = 'none';
-            if (avatarUploadSection) avatarUploadSection.style.display = 'none';
-            if (statusMessageSection) statusMessageSection.style.display = 'none';
-            if (externalLinksSection) externalLinksSection.style.display = 'none';
-            if (bioSection) bioSection.style.display = 'none';
-            if (badgesSection) badgesSection.style.display = 'none';
         }
-    }, (error) => {
-        document.title = 'Errore Profilo - asyncDonkey.io';
-        if (profileSectionTitle) profileSectionTitle.textContent = 'Errore Profilo';
-        console.error('[AthenaDev Debug - onSnapshot] Errore nel listener del profilo:', error);
-        if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
-        if (profileLoginMessage) {
-            profileLoginMessage.style.display = 'block';
-            profileLoginMessage.innerHTML = `<p>Errore caricamento profilo: ${error.message}</p>`;
-        }
-        if (profileContent) profileContent.style.display = 'none';
-    });
+    );
 }
 
 // --- FUNZIONI DI GESTIONE (la maggior parte rimane invariata) ---
@@ -458,47 +497,61 @@ function openExternalLinkFormForEdit(index) {
 async function handleExternalLinkFormSubmit(event) {
     event.preventDefault();
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
-        showToast('Azione non permessa o errore interfaccia.', 'error'); return;
+        showToast('Azione non permessa o errore interfaccia.', 'error');
+        return;
     }
     // Assicurati che externalLinkTitleInput, externalLinkUrlInput, editingLinkIndexInput,
     // externalLinkErrorDiv, saveExternalLinkBtn siano definite globalmente o passate correttamente.
     // Dall'analisi del tuo js/profile.js, queste sono definite come costanti globali nel modulo.
-    
+
     const title = externalLinkTitleInput.value.trim();
     const url = externalLinkUrlInput.value.trim();
     const editingIndex = parseInt(editingLinkIndexInput.value, 10);
 
     if (!title || !url) {
         if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = 'Titolo e URL sono obbligatori.';
-        showToast('Titolo e URL sono obbligatori.', 'warning'); return;
+        showToast('Titolo e URL sono obbligatori.', 'warning');
+        return;
     }
-    if (!isValidHttpUrl(url)) { // isValidHttpUrl è una funzione helper che dovresti avere nel file
+    if (!isValidHttpUrl(url)) {
+        // isValidHttpUrl è una funzione helper che dovresti avere nel file
         if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = 'Inserisci un URL valido (http:// o https://).';
-        showToast('URL non valido. Deve iniziare con http:// o https://', 'warning'); return;
+        showToast('URL non valido. Deve iniziare con http:// o https://', 'warning');
+        return;
     }
     if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = '';
 
-    let currentLinks = Array.isArray(profileDataForDisplay.externalLinks) ? [...profileDataForDisplay.externalLinks] : [];
-    if (editingIndex > -1) { // Modalità Modifica
+    let currentLinks = Array.isArray(profileDataForDisplay.externalLinks)
+        ? [...profileDataForDisplay.externalLinks]
+        : [];
+    if (editingIndex > -1) {
+        // Modalità Modifica
         if (editingIndex < currentLinks.length) {
             currentLinks[editingIndex] = { title, url };
-        } else { 
-            showToast('Errore: indice link da modificare non valido.', 'error'); return; 
+        } else {
+            showToast('Errore: indice link da modificare non valido.', 'error');
+            return;
         }
-    } else { // Modalità Aggiungi
-        if (currentLinks.length >= MAX_EXTERNAL_LINKS) { // MAX_EXTERNAL_LINKS è una costante (es. 5)
-            showToast(`Puoi aggiungere al massimo ${MAX_EXTERNAL_LINKS} link.`, 'warning'); return;
+    } else {
+        // Modalità Aggiungi
+        if (currentLinks.length >= MAX_EXTERNAL_LINKS) {
+            // MAX_EXTERNAL_LINKS è una costante (es. 5)
+            showToast(`Puoi aggiungere al massimo ${MAX_EXTERNAL_LINKS} link.`, 'warning');
+            return;
         }
         currentLinks.push({ title, url });
     }
 
-    if (saveExternalLinkBtn) { saveExternalLinkBtn.disabled = true; saveExternalLinkBtn.textContent = 'Salvataggio...'; }
-    
+    if (saveExternalLinkBtn) {
+        saveExternalLinkBtn.disabled = true;
+        saveExternalLinkBtn.textContent = 'Salvataggio...';
+    }
+
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
-        await updateDoc(userProfileRef, { 
-            externalLinks: currentLinks, 
-            updatedAt: serverTimestamp() // <<< MODIFICA CHIAVE: da profileUpdatedAt a updatedAt
+        await updateDoc(userProfileRef, {
+            externalLinks: currentLinks,
+            updatedAt: serverTimestamp(), // <<< MODIFICA CHIAVE: da profileUpdatedAt a updatedAt
         });
         showToast(editingIndex > -1 ? 'Link aggiornato con successo!' : 'Link aggiunto con successo!', 'success');
         // onSnapshot dovrebbe aggiornare l'UI, incluso renderExternalLinks
@@ -508,42 +561,57 @@ async function handleExternalLinkFormSubmit(event) {
         showToast('Errore durante il salvataggio del link.', 'error');
         if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = `Errore: ${error.message}`;
     } finally {
-        if (saveExternalLinkBtn) { 
-            saveExternalLinkBtn.disabled = false; 
+        if (saveExternalLinkBtn) {
+            saveExternalLinkBtn.disabled = false;
             // Il testo del bottone viene resettato da resetAndHideExternalLinkForm
         }
     }
 }
 
 async function handleDeleteExternalLink(indexToDelete) {
-    if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid || !Array.isArray(profileDataForDisplay.externalLinks)) {
-        showToast('Azione non permessa o errore dati.', 'error'); return;
+    if (
+        !loggedInUser ||
+        !profileDataForDisplay ||
+        profileDataForDisplay.userId !== loggedInUser.uid ||
+        !Array.isArray(profileDataForDisplay.externalLinks)
+    ) {
+        showToast('Azione non permessa o errore dati.', 'error');
+        return;
     }
     const linkToDelete = profileDataForDisplay.externalLinks[indexToDelete];
-    if (!linkToDelete) { 
-        showToast('Link non trovato per eliminazione.', 'error'); return; 
+    if (!linkToDelete) {
+        showToast('Link non trovato per eliminazione.', 'error');
+        return;
     }
 
     // Assumendo che showConfirmationModal sia una funzione globale/importata
-    const confirmed = await showConfirmationModal('Conferma Eliminazione Link', `Sei sicuro di voler eliminare il link "${linkToDelete.title || 'Senza titolo'}"?`);
-    if (!confirmed) { 
-        showToast('Eliminazione link annullata.', 'info'); return; 
+    const confirmed = await showConfirmationModal(
+        'Conferma Eliminazione Link',
+        `Sei sicuro di voler eliminare il link "${linkToDelete.title || 'Senza titolo'}"?`
+    );
+    if (!confirmed) {
+        showToast('Eliminazione link annullata.', 'info');
+        return;
     }
 
     let currentLinks = [...profileDataForDisplay.externalLinks];
     currentLinks.splice(indexToDelete, 1);
-    
+
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
-        await updateDoc(userProfileRef, { 
-            externalLinks: currentLinks, 
-            updatedAt: serverTimestamp() // <<< MODIFICA CHIAVE: da profileUpdatedAt a updatedAt
+        await updateDoc(userProfileRef, {
+            externalLinks: currentLinks,
+            updatedAt: serverTimestamp(), // <<< MODIFICA CHIAVE: da profileUpdatedAt a updatedAt
         });
         showToast('Link eliminato con successo!', 'success');
         // onSnapshot dovrebbe aggiornare l'UI
         // Se il form di modifica era aperto per il link eliminato, resettalo
-        if (externalLinkFormContainer && externalLinkFormContainer.style.display === 'block' && 
-            editingLinkIndexInput && parseInt(editingLinkIndexInput.value, 10) === indexToDelete) {
+        if (
+            externalLinkFormContainer &&
+            externalLinkFormContainer.style.display === 'block' &&
+            editingLinkIndexInput &&
+            parseInt(editingLinkIndexInput.value, 10) === indexToDelete
+        ) {
             resetAndHideExternalLinkForm();
         }
     } catch (error) {
@@ -565,49 +633,64 @@ function resetAndHideExternalLinkForm() {
 
 function isValidHttpUrl(string) {
     let url;
-    try { url = new URL(string); } catch (_) { return false; }
+    try {
+        url = new URL(string);
+    } catch (_) {
+        return false;
+    }
     return url.protocol === 'http:' || url.protocol === 'https:';
 }
 
 async function handleStatusMessageUpdate(event) {
     event.preventDefault();
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
-        showToast('Devi essere loggato e sul tuo profilo per aggiornare lo stato.', 'error'); return;
+        showToast('Devi essere loggato e sul tuo profilo per aggiornare lo stato.', 'error');
+        return;
     }
     // statusMessageInput è una costante globale definita all'inizio del file js/profile.js
-    if (!statusMessageInput /*|| !statusUpdateMessage || !statusMessageDisplay*/) { // statusUpdateMessage e statusMessageDisplay non sono cruciali per l'update stesso
+    if (!statusMessageInput /*|| !statusUpdateMessage || !statusMessageDisplay*/) {
+        // statusUpdateMessage e statusMessageDisplay non sono cruciali per l'update stesso
         console.error('Elementi DOM per aggiornamento stato mancanti (input).');
-        showToast('Errore interfaccia utente (input stato).', 'error'); return;
+        showToast('Errore interfaccia utente (input stato).', 'error');
+        return;
     }
     const newStatus = statusMessageInput.value.trim();
     if (newStatus.length > 150) {
         if (statusUpdateMessage) statusUpdateMessage.textContent = 'Stato max 150 caratteri.'; // statusUpdateMessage è per i messaggi di errore UI
-        showToast('Stato troppo lungo (max 150 caratteri).', 'warning'); return;
+        showToast('Stato troppo lungo (max 150 caratteri).', 'warning');
+        return;
     }
     // Opzionale: Verifica se lo stato è effettivamente cambiato prima di inviare
-    if (newStatus === (profileDataForDisplay.statusMessage || '')) { 
-        showToast('Nessuna modifica allo stato.', 'info'); return;
+    if (newStatus === (profileDataForDisplay.statusMessage || '')) {
+        showToast('Nessuna modifica allo stato.', 'info');
+        return;
     }
 
     const updateBtn = updateStatusForm ? updateStatusForm.querySelector('button[type="submit"]') : null;
-    if (updateBtn) { updateBtn.disabled = true; updateBtn.textContent = 'Aggiornamento...'; }
-    
+    if (updateBtn) {
+        updateBtn.disabled = true;
+        updateBtn.textContent = 'Aggiornamento...';
+    }
+
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
-        await updateDoc(userProfileRef, { 
-            statusMessage: newStatus, 
-            updatedAt: serverTimestamp() // << MODIFICA CORRETTA
+        await updateDoc(userProfileRef, {
+            statusMessage: newStatus,
+            updatedAt: serverTimestamp(), // << MODIFICA CORRETTA
         });
-        showToast("Stato aggiornato!", 'success');
-        if(statusMessageInput) statusMessageInput.value = ''; // Pulisci input dopo successo
-        if(statusUpdateMessage) statusUpdateMessage.textContent = ''; // Pulisci messaggio errore
+        showToast('Stato aggiornato!', 'success');
+        if (statusMessageInput) statusMessageInput.value = ''; // Pulisci input dopo successo
+        if (statusUpdateMessage) statusUpdateMessage.textContent = ''; // Pulisci messaggio errore
         // onSnapshot dovrebbe aggiornare statusMessageDisplay
     } catch (error) {
-        console.error("Errore aggiornamento stato:", error);
+        console.error('Errore aggiornamento stato:', error);
         showToast(`Errore aggiornamento stato: ${error.message}`, 'error');
         if (statusUpdateMessage) statusUpdateMessage.textContent = `Errore: ${error.message}`;
     } finally {
-        if (updateBtn) { updateBtn.disabled = false; updateBtn.textContent = 'Aggiorna'; }
+        if (updateBtn) {
+            updateBtn.disabled = false;
+            updateBtn.textContent = 'Aggiorna';
+        }
     }
 }
 
@@ -623,34 +706,43 @@ function updateBioCharCounter() {
 async function handleBioUpdate(event) {
     event.preventDefault();
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
-        showToast('Devi essere loggato e sul tuo profilo per aggiornare la bio.', 'error'); return;
+        showToast('Devi essere loggato e sul tuo profilo per aggiornare la bio.', 'error');
+        return;
     }
     // bioInput è una costante globale definita all'inizio del file js/profile.js
-    if (!bioInput /*|| !bioUpdateMessage || !bioDisplay*/) { // bioUpdateMessage e bioDisplay non sono cruciali per l'update stesso
+    if (!bioInput /*|| !bioUpdateMessage || !bioDisplay*/) {
+        // bioUpdateMessage e bioDisplay non sono cruciali per l'update stesso
         console.error('Elementi DOM per aggiornamento bio mancanti (input).');
-        showToast('Errore interfaccia utente (input bio).', 'error'); return;
+        showToast('Errore interfaccia utente (input bio).', 'error');
+        return;
     }
     const newBio = bioInput.value; // Non fare trim() qui per permettere spazi intenzionali, Firestore rules non lo vietano
-    if (newBio.length > MAX_BIO_CHARS) { // MAX_BIO_CHARS è una costante definita nel file (300)
-        showToast(`Bio troppo lunga (max ${MAX_BIO_CHARS} caratteri).`, 'warning'); return;
+    if (newBio.length > MAX_BIO_CHARS) {
+        // MAX_BIO_CHARS è una costante definita nel file (300)
+        showToast(`Bio troppo lunga (max ${MAX_BIO_CHARS} caratteri).`, 'warning');
+        return;
     }
     // Opzionale: Verifica se la bio è effettivamente cambiata
-    if (newBio === (profileDataForDisplay.bio || '')) { 
-        showToast('Nessuna modifica alla bio.', 'info'); return;
+    if (newBio === (profileDataForDisplay.bio || '')) {
+        showToast('Nessuna modifica alla bio.', 'info');
+        return;
     }
 
     const updateBtn = updateBioForm ? updateBioForm.querySelector('button[type="submit"]') : null;
-    if (updateBtn) { updateBtn.disabled = true; updateBtn.textContent = 'Salvataggio Bio...'; }
+    if (updateBtn) {
+        updateBtn.disabled = true;
+        updateBtn.textContent = 'Salvataggio Bio...';
+    }
 
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
-        await updateDoc(userProfileRef, { 
-            bio: newBio, 
-            updatedAt: serverTimestamp() // << MODIFICA CORRETTA
+        await updateDoc(userProfileRef, {
+            bio: newBio,
+            updatedAt: serverTimestamp(), // << MODIFICA CORRETTA
         });
         showToast('Bio aggiornata!', 'success');
-        if(bioInput) bioInput.value = ''; // Pulisci input dopo successo
-        if(bioUpdateMessage) bioUpdateMessage.textContent = ''; // Pulisci messaggio errore
+        if (bioInput) bioInput.value = ''; // Pulisci input dopo successo
+        if (bioUpdateMessage) bioUpdateMessage.textContent = ''; // Pulisci messaggio errore
         updateBioCharCounter(); // Aggiorna il contatore caratteri
         // onSnapshot dovrebbe aggiornare bioDisplay
     } catch (error) {
@@ -658,29 +750,44 @@ async function handleBioUpdate(event) {
         showToast(`Errore aggiornamento bio: ${error.message}`, 'error');
         if (bioUpdateMessage) bioUpdateMessage.textContent = `Errore: ${error.message}`;
     } finally {
-        if (updateBtn) { updateBtn.disabled = false; updateBtn.textContent = 'Salva Bio'; }
+        if (updateBtn) {
+            updateBtn.disabled = false;
+            updateBtn.textContent = 'Salva Bio';
+        }
     }
 }
 
 function formatMyArticleTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
         return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
-            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
-    } return 'N/A';
+    }
+    return 'N/A';
 }
 
 async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
-    const statusText = currentStatus === 'draft' ? 'bozza' : currentStatus === 'rejected' ? 'articolo respinto' : 'articolo';
+    const statusText =
+        currentStatus === 'draft' ? 'bozza' : currentStatus === 'rejected' ? 'articolo respinto' : 'articolo';
     const userConfirmed = await showConfirmationModal(
         `Conferma Eliminazione ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
         `Sei sicuro di voler eliminare ${statusText} "${articleTitle || 'Senza Titolo'}"? L'azione è irreversibile.`
     );
-    if (!userConfirmed) { showToast('Eliminazione annullata.', 'info'); return; }
+    if (!userConfirmed) {
+        showToast('Eliminazione annullata.', 'info');
+        return;
+    }
     try {
         const articleRef = doc(db, 'articles', articleId);
         await deleteDoc(articleRef);
-        showToast(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato.`, 'success');
+        showToast(
+            `${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato.`,
+            'success'
+        );
         if (loggedInUser) loadMyArticles(loggedInUser.uid); // Ricarica la lista
     } catch (error) {
         console.error(`Errore eliminazione ${statusText}:`, error);
@@ -698,7 +805,12 @@ function createMyArticleItemElement(article, articleId) {
     cardDiv.appendChild(titleEl);
     const metaInfoDiv = document.createElement('div');
     metaInfoDiv.className = 'my-article-card-meta';
-    const statusTextMap = { draft: 'Bozza', pendingReview: 'In Revisione', published: 'Pubblicato', rejected: 'Respinto' };
+    const statusTextMap = {
+        draft: 'Bozza',
+        pendingReview: 'In Revisione',
+        published: 'Pubblicato',
+        rejected: 'Respinto',
+    };
     const statusDisplay = statusTextMap[article.status] || article.status || 'Stato Sconosciuto';
     const statusEl = document.createElement('span');
     statusEl.className = `my-article-card-status status-${article.status || 'unknown'}`;
@@ -720,7 +832,7 @@ function createMyArticleItemElement(article, articleId) {
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'my-article-card-actions';
     // ... (logica bottoni azioni come nel tuo codice originale, non modificata)
-     if (article.status === 'draft') {
+    if (article.status === 'draft') {
         const editButton = document.createElement('a');
         editButton.href = `submit-article.html?draftId=${articleId}`;
         editButton.className = 'game-button my-article-action-button';
@@ -734,7 +846,7 @@ function createMyArticleItemElement(article, articleId) {
         actionsDiv.appendChild(deleteButton);
     } else if (article.status === 'pendingReview') {
         const previewButton = document.createElement('a');
-        previewButton.href = `view-article.html?id=${articleId}&preview=true`; 
+        previewButton.href = `view-article.html?id=${articleId}&preview=true`;
         previewButton.target = '_blank';
         previewButton.className = 'game-button my-article-action-button';
         previewButton.textContent = 'Anteprima';
@@ -751,7 +863,8 @@ function createMyArticleItemElement(article, articleId) {
         resubmitButton.href = `submit-article.html?rejectedArticleId=${articleId}`;
         resubmitButton.className = 'game-button my-article-action-button';
         resubmitButton.textContent = 'Crea da Questo Articolo';
-        resubmitButton.title = 'Crea una nuova sottomissione pre-compilata con il contenuto di questo articolo respinto';
+        resubmitButton.title =
+            'Crea una nuova sottomissione pre-compilata con il contenuto di questo articolo respinto';
         actionsDiv.appendChild(resubmitButton);
 
         const deleteButton = document.createElement('button');
@@ -767,24 +880,54 @@ function createMyArticleItemElement(article, articleId) {
 async function loadMyArticles(userIdToLoadArticlesFor) {
     const articleStatusesToLoad = [
         { status: 'draft', listDiv: myDraftArticlesListDiv, loadingMsg: myDraftsLoadingMessage, title: 'Bozze' },
-        { status: 'pendingReview', listDiv: myPendingArticlesListDiv, loadingMsg: myPendingLoadingMessage, title: 'In Revisione' },
-        { status: 'published', listDiv: myPublishedArticlesListDiv, loadingMsg: myPublishedLoadingMessage, title: 'Pubblicati' },
-        { status: 'rejected', listDiv: myRejectedArticlesListDiv, loadingMsg: myRejectedLoadingMessage, title: 'Respinti' },
+        {
+            status: 'pendingReview',
+            listDiv: myPendingArticlesListDiv,
+            loadingMsg: myPendingLoadingMessage,
+            title: 'In Revisione',
+        },
+        {
+            status: 'published',
+            listDiv: myPublishedArticlesListDiv,
+            loadingMsg: myPublishedLoadingMessage,
+            title: 'Pubblicati',
+        },
+        {
+            status: 'rejected',
+            listDiv: myRejectedArticlesListDiv,
+            loadingMsg: myRejectedLoadingMessage,
+            title: 'Respinti',
+        },
     ];
-    if (!userIdToLoadArticlesFor) { if (myArticlesSection) myArticlesSection.style.display = 'none'; return; }
+    if (!userIdToLoadArticlesFor) {
+        if (myArticlesSection) myArticlesSection.style.display = 'none';
+        return;
+    }
     if (loggedInUser && loggedInUser.uid === userIdToLoadArticlesFor) {
         if (myArticlesSection) myArticlesSection.style.display = 'block';
-    } else { if (myArticlesSection) myArticlesSection.style.display = 'none'; return; }
+    } else {
+        if (myArticlesSection) myArticlesSection.style.display = 'none';
+        return;
+    }
 
     for (const S of articleStatusesToLoad) {
         if (S.listDiv && S.loadingMsg) {
-            S.loadingMsg.style.display = 'block'; S.listDiv.innerHTML = '';
+            S.loadingMsg.style.display = 'block';
+            S.listDiv.innerHTML = '';
             try {
-                const q = query(collection(db, 'articles'), where('authorId', '==', userIdToLoadArticlesFor), where('status', '==', S.status), orderBy('updatedAt', 'desc'));
+                const q = query(
+                    collection(db, 'articles'),
+                    where('authorId', '==', userIdToLoadArticlesFor),
+                    where('status', '==', S.status),
+                    orderBy('updatedAt', 'desc')
+                );
                 const querySnapshot = await getDocs(q); // getDocs è corretto qui, non serve onSnapshot per lista articoli
                 S.loadingMsg.style.display = 'none';
                 if (querySnapshot.empty) S.listDiv.innerHTML = `<p>Nessun articolo "${S.title}".</p>`;
-                else querySnapshot.forEach((docSnapshot) => S.listDiv.appendChild(createMyArticleItemElement(docSnapshot.data(), docSnapshot.id)));
+                else
+                    querySnapshot.forEach((docSnapshot) =>
+                        S.listDiv.appendChild(createMyArticleItemElement(docSnapshot.data(), docSnapshot.id))
+                    );
             } catch (error) {
                 console.error(`Errore caricamento articoli ${S.status}:`, error);
                 S.loadingMsg.style.display = 'none';
@@ -796,15 +939,20 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
 
 function openBadgeDetailsModal(badgeId) {
     if (!badgeDetailModal || !badgeDetailModalIcon || !badgeDetailModalName || !badgeDetailModalDescription) {
-        console.error('Elementi modale badge non trovati.'); return;
+        console.error('Elementi modale badge non trovati.');
+        return;
     }
     const badgeInfo = BADGE_DEFINITIONS[badgeId];
-    if (!badgeInfo) { console.error(`Dettagli non trovati per badge: ${badgeId}`); return; }
+    if (!badgeInfo) {
+        console.error(`Dettagli non trovati per badge: ${badgeId}`);
+        return;
+    }
     badgeDetailModalIcon.textContent = badgeInfo.icon;
     badgeDetailModalIcon.style.color = badgeInfo.color || 'inherit';
     badgeDetailModalIcon.className = 'material-symbols-rounded'; // Resetta classi per sicurezza
     if (badgeInfo.isNeon) badgeDetailModalIcon.classList.add('testo-neon-arcade');
-    else if (badgeInfo.isAnimated && badgeInfo.animationClass) badgeDetailModalIcon.classList.add(badgeInfo.animationClass);
+    else if (badgeInfo.isAnimated && badgeInfo.animationClass)
+        badgeDetailModalIcon.classList.add(badgeInfo.animationClass);
     badgeDetailModalName.textContent = badgeInfo.name;
     badgeDetailModalDescription.textContent = badgeInfo.description;
     badgeDetailModal.style.display = 'block';
@@ -824,18 +972,25 @@ function handleAvatarFileSelection(event) {
     if (!allowedTypes.includes(file.type)) {
         showToast('Formato file non supportato (JPG, PNG, WebP).', 'error');
         if (avatarUploadStatus) avatarUploadStatus.textContent = 'Formato file non valido.';
-        selectedAvatarFile = null; if (avatarUploadInput) avatarUploadInput.value = ''; return;
+        selectedAvatarFile = null;
+        if (avatarUploadInput) avatarUploadInput.value = '';
+        return;
     }
     const maxSize = MAX_AVATAR_SIZE_MB * 1024 * 1024;
     if (file.size > maxSize) {
         showToast(`File troppo grande (max ${MAX_AVATAR_SIZE_MB}MB).`, 'error');
         if (avatarUploadStatus) avatarUploadStatus.textContent = `File troppo grande (max ${MAX_AVATAR_SIZE_MB}MB).`;
-        selectedAvatarFile = null; if (avatarUploadInput) avatarUploadInput.value = ''; return;
+        selectedAvatarFile = null;
+        if (avatarUploadInput) avatarUploadInput.value = '';
+        return;
     }
     selectedAvatarFile = file;
     const reader = new FileReader();
     reader.onload = (e) => {
-        if (avatarPreview) { avatarPreview.src = e.target.result; avatarPreview.style.display = 'block'; }
+        if (avatarPreview) {
+            avatarPreview.src = e.target.result;
+            avatarPreview.style.display = 'block';
+        }
         if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'none';
     };
     reader.readAsDataURL(file);
@@ -846,9 +1001,13 @@ function handleAvatarFileSelection(event) {
 
 async function handleConfirmAvatarUpload() {
     if (!selectedAvatarFile || !loggedInUser) {
-        showToast('Nessun file selezionato o utente non loggato.', 'warning'); return;
+        showToast('Nessun file selezionato o utente non loggato.', 'warning');
+        return;
     }
-    if (confirmAvatarUploadBtn) { confirmAvatarUploadBtn.disabled = true; confirmAvatarUploadBtn.textContent = 'Caricamento...'; }
+    if (confirmAvatarUploadBtn) {
+        confirmAvatarUploadBtn.disabled = true;
+        confirmAvatarUploadBtn.textContent = 'Caricamento...';
+    }
     if (avatarUploadStatus) avatarUploadStatus.textContent = 'Inizio upload...';
     if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'block';
     if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = '0%';
@@ -859,32 +1018,39 @@ async function handleConfirmAvatarUpload() {
     const fileStorageRef = storageRef(storage, filePath);
     const uploadTask = uploadBytesResumable(fileStorageRef, selectedAvatarFile);
 
-    uploadTask.on('state_changed',
+    uploadTask.on(
+        'state_changed',
         (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = progress + '%';
             if (avatarUploadProgressText) avatarUploadProgressText.textContent = Math.round(progress) + '%';
         },
         (error) => {
-            console.error("Errore upload avatar su Storage:", error);
+            console.error('Errore upload avatar su Storage:', error);
             showToast(`Errore upload: ${error.code}`, 'error'); // Mostra error.code che è più utile a volte
             if (avatarUploadStatus) avatarUploadStatus.textContent = `Errore upload: ${error.code}`;
-            if (confirmAvatarUploadBtn) { confirmAvatarUploadBtn.disabled = false; confirmAvatarUploadBtn.textContent = 'Conferma e Carica'; }
+            if (confirmAvatarUploadBtn) {
+                confirmAvatarUploadBtn.disabled = false;
+                confirmAvatarUploadBtn.textContent = 'Conferma e Carica';
+            }
             if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
-            selectedAvatarFile = null; if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta input
+            selectedAvatarFile = null;
+            if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta input
         },
-        () => { // Upload completato con successo su Storage
+        () => {
+            // Upload completato con successo su Storage
             showToast('Immagine caricata! In attesa di elaborazione...', 'info', 7000);
-            if (avatarUploadStatus) avatarUploadStatus.textContent = 'Elaborazione in corso... L\'immagine si aggiornerà a breve.';
+            if (avatarUploadStatus)
+                avatarUploadStatus.textContent = "Elaborazione in corso... L'immagine si aggiornerà a breve.";
             if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'none'; // Nascondi bottone dopo successo
-            if (avatarUploadInput) avatarUploadInput.value = ''; 
-            if (avatarPreview) avatarPreview.style.display = 'none'; 
+            if (avatarUploadInput) avatarUploadInput.value = '';
+            if (avatarPreview) avatarPreview.style.display = 'none';
             if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'flex';
             selectedAvatarFile = null; // Resetta file dopo upload per evitare re-upload accidentali
 
             // L'UI si aggiornerà grazie a onSnapshot in loadProfileData
             // Non è necessario un refresh manuale o un richiamo a loadProfileData
-            
+
             // setTimeout per resettare il bottone se l'utente volesse caricare un altro file dopo un po'
             // Ma dato che nascondiamo il bottone, questo è meno rilevante.
             // setTimeout(() => {
@@ -904,7 +1070,9 @@ onAuthStateChanged(auth, (user) => {
     const profileUserIdFromUrl = urlParams.get('userId');
 
     if (currentProfileListenerUnsubscribe) {
-        console.log('[AthenaDev Debug - Auth] Annullamento iscrizione dal listener profilo precedente (cambio auth/utente).');
+        console.log(
+            '[AthenaDev Debug - Auth] Annullamento iscrizione dal listener profilo precedente (cambio auth/utente).'
+        );
         currentProfileListenerUnsubscribe();
         currentProfileListenerUnsubscribe = null;
     }
@@ -923,13 +1091,15 @@ onAuthStateChanged(auth, (user) => {
         loadProfileData(loggedInUser.uid, true);
         loadMyArticles(loggedInUser.uid);
         // La visibilità di avatarUploadSection è gestita da updateProfilePageUI
-    } else { // Utente non loggato e nessun userId nell'URL
+    } else {
+        // Utente non loggato e nessun userId nell'URL
         profileDataForDisplay = null; // Resetta dati locali
         if (profileContent) profileContent.style.display = 'none';
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
         if (profileLoginMessage) {
             profileLoginMessage.style.display = 'block';
-            profileLoginMessage.innerHTML = '<p>Per visualizzare o modificare un profilo, <a href="register.html?authAction=login">accedi</a> o <a href="register.html?authAction=signup">registrati</a>.</p>';
+            profileLoginMessage.innerHTML =
+                '<p>Per visualizzare o modificare un profilo, <a href="register.html?authAction=login">accedi</a> o <a href="register.html?authAction=signup">registrati</a>.</p>';
         }
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
         if (statusMessageSection) statusMessageSection.style.display = 'none';
@@ -940,14 +1110,15 @@ onAuthStateChanged(auth, (user) => {
         if (myArticlesSection) myArticlesSection.style.display = 'none';
         if (avatarUploadSection) avatarUploadSection.style.display = 'none';
         document.title = 'Profilo Utente - asyncDonkey.io';
-        if(profileSectionTitle) profileSectionTitle.textContent = 'Profilo Utente';
+        if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Utente';
     }
 });
 
 // Event Listeners per i form e altri elementi interattivi
 if (updateStatusForm) updateStatusForm.addEventListener('submit', handleStatusMessageUpdate);
 
-if (resendVerificationEmailBtn && emailVerificationBanner) { // Assicurati che anche banner esista
+if (resendVerificationEmailBtn && emailVerificationBanner) {
+    // Assicurati che anche banner esista
     resendVerificationEmailBtn.addEventListener('click', async () => {
         if (loggedInUser && !loggedInUser.emailVerified) {
             try {
@@ -962,13 +1133,14 @@ if (resendVerificationEmailBtn && emailVerificationBanner) { // Assicurati che a
                 }
             } catch (error) {
                 console.error('Errore invio nuova email di verifica:', error);
-                showToast("Errore invio email. Riprova.", 'error');
+                showToast('Errore invio email. Riprova.', 'error');
                 if (resendEmailMessage) {
                     resendEmailMessage.textContent = `Errore: ${error.message}`;
                     resendEmailMessage.style.color = 'red';
                 }
             } finally {
-                setTimeout(() => { // Timeout per riabilitare il bottone
+                setTimeout(() => {
+                    // Timeout per riabilitare il bottone
                     if (resendVerificationEmailBtn) {
                         resendVerificationEmailBtn.disabled = false;
                         resendVerificationEmailBtn.textContent = 'Invia di nuovo email di verifica';
@@ -1021,9 +1193,12 @@ document.addEventListener('DOMContentLoaded', () => {
         badgeDetailModalName = badgeDetailModal.querySelector('#badgeDetailModalName');
         badgeDetailModalDescription = badgeDetailModal.querySelector('#badgeDetailModalDescription');
         if (closeBadgeDetailModalBtn) {
-            closeBadgeDetailModalBtn.addEventListener('click', () => { badgeDetailModal.style.display = 'none'; });
+            closeBadgeDetailModalBtn.addEventListener('click', () => {
+                badgeDetailModal.style.display = 'none';
+            });
         }
-        badgeDetailModal.addEventListener('click', (event) => { // Chiudi cliccando fuori dalla modale
+        badgeDetailModal.addEventListener('click', (event) => {
+            // Chiudi cliccando fuori dalla modale
             if (event.target === badgeDetailModal) badgeDetailModal.style.display = 'none';
         });
     }

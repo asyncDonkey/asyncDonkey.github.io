@@ -55,7 +55,9 @@ function formatGlobalScoreTimestamp(firebaseTimestamp) {
 async function loadGlobalLeaderboard(direction = 'initial') {
     if (!leaderboardTableBody || !prevPageBtn || !nextPageBtn || !currentPageIndicator || !refreshLeaderboardBtn) {
         console.error('Elementi DOM per la leaderboard o paginazione/refresh mancanti.');
-        if (globalLeaderboardContainer) globalLeaderboardContainer.innerHTML = '<p class="no-scores">Errore: Struttura pagina classifica non caricata.</p>';
+        if (globalLeaderboardContainer)
+            globalLeaderboardContainer.innerHTML =
+                '<p class="no-scores">Errore: Struttura pagina classifica non caricata.</p>';
         return;
     }
     if (!db) {
@@ -69,7 +71,8 @@ async function loadGlobalLeaderboard(direction = 'initial') {
     nextPageBtn.disabled = true;
     refreshLeaderboardBtn.disabled = true;
     const originalRefreshBtnText = refreshLeaderboardBtn.innerHTML;
-    refreshLeaderboardBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Caricamento...';
+    refreshLeaderboardBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Caricamento...';
 
     const leaderboardScoresCollection = collection(db, 'leaderboardScores');
     let q;
@@ -78,25 +81,63 @@ async function loadGlobalLeaderboard(direction = 'initial') {
     try {
         // --- Logica query per paginazione 'initial', 'next', 'prev' (come nel tuo file, con piccole correzioni alla logica 'prev') ---
         if (direction === 'initial') {
-            currentPage = 1; lastVisibleDoc = null; firstVisibleDoc = null; firstDocsHistory = []; isFetchingFirstPageQuery = true;
-            q = query(leaderboardScoresCollection, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), orderBy('timestamp', 'asc'), limit(SCORES_PER_PAGE));
+            currentPage = 1;
+            lastVisibleDoc = null;
+            firstVisibleDoc = null;
+            firstDocsHistory = [];
+            isFetchingFirstPageQuery = true;
+            q = query(
+                leaderboardScoresCollection,
+                where('gameId', '==', 'donkeyRunner'),
+                orderBy('score', 'desc'),
+                orderBy('timestamp', 'asc'),
+                limit(SCORES_PER_PAGE)
+            );
         } else if (direction === 'next' && lastVisibleDoc) {
-            q = query(leaderboardScoresCollection, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), orderBy('timestamp', 'asc'), startAfter(lastVisibleDoc), limit(SCORES_PER_PAGE));
+            q = query(
+                leaderboardScoresCollection,
+                where('gameId', '==', 'donkeyRunner'),
+                orderBy('score', 'desc'),
+                orderBy('timestamp', 'asc'),
+                startAfter(lastVisibleDoc),
+                limit(SCORES_PER_PAGE)
+            );
         } else if (direction === 'prev') {
-            if (currentPage <= 1) { loadGlobalLeaderboard('initial'); return; } // currentPage è già decrementato
-            isFetchingFirstPageQuery = (currentPage === 1); // Sarà la prima pagina solo se currentPage è 1
-            
+            if (currentPage <= 1) {
+                loadGlobalLeaderboard('initial');
+                return;
+            } // currentPage è già decrementato
+            isFetchingFirstPageQuery = currentPage === 1; // Sarà la prima pagina solo se currentPage è 1
+
             if (isFetchingFirstPageQuery) {
-                q = query(leaderboardScoresCollection, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), orderBy('timestamp', 'asc'), limit(SCORES_PER_PAGE));
-            } else if (firstDocsHistory[currentPage - 2]) { // Usa il primo doc della pagina precedente come cursore 'startAfter'
-                                                            // firstDocsHistory[currentPage-1] è il primo della pag. corrente
-                                                            // firstDocsHistory[currentPage-2] è il primo della pag. precedente
-                q = query(leaderboardScoresCollection, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), orderBy('timestamp', 'asc'), startAfter(firstDocsHistory[currentPage - 2]), limit(SCORES_PER_PAGE));
+                q = query(
+                    leaderboardScoresCollection,
+                    where('gameId', '==', 'donkeyRunner'),
+                    orderBy('score', 'desc'),
+                    orderBy('timestamp', 'asc'),
+                    limit(SCORES_PER_PAGE)
+                );
+            } else if (firstDocsHistory[currentPage - 2]) {
+                // Usa il primo doc della pagina precedente come cursore 'startAfter'
+                // firstDocsHistory[currentPage-1] è il primo della pag. corrente
+                // firstDocsHistory[currentPage-2] è il primo della pag. precedente
+                q = query(
+                    leaderboardScoresCollection,
+                    where('gameId', '==', 'donkeyRunner'),
+                    orderBy('score', 'desc'),
+                    orderBy('timestamp', 'asc'),
+                    startAfter(firstDocsHistory[currentPage - 2]),
+                    limit(SCORES_PER_PAGE)
+                );
             } else {
-                console.warn("History non sufficiente per 'prev', ricarico 'initial'"); loadGlobalLeaderboard('initial'); return;
+                console.warn("History non sufficiente per 'prev', ricarico 'initial'");
+                loadGlobalLeaderboard('initial');
+                return;
             }
         } else {
-            console.warn("Stato paginazione non valido. Ritorno a 'initial'."); loadGlobalLeaderboard('initial'); return;
+            console.warn("Stato paginazione non valido. Ritorno a 'initial'.");
+            loadGlobalLeaderboard('initial');
+            return;
         }
 
         const querySnapshot = await getDocs(q);
@@ -105,7 +146,7 @@ async function loadGlobalLeaderboard(direction = 'initial') {
 
         if (scoreDocs.length > 0) {
             // --- OTTIMIZZAZIONE: Recupero profili utente con query 'in' ---
-            const userIdsToFetch = [...new Set(scoreDocs.map(sDoc => sDoc.data().userId).filter(id => id))]; // Array di userId unici e validi
+            const userIdsToFetch = [...new Set(scoreDocs.map((sDoc) => sDoc.data().userId).filter((id) => id))]; // Array di userId unici e validi
             const profilesMap = new Map();
 
             if (userIdsToFetch.length > 0) {
@@ -114,19 +155,22 @@ async function loadGlobalLeaderboard(direction = 'initial') {
 
                 for (let i = 0; i < userIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
                     const batchUserIds = userIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
-                    const profilesQuery = query(collection(db, 'userProfiles'), where(documentId(), 'in', batchUserIds));
+                    const profilesQuery = query(
+                        collection(db, 'userProfiles'),
+                        where(documentId(), 'in', batchUserIds)
+                    );
                     profilePromises.push(getDocs(profilesQuery));
                 }
 
                 try {
                     const snapshotsArray = await Promise.all(profilePromises);
-                    snapshotsArray.forEach(snapshot => {
-                        snapshot.forEach(docSnap => {
+                    snapshotsArray.forEach((snapshot) => {
+                        snapshot.forEach((docSnap) => {
                             profilesMap.set(docSnap.id, docSnap.data());
                         });
                     });
                 } catch (profileError) {
-                    console.error("Errore durante il recupero batch dei profili utente:", profileError);
+                    console.error('Errore durante il recupero batch dei profili utente:', profileError);
                     // Potresti voler gestire questo errore in modo più granulare, es. mostrando placeholder
                 }
             }
@@ -154,7 +198,7 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                     userProfileUpdatedAt = userProfile.profileUpdatedAt || null;
                     nationalityCode = userProfile.nationalityCode || nationalityCode; // Sovrascrivi con quello del profilo se presente
                 }
-                
+
                 enrichedScores.push({
                     id: scoreDoc.id,
                     ...scoreData,
@@ -162,46 +206,44 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                     profileDisplayName,
                     profileAvatarUrl,
                     userProfileUpdatedAt,
-                    nationalityCode // Assicura che nationalityCode sia nell'oggetto enrichedScores
+                    nationalityCode, // Assicura che nationalityCode sia nell'oggetto enrichedScores
                 });
             }
         }
         // --- Fine arricchimento punteggi ---
 
-
         // ... (resto della logica di paginazione e gestione firstVisibleDoc/lastVisibleDoc come nel tuo file) ...
         if (enrichedScores.length > 0) {
             if (direction === 'next') {
                 currentPage++;
-            } 
+            }
             if (direction === 'prev' && !isFetchingFirstPageQuery) {
-                 firstDocsHistory.splice(currentPage); // currentPage è già il numero della pagina visualizzata
+                firstDocsHistory.splice(currentPage); // currentPage è già il numero della pagina visualizzata
             }
 
             firstVisibleDoc = enrichedScores[0].firestoreDoc;
             lastVisibleDoc = enrichedScores[enrichedScores.length - 1].firestoreDoc;
 
             if (firstVisibleDoc) {
-                if (firstDocsHistory.length < currentPage) { 
+                if (firstDocsHistory.length < currentPage) {
                     firstDocsHistory.push(firstVisibleDoc);
-                } else { 
+                } else {
                     firstDocsHistory[currentPage - 1] = firstVisibleDoc;
                 }
             }
         } else {
-            if (direction === 'next') { /* No more pages */ }
-            else if ((isFetchingFirstPageQuery || currentPage === 1)) {
-                 currentPage = 1; firstDocsHistory = []; lastVisibleDoc = null;
+            if (direction === 'next') {
+                /* No more pages */
+            } else if (isFetchingFirstPageQuery || currentPage === 1) {
+                currentPage = 1;
+                firstDocsHistory = [];
+                lastVisibleDoc = null;
             }
             firstVisibleDoc = null;
         }
 
         displayGlobalLeaderboard(enrichedScores, currentPage);
-        updatePaginationControls(
-            enrichedScores.length,
-            isFetchingFirstPageQuery || currentPage === 1
-        );
-
+        updatePaginationControls(enrichedScores.length, isFetchingFirstPageQuery || currentPage === 1);
     } catch (error) {
         console.error(`Errore durante il caricamento della leaderboard (direzione: ${direction}):`, error);
         if (leaderboardTableBody) {
@@ -211,14 +253,16 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                 leaderboardTableBody.innerHTML = `<tr class="no-scores"><td colspan="4">Errore nel caricamento dei punteggi.</td></tr>`;
             }
         }
-        currentPage = 1; lastVisibleDoc = null; firstVisibleDoc = null; firstDocsHistory = [];
+        currentPage = 1;
+        lastVisibleDoc = null;
+        firstVisibleDoc = null;
+        firstDocsHistory = [];
         updatePaginationControls(0, true);
     } finally {
         refreshLeaderboardBtn.disabled = false;
         refreshLeaderboardBtn.innerHTML = originalRefreshBtnText;
     }
 }
-
 
 /**
  * Popola la tabella HTML con i dati della leaderboard.
@@ -230,9 +274,10 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
     leaderboardTableBody.innerHTML = '';
 
     if (!leaderboardData || leaderboardData.length === 0) {
-        const message = (pageNumber === 1)
-            ? "Nessun punteggio registrato per Donkey Runner. Sii il primo!"
-            : "Nessun altro punteggio disponibile. Sei arrivato alla fine!";
+        const message =
+            pageNumber === 1
+                ? 'Nessun punteggio registrato per Donkey Runner. Sii il primo!'
+                : 'Nessun altro punteggio disponibile. Sei arrivato alla fine!';
         leaderboardTableBody.innerHTML = `<tr class="no-scores"><td colspan="4" class="text-center py-3">${message}</td></tr>`;
         return;
     }
@@ -252,8 +297,10 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
 
         const avatarImg = document.createElement('img');
         avatarImg.className = 'player-avatar me-2';
-        avatarImg.width = 36; avatarImg.height = 36;
-        avatarImg.style.borderRadius = '50%'; avatarImg.style.objectFit = 'cover';
+        avatarImg.width = 36;
+        avatarImg.height = 36;
+        avatarImg.style.borderRadius = '50%';
+        avatarImg.style.objectFit = 'cover';
 
         if (entry.profileAvatarUrl) {
             if (entry.userProfileUpdatedAt && typeof entry.userProfileUpdatedAt.seconds === 'number') {
@@ -264,9 +311,9 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         } else {
             const seedForBlockie = entry.userId || entry.initials || entry.profileDisplayName || `anon-${entry.id}`;
             try {
-                 avatarImg.src = generateBlockieAvatar(seedForBlockie, 36, { size: 8, scale: 4.5 });
+                avatarImg.src = generateBlockieAvatar(seedForBlockie, 36, { size: 8, scale: 4.5 });
             } catch (e) {
-                console.error("Errore generazione Blockie per leaderboard:", e, "seed:", seedForBlockie);
+                console.error('Errore generazione Blockie per leaderboard:', e, 'seed:', seedForBlockie);
                 avatarImg.src = 'assets/images/default-avatar.png';
             }
         }
@@ -274,8 +321,8 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         avatarImg.alt = altText;
         avatarImg.onerror = () => {
             console.warn(`Errore caricamento avatar per ${altText} (URL: ${avatarImg.src}), uso default.`);
-            avatarImg.src = 'assets/images/default-avatar.png'; 
-            avatarImg.onerror = null; 
+            avatarImg.src = 'assets/images/default-avatar.png';
+            avatarImg.onerror = null;
         };
         tdPlayer.appendChild(avatarImg);
 
@@ -286,7 +333,8 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
             const flagIconSpan = document.createElement('span');
             flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
-            flagIconSpan.style.marginRight = '8px'; flagIconSpan.style.verticalAlign = 'middle';
+            flagIconSpan.style.marginRight = '8px';
+            flagIconSpan.style.verticalAlign = 'middle';
             nameSpan.appendChild(flagIconSpan);
         }
 
@@ -295,7 +343,7 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
             const profileLink = document.createElement('a');
             profileLink.href = `profile.html?userId=${entry.userId}`;
             profileLink.textContent = displayNameText;
-            profileLink.classList.add('text-decoration-none'); 
+            profileLink.classList.add('text-decoration-none');
             nameSpan.appendChild(profileLink);
         } else {
             nameSpan.appendChild(document.createTextNode(displayNameText + (entry.initials ? '' : ' (Ospite)')));
@@ -317,7 +365,6 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
     });
 }
 
-
 /**
  * Aggiorna lo stato dei pulsanti di paginazione e l'indicatore di pagina.
  * @param {number} countOnCurrentPage - Numero di elementi caricati nella pagina corrente.
@@ -327,7 +374,7 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
 function updatePaginationControls(countOnCurrentPage, isFirstPageResult = false) {
     if (!prevPageBtn || !nextPageBtn || !currentPageIndicator) return;
     currentPageIndicator.textContent = `Pagina ${currentPage}`;
-    prevPageBtn.disabled = isFirstPageResult || currentPage === 1; 
+    prevPageBtn.disabled = isFirstPageResult || currentPage === 1;
     nextPageBtn.disabled = countOnCurrentPage < SCORES_PER_PAGE;
 }
 
@@ -338,29 +385,35 @@ document.addEventListener('DOMContentLoaded', () => {
         nextPageBtn.addEventListener('click', () => {
             if (!nextPageBtn.disabled) loadGlobalLeaderboard('next');
         });
-    } else { console.error('Bottone nextPageBtn non trovato!'); }
+    } else {
+        console.error('Bottone nextPageBtn non trovato!');
+    }
 
     if (prevPageBtn) {
         prevPageBtn.addEventListener('click', () => {
-            if (!prevPageBtn.disabled) { 
-                if (currentPage > 1) { 
-                    currentPage--; 
+            if (!prevPageBtn.disabled) {
+                if (currentPage > 1) {
+                    currentPage--;
                     loadGlobalLeaderboard('prev');
-                } else { 
+                } else {
                     console.warn("PrevPageBtn cliccato su currentPage=1, ricarico 'initial'");
                     loadGlobalLeaderboard('initial');
                 }
             }
         });
-    } else { console.error('Bottone prevPageBtn non trovato!'); }
+    } else {
+        console.error('Bottone prevPageBtn non trovato!');
+    }
 
     if (refreshLeaderboardBtn) {
         refreshLeaderboardBtn.addEventListener('click', () => {
-            if(!refreshLeaderboardBtn.disabled) {
+            if (!refreshLeaderboardBtn.disabled) {
                 console.log('Pulsante Aggiorna cliccato. Ricarico la prima pagina.');
                 loadGlobalLeaderboard('initial');
             }
         });
-    } else { console.error('Pulsante refreshLeaderboardBtn non trovato!'); }
+    } else {
+        console.error('Pulsante refreshLeaderboardBtn non trovato!');
+    }
     loadGlobalLeaderboard('initial');
 });
