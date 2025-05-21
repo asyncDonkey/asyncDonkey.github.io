@@ -9,6 +9,7 @@
     <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
     <style>
@@ -56,10 +57,13 @@
             transform: translateY(-5px);
             box-shadow: 0 6px 16px rgba(0,0,0,0.12);
         }
-        .portal-card img.card-icon {
-            width: 60px;
-            height: 60px;
+        /* .portal-card img.card-icon è stato modificato/sostituito da .portal-card .card-icon per Material Symbols */
+        .portal-card .card-icon { /* Modificato per Material Symbols */
+            font-size: 3.5em; /* Dimensione dell'icona (era width/height per img) */
+            color: var(--link-color); /* Colore dell'icona, puoi personalizzarlo */
             margin: 0 auto 15px auto;
+            display: block; /* Necessario per centrare un elemento inline-block come span con margin auto */
+            line-height: 1; /* Per un buon allineamento verticale dell'icona font */
         }
         .portal-card h3 {
             font-family: "Space Grotesk", sans-serif;
@@ -140,15 +144,15 @@
             font-weight: bold;
             color: var(--link-color);
         }
-        /* Rimossa la classe .intro-animation-placeholder qui era vuota, 
+        /* Rimossa la classe .intro-animation-placeholder qui era vuota,
            lo stile sarà nella classe specifica definita in styles.css
            o direttamente applicato se decommentato. */
-        
+
         /* Stili per la sezione articoli (H.3) */
         #articlesSection {
             /* Stile per la section se necessario, es. padding, margin */
             /* Inizialmente nascosta, JS la mostrerà se ci sono articoli */
-            display: none; 
+            display: none;
             padding: 20px 0; /* Aggiunto padding verticale */
         }
         #articlesSection .portal-header { /* Titolo sezione articoli */
@@ -226,13 +230,17 @@
         /* Stili per la card "Featured Article" nel portal-grid principale */
         #featuredArticleCard {
             /* Inizialmente nascosta, JS la mostrerà se c'è un articolo featured */
-            display: none; 
+            display: none;
             text-align: left; /* Allineamento a sinistra per questa card specifica */
         }
-        #featuredArticleCard .card-icon {
+        #featuredArticleCard .card-icon { /* Modificato per Material Symbols */
+             font-size: 3.5em;
+             color: var(--link-color);
              margin-left: 0; /* Icona a sinistra per la card featured */
              margin-right: auto;
              margin-bottom: 10px;
+             display: block;
+             line-height: 1;
         }
         #featuredArticleCard h3 { /* Titolo "Featured Article" */
             text-align: left;
@@ -254,34 +262,115 @@
 <body>
 
     <header>
-        <div class="header-content" style="padding: 10px 5%; align-items: center; display: flex; justify-content: space-between; flex-wrap: wrap;">
-            <a href="index.html" style="text-decoration: none;">
-                <h1 style="font-size: 1.8em; margin:0;">asyncDonkey.io</h1>
-            </a>
-            <nav>
-    <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 20px;">
-        <li><a href="index.html" class="auth-button" style="text-decoration:none;">Home</a></li>
-        <li><a href="about.html" class="auth-button" style="text-decoration:none;">.Dev</a></li>
-        <li><a href="contribute.html" class="auth-button" style="text-decoration:none;" id="navContributeLink">Contribuisci</a></li> <li><a href="donkeyRunner.html" class="auth-button" style="text-decoration:none;">codeDash!</a></li>
-        <li><a href="leaderboard.html" class="auth-button" style="text-decoration:none;">Leaderboard</a></li>
-        <li id="profileNav" style="display: none;"><a href="profile.html" class="auth-button" style="text-decoration:none;">Profile</a></li>
-        <li id="navWriteArticle" style="display: none;"><a href="submit-article.html" class="auth-button" style="text-decoration:none;">Scrivi Articolo</a></li>
-    </ul>
-</nav>
-            <div class="header-controls" style="display: flex; align-items: center; gap: 10px;">
-                <div id="authContainer">
-                    <button id="showLoginBtn" class="auth-button">Login</button>
-                    <a href="register.html" id="showSignupBtn" class="auth-button" style="text-decoration: none;">Register</a>
-                </div>
-                <div id="userProfileContainer" style="display: none; align-items: center;">
-                    <img id="headerUserAvatar" src="" alt="User Avatar">
-                    <span id="userDisplayName"></span>
-                    <button id="logoutButton" class="auth-button">Logout</button>
-                </div>
-                <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+    <div class="header-content">
+        <a href="index.html" style="text-decoration: none;">
+            <h1 style="font-size: 1.8em; margin:0;">asyncDonkey.io</h1>
+        </a>
+
+        <nav class="desktop-nav">
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px;">
+                <li>
+                    <a href="index.html" class="auth-button nav-link-icon-only" title="Home">
+                        <span class="material-symbols-rounded">home</span>
+                        <span class="visually-hidden">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="donkeyRunner.html" class="auth-button nav-link-icon-text" title="Gioca a codeDash!">
+                        <span class="material-symbols-rounded">stadia_controller</span>
+                        <span class="nav-text">codeDash!</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica">
+                        <span class="material-symbols-rounded">leaderboard</span>
+                        <span class="nav-text">Leaderboard</span>
+                    </a>
+                </li>
+                <li class="nav-dropdown-container">
+                    <button class="auth-button nav-link-icon-text dropdown-toggle" id="communityDropdownToggle" aria-expanded="false" aria-controls="communityDropdownMenu">
+                        <span class="material-symbols-rounded">groups</span>
+                        <span class="nav-text">Community</span>
+                        <span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
+                    </button>
+                    <ul class="dropdown-menu" id="communityDropdownMenu">
+                        <li>
+                            <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item">
+                                <span class="material-symbols-rounded">edit_note</span>
+                                <span class="nav-text">Contribuisci</span>
+                            </a>
+                        </li>
+                        <li id="navWriteArticleDropdown" style="display: none;">
+                            <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item">
+                                <span class="material-symbols-rounded">article</span>
+                                <span class="nav-text">Scrivi Articolo</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="header-controls" style="display: flex; align-items: center; gap: 10px;">
+            <div id="authContainer">
+                <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login">
+                    <span class="material-symbols-rounded">login</span>
+                    <span class="visually-hidden">Login</span>
+                </a>
+                <a href="register.html" id="showSignupBtn" class="auth-button nav-link-icon-only" title="Registrati">
+                    <span class="material-symbols-rounded">person_add</span>
+                    <span class="visually-hidden">Registrati</span>
+                </a>
+            </div>
+
+
+            <div id="userProfileContainer" style="display: none; align-items: center;">
+                <div id="notificationBellContainer" style="position: relative; display: none; margin-right: 15px; align-self: center;">
+    <a href="#" id="notificationBellLink" title="Notifiche"> <i class="material-symbols-rounded" id="notificationIcon" style="font-size: 28px; color: var(--text-color-navbar); vertical-align: middle;">notifications</i>
+    </a>
+    <span id="notificationCounter" class="notification-badge" style="display: none;">0</span>
+    </a>
+        <span id="notificationCounter" class="notification-badge" style="display: none;">0</span>
+        <div id="notification-panel" class="notification-panel" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 5px; background-color: var(--background-color); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 360px; z-index: 1050; color: var(--text-color);">
+            <div class="notification-panel-header" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-color);">
+                <h2 style="margin: 0; font-size: 1.1em; font-weight: 600;">Notifiche</h2>
+                <button id="mark-all-as-read-btn" class="button-link-sm" title="Segna tutte come lette" style="display: none; background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 0.9em; padding: 4px 8px;">Segna tutte come lette</button>
+            </div>
+            <ul id="notification-list" class="notification-list" style="list-style: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto;">
+                <li id="no-notifications-placeholder" class="notification-item-empty" style="display: none; padding: 16px; text-align: center; color: var(--text-color-secondary);">
+                    <p style="margin: 0;">Nessuna nuova notifica.</p>
+                </li>
+                </ul>
+            <div class="notification-panel-footer" style="padding: 12px 16px; border-top: 1px solid var(--border-color); text-align: center;">
+                <a href="/all-notifications.html" id="view-all-notifications-link" style="display: none; color: var(--primary-color); text-decoration: none; font-weight: 500; font-size: 0.9em;">Vedi tutte le notifiche</a>
             </div>
         </div>
-    </header>
+        </div>
+</div>
+                <img id="headerUserAvatar" src="" alt="User Avatar" style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; display: none;">
+                <span id="userDisplayName" style="margin-right: 8px; display: none;"></span>
+
+                <a href="profile.html" id="profileNavIconLink" class="auth-button nav-link-icon-only" title="Profilo" style="text-decoration:none;">
+                     <span class="material-symbols-rounded">account_circle</span>
+                     <span class="visually-hidden">Profilo</span>
+                </a>
+                <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
+                    <span class="material-symbols-rounded">logout</span>
+                    <span class="visually-hidden">Logout</span>
+                </button>
+            </div>
+            <button id="themeToggleBtn" aria-label="Toggle Tema Chiaro/Scuro" title="Toggle Tema" class="auth-button nav-link-icon-only">
+                <span class="material-symbols-rounded">light_mode</span>
+            </button>
+            <button class="navbar-toggler" id="navbarToggler" aria-label="Toggle Navigazione" aria-expanded="false" aria-controls="mobileNavMenu">
+                <span class="material-symbols-rounded">menu</span>
+            </button>
+        </div>
+    </div>
+    <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true">
+
+    </nav>
+</header>
 
     <main>
         <div class="portal-header">
@@ -290,7 +379,7 @@
         </div>
 
         <div id="glitchzillaDefeatedBanner" class="glitchzilla-banner" style="display: none;"> <p>
-                Last player defeating <span class="glitch-text-effect">Gl!7chz1lla</span> was: 
+                Last player defeating <span class="glitch-text-effect">Gl!7chz1lla</span> was:
                 <span id="lastGlitchzillaDefeater" class="player-name-highlight">[Player Name Placeholder]</span>!
             </p>
         </div>
@@ -300,29 +389,31 @@
         </div>
         <div class="portal-grid">
             <div class="portal-card">
-                <img src="images/icon-dev-solid.svg" alt="Icona .Dev" class="card-icon">
+                <span class="material-symbols-rounded card-icon" aria-label="Icona Percorso .Dev">terminal</span>
                 <h3>Il Percorso .Dev</h3>
                 <p>Scopri di più sullo stack tecnologico, le skills, e il percorso da Ingegneria Civile a Full-Stack Development.</p>
                 <a href="about.html" class="btn-portal">Leggi di più</a>
             </div>
 
             <div class="portal-card">
-                <img src="images/icon-game-controller-solid.svg" alt="Icona Gioco" class="card-icon">
+                <span class="material-symbols-rounded card-icon" aria-label="Icona Gioco">videogame_asset</span>
                 <h3>CodeDash! Runner</h3>
                 <p>Gioca all'endless runner! Salta, spara codice, sopravvivi ai glitch e scala la classifica.</p>
+
+
                 <p class="testo-neon-arcade">F!ght GlI7chz!llA</p>
                 <a href="donkeyRunner.html" class="btn-portal">Gioca Ora!</a>
             </div>
 
             <div class="portal-card">
-                <img src="images/icon-leaderboard-solid.svg" alt="Icona Leaderboard" class="card-icon">
+                <span class="material-symbols-rounded card-icon" aria-label="Icona Leaderboard">leaderboard</span>
                 <h3>CodeDash! Leaderboard</h3>
                 <p>Controlla i punteggi top globali per CodeDash! Runner. Riuscirai ad arrivare in cima?</p>
                 <a href="leaderboard.html" class="btn-portal">Vedi Leaderboard</a>
             </div>
-            
+
             <div class="portal-card">
-                <img src="images/icon-ranking-solid.svg" alt="Icona Mini Leaderboard" class="card-icon">
+                <span class="material-symbols-rounded card-icon" aria-label="Icona Mini Leaderboard">analytics</span>
                 <h3>Top Players (Snippet)</h3>
                 <ol id="homeMiniLeaderboardList">
                     <li>Caricamento...</li>
@@ -331,23 +422,28 @@
             </div>
 
             <div class="portal-card">
-                <img src="images/icon-feedback-solid.svg" alt="Icona Feedback" class="card-icon">
+                <span class="material-symbols-rounded card-icon" aria-label="Icona Feedback">thumbs_up_down</span>
                 <h3>Feedback & Contributi</h3>
                 <p>Trovato un bug o hai un'idea per una nuova feature? Fammelo sapere! Oppure segnala una issue direttamente su GitHub.</p>
                 <a href="donkeyRunner.html#bugReportSection" class="btn-portal" style="margin-bottom:10px;">Feedback Gioco</a>
                 <a href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=bug_report.yml" target="_blank" rel="noopener" class="btn-portal" style="background-color: var(--skill-badge-bg); color:var(--skill-badge-text);">Segnala Issue (GitHub)</a>
             </div>
-            
+
             <div class="portal-card">
-                <img src="images/icon-guestbook-solid.svg" alt="Icona Guestbook" class="card-icon">
+                <span class="material-symbols-rounded card-icon" aria-label="Icona Guestbook">edit_note</span>
                 <h3>Guestbook Generale</h3>
                 <p>Lascia un saluto o un commento generale sul sito e sui progetti.</p>
                 <a href="about.html#guestbook" class="btn-portal">Visita Guestbook</a>
             </div>
-            
+
             <div class="portal-card" id="featuredArticleCard" style="display:none;">
-                <img src="images/icon-article-solid.svg" alt="Icona Articolo" class="card-icon">
-                <h3 id="featuredArticleTitle">Articolo in Evidenza</h3> <span id="featuredArticleActualTitle" style="display: block; font-weight: bold; margin-bottom: 10px; font-size: 1.2em; color: var(--text-color-primary);">Caricamento titolo...</span> <p id="featuredArticleSnippet">Dai un'occhiata agli ultimi approfondimenti e aggiornamenti...</p>
+                <span class="material-symbols-rounded card-icon" aria-label="Icona Articolo">article</span>
+                
+                <h3 id="featuredArticleTitle">Articolo in Evidenza</h3> 
+                <div id="featuredArticleAuthorInfo"> <img id="featuredArticleAuthorAvatar" src="" alt="Avatar autore" style="width:32px; height:32px; border-radius:50%;">
+    <span id="featuredArticleAuthorName"></span>
+</div>
+                <span id="featuredArticleActualTitle" style="display: block; font-weight: bold; margin-bottom: 10px; font-size: 1.2em; color: var(--text-color-primary);">Caricamento titolo...</span> <p id="featuredArticleSnippet">Dai un'occhiata agli ultimi approfondimenti e aggiornamenti...</p>
                 <a href="#articlesSection" id="featuredArticleLink" class="btn-portal">Leggi di più</a>
             </div>
 
@@ -361,9 +457,10 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 asyncDonkey.io.</p>
-        <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
-    </footer>
+    <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>
+    <p style="font-size: 0.8em; margin-top: 5px;">Avatars by <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT License).</p>
+    <p style="font-size: 0.8em; margin-top: 5px;"><a href="about.html">.Dev Info</a></p>
+</footer>
 
     <div id="loginModal" class="modal">
       <div class="modal-content">
@@ -380,6 +477,7 @@
     <div id="toast-container" aria-live="assertive" aria-atomic="true">
     </div>
 
-    <script src="js/main.js" type="module"></script>
-    </body>
+    <script src="js/main.js" type="module" defer></script>
+<script src="js/notificationHandler.js" type="module" defer></script>
+</body>
 </html>

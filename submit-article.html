@@ -7,6 +7,10 @@
         <link rel="stylesheet" href="styles.css" />
         <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
         <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css" />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
         <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
         <style>
             /* Stili specifici per la pagina di sottomissione articolo, se necessari */
@@ -65,63 +69,123 @@
     </head>
     <body>
         <header>
-            <div
-                class="header-content"
-                style="
-                    padding: 10px 5%;
-                    align-items: center;
-                    display: flex;
-                    justify-content: space-between;
-                    flex-wrap: wrap;
-                "
-            >
+            <div class="header-content">
                 <a href="index.html" style="text-decoration: none">
                     <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
                 </a>
-                <nav>
-                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 20px">
-                        <li><a href="index.html" class="auth-button" style="text-decoration: none">Home</a></li>
-                        <li><a href="about.html" class="auth-button" style="text-decoration: none">.Dev</a></li>
+
+                <nav class="desktop-nav">
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px">
+                        <li>
+                            <a href="index.html" class="auth-button nav-link-icon-only" title="Home">
+                                <span class="material-symbols-rounded">home</span>
+                                <span class="visually-hidden">Home</span>
+                            </a>
+                        </li>
                         <li>
                             <a
-                                href="contribute.html"
-                                class="auth-button"
-                                style="text-decoration: none"
-                                id="navContributeLink"
-                                >Contribuisci</a
+                                href="donkeyRunner.html"
+                                class="auth-button nav-link-icon-text"
+                                title="Gioca a codeDash!"
                             >
+                                <span class="material-symbols-rounded">stadia_controller</span>
+                                <span class="nav-text">codeDash!</span>
+                            </a>
                         </li>
                         <li>
-                            <a href="donkeyRunner.html" class="auth-button" style="text-decoration: none">codeDash!</a>
+                            <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica">
+                                <span class="material-symbols-rounded">leaderboard</span>
+                                <span class="nav-text">Leaderboard</span>
+                            </a>
                         </li>
-                        <li>
-                            <a href="leaderboard.html" class="auth-button" style="text-decoration: none">Leaderboard</a>
-                        </li>
-                        <li id="profileNav" style="display: none">
-                            <a href="profile.html" class="auth-button" style="text-decoration: none">Profile</a>
-                        </li>
-                        <li id="navWriteArticle" style="display: none">
-                            <a href="submit-article.html" class="auth-button" style="text-decoration: none"
-                                >Scrivi Articolo</a
+                        <li class="nav-dropdown-container">
+                            <button
+                                class="auth-button nav-link-icon-text dropdown-toggle"
+                                id="communityDropdownToggle"
+                                aria-expanded="false"
+                                aria-controls="communityDropdownMenu"
                             >
+                                <span class="material-symbols-rounded">groups</span>
+                                <span class="nav-text">Community</span>
+                                <span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
+                            </button>
+                            <ul class="dropdown-menu" id="communityDropdownMenu">
+                                <li>
+                                    <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item">
+                                        <span class="material-symbols-rounded">edit_note</span>
+                                        <span class="nav-text">Contribuisci</span>
+                                    </a>
+                                </li>
+                                <li id="navWriteArticleDropdown" style="display: none">
+                                    <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item">
+                                        <span class="material-symbols-rounded">article</span>
+                                        <span class="nav-text">Scrivi Articolo</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </nav>
+
                 <div class="header-controls" style="display: flex; align-items: center; gap: 10px">
                     <div id="authContainer">
-                        <button id="showLoginBtn" class="auth-button">Login</button>
-                        <a href="register.html" id="showSignupBtn" class="auth-button" style="text-decoration: none"
-                            >Register</a
+                        <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login">
+                            <span class="material-symbols-rounded">login</span>
+                            <span class="visually-hidden">Login</span>
+                        </a>
+                        <a
+                            href="register.html"
+                            id="showSignupBtn"
+                            class="auth-button nav-link-icon-only"
+                            title="Registrati"
                         >
+                            <span class="material-symbols-rounded">person_add</span>
+                            <span class="visually-hidden">Registrati</span>
+                        </a>
                     </div>
                     <div id="userProfileContainer" style="display: none; align-items: center">
-                        <img id="headerUserAvatar" src="" alt="User Avatar" />
-                        <span id="userDisplayName"></span>
-                        <button id="logoutButton" class="auth-button">Logout</button>
+                        <img
+                            id="headerUserAvatar"
+                            src=""
+                            alt="User Avatar"
+                            style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; display: none"
+                        />
+                        <span id="userDisplayName" style="margin-right: 8px; display: none"></span>
+                        <a
+                            href="profile.html"
+                            id="profileNavIconLink"
+                            class="auth-button nav-link-icon-only"
+                            title="Profilo"
+                            style="text-decoration: none"
+                        >
+                            <span class="material-symbols-rounded">account_circle</span>
+                            <span class="visually-hidden">Profilo</span>
+                        </a>
+                        <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
+                            <span class="material-symbols-rounded">logout</span>
+                            <span class="visually-hidden">Logout</span>
+                        </button>
                     </div>
-                    <button id="themeToggleBtn" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+                    <button
+                        id="themeToggleBtn"
+                        aria-label="Toggle Tema Chiaro/Scuro"
+                        title="Toggle Tema"
+                        class="auth-button nav-link-icon-only"
+                    >
+                        <span class="material-symbols-rounded">light_mode</span>
+                    </button>
+                    <button
+                        class="navbar-toggler"
+                        id="navbarToggler"
+                        aria-label="Toggle Navigazione"
+                        aria-expanded="false"
+                        aria-controls="mobileNavMenu"
+                    >
+                        <span class="material-symbols-rounded">menu</span>
+                    </button>
                 </div>
             </div>
+            <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true"></nav>
         </header>
 
         <main>
@@ -211,12 +275,13 @@
         </main>
 
         <footer>
-            <p>&copy; ${new Date().getFullYear()} asyncDonkey.io.</p>
+            <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>
             <p style="font-size: 0.8em; margin-top: 5px">
                 Avatars by
                 <a href="https://github.com/ethereum/blockies" target="_blank" rel="noopener">Blockies</a> (MIT
                 License).
             </p>
+            <p style="font-size: 0.8em; margin-top: 5px"><a href="about.html">.Dev Info</a></p>
         </footer>
 
         <div id="loginModal" class="modal">

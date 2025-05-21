@@ -1,0 +1,43 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Percorso per gli avatar degli utenti
+    // user-avatars/{userId}/{originalFileName}
+    match /user-avatars/{userId}/{fileName} {
+      // AUTENTICAZIONE: Solo l'utente autenticato può scrivere nella propria cartella.
+      // {userId} nel percorso DEVE corrispondere all'UID dell'utente che fa la richiesta.
+      // DIMENSIONE: Limita la dimensione del file (es. 5MB).
+      // TIPO DI CONTENUTO: Permetti solo upload di immagini.
+      allow write: if request.auth != null &&
+                      request.auth.uid == userId &&
+                      request.resource.size < 5 * 1024 * 1024 && // Max 5MB
+                      request.resource.contentType.matches('image/.*');
+
+      // LETTURA: Permetti la lettura pubblica degli avatar.
+      // Questo è necessario affinché le immagini possano essere visualizzate nel frontend.
+      // Se la tua Cloud Function salva le versioni processate (es. .webp) qui,
+      // e queste sono quelle che vuoi visualizzare, questa regola va bene.
+      // Se l'originale non deve essere leggibile, e la CF salva i file processati
+      // con nomi/percorsi diversi, dovrai adattare le regole di lettura per
+      // proteggere l'originale e permettere la lettura solo dei file processati.
+      allow read: if true;
+    }
+
+    // Aggiungi qui altre regole per altri percorsi se necessario.
+    // Esempio: se avessi una cartella 'public-assets' leggibile da tutti:
+    // match /public-assets/{allPaths=**} {
+    //   allow read: if true;
+    // }
+
+    // Regola di default più restrittiva (opzionale ma consigliata se non si hanno altre regole):
+    // Nega tutte le letture e scritture a qualsiasi altro percorso non esplicitamente definito sopra.
+    // Se hai solo il percorso user-avatars, potresti ometterla o lasciarla per chiarezza.
+    // match /{allPaths=**} {
+    //  allow read, write: if false;
+    // }
+    // NOTA: Le regole sono valutate in ordine. La prima regola che concede l'accesso ha la precedenza.
+    // Se non c'è una regola `allow` per un percorso, l'accesso è negato.
+    // Quindi, definire solo le `allow` per i percorsi desiderati è spesso sufficiente.
+  }
+}

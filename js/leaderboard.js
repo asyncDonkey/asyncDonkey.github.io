@@ -1,14 +1,16 @@
 // js/leaderboard.js
-
-import { db, auth, generateBlockieAvatar } from './main.js';
+import { db, generateBlockieAvatar } from './main.js';
 import {
     collection,
     query,
     orderBy,
     limit,
     getDocs,
+    doc,
+    getDoc,
     where,
     startAfter,
+    documentId,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 console.log('leaderboard.js caricato.');
@@ -19,15 +21,15 @@ const globalLeaderboardContainer = document.getElementById('globalLeaderboardCon
 const prevPageBtn = document.getElementById('prevPageBtn');
 const nextPageBtn = document.getElementById('nextPageBtn');
 const currentPageIndicator = document.getElementById('currentPageIndicator');
+const refreshLeaderboardBtn = document.getElementById('refreshLeaderboardBtn');
 
 // --- PAGINATION STATE & CONSTANTS ---
 const SCORES_PER_PAGE = 25;
 let currentPage = 1;
-let lastVisibleDoc = null; // Cursore Firestore per la pagina successiva (basato sull'ultimo doc della pagina corrente)
-let firstVisibleDoc = null; // Primo documento Firestore della pagina corrente (per la history)
-let firstDocsHistory = []; // Array per memorizzare i primi documenti delle pagine visitate
-// firstDocsHistory[0] = primo doc della pagina 1
-// firstDocsHistory[1] = primo doc della pagina 2, etc.
+let lastVisibleDoc = null;
+let firstVisibleDoc = null;
+let firstDocsHistory = [];
+const DEFAULT_AVATAR_LEADERBOARD_PATH = 'assets/images/default-avatar.png';
 
 /** Formatta Firestore Timestamp */
 function formatGlobalScoreTimestamp(firebaseTimestamp) {
@@ -36,11 +38,8 @@ function formatGlobalScoreTimestamp(firebaseTimestamp) {
     }
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit',
         });
     } catch (e) {
         console.error('Errore formattazione timestamp:', e);
@@ -53,8 +52,8 @@ function formatGlobalScoreTimestamp(firebaseTimestamp) {
  * @param {('initial'|'next'|'prev')} direction - Direzione della paginazione.
  */
 async function loadGlobalLeaderboard(direction = 'initial') {
-    if (!leaderboardTableBody || !prevPageBtn || !nextPageBtn || !currentPageIndicator) {
-        console.error('Elementi DOM per la leaderboard o paginazione mancanti.');
+    if (!leaderboardTableBody || !prevPageBtn || !nextPageBtn || !currentPageIndicator || !refreshLeaderboardBtn) {
+        console.error('Elementi DOM per la leaderboard o paginazione/refresh mancanti.');
         if (globalLeaderboardContainer)
             globalLeaderboardContainer.innerHTML =
                 '<p class="no-scores">Errore: Struttura pagina classifica non caricata.</p>';
@@ -66,13 +65,17 @@ async function loadGlobalLeaderboard(direction = 'initial') {
         return;
     }
 
-    leaderboardTableBody.innerHTML = `<tr class="loading-leaderboard"><td colspan="4">Caricamento classifica...</td></tr>`;
+    leaderboardTableBody.innerHTML = `<tr class="loading-leaderboard"><td colspan="4" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Caricamento...</span></div> Caricamento classifica...</td></tr>`;
     prevPageBtn.disabled = true;
     nextPageBtn.disabled = true;
+    refreshLeaderboardBtn.disabled = true;
+    const originalRefreshBtnText = refreshLeaderboardBtn.innerHTML;
+    refreshLeaderboardBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Caricamento...';
 
     const leaderboardScoresCollection = collection(db, 'leaderboardScores');
     let q;
-    let isFetchingFirstPageQuery = false; // Flag per sapere se la query costruita è per la prima pagina
+    let isFetchingFirstPageQuery = false;
 
     try {
         if (direction === 'initial') {
@@ -97,108 +100,141 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                 startAfter(lastVisibleDoc),
                 limit(SCORES_PER_PAGE)
             );
-            // Non incrementare currentPage qui, fallo dopo il fetch se ci sono risultati
         } else if (direction === 'prev') {
             if (currentPage <= 1) {
                 loadGlobalLeaderboard('initial');
-                return; // Dovrebbe essere già gestito dal bottone disabilitato
+                return;
             }
+            isFetchingFirstPageQuery = currentPage === 1;
 
-            let startAfterDocForPrev = null;
-            // Se vogliamo caricare pagina N (dopo aver decrementato currentPage a N),
-            // ci serve il primo doc della pagina N-1 come cursore startAfter.
-            // firstDocsHistory[N-2] contiene il primo doc della pagina N-1.
-            if (currentPage - 1 > 1) {
-                // Se la pagina precedente NON è la prima pagina
-                startAfterDocForPrev = firstDocsHistory[currentPage - 2]; // currentPage è già stato decrementato se siamo qui da un click su prev
-            }
-
-            if (startAfterDocForPrev) {
+            if (isFetchingFirstPageQuery) {
                 q = query(
                     leaderboardScoresCollection,
                     where('gameId', '==', 'donkeyRunner'),
                     orderBy('score', 'desc'),
                     orderBy('timestamp', 'asc'),
-                    startAfter(startAfterDocForPrev),
+                    limit(SCORES_PER_PAGE)
+                );
+            } else if (firstDocsHistory[currentPage - 2]) {
+                q = query(
+                    leaderboardScoresCollection,
+                    where('gameId', '==', 'donkeyRunner'),
+                    orderBy('score', 'desc'),
+                    orderBy('timestamp', 'asc'),
+                    startAfter(firstDocsHistory[currentPage - 2]),
                     limit(SCORES_PER_PAGE)
                 );
             } else {
-                // Stiamo tornando alla prima pagina
-                isFetchingFirstPageQuery = true;
-                q = query(
-                    leaderboardScoresCollection,
-                    where('gameId', '==', 'donkeyRunner'),
-                    orderBy('score', 'desc'),
-                    orderBy('timestamp', 'asc'),
-                    limit(SCORES_PER_PAGE)
-                );
+                console.warn("History non sufficiente per 'prev', ricarico 'initial'");
+                loadGlobalLeaderboard('initial');
+                return;
             }
-            // Non modificare currentPage qui, lo facciamo dopo il fetch o in base ai risultati
         } else {
-            console.warn("Stato paginazione non valido o cursore mancante per 'next'. Ritorno a initial.", {
-                direction,
-                lastVisibleDoc,
-                currentPage,
-            });
+            console.warn("Stato paginazione non valido. Ritorno a 'initial'.");
             loadGlobalLeaderboard('initial');
             return;
         }
 
         const querySnapshot = await getDocs(q);
-        const fetchedScores = [];
-        querySnapshot.forEach((doc) => {
-            fetchedScores.push({ id: doc.id, ...doc.data(), firestoreDoc: doc });
-        });
+        const scoreDocs = querySnapshot.docs;
+        let enrichedScores = [];
 
-        if (fetchedScores.length > 0) {
+        if (scoreDocs.length > 0) {
+            const userIdsToFetch = [...new Set(scoreDocs.map((sDoc) => sDoc.data().userId).filter((id) => id))];
+            const publicProfilesMap = new Map(); // Dati letti da userPublicProfiles
+
+            if (userIdsToFetch.length > 0) {
+                const MAX_IDS_PER_IN_QUERY = 30;
+                const profilePromises = [];
+
+                for (let i = 0; i < userIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
+                    const batchUserIds = userIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
+                    // *** MODIFICA CHIAVE: Query su userPublicProfiles ***
+                    const profilesQuery = query(
+                        collection(db, 'userPublicProfiles'), // <-- Query su userPublicProfiles
+                        where(documentId(), 'in', batchUserIds)
+                    );
+                    profilePromises.push(getDocs(profilesQuery));
+                }
+
+                try {
+                    const snapshotsArray = await Promise.all(profilePromises);
+                    snapshotsArray.forEach((snapshot) => {
+                        snapshot.forEach((docSnap) => {
+                            publicProfilesMap.set(docSnap.id, docSnap.data());
+                        });
+                    });
+                } catch (profileError) {
+                    console.error('Errore durante il recupero batch dei profili pubblici:', profileError);
+                }
+            }
+
+            for (const scoreDoc of scoreDocs) {
+                const scoreData = scoreDoc.data();
+                const userPublicProfile = scoreData.userId ? publicProfilesMap.get(scoreData.userId) : null;
+
+                let profileDisplayName = scoreData.userName || scoreData.initials || 'Giocatore Anonimo';
+                let profileAvatarUrl = null;
+                // *** MODIFICA CHIAVE: Usa il timestamp dal profilo pubblico per cache busting ***
+                let userProfilePublicUpdatedAt = null; 
+                let nationalityCode = scoreData.nationalityCode || null;
+
+                if (userPublicProfile) {
+                    profileDisplayName = userPublicProfile.nickname || profileDisplayName;
+                    // *** MODIFICA CHIAVE: Usa avatarUrls.thumbnail dal profilo pubblico ***
+                    if (userPublicProfile.avatarUrls && userPublicProfile.avatarUrls.thumbnail) {
+                        profileAvatarUrl = userPublicProfile.avatarUrls.thumbnail;
+                    }
+                    userProfilePublicUpdatedAt = userPublicProfile.profilePublicUpdatedAt || null;
+                    nationalityCode = userPublicProfile.nationalityCode || nationalityCode;
+                }
+
+                enrichedScores.push({
+                    id: scoreDoc.id,
+                    ...scoreData,
+                    firestoreDoc: scoreDoc,
+                    profileDisplayName,
+                    profileAvatarUrl,
+                    userProfilePublicUpdatedAt, // Timestamp pubblico per cache busting
+                    nationalityCode,
+                });
+            }
+        }
+        
+        if (enrichedScores.length > 0) {
             if (direction === 'next') {
                 currentPage++;
-            } else if (direction === 'prev') {
-                // currentPage è stato già decrementato PRIMA della query
-                // Se currentPage è diventato X, la history deve contenere fino a X-1
-                firstDocsHistory.splice(currentPage - 1);
             }
-            // se direction === 'initial', currentPage è già 1
+            if (direction === 'prev' && !isFetchingFirstPageQuery) {
+                firstDocsHistory.splice(currentPage); 
+            }
 
-            firstVisibleDoc = fetchedScores[0].firestoreDoc;
-            lastVisibleDoc = fetchedScores[fetchedScores.length - 1].firestoreDoc;
+            firstVisibleDoc = enrichedScores[0].firestoreDoc;
+            lastVisibleDoc = enrichedScores[enrichedScores.length - 1].firestoreDoc;
 
-            // Aggiorna la history se necessario
-            // Vogliamo che firstDocsHistory[N-1] sia il primo doc della pagina N
             if (firstVisibleDoc) {
                 if (firstDocsHistory.length < currentPage) {
-                    // Nuova pagina visitata andando avanti
                     firstDocsHistory.push(firstVisibleDoc);
-                } else if (firstDocsHistory[currentPage - 1] !== firstVisibleDoc) {
-                    // Caso in cui potremmo aver ricaricato una pagina (es. tornando indietro e poi di nuovo avanti)
+                } else {
                     firstDocsHistory[currentPage - 1] = firstVisibleDoc;
                 }
             }
         } else {
-            // Nessun punteggio trovato per la query
-            if (direction === 'next') {
-                // Non c'erano più pagine, quindi non incrementare currentPage
-                // lastVisibleDoc rimane quello dell'ultima pagina valida
-            } else if (direction === 'prev') {
-                // Se tornando indietro non troviamo nulla, c'è un problema o siamo andati troppo indietro.
-                // Forse ricaricare la prima pagina è più sicuro.
-                console.warn('Nessun score trovato andando indietro, potrebbe esserci un problema di logica/history.');
-                loadGlobalLeaderboard('initial');
-                return;
+            if (direction === 'next') { /* No more pages */ }
+            else if (isFetchingFirstPageQuery || currentPage === 1) {
+                currentPage = 1;
+                firstDocsHistory = [];
+                lastVisibleDoc = null;
             }
-            // Se 'initial' e non ci sono score, displayGlobalLeaderboard gestirà il messaggio.
-            firstVisibleDoc = null; // Non ci sono doc in questa "pagina"
+            firstVisibleDoc = null;
         }
 
-        displayGlobalLeaderboard(fetchedScores, currentPage);
-        updatePaginationControls(
-            fetchedScores.length,
-            isFetchingFirstPageQuery || (direction === 'prev' && currentPage === 1)
-        );
+        displayGlobalLeaderboard(enrichedScores, currentPage);
+        updatePaginationControls(enrichedScores.length, isFetchingFirstPageQuery || currentPage === 1);
+
     } catch (error) {
         console.error(`Errore durante il caricamento della leaderboard (direzione: ${direction}):`, error);
-        if (globalLeaderboardContainer) {
-            // Mostra messaggio di errore generico
+        if (leaderboardTableBody) {
             if (error.code === 'failed-precondition') {
                 leaderboardTableBody.innerHTML = `<tr class="no-scores"><td colspan="4">Indice Firestore mancante. Controlla la console per il link per crearlo.</td></tr>`;
             } else {
@@ -210,24 +246,25 @@ async function loadGlobalLeaderboard(direction = 'initial') {
         firstVisibleDoc = null;
         firstDocsHistory = [];
         updatePaginationControls(0, true);
+    } finally {
+        refreshLeaderboardBtn.disabled = false;
+        refreshLeaderboardBtn.innerHTML = originalRefreshBtnText;
     }
 }
 
 /**
  * Popola la tabella HTML con i dati della leaderboard.
- * @param {Array} leaderboardData - Array di oggetti punteggio.
- * @param {number} pageNumber - Il numero della pagina corrente.
  */
 function displayGlobalLeaderboard(leaderboardData, pageNumber) {
     if (!leaderboardTableBody) return;
     leaderboardTableBody.innerHTML = '';
 
     if (!leaderboardData || leaderboardData.length === 0) {
-        if (pageNumber === 1) {
-            leaderboardTableBody.innerHTML = `<tr class="no-scores"><td colspan="4">Nessun punteggio registrato per Donkey Runner. Sii il primo!</td></tr>`;
-        } else {
-            leaderboardTableBody.innerHTML = `<tr class="no-scores"><td colspan="4">Nessun altro punteggio disponibile. Sei arrivato alla fine!</td></tr>`;
-        }
+        const message =
+            pageNumber === 1
+                ? 'Nessun punteggio registrato per Donkey Runner. Sii il primo!'
+                : 'Nessun altro punteggio disponibile. Sei arrivato alla fine!';
+        leaderboardTableBody.innerHTML = `<tr class="no-scores"><td colspan="4" class="text-center py-3">${message}</td></tr>`;
         return;
     }
 
@@ -237,47 +274,78 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
 
         const rank = (pageNumber - 1) * SCORES_PER_PAGE + index + 1;
         const tdRank = document.createElement('td');
-        tdRank.className = 'player-rank';
+        tdRank.className = 'player-rank text-center align-middle';
         tdRank.textContent = `${rank}`;
         tr.appendChild(tdRank);
 
         const tdPlayer = document.createElement('td');
-        tdPlayer.className = 'player-info-cell';
+        tdPlayer.className = 'player-info-cell align-middle';
+
         const avatarImg = document.createElement('img');
-        avatarImg.className = 'player-avatar';
-        const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${entry.id}`;
-        let altTextForBlockie = entry.userName || entry.initials || 'Anonimo';
-        avatarImg.src = generateBlockieAvatar(seedForBlockie, 36, { size: 8 });
-        avatarImg.alt = `${altTextForBlockie}'s Avatar`;
-        avatarImg.style.backgroundColor = 'transparent';
+        avatarImg.className = 'player-avatar me-2';
+        avatarImg.width = 36;
+        avatarImg.height = 36;
+        avatarImg.style.borderRadius = '50%';
+        avatarImg.style.objectFit = 'cover';
+
+        // *** MODIFICA CHIAVE: Usa profileAvatarUrl e userProfilePublicUpdatedAt ***
+        if (entry.profileAvatarUrl) {
+            let avatarUrlToSet = entry.profileAvatarUrl;
+            if (entry.userProfilePublicUpdatedAt && typeof entry.userProfilePublicUpdatedAt.seconds === 'number') {
+                avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.seconds}`;
+            } else if (entry.userProfilePublicUpdatedAt instanceof Date) { // Fallback se è già un oggetto Date JS
+                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.getTime()}`;
+            }
+            avatarImg.src = avatarUrlToSet;
+        } else {
+            const seedForBlockie = entry.userId || entry.initials || entry.profileDisplayName || `anon-${entry.id}`;
+            try {
+                avatarImg.src = generateBlockieAvatar(seedForBlockie, 36, { size: 8, scale: 4.5 });
+            } catch (e) {
+                console.error('Errore generazione Blockie per leaderboard:', e, 'seed:', seedForBlockie);
+                avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
+            }
+        }
+        const altText = entry.profileDisplayName || 'Avatar giocatore';
+        avatarImg.alt = altText;
         avatarImg.onerror = () => {
-            avatarImg.src =
-                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
-            avatarImg.alt = 'Error';
+            console.warn(`Errore caricamento avatar per ${altText} (URL: ${avatarImg.src}), uso default.`);
+            avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
+            avatarImg.onerror = null;
         };
         tdPlayer.appendChild(avatarImg);
 
         const nameSpan = document.createElement('span');
         nameSpan.className = 'player-name';
+
         if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
             const flagIconSpan = document.createElement('span');
             flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
+            flagIconSpan.style.marginRight = '8px';
+            flagIconSpan.style.verticalAlign = 'middle';
             nameSpan.appendChild(flagIconSpan);
         }
-        let displayName = entry.userName || entry.initials || 'Giocatore Anonimo';
-        if (!entry.userId && !entry.initials) displayName += ' (Ospite)';
-        else if (!entry.userId && entry.initials) displayName = entry.initials + ' (Ospite)';
-        nameSpan.appendChild(document.createTextNode(displayName));
+
+        const displayNameText = entry.profileDisplayName || 'Giocatore Anonimo';
+        if (entry.userId) {
+            const profileLink = document.createElement('a');
+            profileLink.href = `profile.html?userId=${entry.userId}`;
+            profileLink.textContent = displayNameText;
+            profileLink.classList.add('text-decoration-none');
+            nameSpan.appendChild(profileLink);
+        } else {
+            nameSpan.appendChild(document.createTextNode(displayNameText + (entry.initials ? '' : ' (Ospite)')));
+        }
         tdPlayer.appendChild(nameSpan);
         tr.appendChild(tdPlayer);
 
         const tdScore = document.createElement('td');
-        tdScore.className = 'player-score';
+        tdScore.className = 'player-score text-end align-middle';
         tdScore.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
         tr.appendChild(tdScore);
 
         const tdDate = document.createElement('td');
-        tdDate.className = 'player-date';
+        tdDate.className = 'player-date text-center align-middle';
         tdDate.textContent = formatGlobalScoreTimestamp(entry.timestamp);
         tr.appendChild(tdDate);
 
@@ -285,30 +353,18 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
     });
 }
 
-/**
- * Aggiorna lo stato dei pulsanti di paginazione e l'indicatore di pagina.
- * @param {number} countOnCurrentPage - Numero di elementi caricati nella pagina corrente.
- * @param {boolean} isFirstPageResult - True se i dati caricati sono per la prima pagina.
- */
 function updatePaginationControls(countOnCurrentPage, isFirstPageResult = false) {
     if (!prevPageBtn || !nextPageBtn || !currentPageIndicator) return;
-
     currentPageIndicator.textContent = `Pagina ${currentPage}`;
-    prevPageBtn.disabled = isFirstPageResult || currentPage === 1; // Disabilitato se è il risultato della prima pagina o currentPage è 1
+    prevPageBtn.disabled = isFirstPageResult || currentPage === 1;
     nextPageBtn.disabled = countOnCurrentPage < SCORES_PER_PAGE;
 }
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded per leaderboard.js con paginazione.');
-
     if (nextPageBtn) {
         nextPageBtn.addEventListener('click', () => {
-            if (!nextPageBtn.disabled) {
-                // Salviamo il primo documento della pagina corrente PRIMA di caricare la successiva
-                // Questa logica è ora gestita all'interno di loadGlobalLeaderboard
-                loadGlobalLeaderboard('next');
-            }
+            if (!nextPageBtn.disabled) loadGlobalLeaderboard('next');
         });
     } else {
         console.error('Bottone nextPageBtn non trovato!');
@@ -317,13 +373,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (prevPageBtn) {
         prevPageBtn.addEventListener('click', () => {
             if (!prevPageBtn.disabled) {
-                // La logica di decremento di currentPage e gestione history è in loadGlobalLeaderboard
-                loadGlobalLeaderboard('prev');
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadGlobalLeaderboard('prev');
+                } else {
+                    console.warn("PrevPageBtn cliccato su currentPage=1, ricarico 'initial'");
+                    loadGlobalLeaderboard('initial');
+                }
             }
         });
     } else {
         console.error('Bottone prevPageBtn non trovato!');
     }
 
+    if (refreshLeaderboardBtn) {
+        refreshLeaderboardBtn.addEventListener('click', () => {
+            if (!refreshLeaderboardBtn.disabled) {
+                console.log('Pulsante Aggiorna cliccato. Ricarico la prima pagina.');
+                loadGlobalLeaderboard('initial');
+            }
+        });
+    } else {
+        console.error('Pulsante refreshLeaderboardBtn non trovato!');
+    }
     loadGlobalLeaderboard('initial');
 });

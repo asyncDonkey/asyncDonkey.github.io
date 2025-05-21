@@ -1,5 +1,4 @@
 // js/comments.js
-
 import { db, auth, generateBlockieAvatar } from './main.js';
 import {
     collection,
@@ -16,19 +15,16 @@ import {
     where,
     arrayUnion,
     arrayRemove,
-    Timestamp, // Aggiunto Timestamp se non già presente
+    Timestamp,
+    documentId,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { showToast } from './toastNotifications.js';
 
-// --- INIZIO MODIFICHE ---
+const DEFAULT_AVATAR_COMMENT_PATH = 'assets/images/default-avatar.png';
 
-// Riferimenti DOM per la modale "Liked By" (da usare per i commenti del guestbook)
-// Questi ID devono corrispondere a quelli della modale copiata in about.html e donkeyRunner.html
+// Riferimenti DOM per la modale "Liked By" (invariati)
 let likedByModal, closeLikedByModalBtn, likedByModalTitle, likedByModalList, likedByModalLoading, likedByModalNoLikes;
-
-// Costanti per emoji dei like ai commenti (già presenti, ma le spostiamo per chiarezza)
-const INITIAL_GUESTBOOK_COMMENT_LIKE_EMOJI = '🤍'; // Cuore bianco
-const LIKED_GUESTBOOK_COMMENT_EMOJI = '💙'; // Cuore blu
 
 let guestbookCollection;
 if (db) {
@@ -37,54 +33,43 @@ if (db) {
     console.error('comments.js: DB instance not valid!');
 }
 
-const commentForm = document.getElementById('commentForm');
-const commentNameInput = document.getElementById('commentName');
-const commentMessageInput = document.getElementById('commentMessage');
-const submitCommentBtn = document.getElementById('submitCommentBtn');
-const commentsListDiv = document.getElementById('commentsList');
-
-const commentNameSection = document.getElementById('commentNameSection');
-const commentsListContainer = document.getElementById('commentsListContainer');
-
-const MAX_COMMENTS_DISPLAYED = 20;
+// Riferimenti DOM specifici (invariati)
+let commentForm,
+    commentNameInput,
+    commentMessageInput,
+    submitCommentBtn,
+    commentsListDiv,
+    commentNameSection,
+    commentsListContainer;
 
 let currentPageId = 'default';
-if (commentsListContainer && commentsListContainer.dataset.pageId) {
-    currentPageId = commentsListContainer.dataset.pageId;
-    console.log(`comments.js: Initialized for pageId: ${currentPageId}`);
-} else {
-    console.warn(
-        'comments.js: commentsListContainer o data-page-id non trovato. Verrà usato il pageId di fallback "default".'
-    );
-}
 
-/** Formats Firestore Timestamp */
+/**
+ * Formatta un timestamp di Firestore per la visualizzazione. (invariata)
+ */
 function formatFirebaseTimestamp(firebaseTimestamp) {
-    if (!firebaseTimestamp?.toDate) return 'Date unavailable';
+    if (!firebaseTimestamp?.toDate) return 'Data non disponibile';
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit',
         });
     } catch (e) {
-        return 'Date format error';
+        console.error('Errore formattazione timestamp commento:', e);
+        return 'Formato data errato';
     }
 }
 
 /**
- * Gestisce il click sul pulsante "Like" per un commento del guestbook.
- * @param {Event} event - L'evento click.
+ * Gestisce il click sul pulsante "Like" per un commento del guestbook. (invariata)
  */
 async function handleGuestbookCommentLike(event) {
     const button = event.currentTarget;
-    const commentId = button.dataset.commentId; // Assicurati che il data-attribute sia 'data-comment-id'
+    const commentId = button.dataset.commentId;
     const currentUser = auth.currentUser;
 
     if (!commentId || !guestbookCollection) {
-        console.error('handleGuestbookCommentLike: commentId o guestbookCollection mancante.');
+        console.error('[comments.js] handleGuestbookCommentLike: commentId o guestbookCollection mancante.');
         return;
     }
     if (!currentUser) {
@@ -98,7 +83,7 @@ async function handleGuestbookCommentLike(event) {
     try {
         const commentSnap = await getDoc(commentDocRef);
         if (!commentSnap.exists()) {
-            console.error('Commento del guestbook non trovato:', commentId);
+            console.error('[comments.js] Commento del guestbook non trovato:', commentId);
             showToast('Errore: commento non trovato.');
             button.disabled = false;
             return;
@@ -108,24 +93,18 @@ async function handleGuestbookCommentLike(event) {
         const likedByUsers = commentData.likedBy || [];
         const userHasLiked = likedByUsers.includes(currentUser.uid);
 
-        // Determina l'operazione e l'aggiornamento dell'array
         let newLikesCountOp = userHasLiked ? increment(-1) : increment(1);
         let userArrayUpdateOp = userHasLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid);
 
-        // Logica per evitare conteggio negativo se non dovrebbe succedere
         if (userHasLiked && (commentData.likes || 0) <= 0) {
             if (!likedByUsers.includes(currentUser.uid)) {
-                // L'utente non era tra i likers ma il conteggio era <=0
                 console.warn(
-                    `Inconsistenza dati per commento ${commentId}: l'utente non ha messo like ma il conteggio è <=0.`
+                    `[comments.js] Inconsistenza dati per commento ${commentId}: l'utente non ha messo like ma il conteggio è <=0.`
                 );
-                button.disabled = false; // Riabilita e non fare nulla
-                return; // Evita l'operazione
+                button.disabled = false;
+                return;
             }
-            // Se l'utente ha messo like ma il conteggio è già 0 o negativo, non decrementare ulteriormente.
-            // Questo previene che 'likes' diventi negativo se c'è un'incoerenza.
-            // Si limita a rimuovere l'utente da likedBy.
-            if ((commentData.likes || 0) <= 0) newLikesCountOp = increment(0); // Non cambiare il conteggio se già a zero o meno
+            if ((commentData.likes || 0) <= 0) newLikesCountOp = increment(0);
         }
 
         await updateDoc(commentDocRef, {
@@ -133,61 +112,59 @@ async function handleGuestbookCommentLike(event) {
             likedBy: userArrayUpdateOp,
         });
 
-        // Aggiorna l'UI leggendo i dati aggiornati da Firestore per coerenza
         const updatedCommentSnap = await getDoc(commentDocRef);
         if (updatedCommentSnap.exists()) {
             const updatedCommentData = updatedCommentSnap.data();
             const currentLikesCount = updatedCommentData.likes || 0;
             const userNowHasLiked = updatedCommentData.likedBy && updatedCommentData.likedBy.includes(currentUser.uid);
 
-            // Aggiorna il conteggio numerico (se esiste come span separato o dentro il bottone)
-            // Questa parte assume che il conteggio sia dentro il bottone, come per i commenti articolo
-            const likeCountSpanInsideButton = button.querySelector('.like-count'); // Cerca uno span .like-count DENTRO il bottone
+            const iconName = userNowHasLiked ? 'favorite' : 'favorite_border';
+            button.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikesCount}</span>`;
+
+            button.classList.toggle('liked', userNowHasLiked);
+            button.title = userNowHasLiked ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
+
+            const likeCountSpanInsideButton = button.querySelector('.like-count');
             if (likeCountSpanInsideButton) {
-                likeCountSpanInsideButton.textContent = currentLikesCount;
-            } else {
-                // Se lo span è FRATELLO del bottone (come nella versione precedente di `comments.js`)
-                const likeCountSpanSibling = button.nextElementSibling;
-                if (likeCountSpanSibling && likeCountSpanSibling.classList.contains('like-count')) {
-                    likeCountSpanSibling.textContent = `${currentLikesCount}`;
+                const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
+                if (oldListener) {
+                    likeCountSpanInsideButton.removeEventListener('click', oldListener);
                 }
-            }
-
-            // Aggiorna l'emoji del bottone
-            // Assumiamo che l'emoji sia il primo nodo figlio del bottone e sia un nodo di testo
-            const emojiNode = button.childNodes[0];
-            if (emojiNode && emojiNode.nodeType === Node.TEXT_NODE) {
-                emojiNode.nodeValue = `${userNowHasLiked ? LIKED_GUESTBOOK_COMMENT_EMOJI : INITIAL_GUESTBOOK_COMMENT_LIKE_EMOJI} `; // Spazio per separare dall'eventuale span
-            }
-
-            if (userNowHasLiked) {
-                button.classList.add('liked');
-                button.title = "Togli il 'Mi piace' a questo commento";
-            } else {
-                button.classList.remove('liked');
-                button.title = "Metti 'Mi piace' a questo commento";
+                if (currentLikesCount > 0) {
+                    likeCountSpanInsideButton.classList.add('clickable-comment-like-count');
+                    likeCountSpanInsideButton.title = 'Vedi a chi piace questo commento';
+                    const newListener = (e) => {
+                        e.stopPropagation();
+                        openGuestbookLikedByListModal(commentId);
+                    };
+                    likeCountSpanInsideButton.addEventListener('click', newListener);
+                    likeCountSpanInsideButton.handleLikeCountClick = newListener;
+                } else {
+                    likeCountSpanInsideButton.classList.remove('clickable-comment-like-count');
+                    likeCountSpanInsideButton.style.cursor = 'default';
+                    likeCountSpanInsideButton.style.textDecoration = 'none';
+                    likeCountSpanInsideButton.title = '';
+                    delete likeCountSpanInsideButton.handleLikeCountClick;
+                }
             }
         }
         button.disabled = false;
     } catch (error) {
-        console.error("comments.js - Errore durante l'aggiornamento del like al commento guestbook:", error);
+        console.error("[comments.js] Errore durante l'aggiornamento del like al commento guestbook:", error);
         showToast("Si è verificato un errore durante l'aggiornamento del like. Riprova.");
         button.disabled = false;
-        // Potrebbe essere utile ricaricare i commenti per riflettere lo stato corretto
-        if (commentsListDiv && guestbookCollection && currentPageId) {
-            await loadComments();
-        }
     }
 }
 
-/** Loads and displays comments based on currentPageId */
+/**
+ * Carica e visualizza i commenti del guestbook per la pagina corrente.
+ */
 async function loadComments() {
     if (!commentsListDiv || !guestbookCollection) {
-        if (commentsListDiv) commentsListDiv.innerHTML = '<p>Error: Database connection or DOM element missing.</p>';
+        if (commentsListDiv) commentsListDiv.innerHTML = '<p>Errore: Connessione al DB o elemento DOM mancante.</p>';
         return;
     }
-    commentsListDiv.innerHTML = `<p>Loading comments for ${currentPageId}...</p>`;
-
+    commentsListDiv.innerHTML = `<p>Caricamento commenti per ${currentPageId}...</p>`;
     const currentUser = auth.currentUser;
 
     try {
@@ -195,63 +172,142 @@ async function loadComments() {
             guestbookCollection,
             where('pageId', '==', currentPageId),
             orderBy('timestamp', 'desc'),
-            limit(MAX_COMMENTS_DISPLAYED)
+            limit(20)
         );
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-            commentsListDiv.innerHTML = '<p>Nessun commento per questa pagina. Sii il primo!</p>';
+            commentsListDiv.innerHTML = `<p>Nessun commento per "${currentPageId}". Sii il primo!</p>`;
             return;
         }
+
+        const commenterIdsToFetch = [
+            ...new Set(
+                querySnapshot.docs.map((docSnap) => docSnap.data().userId).filter((id) => id)
+            ),
+        ];
+
+        const commenterPublicProfilesMap = new Map(); // Rinominato per chiarezza
+        if (commenterIdsToFetch.length > 0) {
+            const MAX_IDS_PER_IN_QUERY = 30;
+            const profilePromises = [];
+            for (let i = 0; i < commenterIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
+                const batchUserIds = commenterIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
+                // *** MODIFICA CHIAVE: Query su userPublicProfiles ***
+                const profilesQuery = query(collection(db, 'userPublicProfiles'), where(documentId(), 'in', batchUserIds));
+                profilePromises.push(getDocs(profilesQuery));
+            }
+            try {
+                const snapshotsArray = await Promise.all(profilePromises);
+                snapshotsArray.forEach((snapshot) => {
+                    snapshot.forEach((docSnap) => {
+                        if (docSnap.exists()) {
+                            commenterPublicProfilesMap.set(docSnap.id, docSnap.data());
+                        }
+                    });
+                });
+            } catch (profileError) {
+                console.error('[comments.js] Errore durante il recupero batch dei profili pubblici dei commentatori:', profileError);
+            }
+        }
+
         commentsListDiv.innerHTML = '';
         querySnapshot.forEach((docSnapshot) => {
-            const commentData = docSnapshot.data();
+            const commentData = docSnapshot.data(); // Dati denormalizzati dal commento stesso
             const commentId = docSnapshot.id;
             const commentElement = document.createElement('div');
             commentElement.classList.add('comment-item');
 
             const avatarImg = document.createElement('img');
-            avatarImg.classList.add('comment-avatar-img'); // Usa la classe CSS
-            const seedForBlockie =
-                commentData.userId || commentData.userName || commentData.name || `anon-g-${commentId}`;
-            let altTextForBlockie = commentData.userName || commentData.name || 'Anonymous';
-            avatarImg.src = generateBlockieAvatar(seedForBlockie, 40, { size: 8 });
-            avatarImg.alt = `${altTextForBlockie}'s Blockie Avatar`;
-            commentElement.appendChild(avatarImg);
+            avatarImg.classList.add('comment-avatar-img');
 
-            const commentContent = document.createElement('div');
-            commentContent.classList.add('comment-content');
-            const nameEl = document.createElement('strong');
-            let commenterNameDisplay = commentData.userId
-                ? commentData.userName || 'Utente Registrato'
-                : (commentData.name || 'Anonimo') + ' (Ospite)';
+            let commenterAvatarSrc = DEFAULT_AVATAR_COMMENT_PATH;
+            let commenterNameDisplay = commentData.userName || commentData.name || 'Anonimo'; // Priorità ai dati denormalizzati
+            let commenterNationalityCode = commentData.nationalityCode || null; // Priorità ai dati denormalizzati
+            
+            // *** MODIFICA CHIAVE: Usa dati da commenterPublicProfilesMap per arricchimento ***
+            const commenterPublicProfile = commentData.userId ? commenterPublicProfilesMap.get(commentData.userId) : null;
+            let commenterProfilePublicUpdatedAt = null; // Per cache-busting dell'avatar pubblico
 
-            // Aggiungi bandierina se presente
-            if (commentData.nationalityCode && commentData.nationalityCode !== 'OTHER') {
-                const flagIconSpan = document.createElement('span');
-                flagIconSpan.classList.add('fi', `fi-${commentData.nationalityCode.toLowerCase()}`);
-                flagIconSpan.style.marginRight = '5px';
-                flagIconSpan.style.verticalAlign = 'middle';
-                nameEl.appendChild(flagIconSpan);
+            if (commenterPublicProfile) {
+                commenterNameDisplay = commenterPublicProfile.nickname || commenterNameDisplay; // Sovrascrive se disponibile nel profilo pubblico
+                commenterNationalityCode = commenterPublicProfile.nationalityCode || commenterNationalityCode; // Sovrascrive se disponibile
+
+                // *** MODIFICA CHIAVE: Usa avatarUrls.thumbnail e profilePublicUpdatedAt ***
+                if (commenterPublicProfile.avatarUrls && commenterPublicProfile.avatarUrls.thumbnail) {
+                    commenterAvatarSrc = commenterPublicProfile.avatarUrls.thumbnail;
+                    commenterProfilePublicUpdatedAt = commenterPublicProfile.profilePublicUpdatedAt;
+                } else if (commentData.userId) { // Profilo pubblico trovato ma senza avatar.thumbnail
+                    commenterAvatarSrc = generateBlockieAvatar(commentData.userId, 40, { size: 8 });
+                }
+            } else if (commentData.userId) { // Nessun profilo pubblico trovato, ma c'è un userId nel commento
+                commenterAvatarSrc = generateBlockieAvatar(commentData.userId, 40, { size: 8 });
+            } else { // Commento ospite (senza userId)
+                const seedForGuestBlockie = commentData.name || `anon-g-${commentId}`;
+                commenterAvatarSrc = generateBlockieAvatar(seedForGuestBlockie, 40, { size: 8 });
             }
 
-            nameEl.appendChild(document.createTextNode(commenterNameDisplay));
-            const dateEl = document.createElement('small');
-            dateEl.classList.add('comment-date');
-            dateEl.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
-            const messageEl = document.createElement('p');
-            messageEl.textContent = commentData.message
+            // Applica cache busting se l'avatar non è un Blockie e il timestamp pubblico è disponibile
+            if (commenterAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH && !commenterAvatarSrc.startsWith('data:image/png;base64') && commenterProfilePublicUpdatedAt) {
+                if (commenterProfilePublicUpdatedAt.seconds) {
+                     commenterAvatarSrc += `?v=${commenterProfilePublicUpdatedAt.seconds}`;
+                } else if (commenterProfilePublicUpdatedAt instanceof Date) { // Fallback per sicurezza
+                     commenterAvatarSrc += `?v=${commenterProfilePublicUpdatedAt.getTime()}`;
+                }
+            }
+
+            avatarImg.src = commenterAvatarSrc;
+            avatarImg.alt = `Avatar di ${commenterNameDisplay}`;
+            avatarImg.onerror = () => {
+                avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH;
+                avatarImg.onerror = null;
+            };
+
+            const headerDiv = document.createElement('div');
+            headerDiv.classList.add('comment-header', 'd-flex', 'align-items-center', 'mb-2');
+            headerDiv.appendChild(avatarImg);
+
+            const nameAndDateDiv = document.createElement('div');
+            nameAndDateDiv.classList.add('ms-2');
+
+            const nameStrong = document.createElement('strong');
+            if (commenterNationalityCode && commenterNationalityCode !== 'OTHER') {
+                const flagSpan = document.createElement('span');
+                flagSpan.className = `fi fi-${commenterNationalityCode.toLowerCase()} me-1`;
+                nameStrong.appendChild(flagSpan);
+            }
+
+            if (commentData.userId) {
+                const userProfileLink = document.createElement('a');
+                userProfileLink.href = `profile.html?userId=${commentData.userId}`; // Link corretto
+                userProfileLink.textContent = commenterNameDisplay;
+                userProfileLink.classList.add('comment-author-link');
+                nameStrong.appendChild(userProfileLink);
+            } else {
+                nameStrong.appendChild(document.createTextNode(commenterNameDisplay));
+            }
+            nameAndDateDiv.appendChild(nameStrong);
+
+            const dateSmall = document.createElement('small');
+            dateSmall.classList.add('text-muted', 'ms-2', 'comment-date-text');
+            dateSmall.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
+            nameAndDateDiv.appendChild(dateSmall);
+
+            headerDiv.appendChild(nameAndDateDiv);
+
+            const messageP = document.createElement('p');
+            messageP.classList.add('comment-message', 'mb-1', 'mt-1');
+            messageP.textContent = commentData.message
                 ? String(commentData.message).replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 : '';
-            commentContent.appendChild(nameEl);
-            commentContent.appendChild(dateEl);
-            commentContent.appendChild(messageEl);
 
-            // --- Sezione Like per commenti Guestbook ---
+            commentElement.appendChild(headerDiv);
+            commentElement.appendChild(messageP);
+
             const likesContainer = document.createElement('div');
-            likesContainer.classList.add('likes-container');
+            likesContainer.classList.add('likes-container', 'mt-1');
             const likeButton = document.createElement('button');
-            likeButton.classList.add('like-btn'); // Classe generica per stile bottone like
+            likeButton.classList.add('like-btn');
             likeButton.setAttribute('data-comment-id', commentId);
 
             const currentLikes = commentData.likes || 0;
@@ -259,67 +315,67 @@ async function loadComments() {
             if (currentUser && commentData.likedBy && commentData.likedBy.includes(currentUser.uid)) {
                 userHasLikedThisComment = true;
             }
-
-            // Mettiamo l'emoji e lo span del conteggio DENTRO al bottone
-            likeButton.innerHTML = `${userHasLikedThisComment ? LIKED_GUESTBOOK_COMMENT_EMOJI : INITIAL_GUESTBOOK_COMMENT_LIKE_EMOJI} <span class="like-count">${currentLikes}</span>`;
-
-            if (userHasLikedThisComment) {
-                likeButton.classList.add('liked'); // Per stilizzare il bottone "liked"
-            }
+            const iconName = userHasLikedThisComment ? 'favorite' : 'favorite_border';
+            likeButton.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikes}</span>`;
+            likeButton.classList.toggle('liked', userHasLikedThisComment);
             likeButton.title = userHasLikedThisComment ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
-            likeButton.disabled = !currentUser; // Disabilita se utente non loggato
+            likeButton.disabled = !currentUser;
 
-            likeButton.addEventListener('click', handleGuestbookCommentLike);
-            likesContainer.appendChild(likeButton);
+            if (!likeButton.hasAttribute('data-like-listener-attached')) {
+                likeButton.addEventListener('click', handleGuestbookCommentLike);
+                likeButton.setAttribute('data-like-listener-attached', 'true');
+            }
 
-            // Rendi il conteggio dei like cliccabile per aprire la modale
-            const likeCountSpanInButton = likeButton.querySelector('.like-count');
-            if (likeCountSpanInButton) {
-                // Verifica che lo span esista
+            const likeCountSpanInsideButton = likeButton.querySelector('.like-count');
+            if (likeCountSpanInsideButton) {
+                const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
+                if (oldListener) likeCountSpanInsideButton.removeEventListener('click', oldListener);
                 if (currentLikes > 0) {
-                    likeCountSpanInButton.classList.add('clickable-comment-like-count'); // Aggiungi per stile CSS
-                    likeCountSpanInButton.title = 'Vedi a chi piace questo commento';
-
-                    likeCountSpanInButton.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Evita che il click si propaghi al bottone like
-                        openGuestbookLikedByListModal(commentId); // Apri modale per questo commento
-                    });
+                    likeCountSpanInsideButton.classList.add('clickable-comment-like-count');
+                    likeCountSpanInsideButton.title = 'Vedi a chi piace questo commento';
+                    const newListener = (e) => {
+                        e.stopPropagation();
+                        openGuestbookLikedByListModal(commentId);
+                    };
+                    likeCountSpanInsideButton.addEventListener('click', newListener);
+                    likeCountSpanInsideButton.handleLikeCountClick = newListener;
                 } else {
-                    // Se non ci sono like, non rendere cliccabile e rimuovi eventuali stili
-                    likeCountSpanInButton.classList.remove('clickable-comment-like-count');
-                    likeCountSpanInButton.style.cursor = 'default';
-                    likeCountSpanInButton.style.textDecoration = 'none';
-                    likeCountSpanInButton.title = '';
+                    likeCountSpanInsideButton.classList.remove('clickable-comment-like-count');
+                    likeCountSpanInsideButton.style.cursor = 'default';
+                    likeCountSpanInsideButton.style.textDecoration = 'none';
+                    likeCountSpanInsideButton.title = '';
+                    delete likeCountSpanInsideButton.handleLikeCountClick;
                 }
             }
 
-            commentContent.appendChild(likesContainer);
-            // --- Fine Sezione Like ---
-
-            commentElement.appendChild(commentContent);
+            likesContainer.appendChild(likeButton);
+            commentElement.appendChild(likesContainer);
             commentsListDiv.appendChild(commentElement);
         });
     } catch (error) {
-        console.error(`comments.js - Error loading comments for pageId ${currentPageId}: `, error);
+        console.error(`[comments.js] Errore caricamento commenti per pageId ${currentPageId}: `, error);
         if (error.code === 'failed-precondition' && commentsListDiv) {
-            commentsListDiv.innerHTML = `<p>Errore: Indice Firestore mancante per filtrare i commenti. Controlla la console del browser per il link per crearlo.</p>`;
+            commentsListDiv.innerHTML = `<p>Errore: Indice Firestore mancante per filtrare i commenti. Controlla la console.</p>`;
         } else if (commentsListDiv) {
             commentsListDiv.innerHTML = '<p>Errore caricamento commenti. Riprova più tardi.</p>';
         }
     }
 }
 
-/** Handles comment form submission */
+/**
+ * Gestisce l'invio di un nuovo commento al guestbook.
+ * (La logica per recuperare il profilo dell'utente corrente da userProfiles è CORRETTA e rimane invariata)
+ */
 async function handleCommentSubmit(event) {
     event.preventDefault();
     if (!guestbookCollection || !commentMessageInput || !submitCommentBtn || !commentsListDiv) {
-        console.error('comments.js - Elementi DOM del form commenti mancanti.');
+        console.error('[comments.js] Elementi DOM del form commenti mancanti.');
         showToast('Errore interfaccia. Riprova.');
         return;
     }
     const message = commentMessageInput.value.trim();
     if (!message) {
-        showToast('Please enter a message.');
+        showToast('Per favore, inserisci un messaggio.');
         return;
     }
 
@@ -332,79 +388,75 @@ async function handleCommentSubmit(event) {
     if (user) {
         userIdToSave = user.uid;
         try {
-            const userProfileRef = doc(db, 'userProfiles', user.uid);
+            // *** IMPORTANTE: Legge da userProfiles (privato) per denormalizzare i dati del PROPRIO profilo ***
+            // Questo è CORRETTO perché stiamo scrivendo nuovi dati basati sul profilo completo dell'utente loggato.
+            const userProfileRef = doc(db, 'userProfiles', user.uid); 
             const docSnap = await getDoc(userProfileRef);
             if (docSnap.exists()) {
                 const profileData = docSnap.data();
-                userNameForDb = profileData.nickname || (user.email ? user.email.split('@')[0] : 'Registered User');
+                userNameForDb = profileData.nickname || (user.email ? user.email.split('@')[0] : 'Utente Registrato');
                 if (profileData.nationalityCode) {
                     userNationalityCode = profileData.nationalityCode;
                 }
             } else {
-                userNameForDb = user.email ? user.email.split('@')[0] : 'Registered User';
+                userNameForDb = user.email ? user.email.split('@')[0] : 'Utente Registrato';
             }
         } catch (profileError) {
-            console.error('comments.js - Error loading profile for comment:', profileError);
-            userNameForDb = user.email ? user.email.split('@')[0] : 'Registered User';
+            console.error('[comments.js] Errore caricamento profilo per commento:', profileError);
+            userNameForDb = user.email ? user.email.split('@')[0] : 'Utente Registrato';
         }
     } else {
         if (!commentNameInput || !commentNameSection) {
-            console.error('comments.js - Elementi DOM per nome anonimo mancanti.');
+            console.error('[comments.js] Elementi DOM per nome anonimo mancanti.');
             showToast('Errore interfaccia. Riprova.');
             return;
         }
         nameForDb = commentNameInput.value.trim();
         if (!nameForDb) {
-            showToast('Please enter your name or log in.');
+            showToast('Per favore, inserisci il tuo nome o effettua il login.');
             return;
         }
     }
 
     submitCommentBtn.disabled = true;
-    submitCommentBtn.textContent = 'Submitting...';
+    submitCommentBtn.textContent = 'Invio...';
     try {
         const commentDataPayload = {
-            // Rinominato per chiarezza
             message: message,
             timestamp: serverTimestamp(),
-            likes: 0, // Sub-task G.1.1: Inizializza likes a 0
-            likedBy: [], // Sub-task G.1.1: Inizializza likedBy a array vuoto
+            likes: 0,
+            likedBy: [],
             pageId: currentPageId,
         };
         if (userIdToSave) {
             commentDataPayload.userId = userIdToSave;
-            commentDataPayload.userName = userNameForDb;
+            commentDataPayload.userName = userNameForDb; 
             if (userNationalityCode) {
-                // Salva anche la nazionalità per gli utenti loggati
                 commentDataPayload.nationalityCode = userNationalityCode;
             }
         } else {
             commentDataPayload.name = nameForDb;
-            // Per gli utenti anonimi, la nazionalità non è richiesta/gestita nel form base
         }
 
         await addDoc(guestbookCollection, commentDataPayload);
 
         if (commentMessageInput) commentMessageInput.value = '';
-        if (commentNameInput && !user) commentNameInput.value = ''; // Pulisci nome solo se utente non loggato
+        if (commentNameInput && !user) commentNameInput.value = '';
         await loadComments();
+        showToast('Commento inviato con successo!', 'success');
     } catch (error) {
-        console.error('comments.js - Error submitting comment:', error);
-        showToast('Error submitting comment. Please try again.');
+        console.error('[comments.js] Errore invio commento:', error);
+        showToast('Errore invio commento. Riprova.');
     } finally {
         if (submitCommentBtn) {
             submitCommentBtn.disabled = false;
-            submitCommentBtn.textContent = 'Submit Comment';
+            submitCommentBtn.textContent = 'Invia Commento';
         }
     }
 }
 
-// --- Funzioni per la Modale "Liked By" per i Commenti del Guestbook ---
-
 function closeGuestbookLikedByListModal() {
-    if (likedByModal) {
-        likedByModal.style.display = 'none';
-    }
+    if (likedByModal) likedByModal.style.display = 'none';
     if (likedByModalList) likedByModalList.innerHTML = '';
     if (likedByModalLoading) likedByModalLoading.style.display = 'none';
     if (likedByModalNoLikes) likedByModalNoLikes.style.display = 'none';
@@ -412,42 +464,34 @@ function closeGuestbookLikedByListModal() {
 
 async function openGuestbookLikedByListModal(commentId) {
     if (!likedByModal) {
-        console.error('Elemento likedByModal non trovato per i commenti del guestbook.');
+        console.error('[comments.js] Elemento likedByModal non trovato.');
         return;
     }
-    // Non serve controllare auth.currentUser qui, perché il conteggio cliccabile
-    // non dovrebbe essere visibile o la modale non dovrebbe aprirsi se non ci sono like.
-    // La logica di chi può vedere è più a livello di UI che impedisce l'azione.
-
+    if (!auth.currentUser) {
+        showToast('Devi essere loggato per vedere i like.', 'info');
+        return;
+    }
     if (likedByModalList) likedByModalList.innerHTML = '';
     if (likedByModalNoLikes) likedByModalNoLikes.style.display = 'none';
     if (likedByModalLoading) likedByModalLoading.style.display = 'block';
-
-    if (likedByModalTitle) {
-        likedByModalTitle.textContent = 'Persone a cui piace questo commento';
-    }
-
+    if (likedByModalTitle) likedByModalTitle.textContent = 'Persone a cui piace questo commento';
     likedByModal.style.display = 'block';
     await populateGuestbookLikedByListModal(commentId);
 }
 
 async function populateGuestbookLikedByListModal(commentId) {
     if (!likedByModalList || !likedByModalLoading || !likedByModalNoLikes || !db) {
-        console.error('Elementi modale o DB mancanti per populateGuestbookLikedByListModal');
-        if (likedByModalLoading) likedByModalLoading.style.display = 'none';
-        if (likedByModalList) likedByModalList.innerHTML = '<li>Errore critico.</li>';
         return;
     }
 
     try {
-        const commentDocRef = doc(db, 'guestbookEntries', commentId); // Usa la collezione corretta
+        const commentDocRef = doc(db, 'guestbookEntries', commentId);
         const commentSnap = await getDoc(commentDocRef);
-
         let likedByUsersIds = [];
         if (commentSnap.exists()) {
             likedByUsersIds = commentSnap.data().likedBy || [];
         } else {
-            console.warn(`Commento guestbook non trovato ID: ${commentId}`);
+            console.warn(`[comments.js] Commento guestbook non trovato ID: ${commentId}`);
             likedByModalList.innerHTML = '<li>Errore: commento non trovato.</li>';
             if (likedByModalLoading) likedByModalLoading.style.display = 'none';
             return;
@@ -455,68 +499,95 @@ async function populateGuestbookLikedByListModal(commentId) {
 
         if (likedByUsersIds.length === 0) {
             if (likedByModalNoLikes) likedByModalNoLikes.style.display = 'block';
-            likedByModalList.innerHTML = ''; // Assicurati che la lista sia vuota
+            likedByModalList.innerHTML = '';
         } else {
-            const userProfilePromises = likedByUsersIds.map((userId) => getDoc(doc(db, 'userProfiles', userId)));
+            // *** MODIFICA CHIAVE: Query su userPublicProfiles ***
+            const userProfilePromises = likedByUsersIds.map((userId) => getDoc(doc(db, 'userPublicProfiles', userId)));
             const userProfileSnapshots = await Promise.all(userProfilePromises);
+            likedByModalList.innerHTML = '';
 
-            likedByModalList.innerHTML = ''; // Pulisci prima di popolare
             userProfileSnapshots.forEach((userSnap) => {
                 const li = document.createElement('li');
+                const avatarImg = document.createElement('img');
+                avatarImg.className = 'liked-by-avatar';
+
+                let userAvatarSrc = DEFAULT_AVATAR_COMMENT_PATH;
+                let userNameDisplay = 'Anonimo';
+                const userIdForBlockie = userSnap.id || 'unknownLiker';
+                let userProfilePublicUpdatedAt = null; // Per cache busting dell'avatar pubblico
+
                 if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    const avatarImg = document.createElement('img');
-                    avatarImg.className = 'liked-by-avatar'; // Usa la classe CSS per lo stile avatar
-                    avatarImg.src = generateBlockieAvatar(userSnap.id, 32, { size: 8 });
-                    avatarImg.alt = `Avatar di ${userData.nickname || 'Utente'}`;
+                    const userPublicData = userSnap.data(); // Dati dal profilo pubblico
+                    userNameDisplay = userPublicData.nickname || 'Utente';
+                    userProfilePublicUpdatedAt = userPublicData.profilePublicUpdatedAt;
 
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'liked-by-name'; // Usa la classe CSS per lo stile nome
-                    nameSpan.textContent = userData.nickname || 'Utente Sconosciuto';
-
-                    li.appendChild(avatarImg);
-                    li.appendChild(nameSpan);
-
-                    if (userData.nationalityCode && userData.nationalityCode !== 'OTHER') {
-                        const flagSpan = document.createElement('span');
-                        flagSpan.className = `fi fi-${userData.nationalityCode.toLowerCase()}`;
-                        flagSpan.title = userData.nationalityCode; // Tooltip con il codice paese
-                        // Potresti aggiungere stili direttamente qui o via CSS per il flagSpan
-                        flagSpan.style.marginLeft = '8px'; // Esempio di stile
-                        li.appendChild(flagSpan);
+                    // *** MODIFICA CHIAVE: Usa avatarUrls.thumbnail dal profilo pubblico ***
+                    if (userPublicData.avatarUrls && userPublicData.avatarUrls.thumbnail) {
+                        userAvatarSrc = userPublicData.avatarUrls.thumbnail;
+                    } else { // Profilo pubblico trovato ma senza avatar.thumbnail
+                        userAvatarSrc = generateBlockieAvatar(userSnap.id, 32, { size: 8 });
                     }
-                } else {
-                    // Utente potrebbe essere stato cancellato o ID non valido
-                    console.warn(`Profilo utente non trovato per ID: ${userSnap.id} (liker di commento guestbook)`);
-                    const avatarImg = document.createElement('img');
-                    avatarImg.className = 'liked-by-avatar';
-                    avatarImg.src = generateBlockieAvatar(userSnap.id || 'unknown', 32, { size: 8 }); // Avatar generico
-                    avatarImg.alt = 'Avatar Utente Sconosciuto';
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'liked-by-name';
-                    nameSpan.textContent = 'Utente Sconosciuto';
-                    li.appendChild(avatarImg);
-                    li.appendChild(nameSpan);
+                } else { // Profilo pubblico non trovato
+                    console.warn(`[comments.js] Profilo pubblico (likedBy modal) non trovato: ${userSnap.id}`);
+                    userAvatarSrc = generateBlockieAvatar(userIdForBlockie, 32, { size: 8 });
+                }
+                
+                // Applica cache busting
+                if (userAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH && !userAvatarSrc.startsWith('data:image/png;base64') && userProfilePublicUpdatedAt) {
+                     if (userProfilePublicUpdatedAt.seconds) {
+                         userAvatarSrc += `?v=${userProfilePublicUpdatedAt.seconds}`;
+                    } else if (userProfilePublicUpdatedAt instanceof Date) { // Fallback per sicurezza
+                         userAvatarSrc += `?v=${userProfilePublicUpdatedAt.getTime()}`;
+                    }
+                }
+                
+                avatarImg.src = userAvatarSrc;
+                avatarImg.alt = `Avatar di ${userNameDisplay}`;
+                avatarImg.onerror = () => {
+                    avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH;
+                    avatarImg.onerror = null;
+                };
+                li.appendChild(avatarImg);
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'liked-by-name';
+                nameSpan.textContent = userNameDisplay;
+                li.appendChild(nameSpan);
+
+                // Nazionalità dal profilo pubblico (se esiste)
+                if (userSnap.exists() && userSnap.data().nationalityCode && userSnap.data().nationalityCode !== 'OTHER') {
+                    const userPublicDataForFlag = userSnap.data(); 
+                    const flagSpan = document.createElement('span');
+                    flagSpan.className = `fi fi-${userPublicDataForFlag.nationalityCode.toLowerCase()}`;
+                    flagSpan.title = userPublicDataForFlag.nationalityCode;
+                    flagSpan.style.marginLeft = '8px';
+                    li.appendChild(flagSpan);
                 }
                 likedByModalList.appendChild(li);
             });
         }
     } catch (error) {
-        console.error(`Errore nel popolare la lista "Liked By" per commento guestbook:`, error);
+        console.error(`[comments.js] Errore nel popolare la lista "Liked By" per commento guestbook:`, error);
         likedByModalList.innerHTML = '<li>Errore durante il caricamento della lista.</li>';
     } finally {
         if (likedByModalLoading) likedByModalLoading.style.display = 'none';
     }
 }
 
-// --- Initialization ---
+// --- INIZIALIZZAZIONE ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Inizializzazione dei riferimenti DOM per la modale
-    // Questi ID DEVONO CORRISPONDERE a quelli nell'HTML copiato in about.html e donkeyRunner.html
-    likedByModal = document.getElementById('likedByModal'); // Assumiamo ID generico per la modale
+    console.log('[comments.js] DOMContentLoaded');
+    commentForm = document.getElementById('commentForm');
+    commentNameInput = document.getElementById('commentName');
+    commentMessageInput = document.getElementById('commentMessage');
+    submitCommentBtn = document.getElementById('submitCommentBtn');
+    commentsListDiv = document.getElementById('commentsList');
+    commentNameSection = document.getElementById('commentNameSection');
+    commentsListContainer = document.getElementById('commentsListContainer');
+
+    likedByModal = document.getElementById('likedByModal');
     if (likedByModal) {
-        // Solo se la modale esiste nella pagina corrente
-        closeLikedByModalBtn = likedByModal.querySelector('#closeLikedByModalBtn'); // Cerca all'interno della modale
+        closeLikedByModalBtn = likedByModal.querySelector('#closeLikedByModalBtn');
         likedByModalTitle = likedByModal.querySelector('#likedByModalTitle');
         likedByModalList = likedByModal.querySelector('#likedByModalList');
         likedByModalLoading = likedByModal.querySelector('#likedByModalLoading');
@@ -525,15 +596,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (closeLikedByModalBtn) {
             closeLikedByModalBtn.addEventListener('click', closeGuestbookLikedByListModal);
         }
-        // Event listener per chiudere la modale cliccando sullo sfondo
         likedByModal.addEventListener('click', (event) => {
             if (event.target === likedByModal) {
-                // Se il click è direttamente sullo sfondo della modale
                 closeGuestbookLikedByListModal();
             }
         });
+    }
+
+    if (commentsListContainer && commentsListContainer.dataset.pageId) {
+        currentPageId = commentsListContainer.dataset.pageId;
+        console.log(`[comments.js] Inizializzato per pageId: ${currentPageId}`);
     } else {
-        // console.warn("La modale 'likedByModal' non è presente in questa pagina. Le funzionalità di visualizzazione likers per i commenti guestbook potrebbero non essere attive.");
+        console.warn(
+            '[comments.js] commentsListContainer o data-page-id non trovato. Verrà usato il pageId di fallback "default".'
+        );
+    }
+
+    if (!commentForm || !commentMessageInput || !submitCommentBtn || !commentsListDiv || !commentsListContainer) {
+        console.error('[comments.js] Uno o più Elementi DOM essenziali per la funzionalità guestbook sono mancanti.');
     }
 
     const user = auth.currentUser;
@@ -546,18 +626,25 @@ document.addEventListener('DOMContentLoaded', () => {
             commentNameInput.required = true;
         }
     }
-    if (commentForm) commentForm.addEventListener('submit', handleCommentSubmit);
+
+    if (commentForm) {
+        if (!commentForm.hasAttribute('data-submit-listener-attached')) {
+            commentForm.addEventListener('submit', handleCommentSubmit);
+            commentForm.setAttribute('data-submit-listener-attached', 'true');
+        }
+    }
+
     if (commentsListDiv && db && currentPageId) {
         loadComments();
     } else if (!db && commentsListDiv) {
-        commentsListDiv.innerHTML = '<p>Error: Cannot connect to database.</p>';
+        commentsListDiv.innerHTML = '<p>Errore: Impossibile connettersi al database.</p>';
     } else if (!currentPageId && commentsListDiv) {
-        commentsListDiv.innerHTML = '<p>Error: Page context for comments not defined.</p>';
+        commentsListDiv.innerHTML = '<p>Errore: Contesto pagina per i commenti non definito.</p>';
     }
 });
 
 onAuthStateChanged(auth, (user) => {
-    console.log('comments.js - Auth state changed. User:', user ? user.uid : 'null');
+    console.log('[comments.js] Auth state changed. User:', user ? user.uid : 'null');
     if (commentNameSection && commentNameInput) {
         if (user) {
             commentNameSection.style.display = 'none';
@@ -568,8 +655,7 @@ onAuthStateChanged(auth, (user) => {
         }
     }
     if (commentsListDiv && db && currentPageId) {
-        console.log('Auth state changed, reloading comments for like status and UI update (guestbook).');
-        loadComments(); // Ricarica per aggiornare lo stato dei like
+        console.log('[comments.js] Auth state changed, ricaricamento commenti per aggiornare UI like.');
+        loadComments();
     }
 });
-// --- FINE MODIFICHE ---

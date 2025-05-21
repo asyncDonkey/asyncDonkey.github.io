@@ -1,5 +1,5 @@
 // js/adminDashboard.js
-import { db, auth } from './main.js';
+import { db, auth, showConfirmationModal } from './main.js';
 import {
     collection,
     query,
@@ -199,42 +199,58 @@ async function handleRejectArticleClick(e) {
         return;
     }
 
-    // Tenta di ottenere il titolo dell'articolo per la modale
-    let articleTitleForModal = `ID: ${articleId.substring(0, 6)}...`;
+    let articleTitleForDisplay = `ID: ${articleId.substring(0, 6)}...`; // Fallback title
     try {
         const articleRef = doc(db, 'articles', articleId);
         const docSnap = await getDoc(articleRef);
         if (docSnap.exists() && docSnap.data().title) {
-            articleTitleForModal = `"${docSnap.data().title}"`;
+            articleTitleForDisplay = `"${docSnap.data().title}"`;
         }
     } catch (err) {
-        console.warn('Impossibile recuperare il titolo per la modale di rifiuto:', err);
+        console.warn(`Impossibile recuperare il titolo per l'articolo ${articleId}:`, err);
     }
 
-    if (!confirm(`Sei sicuro di voler avviare il processo di rifiuto per l'articolo ${articleTitleForModal}?`)) {
-        return;
+    // Mostra la modale di conferma PRIMA di procedere
+    const userConfirmedInitialRejection = await showConfirmationModal(
+        'Conferma Iniziale Rifiuto',
+        `Sei sicuro di voler avviare il processo di rifiuto per l'articolo ${articleTitleForDisplay}? Potrai inserire un motivo nel passo successivo.`
+    );
+
+    if (!userConfirmedInitialRejection) {
+        showToast("Processo di rifiuto annullato dall'utente.", 'info');
+        return; // L'utente ha cliccato "No" o chiuso la modale di conferma
     }
 
-    currentArticleIdToReject = articleId;
-    if (rejectingArticleIdInput) rejectingArticleIdInput.value = articleId;
-    if (rejectionReasonTextarea) rejectionReasonTextarea.value = ''; // Pulisci
+    // L'utente ha confermato, procedi con l'apertura della modale per il motivo
+    currentArticleIdToReject = articleId; // Salva l'ID per usarlo nel submit del form del motivo
 
-    const modalTitleEl = document.getElementById('rejectReasonModalTitle');
-    if (modalTitleEl) {
-        modalTitleEl.textContent = `Motivo Rifiuto per: ${articleTitleForModal}`;
+    if (rejectingArticleIdInput) {
+        rejectingArticleIdInput.value = articleId; // Popola l'input nascosto nel form del motivo
+    }
+    if (rejectionReasonTextarea) {
+        rejectionReasonTextarea.value = ''; // Pulisci il textarea da usi precedenti
+    }
+
+    const modalReasonTitleEl = document.getElementById('rejectReasonModalTitle'); // ID dal tuo HTML
+    if (modalReasonTitleEl) {
+        modalReasonTitleEl.textContent = `Motivo Rifiuto per: ${articleTitleForDisplay}`;
     }
 
     if (rejectReasonModal) {
         rejectReasonModal.style.display = 'block';
-        if (rejectionReasonTextarea) rejectionReasonTextarea.focus();
+        if (rejectionReasonTextarea) {
+            rejectionReasonTextarea.focus(); // Metti il focus sul textarea
+        }
     } else {
-        showToast('Errore: Modale per motivo rifiuto non trovata.', 'error');
-        // Fallback a prompt se la modale non esiste (come prima, ma non ideale)
-        console.error('Fallback a prompt() perché rejectReasonModal non è stata trovata.');
-        const reason = prompt(
-            `Opzionale: Inserisci un breve motivo per il rifiuto dell'articolo ${articleTitleForModal}:`
-        );
-        await processArticleRejection(articleId, reason);
+        // Fallback nel caso estremamente raro la modale del motivo non sia trovata
+        // (dovrebbe essere sempre presente se l'HTML è corretto)
+        showToast('Errore critico: la modale per inserire il motivo del rifiuto non è stata trovata.', 'error');
+        console.error('La modale #rejectReasonModal non è stata trovata nel DOM!');
+        // Potresti voler fare un prompt qui come ULTIMISSIMA spiaggia, ma è meglio evitare.
+        // const reasonFallback = prompt(`Inserisci motivo per rifiutare ${articleTitleForDisplay}:`);
+        // if (reasonFallback !== null) { // Se l'utente non preme annulla sul prompt
+        //     await processArticleRejection(articleId, reasonFallback);
+        // }
     }
 }
 

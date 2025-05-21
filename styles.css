@@ -147,6 +147,7 @@ header {
     transition:
         background-color 0.3s,
         border-color 0.3s;
+    position: relative; /* <-- AGGIUNGI QUESTO! */
 }
 header .avatar img {
     width: 50px;
@@ -160,7 +161,14 @@ header .header-content {
     align-items: center;
     justify-content: space-between;
     flex-grow: 1;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 20px;
+}
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
     gap: 20px;
 }
 header h1 {
@@ -204,13 +212,14 @@ header nav a:hover {
     gap: 8px;
 }
 #userProfileContainer {
-    display: none;
-    align-items: center;
+    display: flex;
+    align-items: center; /* Già presente, ma per chiarezza */
+    gap: 8px; /* Spazio tra avatar, nome, e bottoni profilo/logout */
 } /* JS gestirà la visibilità */
 #userProfileContainer span {
     color: var(--text-color-primary);
-    font-size: 0.9em;
-    margin-right: 10px;
+    font-size: 1.2rem;
+    margin-right: 0px;
     white-space: nowrap;
 }
 #headerUserAvatar {
@@ -223,24 +232,35 @@ header nav a:hover {
     vertical-align: middle;
     object-fit: cover;
     border: 1px solid var(--border-color-secondary);
+    flex-shrink: 0;
 }
 .auth-button {
-    /* Stile generico per bottoni Login/Register/Logout e link nav */
     background-color: transparent;
     border: 1px solid var(--text-color-muted);
     color: var(--text-color-secondary);
-    padding: 6px 12px;
+    padding: 6px 12px; /* Padding di default */
     border-radius: 20px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.9em; /* ~14.4px se base è 16px */
     transition: all 0.2s ease;
-    white-space: nowrap;
-    text-decoration: none; /* Assicura che non sia sottolineato se è un <a> */
+    text-decoration: none;
+
+    /* Proprietà Flex per centrare il contenuto INTERNO */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle; /* Aggiunto per coerenza con altri bottoni nav */
+    box-sizing: border-box;
+    white-space: nowrap; /* Evita che testo+icona vada a capo se c'è */
 }
 .auth-button:hover {
     border-color: var(--link-color);
     color: var(--link-color);
     text-decoration: none;
+}
+
+header .auth-button.nav-link-icon-text .material-symbols-rounded {
+    margin-right: 6px; /* Spazio tra icona e testo per bottoni con testo */
 }
 
 /* ===== Main Content & Generic Section Styles ===== */
@@ -1611,17 +1631,11 @@ body.touch-enabled .game-instructions {
 
 /* ===== Testo Neon Arcade (usato in index.html e .glitchzilla-banner) ===== */
 .testo-neon-arcade {
-    /* Usato nella card gioco in index.html */
-    font-size: 1.5em;
-    text-align: center;
-    padding: 0.5rem;
-    margin-top: 10px;
-    border-width: 2px;
-    border-style: solid;
     text-shadow:
-        0 0 5px rgba(255, 255, 255, 0.5),
-        0 0 10px currentColor;
-    animation: cambio-colore-neon 1.5s infinite steps(1, end); /* Usa l'animazione globale */
+        0 0 5px rgba(255, 255, 255, 0.3),
+        0 0 8px currentColor;
+    animation: cambio-colore-neon 1.5s infinite steps(1, end);
+    font-weight: bold;
 }
 
 /* ===== Footer Styles ===== */
@@ -1649,8 +1663,12 @@ footer a {
         padding: 15px 3%;
     }
     header .header-content {
-        width: 100%;
-        justify-content: center;
+        width: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        gap: 20px;
     }
     header .header-controls {
         width: 100%;
@@ -3003,7 +3021,7 @@ body.game-fullscreen-active #gameContainer {
 body.game-fullscreen-active.game-fullscreen-landscape #gameCanvas {
     width: 100vw; /* Occupa tutta la larghezza del viewport */
     height: 100vh; /* Occupa tutta l'altezza del viewport */
-    object-fit: cover; /* Mantiene l'aspect ratio del contenuto del canvas (800x450),
+    object-fit: contain; /* Mantiene l'aspect ratio del contenuto del canvas (800x450),
                            lo scala per coprire l'area e ritaglia l'eccesso. */
     border: none !important; /* Rimuovi i bordi in fullscreen */
     border-radius: 0 !important; /* Rimuovi angoli arrotondati */
@@ -3398,16 +3416,6 @@ body.game-fullscreen-active #gameContainer {
     justify-content: center;
 }
 
-body.game-fullscreen-active.game-fullscreen-landscape #gameCanvas {
-    width: 100%; /* Occupa la larghezza del gameContainer (che è 100vw) */
-    height: 100%; /* Occupa l'altezza del gameContainer (che è 100vh) */
-    object-fit: cover;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    max-height: none !important;
-}
-
 body.game-fullscreen-active #mobileControls {
     /* Rimosso .game-fullscreen-landscape per applicarlo sempre in fullscreen */
     position: fixed; /* Fisso rispetto al viewport */
@@ -3475,3 +3483,878 @@ body.game-fullscreen-active main {
     justify-content: center;
     overflow: hidden; /* Nasconde eventuali scrollbar del body */
 }
+
+/* === Navbar Styles === */
+header .desktop-nav {
+    display: flex;
+    align-items: center; /* Aggiunto per allineare verticalmente i link se hanno altezze diverse */
+}
+
+/* Stili base per Material Symbols nella navbar */
+.auth-button .material-symbols-rounded {
+    /*
+        La dimensione dell'icona è critica.
+        Material Symbols di default può prendere la dimensione del font del suo genitore.
+        Se .auth-button ha font-size: 0.9em, e l'icona ha font-size: 1.5em,
+        l'icona sarà 1.5 * (0.9em del font-size del *contenitore* di .auth-button).
+        Assicuriamoci che l'icona sia abbastanza grande da essere visibile e centrabile.
+    */
+    font-size: 1rem; /* Prova una dimensione FISSA IN PIXEL per l'icona */
+    /* Se .auth-button.nav-link-icon-only è 38x38px, un'icona da 22-24px dovrebbe centrarsi bene */
+    line-height: 1; /* Molto importante per il centraggio verticale dei font icona */
+    margin: 0; /* Nessun margine sull'icona stessa */
+    padding: 0; /* Nessun padding sull'icona stessa */
+    /* vertical-align: middle; -- non necessario se il genitore è flex e usa align-items */
+    /* display: block; -- non necessario se il genitore è flex e usa align-items/justify-content */
+}
+
+.auth-button.nav-link-icon-only {
+    padding: 0; /* Sovrascrivi il padding per un controllo preciso */
+    width: 2rem; /* Adatta questa dimensione! Deve essere sufficiente per l'icona + un po' di respiro */
+    height: 2rem; /* Uguale a width per un cerchio/quadrato */
+    border-radius: 50%; /* Per renderlo circolare */
+    /* justify-content: center; e align-items: center; sono ereditati da .auth-button */
+}
+
+header .nav-link-icon-text .material-symbols-rounded {
+    margin-right: 6px; /* Spazio tra icona e testo */
+}
+
+/* Nasconde il testo per i link solo-icona, ma lo span .visually-hidden rimane per screen reader */
+header .nav-link-icon-only .nav-text,
+header .nav-link-icon-only .nav-text-desktop {
+    display: none;
+}
+header .nav-link-icon-only .material-symbols-rounded {
+    margin-right: 0; /* Nessun margine se solo icona */
+}
+
+/* Stile per nascondere testo di "Home" su desktop se vuoi solo icona */
+@media (min-width: 992px) {
+    header .desktop-nav a[href='index.html'].nav-link-icon-only .nav-text-desktop {
+        /* Se avevi uno span specifico per il testo desktop di home, nascondilo */
+        /* display: none; */
+    }
+    /* Se il link Home è nav-link-icon-only, il testo è già nascosto dalla regola generale sopra.
+        Non serve altro per nascondere il testo, ma potresti voler forzare la non visualizzazione
+        di .nav-text se per errore fosse presente e visibile */
+    header .desktop-nav a[href='index.html'].nav-link-icon-only .nav-text {
+        display: none;
+    }
+}
+
+/* Dropdown Desktop "Community" */
+.nav-dropdown-container {
+    position: relative;
+}
+
+.dropdown-toggle .dropdown-arrow {
+    font-size: 1.5em; /* Adatta se l'icona arrow_drop_down sembra troppo piccola/grande */
+    vertical-align: middle;
+    transition: transform 0.2s ease-in-out;
+}
+
+.dropdown-toggle[aria-expanded='true'] .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* Potrebbe essere necessario assicurarsi che l'icona stessa non abbia margini che la spingono */
+.auth-button .material-symbols-rounded {
+    font-size: 1.5em; /* Icona sarà 1.5 * (font-size di .auth-button = 0.9em) */
+    /* Se font-size base è 16px -> 0.9*16 = 14.4px. Icona = 1.5 * 14.4px = 21.6px */
+    line-height: 1; /* Evita spazio extra verticale */
+    margin: 0; /* Assicura che non ci siano margini sull'icona stessa */
+    /* vertical-align: middle; non più strettamente necessario con flex, ma può rimanere per sicurezza */
+}
+
+.auth-button.nav-link-icon-only .visually-hidden {
+    display: none !important; /* Forza la non visualizzazione se .visually-hidden standard non basta */
+}
+
+.article-like-btn {
+    padding-top: 0.5em; /* Per centrare verticalmente l'icona */
+    padding-bottom: 0.1em; /* Per centrare verticalmente l'icona */
+    padding-left: 0.5em; /* Per centrare verticalmente l'icona */
+    padding-right: 0.5em; /* Per centrare verticalmente l'icona */
+}
+
+.dropdown-menu {
+    display: none; /* Gestito da JS */
+    position: absolute;
+    top: calc(100% + 5px); /* Posizionamento sotto il bottone toggle */
+    left: 0;
+    z-index: 1000;
+
+    /* Rendi il contenitore UL completamente trasparente e senza stili propri evidenti */
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0; /* Il padding sarà sugli item individuali */
+    margin: 0;
+    list-style: none;
+    min-width: auto; /* Lascia che la larghezza sia determinata dagli item */
+}
+
+.dropdown-menu li {
+    margin: 0; /* Rimuovi margini di default */
+    padding: 0; /* Rimuovi padding di default */
+    /* Puoi aggiungere un piccolo margine inferiore qui se vuoi più spazio verticale TRA le "pillole" */
+    margin-bottom: 3px; /* Esempio: piccolo spazio tra un link e l'altro */
+}
+
+.dropdown-menu li:last-child {
+    margin-bottom: 0; /* Rimuovi margine dall'ultimo item */
+}
+
+.dropdown-menu li a.dropdown-item {
+    display: flex; /* Per allineare icona e testo */
+    align-items: center;
+    padding: 10px 15px; /* Padding interno al link */
+    text-decoration: none;
+    color: var(--text-color-primary);
+    white-space: nowrap; /* Evita che il testo del link vada a capo */
+
+    /* Applica qui lo stile "pillola" */
+    background-color: var(--surface-bg-primary); /* Sfondo per ogni item */
+    border: 1px solid var(--border-color-secondary); /* Bordo per ogni item */
+    border-radius: 4px; /* Angoli arrotondati per ogni item */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.07); /* Ombra leggera per ogni item */
+
+    transition:
+        background-color 0.2s,
+        color 0.2s,
+        border-color 0.2s;
+}
+
+.dropdown-menu li a.dropdown-item:hover {
+    background-color: var(--surface-bg-secondary);
+    color: var(--link-hover-color);
+    border-color: var(--link-color); /* Opzionale: cambia colore bordo su hover */
+}
+
+.dropdown-menu li a.dropdown-item .material-symbols-rounded {
+    /* CAMBIATO QUI */
+    margin-right: 10px;
+}
+
+/* Pulsante Hamburger e Menu Mobile */
+.navbar-toggler {
+    display: none; /* Nascosto su desktop */
+    background: none;
+    border: none;
+    color: var(--text-color-primary);
+    font-size: 2em;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1; /* Per centrare meglio l'icona hamburger */
+}
+.navbar-toggler:hover,
+.navbar-toggler:focus {
+    background-color: var(--surface-bg-secondary);
+}
+.navbar-toggler .material-symbols-rounded {
+    /* CAMBIATO QUI */
+    font-size: 1em; /* L'icona erediterà la dimensione dal font-size del bottone */
+    vertical-align: middle;
+}
+
+.mobile-nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.mobile-nav-menu ul li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--text-color-primary);
+    border-bottom: 1px solid var(--border-color-secondary);
+}
+.mobile-nav-menu ul li a:hover {
+    background-color: var(--surface-bg-secondary);
+    color: var(--link-hover-color);
+}
+.mobile-nav-menu ul li a .material-symbols-rounded {
+    /* CAMBIATO QUI */
+    margin-right: 12px;
+    font-size: 1.4em;
+    vertical-align: middle;
+}
+.mobile-nav-menu ul li:last-child a {
+    border-bottom: none;
+}
+
+/* Stile per nascondere elementi solo visivamente per screen reader */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- Mobile Navigation Menu --- */
+
+/* Stile base per il contenitore del menu mobile (#mobileNavMenu) */
+.mobile-nav-menu {
+    /* Questo è l'ID #mobileNavMenu nel tuo HTML */
+    display: none; /* Nascosto di default */
+    position: absolute;
+    top: 100%; /* Si posiziona sotto l'header (grazie a position:relative sull'header) */
+    left: 0;
+    right: 0;
+    background-color: var(--surface-bg-primary, #fff); /* Usa var, fallback a bianco */
+    z-index: 1000; /* Sopra gli altri contenuti */
+    border-top: 1px solid var(--border-color-primary, #ddd);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: calc(100vh - 70px); /* Altezza massima (viewport meno un po' per l'header) */
+    overflow-y: auto; /* Scroll se il contenuto è troppo lungo */
+}
+
+/* Quando il menu mobile è attivo (classe .active aggiunta da JS) */
+.mobile-nav-menu.active {
+    display: block; /* Rende visibile il menu */
+}
+
+/* Stile per la lista UL generata da JS dentro #mobileNavMenu */
+.mobile-nav-menu .mobile-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Stile per ogni elemento LI e LINK A dentro la lista mobile */
+.mobile-nav-menu .mobile-menu-list li a,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle {
+    /* Stile anche per i toggle dei sottomenu */
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: var(--text-color-primary, #333); /* Colore testo primario */
+    border-bottom: 1px solid var(--border-color-secondary, #eee); /* Separatore */
+    gap: 12px; /* Spazio tra icona e testo */
+    transition:
+        background-color 0.2s ease-in-out,
+        color 0.2s ease-in-out;
+}
+
+.mobile-nav-menu .mobile-menu-list li a .material-symbols-rounded,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle .material-symbols-rounded {
+    font-size: 1.4em; /* Dimensione icone */
+}
+
+.mobile-nav-menu .mobile-menu-list li a:hover,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle:hover {
+    background-color: var(--surface-bg-secondary, #f5f5f5);
+    color: var(--link-hover-color, #0056b3);
+}
+
+.mobile-nav-menu .mobile-menu-list li:last-child > a,
+.mobile-nav-menu .mobile-menu-list li:last-child > .dropdown-toggle {
+    border-bottom: none; /* Rimuovi bordo per l'ultimo elemento di primo livello */
+}
+
+/* Stile per il sottomenu del dropdown "Community" mobile */
+.mobile-nav-menu .mobile-menu-list .mobile-submenu {
+    list-style: none;
+    padding-left: 20px; /* Indentazione */
+    margin: 0;
+    background-color: var(--bg-color, #f9f9f9); /* Sfondo leggermente diverso */
+    /* display: none; è gestito da JavaScript per il toggle */
+}
+
+.mobile-nav-menu .mobile-menu-list .mobile-submenu li a {
+    padding: 12px 20px 12px 15px; /* Padding aggiustato per sottomenu */
+    border-bottom: 1px solid var(--border-color-secondary, #f0f0f0); /* Separatore più leggero */
+    font-size: 0.95em; /* Testo leggermente più piccolo per sottomenu */
+}
+
+.mobile-nav-menu .mobile-menu-list .mobile-submenu li a:last-child {
+    border-bottom: none; /* Rimuovi il bordo dall'ultimo item del sottomenu */
+}
+
+/* Assicurati che il testo del link sia visibile e non solo l'icona se c'è .nav-text */
+.mobile-nav-menu .nav-text {
+    display: inline; /* O flex-grow: 1; se vuoi che occupi lo spazio rimanente */
+}
+.mobile-nav-menu .visually-hidden {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0 0 0 8px; /* Aggiungi margine a sinistra se vuoi spazio dopo l'icona */
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    display: inline;
+}
+
+/* Il tuo CSS esistente per i breakpoint */
+@media (max-width: 991px) {
+    header .desktop-nav {
+        display: none;
+    }
+    header .navbar-toggler {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #userProfileContainer #userDisplayName {
+        display: none;
+        white-space: nowrap;
+    }
+    /* Qui potresti voler aggiungere stili specifici per #mobileNavMenu se necessario,
+       ma le regole generali sopra dovrebbero già funzionare. */
+}
+
+/* Il tuo CSS per breakpoint più piccoli, potrebbe sovrascrivere o aggiungere dettagli */
+@media (max-width: 576px) {
+    .header-content h1 {
+        font-size: 1.5em;
+    }
+    .header-controls {
+        gap: 5px;
+    }
+    .header-controls .auth-button {
+        padding: 6px 8px;
+    }
+    .header-controls .material-symbols-rounded {
+        font-size: 1.3em;
+    }
+
+    /* Questa regola potrebbe essere già coperta o necessitare di aggiustamenti
+       rispetto a .mobile-nav-menu .mobile-menu-list li a sopra */
+    .mobile-nav-menu ul li a {
+        /* Potresti voler rendere questo più specifico: .mobile-nav-menu .mobile-menu-list li a */
+        padding: 10px 15px;
+    }
+
+    #userProfileContainer #headerUserAvatar {
+        width: 28px;
+        height: 28px;
+        margin-right: 5px;
+    }
+    #userProfileContainer .auth-button .material-symbols-rounded {
+        font-size: 1.3em;
+    }
+}
+
+.dev-text-content p {
+    margin-bottom: 1em; /* Aggiunge spazio sotto ogni paragrafo */
+}
+
+.dev-text-content ul {
+    list-style-position: inside; /* Porta i pallini dentro il blocco della lista */
+    padding-left: 0; /* Rimuovi il padding di default se 'inside' non basta */
+    margin-left: 1.5em; /* Aggiungi un margine per indentare un po' la lista */
+    margin-bottom: 1em; /* Spazio sotto la lista */
+}
+
+.dev-text-content ul li {
+    margin-bottom: 0.5em; /* Spazio tra gli elementi della lista */
+}
+
+.like-btn .material-symbols-rounded,
+#likeArticleButton .material-symbols-rounded {
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 20; /* Default: icona vuota */
+    font-size: 1.2em; /* Puoi aggiustare la dimensione */
+    vertical-align: middle; /* Buon allineamento di base */
+    /* margin-right: 4px; /* Spazio se c'è testo dopo l'icona, potrebbe non servire se usi gap */
+    transition: font-variation-settings 0.15s ease-in-out; /* Transizione per l'effetto di riempimento */
+}
+
+/* Quando un pulsante con classe .like-btn o l'ID #likeArticleButton 
+   HA ANCHE la classe .liked, l'icona Material Symbol al suo interno diventa piena. */
+.like-btn.liked .material-symbols-rounded,
+#likeArticleButton.liked .material-symbols-rounded {
+    font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 20; /* Forza il riempimento dell'icona */
+    /* Potresti voler cambiare il colore dell'icona quando è "liked" */
+    /* color: var(--link-color); */
+}
+
+/* Stili specifici per i bottoni like nelle card della homepage (classe .article-like-btn) */
+.article-like-btn .material-symbols-rounded {
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 18; /* Default: vuoto, leggermente più piccolo */
+    font-size: 1em; /* Adatta alla dimensione del testo del bottone */
+    vertical-align: middle;
+    /* Non serve margin-right se il testo "Like" è gestito separatamente o con gap */
+    transition: font-variation-settings 0.15s ease-in-out;
+}
+
+.article-like-btn.liked .material-symbols-rounded {
+    font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 18; /* Forza il riempimento */
+}
+
+/* BADGES */
+/* Assicurati che i bottoni di like siano flex per un buon allineamento icona-testo,
+   se non lo sono già attraverso altre regole. */
+#likeArticleButton,
+.like-btn, /* Per i commenti */
+.article-like-btn /* Per la homepage */ {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em; /* Spazio tra icona e testo/conteggio */
+}
+
+#badgesSection h3 {
+    /* Stile per il titolo della sezione badge */
+    /* margin-bottom: 15px; è già nel tuo HTML inline */
+}
+
+#badgesDisplayContainer {
+    /* display: flex; flex-wrap: wrap; gap: 15px; è già nel tuo HTML inline */
+    /* Potresti aggiungere padding o altro se necessario */
+}
+
+.badge-item {
+    /* Stili base per ogni badge, alcuni sono già inline nel JS per flessibilità,
+       ma potresti volerli centralizzare qui */
+    transition: transform 0.2s ease-out;
+    cursor: help; /* Indica che c'è un tooltip */
+    /* text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Leggera ombra per il testo */
+}
+
+.badge-item:hover {
+    transform: translateY(-2px);
+    /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */
+}
+
+.badge-item .material-symbols-rounded {
+    font-size: 1.4em; /* Dimensione dell'icona del badge */
+    margin-right: 8px; /* Spazio tra icona e nome badge, già gestito da 'gap' nel JS */
+    vertical-align: middle; /* Buon allineamento se non usi flex */
+}
+
+/* La classe .testo-neon-arcade è già definita e dovrebbe applicare l'effetto neon */
+/* Se vuoi un effetto specifico solo per le icone badge neon: */
+/*
+.badge-item .material-symbols-rounded.neon-badge-icon {
+    animation: cambio-colore-neon 2s infinite steps(1, end);
+    text-shadow: 0 0 3px rgba(255,255,255,0.5), 0 0 6px currentColor; // Esempio ombra neon
+}
+*/
+
+#noBadgesMessage {
+    /* font-style: italic; */
+    /* color: var(--text-color-muted); è già inline nel JS */
+}
+
+/* Stili per la sezione Riconoscimenti/Badge */
+#badgesSection {
+    /* ... eventuali stili per la section ... */
+}
+
+#badgesDisplayContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px; /* Spazio tra le icone dei badge */
+    justify-content: flex-start; /* O 'center' se preferisci */
+    margin-top: 10px;
+}
+
+.badge-icon-item {
+    /* Contenitore per la singola icona badge cliccabile */
+    display: inline-flex; /* Per allineare l'icona se avesse testo (ma non ne avrà) */
+    align-items: center;
+    justify-content: center;
+    padding: 8px; /* Padding attorno all'icona */
+    border-radius: 50%; /* Rende il contenitore circolare */
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-secondary);
+    cursor: pointer;
+    transition:
+        transform 0.2s ease-out,
+        box-shadow 0.2s ease-out;
+    min-width: 48px; /* Dimensione minima per il cerchio */
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.badge-icon-item:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-icon-item .material-symbols-rounded {
+    font-size: 2em; /* Dimensione dell'icona del badge */
+    line-height: 1; /* Per un buon allineamento verticale */
+    /* Il colore sarà impostato da BADGE_DEFINITIONS via JS o da classi specifiche */
+}
+
+/* Animazione per badge "Autore Debuttante" (es. un soft pulse o cambio colore) */
+.badge-icon-item .material-symbols-rounded.author-rookie-icon-animated {
+    /* Esempio: animazione di cambio colore "soft" */
+    animation: soft-color-pulse 3s infinite ease-in-out;
+    /* Oppure potresti usare un'altra animazione neon ma con colori diversi */
+}
+
+@keyframes soft-color-pulse {
+    0%,
+    100% {
+        color: var(--bs-success); /* Colore base del badge */
+    }
+    50% {
+        color: #a3e4a3; /* Una tonalità leggermente diversa e più chiara del verde */
+    }
+}
+
+/* La classe .testo-neon-arcade è già definita e si applicherà
+   all'icona Glitchzilla Slayer se specificato in BADGE_DEFINITIONS */
+
+/* Stili per la Modale Dettagli Badge */
+.badge-detail-modal-content {
+    /* Puoi personalizzare ulteriormente lo stile della modale qui se necessario */
+    padding: 25px;
+}
+
+#badgeDetailModalIcon.testo-neon-arcade {
+    /* Per applicare il neon anche all'icona grande nella modale */
+    /* Gli stili neon sono già in .testo-neon-arcade */
+}
+
+/* Stile per il badge del contatore notifiche */
+.notification-badge {
+    position: absolute;
+    top: -8px; /* Aggiusta per posizionare sopra l'icona */
+    right: -8px; /* Aggiusta per posizionare a destra dell'icona */
+    background-color: var(--accent-color, red); /* Usa il tuo colore di accento o un rosso standard */
+    color: white;
+    border-radius: 50%;
+    padding: 1px 5px; /* Leggermente più piccolo */
+    font-size: 0.65rem; /* Leggermente più piccolo */
+    font-weight: bold;
+    border: 1px solid var(--background-color, white); /* Bordo per staccare dallo sfondo */
+    display: none; /* Verrà mostrato da JS se il contatore > 0 */
+    line-height: 1; /* Assicura che il testo sia centrato verticalmente */
+    min-width: 16px; /* Larghezza minima per contenere anche un solo numero */
+    text-align: center;
+}
+
+#notificationBellContainer:hover #notificationIcon {
+    color: var(--primary-color, lightblue); /* Esempio di hover */
+}
+
+/* ======================================== */
+/* Notification Panel Styles              */
+/* ======================================== */
+
+/* Container for the bell icon and the panel */
+/* Ensures proper positioning of the dropdown panel */
+#notificationBellContainer {
+    position: relative; /* Establishes a positioning context for the panel */
+    display: inline-block; /* Or 'flex' if it's part of a flex layout */
+    cursor: pointer;
+}
+
+/* The main notification panel (dropdown) */
+.notification-panel {
+    display: none; /* Initially hidden, controlled by JS */
+    position: absolute;
+    top: calc(100% + 8px); /* Position below the bell icon with a small gap */
+    right: 0;
+    width: 360px; /* Or your preferred width */
+    max-width: calc(100vw - 32px); /* Prevent overflow on small screens */
+    background-color: var(
+        --dialog-background-color,
+        var(--surface-color, #fff)
+    ); /* Fallback if --dialog-background-color is not set */
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: var(--border-radius-md, 8px);
+    box-shadow: var(--box-shadow-medium, 0 4px 12px rgba(0, 0, 0, 0.15));
+    z-index: 1050; /* Ensure it's above other content */
+    color: var(--text-color, #333);
+    font-size: 0.95em; /* Slightly smaller font for dropdown items if desired */
+}
+
+.notification-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color-soft, var(--border-color, #eee));
+}
+
+.notification-panel-header h2 {
+    margin: 0;
+    font-size: 1.1em; /* Relative to panel's font-size */
+    font-weight: 600;
+    color: var(--text-color, #333);
+}
+
+/* Styling for the "Mark all as read" button */
+/* Leverages existing .button-link-sm if appropriate, or define specifically */
+#mark-all-as-read-btn {
+    /* Assuming .button-link-sm provides base styling for color, background, border */
+    padding: 4px 8px; /* Adjust padding if needed */
+    font-size: 0.9em; /* Relative to panel's font-size */
+    /* color: var(--button-link-sm-color, var(--primary-color)); */ /* Already handled by .button-link-sm */
+}
+
+/* #mark-all-as-read-btn:hover { */
+/* color: var(--button-link-sm-hover-color, var(--accent-color)); */ /* Already handled by .button-link-sm */
+/* } */
+
+.notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 400px; /* Limit height and enable scrolling */
+    overflow-y: auto;
+}
+
+/* Custom scrollbar for notification list (Webkit browsers) */
+.notification-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background-color: var(--surface-color, #f5f5f5);
+    border-radius: 10px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background-color: var(--border-color, #ccc);
+    border-radius: 10px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-color-secondary, #aaa);
+}
+
+/* Individual notification item */
+.notification-item {
+    display: flex;
+    align-items: flex-start; /* Align icon with the start of the text block */
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color-soft, var(--border-color, #eee));
+    position: relative; /* For absolute positioning of the link overlay */
+    cursor: default; /* Default cursor, link will provide pointer if used */
+    transition: background-color 0.2s ease-in-out;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item.unread {
+    background-color: var(
+        --primary-color-ultralight,
+        rgba(0, 123, 255, 0.05)
+    ); /* Example: very light blue for unread */
+    /* Or use a border indicator: */
+    /* border-left: 3px solid var(--primary-color); */
+}
+
+.notification-item:hover {
+    background-color: var(
+        --surface-hover-color,
+        var(--background-color, #f9f9f9)
+    ); /* Use a variable for hover on interactive surfaces */
+}
+
+.notification-item-icon {
+    margin-right: 12px;
+    margin-top: 2px; /* Fine-tune vertical alignment with text */
+    color: var(--primary-color, #007bff); /* Default icon color */
+    flex-shrink: 0;
+}
+.notification-item-icon .material-symbols-rounded {
+    font-size: 20px; /* Adjust as needed */
+    vertical-align: middle;
+}
+
+.notification-item-icon.icon-type-badge {
+    color: var(--accent-color, #ffc107);
+} /* Example for badge notifications */
+.notification-item-icon.icon-type-article-approved {
+    color: var(--success-color, #28a745);
+} /* Example */
+.notification-item-icon.icon-type-article-rejected {
+    color: var(--danger-color, #dc3545);
+} /* Example */
+
+.notification-item-content {
+    flex-grow: 1;
+    min-width: 0; /* Prevents text overflow issues in flex containers */
+}
+
+.notification-item-text {
+    margin: 0 0 4px 0;
+    font-size: 1em; /* Relative to .notification-item */
+    line-height: 1.4;
+    color: var(--text-color, #333);
+    /* Allow text to break to prevent overflow */
+    word-break: break-word;
+    white-space: normal; /* Ensure text wraps */
+}
+
+.notification-item-timestamp {
+    font-size: 0.85em; /* Relative to .notification-item */
+    color: var(--text-color-secondary, #777);
+}
+
+/* Optional: Full item link (overlay) */
+.notification-item a.notification-item-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Above other content within the item, but below panel header/footer */
+    text-indent: -9999px; /* Hide text if any, make it an invisible overlay */
+    /* For debugging, add a background: outline: 1px solid red; */
+}
+.notification-item:hover a.notification-item-link {
+    cursor: pointer;
+}
+
+/* Placeholder for when there are no notifications */
+.notification-item-empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--text-color-secondary, #777);
+    border-bottom: none; /* No border if it's the only item */
+}
+
+.notification-item-empty p {
+    margin: 0;
+    font-style: italic;
+}
+
+.notification-panel-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border-color-soft, var(--border-color, #eee));
+    text-align: center;
+}
+
+#view-all-notifications-link {
+    color: var(--primary-color, #007bff);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9em; /* Relative to panel's font-size */
+    padding: 6px 12px;
+    display: inline-block;
+    border-radius: var(--border-radius-sm, 4px);
+    transition:
+        background-color 0.2s ease-in-out,
+        color 0.2s ease-in-out;
+}
+
+#view-all-notifications-link:hover {
+    background-color: var(--primary-color-light, rgba(0, 123, 255, 0.1));
+    text-decoration: none;
+}
+
+/* Ensure the panel visibility is controlled by JS (e.g., adding a class) */
+/* Alternatively, JS can directly set style.display */
+/* .notification-panel.visible { */
+/* display: block; */
+/* } */
+
+.page-container {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .notifications-page-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .notifications-page-list .notification-item { /* Reuse styles from panel if possible */
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+            cursor: default; /* Default cursor, link part will be pointer */
+        }
+        .notifications-page-list .notification-item:hover {
+            background-color: var(--hover-background-color);
+        }
+        .notifications-page-list .notification-item.unread {
+            background-color: var(--notification-unread-bg, var(--accent-color-light-transparent)); /* Or a distinct background */
+            font-weight: bold; /* Example */
+        }
+        .notifications-page-list .notification-item.read {
+            /* Styles for read items, e.g., less prominent */
+            opacity: 0.85;
+        }
+        .notifications-page-list .notification-item-icon {
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .notifications-page-list .notification-item-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .notifications-page-list .notification-item-text {
+            margin: 0 0 4px 0;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        .notifications-page-list .notification-item.unread .notification-item-text {
+             font-weight: 600; /* More emphasis for unread messages */
+        }
+         .notifications-page-list .notification-item.read .notification-item-text {
+             font-weight: normal;
+        }
+        .notifications-page-list .notification-item-timestamp {
+            font-size: 0.8em;
+            color: var(--text-color-secondary);
+        }
+        .notifications-page-list .notification-item-link { /* Overlay link for clickable item */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Ensure it's clickable over content if styled as overlay */
+            cursor: pointer;
+        }
+         .notifications-page-list .notification-item { /* Add relative positioning for the overlay link */
+            position: relative;
+        }
+        .notifications-page-list .placeholder-message {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-color-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section-divider {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            border: 0;
+            border-top: 1px solid var(--border-color-strong);
+        }
+        #auth-prompt {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: var(--background-alt-color);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        #auth-prompt p { margin-bottom: 15px; }
+        #auth-prompt .button-primary { text-decoration: none; }

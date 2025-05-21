@@ -2,9 +2,9 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
     getFirestore,
+    connectFirestoreEmulator, // IMPORT PER EMULATORE FIRESTORE
     doc,
     getDoc,
-    setDoc, // MANTENUTO - Usato nel blocco signupForm se rimane attivo
     serverTimestamp,
     collection,
     query,
@@ -12,27 +12,29 @@ import {
     orderBy,
     limit,
     getDocs,
-    updateDoc,
-    increment,
-    arrayUnion,
-    arrayRemove,
+    onSnapshot,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
-    getAuth, // MANTENUTO - Essenziale per inizializzare auth
+    getAuth,
+    connectAuthEmulator, // IMPORT PER EMULATORE AUTH
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+// IMPORT PER EMULATORE STORAGE
+import { getStorage, connectStorageEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
-import { showToast } from './toastNotifications.js'; // Assicurati che showToast sia importato
+import { showToast } from './toastNotifications.js';
 
 // --- Firebase Config ---
 const firebaseConfig = {
-    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', // Sostituisci se necessario
+    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', // Sostituisci con la tua vera chiave se necessario (anche se per gli emulatori non è usata per auth)
     authDomain: 'asyncdonkey.firebaseapp.com',
     projectId: 'asyncdonkey',
-    storageBucket: 'asyncdonkey.appspot.com',
+    storageBucket: 'asyncdonkey.firebasestorage.app', // Assicurati sia il bucket corretto
     messagingSenderId: '939854468396',
     appId: '1:939854468396:web:9646d4f51737add7704889',
     measurementId: 'G-EQDBKQM3YE',
@@ -40,10 +42,96 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app); // CORRETTO - getAuth è necessario
+const auth = getAuth(app);
+const storage = getStorage(app); // INIZIALIZZA STORAGE
 
-// --- Utility Functions ---
+let currentUserProfileUnsubscribe = null;
+let loggedInUser = null; // Mantieni aggiornato lo stato dell'utente loggato
+let notificationListener = null; // Per tenere traccia del listener delle notifiche
+
+// ----- INIZIO CODICE PER EMULATORI -----
+// Controlla se siamo in un contesto locale (es. localhost o 127.0.0.1)
+// Se l'hostname è vuoto (es. apertura diretta di file:///), gli emulatori non verranno usati.
+// if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+//     try {
+//         console.log("[main.js] Tentativo di connessione agli emulatori Firebase...");
+
+//         // Connetti a Firestore Emulator (porta 8080, come configurato)
+//         connectFirestoreEmulator(db, 'localhost', 8080);
+//         console.log("[main.js] Connesso a Firestore Emulator su localhost:8080");
+
+//         // Connetti a Auth Emulator (porta 9099, come configurato)
+//         connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true }); // disableWarnings è opzionale
+//         console.log("[main.js] Connesso a Auth Emulator su http://localhost:9099");
+
+//         // Connetti a Storage Emulator (porta 9199, default)
+//         connectStorageEmulator(storage, "localhost", 9199);
+//         console.log("[main.js] Connesso a Storage Emulator su localhost:9199");
+
+//         // Potresti aggiungere connectFunctionsEmulator qui se userai callable functions dal client
+//         // import { getFunctions, connectFunctionsEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+//         // const functions = getFunctions(app);
+//         // connectFunctionsEmulator(functions, "localhost", 5001); // Porta Functions Emulator
+//         // console.log("[main.js] Connesso a Functions Emulator su localhost:5001");
+
+//         showToast("Collegato agli emulatori Firebase locali (Auth, Firestore, Storage)!", "info", 7000);
+//     } catch (error) {
+//         console.error("[main.js] Errore durante la connessione agli emulatori:", error);
+//         showToast("Errore connessione emulatori Firebase. Vedi console.", "error", 7000);
+//     }
+// } else {
+//     console.log("[main.js] Connesso ai servizi Firebase di produzione.");
+// }
+// ----- FINE CODICE PER EMULATORI -----
+
+export function showConfirmationModal(title = 'Conferma Azione', message = 'Sei sicuro di voler procedere?') {
+    // ... (codice invariato, come da versione precedente)
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmationModal');
+        const modalTitleEl = document.getElementById('confirmationModalTitle');
+        const modalMessageEl = document.getElementById('confirmationModalMessage');
+        const yesBtn = document.getElementById('confirmModalYesBtn');
+        const noBtn = document.getElementById('confirmModalNoBtn');
+
+        if (!modal || !modalTitleEl || !modalMessageEl || !yesBtn || !noBtn) {
+            console.error(
+                'Elementi della modale di conferma (confirmationModal, confirmationModalTitle, etc.) non trovati nel DOM.'
+            );
+            const userConfirmation = window.confirm(`${title}\n${message}`);
+            resolve(userConfirmation);
+            return;
+        }
+
+        modalTitleEl.textContent = title;
+        modalMessageEl.textContent = message;
+
+        const closeAndResolve = (value) => {
+            modal.style.display = 'none';
+            const newYesBtn = yesBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+            const newNoBtn = noBtn.cloneNode(true);
+            noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+            modal.removeEventListener('click', handleModalOutsideClick);
+            resolve(value);
+        };
+
+        const handleModalOutsideClick = (event) => {
+            if (event.target === modal) {
+                closeAndResolve(false);
+            }
+        };
+
+        document.getElementById('confirmModalYesBtn').onclick = () => closeAndResolve(true);
+        document.getElementById('confirmModalNoBtn').onclick = () => closeAndResolve(false);
+        modal.addEventListener('click', handleModalOutsideClick);
+
+        modal.style.display = 'block';
+        if (yesBtn) yesBtn.focus();
+    });
+}
+
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
+    // ... (codice invariato)
     if (typeof createIcon !== 'function') {
         console.error('createIcon from Blockies non importata!');
         return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${imgSize}' height='${imgSize}' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E`;
@@ -69,93 +157,488 @@ export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
 }
 
 function escapeHTML(str) {
+    // ... (codice invariato)
     if (str === null || str === undefined) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
-async function loadUserProfile(user) {
+// Funzione loadHeaderUserProfileDisplay (modificata per caricare avatar personalizzato)
+async function loadHeaderUserProfileDisplay(user, profileData) {
+    // Modificata per accettare profileData
     const userDisplayNameElement = document.getElementById('userDisplayName');
     const headerUserAvatarElement = document.getElementById('headerUserAvatar');
 
-    if (!user || !userDisplayNameElement || !headerUserAvatarElement) {
-        if (userDisplayNameElement) userDisplayNameElement.textContent = '';
-        if (headerUserAvatarElement) headerUserAvatarElement.style.display = 'none';
+    if (!userDisplayNameElement || !headerUserAvatarElement) {
+        console.warn('[Main.js loadHeaderUserProfileDisplay] Elementi userDisplayName o headerUserAvatar non trovati.');
         return;
     }
 
-    let nicknameToShow = user.email ? user.email.split('@')[0] : 'User';
-    const seedForAvatar = user.uid;
-
-    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-    headerUserAvatarElement.style.setProperty('display', 'inline-block', 'important');
-    headerUserAvatarElement.src = generateBlockieAvatar(seedForAvatar, 32, { size: 8 });
-    headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
-    headerUserAvatarElement.style.backgroundColor = 'transparent';
-    headerUserAvatarElement.onerror = () => {
+    if (!user) {
+        // Se l'utente non è loggato, assicurati che questi siano nascosti (gestito anche da updateHeaderAuthContainersVisibility)
+        userDisplayNameElement.textContent = '';
         headerUserAvatarElement.style.display = 'none';
-    };
-
-    const userProfileRef = doc(db, 'userProfiles', user.uid);
-    try {
-        const docSnap = await getDoc(userProfileRef);
-        if (docSnap.exists()) {
-            nicknameToShow = docSnap.data().nickname || nicknameToShow;
-        }
-        userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-        headerUserAvatarElement.alt = `Avatar di ${escapeHTML(nicknameToShow)}`;
-    } catch (error) {
-        console.error('Errore caricamento profilo utente per navbar:', error);
+        return;
     }
+
+    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente'; // Fallback iniziale
+    let avatarSrcToSet = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 }); // Default Blockie per navbar
+    let altText = `${nicknameToShow}'s Blockie Avatar`;
+
+    if (profileData) {
+        // Se abbiamo i dati del profilo (da onSnapshot)
+        if (profileData.nickname) {
+            nicknameToShow = profileData.nickname;
+        }
+        altText = `${nicknameToShow}'s Avatar`; // Aggiorna alt text con nickname corretto
+
+        if (profileData.avatarUrls && (profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile)) {
+            let baseUrl = profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile; // Preferisci thumbnail
+
+            // Applica cache busting
+            if (profileData.profileUpdatedAt && profileData.profileUpdatedAt.seconds) {
+                avatarSrcToSet = `${baseUrl}?v=${profileData.profileUpdatedAt.seconds}`;
+            } else if (profileData.profileUpdatedAt instanceof Date) {
+                avatarSrcToSet = `${baseUrl}?v=${profileData.profileUpdatedAt.getTime()}`;
+            } else {
+                avatarSrcToSet = baseUrl; // Nessun timestamp per cache busting
+            }
+            altText = `${nicknameToShow}'s Custom Avatar`;
+        }
+        // Se profileData esiste ma non ci sono avatarUrls, avatarSrcToSet rimane il Blockie generato sopra.
+    }
+    // Se profileData è null (es. profilo non ancora creato o errore nel fetch),
+    // nicknameToShow e avatarSrcToSet useranno i fallback basati su `user` e Blockie.
+
+    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`; // escapeHTML è già nel tuo codice
+    headerUserAvatarElement.src = avatarSrcToSet;
+    headerUserAvatarElement.alt = altText; // Usa l'alt text determinato
+    headerUserAvatarElement.style.display = 'inline-block';
+    headerUserAvatarElement.style.backgroundColor = 'transparent';
+
+    headerUserAvatarElement.onerror = () => {
+        console.warn(
+            `[Main.js Navbar] Errore caricamento avatar: ${headerUserAvatarElement.src}. Fallback finale a Blockie.`
+        );
+        if (user && user.uid) {
+            // Assicurati che user.uid sia ancora accessibile
+            headerUserAvatarElement.src = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 });
+            headerUserAvatarElement.alt = `${nicknameToShow}'s Blockie Avatar (fallback errore)`;
+        } else {
+            headerUserAvatarElement.style.display = 'none'; // Nascondi se non si può generare Blockie
+        }
+    };
 }
 
-function updateAuthUI(user) {
+function updateHeaderAuthContainersVisibility(user) {
+    // ... (codice invariato)
     const authContainer = document.getElementById('authContainer');
     const userProfileContainer = document.getElementById('userProfileContainer');
-    const profileNavLink = document.getElementById('profileNav');
-    const writeArticleNavLink = document.getElementById('navWriteArticle');
+    if (authContainer) authContainer.style.display = user ? 'none' : 'flex';
+    if (userProfileContainer) userProfileContainer.style.display = user ? 'flex' : 'none';
+}
 
-    const elementsToToggleBasedOnLogin = [
-        { el: authContainer, showWhenLoggedOut: true, displayType: 'flex' },
-        { el: userProfileContainer, showWhenLoggedOut: false, displayType: 'flex' },
-        { el: profileNavLink, showWhenLoggedOut: false, displayType: 'list-item' },
-        { el: writeArticleNavLink, showWhenLoggedOut: false, displayType: 'list-item' },
-    ];
+// --- NUOVA LOGICA NAVBAR ---
+function toggleMobileMenu() {
+    const mobileMenuContainer = document.getElementById('mobileNavMenu');
+    const mobileMenuButton = document.getElementById('navbarToggler');
 
-    elementsToToggleBasedOnLogin.forEach((item) => {
-        if (item.el) {
-            const displayStyle = user
-                ? item.showWhenLoggedOut
-                    ? 'none'
-                    : item.displayType
-                : item.showWhenLoggedOut
-                  ? item.displayType
-                  : 'none';
-            item.el.style.display = displayStyle;
+    if (!mobileMenuContainer || !mobileMenuButton) {
+        console.error('[toggleMobileMenu] Elementi del menu mobile non trovati.');
+        return;
+    }
+    const burgerIcon = mobileMenuButton.querySelector('.material-symbols-rounded');
+    if (!burgerIcon) {
+        console.error('[toggleMobileMenu] Icona burger non trovata.');
+        return;
+    }
+
+    const isActive = mobileMenuContainer.classList.toggle('active');
+    mobileMenuButton.setAttribute('aria-expanded', isActive.toString());
+    burgerIcon.textContent = isActive ? 'close' : 'menu';
+
+    if (!isActive) {
+        // Menu CHIUSO
+        mobileMenuContainer.setAttribute('aria-hidden', 'true');
+        // Ritarda leggermente lo spostamento del focus per assicurarsi che il menu sia "andato"
+        // e che il focus non venga "rubato" da un elemento appena nascosto.
+        setTimeout(() => {
+            // Controlla se il focus è ancora su un elemento dentro il menu mobile (che ora è nascosto)
+            // o se è sul body (il che può accadere se l'elemento con focus è stato rimosso).
+            if (document.activeElement === document.body || mobileMenuContainer.contains(document.activeElement)) {
+                // Se sì, sposta il focus sul pulsante che ha aperto/chiuso il menu.
+                mobileMenuButton.focus();
+            }
+            // Altrimenti, il focus potrebbe essere già stato gestito correttamente (es. da un logout)
+            // o spostato altrove dall'utente/browser, quindi non lo forziamo.
+        }, 0);
+    } else {
+        // Menu APERTO
+        mobileMenuContainer.removeAttribute('aria-hidden');
+        // Opzionale: focus sul primo elemento del menu quando si apre
+        const firstFocusableElement = mobileMenuContainer.querySelector('a, button');
+        if (firstFocusableElement) {
+            // firstFocusableElement.focus(); // Commentato per ora, può essere fastidioso
+        }
+    }
+    // console.log(`[main.js toggleMobileMenu] Menu mobile ${isActive ? 'APERTO' : 'CHIUSO'}.`);
+}
+
+function populateMobileMenu() {
+    // ... (codice invariato)
+    const navbarLinksContainer = document.querySelector('.desktop-nav > ul');
+    const mobileMenuTarget = document.getElementById('mobileNavMenu');
+
+    if (!navbarLinksContainer) {
+        return;
+    }
+    if (!mobileMenuTarget) {
+        return;
+    }
+
+    mobileMenuTarget.innerHTML = '';
+    const mobileUl = document.createElement('ul');
+    mobileUl.className = 'mobile-menu-list';
+    mobileUl.style.listStyle = 'none';
+    mobileUl.style.padding = '0';
+    mobileUl.style.margin = '0';
+
+    const desktopListItems = navbarLinksContainer.querySelectorAll(':scope > li');
+
+    desktopListItems.forEach((desktopLi) => {
+        const isDropdownContainer = desktopLi.classList.contains('nav-dropdown-container');
+        let linkToProcess;
+
+        if (isDropdownContainer) {
+            linkToProcess = desktopLi.querySelector('button.dropdown-toggle#communityDropdownToggle');
+        } else {
+            linkToProcess = desktopLi.querySelector('a');
+        }
+
+        if (!linkToProcess) {
+            return;
+        }
+
+        const dynamicDesktopLiIds = ['profile-link-li', 'logout-link-li', 'login-link-li'];
+        if (dynamicDesktopLiIds.includes(desktopLi.id)) {
+            return;
+        }
+
+        if (isDropdownContainer && linkToProcess && linkToProcess.id === 'communityDropdownToggle') {
+            const mobileDropdownLi = document.createElement('li');
+            mobileDropdownLi.classList.add('nav-item', 'mobile-dropdown');
+
+            const mobileDropdownToggle = document.createElement('a');
+            mobileDropdownToggle.href = '#';
+            mobileDropdownToggle.innerHTML = linkToProcess.innerHTML;
+            mobileDropdownToggle.classList.add('dropdown-toggle');
+            mobileDropdownToggle.setAttribute('aria-expanded', 'false');
+
+            const mobileSubmenu = document.createElement('ul');
+            mobileSubmenu.classList.add('mobile-submenu');
+            mobileSubmenu.style.display = 'none';
+            mobileSubmenu.style.listStyle = 'none';
+            mobileSubmenu.style.paddingLeft = '20px';
+
+            const desktopSubmenuItems = desktopLi.querySelectorAll('.dropdown-menu li');
+
+            desktopSubmenuItems.forEach((subItemLi) => {
+                const subItemLink = subItemLi.querySelector('a');
+                if (subItemLink) {
+                    const mobileSubmenuItemLi = document.createElement('li');
+                    if (subItemLi.id === 'navWriteArticleDropdown') {
+                        mobileSubmenuItemLi.id = 'mobile-navWriteArticleDropdown';
+                        mobileSubmenuItemLi.style.display = 'none';
+                    }
+
+                    const mobileSubmenuLink = document.createElement('a');
+                    mobileSubmenuLink.href = subItemLink.href;
+                    mobileSubmenuLink.innerHTML = subItemLink.innerHTML;
+                    mobileSubmenuLink.classList.add('nav-item');
+                    if (subItemLink.target === '_blank') {
+                        mobileSubmenuLink.target = '_blank';
+                        mobileSubmenuLink.rel = 'noopener noreferrer';
+                    }
+                    mobileSubmenuItemLi.appendChild(mobileSubmenuLink);
+                    mobileSubmenu.appendChild(mobileSubmenuItemLi);
+                }
+            });
+
+            mobileDropdownToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isExpanded = mobileSubmenu.style.display === 'block';
+                mobileSubmenu.style.display = isExpanded ? 'none' : 'block';
+                mobileDropdownToggle.setAttribute('aria-expanded', String(!isExpanded));
+                const icon = mobileDropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow');
+                if (icon) icon.textContent = !isExpanded ? 'arrow_drop_up' : 'arrow_drop_down';
+            });
+
+            mobileDropdownLi.appendChild(mobileDropdownToggle);
+            mobileDropdownLi.appendChild(mobileSubmenu);
+            mobileUl.appendChild(mobileDropdownLi);
+        } else if (!isDropdownContainer && linkToProcess) {
+            const mobileListItem = document.createElement('li');
+            const mobileLink = document.createElement('a');
+            mobileLink.href = linkToProcess.href || '#';
+            mobileLink.innerHTML = linkToProcess.innerHTML;
+            mobileLink.classList.add('nav-item');
+            if (linkToProcess.target === '_blank') {
+                mobileLink.target = '_blank';
+                mobileLink.rel = 'noopener noreferrer';
+            }
+            mobileListItem.appendChild(mobileLink);
+            mobileUl.appendChild(mobileListItem);
         }
     });
 
-    const userDisplayName = document.getElementById('userDisplayName');
-    const headerUserAvatar = document.getElementById('headerUserAvatar');
-
-    if (!user) {
-        if (userDisplayName) userDisplayName.textContent = '';
-        if (headerUserAvatar) headerUserAvatar.style.display = 'none';
-    } else {
-        loadUserProfile(user);
-        const loginModal = document.getElementById('loginModal');
-        // const signupModal = document.getElementById('signupModal'); // RIMOSSO RIFERIMENTO ALLA MODALE SIGNUP
-
-        if (loginModal && loginModal.style.display === 'block') loginModal.style.display = 'none';
-        // La riga sotto che chiudeva signupModal non è più necessaria se la modale HTML è stata rimossa
-        // if (signupModal && signupModal.style.display === 'block') signupModal.style.display = 'none';
+    if (mobileUl.hasChildNodes()) {
+        mobileMenuTarget.appendChild(mobileUl);
     }
 }
 
-export { db, auth };
+function loadContentSpecificFeatures(user) {
+    // console.log('[Main.js] loadContentSpecificFeatures chiamata per utente:', user ? user.uid : null);
+    // TODO: Implementare logica per caricare funzionalità specifiche della pagina
+    // basate sull'utente o sul percorso della pagina corrente.
+}
+
+function setupDesktopCommunityDropdown() {
+    // ... (codice invariato)
+    const dropdownToggle = document.getElementById('communityDropdownToggle');
+    const dropdownMenu = document.getElementById('communityDropdownMenu');
+
+    if (dropdownToggle && dropdownMenu) {
+        dropdownToggle.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', String(!isExpanded));
+            dropdownMenu.style.display = isExpanded ? 'none' : 'block';
+            const icon = this.querySelector('.material-symbols-rounded.dropdown-arrow');
+            if (icon) icon.textContent = isExpanded ? 'arrow_drop_down' : 'arrow_drop_up';
+        });
+        document.addEventListener('click', function (event) {
+            if (
+                dropdownMenu.style.display === 'block' &&
+                !dropdownToggle.contains(event.target) &&
+                !dropdownMenu.contains(event.target)
+            ) {
+                dropdownMenu.style.display = 'none';
+                dropdownToggle.setAttribute('aria-expanded', 'false');
+                const icon = dropdownToggle.querySelector('.material-symbols-rounded.dropdown-arrow');
+                if (icon) icon.textContent = 'arrow_drop_down';
+            }
+        });
+    }
+}
+
+function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], onClickHandler = null) {
+    // ... (codice invariato)
+    const listItem = document.createElement('li');
+    listItem.id = liId;
+    const link = document.createElement('a');
+    link.id = aId;
+    link.href = href;
+    link.innerHTML = innerHTML;
+    aClasses.forEach((cls) => link.classList.add(cls));
+    if (onClickHandler) {
+        link.addEventListener('click', onClickHandler);
+    }
+    listItem.appendChild(link);
+    return listItem;
+}
+
+async function getUserProfile(userId) {
+    // ... (codice invariato)
+    if (!db) {
+        console.error('Firestore (db) non inizializzato (getUserProfile).');
+        return { nickname: 'Errore DB' };
+    }
+    try {
+        const userProfileDoc = await getDoc(doc(db, 'userProfiles', userId));
+        if (userProfileDoc.exists()) {
+            return userProfileDoc.data();
+        } else {
+            return { nickname: 'Utente' };
+        }
+    } catch (error) {
+        console.error(`Errore durante il recupero del profilo utente (${userId}):`, error);
+        return { nickname: 'Errore Profilo' };
+    }
+}
+
+async function updateLoginLogoutLinks(user) {
+    const mobileMenuNode = document.getElementById('mobileNavMenu');
+    const mobileMenuContainer = mobileMenuNode ? mobileMenuNode.querySelector('.mobile-menu-list') : null;
+
+    const navWriteArticleDropdownLiMobile = document.getElementById('mobile-navWriteArticleDropdown');
+    if (navWriteArticleDropdownLiMobile) {
+        navWriteArticleDropdownLiMobile.style.display = user ? 'list-item' : 'none';
+    }
+    const navWriteArticleDropdownLiDesktop = document.getElementById('navWriteArticleDropdown');
+    if (navWriteArticleDropdownLiDesktop) {
+        navWriteArticleDropdownLiDesktop.style.display = user ? 'list-item' : 'none';
+    }
+
+    if (!mobileMenuContainer) {
+        console.warn('[main.js updateLoginLogoutLinks] Contenitore menu mobile non trovato o non ancora popolato.');
+        return;
+    }
+
+    const dynamicMobileLiIds = ['mobile-profile-link-li', 'mobile-logout-link-li', 'mobile-login-link-li'];
+    dynamicMobileLiIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && el.parentNode === mobileMenuContainer) {
+            // console.log(`[main.js updateLoginLogoutLinks] Rimuovo LI mobile: ${id}`); // DEBUG
+            el.remove();
+        }
+    });
+
+    if (user) {
+        let userProfile = await getUserProfile(user.uid);
+        let userNickname = userProfile?.nickname || (user.email ? user.email.split('@')[0] : 'Utente');
+
+        const profileHTMLMobile = `<span class="material-symbols-rounded">account_circle</span> <span class="nav-text">My Profile (${escapeHTML(userNickname)})</span>`;
+        mobileMenuContainer.appendChild(
+            createNavLinkItem('mobile-profile-link-li', 'mobile-profile-link', 'profile.html', profileHTMLMobile, [
+                'nav-item',
+            ])
+        );
+        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "My Profile" mobile.'); // DEBUG
+
+        const logoutHandler = async (e) => {
+            e.preventDefault();
+            console.log('[main.js logoutHandler mobile] Logout cliccato!'); // DEBUG
+            const mobileMenuContainerForLogout = document.getElementById('mobileNavMenu'); // Riferimento fresco
+            const isActiveBeforeLogout =
+                mobileMenuContainerForLogout && mobileMenuContainerForLogout.classList.contains('active');
+
+            if (isActiveBeforeLogout) {
+                // console.log('[main.js logoutHandler mobile] Chiusura menu mobile prima del signOut.'); // DEBUG
+                toggleMobileMenu(); // Chiude il menu e dovrebbe spostare il focus sul toggler
+            } else {
+                // console.log('[main.js logoutHandler mobile] Menu mobile non attivo, procedo con signOut.'); // DEBUG
+            }
+
+            try {
+                console.log('[main.js logoutHandler mobile] Chiamata a signOut...'); // DEBUG
+                await signOut(auth);
+                showToast('Logout effettuato con successo!', 'success');
+                console.log('[main.js logoutHandler mobile] Logout riuscito.'); // DEBUG
+            } catch (error) {
+                console.error('Errore durante il logout (mobile):', error);
+                showToast('Errore durante il logout. Riprova.', 'error');
+            }
+        };
+        const logoutHTMLMobile = `<span class="material-symbols-rounded">logout</span> <span class="nav-text">Logout</span>`;
+        mobileMenuContainer.appendChild(
+            createNavLinkItem(
+                'mobile-logout-link-li',
+                'mobile-logout-link',
+                '#',
+                logoutHTMLMobile,
+                ['nav-item'],
+                logoutHandler
+            )
+        );
+        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "Logout" mobile.'); // DEBUG
+    } else {
+        const loginHTMLMobile = `<span class="material-symbols-rounded">login</span> <span class="nav-text">Login / Register</span>`;
+        const loginMobileHandler = (e) => {
+            e.preventDefault();
+            const loginModalEl = document.getElementById('loginModal');
+            if (loginModalEl) loginModalEl.style.display = 'block';
+            const mobileMenuContainerForLogin = document.getElementById('mobileNavMenu');
+            if (mobileMenuContainerForLogin && mobileMenuContainerForLogin.classList.contains('active')) {
+                toggleMobileMenu(); // Chiudi menu mobile
+            }
+        };
+        // mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', 'register.html', loginHTMLMobile, ['nav-item']));
+        mobileMenuContainer.appendChild(
+            createNavLinkItem(
+                'mobile-login-link-li',
+                'mobile-login-link',
+                '#',
+                loginHTMLMobile,
+                ['nav-item'],
+                loginMobileHandler
+            )
+        );
+
+        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "Login/Register" mobile.'); // DEBUG
+    }
+}
+
+async function updateAdminDashboardLink(user) {
+    // ... (codice invariato)
+    const adminDashboardLinkFooter = document.getElementById('admin-dashboard-footer-link');
+    if (!adminDashboardLinkFooter) return;
+    if (user) {
+        try {
+            const idTokenResult = await user.getIdTokenResult();
+            adminDashboardLinkFooter.style.display = idTokenResult.claims.admin ? '' : 'none';
+        } catch (error) {
+            console.error("Errore nel verificare i custom claims dell'admin:", error);
+            adminDashboardLinkFooter.style.display = 'none';
+        }
+    } else {
+        adminDashboardLinkFooter.style.display = 'none';
+    }
+}
+
+function initializeNewNavbar() {
+    // ... (codice invariato)
+    const mobileMenuButton = document.getElementById('navbarToggler');
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', toggleMobileMenu);
+    } else {
+        console.error('[initializeNewNavbar] Pulsante menu mobile (navbarToggler) NON TROVATO.');
+    }
+    populateMobileMenu();
+    setupDesktopCommunityDropdown();
+    console.log('[initializeNewNavbar] Nuova navbar inizializzata.');
+}
+
+function updateUIBasedOnAuthState(user, profileData) {
+    console.log('[Main.js updateUIBasedOnAuthState] Chiamata con utente:', user ? user.uid : null);
+    // console.log('[Main.js updateUIBasedOnAuthState] ProfileData ricevuto:', profileData);
+
+    // Aggiorna la visibilità dei container principali Login/Profilo nell'header
+    updateHeaderAuthContainersVisibility(user); // Funzione già presente nel tuo codice
+
+    // Aggiorna l'avatar e il nome utente nell'header usando profileData reattivo
+    loadHeaderUserProfileDisplay(user, profileData); // Funzione già presente e corretta nel tuo codice
+
+    // Aggiorna i link dinamici nel menu mobile (es. Profilo, Logout/Login)
+    updateLoginLogoutLinks(user); // Funzione già presente nel tuo codice
+
+    // Aggiorna la visibilità del link "Scrivi Articolo" nella navbar desktop e mobile
+    const navWriteArticleDropdownDesktop = document.getElementById('navWriteArticleDropdown');
+    if (navWriteArticleDropdownDesktop) {
+        navWriteArticleDropdownDesktop.style.display = user ? 'list-item' : 'none';
+    }
+    // (La logica per 'mobile-navWriteArticleDropdown' è già in updateLoginLogoutLinks)
+
+    // Aggiorna il link Admin Dashboard nel footer (se l'utente è admin)
+    // La funzione updateAdminDashboardLink gestisce il recupero dei custom claims
+    // e la visualizzazione del link nel footer, puoi chiamarla qui.
+    updateAdminDashboardLink(user); // Funzione già presente nel tuo codice
+
+    // Inizializza/aggiorna altre interazioni UI specifiche (es. homepage)
+    // Se initializeHomepageArticleInteractions deve essere chiamata qui:
+    if (document.getElementById('articlesSection')) {
+        // O un altro check per la homepage
+        initializeHomepageArticleInteractions(user); // Funzione già presente nel tuo codice
+    }
+
+    console.log('[Main.js updateUIBasedOnAuthState] Fine aggiornamenti UI orchestrati.');
+}
+
+export { db, auth, firebaseConfig };
 
 async function loadHomeMiniLeaderboard() {
+    // ... (codice invariato)
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
     if (!leaderboardListElement) return;
     if (!db) {
@@ -183,33 +666,37 @@ async function loadHomeMiniLeaderboard() {
             listItem.appendChild(rankSpan);
             const avatarImg = document.createElement('img');
             avatarImg.className = 'player-avatar';
-            const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${docSnapshot.id}`;
+            const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-home-${docSnapshot.id}`;
             avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
             avatarImg.alt = `Avatar`;
             avatarImg.style.backgroundColor = 'transparent';
             avatarImg.onerror = () => {
-                avatarImg.style.backgroundColor = '#ddd';
-                avatarImg.alt = 'Err';
-                avatarImg.src =
-                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+                /* gestione errore avatar */
             };
             listItem.appendChild(avatarImg);
             const playerInfoSpan = document.createElement('span');
             playerInfoSpan.className = 'player-info';
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'player-name';
+            const nameElementContainer = document.createElement('span');
+            nameElementContainer.className = 'player-name';
             if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
                 const flagIconSpan = document.createElement('span');
                 flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
                 flagIconSpan.style.marginRight = '5px';
-                flagIconSpan.style.fontSize = '1em';
                 flagIconSpan.style.verticalAlign = 'middle';
-                nameSpan.appendChild(flagIconSpan);
+                nameElementContainer.appendChild(flagIconSpan);
             }
             let displayName = entry.userName || entry.initials || 'Anonimo';
-            if (!entry.userId && entry.initials) displayName = entry.initials;
-            nameSpan.appendChild(document.createTextNode(displayName));
-            playerInfoSpan.appendChild(nameSpan);
+            if (entry.userId) {
+                const profileLink = document.createElement('a');
+                profileLink.href = `profile.html?userId=${entry.userId}`;
+                profileLink.textContent = escapeHTML(displayName);
+                nameElementContainer.appendChild(profileLink);
+            } else {
+                if (entry.initials) displayName = entry.initials + ' (Ospite)';
+                else displayName += ' (Ospite)';
+                nameElementContainer.appendChild(document.createTextNode(escapeHTML(displayName)));
+            }
+            playerInfoSpan.appendChild(nameElementContainer);
             listItem.appendChild(playerInfoSpan);
             const scoreSpan = document.createElement('span');
             scoreSpan.className = 'player-score';
@@ -228,73 +715,64 @@ async function loadHomeMiniLeaderboard() {
 }
 
 async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser) {
-    if (!buttonElement || !articleId) {
-        return;
-    }
+    // ... (codice invariato, già usa Material Symbols)
+    if (!buttonElement || !articleId) return;
     const likeCountSpan = buttonElement.nextElementSibling;
     if (!likeCountSpan || !likeCountSpan.classList.contains('homepage-like-count')) {
-        console.warn(`Span conteggio like non trovato o errato per articleId: ${articleId}.`);
+        // console.warn(`Span conteggio like non trovato o errato per articleId: ${articleId}.`);
     }
-
     try {
         const articleRef = doc(db, 'articles', articleId);
         const docSnap = await getDoc(articleRef);
-
         if (docSnap.exists()) {
             const articleData = docSnap.data();
             if (articleData.status !== 'published') {
                 if (likeCountSpan) likeCountSpan.textContent = articleData.likeCount || 0;
-                buttonElement.innerHTML = `🤍`;
+                buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
                 buttonElement.disabled = true;
                 buttonElement.title = 'Articolo non disponibile per like';
                 buttonElement.classList.remove('liked');
                 return;
             }
-
             const likes = articleData.likeCount || 0;
             const likedByUsers = articleData.likedByUsers || [];
-
-            if (likeCountSpan) {
-                likeCountSpan.textContent = likes;
-            }
-
+            if (likeCountSpan) likeCountSpan.textContent = likes;
             if (currentUser) {
                 buttonElement.disabled = false;
                 const userHasLiked = Array.isArray(likedByUsers) && likedByUsers.includes(currentUser.uid);
                 if (userHasLiked) {
-                    buttonElement.innerHTML = `💙`;
+                    buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite</span>`;
                     buttonElement.classList.add('liked');
                     buttonElement.title = "Hai messo 'Mi piace' (vedi articolo per cambiare)";
                 } else {
-                    buttonElement.innerHTML = `🤍`;
+                    buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
                     buttonElement.classList.remove('liked');
                     buttonElement.title = "Metti 'Mi piace' (vedi articolo)";
                 }
             } else {
-                buttonElement.innerHTML = `🤍`;
+                buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
                 buttonElement.disabled = true;
                 buttonElement.title = 'Fai login per mettere like';
                 buttonElement.classList.remove('liked');
             }
         } else {
-            console.warn(`Articolo "${articleId}" non trovato in Firestore.`);
             if (likeCountSpan) likeCountSpan.textContent = '0';
-            buttonElement.innerHTML = `🤍`;
+            buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
             buttonElement.disabled = true;
         }
     } catch (error) {
         console.error(`Errore Firestore aggiornamento UI like per articolo "${articleId}":`, error);
         if (likeCountSpan) likeCountSpan.textContent = 'Err';
-        buttonElement.innerHTML = `🤍`;
+        buttonElement.innerHTML = `<span class="material-symbols-rounded">favorite_border</span>`;
         buttonElement.disabled = true;
     }
 }
 
 async function handleHomepageArticleLike(event) {
+    // ... (codice invariato)
     const button = event.currentTarget;
     const articleId = button.dataset.articleId;
     const currentUser = auth.currentUser;
-
     if (!currentUser) {
         showToast("Devi essere loggato per interagire con i like. Puoi mettere like dalla pagina dell'articolo.");
         return;
@@ -307,6 +785,7 @@ async function handleHomepageArticleLike(event) {
 }
 
 async function updateHomepageCommentCountUI(countSpanElement, articleId) {
+    // ... (codice invariato)
     if (!countSpanElement || !articleId) return;
     try {
         const articleRef = doc(db, 'articles', articleId);
@@ -325,21 +804,15 @@ async function updateHomepageCommentCountUI(countSpanElement, articleId) {
 }
 
 export async function initializeHomepageArticleInteractions(currentUser) {
+    // ... (codice invariato)
     const articlesGrid = document.getElementById('articlesGrid');
-    if (!articlesGrid) {
-        return;
-    }
+    if (!articlesGrid) return;
     const articleCards = articlesGrid.querySelectorAll('.article-card');
-
-    if (articleCards.length === 0) {
-        return;
-    }
-
+    if (articleCards.length === 0) return;
     for (const card of articleCards) {
         const articleId = card.dataset.articleId;
         const likeButton = card.querySelector('.homepage-like-btn');
         const commentCountSpan = card.querySelector('.homepage-comment-count');
-
         if (articleId) {
             if (likeButton) {
                 await updateHomepageLikeButtonUI(likeButton, articleId, currentUser);
@@ -354,6 +827,7 @@ export async function initializeHomepageArticleInteractions(currentUser) {
 }
 
 function traduireErroreFirebase(codiceErrore) {
+    // ... (codice invariato)
     const errors = {
         'auth/invalid-email': "L'indirizzo email non è valido.",
         'auth/user-disabled': 'Questo account utente è stato disabilitato.',
@@ -363,22 +837,110 @@ function traduireErroreFirebase(codiceErrore) {
         'auth/operation-not-allowed': 'Operazione non permessa (controlla config Firebase Auth).',
         'auth/weak-password': 'La password è troppo debole (minimo 6 caratteri).',
     };
-    return errors[codiceErrore] || `Errore (${codiceErrore}). Riprova.`; // Modificato il fallback
+    return errors[codiceErrore] || `Errore (${codiceErrore}). Riprova.`;
+}
+
+/**
+ * Imposta il listener Firestore per le notifiche non lette dell'utente.
+ * @param {string} userId L'ID dell'utente.
+ */
+function setupNotificationBellListener(userId) {
+    if (typeof db === 'undefined' || !db) {
+        console.error("Firestore 'db' instance is not available in main.js for notifications.");
+        return;
+    }
+    if (notificationListener) {
+        // Rimuovi listener precedente se esiste
+        clearNotificationBellListener(); // clearNotificationBellListener si occuperà anche di nascondere il bell
+    }
+
+    const bellContainer = document.getElementById('notificationBellContainer');
+    const counterElement = document.getElementById('notificationCounter');
+    const bellLink = document.getElementById('notificationBellLink');
+
+    if (bellContainer) {
+        bellContainer.style.display = 'flex'; // o 'inline-flex' o come preferisci per visualizzarlo
+        // Assicurati che il click listener sia aggiunto una sola volta
+        if (bellLink && !bellLink.getAttribute('data-listener-attached')) {
+            bellLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                // TODO: (A.5.4) Mostra il pannello/dropdown delle notifiche qui
+                console.log('Notification bell clicked! Future: show notifications panel.');
+            });
+            bellLink.setAttribute('data-listener-attached', 'true');
+        }
+    } else {
+        console.warn('setupNotificationBellListener: notificationBellContainer non trovato nel DOM.');
+        return; // Non procedere se il contenitore non c'è
+    }
+
+    const notificationsRef = collection(db, 'userProfiles', userId, 'notifications'); // Uso corretto di collection()
+    const unreadNotificationsQuery = query(notificationsRef, where('read', '==', false));
+
+    notificationListener = onSnapshot(
+        unreadNotificationsQuery,
+        (snapshot) => {
+            const unreadCount = snapshot.size;
+
+            if (counterElement) {
+                if (unreadCount > 0) {
+                    counterElement.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    counterElement.style.display = 'inline-block';
+                } else {
+                    counterElement.style.display = 'none';
+                }
+            }
+            if (bellLink) {
+                bellLink.title = unreadCount > 0 ? `${unreadCount} notifiche non lette` : 'Nessuna nuova notifica';
+            }
+        },
+        (error) => {
+            console.error('Errore nel listener delle notifiche: ', error);
+            if (counterElement) counterElement.style.display = 'none'; // Nascondi in caso di errore
+        }
+    );
+    console.log('[Main.js setupNotificationBellListener] Notification listener attached for user:', userId);
+}
+
+/**
+ * Rimuove il listener Firestore per le notifiche e nasconde la campanella.
+ */
+function clearNotificationBellListener() {
+    if (notificationListener) {
+        notificationListener(); // Chiama la funzione di unsubscribe ritornata da onSnapshot
+        notificationListener = null;
+        console.log('[Main.js clearNotificationBellListener] Notification listener detached.');
+    }
+    const bellContainer = document.getElementById('notificationBellContainer');
+    if (bellContainer) {
+        bellContainer.style.display = 'none'; // Nascondi sempre la campanella al clear
+    }
+    const counterElement = document.getElementById('notificationCounter');
+    if (counterElement) {
+        counterElement.textContent = '0';
+        counterElement.style.display = 'none';
+    }
+    const bellLink = document.getElementById('notificationBellLink');
+    if (bellLink) {
+        // Rimuovi l'attributo per permettere al listener di essere riattaccato
+        bellLink.removeAttribute('data-listener-attached');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // ... (codice invariato, inclusa la chiamata a initializeNewNavbar)
+    initializeNewNavbar();
     const loginForm = document.getElementById('loginForm');
-
-    const logoutButton = document.getElementById('logoutButton');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
-    const bodyElement = document.body;
     const loginModal = document.getElementById('loginModal');
-    // const signupModal = document.getElementById('signupModal'); // RIMOSSO - La modale signup è stata eliminata
     const showLoginBtn = document.getElementById('showLoginBtn');
-    // const showSignupBtn = document.getElementById('showSignupBtn'); // RIMOSSO - Ora è un link diretto in HTML, non apre modale
     const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
-    // const closeSignupBtn = signupModal ? signupModal.querySelector('.closeSignupBtn') : null; // RIMOSSO
+    const openModal = (modal) => {
+        if (modal) modal.style.display = 'block';
+    };
+    const closeModal = (modal) => {
+        if (modal) modal.style.display = 'none';
+    };
 
     function setupSmoothScrolling() {
         document.querySelectorAll('header nav a[href^="#"]').forEach((link) => {
@@ -419,20 +981,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 currentlyActiveSkillBadge = this;
                 const skillName = this.dataset.skillName || 'Skill';
                 const skillDescription = this.dataset.description || 'Nessun dettaglio disponibile.';
-                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(
-                    skillDescription
-                )}</p>`;
+                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
             });
         });
     }
     function setupThemeSwitcher() {
-        if (!themeToggleBtn || !bodyElement) return;
-        const moonIcon = '🌙';
-        const sunIcon = '☀️';
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        if (!themeToggleBtn) return;
+        const bodyElement = document.body;
+        const moonIconName = 'dark_mode';
+        const sunIconName = 'light_mode';
+        const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded');
         function applyTheme(theme) {
             bodyElement.classList.toggle('dark-mode', theme === 'dark');
-            themeToggleBtn.textContent = theme === 'dark' ? sunIcon : moonIcon;
+            if (iconSpan) iconSpan.textContent = theme === 'dark' ? sunIconName : moonIconName;
             localStorage.setItem('theme', theme);
+            themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
+            themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
         }
         const savedTheme = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -443,30 +1008,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupModalControls() {
-        const openModal = (modal) => {
-            if (modal) modal.style.display = 'block';
-        };
-        const closeModal = (modal) => {
-            if (modal) modal.style.display = 'none';
-        };
-
         if (showLoginBtn && loginModal) {
-            showLoginBtn.addEventListener('click', () => openModal(loginModal));
+            showLoginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal(loginModal);
+            });
         }
-
-        // RIMOSSO: if (showSignupBtn && signupModal) showSignupBtn.addEventListener('click', () => openModal(signupModal));
-
         if (closeLoginBtn) {
             closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
         }
-        // RIMOSSO: if (closeSignupBtn) closeSignupBtn.addEventListener('click', () => closeModal(signupModal));
-
         window.addEventListener('click', (event) => {
             if (event.target === loginModal) closeModal(loginModal);
-            // RIMOSSO: if (event.target === signupModal) closeModal(signupModal);
         });
     }
-
     setupSmoothScrolling();
     setupScrollToTopButton();
     setupInteractiveSkills();
@@ -479,9 +1033,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('articlesSection')) {
         displayArticlesSection()
             .then(() => {
-                if (auth.currentUser) {
-                    initializeHomepageArticleInteractions(auth.currentUser);
-                }
+                /* Interazioni inizializzate da onAuthStateChanged */
             })
             .catch((error) => {
                 console.error('Errore durante displayArticlesSection in DOMContentLoaded:', error);
@@ -490,17 +1042,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('glitchzillaDefeatedBanner')) {
         displayGlitchzillaBanner();
     }
-
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = loginForm.loginEmail.value;
             const password = loginForm.loginPassword.value;
+            const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
+            if (loginModalErrorDiv) loginModalErrorDiv.style.display = 'none';
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 loginForm.reset();
+                closeModal(loginModal);
+                showToast('Login effettuato con successo!', 'success');
             } catch (error) {
-                const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
                 const friendlyError = traduireErroreFirebase(error.code);
                 if (loginModalErrorDiv) {
                     loginModalErrorDiv.textContent = friendlyError;
@@ -511,99 +1065,84 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-
-    // RIMOSSO: Blocco if (signupForm) { ... }
-    // L'event listener per il signupForm è ora gestito in js/register.js
-    // Se il signupForm è ancora referenziato qui, è un residuo e dovrebbe essere rimosso
-    // dato che la modale di signup non esiste più in questo contesto.
-    // Per sicurezza, lo commento invece di rimuoverlo completamente se hai ancora
-    // un elemento con id="signupForm" in qualche pagina per altri scopi (improbabile).
-    /*
-    if (signupForm) { // QUESTO BLOCCO VA RIMOSSO SE signupForm ERA SOLO PER LA MODALE
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = signupForm.signupEmail.value;
-            const password = signupForm.signupPassword.value;
-            const nickname = signupForm.signupNickname.value.trim();
-            const selectedNationalityCode = signupForm.signupNationality.value;
-            if (password.length < 6) {
-                showToast('Password min. 6 caratteri.');
-                return;
-            }
-            if (nickname.length < 3 || nickname.length > 25) {
-                showToast('Nickname 3-25 caratteri.');
-                return;
-            }
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                const userProfileData = {
-                    email: user.email,
-                    nickname: nickname,
-                    createdAt: serverTimestamp(),
-                };
-                if (selectedNationalityCode && selectedNationalityCode !== '') {
-                    userProfileData.nationalityCode = selectedNationalityCode;
-                }
-                await setDoc(doc(db, 'userProfiles', user.uid), userProfileData);
-                signupForm.reset();
-                showToast('Registrazione avvenuta con successo!');
-            } catch (authError) {
-                showToast('Errore Registrazione: ' + traduireErroreFirebase(authError.code));
-            }
-        });
-    }
-    */
-
-    if (logoutButton) {
-        logoutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                showToast('Logout effettuato con successo!', 'info');
-                if (
-                    window.location.pathname.includes('profile.html') ||
-                    window.location.pathname.includes('admin-dashboard.html') ||
-                    window.location.pathname.includes('submit-article.html')
-                ) {
-                    window.location.href = 'index.html';
-                }
-            } catch (error) {
-                showToast('Errore logout: ' + error.message, 'error');
-            }
-        });
-    }
 });
 
-onAuthStateChanged(auth, (user) => {
-    console.log('main.js - Auth state changed. User:', user ? user.uid : 'null');
-    updateAuthUI(user);
+onAuthStateChanged(auth, async (user) => {
+    console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
+    loggedInUser = user; // Assumendo che loggedInUser sia una variabile a livello di modulo/globale che usi
 
-    const articlesGridElement = document.getElementById('articlesGrid');
-    if (articlesGridElement && typeof initializeHomepageArticleInteractions === 'function') {
-        setTimeout(() => {
-            if (articlesGridElement.querySelector('.article-card')) {
-                initializeHomepageArticleInteractions(user);
+    // Gestione unsubscribe dal listener del profilo precedente
+    if (currentUserProfileUnsubscribe) {
+        console.log('[Main.js onAuthStateChanged] Annullamento iscrizione dal listener profilo navbar precedente.');
+        currentUserProfileUnsubscribe();
+        currentUserProfileUnsubscribe = null;
+    }
+
+    if (user) {
+        // Utente AUTENTICATO
+        const userIdForEvent = user.uid; // Variabile locale per chiarezza nell'evento
+        const userProfileRef = doc(db, 'userProfiles', userIdForEvent);
+
+        console.log(
+            `[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${userIdForEvent}`
+        );
+
+        currentUserProfileUnsubscribe = onSnapshot(
+            userProfileRef,
+            (docSnap) => {
+                const userProfileData = docSnap.exists() ? docSnap.data() : null;
+                if (docSnap.exists()) {
+                    console.log(
+                        '[Main.js onSnapshot Navbar] Dati profilo ricevuti/aggiornati per navbar:',
+                        userProfileData
+                    );
+                } else {
+                    console.warn(
+                        `[Main.js onSnapshot Navbar] Profilo per UID ${userIdForEvent} non trovato. La navbar userà dati Auth di fallback.`
+                    );
+                }
+                // Chiamata principale per aggiornare tutta l'UI, inclusa la logica della campanella
+                updateUIBasedOnAuthState(user, userProfileData);
+            },
+            (error) => {
+                console.error('[Main.js onSnapshot Navbar] Errore nel listener del profilo per navbar:', error);
+                updateUIBasedOnAuthState(user, null); // Usa dati Auth di fallback in caso di errore
             }
-        }, 250);
-    }
+        );
 
-    if (user && user.emailVerified) {
-        const isNewlyRegistered = sessionStorage.getItem('newlyRegistered');
-        if (isNewlyRegistered) {
-            getDoc(doc(db, 'userProfiles', user.uid))
-                .then((profileSnap) => {
-                    if (profileSnap.exists()) {
-                        const nickname = profileSnap.data().nickname || user.email.split('@')[0];
-                        showToast(`Benvenuto/a su asyncDonkey.io, ${nickname}!`, 'success', 7000);
-                    } else {
-                        showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
-                    }
-                    sessionStorage.removeItem('newlyRegistered');
-                })
-                .catch(() => {
-                    showToast(`Benvenuto/a su asyncDonkey.io!`, 'success', 7000);
-                    sessionStorage.removeItem('newlyRegistered');
-                });
-        }
+        // Configura il listener della campanella delle notifiche
+        setupNotificationBellListener(userIdForEvent);
+        loadContentSpecificFeatures(user);
+
+        // ---> INIZIO SEZIONE: INVIA EVENTO userAuthenticated PER UTENTE LOGGATO <---
+        console.log(`[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con userId: ${userIdForEvent}`);
+        document.dispatchEvent(
+            new CustomEvent('userAuthenticated', {
+                detail: { user: user, userId: userIdForEvent }, // Passa l'oggetto user completo e userId
+            })
+        );
+        // ---> FINE SEZIONE: INVIA EVENTO userAuthenticated <---
+
+        console.log('[Main.js onAuthStateChanged] Operazioni per utente autenticato completate.');
+    } else {
+        // Utente NON AUTENTICATO (logout)
+        console.log('[Main.js onAuthStateChanged] Utente non loggato.');
+        updateUIBasedOnAuthState(null, null); // Aggiorna l'UI per lo stato di logout
+        clearNotificationBellListener(); // Assicurati che il listener e la campanella siano rimossi/nascosti
+        loadContentSpecificFeatures(null);
+
+        // ---> INIZIO SEZIONE: INVIA EVENTO userAuthenticated PER LOGOUT <---
+        console.log('[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con utente nullo (logout).');
+        document.dispatchEvent(
+            new CustomEvent('userAuthenticated', {
+                detail: { user: null, userId: null }, // Invia null per indicare il logout
+            })
+        );
+        // ---> FINE SEZIONE: INVIA EVENTO userAuthenticated <---
+
+        console.log('[Main.js onAuthStateChanged] Operazioni per utente non autenticato completate.');
     }
+    console.log(
+        '[Main.js onAuthStateChanged] Aggiornamento UI di base completato (dettagli profilo via onSnapshot se loggato).'
+    );
 });
