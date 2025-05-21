@@ -1,12 +1,13 @@
-import { db, generateBlockieAvatar } from './main.js'; // auth non sembra usato qui
+// js/leaderboard.js
+import { db, generateBlockieAvatar } from './main.js';
 import {
     collection,
     query,
     orderBy,
     limit,
     getDocs,
-    doc, // AGGIUNTO: per referenziare un singolo documento
-    getDoc, // AGGIUNTO: per recuperare un singolo documento
+    doc,
+    getDoc,
     where,
     startAfter,
     documentId,
@@ -20,7 +21,7 @@ const globalLeaderboardContainer = document.getElementById('globalLeaderboardCon
 const prevPageBtn = document.getElementById('prevPageBtn');
 const nextPageBtn = document.getElementById('nextPageBtn');
 const currentPageIndicator = document.getElementById('currentPageIndicator');
-const refreshLeaderboardBtn = document.getElementById('refreshLeaderboardBtn'); // NUOVO
+const refreshLeaderboardBtn = document.getElementById('refreshLeaderboardBtn');
 
 // --- PAGINATION STATE & CONSTANTS ---
 const SCORES_PER_PAGE = 25;
@@ -28,6 +29,7 @@ let currentPage = 1;
 let lastVisibleDoc = null;
 let firstVisibleDoc = null;
 let firstDocsHistory = [];
+const DEFAULT_AVATAR_LEADERBOARD_PATH = 'assets/images/default-avatar.png';
 
 /** Formatta Firestore Timestamp */
 function formatGlobalScoreTimestamp(firebaseTimestamp) {
@@ -36,11 +38,8 @@ function formatGlobalScoreTimestamp(firebaseTimestamp) {
     }
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit',
         });
     } catch (e) {
         console.error('Errore formattazione timestamp:', e);
@@ -79,7 +78,6 @@ async function loadGlobalLeaderboard(direction = 'initial') {
     let isFetchingFirstPageQuery = false;
 
     try {
-        // --- Logica query per paginazione 'initial', 'next', 'prev' (come nel tuo file, con piccole correzioni alla logica 'prev') ---
         if (direction === 'initial') {
             currentPage = 1;
             lastVisibleDoc = null;
@@ -106,8 +104,8 @@ async function loadGlobalLeaderboard(direction = 'initial') {
             if (currentPage <= 1) {
                 loadGlobalLeaderboard('initial');
                 return;
-            } // currentPage è già decrementato
-            isFetchingFirstPageQuery = currentPage === 1; // Sarà la prima pagina solo se currentPage è 1
+            }
+            isFetchingFirstPageQuery = currentPage === 1;
 
             if (isFetchingFirstPageQuery) {
                 q = query(
@@ -118,9 +116,6 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                     limit(SCORES_PER_PAGE)
                 );
             } else if (firstDocsHistory[currentPage - 2]) {
-                // Usa il primo doc della pagina precedente come cursore 'startAfter'
-                // firstDocsHistory[currentPage-1] è il primo della pag. corrente
-                // firstDocsHistory[currentPage-2] è il primo della pag. precedente
                 q = query(
                     leaderboardScoresCollection,
                     where('gameId', '==', 'donkeyRunner'),
@@ -145,18 +140,18 @@ async function loadGlobalLeaderboard(direction = 'initial') {
         let enrichedScores = [];
 
         if (scoreDocs.length > 0) {
-            // --- OTTIMIZZAZIONE: Recupero profili utente con query 'in' ---
-            const userIdsToFetch = [...new Set(scoreDocs.map((sDoc) => sDoc.data().userId).filter((id) => id))]; // Array di userId unici e validi
-            const profilesMap = new Map();
+            const userIdsToFetch = [...new Set(scoreDocs.map((sDoc) => sDoc.data().userId).filter((id) => id))];
+            const publicProfilesMap = new Map(); // Dati letti da userPublicProfiles
 
             if (userIdsToFetch.length > 0) {
-                const MAX_IDS_PER_IN_QUERY = 30; // Limite di Firestore per operatore 'in'
+                const MAX_IDS_PER_IN_QUERY = 30;
                 const profilePromises = [];
 
                 for (let i = 0; i < userIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
                     const batchUserIds = userIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
+                    // *** MODIFICA CHIAVE: Query su userPublicProfiles ***
                     const profilesQuery = query(
-                        collection(db, 'userProfiles'),
+                        collection(db, 'userPublicProfiles'), // <-- Query su userPublicProfiles
                         where(documentId(), 'in', batchUserIds)
                     );
                     profilePromises.push(getDocs(profilesQuery));
@@ -166,59 +161,52 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                     const snapshotsArray = await Promise.all(profilePromises);
                     snapshotsArray.forEach((snapshot) => {
                         snapshot.forEach((docSnap) => {
-                            profilesMap.set(docSnap.id, docSnap.data());
+                            publicProfilesMap.set(docSnap.id, docSnap.data());
                         });
                     });
                 } catch (profileError) {
-                    console.error('Errore durante il recupero batch dei profili utente:', profileError);
-                    // Potresti voler gestire questo errore in modo più granulare, es. mostrando placeholder
+                    console.error('Errore durante il recupero batch dei profili pubblici:', profileError);
                 }
             }
-            // --- FINE OTTIMIZZAZIONE ---
 
-            // Arricchisci i punteggi con i dati del profilo utente dalla profilesMap
             for (const scoreDoc of scoreDocs) {
                 const scoreData = scoreDoc.data();
-                const userProfile = scoreData.userId ? profilesMap.get(scoreData.userId) : null;
+                const userPublicProfile = scoreData.userId ? publicProfilesMap.get(scoreData.userId) : null;
 
                 let profileDisplayName = scoreData.userName || scoreData.initials || 'Giocatore Anonimo';
                 let profileAvatarUrl = null;
-                let userProfileUpdatedAt = null;
-                let nationalityCode = scoreData.nationalityCode || null; // Prendi da scoreData se disponibile
+                // *** MODIFICA CHIAVE: Usa il timestamp dal profilo pubblico per cache busting ***
+                let userProfilePublicUpdatedAt = null; 
+                let nationalityCode = scoreData.nationalityCode || null;
 
-                if (userProfile) {
-                    profileDisplayName = userProfile.nickname || userProfile.displayName || profileDisplayName;
-                    if (userProfile.avatarUrls && userProfile.avatarUrls.url_48x48) {
-                        profileAvatarUrl = userProfile.avatarUrls.url_48x48;
-                    } else if (userProfile.avatarUrls && userProfile.avatarUrls.small) {
-                        profileAvatarUrl = userProfile.avatarUrls.small;
-                    } else if (userProfile.photoURL) {
-                        profileAvatarUrl = userProfile.photoURL;
+                if (userPublicProfile) {
+                    profileDisplayName = userPublicProfile.nickname || profileDisplayName;
+                    // *** MODIFICA CHIAVE: Usa avatarUrls.thumbnail dal profilo pubblico ***
+                    if (userPublicProfile.avatarUrls && userPublicProfile.avatarUrls.thumbnail) {
+                        profileAvatarUrl = userPublicProfile.avatarUrls.thumbnail;
                     }
-                    userProfileUpdatedAt = userProfile.profileUpdatedAt || null;
-                    nationalityCode = userProfile.nationalityCode || nationalityCode; // Sovrascrivi con quello del profilo se presente
+                    userProfilePublicUpdatedAt = userPublicProfile.profilePublicUpdatedAt || null;
+                    nationalityCode = userPublicProfile.nationalityCode || nationalityCode;
                 }
 
                 enrichedScores.push({
                     id: scoreDoc.id,
                     ...scoreData,
-                    firestoreDoc: scoreDoc, // Manteniamo il doc per i cursori
+                    firestoreDoc: scoreDoc,
                     profileDisplayName,
                     profileAvatarUrl,
-                    userProfileUpdatedAt,
-                    nationalityCode, // Assicura che nationalityCode sia nell'oggetto enrichedScores
+                    userProfilePublicUpdatedAt, // Timestamp pubblico per cache busting
+                    nationalityCode,
                 });
             }
         }
-        // --- Fine arricchimento punteggi ---
-
-        // ... (resto della logica di paginazione e gestione firstVisibleDoc/lastVisibleDoc come nel tuo file) ...
+        
         if (enrichedScores.length > 0) {
             if (direction === 'next') {
                 currentPage++;
             }
             if (direction === 'prev' && !isFetchingFirstPageQuery) {
-                firstDocsHistory.splice(currentPage); // currentPage è già il numero della pagina visualizzata
+                firstDocsHistory.splice(currentPage); 
             }
 
             firstVisibleDoc = enrichedScores[0].firestoreDoc;
@@ -232,9 +220,8 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                 }
             }
         } else {
-            if (direction === 'next') {
-                /* No more pages */
-            } else if (isFetchingFirstPageQuery || currentPage === 1) {
+            if (direction === 'next') { /* No more pages */ }
+            else if (isFetchingFirstPageQuery || currentPage === 1) {
                 currentPage = 1;
                 firstDocsHistory = [];
                 lastVisibleDoc = null;
@@ -244,6 +231,7 @@ async function loadGlobalLeaderboard(direction = 'initial') {
 
         displayGlobalLeaderboard(enrichedScores, currentPage);
         updatePaginationControls(enrichedScores.length, isFetchingFirstPageQuery || currentPage === 1);
+
     } catch (error) {
         console.error(`Errore durante il caricamento della leaderboard (direzione: ${direction}):`, error);
         if (leaderboardTableBody) {
@@ -266,8 +254,6 @@ async function loadGlobalLeaderboard(direction = 'initial') {
 
 /**
  * Popola la tabella HTML con i dati della leaderboard.
- * @param {Array} leaderboardData - Array di oggetti punteggio arricchiti.
- * @param {number} pageNumber - Il numero della pagina corrente.
  */
 function displayGlobalLeaderboard(leaderboardData, pageNumber) {
     if (!leaderboardTableBody) return;
@@ -302,26 +288,29 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         avatarImg.style.borderRadius = '50%';
         avatarImg.style.objectFit = 'cover';
 
+        // *** MODIFICA CHIAVE: Usa profileAvatarUrl e userProfilePublicUpdatedAt ***
         if (entry.profileAvatarUrl) {
-            if (entry.userProfileUpdatedAt && typeof entry.userProfileUpdatedAt.seconds === 'number') {
-                avatarImg.src = `${entry.profileAvatarUrl}?v=${entry.userProfileUpdatedAt.seconds}`;
-            } else {
-                avatarImg.src = entry.profileAvatarUrl;
+            let avatarUrlToSet = entry.profileAvatarUrl;
+            if (entry.userProfilePublicUpdatedAt && typeof entry.userProfilePublicUpdatedAt.seconds === 'number') {
+                avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.seconds}`;
+            } else if (entry.userProfilePublicUpdatedAt instanceof Date) { // Fallback se è già un oggetto Date JS
+                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.getTime()}`;
             }
+            avatarImg.src = avatarUrlToSet;
         } else {
             const seedForBlockie = entry.userId || entry.initials || entry.profileDisplayName || `anon-${entry.id}`;
             try {
                 avatarImg.src = generateBlockieAvatar(seedForBlockie, 36, { size: 8, scale: 4.5 });
             } catch (e) {
                 console.error('Errore generazione Blockie per leaderboard:', e, 'seed:', seedForBlockie);
-                avatarImg.src = 'assets/images/default-avatar.png';
+                avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
             }
         }
         const altText = entry.profileDisplayName || 'Avatar giocatore';
         avatarImg.alt = altText;
         avatarImg.onerror = () => {
             console.warn(`Errore caricamento avatar per ${altText} (URL: ${avatarImg.src}), uso default.`);
-            avatarImg.src = 'assets/images/default-avatar.png';
+            avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
             avatarImg.onerror = null;
         };
         tdPlayer.appendChild(avatarImg);
@@ -329,7 +318,6 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         const nameSpan = document.createElement('span');
         nameSpan.className = 'player-name';
 
-        // Usa entry.nationalityCode che ora è parte di enrichedScores
         if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
             const flagIconSpan = document.createElement('span');
             flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
@@ -365,12 +353,6 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
     });
 }
 
-/**
- * Aggiorna lo stato dei pulsanti di paginazione e l'indicatore di pagina.
- * @param {number} countOnCurrentPage - Numero di elementi caricati nella pagina corrente.
- * @param {boolean} isFirstPageResult - True se i dati caricati sono per la prima pagina.
- */
-
 function updatePaginationControls(countOnCurrentPage, isFirstPageResult = false) {
     if (!prevPageBtn || !nextPageBtn || !currentPageIndicator) return;
     currentPageIndicator.textContent = `Pagina ${currentPage}`;
@@ -378,7 +360,6 @@ function updatePaginationControls(countOnCurrentPage, isFirstPageResult = false)
     nextPageBtn.disabled = countOnCurrentPage < SCORES_PER_PAGE;
 }
 
-// --- INITIALIZATION --- (come nel tuo file, con correzioni per la logica di currentPage in prevPageBtn)
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded per leaderboard.js con paginazione.');
     if (nextPageBtn) {
