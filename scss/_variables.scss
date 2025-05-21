@@ -1,0 +1,72 @@
+:root {
+    /* Light Theme Palette (Default) */
+    --bg-color: #f8f9fa;
+    --text-color-primary: #343a40;
+    --text-color-secondary: #495057;
+    --text-color-muted: #6c757d;
+
+    --surface-bg-primary: #ffffff;
+    --surface-bg-secondary: #e9ecef;
+    --border-color-primary: #dee2e6;
+    --border-color-secondary: #e9ecef;
+    --border-color-avatar: #dee2e6;
+    --heading-color: #2c3e50;
+    --link-color: #007bff;
+    --link-hover-color: #0056b3;
+    --button-bg-primary: #007bff;
+    --button-text-primary: #ffffff;
+    --button-hover-bg-primary: #0056b3;
+
+    --skill-badge-bg: var(--surface-bg-secondary);
+    --skill-badge-text: var(--text-color-secondary);
+    --skill-badge-hover-bg: var(--link-color);
+    --skill-badge-hover-text: var(--button-text-primary);
+    --skill-badge-active-bg: var(--link-hover-color);
+    --skill-badge-active-text: var(--button-text-primary);
+
+    --skill-details-bg: var(--bg-color);
+    --skill-details-border: var(--border-color-secondary);
+    --skill-details-text: var(--text-color-secondary);
+    --skill-details-heading: var(--link-color);
+
+    --link-color-rgb: 0, 123, 255; /* For focus ring */
+    --game-border-color: #00b9be;
+    --game-ground-line-color: #00b9be;
+    --game-button-bg: rgba(0, 50, 80, 0.6);
+    --game-button-text: #c4f0c2;
+    --game-button-border: #5ab9a8;
+    --game-button-active-bg: rgba(0, 70, 100, 0.8);
+    --game-border-color-rgb: 0, 185, 190; /* For canvas shadow */
+}
+
+body.dark-mode {
+    /* Dark Theme Palette */
+    --bg-color: #121212;
+    --text-color-primary: #e0e0e0;
+    --text-color-secondary: #b0b0b0;
+    --text-color-muted: #888888;
+
+    --surface-bg-primary: #1e1e1e;
+    --surface-bg-secondary: #2a2a2a;
+    --border-color-primary: #333333;
+    --border-color-secondary: #444444;
+    --border-color-avatar: #555555;
+    --heading-color: #d4d4d4;
+    --link-color: #64b5f6;
+    --link-hover-color: #90caf9;
+    --button-bg-primary: var(--link-color);
+    --button-text-primary: #121212;
+    --button-hover-bg-primary: var(--link-hover-color);
+
+    --skill-badge-bg: #3a3a3a;
+    --skill-details-bg: #232323;
+    --link-color-rgb: 100, 181, 246; /* For focus ring */
+
+    --game-border-color: #5ab9a8;
+    --game-ground-line-color: #5ab9a8;
+    --game-button-bg: rgba(20, 70, 100, 0.7);
+    /* --game-button-text: #c4f0c2; */ /* Already defined in :root, can inherit */
+    --game-button-border: #00b9be;
+    --game-button-active-bg: rgba(30, 90, 120, 0.9);
+    --game-border-color-rgb: 90, 185, 168; /* For canvas shadow in dark mode */
+}

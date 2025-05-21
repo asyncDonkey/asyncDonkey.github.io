@@ -1,0 +1,504 @@
+/* ===== Homepage Specific Styles (Portal, Articles on Home) ===== */
+.portal-header {
+    /* Header per sezioni tipo portale o lista articoli */
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--surface-bg-secondary);
+    border-bottom: 1px solid var(--border-color-primary);
+    margin-bottom: 30px;
+}
+.portal-header h1 {
+    /* Titolo H1 specifico del .portal-header */
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.8em;
+    color: var(--heading-color);
+    margin-bottom: 10px;
+}
+.portal-header p {
+    font-size: 1.2em;
+    color: var(--text-color-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Placeholder per Immagine/Animazione Introduttiva Homepage */
+/*
+.intro-visual-container { text-align: center; }
+.intro-visual-item {
+    max-width: 500px; height: auto; display: block; margin: 20px auto 40px auto;
+    border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background-color: var(--surface-bg-secondary); border: 1px solid var(--border-color-secondary);
+}
+*/
+
+.portal-grid {
+    /* Griglia per card su homepage e griglia articoli */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 0 5% 30px 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.portal-card {
+    /* Stile base per card nel portale */
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.portal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+.portal-card img.card-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px auto;
+}
+.portal-card h3 {
+    /* Titolo dentro una portal-card */
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5em;
+    color: var(--heading-color);
+    margin-bottom: 10px;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.portal-card p {
+    color: var(--text-color-secondary);
+    font-size: 1em;
+    margin-bottom: 20px;
+    flex-grow: 1;
+    min-height: 60px;
+}
+.portal-card .btn-portal {
+    /* Bottone specifico per portal-card */
+    display: inline-block;
+    background-color: var(--link-color);
+    color: var(--button-text-primary);
+    padding: 10px 25px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+    align-self: center;
+}
+.portal-card .btn-portal:hover {
+    background-color: var(--link-hover-color);
+}
+
+/* Mini Leaderboard (Homepage) */
+#homeMiniLeaderboardList {
+    list-style-type: none;
+    padding: 0;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.9em;
+    text-align: left;
+}
+#homeMiniLeaderboardList li {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border-color-secondary);
+}
+#homeMiniLeaderboardList li:last-child {
+    border-bottom: none;
+}
+#homeMiniLeaderboardList .player-rank {
+    margin-right: 8px;
+    font-weight: bold;
+    min-width: 15px;
+}
+#homeMiniLeaderboardList .player-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    margin-right: 8px;
+    background-color: #eee;
+    image-rendering: pixelated;
+}
+#homeMiniLeaderboardList .player-info {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+#homeMiniLeaderboardList .player-name {
+    font-weight: bold;
+    color: var(--text-color-primary);
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+}
+#homeMiniLeaderboardList .player-name .fi {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+#homeMiniLeaderboardList .player-score {
+    font-weight: bold;
+    color: var(--link-color);
+}
+
+/* Banner Glitchzilla (Homepage) */
+.glitchzilla-banner {
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-secondary);
+    padding: 12px 20px;
+    text-align: center;
+    margin: 0 auto 30px auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    max-width: 90%;
+    /* display: none; gestito da JS */
+}
+.glitchzilla-banner p {
+    margin: 0;
+    font-size: 1.1em;
+    font-family: 'Source Code Pro', monospace;
+}
+.glitchzilla-banner .glitch-text-effect,
+.glitchzilla-banner .player-name-highlight {
+    text-shadow:
+        0 0 5px rgba(255, 255, 255, 0.3),
+        0 0 8px currentColor;
+    animation: cambio-colore-neon 1.5s infinite steps(1, end);
+    font-weight: bold;
+}
+
+/* Sezione Griglia Articoli (Homepage) */
+#articlesSection {
+    padding: 20px 0; /* display: none; gestito da JS */
+}
+#articlesSection .portal-header {
+    margin-bottom: 20px;
+}
+/* #articlesGrid eredita da .portal-grid */
+
+.article-card {
+    /* Card singola articolo (usata in #articlesGrid) */
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition:
+        transform 0.2s ease-out,
+        box-shadow 0.2s ease-out;
+}
+.article-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.1);
+}
+.article-card h4 {
+    font-size: 1.3em;
+    color: var(--heading-color);
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+.article-card .article-meta {
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap; /* Permette agli elementi di andare a capo se necessario */
+    align-items: center; /* Allinea verticalmente gli elementi nel meta container */
+    gap: 8px 15px; /* 8px di spazio verticale (se vanno a capo), 15px di spazio orizzontale */
+}
+
+.article-author-info {
+    display: inline-flex; /* Tratta questo blocco come inline, ma permette flex per i suoi figli */
+    align-items: center; /* Allinea verticalmente avatar, nome e bandierina */
+    gap: 6px; /* Spazio tra avatar, nome e bandierina */
+    color: var(--text-color-secondary); /* Colore di default per il testo in questo blocco */
+    order: -1; /* Opzionale: per provare a mettere le info autore prima della data/tags nella riga flex */
+}
+
+.author-avatar-homepage {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%; /* Avatar circolare */
+    object-fit: cover;
+    background-color: var(--surface-bg-secondary); /* Colore di sfondo placeholder */
+    border: 1px solid var(--border-color-secondary);
+    image-rendering: pixelated; /* Mantiene lo stile blockie */
+    vertical-align: middle; /* Utile se non fosse un flex child diretto */
+}
+
+.article-author-name {
+    font-weight: 500; /* Nome autore leggermente più marcato */
+    color: var(--text-color-primary); /* Colore più scuro per il nome */
+    white-space: nowrap; /* Evita che il nome vada a capo */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px; /* Limita la larghezza massima del nome se necessario */
+}
+
+.article-author-info .fi {
+    font-size: 1.1em; /* Dimensione della bandierina */
+    line-height: 1; /* Per un corretto allineamento verticale */
+    /* vertical-align: middle; / * Alternativa se non flex child * / */
+}
+
+.article-card .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.article-card .article-tag {
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-secondary);
+    padding: 4px 10px; /* Aumentato leggermente padding per leggibilità */
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+}
+.article-card .article-tag:hover {
+    background-color: var(--link-color);
+    color: var(--button-text-primary);
+}
+.article-card .article-snippet {
+    font-size: 0.95em;
+    color: var(--text-color-secondary);
+    margin-bottom: 10px;
+    flex-grow: 1;
+    line-height: 1.6;
+}
+.article-card .article-stats {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-color-secondary);
+}
+.article-stat-badge {
+    display: flex;
+    align-items: center;
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    background-color: var(--surface-bg-secondary);
+    padding: 4px 8px;
+    border-radius: 15px;
+    transition:
+        color 0.2s,
+        background-color 0.2s;
+}
+.article-stat-badge:hover {
+    color: var(--link-hover-color);
+}
+.article-stat-badge .stat-icon {
+    margin-right: 5px;
+    font-size: 0.9em;
+}
+.article-stat-badge .stat-count {
+    font-weight: 500;
+    color: var(--text-color-secondary);
+}
+.article-card .btn-read-more {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--link-color);
+    padding: 8px 0;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+    border: none;
+    align-self: flex-start;
+    margin-top: auto;
+}
+.article-card .btn-read-more:hover {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+/* Card Articolo in Evidenza (Homepage) */
+#featuredArticleCard {
+    text-align: left; /* display: none; gestito da JS */
+}
+#featuredArticleCard .card-icon {
+    margin-left: 0;
+    margin-right: auto;
+    margin-bottom: 10px;
+}
+#featuredArticleCard > h3 {
+    text-align: left;
+    font-size: 1.6em;
+}
+#featuredArticleCard #featuredArticleActualTitle {
+    font-size: 1.3em;
+    color: var(--text-color-primary);
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+#featuredArticleCard .btn-portal {
+    align-self: flex-start;
+} /* Sovrascrive .portal-card .btn-portal */
+
+.article-card-interactions {
+    display: flex;
+    justify-content: space-between; /* Spazia like e commenti */
+    align-items: center;
+    padding: 10px 0; /* Spaziatura verticale */
+    margin-top: 10px;
+    border-top: 1px dashed var(--border-color-secondary); /* Separatore opzionale */
+}
+
+.interaction-item {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Spazio tra icona/bottone e testo */
+}
+
+.article-like-btn,
+.article-comment-link-homepage {
+    background-color: transparent;
+    border: 1px solid var(--text-color-muted);
+    color: var(--text-color-muted);
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.article-like-btn:hover,
+.article-comment-link-homepage:hover {
+    border-color: var(--link-color);
+    color: var(--link-color);
+}
+
+.article-like-btn.liked {
+    /* Stile per quando l'utente ha messo like */
+    background-color: var(--link-color); /* O un colore specifico per "liked" */
+    color: var(--button-text-primary);
+    border-color: var(--link-color);
+}
+.article-like-btn.liked:hover {
+    background-color: var(--link-hover-color);
+}
+
+.article-like-btn .stat-icon,
+.comment-icon-homepage {
+    /* Per le icone se decidi di usarle dentro i bottoni o span */
+    margin-right: 4px;
+}
+
+.article-like-count,
+.article-comment-count {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--text-color-secondary);
+}
+
+.comment-icon-homepage {
+    font-size: 1em; /* Adatta se necessario */
+}
+
+.view-likers-icon {
+    font-size: 0.8em; /* O la dimensione che preferisci */
+    margin-left: 4px;
+    /* Potresti voler cambiare il colore o altro */
+}
+
+.clickable-comment-like-count {
+    /* text-decoration: underline; (già impostato via JS, ma può stare qui) */
+    /* cursor: pointer; (già impostato via JS) */
+    display: inline-block; /* Per padding/margin se necessario */
+    padding: 2px 4px; /* Opzionale: piccolo padding per allargare area cliccabile e per background */
+    border-radius: 3px; /* Opzionale: per angoli smussati se usi background */
+    transition:
+        background-color 0.2s,
+        color 0.2s; /* Transizione fluida */
+}
+
+.clickable-comment-like-count:hover,
+.clickable-comment-like-count:focus {
+    color: var(--link-hover-color); /* Cambia colore del testo */
+    background-color: var(--surface-bg-secondary); /* Leggero sfondo al passaggio del mouse */
+    outline: none; /* Rimuovi outline di default del focus se personalizzi */
+}
+
+.clickable-like-count {
+    cursor: pointer;
+    text-decoration: underline;
+    /* Altri stili desiderati, es. su hover */
+}
+.clickable-like-count:hover {
+    color: var(--link-hover-color); /* Esempio */
+}
+
+#articleLikesContainer .clickable-like-count {
+    /* Più specifico per l'articolo */
+    cursor: pointer;
+    text-decoration: underline;
+    color: var(--link-color); /* Usa il colore del link per indicare interattività */
+    padding: 2px 5px; /* Aggiunge un po' di area cliccabile attorno al numero */
+    border-radius: 4px; /* Angoli smussati per un aspetto più "button-like" */
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+}
+
+#articleLikesContainer .clickable-like-count:hover,
+#articleLikesContainer .clickable-like-count:focus {
+    color: var(--link-hover-color);
+    background-color: var(--surface-bg-secondary); /* Leggero sfondo al passaggio del mouse */
+    text-decoration: underline; /* Mantieni la sottolineatura */
+}
+
+#articleLikesContainer > span#articleLikeCount + span {
+    cursor: pointerù;
+}
+
+/* Stile per il conteggio dei like dei COMMENTI (guestbook e articoli) quando cliccabile */
+/* Questo è lo span DENTRO il bottone like del commento */
+.likes-container .like-btn span.clickable-comment-like-count {
+    text-decoration: underline; /* Potrebbe essere già sufficiente dal JS o dal browser */
+    color: var(white); /* Potrebbe cambiare il colore del numero dentro il bottone */
+    padding: 1px 3px;
+    /* border-radius: 3px; */
+    /* transition: background-color 0.2s, color 0.2s; */
+
+    /* Per ora, ci affidiamo principalmente al fatto che l'intero bottone like è già cliccabile
+       e il JS aggiunge la sottolineatura. Se vogliamo rendere solo il numero più evidente,
+       possiamo decommentare e aggiustare.
+       La cosa più importante qui è che il title attribute viene già impostato dal JS.
+    */
+}
+
+@media (max-width: 576px) {
+.portal-grid {
+        grid-template-columns: 1fr;
+        padding: 0 3% 20px 3%;
+    }
+    .project,
+    .team-member,
+    .portal-card,
+    .article-card {
+        flex-basis: 100%;
+        width: 100%;
+        max-width: none;
+    }
+}

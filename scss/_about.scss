@@ -1,0 +1,14 @@
+.dev-text-content p {
+    margin-bottom: 1em; /* Aggiunge spazio sotto ogni paragrafo */
+}
+
+.dev-text-content ul {
+    list-style-position: inside; /* Porta i pallini dentro il blocco della lista */
+    padding-left: 0; /* Rimuovi il padding di default se 'inside' non basta */
+    margin-left: 1.5em; /* Aggiungi un margine per indentare un po' la lista */
+    margin-bottom: 1em; /* Spazio sotto la lista */
+}
+
+.dev-text-content ul li {
+    margin-bottom: 0.5em; /* Spazio tra gli elementi della lista */
+}

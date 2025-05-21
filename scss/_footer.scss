@@ -1,0 +1,23 @@
+/* ===== Footer Styles ===== */
+footer {
+    background-color: var(--surface-bg-secondary);
+    padding: 25px;
+    border-top: 1px solid var(--border-color-primary);
+    color: var(--text-color-muted);
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.9em;
+    transition:
+        background-color 0.3s,
+        border-color 0.3s;
+}
+footer a {
+    color: var(--link-color);
+}
+
+@media (max-width: 576px) {
+    footer {
+        font-size: 0.85em;
+        padding: 20px;
+    }
+}

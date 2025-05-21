@@ -1,0 +1,167 @@
+/* Modali (Login/Signup) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+.modal-content {
+    background-color: var(--surface-bg-primary);
+    margin: 10% auto;
+    padding: 25px;
+    border: 1px solid var(--border-color-secondary);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--heading-color);
+    text-align: center;
+}
+.modal-content div {
+    margin-bottom: 15px;
+}
+.modal-content label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--text-color-primary);
+}
+.modal-content input[type='email'],
+.modal-content input[type='password'],
+.modal-content input[type='text'],
+.modal-content select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color-primary);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color-primary);
+    font-size: 1em;
+    font-family: inherit;
+}
+.modal-content input:focus,
+.modal-content select:focus {
+    outline: none;
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.25);
+}
+.modal-content button.game-button[type='submit'] {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+}
+.closeLoginBtn,
+.closeSignupBtn {
+    color: var(--text-color-muted);
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+.closeLoginBtn:hover,
+.closeSignupBtn:hover {
+    color: var(--text-color-primary);
+}
+
+
+//modals for like list
+.modal#likedByModal .modal-content {
+    /* Stessi stili base .modal-content, ma con possibili aggiustamenti */
+    /* background-color: var(--surface-bg-primary); margin: 10% auto; padding: 25px; */
+    /* border: 1px solid var(--border-color-secondary); border-radius: 8px; */
+    /* width: 90%; max-width: 480px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; */
+    min-height: 200px; /* Altezza minima per dare spazio */
+    max-height: 70vh; /* Altezza massima per evitare che sia troppo lunga su schermi grandi */
+    display: flex;
+    flex-direction: column;
+}
+
+.modal#likedByModal .close-modal-btn {
+    /* Stile bottone chiusura */
+    /* Eredita da .closeLoginBtn, .closeSignupBtn o definisci uno specifico */
+    color: var(--text-color-muted);
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+.modal#likedByModal .close-modal-btn:hover {
+    color: var(--text-color-primary);
+}
+
+.modal#likedByModal h3 {
+    /* Eredita da .modal-content h3 o definisci */
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--heading-color);
+    text-align: center;
+}
+
+.liked-by-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto; /* Scroll se la lista è lunga */
+    flex-grow: 1; /* Fa espandere la lista per riempire lo spazio */
+}
+
+.liked-by-list li {
+    display: flex;
+    align-items: center;
+    padding: 10px 5px;
+    border-bottom: 1px solid var(--border-color-secondary);
+}
+.liked-by-list li:last-child {
+    border-bottom: none;
+}
+
+.liked-by-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+    background-color: var(--surface-bg-secondary); /* Placeholder bg */
+    image-rendering: pixelated;
+}
+
+.liked-by-name {
+    flex-grow: 1;
+    font-size: 0.95em;
+    color: var(--text-color-primary);
+}
+
+.liked-by-list .fi {
+    /* Stile per bandierina */
+    font-size: 1.1em;
+    margin-left: 8px;
+}
+
+/* Responsive adjustments for the modal if needed beyond the base .modal-content */
+@media (max-width: 600px) {
+    .modal#likedByModal .modal-content {
+        /* Potrebbe non servire se .modal-content è già responsivo */
+        /* margin: 5% auto; */
+        /* max-width: 95%; */
+        padding: 20px;
+    }
+    .liked-by-name {
+        font-size: 0.9em;
+    }
+}

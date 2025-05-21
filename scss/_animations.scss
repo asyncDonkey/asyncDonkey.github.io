@@ -1,0 +1,46 @@
+/* ===== Animations ===== */
+@keyframes cambio-colore-neon {
+    /* Definizione singola */
+    0% {
+        color: #ff00ff; /* Magenta Neon */
+        border-color: #ff00ff;
+        text-shadow:
+            0 0 5px rgba(255, 255, 255, 0.5),
+            0 0 10px #ff00ff,
+            0 0 15px #ff00ff;
+    }
+    33% {
+        color: #00ffff; /* Ciano Neon */
+        border-color: #00ffff;
+        text-shadow:
+            0 0 5px rgba(255, 255, 255, 0.5),
+            0 0 10px #00ffff,
+            0 0 15px #00ffff;
+    }
+    66% {
+        color: #39ff14; /* Verde Lime Neon */
+        border-color: #39ff14;
+        text-shadow:
+            0 0 5px rgba(255, 255, 255, 0.5),
+            0 0 10px #39ff14,
+            0 0 15px #39ff14;
+    }
+    100% {
+        color: #ff00ff; /* Ritorna al Magenta per un ciclo pulito */
+        border-color: #ff00ff;
+        text-shadow:
+            0 0 5px rgba(255, 255, 255, 0.5),
+            0 0 10px #ff00ff,
+            0 0 15px #ff00ff;
+    }
+}
+
+
+/* ===== Testo Neon Arcade (usato in index.html e .glitchzilla-banner) ===== */
+.testo-neon-arcade {
+    text-shadow:
+        0 0 5px rgba(255, 255, 255, 0.3),
+        0 0 8px currentColor;
+    animation: cambio-colore-neon 1.5s infinite steps(1, end);
+    font-weight: bold;
+}
