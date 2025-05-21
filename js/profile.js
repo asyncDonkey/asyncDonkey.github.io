@@ -533,6 +533,7 @@ async function handleExternalLinkFormSubmit(event) {
         return;
     }
     if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = '';
+    
 
     let currentLinks = Array.isArray(profileDataForDisplay.externalLinks)
         ? [...profileDataForDisplay.externalLinks]
@@ -554,6 +555,7 @@ async function handleExternalLinkFormSubmit(event) {
         }
         currentLinks.push({ title, url });
     }
+    console.log("Saving externalLinks. Data being sent:", JSON.stringify(currentLinks, null, 2));
 
     if (saveExternalLinkBtn) {
         saveExternalLinkBtn.disabled = true;
