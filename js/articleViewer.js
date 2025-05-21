@@ -719,8 +719,8 @@ async function loadArticleComments() {
                 const guestCommentLikeHandler = (e) => {
                     e.stopPropagation(); // Importante per non triggerare altri eventi se il wrapper è dentro altri elementi cliccabili
                     showToast("Devi essere loggato per mettere 'Mi piace' ai commenti.", "info");
-                    const showLoginBtnGlobal = document.getElementById('showLoginBtn');
-                    if (showLoginBtnGlobal) showLoginBtnGlobal.click();
+                    // const showLoginBtnGlobal = document.getElementById('showLoginBtn');
+                    // if (showLoginBtnGlobal) showLoginBtnGlobal.click();
                 };
                 commentLikeInteractionWrapper.addEventListener('click', guestCommentLikeHandler);
                 commentLikeInteractionWrapper.guestHandlerAttached = guestCommentLikeHandler;
