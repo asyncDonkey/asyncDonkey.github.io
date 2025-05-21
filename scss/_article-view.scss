@@ -222,3 +222,21 @@
     align-items: center;
     gap: 0.3em; /* Spazio tra icona e testo/conteggio */
 }
+
+// Per il like all'articolo
+#articleLikeInteractionWrapper {
+    &.guest-interactive {
+        button#likeArticleButton {
+            pointer-events: none; // Il click passerà attraverso al wrapper
+        }
+    }
+}
+
+// Per i like ai commenti (se usi una classe wrapper comune)
+.comment-like-interaction-wrapper { // Assumendo che aggiungi questa classe al wrapper del like del commento
+    &.guest-interactive {
+        button.like-btn { // Targettiamo il bottone like-btn interno
+            pointer-events: none;
+        }
+    }
+}

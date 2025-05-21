@@ -192,23 +192,25 @@ Collezione per definire i badge disponibili nel sistema. _(Invariato rispetto al
 
 ## 9. Sottocollezione: Notifiche Utente (`userProfiles/{userId}/notifications`)
 
-Memorizza le notifiche specifiche per un utente. _(Invariato rispetto al tuo schema)_
+Memorizza le notifiche specifiche per un utente. Creata e gestita principalmente da Cloud Functions.
 
 **Percorso:** `/userProfiles/{userId}/notifications/{notificationId}`
 
 **Campi del Documento (`notificationId`):**
 
-| Campo             | Tipo      | Descrizione                                                        | Esempio Valore                                         | Note                                                         |
-| :---------------- | :-------- | :----------------------------------------------------------------- | :----------------------------------------------------- | :----------------------------------------------------------- |
-| `type`            | String    | Tipo di notifica (per logica e iconografia).                       | `'article_approved'`, `'new_badge_awarded'`            |                                                              |
-| `title`           | String    | Titolo breve della notifica.                                       | `"Articolo Approvato!"`                                | Max ~100 caratteri consigliato.                              |
-| `message`         | String    | (Opzionale) Messaggio più dettagliato.                             | `"Il tuo articolo 'Storia dei Videogiochi' è online."` | Max ~250 caratteri consigliato.                              |
-| `link`            | String    | (Opzionale) URL relativo alla risorsa target.                      | `"/view-article.html?id=ARTICLE_XYZ"`                  |                                                              |
-| `timestamp`       | Timestamp | Data e ora di creazione.                                           | `FieldValue.serverTimestamp()`                         | Usato per ordinare le notifiche.                             |
-| `isRead`          | Boolean   | Indica se l'utente ha letto/interagito.                            | `false` (default), `true`                              |                                                              |
-| `icon`            | String    | (Opzionale) Nome icona (es. Material Symbols) o URL.               | `'check_circle'`, `'emoji_events'`                     | Per differenziare visivamente.                               |
-| `relatedEntityId` | String    | (Opzionale) ID dell'entità correlata (es. `articleId`, `badgeId`). | `"ARTICLE_XYZ"`                                        | Utile per raggruppare o filtrare.                            |
-| `userId`          | String    | ID dell'utente a cui è destinata la notifica.                      | `"USER_ABC"`                                           | Ridondante (già nel path), ma può semplificare query/regole. |
+| Campo             | Tipo      | Descrizione                                                                 | Esempio Valore                                   | Note                                                                                                |
+| :---------------- | :-------- | :-------------------------------------------------------------------------- | :----------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
+| `type`            | String    | Tipo di notifica (per logica e iconografia).                                | `'article_published'`, `'new_badge'`             |                                                                                                     |
+| `title`           | String    | Titolo breve della notifica.                                                | `"Articolo Pubblicato!"`                           | Max ~100 caratteri consigliato.                                                                     |
+| `message`         | String    | (Opzionale) Messaggio più dettagliato.                                      | `"Il tuo articolo 'Storia dei Videogiochi' è online."` | Max ~250 caratteri consigliato.                                                                     |
+| `link`            | String    | (Opzionale) URL relativo alla risorsa target.                               | `"/view-article.html?id=ARTICLE_XYZ"`            |                                                                                                     |
+| `timestamp`       | Timestamp | Data e ora di creazione della notifica.                                     | `FieldValue.serverTimestamp()`                   | Usato per ordinare le notifiche.                                                                    |
+| `isRead`          | Boolean   | Indica se l'utente ha letto/interagito con la notifica.                     | `false` (default), `true`                        |                                                                                                     |
+| `icon`            | String    | (Opzionale) Nome icona (es. Material Symbols) o fallback predefinito.       | `'check_circle'`, `'emoji_events'`               | Per differenziare visivamente. Default: `'notifications'` se non specificato dalla Cloud Function. |
+| `relatedItemId`   | String    | (Opzionale) ID dell'entità correlata (es. `articleId`, `badgeId`).          | `"ARTICLE_XYZ"`, `"glitchzilla-slayer"`          | Utile per raggruppare, filtrare o navigare.                                                          |
+| `updatedAt`       | Timestamp | (Opzionale) Data e ora dell'ultimo aggiornamento (es. quando letta).        | `FieldValue.serverTimestamp()`                   | Impostato quando la notifica viene segnata come letta.                                              |
+
+---
 
 ---
 

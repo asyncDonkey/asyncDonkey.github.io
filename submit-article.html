@@ -191,18 +191,16 @@
         <main>
             <section id="articleSubmissionSection">
                 <h2>Invia Nuovo Articolo</h2>
-                <div
-                    id="authRequiredMessage"
-                    style="
-                        display: none;
-                        text-align: center;
-                        padding: 20px;
-                        background-color: var(--surface-bg-secondary);
-                        border-radius: 8px;
-                    "
-                >
-                    <p>Devi essere <a href="#" id="loginLinkFromSubmitPage">loggato</a> per inviare un articolo.</p>
-                </div>
+                <div id="authRequiredMessage" class="auth-required-prompt" style="display: none; text-align: center; padding: 20px; background-color: var(--surface-bg-secondary); border-radius: 8px;">
+    <h2>Accesso Richiesto</h2>
+    <p>Devi essere loggato per inviare un nuovo articolo.</p>
+    <p>
+        <a href="register.html?authAction=login" class="game-button">Accedi</a> 
+        <span style="margin: 0 10px;">oppure</span>
+        <a href="register.html?authAction=signup" class="game-button alt">Registrati</a>
+    </p>
+    <p style="margin-top: 15px;"><a href="index.html">&larr; Torna alla Homepage</a></p>
+</div>
 
                 <form id="articleSubmissionForm" style="display: none">
                     <div>

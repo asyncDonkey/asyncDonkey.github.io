@@ -50,35 +50,33 @@ function formatArticleDate(dateInput) {
 }
 
 /**
- * Crea e appende una card articolo al DOM.
- * @param {object} articleData - L'oggetto articolo da Firestore.
- * @param {string} articleId - L'ID del documento articolo.
- * @param {object|null} authorProfile - Il profilo dell'autore recuperato da userProfiles, o null. // AGGIUNTO PARAMETRO
- * @param {HTMLElement} gridContainer - Il contenitore della griglia a cui appendere la card.
+ * Creates and appends an article card to the DOM.
+ * Uses authorProfile (from userPublicProfiles) for avatar and name.
+ * @param {object} articleData - The article data from Firestore.
+ * @param {string} articleId - The document ID of the article.
+ * @param {object|null} authorPublicProfile - The author's public profile data, or null.
+ * @param {HTMLElement} gridContainer - The grid container to append the card to.
  */
-function createArticleCard(articleData, articleId, authorProfile, gridContainer) {
-    // MODIFICATA SIGNATURE
+function createArticleCard(articleData, articleId, authorPublicProfile, gridContainer) {
     const card = document.createElement('div');
-    card.className = 'article-card'; // Assicurati che questa classe sia stilizzata per la griglia
+    card.className = 'article-card';
     card.setAttribute('data-article-id', articleId);
 
     const titleEl = document.createElement('h4');
-    // AGGIUNTO: Link sul titolo
     const titleLink = document.createElement('a');
     titleLink.href = `view-article.html?id=${articleId}`;
     titleLink.textContent = articleData.title || 'Titolo mancante';
-    titleLink.classList.add('article-card-title-link'); // Per stile
+    titleLink.classList.add('article-card-title-link');
     titleEl.appendChild(titleLink);
     card.appendChild(titleEl);
 
-    // Immagine di copertina (se presente)
     if (articleData.coverImageUrl) {
         const coverImgLink = document.createElement('a');
         coverImgLink.href = `view-article.html?id=${articleId}`;
         const coverImg = document.createElement('img');
         coverImg.src = articleData.coverImageUrl;
         coverImg.alt = `Copertina per ${articleData.title || 'articolo'}`;
-        coverImg.className = 'article-card-cover-image'; // Per stile
+        coverImg.className = 'article-card-cover-image';
         coverImgLink.appendChild(coverImg);
         card.appendChild(coverImgLink);
     }
@@ -89,41 +87,45 @@ function createArticleCard(articleData, articleId, authorProfile, gridContainer)
     const authorInfoSpan = document.createElement('span');
     authorInfoSpan.className = 'article-author-info';
 
-    // --- MODIFICATO: Logica Avatar e Nome Autore ---
-    let authorDisplayName = articleData.authorName || 'Autore Sconosciuto';
+    let authorDisplayName = articleData.authorName || 'Autore Sconosciuto'; // Fallback to denormalized name on article
     let authorAvatarSrc = DEFAULT_AUTHOR_AVATAR_PATH;
-    let authorNationalityCode = articleData.authorNationalityCode || null; // Prendi da articolo come fallback
+    let authorNationalityCode = articleData.authorNationalityCode || null; // Fallback
 
-    if (authorProfile) {
-        authorDisplayName = authorProfile.nickname || authorDisplayName;
-        authorNationalityCode = authorProfile.nationalityCode || authorNationalityCode; // Sovrascrivi se presente nel profilo
+    if (authorPublicProfile) {
+        authorDisplayName = authorPublicProfile.nickname || authorDisplayName;
+        authorNationalityCode = authorPublicProfile.nationalityCode || authorNationalityCode;
 
         let chosenAvatarUrl = null;
-        if (authorProfile.avatarUrls) {
-            if (authorProfile.avatarUrls.small) {
-                chosenAvatarUrl = authorProfile.avatarUrls.small;
-            } else if (authorProfile.avatarUrls.profile) {
-                chosenAvatarUrl = authorProfile.avatarUrls.profile;
-            }
+        if (authorPublicProfile.avatarUrls && authorPublicProfile.avatarUrls.thumbnail) { // schema uses thumbnail
+            chosenAvatarUrl = authorPublicProfile.avatarUrls.thumbnail;
         }
+        // No need to check for .small or .profile here if userPublicProfileSync maps them to .thumbnail
 
         if (chosenAvatarUrl) {
             authorAvatarSrc = chosenAvatarUrl;
-            if (authorProfile.profileUpdatedAt && authorProfile.profileUpdatedAt.seconds) {
-                authorAvatarSrc += `?v=${authorProfile.profileUpdatedAt.seconds}`;
+            let timestampForCache;
+            if (authorPublicProfile.profilePublicUpdatedAt) { // Prioritize this from public profile
+                timestampForCache = authorPublicProfile.profilePublicUpdatedAt;
+            } else if (authorPublicProfile.profileUpdatedAt) { // Fallback if profileUpdatedAt is also synced
+                timestampForCache = authorPublicProfile.profileUpdatedAt;
+            }
+
+            if (timestampForCache && typeof timestampForCache.seconds === 'number') {
+                authorAvatarSrc += `?v=${timestampForCache.seconds}`;
+            } else if (timestampForCache && typeof timestampForCache === 'number') { // e.g. a direct number timestamp
+                 authorAvatarSrc += `?v=${timestampForCache}`;
+            } else if (timestampForCache instanceof Date) {
+                 authorAvatarSrc += `?v=${Math.floor(timestampForCache.getTime() / 1000)}`;
             }
         } else if (articleData.authorId) {
-            // Profilo trovato ma senza avatar validi
-            authorAvatarSrc = generateBlockieAvatar(articleData.authorId, 24); // Dimensione per homepage
+            authorAvatarSrc = generateBlockieAvatar(articleData.authorId, 24);
         }
     } else if (articleData.authorId) {
-        // Profilo non trovato, ma c'è ID autore
         authorAvatarSrc = generateBlockieAvatar(articleData.authorId, 24);
     }
-    // Se authorId non c'è, rimane il DEFAULT_AUTHOR_AVATAR_PATH
 
     const avatarImg = document.createElement('img');
-    avatarImg.className = 'author-avatar-homepage'; // Assicurati che questa classe sia stilizzata (es. 24x24px, rounded)
+    avatarImg.className = 'author-avatar-homepage';
     avatarImg.src = authorAvatarSrc;
     avatarImg.alt = `Avatar di ${authorDisplayName}`;
     avatarImg.onerror = () => {
@@ -131,7 +133,6 @@ function createArticleCard(articleData, articleId, authorProfile, gridContainer)
         avatarImg.onerror = null;
     };
     authorInfoSpan.appendChild(avatarImg);
-    // --- FINE MODIFICA AVATAR ---
 
     const authorNameContainer = document.createElement('span');
     authorNameContainer.className = 'article-author-name';
@@ -139,7 +140,7 @@ function createArticleCard(articleData, articleId, authorProfile, gridContainer)
     if (articleData.authorId) {
         const authorLink = document.createElement('a');
         authorLink.href = `profile.html?userId=${articleData.authorId}`;
-        authorLink.textContent = authorDisplayName; // Usa il nome aggiornato dal profilo se disponibile
+        authorLink.textContent = authorDisplayName;
         authorNameContainer.appendChild(authorLink);
     } else {
         authorNameContainer.textContent = authorDisplayName;
@@ -150,7 +151,7 @@ function createArticleCard(articleData, articleId, authorProfile, gridContainer)
         const flagIcon = document.createElement('span');
         flagIcon.classList.add('fi', `fi-${authorNationalityCode.toLowerCase()}`);
         flagIcon.title = authorNationalityCode;
-        flagIcon.style.marginLeft = '5px'; // Aggiungi un po' di spazio
+        flagIcon.style.marginLeft = '5px';
         authorInfoSpan.appendChild(flagIcon);
     }
     metaEl.appendChild(authorInfoSpan);
@@ -162,11 +163,9 @@ function createArticleCard(articleData, articleId, authorProfile, gridContainer)
     metaEl.appendChild(dateEl);
 
     if (articleData.tags && Array.isArray(articleData.tags) && articleData.tags.length > 0) {
-        // ... (la tua logica per i tag non cambia)
         const tagsContainer = document.createElement('div');
         tagsContainer.className = 'article-tags';
         articleData.tags.slice(0, 3).forEach((tagText) => {
-            // Mostra max 3 tag per brevità
             const tagEl = document.createElement('span');
             tagEl.className = 'article-tag';
             tagEl.textContent = tagText;
@@ -183,29 +182,26 @@ function createArticleCard(articleData, articleId, authorProfile, gridContainer)
 
     const interactionsEl = document.createElement('div');
     interactionsEl.className = 'article-card-interactions';
-    // ... (la tua logica per like e commenti (solo display) qui, come nel tuo file, non cambia)
-    // Like
     const likeContainer = document.createElement('div');
     likeContainer.className = 'interaction-item like-interaction-homepage';
-    const likeIcon = document.createElement('span'); // Usiamo solo l'icona e il conteggio
+    const likeIcon = document.createElement('span');
     likeIcon.className = 'material-symbols-rounded';
-    likeIcon.innerHTML = 'favorite'; // o 'favorite_border' se vuoi indicare non-liked
+    likeIcon.innerHTML = 'favorite';
     likeIcon.title = 'Mi piace';
     const likeCountSpan = document.createElement('span');
-    likeCountSpan.className = 'article-like-count homepage-like-count';
+    likeCountSpan.className = 'article-like-count homepage-like-count'; // Retain class for main.js to update
     likeCountSpan.textContent = `${articleData.likeCount || 0}`;
     likeContainer.appendChild(likeIcon);
     likeContainer.appendChild(likeCountSpan);
     interactionsEl.appendChild(likeContainer);
 
-    // Commenti
     const commentContainer = document.createElement('div');
     commentContainer.className = 'interaction-item comment-interaction-homepage';
     const commentIcon = document.createElement('span');
     commentIcon.className = 'comment-icon-homepage material-symbols-rounded';
-    commentIcon.innerHTML = 'chat_bubble'; // o 'chat_bubble_outline'
+    commentIcon.innerHTML = 'chat_bubble';
     const commentCountSpan = document.createElement('span');
-    commentCountSpan.className = 'article-comment-count homepage-comment-count';
+    commentCountSpan.className = 'article-comment-count homepage-comment-count'; // Retain class
     commentCountSpan.textContent = `${articleData.commentCount || 0}`;
     commentContainer.appendChild(commentIcon);
     commentContainer.appendChild(commentCountSpan);
@@ -214,34 +210,40 @@ function createArticleCard(articleData, articleId, authorProfile, gridContainer)
     card.appendChild(interactionsEl);
 
     const readMoreLinkEl = document.createElement('a');
-    readMoreLinkEl.className = 'btn-read-more'; // Stila questo come un bottone o link prominente
+    readMoreLinkEl.className = 'btn-read-more';
     readMoreLinkEl.href = `view-article.html?id=${articleId}`;
     readMoreLinkEl.textContent = 'Leggi di più →';
     card.appendChild(readMoreLinkEl);
 
     gridContainer.appendChild(card);
 }
-
 /**
  * Visualizza la sezione articoli e l'articolo in evidenza caricandoli da Firestore.
  */
 export async function displayArticlesSection() {
     const articlesSection = document.getElementById('articlesSection');
     const articlesGrid = document.getElementById('articlesGrid');
-    // ... (elementi featured come nel tuo file)
     const featuredArticleCard = document.getElementById('featuredArticleCard');
-    const featuredArticleTitleEl = document.getElementById('featuredArticleActualTitle');
+    const featuredArticleTitleEl = document.getElementById('featuredArticleActualTitle'); // ID from your HTML
     const featuredArticleSnippetEl = document.getElementById('featuredArticleSnippet');
     const featuredArticleLinkEl = document.getElementById('featuredArticleLink');
+    const featuredAuthorAvatarElement = document.getElementById('featuredArticleAuthorAvatar');
+    const featuredAuthorNameElement = document.getElementById('featuredArticleAuthorName');
+
 
     if (!articlesSection || !articlesGrid) {
-        /* ... errore critico ... */
         console.error('[homePageFeatures.js] articlesSection o articlesGrid non trovato.');
         return;
     }
 
     const featuredElementsPresent =
-        featuredArticleCard && featuredArticleTitleEl && featuredArticleSnippetEl && featuredArticleLinkEl;
+        featuredArticleCard &&
+        featuredArticleTitleEl &&
+        featuredArticleSnippetEl &&
+        featuredArticleLinkEl &&
+        featuredAuthorAvatarElement &&
+        featuredAuthorNameElement;
+
     if (!featuredElementsPresent) {
         console.warn('[homePageFeatures.js] Elementi per Articolo in Evidenza mancanti. Funzionalità disabilitata.');
         if (featuredArticleCard) featuredArticleCard.style.display = 'none';
@@ -250,10 +252,9 @@ export async function displayArticlesSection() {
     articlesGrid.innerHTML =
         '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli...</p>';
     articlesSection.style.display = 'block';
-    if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none'; // Nascondi inizialmente
+    if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none';
 
     if (!db) {
-        /* ... errore db ... */
         console.error('[homePageFeatures.js] Istanza Firestore (db) non disponibile.');
         articlesGrid.innerHTML =
             '<p style="text-align:center; color:red;">Errore: Connessione al database non disponibile.</p>';
@@ -266,7 +267,7 @@ export async function displayArticlesSection() {
             articlesCollectionRef,
             where('status', '==', 'published'),
             orderBy('publishedAt', 'desc'),
-            limit(10) // Recupera un po' di più per avere scelta per il featured e la griglia
+            limit(10)
         );
 
         const querySnapshot = await getDocs(q);
@@ -277,20 +278,20 @@ export async function displayArticlesSection() {
 
         articlesGrid.innerHTML = '';
 
-        // --- AGGIUNTO: Recupero profili autori con query 'in' ---
         const authorIdsToFetch = [
             ...new Set(
-                articlesFromDb.map((article) => article.authorId).filter((id) => id) // Escludi articoli senza authorId
+                articlesFromDb.map((article) => article.authorId).filter((id) => id)
             ),
         ];
 
-        const profilesMap = new Map();
+        const publicProfilesMap = new Map(); // Changed variable name for clarity
         if (authorIdsToFetch.length > 0) {
             const MAX_IDS_PER_IN_QUERY = 30;
             const profilePromises = [];
             for (let i = 0; i < authorIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
                 const batchUserIds = authorIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
-                const profilesQuery = query(collection(db, 'userProfiles'), where(documentId(), 'in', batchUserIds));
+                // CORRECTED: Fetch from userPublicProfiles
+                const profilesQuery = query(collection(db, 'userPublicProfiles'), where(documentId(), 'in', batchUserIds));
                 profilePromises.push(getDocs(profilesQuery));
             }
             try {
@@ -298,22 +299,20 @@ export async function displayArticlesSection() {
                 profileSnapshotsArray.forEach((profileSnaps) => {
                     profileSnaps.forEach((snap) => {
                         if (snap.exists()) {
-                            profilesMap.set(snap.id, snap.data());
+                            publicProfilesMap.set(snap.id, snap.data());
                         }
                     });
                 });
             } catch (profileError) {
-                console.error('[homePageFeatures.js] Errore recupero profili autori per homepage:', profileError);
+                console.error('[homePageFeatures.js] Errore recupero profili pubblici autori per homepage:', profileError);
             }
         }
-        // --- FINE RECUPERO PROFILI ---
 
         let actualFeaturedArticleData = null;
         if (articlesFromDb.length > 0 && featuredElementsPresent) {
             actualFeaturedArticleData =
                 articlesFromDb.find((article) => article.isFeatured === true) || articlesFromDb[0];
             if (actualFeaturedArticleData) {
-                // Popola la card dell'articolo in evidenza
                 if (featuredArticleTitleEl)
                     featuredArticleTitleEl.textContent = actualFeaturedArticleData.title || 'N/D';
                 if (featuredArticleSnippetEl) {
@@ -326,52 +325,59 @@ export async function displayArticlesSection() {
                 if (featuredArticleLinkEl)
                     featuredArticleLinkEl.href = `view-article.html?id=${actualFeaturedArticleData.id}`;
 
-                // --- AGGIUNTO: Avatar per l'articolo in evidenza ---
-                const featuredAuthorAvatarElement = document.getElementById('featuredArticleAuthorAvatar'); // Assicurati che esista questo ID
-                const featuredAuthorNameElement = document.getElementById('featuredArticleAuthorName'); // Assicurati che esista questo ID
+                let featAuthorName = actualFeaturedArticleData.authorName || 'Autore Sconosciuto';
+                let featAuthorAvatarSrc = DEFAULT_AUTHOR_AVATAR_PATH;
+                const featAuthorPublicProfile = actualFeaturedArticleData.authorId
+                    ? publicProfilesMap.get(actualFeaturedArticleData.authorId)
+                    : null;
 
-                if (featuredAuthorAvatarElement && featuredAuthorNameElement) {
-                    let featAuthorName = actualFeaturedArticleData.authorName || 'Autore Sconosciuto';
-                    let featAuthorAvatarSrc = DEFAULT_AUTHOR_AVATAR_PATH;
-                    const featAuthorProfile = actualFeaturedArticleData.authorId
-                        ? profilesMap.get(actualFeaturedArticleData.authorId)
-                        : null;
+                if (featAuthorPublicProfile) {
+                    featAuthorName = featAuthorPublicProfile.nickname || featAuthorName;
+                    let chosenFeatAvatarUrl = null;
+                    if (featAuthorPublicProfile.avatarUrls && featAuthorPublicProfile.avatarUrls.thumbnail) {
+                         chosenFeatAvatarUrl = featAuthorPublicProfile.avatarUrls.thumbnail;
+                    }
 
-                    if (featAuthorProfile) {
-                        featAuthorName = featAuthorProfile.nickname || featAuthorName;
-                        let chosenFeatAvatarUrl = null;
-                        if (featAuthorProfile.avatarUrls) {
-                            if (featAuthorProfile.avatarUrls.small)
-                                chosenFeatAvatarUrl = featAuthorProfile.avatarUrls.small;
-                            else if (featAuthorProfile.avatarUrls.profile)
-                                chosenFeatAvatarUrl = featAuthorProfile.avatarUrls.profile;
+                    if (chosenFeatAvatarUrl) {
+                        featAuthorAvatarSrc = chosenFeatAvatarUrl;
+                        let timestampForCache;
+                        if (featAuthorPublicProfile.profilePublicUpdatedAt) { // PRIORITIZE THIS
+                            timestampForCache = featAuthorPublicProfile.profilePublicUpdatedAt;
+                        } else if (featAuthorPublicProfile.profileUpdatedAt) { // Fallback
+                            timestampForCache = featAuthorPublicProfile.profileUpdatedAt;
                         }
-                        if (chosenFeatAvatarUrl) {
-                            featAuthorAvatarSrc = chosenFeatAvatarUrl;
-                            if (featAuthorProfile.profileUpdatedAt && featAuthorProfile.profileUpdatedAt.seconds) {
-                                featAuthorAvatarSrc += `?v=${featAuthorProfile.profileUpdatedAt.seconds}`;
-                            }
-                        } else if (actualFeaturedArticleData.authorId) {
-                            featAuthorAvatarSrc = generateBlockieAvatar(actualFeaturedArticleData.authorId, 32); // Dimensione per featured
+
+                        if (timestampForCache && typeof timestampForCache.seconds === 'number') {
+                            featAuthorAvatarSrc += `?v=${timestampForCache.seconds}`;
+                        } else if (timestampForCache && typeof timestampForCache === 'number') {
+                            featAuthorAvatarSrc += `?v=${timestampForCache}`;
+                        } else if (timestampForCache instanceof Date) {
+                            featAuthorAvatarSrc += `?v=${Math.floor(timestampForCache.getTime() / 1000)}`;
                         }
                     } else if (actualFeaturedArticleData.authorId) {
                         featAuthorAvatarSrc = generateBlockieAvatar(actualFeaturedArticleData.authorId, 32);
                     }
+                } else if (actualFeaturedArticleData.authorId) {
+                    featAuthorAvatarSrc = generateBlockieAvatar(actualFeaturedArticleData.authorId, 32);
+                }
+
+                if(featuredAuthorAvatarElement) {
                     featuredAuthorAvatarElement.src = featAuthorAvatarSrc;
                     featuredAuthorAvatarElement.alt = `Avatar di ${featAuthorName}`;
                     featuredAuthorAvatarElement.onerror = () => {
                         featuredAuthorAvatarElement.src = DEFAULT_AUTHOR_AVATAR_PATH;
                         featuredAuthorAvatarElement.onerror = null;
                     };
+                }
 
+                if(featuredAuthorNameElement) {
                     if (actualFeaturedArticleData.authorId) {
                         featuredAuthorNameElement.innerHTML = `<a href="profile.html?userId=${actualFeaturedArticleData.authorId}">${featAuthorName}</a>`;
                     } else {
                         featuredAuthorNameElement.textContent = featAuthorName;
                     }
                 }
-                // --- FINE AVATAR FEATURED ---
-                if (featuredArticleCard) featuredArticleCard.style.display = 'flex'; // o 'block' a seconda del tuo CSS
+                if (featuredArticleCard) featuredArticleCard.style.display = 'flex';
             }
         }
 
@@ -379,28 +385,24 @@ export async function displayArticlesSection() {
         articlesFromDb.forEach((articleDataInLoop) => {
             if (!actualFeaturedArticleData || articleDataInLoop.id !== actualFeaturedArticleData.id) {
                 if (articlesAddedToGrid < MAX_FEATURED_ARTICLES) {
-                    // Mostra MAX_FEATURED_ARTICLES nella griglia
-                    const authorProfileForCard = articleDataInLoop.authorId
-                        ? profilesMap.get(articleDataInLoop.authorId)
+                    const authorPublicProfileForCard = articleDataInLoop.authorId
+                        ? publicProfilesMap.get(articleDataInLoop.authorId)
                         : null;
-                    createArticleCard(articleDataInLoop, articleDataInLoop.id, authorProfileForCard, articlesGrid);
+                    createArticleCard(articleDataInLoop, articleDataInLoop.id, authorPublicProfileForCard, articlesGrid);
                     articlesAddedToGrid++;
                 }
             }
         });
 
         if (articlesFromDb.length === 0) {
-            /* ... nessun articolo ... */
             articlesGrid.innerHTML =
                 '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun articolo pubblicato trovato.</p>';
             if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none';
         } else if (articlesAddedToGrid === 0 && actualFeaturedArticleData) {
-            /* ... solo featured ... */
             articlesGrid.innerHTML =
                 '<p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Nessun altro articolo da visualizzare al momento.</p>';
         }
     } catch (error) {
-        /* ... gestione errore ... */
         console.error('[homePageFeatures.js] Errore durante il caricamento degli articoli:', error);
         articlesGrid.innerHTML =
             '<p style="text-align:center; color:red;">Errore nel caricamento degli articoli. Controlla la console.</p>';
@@ -410,6 +412,7 @@ export async function displayArticlesSection() {
         if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none';
     }
 }
+
 
 /**
  * Mostra il banner dell'ultimo giocatore che ha sconfitto Glitchzilla.

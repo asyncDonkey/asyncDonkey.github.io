@@ -488,6 +488,18 @@
     */
 }
 
+/* In styles.css o nel tuo SCSS compilato */
+
+/* Quando il wrapper del like articolo è inteso per ospiti e deve catturare il click */
+#articleLikeInteractionWrapper.guest-interactive button#likeArticleButton {
+    pointer-events: none; /* Il click passerà attraverso al wrapper */
+}
+
+/* Stessa logica per i wrapper dei like ai commenti, se necessario */
+.comment-like-interaction-wrapper.guest-interactive button.like-btn {
+    pointer-events: none;
+}
+
 @media (max-width: 576px) {
     .portal-grid {
         grid-template-columns: 1fr;
@@ -502,3 +514,5 @@
         max-width: none;
     }
 }
+
+
