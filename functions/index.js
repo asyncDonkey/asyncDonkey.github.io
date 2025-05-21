@@ -88,20 +88,19 @@ async function createNotification(userId, notificationData) {
 // --- NEW USER PUBLIC PROFILE SYNC FUNCTIONS (Exported from the new module) ---
 
 exports.createUserPublicProfile = onDocumentCreated(
-    "userProfiles/{userId}",
+    'userProfiles/{userId}',
     userPublicProfileSync.handleCreateUserPublicProfile
 );
 
 exports.updateUserPublicProfile = onDocumentUpdated(
-    "userProfiles/{userId}",
+    'userProfiles/{userId}',
     userPublicProfileSync.handleUpdateUserPublicProfile
 );
 
 exports.deleteUserPublicProfile = onDocumentDeleted(
-    "userProfiles/{userId}",
+    'userProfiles/{userId}',
     userPublicProfileSync.handleDeleteUserPublicProfile
 );
-
 
 // --- EXISTING FUNCTION: handleArticleStatusNotifications ---
 exports.handleArticleStatusNotifications = onDocumentUpdated('articles/{articleId}', async (event) => {
@@ -251,7 +250,7 @@ exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}',
 
 // --- EXISTING FUNCTION: awardGlitchzillaSlayer ---
 exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}', async (event) => {
-    const functionName = "awardGlitchzillaSlayer"; // Per facilitare il filtro dei log
+    const functionName = 'awardGlitchzillaSlayer'; // Per facilitare il filtro dei log
     logger.info(`[CF:${functionName}] Triggered for scoreId: ${event.params.scoreId}`);
 
     if (!event.data) {
@@ -265,7 +264,9 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
 
     if (scoreData.userId && scoreData.glitchzillaDefeated === true) {
         const userId = scoreData.userId;
-        logger.info(`[CF:${functionName}] Conditions met: userId=${userId}, glitchzillaDefeated=true. Proceeding to award badge.`);
+        logger.info(
+            `[CF:${functionName}] Conditions met: userId=${userId}, glitchzillaDefeated=true. Proceeding to award badge.`
+        );
 
         const userProfileRef = db.collection('userProfiles').doc(userId);
         let profileUpdatesGlitch = {};
@@ -315,7 +316,10 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
             }
 
             if (Object.keys(profileUpdatesGlitch).length > 0) {
-                logger.info(`[CF:${functionName}] Preparing to update profile for ${userId} with:`, profileUpdatesGlitch);
+                logger.info(
+                    `[CF:${functionName}] Preparing to update profile for ${userId} with:`,
+                    profileUpdatesGlitch
+                );
                 if (FieldValue && typeof FieldValue.serverTimestamp === 'function') {
                     profileUpdatesGlitch.updatedAt = FieldValue.serverTimestamp();
                 } else {
@@ -334,7 +338,10 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
                 // Send notification for the newly awarded badge, if any
                 if (newBadgeAwardedId && BADGE_DETAILS[newBadgeAwardedId]) {
                     const badgeInfo = BADGE_DETAILS[newBadgeAwardedId];
-                    logger.info(`[CF:${functionName}] Preparing notification for new badge '${newBadgeAwardedId}' for user ${userId}. Badge details:`, badgeInfo);
+                    logger.info(
+                        `[CF:${functionName}] Preparing notification for new badge '${newBadgeAwardedId}' for user ${userId}. Badge details:`,
+                        badgeInfo
+                    );
                     await createNotification(userId, {
                         type: 'new_badge',
                         title: 'Nuovo Badge Sbloccato!',
@@ -343,11 +350,17 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
                         icon: badgeInfo.icon,
                         relatedItemId: newBadgeAwardedId,
                     });
-                    logger.info(`[CF:${functionName}] Notification for badge '${newBadgeAwardedId}' sent to user ${userId}.`);
+                    logger.info(
+                        `[CF:${functionName}] Notification for badge '${newBadgeAwardedId}' sent to user ${userId}.`
+                    );
                 } else if (newBadgeAwardedId) {
-                     logger.warn(`[CF:${functionName}] newBadgeAwardedId is set to '${newBadgeAwardedId}', but no details found in BADGE_DETAILS. Notification NOT sent.`);
+                    logger.warn(
+                        `[CF:${functionName}] newBadgeAwardedId is set to '${newBadgeAwardedId}', but no details found in BADGE_DETAILS. Notification NOT sent.`
+                    );
                 } else {
-                    logger.info(`[CF:${functionName}] No new badge ID was set, so no notification will be sent for this update.`);
+                    logger.info(
+                        `[CF:${functionName}] No new badge ID was set, so no notification will be sent for this update.`
+                    );
                 }
             } else {
                 logger.info(`[CF:${functionName}] No profile updates to apply for user ${userId}.`);
@@ -468,7 +481,7 @@ exports.processUploadedAvatar = onObjectFinalized(
             const userProfileRef = db.collection('userProfiles').doc(userId);
             await userProfileRef.update({
                 avatarUrls: {
-                    small: thumbUrl,    // Corrisponde a avatarUrls.small usato nel client
+                    small: thumbUrl, // Corrisponde a avatarUrls.small usato nel client
                     profile: profileUrl, // Corrisponde a avatarUrls.profile usato nel client
                 },
                 profileUpdatedAt: FieldValue.serverTimestamp(),
@@ -477,7 +490,6 @@ exports.processUploadedAvatar = onObjectFinalized(
 
             await bucket.file(filePath).delete();
             logger.info(`processUploadedAvatar: Original image ${filePath} deleted from Storage.`);
-
         } catch (error) {
             logger.error('processUploadedAvatar: Error during avatar processing:', error, { userId, filePath });
         } finally {

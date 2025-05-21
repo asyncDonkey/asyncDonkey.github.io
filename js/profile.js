@@ -144,12 +144,12 @@ function renderExternalLinks(linksArray, isOwnProfile) {
     externalLinksListUL.innerHTML = '';
 
     // Mostra la sezione solo se è il profilo dell'utente E ci sono link o si può aggiungere
-    if (!isOwnProfile || !externalLinksSection) { // Se non è il profilo proprio, non mostrare la sezione link esterni
-        if(externalLinksSection) externalLinksSection.style.display = 'none';
+    if (!isOwnProfile || !externalLinksSection) {
+        // Se non è il profilo proprio, non mostrare la sezione link esterni
+        if (externalLinksSection) externalLinksSection.style.display = 'none';
         return;
     }
     externalLinksSection.style.display = 'block';
-
 
     if (!linksArray || linksArray.length === 0) {
         if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'list-item';
@@ -251,8 +251,8 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             mainAvatarUrl = data.avatarUrls.thumbnail;
             cacheBusterTimestamp = data.profilePublicUpdatedAt;
         } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) {
-             mainAvatarUrl = data.avatarUrls.small;
-             cacheBusterTimestamp = data.profileUpdatedAt;
+            mainAvatarUrl = data.avatarUrls.small;
+            cacheBusterTimestamp = data.profileUpdatedAt;
         }
 
         if (mainAvatarUrl) {
@@ -271,7 +271,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH;
             altText = `${profileNameForTitle}'s Default Avatar`;
         }
-        
+
         profileAvatarImg.src = avatarSrcToSet;
         profileAvatarImg.alt = altText;
         profileAvatarImg.onerror = () => {
@@ -283,7 +283,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
                 profileAvatarImg.src = DEFAULT_AVATAR_IMAGE_PATH;
                 profileAvatarImg.alt = `${profileNameForTitle}'s Default Avatar (fallback errore critico)`;
             }
-            profileAvatarImg.onerror = null; 
+            profileAvatarImg.onerror = null;
         };
     }
 
@@ -321,7 +321,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         // ... (logica badges invariata)
         badgesDisplayContainer.innerHTML = '';
         noBadgesMessage.style.display = 'none';
-        const earnedBadgesArray = isOwnProfile ? (data.earnedBadges || []) : [];
+        const earnedBadgesArray = isOwnProfile ? data.earnedBadges || [] : [];
         if (earnedBadgesArray.length > 0) {
             badgesSection.style.display = 'block';
             earnedBadgesArray.forEach((badgeId) => {
@@ -368,7 +368,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             emailVerificationBanner.style.display = 'block';
             if (resendEmailMessage) resendEmailMessage.textContent = '';
         }
-        
+
         if (updateStatusForm) {
             updateStatusForm.style.display = 'flex';
             if (statusMessageInput)
@@ -378,18 +378,14 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         }
         if (updateBioForm) {
             updateBioForm.style.display = 'block';
-            if (bioInput)
-                bioInput.placeholder = data.bio
-                    ? 'Modifica la tua bio...'
-                    : 'Scrivi qualcosa di te...';
+            if (bioInput) bioInput.placeholder = data.bio ? 'Modifica la tua bio...' : 'Scrivi qualcosa di te...';
         }
 
         if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
         renderExternalLinks(data.externalLinks || [], true);
-        
+
         updateBioCharCounter();
         if (avatarUploadSection) avatarUploadSection.style.display = 'block';
-
     } else {
         // Profilo di un altro utente
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
@@ -451,7 +447,9 @@ function loadProfileData(uidToLoad, isOwnProfile) {
     currentProfileListenerUnsubscribe = onSnapshot(
         userProfileRef,
         (docSnap) => {
-            console.log(`[AthenaDev Debug - onSnapshot] Dati da ${collectionPath} ricevuti/aggiornati per ${uidToLoad}.`);
+            console.log(
+                `[AthenaDev Debug - onSnapshot] Dati da ${collectionPath} ricevuti/aggiornati per ${uidToLoad}.`
+            );
             if (docSnap.exists()) {
                 const profileData = docSnap.data();
                 // console.log('[AthenaDev Debug - onSnapshot] Dati grezzi:', JSON.parse(JSON.stringify(profileData)));
@@ -478,7 +476,10 @@ function loadProfileData(uidToLoad, isOwnProfile) {
         (error) => {
             document.title = 'Errore Profilo - asyncDonkey.io';
             if (profileSectionTitle) profileSectionTitle.textContent = 'Errore Profilo';
-            console.error(`[AthenaDev Debug - onSnapshot] Errore nel listener del profilo ${collectionPath}/${uidToLoad}:`, error);
+            console.error(
+                `[AthenaDev Debug - onSnapshot] Errore nel listener del profilo ${collectionPath}/${uidToLoad}:`,
+                error
+            );
             if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
             if (profileLoginMessage) {
                 profileLoginMessage.style.display = 'block';
@@ -533,7 +534,6 @@ async function handleExternalLinkFormSubmit(event) {
         return;
     }
     if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = '';
-    
 
     let currentLinks = Array.isArray(profileDataForDisplay.externalLinks)
         ? [...profileDataForDisplay.externalLinks]
@@ -555,7 +555,7 @@ async function handleExternalLinkFormSubmit(event) {
         }
         currentLinks.push({ title, url });
     }
-    console.log("Saving externalLinks. Data being sent:", JSON.stringify(currentLinks, null, 2));
+    console.log('Saving externalLinks. Data being sent:', JSON.stringify(currentLinks, null, 2));
 
     if (saveExternalLinkBtn) {
         saveExternalLinkBtn.disabled = true;
@@ -1128,7 +1128,7 @@ onAuthStateChanged(auth, (user) => {
         if (badgesSection) badgesSection.style.display = 'none';
         if (myArticlesSection) myArticlesSection.style.display = 'none';
         if (avatarUploadSection) avatarUploadSection.style.display = 'none';
-        
+
         document.title = 'Profilo Utente - asyncDonkey.io';
         if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Utente';
     }

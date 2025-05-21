@@ -70,36 +70,36 @@ Verifica Necessaria: Confronto con dati Firestore reali e regole.
 🆕 EPIC - KOD-PLATFORM: Funzionalità Core della Piattaforma "Knowledge-on-Demand" (Priorità ALTA)
 
 ⭐🆕 **Sub-Task KOD-FEAT-001: Sistema di Richiesta Articoli**
-    * [ ] Definire struttura Firestore per le richieste articoli (es. `articleRequests/{requestId}` con campi: `topic`, `description`, `requesterUserId`, `timestamp`, `status` ['pending', 'assigned', 'completed', 'rejected'], `voteCount`, `editorUserId` (chi prende in carico)).
-    * [ ] Progettare e implementare UI per la sottomissione di una richiesta articolo (accessibile dalla nuova homepage).
-    * [ ] Implementare logica per gli utenti per votare le richieste articolo (+1).
-    * [ ] Cloud Function (o logica client-protetta) per gestire i voti in modo sicuro.
+_ [ ] Definire struttura Firestore per le richieste articoli (es. `articleRequests/{requestId}` con campi: `topic`, `description`, `requesterUserId`, `timestamp`, `status` ['pending', 'assigned', 'completed', 'rejected'], `voteCount`, `editorUserId` (chi prende in carico)).
+_ [ ] Progettare e implementare UI per la sottomissione di una richiesta articolo (accessibile dalla nuova homepage).
+_ [ ] Implementare logica per gli utenti per votare le richieste articolo (+1).
+_ [ ] Cloud Function (o logica client-protetta) per gestire i voti in modo sicuro.
 
 ⭐🆕 **Sub-Task KOD-FEAT-002: Riprogettazione Homepage (Impatto Elevato)**
-    * [ ] Wireframe/Mockup del nuovo layout homepage. Sezioni chiave:
-        * Modulo/CTA per richiedere un articolo.
-        * Sezione "Richieste Articoli più Votate" (non ancora assegnate, filtrabili/ordinabili).
-        * Sezione "Articoli Recenti/In Evidenza" (basati su KOD).
-    * [ ] Riscrivere `index.html` per il nuovo layout.
-    * [ ] Rifattorizzare/Riscrivere `js/homePageFeatures.js` per popolare le nuove sezioni.
+_ [ ] Wireframe/Mockup del nuovo layout homepage. Sezioni chiave:
+_ Modulo/CTA per richiedere un articolo.
+_ Sezione "Richieste Articoli più Votate" (non ancora assegnate, filtrabili/ordinabili).
+_ Sezione "Articoli Recenti/In Evidenza" (basati su KOD).
+_ [ ] Riscrivere `index.html` per il nuovo layout.
+_ [ ] Rifattorizzare/Riscrivere `js/homePageFeatures.js` per popolare le nuove sezioni.
 
 ⭐🆕 **Sub-Task KOD-FEAT-003: Assegnazione/Presa in Carico Articoli Richiesti**
-    * [ ] UI per autori per visualizzare richieste disponibili e "prendere in carico" una richiesta.
-    * [ ] Logica per aggiornare lo stato della richiesta articolo (es. `status: 'assigned'`, `editorUserId: currentUserId`).
-    * [ ] Collegare la presa in carico al processo di sottomissione articolo esistente (`submit-article.html`). L'articolo sottomesso deve referenziare l'`articleRequestId` originale.
-    * [ ] UI per l'utente che ha richiesto l'articolo per vedere lo stato della sua richiesta.
+_ [ ] UI per autori per visualizzare richieste disponibili e "prendere in carico" una richiesta.
+_ [ ] Logica per aggiornare lo stato della richiesta articolo (es. `status: 'assigned'`, `editorUserId: currentUserId`).
+_ [ ] Collegare la presa in carico al processo di sottomissione articolo esistente (`submit-article.html`). L'articolo sottomesso deve referenziare l'`articleRequestId` originale.
+_ [ ] UI per l'utente che ha richiesto l'articolo per vedere lo stato della sua richiesta.
 
 ⭐🆕 **Sub-Task KOD-FEAT-004: Sistema di "Complimenti" per Autori e Ranking**
-    * [ ] Definire come i "complimenti" vengono dati/registrati (es. `articles/{articleId}/compliments/{userId}` o `userProfiles/{authorId}/complimentsReceived/{complimentId}` con `giverUserId`, `timestamp`).
-    * [ ] Progettare e implementare UI per dare un "complimento" all'autore di un articolo (es. un bottone sulla pagina dell'articolo).
-    * [ ] Definire logica di ranking: come i complimenti (e/o altri fattori come numero articoli approvati) contribuiscono al ranking.
-    * [ ] Struttura dati per i badge/banner di ranking (es. in `userProfiles/{userId}/rankBadges`).
-    * [ ] Cloud Function per aggiornare il ranking/assegnare badge quando un autore riceve complimenti o raggiunge traguardi.
-    * [ ] Visualizzare ranking/badge sul profilo utente e potenzialmente accanto al nome dell'autore negli articoli.
+_ [ ] Definire come i "complimenti" vengono dati/registrati (es. `articles/{articleId}/compliments/{userId}` o `userProfiles/{authorId}/complimentsReceived/{complimentId}` con `giverUserId`, `timestamp`).
+_ [ ] Progettare e implementare UI per dare un "complimento" all'autore di un articolo (es. un bottone sulla pagina dell'articolo).
+_ [ ] Definire logica di ranking: come i complimenti (e/o altri fattori come numero articoli approvati) contribuiscono al ranking.
+_ [ ] Struttura dati per i badge/banner di ranking (es. in `userProfiles/{userId}/rankBadges`).
+_ [ ] Cloud Function per aggiornare il ranking/assegnare badge quando un autore riceve complimenti o raggiunge traguardi.
+_ [ ] Visualizzare ranking/badge sul profilo utente e potenzialmente accanto al nome dell'autore negli articoli.
 
 🆕 **Sub-Task KOD-FEAT-005: Strategia Applicazione Mobile (Placeholder per Ricerca Futura - Priorità BASSA)**
-    * [ ] Valutazione iniziale: PWA vs Responsive Design vs Approcci Nativi per il futuro.
-    * [ ] Identificare le funzionalità KOD chiave che beneficerebbero maggiormente da un'esperienza mobile dedicata.
+_ [ ] Valutazione iniziale: PWA vs Responsive Design vs Approcci Nativi per il futuro.
+_ [ ] Identificare le funzionalità KOD chiave che beneficerebbero maggiormente da un'esperienza mobile dedicata.
 
 🔧 TECHNICAL DEBT & REFACTORING 🔧
 🆕 Task TECH-DEBT-001: Unificare Sistemi di Gestione Commenti (Priorità MEDIA-ALTA)

@@ -8,7 +8,7 @@ import {
     getDocs,
     doc,
     updateDoc,
-    serverTimestamp
+    serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 // If you have a global showToast, import it. For now, console.log for errors.
 // import { showToast } from './toastNotifications.js';
@@ -25,7 +25,6 @@ const loadingReadPlaceholder = document.getElementById('loading-read-placeholder
 const authPromptElement = document.getElementById('auth-prompt');
 const notificationsContentElement = document.getElementById('notifications-content');
 const loginPromptBtn = document.getElementById('login-prompt-btn');
-
 
 const NOTIFICATIONS_LIMIT = 25; // Max notifications to show in each list
 
@@ -109,12 +108,14 @@ async function markSpecificNotificationAsRead(notificationId, currentUserId, lis
         // showToast('Errore: utente non valido.', 'error');
         return false;
     }
-    console.log(`[AllNotifications by Athena] Marking notification ${notificationId} as read for user ${currentUserId}.`);
+    console.log(
+        `[AllNotifications by Athena] Marking notification ${notificationId} as read for user ${currentUserId}.`
+    );
     const notifRef = doc(db, 'userProfiles', currentUserId, 'notifications', notificationId);
     try {
         await updateDoc(notifRef, {
             read: true,
-            updatedAt: serverTimestamp()
+            updatedAt: serverTimestamp(),
         });
         console.log(`[AllNotifications by Athena] Notification ${notificationId} marked as read in Firestore.`);
         if (listItemElement) {
@@ -127,7 +128,10 @@ async function markSpecificNotificationAsRead(notificationId, currentUserId, lis
         // The main.js bell counter will update due to its onSnapshot listener.
         return true;
     } catch (error) {
-        console.error(`[AllNotifications by Athena] Firestore error marking notification ${notificationId} as read:`, error);
+        console.error(
+            `[AllNotifications by Athena] Firestore error marking notification ${notificationId} as read:`,
+            error
+        );
         // showToast('Errore nel segnare la notifica come letta.', 'error');
         return false;
     }
@@ -155,7 +159,8 @@ async function handleNotificationItemClick(event, currentUserId) {
 
     if (isUnread) {
         const success = await markSpecificNotificationAsRead(notificationId, currentUserId, clickedItem);
-        if (success && unreadCountElement) { // Decrement client-side counter
+        if (success && unreadCountElement) {
+            // Decrement client-side counter
             let currentCount = parseInt(unreadCountElement.textContent, 10);
             if (!isNaN(currentCount) && currentCount > 0) {
                 unreadCountElement.textContent = currentCount - 1;
@@ -167,7 +172,6 @@ async function handleNotificationItemClick(event, currentUserId) {
         window.location.href = targetUrl;
     }
 }
-
 
 /**
  * Fetches and displays all notifications for the given user.
@@ -199,7 +203,12 @@ async function loadAllUserNotifications(userId) {
     try {
         // Fetch Unread Notifications
         const unreadNotificationsRef = collection(db, 'userProfiles', userId, 'notifications');
-        const unreadQuery = query(unreadNotificationsRef, where('read', '==', false), orderBy('timestamp', 'desc'), limit(NOTIFICATIONS_LIMIT));
+        const unreadQuery = query(
+            unreadNotificationsRef,
+            where('read', '==', false),
+            orderBy('timestamp', 'desc'),
+            limit(NOTIFICATIONS_LIMIT)
+        );
         const unreadSnapshot = await getDocs(unreadQuery);
 
         loadingUnreadPlaceholder.style.display = 'none';
@@ -207,7 +216,7 @@ async function loadAllUserNotifications(userId) {
             unreadListElement.appendChild(noUnreadPlaceholder);
             noUnreadPlaceholder.style.display = 'list-item';
         } else {
-            unreadSnapshot.forEach(doc => {
+            unreadSnapshot.forEach((doc) => {
                 const notification = { id: doc.id, ...doc.data() };
                 const listItem = createNotificationListItem(notification);
                 unreadListElement.appendChild(listItem);
@@ -216,10 +225,14 @@ async function loadAllUserNotifications(userId) {
         }
         if (unreadCountElement) unreadCountElement.textContent = unreadFetchedCount;
 
-
         // Fetch Read Notifications
         const readNotificationsRef = collection(db, 'userProfiles', userId, 'notifications');
-        const readQuery = query(readNotificationsRef, where('read', '==', true), orderBy('timestamp', 'desc'), limit(NOTIFICATIONS_LIMIT));
+        const readQuery = query(
+            readNotificationsRef,
+            where('read', '==', true),
+            orderBy('timestamp', 'desc'),
+            limit(NOTIFICATIONS_LIMIT)
+        );
         const readSnapshot = await getDocs(readQuery);
 
         loadingReadPlaceholder.style.display = 'none';
@@ -227,7 +240,7 @@ async function loadAllUserNotifications(userId) {
             readListElement.appendChild(noReadPlaceholder);
             noReadPlaceholder.style.display = 'list-item';
         } else {
-            readSnapshot.forEach(doc => {
+            readSnapshot.forEach((doc) => {
                 const notification = { id: doc.id, ...doc.data() };
                 const listItem = createNotificationListItem(notification);
                 readListElement.appendChild(listItem);
@@ -238,7 +251,6 @@ async function loadAllUserNotifications(userId) {
         // Add event listeners to the lists for interaction
         unreadListElement.addEventListener('click', (event) => handleNotificationItemClick(event, userId));
         readListElement.addEventListener('click', (event) => handleNotificationItemClick(event, userId)); // Handles clicks on already read items for navigation
-
     } catch (error) {
         console.error('[AllNotifications by Athena] Error fetching notifications:', error);
         loadingUnreadPlaceholder.textContent = 'Errore nel caricare le notifiche.';
@@ -248,7 +260,6 @@ async function loadAllUserNotifications(userId) {
         // showToast('Errore caricamento notifiche.', 'error');
     }
 }
-
 
 // Main execution flow
 document.addEventListener('DOMContentLoaded', () => {
@@ -262,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else window.location.href = 'index.html'; // Fallback if modal not on page
         });
     }
-    
+
     // Check authentication state
     // Using a slight delay for auth to initialize, or listen to 'userAuthenticated' from main.js
     // For simplicity here, direct check after a brief timeout.
@@ -270,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // or that auth.onAuthStateChanged is handled here too.
     // Let's use onAuthStateChanged for robustness as it's the standard Firebase way.
 
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged((user) => {
         if (user) {
             console.log('[AllNotifications by Athena] User is authenticated:', user.uid);
             authPromptElement.style.display = 'none';
@@ -281,9 +292,9 @@ document.addEventListener('DOMContentLoaded', () => {
             authPromptElement.style.display = 'block';
             notificationsContentElement.style.display = 'none';
             // Clear any potentially loaded data if user logs out while on page
-            if(unreadListElement) unreadListElement.innerHTML = '';
-            if(readListElement) readListElement.innerHTML = '';
-            if(unreadCountElement) unreadCountElement.textContent = '0';
+            if (unreadListElement) unreadListElement.innerHTML = '';
+            if (readListElement) readListElement.innerHTML = '';
+            if (unreadCountElement) unreadCountElement.textContent = '0';
         }
     });
 });

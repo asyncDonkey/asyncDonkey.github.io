@@ -19,6 +19,7 @@ import {
     addDoc,
     doc,
     getDoc,
+    documentId,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { showToast } from './toastNotifications.js';
 
@@ -52,118 +53,212 @@ function formatScoreTimestamp(firebaseTimestamp) {
 }
 
 async function loadDonkeyLeaderboard() {
+    const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
     if (!miniLeaderboardListEl) {
-        console.warn('Elemento miniLeaderboardList non trovato.');
+        console.warn('[donkeyRunner.js] Elemento miniLeaderboardList non trovato.');
         return;
     }
     if (!db) {
-        console.error('Istanza DB non disponibile per caricare la leaderboard di DonkeyRunner.');
+        console.error('[donkeyRunner.js] Istanza DB non disponibile per caricare la leaderboard di DonkeyRunner.');
         miniLeaderboardListEl.innerHTML = '<li>Errore connessione DB.</li>';
         return;
     }
     const leaderboardScoresCollection = collection(db, 'leaderboardScores');
-    miniLeaderboardListEl.innerHTML = '<li>Caricamento punteggi...</li>';
+    miniLeaderboardListEl.innerHTML =
+        '<li><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</li>';
+
     try {
         const q = query(
             leaderboardScoresCollection,
             where('gameId', '==', 'donkeyRunner'),
             orderBy('score', 'desc'),
-            limit(MAX_LEADERBOARD_ENTRIES_MINI)
+            limit(5) // MAX_LEADERBOARD_ENTRIES_MINI (era 5)
         );
         const querySnapshot = await getDocs(q);
         const fetchedLeaderboard = [];
         querySnapshot.forEach((doc) => {
             fetchedLeaderboard.push({ id: doc.id, ...doc.data() });
         });
-        displayDonkeyLeaderboard(fetchedLeaderboard);
+
+        const userIds = [...new Set(fetchedLeaderboard.map((entry) => entry.userId).filter((id) => id))];
+        const profilesMap = new Map();
+
+        if (userIds.length > 0) {
+            const MAX_IDS_PER_IN_QUERY = 30;
+            const profilePromises = [];
+            for (let i = 0; i < userIds.length; i += MAX_IDS_PER_IN_QUERY) {
+                const batchUserIds = userIds.slice(i, i + MAX_IDS_PER_IN_QUERY);
+                if (batchUserIds.length > 0) {
+                    const profilesQuery = query(
+                        collection(db, 'userPublicProfiles'),
+                        where(documentId(), 'in', batchUserIds)
+                    );
+                    profilePromises.push(getDocs(profilesQuery));
+                }
+            }
+            try {
+                const profileSnapshotsArray = await Promise.all(profilePromises);
+                profileSnapshotsArray.forEach((profileSnaps) => {
+                    profileSnaps.forEach((snap) => {
+                        if (snap.exists()) {
+                            profilesMap.set(snap.id, snap.data());
+                        }
+                    });
+                });
+            } catch (profileError) {
+                console.error(
+                    '[donkeyRunner.js] Errore caricamento profili pubblici per mini leaderboard:',
+                    profileError
+                );
+            }
+        }
+
+        displayDonkeyLeaderboard(fetchedLeaderboard, profilesMap);
     } catch (error) {
-        console.error('Errore caricamento DonkeyRunner leaderboard: ', error);
+        console.error('[donkeyRunner.js] Errore caricamento DonkeyRunner leaderboard: ', error);
         if (error.code === 'failed-precondition') {
             miniLeaderboardListEl.innerHTML =
                 '<li>Indice Firestore mancante. Controlla la console per il link per crearlo.</li>';
-            console.error(
-                "Potrebbe essere necessario un indice composito in Firestore. L'errore originale è:",
-                error.message
-            );
         } else {
             if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Errore caricamento punteggi.</li>';
         }
     }
 }
 
-function displayDonkeyLeaderboard(leaderboardData) {
-    if (!miniLeaderboardListEl) {
-        console.warn('Elemento miniLeaderboardList non trovato.');
-        return;
-    }
+function displayDonkeyLeaderboard(leaderboardData, profilesMap) {
+    const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
+    if (!miniLeaderboardListEl) return;
+
     miniLeaderboardListEl.innerHTML = '';
     if (!leaderboardData || leaderboardData.length === 0) {
         miniLeaderboardListEl.innerHTML = '<li>Nessun punteggio registrato.</li>';
         return;
     }
+
     leaderboardData.forEach((entry, index) => {
         const li = document.createElement('li');
+
         const rankSpan = document.createElement('span');
         rankSpan.className = 'player-rank';
         rankSpan.textContent = `${index + 1}.`;
         li.appendChild(rankSpan);
+
         const avatarImg = document.createElement('img');
-        avatarImg.className = 'player-avatar';
-        const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${entry.id}`;
-        let altTextForBlockie = entry.userName || entry.initials || 'Anon';
-        avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 });
-        avatarImg.alt = `${altTextForBlockie}'s Avatar`;
-        avatarImg.style.backgroundColor = 'transparent';
+        avatarImg.className = 'player-avatar'; // Assicurati che sia stilizzata (es. 30x30px)
+
+        const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-dr-${entry.id}`;
+        // Priorità ai dati del profilo pubblico, poi a quelli del punteggio, infine fallback generici
+        let userDisplayName = 'Giocatore Anonimo'; // Fallback finale per nome
+        let altTextForAvatar = 'Avatar Giocatore';
+        let avatarSrcToUse = generateBlockieAvatar(seedForBlockie, 30, { size: 8 }); // Default blockie
+        let userNationalityCode = null; // Inizializza a null
+
+        // Prova prima con i dati del punteggio (per ospiti o se il profilo non viene trovato)
+        if (entry.userName) userDisplayName = entry.userName;
+        if (entry.initials && !entry.userName) userDisplayName = entry.initials; // Se userName non c'è ma initials sì
+        altTextForAvatar = userDisplayName;
+        if (entry.nationalityCode) userNationalityCode = entry.nationalityCode;
+
+        const userProfile = entry.userId ? profilesMap.get(entry.userId) : null;
+
+        if (userProfile) {
+            userDisplayName = userProfile.displayName || userDisplayName; // Sovrascrive con displayName da userPublicProfiles se esiste
+            altTextForAvatar = userDisplayName; // Aggiorna alt text con il nome più accurato
+            userNationalityCode = userProfile.nationalityCode || userNationalityCode; // Sovrascrive/imposta da userPublicProfiles
+
+            let chosenAvatarUrl = null;
+            if (userProfile.avatarUrls) {
+                // Assicurati che avatarUrls esista
+                if (userProfile.avatarUrls.small) {
+                    chosenAvatarUrl = userProfile.avatarUrls.small;
+                } else if (userProfile.avatarUrls.profile) {
+                    // Fallback a dimensione profile
+                    chosenAvatarUrl = userProfile.avatarUrls.profile;
+                } else if (userProfile.avatarUrls.thumbnail) {
+                    // Altro possibile fallback
+                    chosenAvatarUrl = userProfile.avatarUrls.thumbnail;
+                }
+            }
+            // Supporto per vecchio campo avatarUrl singolo, se avatarUrls non produce nulla
+            if (!chosenAvatarUrl && userProfile.avatarUrl) {
+                chosenAvatarUrl = userProfile.avatarUrl;
+            }
+
+            if (chosenAvatarUrl) {
+                avatarSrcToUse = chosenAvatarUrl;
+                // Usa profileUpdatedAt (canonica) per cache-busting
+                if (userProfile.profileUpdatedAt && userProfile.profileUpdatedAt.seconds) {
+                    avatarSrcToUse += `?ts=${userProfile.profileUpdatedAt.seconds}`;
+                } else if (userProfile.profileUpdatedAt && typeof userProfile.profileUpdatedAt === 'number') {
+                    // Se è un timestamp numerico
+                    avatarSrcToUse += `?ts=${userProfile.profileUpdatedAt}`;
+                }
+            }
+            // Se chosenAvatarUrl è null, avatarSrcToUse rimane il blockie generato in precedenza
+        }
+
+        avatarImg.src = avatarSrcToUse;
+        avatarImg.alt = `${altTextForAvatar}'s Avatar`;
+        avatarImg.style.backgroundColor = 'transparent'; // O gestisci via CSS
         avatarImg.onerror = () => {
-            avatarImg.style.backgroundColor = '#ddd';
-            avatarImg.alt = 'Error loading avatar';
-            avatarImg.src =
-                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+            avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 });
+            avatarImg.alt = `${altTextForAvatar}'s Fallback Avatar`;
+            avatarImg.style.backgroundColor = '#ddd'; // Sfondo per fallback
+            avatarImg.onerror = null;
         };
         li.appendChild(avatarImg);
+
         const playerInfoDiv = document.createElement('div');
         playerInfoDiv.className = 'player-info';
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'player-name'; // Mantieni la classe per lo stile
 
-        // Aggiungi la bandierina prima del nome/link
-        if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'player-name';
+
+        if (
+            userNationalityCode &&
+            userNationalityCode !== 'OTHER' &&
+            typeof userNationalityCode === 'string' &&
+            userNationalityCode.length === 2
+        ) {
             const flagIconSpan = document.createElement('span');
-            flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
-            // Applica eventuali stili per la bandierina se necessario qui o via CSS
-            flagIconSpan.style.marginRight = '8px'; // Esempio
+            flagIconSpan.classList.add('fi', `fi-${userNationalityCode.toLowerCase()}`);
+            flagIconSpan.title = userNationalityCode;
+            flagIconSpan.style.marginRight = '8px';
             flagIconSpan.style.verticalAlign = 'middle';
             nameSpan.appendChild(flagIconSpan);
         }
 
-        let displayName = entry.userName || entry.initials || 'Giocatore Anonimo';
-
         if (entry.userId) {
-            // Utente Registrato
             const profileLink = document.createElement('a');
             profileLink.href = `profile.html?userId=${entry.userId}`;
-            profileLink.textContent = displayName;
-            // Potresti aggiungere una classe CSS specifica per i link ai profili se vuoi stili diversi
-            // profileLink.classList.add('profile-link-leaderboard');
+            profileLink.textContent = userDisplayName;
             nameSpan.appendChild(profileLink);
         } else {
-            // Utente Ospite
-            if (!entry.initials)
-                displayName += ' (Ospite)'; // Se non ci sono initials, rendi più esplicito che è ospite
-            else if (entry.initials) displayName = entry.initials + ' (Ospite)'; // Se ci sono initials, usa quelle + (Ospite)
-            nameSpan.appendChild(document.createTextNode(displayName));
+            // Gestione nome ospite
+            let guestDisplayName = userDisplayName; // Che a questo punto è entry.initials o 'Giocatore Anonimo'
+            if (entry.initials && !guestDisplayName.toLowerCase().includes('(ospite)')) {
+                guestDisplayName = entry.initials + ' (Ospite)';
+            } else if (guestDisplayName === 'Giocatore Anonimo' && (!entry.initials || entry.initials.trim() === '')) {
+                // Se è "Giocatore Anonimo" e non ci sono initial esplicite, aggiungi (Ospite)
+                guestDisplayName += ' (Ospite)';
+            }
+            nameSpan.appendChild(document.createTextNode(guestDisplayName));
         }
 
         const dateSpan = document.createElement('span');
         dateSpan.className = 'player-date';
+        // La funzione formatScoreTimestamp è già definita nel tuo donkeyRunner.js
         dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
+
         playerInfoDiv.appendChild(nameSpan);
         playerInfoDiv.appendChild(dateSpan);
         li.appendChild(playerInfoDiv);
+
         const scoreSpan = document.createElement('span');
         scoreSpan.className = 'player-score';
-        scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
+        scoreSpan.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
         li.appendChild(scoreSpan);
+
         miniLeaderboardListEl.appendChild(li);
     });
 }

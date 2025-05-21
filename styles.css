@@ -4274,87 +4274,97 @@ header .nav-link-icon-only .material-symbols-rounded {
 /* } */
 
 .page-container {
-            padding-top: 20px;
-            padding-bottom: 40px;
-        }
-        .notifications-page-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .notifications-page-list .notification-item { /* Reuse styles from panel if possible */
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s ease;
-            cursor: default; /* Default cursor, link part will be pointer */
-        }
-        .notifications-page-list .notification-item:hover {
-            background-color: var(--hover-background-color);
-        }
-        .notifications-page-list .notification-item.unread {
-            background-color: var(--notification-unread-bg, var(--accent-color-light-transparent)); /* Or a distinct background */
-            font-weight: bold; /* Example */
-        }
-        .notifications-page-list .notification-item.read {
-            /* Styles for read items, e.g., less prominent */
-            opacity: 0.85;
-        }
-        .notifications-page-list .notification-item-icon {
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-        .notifications-page-list .notification-item-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .notifications-page-list .notification-item-text {
-            margin: 0 0 4px 0;
-            font-size: 0.95em;
-            line-height: 1.4;
-        }
-        .notifications-page-list .notification-item.unread .notification-item-text {
-             font-weight: 600; /* More emphasis for unread messages */
-        }
-         .notifications-page-list .notification-item.read .notification-item-text {
-             font-weight: normal;
-        }
-        .notifications-page-list .notification-item-timestamp {
-            font-size: 0.8em;
-            color: var(--text-color-secondary);
-        }
-        .notifications-page-list .notification-item-link { /* Overlay link for clickable item */
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1; /* Ensure it's clickable over content if styled as overlay */
-            cursor: pointer;
-        }
-         .notifications-page-list .notification-item { /* Add relative positioning for the overlay link */
-            position: relative;
-        }
-        .notifications-page-list .placeholder-message {
-            padding: 20px;
-            text-align: center;
-            color: var(--text-color-secondary);
-            border-bottom: 1px solid var(--border-color);
-        }
-        .section-divider {
-            margin-top: 30px;
-            margin-bottom: 30px;
-            border: 0;
-            border-top: 1px solid var(--border-color-strong);
-        }
-        #auth-prompt {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: var(--background-alt-color);
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        #auth-prompt p { margin-bottom: 15px; }
-        #auth-prompt .button-primary { text-decoration: none; }
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+.notifications-page-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.notifications-page-list .notification-item {
+    /* Reuse styles from panel if possible */
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+    cursor: default; /* Default cursor, link part will be pointer */
+}
+.notifications-page-list .notification-item:hover {
+    background-color: var(--hover-background-color);
+}
+.notifications-page-list .notification-item.unread {
+    background-color: var(
+        --notification-unread-bg,
+        var(--accent-color-light-transparent)
+    ); /* Or a distinct background */
+    font-weight: bold; /* Example */
+}
+.notifications-page-list .notification-item.read {
+    /* Styles for read items, e.g., less prominent */
+    opacity: 0.85;
+}
+.notifications-page-list .notification-item-icon {
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.notifications-page-list .notification-item-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.notifications-page-list .notification-item-text {
+    margin: 0 0 4px 0;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+.notifications-page-list .notification-item.unread .notification-item-text {
+    font-weight: 600; /* More emphasis for unread messages */
+}
+.notifications-page-list .notification-item.read .notification-item-text {
+    font-weight: normal;
+}
+.notifications-page-list .notification-item-timestamp {
+    font-size: 0.8em;
+    color: var(--text-color-secondary);
+}
+.notifications-page-list .notification-item-link {
+    /* Overlay link for clickable item */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Ensure it's clickable over content if styled as overlay */
+    cursor: pointer;
+}
+.notifications-page-list .notification-item {
+    /* Add relative positioning for the overlay link */
+    position: relative;
+}
+.notifications-page-list .placeholder-message {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-color-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+.section-divider {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border: 0;
+    border-top: 1px solid var(--border-color-strong);
+}
+#auth-prompt {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--background-alt-color);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+#auth-prompt p {
+    margin-bottom: 15px;
+}
+#auth-prompt .button-primary {
+    text-decoration: none;
+}

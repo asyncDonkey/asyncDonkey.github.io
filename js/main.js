@@ -13,6 +13,7 @@ import {
     limit,
     getDocs,
     onSnapshot,
+    documentId,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
     getAuth,
@@ -638,77 +639,212 @@ function updateUIBasedOnAuthState(user, profileData) {
 export { db, auth, firebaseConfig };
 
 async function loadHomeMiniLeaderboard() {
-    // ... (codice invariato)
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
-    if (!leaderboardListElement) return;
+    if (!leaderboardListElement) {
+        console.warn('[main.js] Elemento homeMiniLeaderboardList non trovato.');
+        return;
+    }
     if (!db) {
-        console.error('DB instance non disponibile per mini-leaderboard homepage.');
+        // Assicurati che 'db' sia disponibile globalmente o importato correttamente
+        console.error('[main.js] Istanza DB non disponibile per mini-leaderboard homepage.');
         leaderboardListElement.innerHTML = '<li>Errore DB.</li>';
         return;
     }
-    leaderboardListElement.innerHTML = '<li>Caricamento...</li>';
+
+    // Assicurati che 'collection', 'query', 'where', 'orderBy', 'limit', 'getDocs', 'documentId'
+    // e 'generateBlockieAvatar', 'escapeHTML' siano importati/disponibili in questo scope.
+    // Esempio:
+    // import { collection, query, where, orderBy, limit, getDocs, documentId } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    // import { db, generateBlockieAvatar, escapeHTML } from './main.js'; // o da dove provengono
+
+    leaderboardListElement.innerHTML =
+        '<li><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</li>';
+
     try {
         const scoresCollectionRef = collection(db, 'leaderboardScores');
-        const q = query(scoresCollectionRef, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), limit(5));
+        // Se questa leaderboard è solo per Donkey Runner, mantieni il filtro:
+        // const q = query(scoresCollectionRef, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), limit(5));
+        // Se è una leaderboard generale dei punteggi più alti da qualsiasi gioco:
+        const q = query(scoresCollectionRef, orderBy('score', 'desc'), limit(5));
+
         const querySnapshot = await getDocs(q);
-        leaderboardListElement.innerHTML = '';
+
         if (querySnapshot.empty) {
             leaderboardListElement.innerHTML = '<li>Nessun punteggio! Sii il primo!</li>';
             return;
         }
-        let rank = 1;
+
+        const scoresData = [];
         querySnapshot.forEach((docSnapshot) => {
-            const entry = docSnapshot.data();
+            scoresData.push({ id: docSnapshot.id, ...docSnapshot.data() });
+        });
+
+        const userIds = [...new Set(scoresData.map((entry) => entry.userId).filter((id) => id))];
+        const profilesMap = new Map();
+
+        if (userIds.length > 0) {
+            const MAX_IDS_PER_IN_QUERY = 30;
+            const profilePromises = [];
+            for (let i = 0; i < userIds.length; i += MAX_IDS_PER_IN_QUERY) {
+                const batchUserIds = userIds.slice(i, i + MAX_IDS_PER_IN_QUERY);
+                if (batchUserIds.length > 0) {
+                    const profilesQuery = query(
+                        collection(db, 'userPublicProfiles'),
+                        where(documentId(), 'in', batchUserIds)
+                    );
+                    profilePromises.push(getDocs(profilesQuery));
+                }
+            }
+            try {
+                const profileSnapshotsArray = await Promise.all(profilePromises);
+                profileSnapshotsArray.forEach((profileSnaps) => {
+                    profileSnaps.forEach((snap) => {
+                        if (snap.exists()) {
+                            profilesMap.set(snap.id, snap.data());
+                        }
+                    });
+                });
+            } catch (profileError) {
+                console.error('[main.js] Errore caricamento profili per mini-leaderboard homepage:', profileError);
+            }
+        }
+
+        leaderboardListElement.innerHTML = '';
+        let rank = 1;
+        scoresData.forEach((entry) => {
             const listItem = document.createElement('li');
+
             const rankSpan = document.createElement('span');
             rankSpan.className = 'player-rank';
             rankSpan.textContent = `${rank}.`;
             listItem.appendChild(rankSpan);
+
             const avatarImg = document.createElement('img');
             avatarImg.className = 'player-avatar';
-            const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-home-${docSnapshot.id}`;
-            avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
-            avatarImg.alt = `Avatar`;
+
+            const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-home-${entry.id}`;
+            let userDisplayName = entry.userName || entry.initials || 'Anonimo';
+            let altTextForAvatar = userDisplayName;
+            let avatarSrcToUse = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
+            let userNationalityCode = entry.nationalityCode;
+
+            const userProfile = entry.userId ? profilesMap.get(entry.userId) : null;
+
+            if (userProfile) {
+                userDisplayName = userProfile.displayName || userDisplayName;
+                altTextForAvatar = userDisplayName;
+                userNationalityCode = userProfile.nationalityCode || userNationalityCode;
+
+                let chosenAvatarUrl = null;
+                if (userProfile.avatarUrls && userProfile.avatarUrls.small) {
+                    chosenAvatarUrl = userProfile.avatarUrls.small;
+                } else if (userProfile.avatarUrls && userProfile.avatarUrls.profile) {
+                    chosenAvatarUrl = userProfile.avatarUrls.profile;
+                } else if (userProfile.avatarUrls && userProfile.avatarUrls.thumbnail) {
+                    // Aggiunto controllo per thumbnail
+                    chosenAvatarUrl = userProfile.avatarUrls.thumbnail;
+                } else if (userProfile.avatarUrl) {
+                    // Supporto per vecchio campo singolo
+                    chosenAvatarUrl = userProfile.avatarUrl;
+                }
+
+                if (chosenAvatarUrl) {
+                    avatarSrcToUse = chosenAvatarUrl;
+
+                    // --- INIZIO SEZIONE CRITICA PER CACHE-BUSTING REVISIONATA ---
+                    let timestampForCache;
+                    // Controlla prima il campo che sospettiamo essere usato (es. da comments.js)
+                    if (userProfile.profilePublicUpdatedAt) {
+                        timestampForCache = userProfile.profilePublicUpdatedAt;
+                    } else if (userProfile.profileUpdatedAt) {
+                        // Poi il campo canonico/standard
+                        timestampForCache = userProfile.profileUpdatedAt;
+                    }
+
+                    if (timestampForCache) {
+                        if (timestampForCache.seconds !== undefined && typeof timestampForCache.seconds === 'number') {
+                            // Timestamp Firestore
+                            avatarSrcToUse += `?ts=${timestampForCache.seconds}`;
+                        } else if (typeof timestampForCache === 'number') {
+                            // Timestamp numerico (es. millisecondi)
+                            // Se è in millisecondi e il server/CDN non lo gestisce, potresti voler dividere per 1000
+                            avatarSrcToUse += `?ts=${timestampForCache}`;
+                        } else if (timestampForCache instanceof Date) {
+                            // Oggetto Date JavaScript
+                            avatarSrcToUse += `?ts=${Math.floor(timestampForCache.getTime() / 1000)}`;
+                        } else {
+                            console.warn(
+                                `[main.js] Timestamp per cache-busting avatar non riconosciuto per ${entry.userId}:`,
+                                timestampForCache
+                            );
+                        }
+                    } else {
+                        console.warn(
+                            `[main.js] Nessun timestamp (profilePublicUpdatedAt o profileUpdatedAt) trovato per cache-busting avatar per ${entry.userId}`
+                        );
+                    }
+                    // --- FINE SEZIONE CRITICA PER CACHE-BUSTING REVISIONATA ---
+                }
+            }
+
+            avatarImg.src = avatarSrcToUse;
+            avatarImg.alt = `${altTextForAvatar}'s Avatar`;
             avatarImg.style.backgroundColor = 'transparent';
             avatarImg.onerror = () => {
-                /* gestione errore avatar */
+                avatarImg.src = generateBlockieAvatar(seedForBlockie, 24, { size: 6, scale: 4 });
+                avatarImg.alt = `${altTextForAvatar}'s Fallback Avatar`;
+                avatarImg.onerror = null;
             };
             listItem.appendChild(avatarImg);
+
             const playerInfoSpan = document.createElement('span');
             playerInfoSpan.className = 'player-info';
+
             const nameElementContainer = document.createElement('span');
             nameElementContainer.className = 'player-name';
-            if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
+
+            if (
+                userNationalityCode &&
+                userNationalityCode !== 'OTHER' &&
+                typeof userNationalityCode === 'string' &&
+                userNationalityCode.length === 2
+            ) {
                 const flagIconSpan = document.createElement('span');
-                flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
+                flagIconSpan.classList.add('fi', `fi-${userNationalityCode.toLowerCase()}`);
+                flagIconSpan.title = userNationalityCode; // Aggiungi tooltip per accessibilità
                 flagIconSpan.style.marginRight = '5px';
                 flagIconSpan.style.verticalAlign = 'middle';
                 nameElementContainer.appendChild(flagIconSpan);
             }
-            let displayName = entry.userName || entry.initials || 'Anonimo';
+
             if (entry.userId) {
                 const profileLink = document.createElement('a');
                 profileLink.href = `profile.html?userId=${entry.userId}`;
-                profileLink.textContent = escapeHTML(displayName);
+                profileLink.textContent = escapeHTML(userDisplayName);
                 nameElementContainer.appendChild(profileLink);
             } else {
-                if (entry.initials) displayName = entry.initials + ' (Ospite)';
-                else displayName += ' (Ospite)';
-                nameElementContainer.appendChild(document.createTextNode(escapeHTML(displayName)));
+                let guestName = userDisplayName;
+                if (entry.initials && !guestName.toLowerCase().includes('(ospite)'))
+                    guestName = entry.initials + ' (Ospite)';
+                else if (!entry.initials && guestName === 'Anonimo' && !guestName.toLowerCase().includes('(ospite)'))
+                    guestName += ' (Ospite)';
+                nameElementContainer.appendChild(document.createTextNode(escapeHTML(guestName)));
             }
             playerInfoSpan.appendChild(nameElementContainer);
             listItem.appendChild(playerInfoSpan);
+
             const scoreSpan = document.createElement('span');
             scoreSpan.className = 'player-score';
             scoreSpan.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
             listItem.appendChild(scoreSpan);
+
             leaderboardListElement.appendChild(listItem);
             rank++;
         });
     } catch (error) {
-        console.error('Errore caricamento mini-leaderboard homepage:', error);
+        console.error('[main.js] Errore caricamento mini-leaderboard homepage:', error);
         leaderboardListElement.innerHTML = '<li>Errore caricamento.</li>';
-        if (error.code === 'failed-precondition') {
+        if (error.code === 'failed-precondition' && error.message.includes('index')) {
             leaderboardListElement.innerHTML += '<li>(Indice DB mancante)</li>';
         }
     }

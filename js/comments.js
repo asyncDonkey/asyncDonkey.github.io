@@ -51,8 +51,11 @@ function formatFirebaseTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp?.toDate) return 'Data non disponibile';
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
     } catch (e) {
         console.error('Errore formattazione timestamp commento:', e);
@@ -182,9 +185,7 @@ async function loadComments() {
         }
 
         const commenterIdsToFetch = [
-            ...new Set(
-                querySnapshot.docs.map((docSnap) => docSnap.data().userId).filter((id) => id)
-            ),
+            ...new Set(querySnapshot.docs.map((docSnap) => docSnap.data().userId).filter((id) => id)),
         ];
 
         const commenterPublicProfilesMap = new Map(); // Rinominato per chiarezza
@@ -194,7 +195,10 @@ async function loadComments() {
             for (let i = 0; i < commenterIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
                 const batchUserIds = commenterIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
                 // *** MODIFICA CHIAVE: Query su userPublicProfiles ***
-                const profilesQuery = query(collection(db, 'userPublicProfiles'), where(documentId(), 'in', batchUserIds));
+                const profilesQuery = query(
+                    collection(db, 'userPublicProfiles'),
+                    where(documentId(), 'in', batchUserIds)
+                );
                 profilePromises.push(getDocs(profilesQuery));
             }
             try {
@@ -207,7 +211,10 @@ async function loadComments() {
                     });
                 });
             } catch (profileError) {
-                console.error('[comments.js] Errore durante il recupero batch dei profili pubblici dei commentatori:', profileError);
+                console.error(
+                    '[comments.js] Errore durante il recupero batch dei profili pubblici dei commentatori:',
+                    profileError
+                );
             }
         }
 
@@ -224,9 +231,11 @@ async function loadComments() {
             let commenterAvatarSrc = DEFAULT_AVATAR_COMMENT_PATH;
             let commenterNameDisplay = commentData.userName || commentData.name || 'Anonimo'; // Priorità ai dati denormalizzati
             let commenterNationalityCode = commentData.nationalityCode || null; // Priorità ai dati denormalizzati
-            
+
             // *** MODIFICA CHIAVE: Usa dati da commenterPublicProfilesMap per arricchimento ***
-            const commenterPublicProfile = commentData.userId ? commenterPublicProfilesMap.get(commentData.userId) : null;
+            const commenterPublicProfile = commentData.userId
+                ? commenterPublicProfilesMap.get(commentData.userId)
+                : null;
             let commenterProfilePublicUpdatedAt = null; // Per cache-busting dell'avatar pubblico
 
             if (commenterPublicProfile) {
@@ -237,22 +246,30 @@ async function loadComments() {
                 if (commenterPublicProfile.avatarUrls && commenterPublicProfile.avatarUrls.thumbnail) {
                     commenterAvatarSrc = commenterPublicProfile.avatarUrls.thumbnail;
                     commenterProfilePublicUpdatedAt = commenterPublicProfile.profilePublicUpdatedAt;
-                } else if (commentData.userId) { // Profilo pubblico trovato ma senza avatar.thumbnail
+                } else if (commentData.userId) {
+                    // Profilo pubblico trovato ma senza avatar.thumbnail
                     commenterAvatarSrc = generateBlockieAvatar(commentData.userId, 40, { size: 8 });
                 }
-            } else if (commentData.userId) { // Nessun profilo pubblico trovato, ma c'è un userId nel commento
+            } else if (commentData.userId) {
+                // Nessun profilo pubblico trovato, ma c'è un userId nel commento
                 commenterAvatarSrc = generateBlockieAvatar(commentData.userId, 40, { size: 8 });
-            } else { // Commento ospite (senza userId)
+            } else {
+                // Commento ospite (senza userId)
                 const seedForGuestBlockie = commentData.name || `anon-g-${commentId}`;
                 commenterAvatarSrc = generateBlockieAvatar(seedForGuestBlockie, 40, { size: 8 });
             }
 
             // Applica cache busting se l'avatar non è un Blockie e il timestamp pubblico è disponibile
-            if (commenterAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH && !commenterAvatarSrc.startsWith('data:image/png;base64') && commenterProfilePublicUpdatedAt) {
+            if (
+                commenterAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH &&
+                !commenterAvatarSrc.startsWith('data:image/png;base64') &&
+                commenterProfilePublicUpdatedAt
+            ) {
                 if (commenterProfilePublicUpdatedAt.seconds) {
-                     commenterAvatarSrc += `?v=${commenterProfilePublicUpdatedAt.seconds}`;
-                } else if (commenterProfilePublicUpdatedAt instanceof Date) { // Fallback per sicurezza
-                     commenterAvatarSrc += `?v=${commenterProfilePublicUpdatedAt.getTime()}`;
+                    commenterAvatarSrc += `?v=${commenterProfilePublicUpdatedAt.seconds}`;
+                } else if (commenterProfilePublicUpdatedAt instanceof Date) {
+                    // Fallback per sicurezza
+                    commenterAvatarSrc += `?v=${commenterProfilePublicUpdatedAt.getTime()}`;
                 }
             }
 
@@ -390,7 +407,7 @@ async function handleCommentSubmit(event) {
         try {
             // *** IMPORTANTE: Legge da userProfiles (privato) per denormalizzare i dati del PROPRIO profilo ***
             // Questo è CORRETTO perché stiamo scrivendo nuovi dati basati sul profilo completo dell'utente loggato.
-            const userProfileRef = doc(db, 'userProfiles', user.uid); 
+            const userProfileRef = doc(db, 'userProfiles', user.uid);
             const docSnap = await getDoc(userProfileRef);
             if (docSnap.exists()) {
                 const profileData = docSnap.data();
@@ -430,7 +447,7 @@ async function handleCommentSubmit(event) {
         };
         if (userIdToSave) {
             commentDataPayload.userId = userIdToSave;
-            commentDataPayload.userName = userNameForDb; 
+            commentDataPayload.userName = userNameForDb;
             if (userNationalityCode) {
                 commentDataPayload.nationalityCode = userNationalityCode;
             }
@@ -524,23 +541,30 @@ async function populateGuestbookLikedByListModal(commentId) {
                     // *** MODIFICA CHIAVE: Usa avatarUrls.thumbnail dal profilo pubblico ***
                     if (userPublicData.avatarUrls && userPublicData.avatarUrls.thumbnail) {
                         userAvatarSrc = userPublicData.avatarUrls.thumbnail;
-                    } else { // Profilo pubblico trovato ma senza avatar.thumbnail
+                    } else {
+                        // Profilo pubblico trovato ma senza avatar.thumbnail
                         userAvatarSrc = generateBlockieAvatar(userSnap.id, 32, { size: 8 });
                     }
-                } else { // Profilo pubblico non trovato
+                } else {
+                    // Profilo pubblico non trovato
                     console.warn(`[comments.js] Profilo pubblico (likedBy modal) non trovato: ${userSnap.id}`);
                     userAvatarSrc = generateBlockieAvatar(userIdForBlockie, 32, { size: 8 });
                 }
-                
+
                 // Applica cache busting
-                if (userAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH && !userAvatarSrc.startsWith('data:image/png;base64') && userProfilePublicUpdatedAt) {
-                     if (userProfilePublicUpdatedAt.seconds) {
-                         userAvatarSrc += `?v=${userProfilePublicUpdatedAt.seconds}`;
-                    } else if (userProfilePublicUpdatedAt instanceof Date) { // Fallback per sicurezza
-                         userAvatarSrc += `?v=${userProfilePublicUpdatedAt.getTime()}`;
+                if (
+                    userAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH &&
+                    !userAvatarSrc.startsWith('data:image/png;base64') &&
+                    userProfilePublicUpdatedAt
+                ) {
+                    if (userProfilePublicUpdatedAt.seconds) {
+                        userAvatarSrc += `?v=${userProfilePublicUpdatedAt.seconds}`;
+                    } else if (userProfilePublicUpdatedAt instanceof Date) {
+                        // Fallback per sicurezza
+                        userAvatarSrc += `?v=${userProfilePublicUpdatedAt.getTime()}`;
                     }
                 }
-                
+
                 avatarImg.src = userAvatarSrc;
                 avatarImg.alt = `Avatar di ${userNameDisplay}`;
                 avatarImg.onerror = () => {
@@ -555,8 +579,12 @@ async function populateGuestbookLikedByListModal(commentId) {
                 li.appendChild(nameSpan);
 
                 // Nazionalità dal profilo pubblico (se esiste)
-                if (userSnap.exists() && userSnap.data().nationalityCode && userSnap.data().nationalityCode !== 'OTHER') {
-                    const userPublicDataForFlag = userSnap.data(); 
+                if (
+                    userSnap.exists() &&
+                    userSnap.data().nationalityCode &&
+                    userSnap.data().nationalityCode !== 'OTHER'
+                ) {
+                    const userPublicDataForFlag = userSnap.data();
                     const flagSpan = document.createElement('span');
                     flagSpan.className = `fi fi-${userPublicDataForFlag.nationalityCode.toLowerCase()}`;
                     flagSpan.title = userPublicDataForFlag.nationalityCode;

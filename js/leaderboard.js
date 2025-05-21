@@ -38,8 +38,11 @@ function formatGlobalScoreTimestamp(firebaseTimestamp) {
     }
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
     } catch (e) {
         console.error('Errore formattazione timestamp:', e);
@@ -176,7 +179,7 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                 let profileDisplayName = scoreData.userName || scoreData.initials || 'Giocatore Anonimo';
                 let profileAvatarUrl = null;
                 // *** MODIFICA CHIAVE: Usa il timestamp dal profilo pubblico per cache busting ***
-                let userProfilePublicUpdatedAt = null; 
+                let userProfilePublicUpdatedAt = null;
                 let nationalityCode = scoreData.nationalityCode || null;
 
                 if (userPublicProfile) {
@@ -200,13 +203,13 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                 });
             }
         }
-        
+
         if (enrichedScores.length > 0) {
             if (direction === 'next') {
                 currentPage++;
             }
             if (direction === 'prev' && !isFetchingFirstPageQuery) {
-                firstDocsHistory.splice(currentPage); 
+                firstDocsHistory.splice(currentPage);
             }
 
             firstVisibleDoc = enrichedScores[0].firestoreDoc;
@@ -220,8 +223,9 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                 }
             }
         } else {
-            if (direction === 'next') { /* No more pages */ }
-            else if (isFetchingFirstPageQuery || currentPage === 1) {
+            if (direction === 'next') {
+                /* No more pages */
+            } else if (isFetchingFirstPageQuery || currentPage === 1) {
                 currentPage = 1;
                 firstDocsHistory = [];
                 lastVisibleDoc = null;
@@ -231,7 +235,6 @@ async function loadGlobalLeaderboard(direction = 'initial') {
 
         displayGlobalLeaderboard(enrichedScores, currentPage);
         updatePaginationControls(enrichedScores.length, isFetchingFirstPageQuery || currentPage === 1);
-
     } catch (error) {
         console.error(`Errore durante il caricamento della leaderboard (direzione: ${direction}):`, error);
         if (leaderboardTableBody) {
@@ -293,8 +296,9 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
             let avatarUrlToSet = entry.profileAvatarUrl;
             if (entry.userProfilePublicUpdatedAt && typeof entry.userProfilePublicUpdatedAt.seconds === 'number') {
                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.seconds}`;
-            } else if (entry.userProfilePublicUpdatedAt instanceof Date) { // Fallback se è già un oggetto Date JS
-                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.getTime()}`;
+            } else if (entry.userProfilePublicUpdatedAt instanceof Date) {
+                // Fallback se è già un oggetto Date JS
+                avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.getTime()}`;
             }
             avatarImg.src = avatarUrlToSet;
         } else {

@@ -12,10 +12,15 @@ import {
     getDocs,
     doc,
     updateDoc,
-    serverTimestamp
+    serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-console.log('[NotificationHandler by Athena] DEBUG: Modulo caricato per "Mark all as read". DB:', db ? 'Available' : 'Not Available', 'Auth:', auth ? 'Available' : 'Not Available');
+console.log(
+    '[NotificationHandler by Athena] DEBUG: Modulo caricato per "Mark all as read". DB:',
+    db ? 'Available' : 'Not Available',
+    'Auth:',
+    auth ? 'Available' : 'Not Available'
+);
 
 let currentUserId = null;
 
@@ -110,11 +115,15 @@ function createNotificationElement(notification) {
 async function loadNotifications() {
     // ... (existing loadNotifications function - minor change to handle button visibility) ...
     if (!currentUserId || !db) {
-        console.warn(`[NotificationHandler by Athena] loadNotifications: UserID (${currentUserId}) or DB (${!!db}) not ready.`);
+        console.warn(
+            `[NotificationHandler by Athena] loadNotifications: UserID (${currentUserId}) or DB (${!!db}) not ready.`
+        );
         if (noNotificationsPlaceholder && notificationList) {
             notificationList.innerHTML = '';
             noNotificationsPlaceholder.style.display = 'block';
-            noNotificationsPlaceholder.querySelector('p').textContent = currentUserId ? 'Errore caricamento (DB non pronto?)' : 'Effettua il login.';
+            noNotificationsPlaceholder.querySelector('p').textContent = currentUserId
+                ? 'Errore caricamento (DB non pronto?)'
+                : 'Effettua il login.';
         }
         if (markAllAsReadBtn) markAllAsReadBtn.style.display = 'none'; // Ensure hidden if no load
         return;
@@ -164,7 +173,6 @@ async function loadNotifications() {
     }
 }
 
-
 // --- Panel Management Logic (Module Scope) ---
 function closeNotificationPanel() {
     // ... (existing closeNotificationPanel function - unchanged) ...
@@ -186,7 +194,9 @@ function openNotificationPanel() {
         if (currentUserId && db) {
             loadNotifications(); // This will now also manage markAllAsReadBtn visibility
         } else {
-            console.warn('[NotificationHandler by Athena] Panel opened, but UserID or DB not ready for loadNotifications.');
+            console.warn(
+                '[NotificationHandler by Athena] Panel opened, but UserID or DB not ready for loadNotifications.'
+            );
             if (notificationList) notificationList.innerHTML = '';
             if (noNotificationsPlaceholder) {
                 noNotificationsPlaceholder.style.display = 'block';
@@ -211,7 +221,9 @@ function toggleNotificationPanelState(event) {
         event.stopPropagation();
     }
     if (!notificationPanel) {
-        console.warn('[NotificationHandler by Athena] toggleNotificationPanelState called before notificationPanel is initialized.');
+        console.warn(
+            '[NotificationHandler by Athena] toggleNotificationPanelState called before notificationPanel is initialized.'
+        );
         return;
     }
     if (notificationPanel.style.display === 'block') {
@@ -237,22 +249,31 @@ async function markNotificationAsRead(notificationId) {
         console.error('[NotificationHandler by Athena] User ID or DB not available. Cannot mark as read.');
         throw new Error('User ID or DB not available. Cannot mark as read.');
     }
-    console.log(`[NotificationHandler by Athena] Operation: Attempting to mark notification ${notificationId} as read for user ${currentUserId}.`);
+    console.log(
+        `[NotificationHandler by Athena] Operation: Attempting to mark notification ${notificationId} as read for user ${currentUserId}.`
+    );
     const notifRef = doc(db, 'userProfiles', currentUserId, 'notifications', notificationId);
     try {
         await updateDoc(notifRef, {
             read: true,
-            updatedAt: serverTimestamp()
+            updatedAt: serverTimestamp(),
         });
-        console.log(`[NotificationHandler by Athena] Notification ${notificationId} successfully marked as read in Firestore.`);
+        console.log(
+            `[NotificationHandler by Athena] Notification ${notificationId} successfully marked as read in Firestore.`
+        );
         const notificationElement = notificationList.querySelector(`li[data-notification-id="${notificationId}"]`);
         if (notificationElement) {
             notificationElement.classList.remove('unread');
             notificationElement.classList.add('read');
-            console.log(`[NotificationHandler by Athena] UI for notification ${notificationId} updated to 'read' state.`);
+            console.log(
+                `[NotificationHandler by Athena] UI for notification ${notificationId} updated to 'read' state.`
+            );
         }
     } catch (error) {
-        console.error(`[NotificationHandler by Athena] Firestore error marking notification ${notificationId} as read:`, error);
+        console.error(
+            `[NotificationHandler by Athena] Firestore error marking notification ${notificationId} as read:`,
+            error
+        );
         throw error;
     }
 }
@@ -264,12 +285,17 @@ async function handleNotificationClick(event) {
 
     const notificationId = clickedItem.dataset.notificationId;
     if (!notificationId) {
-        console.warn('[NotificationHandler by Athena] Clicked item is missing data-notification-id attribute.', clickedItem);
+        console.warn(
+            '[NotificationHandler by Athena] Clicked item is missing data-notification-id attribute.',
+            clickedItem
+        );
         return;
     }
 
     if (!currentUserId || !db) {
-        console.warn('[NotificationHandler by Athena] User not authenticated or DB not ready for notification click.', { notificationId });
+        console.warn('[NotificationHandler by Athena] User not authenticated or DB not ready for notification click.', {
+            notificationId,
+        });
         return;
     }
 
@@ -279,14 +305,19 @@ async function handleNotificationClick(event) {
 
     if (targetUrl && isCurrentlyUnread && event.target.closest('a.notification-item-link')) {
         event.preventDefault();
-        console.log(`[NotificationHandler by Athena] Click on unread link for ${notificationId}. Default navigation prevented for pre-marking.`);
+        console.log(
+            `[NotificationHandler by Athena] Click on unread link for ${notificationId}. Default navigation prevented for pre-marking.`
+        );
     }
 
     if (isCurrentlyUnread) {
         try {
             await markNotificationAsRead(notificationId);
         } catch (error) {
-            console.error(`[NotificationHandler by Athena] Failed to mark ${notificationId} as read during click. Link navigation (if any) will proceed.`, error);
+            console.error(
+                `[NotificationHandler by Athena] Failed to mark ${notificationId} as read during click. Link navigation (if any) will proceed.`,
+                error
+            );
         }
     }
 
@@ -295,7 +326,9 @@ async function handleNotificationClick(event) {
         window.location.href = targetUrl;
         closeNotificationPanel();
     } else {
-        console.log(`[NotificationHandler by Athena] Notification ${notificationId} clicked. No link. Read state was: ${isCurrentlyUnread ? 'unread (now read)' : 'already read'}.`);
+        console.log(
+            `[NotificationHandler by Athena] Notification ${notificationId} clicked. No link. Read state was: ${isCurrentlyUnread ? 'unread (now read)' : 'already read'}.`
+        );
     }
 }
 
@@ -337,19 +370,24 @@ async function handleMarkAllAsRead() {
                 successCount++;
             } catch (error) {
                 failCount++;
-                console.error(`[NotificationHandler by Athena] Failed to mark notification ${notificationId} as read during "Mark all" operation.`, error);
+                console.error(
+                    `[NotificationHandler by Athena] Failed to mark notification ${notificationId} as read during "Mark all" operation.`,
+                    error
+                );
                 // Continue to next item even if one fails
             }
         }
     }
 
-    console.log(`[NotificationHandler by Athena] "Mark all as read" completed. Success: ${successCount}, Failed: ${failCount}.`);
+    console.log(
+        `[NotificationHandler by Athena] "Mark all as read" completed. Success: ${successCount}, Failed: ${failCount}.`
+    );
 
     // After processing, hide the button as all *visible* items should now be read or attempted.
     // The bell counter will have updated progressively.
     if (markAllAsReadBtn) {
         markAllAsReadBtn.style.display = 'none'; // Hide the button
-        markAllAsReadBtn.disabled = false;     // Re-enable for future panel openings if needed
+        markAllAsReadBtn.disabled = false; // Re-enable for future panel openings if needed
     }
 
     // Potentially show a toast summary if you have a toast notification system
@@ -390,11 +428,12 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-
     if (notificationBellLink) {
         notificationBellLink.addEventListener('click', toggleNotificationPanelState);
     } else {
-         console.warn('[NotificationHandler by Athena] notificationBellLink NOT FOUND. Panel cannot be opened by bell click.');
+        console.warn(
+            '[NotificationHandler by Athena] notificationBellLink NOT FOUND. Panel cannot be opened by bell click.'
+        );
     }
 
     document.addEventListener('keydown', (event) => {
@@ -405,9 +444,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (notificationList) {
         notificationList.addEventListener('click', handleNotificationClick);
-        console.log('[NotificationHandler by Athena] Click listener for notification items attached to notificationList.');
+        console.log(
+            '[NotificationHandler by Athena] Click listener for notification items attached to notificationList.'
+        );
     } else {
-        console.warn('[NotificationHandler by Athena] DOMContentLoaded: notificationList element NOT FOUND. Click interactions for notifications will not work.');
+        console.warn(
+            '[NotificationHandler by Athena] DOMContentLoaded: notificationList element NOT FOUND. Click interactions for notifications will not work.'
+        );
     }
 
     // --- AGGIUNTA EVENT LISTENER PER TASK A.5.4.6 ---
@@ -415,7 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
         markAllAsReadBtn.addEventListener('click', handleMarkAllAsRead);
         console.log('[NotificationHandler by Athena] Click listener for "Mark all as read" button attached.');
     } else {
-        console.warn('[NotificationHandler by Athena] DOMContentLoaded: markAllAsReadBtn element NOT FOUND. "Mark all as read" feature will not work.');
+        console.warn(
+            '[NotificationHandler by Athena] DOMContentLoaded: markAllAsReadBtn element NOT FOUND. "Mark all as read" feature will not work.'
+        );
     }
     // --- FINE AGGIUNTA EVENT LISTENER ---
 });
