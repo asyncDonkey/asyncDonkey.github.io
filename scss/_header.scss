@@ -423,8 +423,6 @@ header .nav-link-icon-only .material-symbols-rounded {
     display: inline;
 }
 
-
-
 @media (max-width: 768px) {
     header {
         flex-direction: column;
@@ -473,7 +471,7 @@ header .nav-link-icon-only .material-symbols-rounded {
     #userProfileContainer {
         justify-content: center;
     } /* Centro user profile */
-} 
+}
 
 @media (max-width: 576px) {
     header nav ul {
