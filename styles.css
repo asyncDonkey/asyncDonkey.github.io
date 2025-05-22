@@ -4297,6 +4297,20 @@ body.dark-mode #leaderboardTable tr:nth-child(even) {
     font-size: 0.9em;
   }
 }
+#leaderboardTable tr.current-user-highlight {
+  background-color: var(--link-color-rgb-opacity-15, rgba(var(--link-color-rgb), 0.15));
+}
+#leaderboardTable tr.current-user-highlight:hover {
+  background-color: var(--link-color-rgb-opacity-25, rgba(var(--link-color-rgb), 0.25));
+}
+
+.glitchzilla-debunked .material-symbols-rounded {
+  font-size: 1.1em;
+  color: var(--success-color, #28a745);
+  vertical-align: text-bottom;
+  margin-left: 4px;
+}
+
 /* ===== Utilities (Scroll-to-top, Theme Toggle Button) ===== */
 #scrollToTopBtn {
   display: none;

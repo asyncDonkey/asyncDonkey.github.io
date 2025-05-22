@@ -638,6 +638,10 @@ function updateUIBasedOnAuthState(user, profileData) {
 
 export { db, auth, firebaseConfig, escapeHTML };
 
+export function getCurrentUserId() {
+    return auth.currentUser ? auth.currentUser.uid : null;
+}
+
 async function loadHomeMiniLeaderboard() {
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
     if (!leaderboardListElement) {

@@ -269,3 +269,34 @@
         }
     }
 }
+
+#leaderboardTable { // Assicurati che sia annidato o specifico se necessario
+    tr.current-user-highlight {
+        background-color: var(--link-color-rgb-opacity-15, rgba(var(--link-color-rgb), 0.15)); // Usa una variabile per lo sfondo, es. un blu chiaro
+        // Puoi anche aggiungere un bordo laterale o altri stili distintivi
+        // border-left: 3px solid var(--link-color);
+
+        td {
+            // Opzionale: rendi il testo più scuro o più marcato
+            // color: var(--text-color-primary); 
+            // font-weight: 500;
+        }
+
+        // Mantieni l'effetto hover, ma potrebbe essere leggermente diverso
+        &:hover {
+            background-color: var(--link-color-rgb-opacity-25, rgba(var(--link-color-rgb), 0.25));
+        }
+    }
+}
+
+// Stile per l'indicatore "Glitchzilla Debunked!"
+.glitchzilla-debunked {
+    .material-symbols-rounded {
+        font-size: 1.1em; // Adatta la dimensione dell'icona
+        color: var(--success-color, #28a745); // Un colore che indica successo/completamento (es. verde)
+        vertical-align: text-bottom; // Buon allineamento con il testo
+        margin-left: 4px; // Piccolo spazio dal nome
+    }
+    // Non c'è testo visibile qui, solo l'icona con un tooltip.
+    // Se volessi aggiungere testo visibile, dovresti aggiungerlo all'HTML in JS.
+}

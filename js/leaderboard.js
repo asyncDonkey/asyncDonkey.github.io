@@ -1,5 +1,5 @@
 // js/leaderboard.js
-import { db, generateBlockieAvatar, escapeHTML } from './main.js';
+import { db, generateBlockieAvatar, escapeHTML, getCurrentUserId } from './main.js';
 import { getAuthorIconHTML } from './uiUtils.js';
 import {
     collection,
@@ -266,6 +266,10 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
     if (!leaderboardTableBody) return;
     leaderboardTableBody.innerHTML = '';
 
+    // --- NUOVA PARTE: Ottieni l'ID dell'utente loggato ---
+    const loggedInUserId = getCurrentUserId(); // Funzione da main.js
+    // --- FINE NUOVA PARTE ---
+
     if (!leaderboardData || leaderboardData.length === 0) {
         const message =
             pageNumber === 1
@@ -279,6 +283,12 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         const tr = document.createElement('tr');
         tr.dataset.docId = entry.id;
 
+        // --- NUOVA PARTE: Aggiungi classe se l'utente è quello loggato ---
+        if (loggedInUserId && entry.userId === loggedInUserId) {
+            tr.classList.add('current-user-highlight');
+        }
+        // --- FINE NUOVA PARTE ---
+
         const rank = (pageNumber - 1) * SCORES_PER_PAGE + index + 1;
         const tdRank = document.createElement('td');
         tdRank.className = 'player-rank text-center align-middle';
@@ -289,18 +299,19 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         tdPlayer.className = 'player-info-cell align-middle';
 
         const avatarImg = document.createElement('img');
-        // ... (logica avatar invariata)
         avatarImg.className = 'player-avatar me-2';
         avatarImg.width = 36;
         avatarImg.height = 36;
-        avatarImg.style.borderRadius = '50%';
+        // Stile borderRadius e objectFit potrebbero essere già nel CSS, ma per sicurezza:
+        avatarImg.style.borderRadius = '50%'; 
         avatarImg.style.objectFit = 'cover';
+
 
         if (entry.profileAvatarUrl) {
             let avatarUrlToSet = entry.profileAvatarUrl;
             if (entry.userProfilePublicUpdatedAt && typeof entry.userProfilePublicUpdatedAt.seconds === 'number') {
                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.seconds}`;
-            } else if (entry.userProfilePublicUpdatedAt instanceof Date) {
+            } else if (entry.userProfilePublicUpdatedAt instanceof Date) { // Fallback per timestamp client-side
                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.getTime()}`;
             }
             avatarImg.src = avatarUrlToSet;
@@ -309,6 +320,7 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
             try {
                 avatarImg.src = generateBlockieAvatar(seedForBlockie, 36, { size: 8, scale: 4.5 });
             } catch (e) {
+                console.warn('Blockie generation failed, falling back to default.', e);
                 avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
             }
         }
@@ -316,34 +328,41 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         avatarImg.alt = altText;
         avatarImg.onerror = () => {
             avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
-            avatarImg.onerror = null;
+            avatarImg.onerror = null; 
         };
         tdPlayer.appendChild(avatarImg);
 
         const nameSpan = document.createElement('span');
-        nameSpan.className = 'player-name'; // Questo span conterrà il link o il testo del nome
+        nameSpan.className = 'player-name'; 
 
         if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
             const flagIconSpan = document.createElement('span');
             flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
-            flagIconSpan.style.marginRight = '8px';
-            flagIconSpan.style.verticalAlign = 'middle'; // o text-bottom
-            nameSpan.appendChild(flagIconSpan); // Aggiungi la bandiera prima del nome
+            flagIconSpan.style.marginRight = '8px'; 
+            flagIconSpan.style.verticalAlign = 'middle'; 
+            nameSpan.appendChild(flagIconSpan); 
         }
 
         const displayNameText = entry.profileDisplayName || 'Giocatore Anonimo';
-        const authorIconHTML = getAuthorIconHTML(entry.userPublicProfileData); // Recupera HTML dell'icona
+        const authorIconHTML = getAuthorIconHTML(entry.userPublicProfileData);
         const escapedDisplayName = escapeHTML(displayNameText);
+
+        // --- PARTE MODIFICATA: Info "Glitchzilla Debunked!" ---
+        let glitchzillaInfo = '';
+        if (entry.userPublicProfileData && entry.userPublicProfileData.hasDefeatedGlitchzilla) {
+            // Aggiungiamo la classe 'testo-neon-arcade' all'icona
+            glitchzillaInfo = ` <span class="glitchzilla-debunked" title="Glitchzilla Debunked!"><span class="material-symbols-rounded testo-neon-arcade">bug_report</span></span>`;
+        }
+        // --- FINE PARTE MODIFICATA ---
 
         if (entry.userId) {
             const profileLink = document.createElement('a');
             profileLink.href = `profile.html?userId=${entry.userId}`;
-            profileLink.classList.add('text-decoration-none'); // Stile link se necessario
-            profileLink.innerHTML = escapedDisplayName + authorIconHTML; // Nome + Icona nel link
+            profileLink.classList.add('text-decoration-none'); 
+            profileLink.innerHTML = escapedDisplayName + authorIconHTML + glitchzillaInfo; // glitchzillaInfo è già qui
             nameSpan.appendChild(profileLink);
         } else {
-            // Per ospiti o utenti senza ID, mostra nome + icona (l'icona non apparirà se non hanno hasPublishedArticles)
-            nameSpan.innerHTML += escapedDisplayName + authorIconHTML; 
+            nameSpan.innerHTML += escapedDisplayName + authorIconHTML + glitchzillaInfo; // glitchzillaInfo è già qui
         }
         tdPlayer.appendChild(nameSpan);
         tr.appendChild(tdPlayer);
@@ -361,6 +380,7 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         leaderboardTableBody.appendChild(tr);
     });
 }
+
 
 function updatePaginationControls(countOnCurrentPage, isFirstPageResult = false) {
     if (!prevPageBtn || !nextPageBtn || !currentPageIndicator) return;
