@@ -167,7 +167,6 @@ function escapeHTML(str) {
 
 // Funzione loadHeaderUserProfileDisplay (modificata per caricare avatar personalizzato)
 async function loadHeaderUserProfileDisplay(user, profileData) {
-    // Modificata per accettare profileData
     const userDisplayNameElement = document.getElementById('userDisplayName');
     const headerUserAvatarElement = document.getElementById('headerUserAvatar');
 
@@ -177,12 +176,16 @@ async function loadHeaderUserProfileDisplay(user, profileData) {
     }
 
     if (!user) {
-        // Se l'utente non è loggato, assicurati che questi siano nascosti (gestito anche da updateHeaderAuthContainersVisibility)
+        // Se l'utente non è loggato, assicurati che questi siano nascosti
         userDisplayNameElement.textContent = '';
+        userDisplayNameElement.style.display = 'none'; // Assicura che il nome sia nascosto
+        headerUserAvatarElement.src = ''; // Pulisci src per evitare di mostrare vecchio avatar
+        headerUserAvatarElement.alt = 'User Avatar'; // Resetta alt text
         headerUserAvatarElement.style.display = 'none';
         return;
     }
 
+    // Se l'utente è loggato, procedi
     let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente'; // Fallback iniziale
     let avatarSrcToSet = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 }); // Default Blockie per navbar
     let altText = `${nicknameToShow}'s Blockie Avatar`;
@@ -213,6 +216,8 @@ async function loadHeaderUserProfileDisplay(user, profileData) {
     // nicknameToShow e avatarSrcToSet useranno i fallback basati su `user` e Blockie.
 
     userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`; // escapeHTML è già nel tuo codice
+    userDisplayNameElement.style.display = 'inline'; // <-- ***** MODIFICA CHIAVE: Mostra il nome utente *****
+
     headerUserAvatarElement.src = avatarSrcToSet;
     headerUserAvatarElement.alt = altText; // Usa l'alt text determinato
     headerUserAvatarElement.style.display = 'inline-block';
@@ -603,34 +608,44 @@ function initializeNewNavbar() {
 
 function updateUIBasedOnAuthState(user, profileData) {
     console.log('[Main.js updateUIBasedOnAuthState] Chiamata con utente:', user ? user.uid : null);
-    // console.log('[Main.js updateUIBasedOnAuthState] ProfileData ricevuto:', profileData);
 
-    // Aggiorna la visibilità dei container principali Login/Profilo nell'header
-    updateHeaderAuthContainersVisibility(user); // Funzione già presente nel tuo codice
+    updateHeaderAuthContainersVisibility(user);
+    loadHeaderUserProfileDisplay(user, profileData);
+    updateLoginLogoutLinks(user); // Gestisce il menu mobile
 
-    // Aggiorna l'avatar e il nome utente nell'header usando profileData reattivo
-    loadHeaderUserProfileDisplay(user, profileData); // Funzione già presente e corretta nel tuo codice
-
-    // Aggiorna i link dinamici nel menu mobile (es. Profilo, Logout/Login)
-    updateLoginLogoutLinks(user); // Funzione già presente nel tuo codice
-
-    // Aggiorna la visibilità del link "Scrivi Articolo" nella navbar desktop e mobile
     const navWriteArticleDropdownDesktop = document.getElementById('navWriteArticleDropdown');
     if (navWriteArticleDropdownDesktop) {
         navWriteArticleDropdownDesktop.style.display = user ? 'list-item' : 'none';
     }
-    // (La logica per 'mobile-navWriteArticleDropdown' è già in updateLoginLogoutLinks)
 
-    // Aggiorna il link Admin Dashboard nel footer (se l'utente è admin)
-    // La funzione updateAdminDashboardLink gestisce il recupero dei custom claims
-    // e la visualizzazione del link nel footer, puoi chiamarla qui.
-    updateAdminDashboardLink(user); // Funzione già presente nel tuo codice
+    updateAdminDashboardLink(user);
 
-    // Inizializza/aggiorna altre interazioni UI specifiche (es. homepage)
-    // Se initializeHomepageArticleInteractions deve essere chiamata qui:
     if (document.getElementById('articlesSection')) {
-        // O un altro check per la homepage
-        initializeHomepageArticleInteractions(user); // Funzione già presente nel tuo codice
+        initializeHomepageArticleInteractions(user);
+    }
+
+    const logoutButtonDesktop = document.getElementById('logoutButton');
+    if (logoutButtonDesktop) {
+        const desktopLogoutHandler = async (event) => {
+            event.preventDefault();
+            console.log('[main.js desktopLogoutHandler] Logout desktop cliccato!');
+            try {
+                await signOut(auth);
+                showToast('Logout effettuato con successo!', 'success');
+            } catch (error) {
+                console.error('Errore durante il logout (desktop):', error);
+                showToast('Errore durante il logout. Riprova.', 'error');
+            }
+        };
+
+        const newLogoutButton = logoutButtonDesktop.cloneNode(true);
+        logoutButtonDesktop.parentNode.replaceChild(newLogoutButton, logoutButtonDesktop);
+
+        if (user) {
+            document.getElementById('logoutButton').addEventListener('click', desktopLogoutHandler);
+        }
+    } else {
+        console.warn('[Main.js updateUIBasedOnAuthState] Pulsante logoutButton desktop non trovato.');
     }
 
     console.log('[Main.js updateUIBasedOnAuthState] Fine aggiornamenti UI orchestrati.');
