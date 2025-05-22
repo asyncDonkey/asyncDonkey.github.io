@@ -1,181 +1,58 @@
+// File: scss/_leaderboard.scss
+// AthenaDev
+// Stili specifici per la pagina della leaderboard e i suoi componenti.
+
+// Contenitore principale della leaderboard
 #globalLeaderboardContainer {
-                color: var(--text-color-secondary);
-                background-color: var(--surface-bg-primary);
-                padding: 25px;
-                border-radius: 8px;
-                margin: 20px auto;
-                max-width: 900px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            }
+    color: var(--text-color-secondary);
+    background-color: var(--surface-bg-primary);
+    padding: 25px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 900px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
-            #globalLeaderboardContainer h1 {
-                color: var(--heading-color);
-                margin-top: 0;
-                margin-bottom: 25px;
-                font-size: 2em;
-                text-align: center;
-                border-bottom: 1px solid var(--border-color-primary);
-                padding-bottom: 15px;
-            }
+    h1 {
+        color: var(--heading-color);
+        margin-top: 0;
+        margin-bottom: 25px;
+        font-size: 2em;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color-primary);
+        padding-bottom: 15px;
+    }
+}
 
-            #leaderboardTable {
-                width: 100%;
-                border-collapse: collapse;
-                font-family: 'Source Code Pro', monospace;
-            }
-
-            #leaderboardTable th,
-            #leaderboardTable td {
-                padding: 12px 15px;
-                text-align: left;
-                border-bottom: 1px solid var(--border-color-secondary);
-            }
-
-            #leaderboardTable th {
-                background-color: var(--surface-bg-secondary);
-                color: var(--heading-color);
-                font-weight: bold;
-                font-size: 1.05em;
-            }
-
-            #leaderboardTable tr:nth-child(even) {
-                background-color: var(--surface-bg-secondary);
-            }
-            body.dark-mode #leaderboardTable tr:nth-child(even) {
-                background-color: rgba(
-                    42,
-                    42,
-                    42,
-                    0.5
-                ); /* Esempio per dark mode, definire --surface-bg-secondary-rgb se necessario */
-            }
-
-            #leaderboardTable tr:hover {
-                background-color: var(--link-hover-color);
-                color: var(--button-text-primary);
-            }
-            #leaderboardTable tr:hover td,
-            #leaderboardTable tr:hover .player-name,
-            #leaderboardTable tr:hover .player-score,
-            #leaderboardTable tr:hover .player-date {
-                color: var(--button-text-primary);
-            }
-
-            .player-rank {
-                font-weight: bold;
-                min-width: 30px;
-                text-align: center;
-                color: var(--link-color);
-            }
-
-            .player-avatar {
-                width: 36px;
-                height: 36px;
-                border-radius: 4px;
-                margin-right: 12px;
-                background-color: #eee;
-                image-rendering: pixelated;
-                vertical-align: middle;
-            }
-
-            .player-info-cell {
-                display: flex;
-                align-items: center;
-            }
-
-            .player-name {
-                font-weight: bold;
-                color: var(--text-color-primary);
-                display: flex;
-                align-items: center;
-            }
-            .player-name .fi {
-                margin-right: 8px;
-                font-size: 1.2em;
-                vertical-align: middle;
-            }
-
-            .player-score {
-                font-weight: bold;
-                color: var(--link-color);
-                font-size: 1.15em;
-                text-align: right;
-            }
-
-            .player-date {
-                font-size: 0.9em;
-                color: var(--text-color-muted);
-                text-align: center;
-            }
-
-            .loading-leaderboard,
-            .no-scores {
-                text-align: center;
-                font-size: 1.1em;
-                padding: 20px;
-                color: var(--text-color-muted);
-            }
-            .back-link-container {
-                text-align: center;
-                margin-top: 30px;
-            }
-            .back-link-container a {
-                color: var(--link-color);
-                text-decoration: underline;
-                font-size: 1em;
-            }
-            #paginationControls {
-                text-align: center;
-                margin-top: 25px;
-                margin-bottom: 15px;
-            }
-            #paginationControls button {
-                margin: 0 8px;
-                padding: 8px 16px; /* Leggermente più piccoli dei .game-button standard se necessario */
-            }
-            #paginationControls button:disabled {
-                background-color: var(--surface-bg-secondary);
-                color: var(--text-color-muted);
-                cursor: default;
-                opacity: 0.6;
-            }
-            #currentPageIndicator {
-                margin: 0 15px;
-                color: var(--text-color-secondary);
-                font-weight: bold;
-            }
-
-            // Stili per il pulsante di refresh della leaderboard
+// Pulsante di refresh specifico per la leaderboard
 .btn-leaderboard-refresh {
-    // Eredita alcuni stili da .btn se presente, o definisci da zero
-    // Esempio di stili base, adatta secondo le tue preferenze:
-    background-color: var(--surface-bg-secondary); // Sfondo leggermente diverso dai bottoni primari
+    background-color: var(--surface-bg-secondary);
     color: var(--text-color-secondary);
     border: 1px solid var(--border-color-primary);
-    padding: 0.375rem 0.75rem; // Padding standard per un bottone
-    font-size: 1rem; // Dimensione base del font
-    border-radius: var(--border-radius-sm, 0.25rem); // Angoli arrotondati
-    line-height: 1.5; // Per centrare l'icona verticalmente
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    border-radius: var(--border-radius-sm, 0.25rem);
+    line-height: 1.5;
     cursor: pointer;
     transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
-    display: inline-flex; // Per allineare l'icona
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 
     .material-symbols-rounded {
-        font-size: 1.5em; // Rendi l'icona un po' più grande del testo del bottone (se ci fosse testo)
-        vertical-align: middle; // Aiuta con l'allineamento
+        font-size: 1.5em;
+        vertical-align: middle;
     }
 
     &:hover {
-        background-color: var(--surface-bg-primary); // Sfondo più scuro/chiaro al hover
+        background-color: var(--surface-bg-primary);
         color: var(--link-hover-color);
         border-color: var(--link-color);
     }
 
-    &:focus, &:active {
+    &:focus,
+    &:active {
         outline: none;
-        box-shadow: 0 0 0 0.2rem rgba(var(--link-color-rgb), 0.25); // Focus ring
+        box-shadow: 0 0 0 0.2rem rgba(var(--link-color-rgb), 0.25);
     }
 
     &:disabled {
@@ -187,18 +64,13 @@
     }
 }
 
-// Wrapper per la responsività della tabella leaderboard
+// Wrapper per la tabella per la responsività
 .table-responsive-wrapper {
-    overflow-x: auto;  // Abilita lo scroll orizzontale se il contenuto eccede
-    -webkit-overflow-scrolling: touch; // Abilita uno scroll più fluido su iOS
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 
-    // Opzionale: aggiungi un leggero padding se lo scrollbar copre i bordi
-    // padding-bottom: 5px; 
-
-    // Stili per lo scrollbar (opzionale, ma migliora l'estetica)
-    // Adatta i colori alle tue variabili CSS
     &::-webkit-scrollbar {
-        height: 8px; // Altezza dello scrollbar orizzontale
+        height: 8px;
         background-color: var(--surface-bg-secondary, #e9ecef);
     }
 
@@ -212,53 +84,246 @@
     }
 }
 
-// Media Queries per la responsività della tabella Leaderboard
-@media (max-width: 768px) { // Breakpoint per tablet e mobile più grandi
-    #leaderboardTable {
-        // Opzionale: Riduci un po' il font size generale della tabella per guadagnare spazio
-        // font-size: 0.95em;
+// Tabella della leaderboard
+#leaderboardTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Source Code Pro', monospace;
 
-        th, td {
-            padding: 10px 8px; // Riduci il padding delle celle
+    th,
+    td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color-secondary);
+        vertical-align: middle; // Assicura allineamento verticale per tutte le celle
+    }
+
+    th {
+        background-color: var(--surface-bg-secondary);
+        color: var(--heading-color);
+        font-weight: bold;
+        font-size: 1.05em;
+    }
+
+    tr {
+        &:nth-child(even) {
+            background-color: var(--surface-bg-secondary);
         }
 
-        // Nascondi la colonna "Data"
-        th:nth-child(4), // Selettore per il 4° <th> (Data)
-        td:nth-child(4) { // Selettore per la 4° <td> (Data)
+        &:hover {
+            background-color: var(--link-hover-color);
+            color: var(--button-text-primary);
+
+            // Forza il colore del testo anche per elementi specifici all'interno della cella su hover della riga
+            td,
+            .player-name,
+            .player-name a, // Assicurati che anche i link interni cambino colore
+            .player-score,
+            .player-date,
+            .player-rank, // Rank
+            .glitchzilla-debunked .material-symbols-rounded { // Icona Glitchzilla
+                color: var(--button-text-primary) !important; // Potrebbe servire !important per sovrascrivere stili specifici
+            }
+             // Esempio per l'icona autore, se ha un colore specifico
+            .author-icon .material-symbols-rounded {
+                 color: var(--button-text-primary) !important;
+            }
+        }
+
+        &.current-user-highlight {
+            background-color: var(--link-color-rgb-opacity-15, rgba(var(--link-color-rgb), 0.15));
+            // border-left: 3px solid var(--link-color); // Opzionale
+
+            &:hover {
+                background-color: var(--link-color-rgb-opacity-25, rgba(var(--link-color-rgb), 0.25));
+            }
+        }
+    }
+
+    // Classi specifiche per le celle/contenuti
+    .player-rank {
+        font-weight: bold;
+        min-width: 30px;
+        text-align: center;
+        color: var(--link-color);
+    }
+
+    .player-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%; // Reso circolare per coerenza con header avatar
+        object-fit: cover; // Assicura che l'immagine copra bene
+        margin-right: 12px;
+        background-color: var(--surface-bg-secondary); // Fallback se l'immagine non carica
+        image-rendering: pixelated;
+        // vertical-align: middle; // Non più necessario se la cella è flex o td ha vertical-align:middle
+    }
+
+    .player-info-cell { // La cella che contiene avatar e nome
+        display: flex;
+        align-items: center;
+    }
+
+    .player-name {
+        font-weight: 500; // Leggermente meno bold del rank per differenziare
+        color: var(--text-color-primary);
+        display: flex;
+        align-items: center;
+        gap: 6px; // Spazio tra bandiera, nome, icona autore, icona glitchzilla
+
+        a { // Stili per il link del nome utente
+            color: inherit; // Eredita il colore da .player-name
+            text-decoration: none;
+            &:hover {
+                text-decoration: underline;
+                color: var(--link-hover-color); // Hover specifico per il link nome
+            }
+        }
+        // Se la riga è hoverata e .player-name a deve essere bianco:
+        // La regola tr:hover .player-name a dovrebbe già coprire questo
+
+        .fi { // Flag icon
+            font-size: 1.2em;
+            // vertical-align: middle; // Già coperto da display:flex su .player-name
+        }
+    }
+    
+    .glitchzilla-debunked { // Contenitore per l'icona "Glitchzilla Debunked!"
+        display: inline-flex; // Per allineare l'icona correttamente
+        align-items: center;
+        
+        .material-symbols-rounded {
+            font-size: 1.2em; // Leggermente più grande del testo normale
+            // L'animazione .testo-neon-arcade è applicata via JS
+            // Il colore base è già definito da .testo-neon-arcade,
+            // ma se vuoi un colore statico non animato, scommenta e modifica:
+            // color: var(--success-color, #28a745); 
+            vertical-align: text-bottom; 
+            // margin-left: 4px; // Ora gestito da gap su .player-name
+        }
+    }
+
+
+    .player-score {
+        font-weight: bold;
+        color: var(--link-color);
+        font-size: 1.15em;
+        text-align: right;
+    }
+
+    .player-date {
+        font-size: 0.9em;
+        color: var(--text-color-muted);
+        text-align: center;
+    }
+
+    // Messaggi di stato
+    .loading-leaderboard td, // Applicalo direttamente al td
+    .no-scores td {         // Applicalo direttamente al td
+        text-align: center;
+        font-size: 1.1em;
+        padding: 20px;
+        color: var(--text-color-muted);
+    }
+}
+
+// Tema scuro specifico per la tabella
+body.dark-mode {
+    #leaderboardTable {
+        tr:nth-child(even) {
+            background-color: var(--surface-bg-secondary-dark-transparent, rgba(42, 42, 42, 0.5)); 
+            // Suggerisco una variabile per questo, es. --surface-bg-secondary-dark-transparent
+        }
+        // Potresti voler aggiustare il colore di .current-user-highlight per dark mode
+        // tr.current-user-highlight {
+        //     background-color: rgba(var(--link-color-rgb), 0.25); // Potrebbe essere più scuro in dark mode
+        // }
+    }
+}
+
+
+// Controlli di paginazione
+#paginationControls {
+    text-align: center;
+    margin-top: 25px;
+    margin-bottom: 15px;
+
+    button {
+        margin: 0 8px;
+        padding: 8px 16px;
+        // Eredita stili da .game-button se aggiungi quella classe, altrimenti stili base qui
+
+        &:disabled {
+            background-color: var(--surface-bg-secondary);
+            color: var(--text-color-muted);
+            cursor: default;
+            opacity: 0.6;
+            // Sovrascrivi eventuali stili :hover di .game-button
+            &:hover {
+                background-color: var(--surface-bg-secondary);
+                color: var(--text-color-muted);
+            }
+        }
+    }
+
+    #currentPageIndicator {
+        margin: 0 15px;
+        color: var(--text-color-secondary);
+        font-weight: bold;
+    }
+}
+
+// Link per tornare indietro
+.back-link-container {
+    text-align: center;
+    margin-top: 30px;
+
+    a {
+        color: var(--link-color);
+        text-decoration: underline;
+        font-size: 1em;
+        &:hover {
+            color: var(--link-hover-color);
+        }
+    }
+}
+
+
+// --- Media Queries per Responsività ---
+@media (max-width: 768px) {
+    #leaderboardTable {
+        // font-size: 0.95em; // Opzionale
+
+        th, td {
+            padding: 10px 8px;
+        }
+
+        th:nth-child(4), // Nascondi colonna "Data"
+        td:nth-child(4) {
             display: none;
         }
     }
 }
 
-@media (max-width: 576px) { // Breakpoint per mobile più piccoli
+@media (max-width: 576px) {
     #leaderboardTable {
-        font-size: 0.9em; // Riduci ulteriormente il font size se necessario
+        font-size: 0.9em;
 
         th, td {
-            padding: 8px 6px; // Padding ancora più piccolo
+            padding: 8px 6px;
         }
 
         .player-avatar {
-            width: 28px; // Riduci leggermente l'avatar se necessario
+            width: 28px;
             height: 28px;
             margin-right: 8px;
         }
 
-        .player-name .fi { // Riduci la dimensione della bandiera se necessario
+        .player-name .fi {
             font-size: 1em;
         }
-        
-        // La colonna "Data" è già nascosta dal breakpoint precedente (768px)
-        // Se volessi nascondere ANCHE il punteggio su schermi extra piccoli (sconsigliato di solito):
-        /*
-        th:nth-child(3), // Selettore per il 3° <th> (Punteggio)
-        td:nth-child(3) { // Selettore per la 3° <td> (Punteggio)
-            display: none;
-        }
-        */
     }
 
-    // Assicurati che i controlli di paginazione siano ancora usabili
     #paginationControls {
         button {
             padding: 6px 12px;
@@ -268,35 +333,4 @@
             font-size: 0.9em;
         }
     }
-}
-
-#leaderboardTable { // Assicurati che sia annidato o specifico se necessario
-    tr.current-user-highlight {
-        background-color: var(--link-color-rgb-opacity-15, rgba(var(--link-color-rgb), 0.15)); // Usa una variabile per lo sfondo, es. un blu chiaro
-        // Puoi anche aggiungere un bordo laterale o altri stili distintivi
-        // border-left: 3px solid var(--link-color);
-
-        td {
-            // Opzionale: rendi il testo più scuro o più marcato
-            // color: var(--text-color-primary); 
-            // font-weight: 500;
-        }
-
-        // Mantieni l'effetto hover, ma potrebbe essere leggermente diverso
-        &:hover {
-            background-color: var(--link-color-rgb-opacity-25, rgba(var(--link-color-rgb), 0.25));
-        }
-    }
-}
-
-// Stile per l'indicatore "Glitchzilla Debunked!"
-.glitchzilla-debunked {
-    .material-symbols-rounded {
-        font-size: 1.1em; // Adatta la dimensione dell'icona
-        color: var(--success-color, #28a745); // Un colore che indica successo/completamento (es. verde)
-        vertical-align: text-bottom; // Buon allineamento con il testo
-        margin-left: 4px; // Piccolo spazio dal nome
-    }
-    // Non c'è testo visibile qui, solo l'icona con un tooltip.
-    // Se volessi aggiungere testo visibile, dovresti aggiungerlo all'HTML in JS.
 }

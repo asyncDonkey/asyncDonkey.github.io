@@ -4048,7 +4048,6 @@ body.game-fullscreen-active main {
   -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-
 #globalLeaderboardContainer h1 {
   color: var(--heading-color);
   margin-top: 0;
@@ -4057,147 +4056,6 @@ body.game-fullscreen-active main {
   text-align: center;
   border-bottom: 1px solid var(--border-color-primary);
   padding-bottom: 15px;
-}
-
-#leaderboardTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: "Source Code Pro", monospace;
-}
-
-#leaderboardTable th,
-#leaderboardTable td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color-secondary);
-}
-
-#leaderboardTable th {
-  background-color: var(--surface-bg-secondary);
-  color: var(--heading-color);
-  font-weight: bold;
-  font-size: 1.05em;
-}
-
-#leaderboardTable tr:nth-child(even) {
-  background-color: var(--surface-bg-secondary);
-}
-
-body.dark-mode #leaderboardTable tr:nth-child(even) {
-  background-color: rgba(42, 42, 42, 0.5); /* Esempio per dark mode, definire --surface-bg-secondary-rgb se necessario */
-}
-
-#leaderboardTable tr:hover {
-  background-color: var(--link-hover-color);
-  color: var(--button-text-primary);
-}
-
-#leaderboardTable tr:hover td,
-#leaderboardTable tr:hover .player-name,
-#leaderboardTable tr:hover .player-score,
-#leaderboardTable tr:hover .player-date {
-  color: var(--button-text-primary);
-}
-
-.player-rank {
-  font-weight: bold;
-  min-width: 30px;
-  text-align: center;
-  color: var(--link-color);
-}
-
-.player-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 4px;
-  margin-right: 12px;
-  background-color: #eee;
-  -ms-interpolation-mode: nearest-neighbor;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: pixelated;
-  vertical-align: middle;
-}
-
-.player-info-cell {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-}
-
-.player-name {
-  font-weight: bold;
-  color: var(--text-color-primary);
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-}
-
-.player-name .fi {
-  margin-right: 8px;
-  font-size: 1.2em;
-  vertical-align: middle;
-}
-
-.player-score {
-  font-weight: bold;
-  color: var(--link-color);
-  font-size: 1.15em;
-  text-align: right;
-}
-
-.player-date {
-  font-size: 0.9em;
-  color: var(--text-color-muted);
-  text-align: center;
-}
-
-.loading-leaderboard,
-.no-scores {
-  text-align: center;
-  font-size: 1.1em;
-  padding: 20px;
-  color: var(--text-color-muted);
-}
-
-.back-link-container {
-  text-align: center;
-  margin-top: 30px;
-}
-
-.back-link-container a {
-  color: var(--link-color);
-  text-decoration: underline;
-  font-size: 1em;
-}
-
-#paginationControls {
-  text-align: center;
-  margin-top: 25px;
-  margin-bottom: 15px;
-}
-
-#paginationControls button {
-  margin: 0 8px;
-  padding: 8px 16px; /* Leggermente più piccoli dei .game-button standard se necessario */
-}
-
-#paginationControls button:disabled {
-  background-color: var(--surface-bg-secondary);
-  color: var(--text-color-muted);
-  cursor: default;
-  opacity: 0.6;
-}
-
-#currentPageIndicator {
-  margin: 0 15px;
-  color: var(--text-color-secondary);
-  font-weight: bold;
 }
 
 .btn-leaderboard-refresh {
@@ -4259,6 +4117,170 @@ body.dark-mode #leaderboardTable tr:nth-child(even) {
   background-color: var(--text-color-muted, #6c757d);
 }
 
+#leaderboardTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Source Code Pro", monospace;
+}
+#leaderboardTable th,
+#leaderboardTable td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color-secondary);
+  vertical-align: middle;
+}
+#leaderboardTable th {
+  background-color: var(--surface-bg-secondary);
+  color: var(--heading-color);
+  font-weight: bold;
+  font-size: 1.05em;
+}
+#leaderboardTable tr:nth-child(even) {
+  background-color: var(--surface-bg-secondary);
+}
+#leaderboardTable tr:hover {
+  background-color: var(--link-hover-color);
+  color: var(--button-text-primary);
+}
+#leaderboardTable tr:hover td,
+#leaderboardTable tr:hover .player-name,
+#leaderboardTable tr:hover .player-name a,
+#leaderboardTable tr:hover .player-score,
+#leaderboardTable tr:hover .player-date,
+#leaderboardTable tr:hover .player-rank,
+#leaderboardTable tr:hover .glitchzilla-debunked .material-symbols-rounded {
+  color: var(--button-text-primary) !important;
+}
+#leaderboardTable tr:hover .author-icon .material-symbols-rounded {
+  color: var(--button-text-primary) !important;
+}
+#leaderboardTable tr.current-user-highlight {
+  background-color: var(--link-color-rgb-opacity-15, rgba(var(--link-color-rgb), 0.15));
+}
+#leaderboardTable tr.current-user-highlight:hover {
+  background-color: var(--link-color-rgb-opacity-25, rgba(var(--link-color-rgb), 0.25));
+}
+#leaderboardTable .player-rank {
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+  color: var(--link-color);
+}
+#leaderboardTable .player-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  -o-object-fit: cover;
+     object-fit: cover;
+  margin-right: 12px;
+  background-color: var(--surface-bg-secondary);
+  -ms-interpolation-mode: nearest-neighbor;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: pixelated;
+}
+#leaderboardTable .player-info-cell {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+#leaderboardTable .player-name {
+  font-weight: 500;
+  color: var(--text-color-primary);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 6px;
+}
+#leaderboardTable .player-name a {
+  color: inherit;
+  text-decoration: none;
+}
+#leaderboardTable .player-name a:hover {
+  text-decoration: underline;
+  color: var(--link-hover-color);
+}
+#leaderboardTable .player-name .fi {
+  font-size: 1.2em;
+}
+#leaderboardTable .glitchzilla-debunked {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+#leaderboardTable .glitchzilla-debunked .material-symbols-rounded {
+  font-size: 1.2em;
+  vertical-align: text-bottom;
+}
+#leaderboardTable .player-score {
+  font-weight: bold;
+  color: var(--link-color);
+  font-size: 1.15em;
+  text-align: right;
+}
+#leaderboardTable .player-date {
+  font-size: 0.9em;
+  color: var(--text-color-muted);
+  text-align: center;
+}
+#leaderboardTable .loading-leaderboard td,
+#leaderboardTable .no-scores td {
+  text-align: center;
+  font-size: 1.1em;
+  padding: 20px;
+  color: var(--text-color-muted);
+}
+
+body.dark-mode #leaderboardTable tr:nth-child(even) {
+  background-color: var(--surface-bg-secondary-dark-transparent, rgba(42, 42, 42, 0.5));
+}
+
+#paginationControls {
+  text-align: center;
+  margin-top: 25px;
+  margin-bottom: 15px;
+}
+#paginationControls button {
+  margin: 0 8px;
+  padding: 8px 16px;
+}
+#paginationControls button:disabled {
+  background-color: var(--surface-bg-secondary);
+  color: var(--text-color-muted);
+  cursor: default;
+  opacity: 0.6;
+}
+#paginationControls button:disabled:hover {
+  background-color: var(--surface-bg-secondary);
+  color: var(--text-color-muted);
+}
+#paginationControls #currentPageIndicator {
+  margin: 0 15px;
+  color: var(--text-color-secondary);
+  font-weight: bold;
+}
+
+.back-link-container {
+  text-align: center;
+  margin-top: 30px;
+}
+.back-link-container a {
+  color: var(--link-color);
+  text-decoration: underline;
+  font-size: 1em;
+}
+.back-link-container a:hover {
+  color: var(--link-hover-color);
+}
+
 @media (max-width: 768px) {
   #leaderboardTable th, #leaderboardTable td {
     padding: 10px 8px;
@@ -4271,12 +4293,6 @@ body.dark-mode #leaderboardTable tr:nth-child(even) {
 @media (max-width: 576px) {
   #leaderboardTable {
     font-size: 0.9em;
-    /*
-    th:nth-child(3), // Selettore per il 3° <th> (Punteggio)
-    td:nth-child(3) { // Selettore per la 3° <td> (Punteggio)
-        display: none;
-    }
-    */
   }
   #leaderboardTable th, #leaderboardTable td {
     padding: 8px 6px;
@@ -4297,20 +4313,6 @@ body.dark-mode #leaderboardTable tr:nth-child(even) {
     font-size: 0.9em;
   }
 }
-#leaderboardTable tr.current-user-highlight {
-  background-color: var(--link-color-rgb-opacity-15, rgba(var(--link-color-rgb), 0.15));
-}
-#leaderboardTable tr.current-user-highlight:hover {
-  background-color: var(--link-color-rgb-opacity-25, rgba(var(--link-color-rgb), 0.25));
-}
-
-.glitchzilla-debunked .material-symbols-rounded {
-  font-size: 1.1em;
-  color: var(--success-color, #28a745);
-  vertical-align: text-bottom;
-  margin-left: 4px;
-}
-
 /* ===== Utilities (Scroll-to-top, Theme Toggle Button) ===== */
 #scrollToTopBtn {
   display: none;
