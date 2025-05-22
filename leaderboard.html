@@ -17,154 +17,7 @@
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
         <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
-        <style>
-            #globalLeaderboardContainer {
-                color: var(--text-color-secondary);
-                background-color: var(--surface-bg-primary);
-                padding: 25px;
-                border-radius: 8px;
-                margin: 20px auto;
-                max-width: 900px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            }
 
-            #globalLeaderboardContainer h1 {
-                color: var(--heading-color);
-                margin-top: 0;
-                margin-bottom: 25px;
-                font-size: 2em;
-                text-align: center;
-                border-bottom: 1px solid var(--border-color-primary);
-                padding-bottom: 15px;
-            }
-
-            #leaderboardTable {
-                width: 100%;
-                border-collapse: collapse;
-                font-family: 'Source Code Pro', monospace;
-            }
-
-            #leaderboardTable th,
-            #leaderboardTable td {
-                padding: 12px 15px;
-                text-align: left;
-                border-bottom: 1px solid var(--border-color-secondary);
-            }
-
-            #leaderboardTable th {
-                background-color: var(--surface-bg-secondary);
-                color: var(--heading-color);
-                font-weight: bold;
-                font-size: 1.05em;
-            }
-
-            #leaderboardTable tr:nth-child(even) {
-                background-color: var(--surface-bg-secondary);
-            }
-            body.dark-mode #leaderboardTable tr:nth-child(even) {
-                background-color: rgba(
-                    42,
-                    42,
-                    42,
-                    0.5
-                ); /* Esempio per dark mode, definire --surface-bg-secondary-rgb se necessario */
-            }
-
-            #leaderboardTable tr:hover {
-                background-color: var(--link-hover-color);
-                color: var(--button-text-primary);
-            }
-            #leaderboardTable tr:hover td,
-            #leaderboardTable tr:hover .player-name,
-            #leaderboardTable tr:hover .player-score,
-            #leaderboardTable tr:hover .player-date {
-                color: var(--button-text-primary);
-            }
-
-            .player-rank {
-                font-weight: bold;
-                min-width: 30px;
-                text-align: center;
-                color: var(--link-color);
-            }
-
-            .player-avatar {
-                width: 36px;
-                height: 36px;
-                border-radius: 4px;
-                margin-right: 12px;
-                background-color: #eee;
-                image-rendering: pixelated;
-                vertical-align: middle;
-            }
-
-            .player-info-cell {
-                display: flex;
-                align-items: center;
-            }
-
-            .player-name {
-                font-weight: bold;
-                color: var(--text-color-primary);
-                display: flex;
-                align-items: center;
-            }
-            .player-name .fi {
-                margin-right: 8px;
-                font-size: 1.2em;
-                vertical-align: middle;
-            }
-
-            .player-score {
-                font-weight: bold;
-                color: var(--link-color);
-                font-size: 1.15em;
-                text-align: right;
-            }
-
-            .player-date {
-                font-size: 0.9em;
-                color: var(--text-color-muted);
-                text-align: center;
-            }
-
-            .loading-leaderboard,
-            .no-scores {
-                text-align: center;
-                font-size: 1.1em;
-                padding: 20px;
-                color: var(--text-color-muted);
-            }
-            .back-link-container {
-                text-align: center;
-                margin-top: 30px;
-            }
-            .back-link-container a {
-                color: var(--link-color);
-                text-decoration: underline;
-                font-size: 1em;
-            }
-            #paginationControls {
-                text-align: center;
-                margin-top: 25px;
-                margin-bottom: 15px;
-            }
-            #paginationControls button {
-                margin: 0 8px;
-                padding: 8px 16px; /* Leggermente più piccoli dei .game-button standard se necessario */
-            }
-            #paginationControls button:disabled {
-                background-color: var(--surface-bg-secondary);
-                color: var(--text-color-muted);
-                cursor: default;
-                opacity: 0.6;
-            }
-            #currentPageIndicator {
-                margin: 0 15px;
-                color: var(--text-color-secondary);
-                font-weight: bold;
-            }
-        </style>
     </head>
     <body>
         <header>
@@ -291,9 +144,11 @@
             <section id="globalLeaderboardContainer">
                 <h1>Classifica Globale - asyncDonkey Runner</h1>
                 <div class="leaderboard-controls" style="margin-bottom: 1em; text-align: right">
-                    <button id="refreshLeaderboardBtn" class="btn btn-secondary">Aggiorna Classifica</button>
+                    <button id="refreshLeaderboardBtn" class="btn btn-leaderboard-refresh" title="Aggiorna Classifica">
+    <span class="material-symbols-rounded">refresh</span>
+</button>
                 </div>
-                <table id="leaderboardTable">
+                <div class="table-responsive-wrapper"> <table id="leaderboardTable">
                     <thead>
                         <tr>
                             <th>Rank</th>
@@ -308,6 +163,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
                 <div id="paginationControls">
                     <button id="prevPageBtn" class="game-button" disabled>Precedente</button>
                     <span id="currentPageIndicator">Pagina 1</span>

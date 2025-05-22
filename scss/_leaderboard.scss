@@ -1,0 +1,271 @@
+#globalLeaderboardContainer {
+                color: var(--text-color-secondary);
+                background-color: var(--surface-bg-primary);
+                padding: 25px;
+                border-radius: 8px;
+                margin: 20px auto;
+                max-width: 900px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            }
+
+            #globalLeaderboardContainer h1 {
+                color: var(--heading-color);
+                margin-top: 0;
+                margin-bottom: 25px;
+                font-size: 2em;
+                text-align: center;
+                border-bottom: 1px solid var(--border-color-primary);
+                padding-bottom: 15px;
+            }
+
+            #leaderboardTable {
+                width: 100%;
+                border-collapse: collapse;
+                font-family: 'Source Code Pro', monospace;
+            }
+
+            #leaderboardTable th,
+            #leaderboardTable td {
+                padding: 12px 15px;
+                text-align: left;
+                border-bottom: 1px solid var(--border-color-secondary);
+            }
+
+            #leaderboardTable th {
+                background-color: var(--surface-bg-secondary);
+                color: var(--heading-color);
+                font-weight: bold;
+                font-size: 1.05em;
+            }
+
+            #leaderboardTable tr:nth-child(even) {
+                background-color: var(--surface-bg-secondary);
+            }
+            body.dark-mode #leaderboardTable tr:nth-child(even) {
+                background-color: rgba(
+                    42,
+                    42,
+                    42,
+                    0.5
+                ); /* Esempio per dark mode, definire --surface-bg-secondary-rgb se necessario */
+            }
+
+            #leaderboardTable tr:hover {
+                background-color: var(--link-hover-color);
+                color: var(--button-text-primary);
+            }
+            #leaderboardTable tr:hover td,
+            #leaderboardTable tr:hover .player-name,
+            #leaderboardTable tr:hover .player-score,
+            #leaderboardTable tr:hover .player-date {
+                color: var(--button-text-primary);
+            }
+
+            .player-rank {
+                font-weight: bold;
+                min-width: 30px;
+                text-align: center;
+                color: var(--link-color);
+            }
+
+            .player-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 4px;
+                margin-right: 12px;
+                background-color: #eee;
+                image-rendering: pixelated;
+                vertical-align: middle;
+            }
+
+            .player-info-cell {
+                display: flex;
+                align-items: center;
+            }
+
+            .player-name {
+                font-weight: bold;
+                color: var(--text-color-primary);
+                display: flex;
+                align-items: center;
+            }
+            .player-name .fi {
+                margin-right: 8px;
+                font-size: 1.2em;
+                vertical-align: middle;
+            }
+
+            .player-score {
+                font-weight: bold;
+                color: var(--link-color);
+                font-size: 1.15em;
+                text-align: right;
+            }
+
+            .player-date {
+                font-size: 0.9em;
+                color: var(--text-color-muted);
+                text-align: center;
+            }
+
+            .loading-leaderboard,
+            .no-scores {
+                text-align: center;
+                font-size: 1.1em;
+                padding: 20px;
+                color: var(--text-color-muted);
+            }
+            .back-link-container {
+                text-align: center;
+                margin-top: 30px;
+            }
+            .back-link-container a {
+                color: var(--link-color);
+                text-decoration: underline;
+                font-size: 1em;
+            }
+            #paginationControls {
+                text-align: center;
+                margin-top: 25px;
+                margin-bottom: 15px;
+            }
+            #paginationControls button {
+                margin: 0 8px;
+                padding: 8px 16px; /* Leggermente più piccoli dei .game-button standard se necessario */
+            }
+            #paginationControls button:disabled {
+                background-color: var(--surface-bg-secondary);
+                color: var(--text-color-muted);
+                cursor: default;
+                opacity: 0.6;
+            }
+            #currentPageIndicator {
+                margin: 0 15px;
+                color: var(--text-color-secondary);
+                font-weight: bold;
+            }
+
+            // Stili per il pulsante di refresh della leaderboard
+.btn-leaderboard-refresh {
+    // Eredita alcuni stili da .btn se presente, o definisci da zero
+    // Esempio di stili base, adatta secondo le tue preferenze:
+    background-color: var(--surface-bg-secondary); // Sfondo leggermente diverso dai bottoni primari
+    color: var(--text-color-secondary);
+    border: 1px solid var(--border-color-primary);
+    padding: 0.375rem 0.75rem; // Padding standard per un bottone
+    font-size: 1rem; // Dimensione base del font
+    border-radius: var(--border-radius-sm, 0.25rem); // Angoli arrotondati
+    line-height: 1.5; // Per centrare l'icona verticalmente
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    display: inline-flex; // Per allineare l'icona
+    align-items: center;
+    justify-content: center;
+
+    .material-symbols-rounded {
+        font-size: 1.5em; // Rendi l'icona un po' più grande del testo del bottone (se ci fosse testo)
+        vertical-align: middle; // Aiuta con l'allineamento
+    }
+
+    &:hover {
+        background-color: var(--surface-bg-primary); // Sfondo più scuro/chiaro al hover
+        color: var(--link-hover-color);
+        border-color: var(--link-color);
+    }
+
+    &:focus, &:active {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(var(--link-color-rgb), 0.25); // Focus ring
+    }
+
+    &:disabled {
+        opacity: 0.65;
+        cursor: default;
+        background-color: var(--surface-bg-secondary);
+        border-color: var(--border-color-primary);
+        color: var(--text-color-muted);
+    }
+}
+
+// Wrapper per la responsività della tabella leaderboard
+.table-responsive-wrapper {
+    overflow-x: auto;  // Abilita lo scroll orizzontale se il contenuto eccede
+    -webkit-overflow-scrolling: touch; // Abilita uno scroll più fluido su iOS
+
+    // Opzionale: aggiungi un leggero padding se lo scrollbar copre i bordi
+    // padding-bottom: 5px; 
+
+    // Stili per lo scrollbar (opzionale, ma migliora l'estetica)
+    // Adatta i colori alle tue variabili CSS
+    &::-webkit-scrollbar {
+        height: 8px; // Altezza dello scrollbar orizzontale
+        background-color: var(--surface-bg-secondary, #e9ecef);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--border-color-primary, #dee2e6);
+        border-radius: 4px;
+
+        &:hover {
+            background-color: var(--text-color-muted, #6c757d);
+        }
+    }
+}
+
+// Media Queries per la responsività della tabella Leaderboard
+@media (max-width: 768px) { // Breakpoint per tablet e mobile più grandi
+    #leaderboardTable {
+        // Opzionale: Riduci un po' il font size generale della tabella per guadagnare spazio
+        // font-size: 0.95em;
+
+        th, td {
+            padding: 10px 8px; // Riduci il padding delle celle
+        }
+
+        // Nascondi la colonna "Data"
+        th:nth-child(4), // Selettore per il 4° <th> (Data)
+        td:nth-child(4) { // Selettore per la 4° <td> (Data)
+            display: none;
+        }
+    }
+}
+
+@media (max-width: 576px) { // Breakpoint per mobile più piccoli
+    #leaderboardTable {
+        font-size: 0.9em; // Riduci ulteriormente il font size se necessario
+
+        th, td {
+            padding: 8px 6px; // Padding ancora più piccolo
+        }
+
+        .player-avatar {
+            width: 28px; // Riduci leggermente l'avatar se necessario
+            height: 28px;
+            margin-right: 8px;
+        }
+
+        .player-name .fi { // Riduci la dimensione della bandiera se necessario
+            font-size: 1em;
+        }
+        
+        // La colonna "Data" è già nascosta dal breakpoint precedente (768px)
+        // Se volessi nascondere ANCHE il punteggio su schermi extra piccoli (sconsigliato di solito):
+        /*
+        th:nth-child(3), // Selettore per il 3° <th> (Punteggio)
+        td:nth-child(3) { // Selettore per la 3° <td> (Punteggio)
+            display: none;
+        }
+        */
+    }
+
+    // Assicurati che i controlli di paginazione siano ancora usabili
+    #paginationControls {
+        button {
+            padding: 6px 12px;
+            font-size: 0.9em;
+        }
+        #currentPageIndicator {
+            font-size: 0.9em;
+        }
+    }
+}
