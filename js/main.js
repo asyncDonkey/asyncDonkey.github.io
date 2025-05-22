@@ -1148,63 +1148,55 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupModalControls() {
-        if (showLoginBtn && loginModal) {
-            showLoginBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal(loginModal);
-            });
-        }
-        if (closeLoginBtn) {
-            closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
-        }
-        window.addEventListener('click', (event) => {
-            if (event.target === loginModal) closeModal(loginModal);
+    const loginModal = document.getElementById('loginModal');
+    const showLoginBtn = document.getElementById('showLoginBtn');
+    const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
+
+    // --- INIZIO CODICE PER LOGOUT DESKTOP ---
+    const logoutButtonDesktop = document.getElementById('logoutButton');
+
+    if (logoutButtonDesktop) {
+        logoutButtonDesktop.addEventListener('click', async (e) => {
+            e.preventDefault();
+            console.log('[Main.js setupModalControls] Pulsante Logout DESKTOP cliccato!'); // DEBUG
+            try {
+                console.log('[Main.js setupModalControls] Chiamata a signOut per logout desktop...'); // DEBUG
+                await signOut(auth); // Assicurati che 'auth' sia accessibile qui
+                showToast('Logout effettuato con successo!', 'success');
+                console.log('[Main.js setupModalControls] Logout DESKTOP riuscito.'); // DEBUG
+                // onAuthStateChanged si occuperà di aggiornare l'UI.
+            } catch (error) {
+                console.error('Errore durante il logout (desktop):', error);
+                showToast('Errore durante il logout. Riprova.', 'error');
+            }
+        });
+    } else {
+        // Questo warning potrebbe apparire su pagine dove l'utente non è loggato e #logoutButton non è nel DOM.
+        // Potrebbe essere normale se #userProfileContainer (che contiene #logoutButton) è nascosto.
+        // console.warn('[Main.js setupModalControls] Pulsante logoutButton (desktop) non trovato nel DOM al momento del setup.');
+    }
+    // --- FINE CODICE PER LOGOUT DESKTOP ---
+
+    if (showLoginBtn && loginModal) {
+        showLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal(loginModal); // Assicurati che openModal sia definita
         });
     }
-    setupSmoothScrolling();
-    setupScrollToTopButton();
-    setupInteractiveSkills();
-    setupThemeSwitcher();
-    setupModalControls();
 
-    if (document.getElementById('homeMiniLeaderboardList')) {
-        loadHomeMiniLeaderboard();
+    if (closeLoginBtn) {
+        closeLoginBtn.addEventListener('click', () => closeModal(loginModal)); // Assicurati che closeModal sia definita
     }
-    if (document.getElementById('articlesSection')) {
-        displayArticlesSection()
-            .then(() => {
-                /* Interazioni inizializzate da onAuthStateChanged */
-            })
-            .catch((error) => {
-                console.error('Errore durante displayArticlesSection in DOMContentLoaded:', error);
-            });
-    }
-    if (document.getElementById('glitchzillaDefeatedBanner')) {
-        displayGlitchzillaBanner();
-    }
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = loginForm.loginEmail.value;
-            const password = loginForm.loginPassword.value;
-            const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
-            if (loginModalErrorDiv) loginModalErrorDiv.style.display = 'none';
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                loginForm.reset();
+
+    // Gestione chiusura modale cliccando fuori (se loginModal esiste)
+    if (loginModal) {
+        window.addEventListener('click', (event) => {
+            if (event.target === loginModal) {
                 closeModal(loginModal);
-                showToast('Login effettuato con successo!', 'success');
-            } catch (error) {
-                const friendlyError = traduireErroreFirebase(error.code);
-                if (loginModalErrorDiv) {
-                    loginModalErrorDiv.textContent = friendlyError;
-                    loginModalErrorDiv.style.display = 'block';
-                } else {
-                    showToast('Errore Login: ' + friendlyError, 'error');
-                }
             }
         });
     }
+}
 });
 
 onAuthStateChanged(auth, async (user) => {
