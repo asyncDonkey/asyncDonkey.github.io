@@ -94,24 +94,14 @@ onAuthStateChanged(auth, (user) => {
         } else {
             issueAuthRequiredMessageDiv.style.display = 'block';
             issueSubmissionForm.style.display = 'none';
-            if (loginLinkFromContributePage && document.getElementById('showLoginBtn')) {
-                const newLoginLink = loginLinkFromContributePage.cloneNode(true);
-                if (loginLinkFromContributePage.parentNode) {
-                    loginLinkFromContributePage.parentNode.replaceChild(newLoginLink, loginLinkFromContributePage);
-                }
-                newLoginLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const showLoginBtnGlobal = document.getElementById('showLoginBtn');
-                    if (showLoginBtnGlobal) {
-                        showLoginBtnGlobal.click(); 
-                    }
-                });
-            }
+            // La logica per loginLinkFromContributePage è stata rimossa
+            // perché i link sono ora direttamente nell'HTML.
         }
     }
     // Ricarica le issue per aggiornare lo stato degli upvote e dei listener
+    // (es. per abilitare/disabilitare i pulsanti di voto in base al login)
     if (document.getElementById('issuesDisplayArea')) {
-         loadIssues();
+        loadIssues();
     }
 });
 

@@ -281,20 +281,34 @@
                 <div id="issueTrackerSection" style="margin-top: 20px">
                     <h4>Invia una Nuova Segnalazione o Suggerimento</h4>
                     <div
-                        id="issueAuthRequiredMessage"
-                        style="
-                            display: none;
-                            padding: 10px;
-                            background-color: var(--surface-bg-secondary);
-                            border-radius: 4px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        <p>
-                            Devi essere <a href="#" id="loginLinkFromContributePage">loggato</a> per inviare una
-                            segnalazione o un suggerimento.
-                        </p>
-                    </div>
+    id="issueAuthRequiredMessage"
+    class="auth-required-prompt"
+    style="
+        display: none; /* Gestito da js/issueTracker.js */
+        text-align: center; 
+        padding: 20px 25px; 
+        background-color: var(--surface-bg-secondary); 
+        border-radius: var(--border-radius-standard, 8px); /* Aggiunto fallback per border-radius */
+        margin-bottom: 25px; 
+        border: 1px solid var(--border-color-secondary);
+    "
+>
+    <h3 style="margin-top:0; margin-bottom:10px; font-size: 1.4em; color: var(--heading-color);">Accesso Richiesto</h3>
+    <p style="margin-bottom: 20px; font-size: 1.05em; color: var(--text-color-secondary);">
+        Devi essere autenticato per poter inviare una nuova segnalazione, un suggerimento o votare quelli esistenti.
+    </p>
+    <div class="auth-prompt-actions" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+        <a href="register.html?authAction=login&redirectUrl=/contribute.html" class="game-button primary-action" style="text-decoration: none;">
+            <span class="material-symbols-rounded" style="margin-right: 6px; vertical-align: text-bottom; font-size: 1.2em;">login</span>Accedi
+        </a>
+        <a href="register.html?authAction=signup&redirectUrl=/contribute.html" class="game-button alt secondary-action" style="text-decoration: none;">
+            <span class="material-symbols-rounded" style="margin-right: 6px; vertical-align: text-bottom; font-size: 1.2em;">person_add</span>Registrati
+        </a>
+    </div>
+    <p style="margin-top: 25px; font-size:0.9em;">
+        <a href="index.html" style="color: var(--link-color); text-decoration: underline;">&larr; Oppure torna alla Homepage</a>
+    </p>
+</div>
                     <form id="issueSubmissionForm" style="display: none">
                         <div>
                             <label for="issueTitle">Titolo (opzionale ma consigliato):</label>
