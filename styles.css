@@ -2894,6 +2894,10 @@ img.comment-avatar-img {
   color: var(--text-color-secondary);
 }
 
+.comment-like-interaction-wrapper.guest-interactive button.like-btn {
+  pointer-events: none;
+}
+
 /* Modali (Login/Signup) */
 .modal {
   display: none;
@@ -4913,6 +4917,21 @@ main section {
   border-color: var(--link-color);
   -webkit-box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.2);
           box-shadow: 0 0 0 2px rgba(var(--link-color-rgb), 0.2);
+}
+
+.upvote-interaction-wrapper.guest-interactive button.upvote-issue-btn {
+  pointer-events: none; /* Il click passerà attraverso al wrapper */
+}
+
+.upvote-issue-btn .material-symbols-rounded {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20; /* Contorno di default */
+  vertical-align: bottom; /* o middle, a seconda delle preferenze */
+  font-size: 1.2em; /* Adatta se necessario */
+}
+
+.upvote-issue-btn.voted .material-symbols-rounded {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 20; /* Piena quando votato */
+  /* color: var(--link-color); /* Opzionale: cambia colore quando votato */
 }
 
 .dev-text-content p {

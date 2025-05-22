@@ -126,3 +126,6 @@ img.comment-avatar-img {
     font-size: 0.9em;
     color: var(--text-color-secondary);
 }
+.comment-like-interaction-wrapper.guest-interactive button.like-btn {
+    pointer-events: none;
+}

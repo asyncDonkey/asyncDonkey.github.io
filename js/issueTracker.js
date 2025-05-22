@@ -18,7 +18,7 @@ import {
     Timestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-
+import { showToast } from './toastNotifications.js'; // Assicurati di avere un modulo per le toast
 // Riferimenti DOM
 const issueSubmissionForm = document.getElementById('issueSubmissionForm');
 const issueTitleInput = document.getElementById('issueTitle');
@@ -86,7 +86,7 @@ function getStatusBadgeClass(status) {
 
 // Gestione autenticazione per il form
 onAuthStateChanged(auth, (user) => {
-    currentUser = user;
+    currentUser = user; // currentUser è già aggiornato qui
     if (issueSubmissionForm && issueAuthRequiredMessageDiv) {
         if (user) {
             issueAuthRequiredMessageDiv.style.display = 'none';
@@ -95,7 +95,6 @@ onAuthStateChanged(auth, (user) => {
             issueAuthRequiredMessageDiv.style.display = 'block';
             issueSubmissionForm.style.display = 'none';
             if (loginLinkFromContributePage && document.getElementById('showLoginBtn')) {
-                // Clona il link per evitare listener multipli se onAuthStateChanged scatta più volte
                 const newLoginLink = loginLinkFromContributePage.cloneNode(true);
                 if (loginLinkFromContributePage.parentNode) {
                     loginLinkFromContributePage.parentNode.replaceChild(newLoginLink, loginLinkFromContributePage);
@@ -104,13 +103,16 @@ onAuthStateChanged(auth, (user) => {
                     e.preventDefault();
                     const showLoginBtnGlobal = document.getElementById('showLoginBtn');
                     if (showLoginBtnGlobal) {
-                        showLoginBtnGlobal.click(); // Apre la modale di login da main.js
+                        showLoginBtnGlobal.click(); 
                     }
                 });
             }
         }
     }
-    loadIssues(); // Ricarica le issue per aggiornare lo stato degli upvote
+    // Ricarica le issue per aggiornare lo stato degli upvote e dei listener
+    if (document.getElementById('issuesDisplayArea')) {
+         loadIssues();
+    }
 });
 
 // Logica per mostrare/nascondere la selezione del gioco
@@ -227,6 +229,7 @@ async function loadIssues() {
         return;
     }
     issuesDisplayArea.innerHTML = '<p>Caricamento segnalazioni...</p>';
+    // currentUser è aggiornato da onAuthStateChanged
 
     try {
         const issuesCollectionRef = collection(db, 'userIssues');
@@ -234,24 +237,16 @@ async function loadIssues() {
 
         const filterType = filterIssueTypeSelect ? filterIssueTypeSelect.value : 'all';
         const filterStatus = filterIssueStatusSelect ? filterIssueStatusSelect.value : 'all';
-
         const conditions = [];
-        if (filterType !== 'all') {
-            conditions.push(where('type', '==', filterType));
-        }
-        if (filterStatus !== 'all') {
-            conditions.push(where('status', '==', filterStatus));
-        }
+        if (filterType !== 'all') { conditions.push(where('type', '==', filterType)); }
+        if (filterStatus !== 'all') { conditions.push(where('status', '==', filterStatus)); }
 
         if (conditions.length > 0) {
             q = query(issuesCollectionRef, ...conditions, orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE));
         }
-        // Nota: Firestore richiede che il primo orderBy sia sullo stesso campo di un'eventuale disuguaglianza
-        // Se ci sono filtri (where), potremmo dover aggiustare l'orderBy o creare indici compositi.
-        // Per ora, l'orderBy("timestamp", "desc") potrebbe funzionare o richiedere un indice.
-
+        
         const querySnapshot = await getDocs(q);
-        issuesDisplayArea.innerHTML = ''; // Pulisci
+        issuesDisplayArea.innerHTML = ''; 
 
         if (querySnapshot.empty) {
             issuesDisplayArea.innerHTML =
@@ -263,7 +258,7 @@ async function loadIssues() {
             const issue = docSnapshot.data();
             const issueId = docSnapshot.id;
             const issueCard = document.createElement('div');
-            issueCard.className = 'issue-card'; // Applica stili CSS per la card
+            issueCard.className = 'issue-card'; 
             issueCard.setAttribute('data-issue-id', issueId);
 
             const titleEl = document.createElement('h5');
@@ -280,10 +275,10 @@ async function loadIssues() {
                 issue.type === 'gameIssue'
                     ? `Problema Gioco (${escapeHTML(issue.gameId || 'Non specificato')})`
                     : issue.type === 'generalFeature'
-                      ? 'Funzionalità Generale Sito'
-                      : issue.type === 'newGameRequest'
-                        ? 'Suggerimento Nuovo Gioco'
-                        : 'Sconosciuto';
+                        ? 'Funzionalità Generale Sito'
+                        : issue.type === 'newGameRequest'
+                            ? 'Suggerimento Nuovo Gioco'
+                            : 'Sconosciuto';
             const statusBadge = `<span class="issue-status-badge ${getStatusBadgeClass(issue.status)}">${escapeHTML(issue.status)}</span>`;
 
             let submittedByText = `Inviato da: ${escapeHTML(issue.submittedBy.userName || 'Anonimo')}`;
@@ -299,20 +294,67 @@ async function loadIssues() {
 
             const actionsEl = document.createElement('div');
             actionsEl.className = 'issue-actions';
+
+            const upvoteInteractionWrapper = document.createElement('div');
+            upvoteInteractionWrapper.style.display = 'inline-block'; 
+            upvoteInteractionWrapper.classList.add('upvote-interaction-wrapper');
+
             const upvoteButton = document.createElement('button');
-            upvoteButton.className = 'upvote-issue-btn game-button';
-            upvoteButton.innerHTML = `👍 <span class="upvote-count">${issue.upvotes || 0}</span>`;
-            upvoteButton.title = 'Vota questa segnalazione';
-            upvoteButton.disabled = !currentUser; // Disabilita se utente non loggato
-
+            upvoteButton.className = 'upvote-issue-btn game-button'; 
+            
+            let userHasVoted = false;
             if (currentUser && issue.upvotedBy && issue.upvotedBy.includes(currentUser.uid)) {
-                upvoteButton.classList.add('voted');
-                upvoteButton.title = 'Hai già votato';
+                userHasVoted = true;
             }
-            upvoteButton.addEventListener('click', () => handleIssueUpvote(issueId));
+            
+            const upvoteIconFill = userHasVoted ? 1 : 0;
+            const upvoteIconName = 'how_to_vote'; // Icona scelta
+            
+            upvoteButton.innerHTML = `<span class="material-symbols-rounded" style="font-variation-settings: 'FILL' ${upvoteIconFill};">${upvoteIconName}</span> <span class="upvote-count">${issue.upvotes || 0}</span>`;
+            upvoteButton.title = userHasVoted ? 'Hai già votato' : 'Vota questa segnalazione';
+            if(userHasVoted) upvoteButton.classList.add('voted');
+            
+            // Pulisci listener e classi precedenti
+            if (upvoteInteractionWrapper.guestHandlerAttached) {
+                upvoteInteractionWrapper.removeEventListener('click', upvoteInteractionWrapper.guestHandlerAttached);
+                delete upvoteInteractionWrapper.guestHandlerAttached;
+            }
+            upvoteInteractionWrapper.classList.remove('guest-interactive');
+            upvoteInteractionWrapper.style.cursor = 'default';
 
-            actionsEl.appendChild(upvoteButton);
-            // Potremmo aggiungere un link "Dettagli" qui se la descrizione è troncata
+            const oldButtonHandler = upvoteButton.handlerAttached;
+            if (oldButtonHandler) {
+                upvoteButton.removeEventListener('click', oldButtonHandler);
+                delete upvoteButton.handlerAttached;
+            }
+
+            if (currentUser) {
+                upvoteButton.disabled = false;
+                upvoteInteractionWrapper.style.cursor = 'pointer';
+                
+                const upvoteHandler = () => handleIssueUpvote(issueId);
+                upvoteButton.addEventListener('click', upvoteHandler);
+                upvoteButton.handlerAttached = upvoteHandler; 
+            } else {
+                upvoteButton.disabled = true;
+                upvoteInteractionWrapper.style.cursor = 'pointer';
+                upvoteInteractionWrapper.title = "Accedi per votare";
+                upvoteInteractionWrapper.classList.add('guest-interactive'); 
+
+                const guestUpvoteHandler = (e) => {
+                    e.stopPropagation();
+                    showToast("Devi essere loggato per votare segnalazioni o suggerimenti.", "info", 3000);
+                    const showLoginBtnGlobal = document.getElementById('showLoginBtn');
+                    if (showLoginBtnGlobal) {
+                        showLoginBtnGlobal.click();
+                    }
+                };
+                upvoteInteractionWrapper.addEventListener('click', guestUpvoteHandler);
+                upvoteInteractionWrapper.guestHandlerAttached = guestUpvoteHandler;
+            }
+            
+            upvoteInteractionWrapper.appendChild(upvoteButton);
+            actionsEl.appendChild(upvoteInteractionWrapper);
 
             issueCard.appendChild(titleEl);
             issueCard.appendChild(descriptionEl);
@@ -336,10 +378,14 @@ async function loadIssues() {
 // Gestione upvote
 async function handleIssueUpvote(issueId) {
     if (!currentUser) {
-        // currentUser dovrebbe essere già definito globalmente nel modulo
-        showToast('Devi essere loggato per votare.');
+        console.warn("[handleIssueUpvote] Chiamata anomala: utente non loggato.");
+        // La toast e il modale sono gestiti dal wrapper, ma come fallback:
+        // showToast("Devi essere loggato per votare.", "info");
+        // const showLoginBtnGlobal = document.getElementById('showLoginBtn');
+        // if (showLoginBtnGlobal) showLoginBtnGlobal.click();
         return;
     }
+    
     const issueRef = doc(db, 'userIssues', issueId);
     const issueCard = document.querySelector(`.issue-card[data-issue-id="${issueId}"]`);
     const upvoteButton = issueCard ? issueCard.querySelector('.upvote-issue-btn') : null;
@@ -350,7 +396,7 @@ async function handleIssueUpvote(issueId) {
         const docSnap = await getDoc(issueRef);
         if (!docSnap.exists()) {
             console.error('Issue non trovata:', issueId);
-            showToast('Errore: Segnalazione non trovata.');
+            showToast('Errore: Segnalazione non trovata.', 'error');
             if (upvoteButton) upvoteButton.disabled = false;
             return;
         }
@@ -361,23 +407,39 @@ async function handleIssueUpvote(issueId) {
         const newUpvotesCountOp = userHasUpvoted ? increment(-1) : increment(1);
         const userArrayUpdateOp = userHasUpvoted ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid);
 
-        // *** Oggetto di aggiornamento CORRETTO ***
         const updatePayload = {
             upvotes: newUpvotesCountOp,
             upvotedBy: userArrayUpdateOp,
-            updatedAt: serverTimestamp(), // <-- AGGIUNTA CRUCIALE
+            updatedAt: serverTimestamp(), 
         };
 
         await updateDoc(issueRef, updatePayload);
+        if (userHasUpvoted) { // Se l'utente AVEVA votato, ora sta togliendo il voto
+            showToast("Voto rimosso.", "info", 2000);
+        } else { // Se l'utente NON aveva votato, ora sta aggiungendo il voto
+            showToast("Grazie per il tuo voto!", "success", 2000);
+        }
 
-        // Aggiorna UI direttamente o ricarica quella specifica issue/tutta la lista
-        const updatedDocSnap = await getDoc(issueRef); // Richiedi dati aggiornati
+        const updatedDocSnap = await getDoc(issueRef); 
         if (updatedDocSnap.exists() && upvoteButton) {
             const updatedData = updatedDocSnap.data();
             const countSpan = upvoteButton.querySelector('.upvote-count');
             if (countSpan) countSpan.textContent = updatedData.upvotes || 0;
 
-            if (updatedData.upvotedBy && updatedData.upvotedBy.includes(currentUser.uid)) {
+            const userNowHasVoted = updatedData.upvotedBy && updatedData.upvotedBy.includes(currentUser.uid);
+            const upvoteIconFill = userNowHasVoted ? 1 : 0;
+            const upvoteIconName = 'how_to_vote'; // Mantieni la stessa icona
+            
+            const iconSpanElement = upvoteButton.querySelector('.material-symbols-rounded');
+            if(iconSpanElement) {
+                iconSpanElement.textContent = upvoteIconName;
+                iconSpanElement.style.fontVariationSettings = `'FILL' ${upvoteIconFill}`;
+            }
+            // Se vuoi ricreare l'innerHTML completo:
+            // upvoteButton.innerHTML = `<span class="material-symbols-rounded" style="font-variation-settings: 'FILL' ${upvoteIconFill};">${upvoteIconName}</span> <span class="upvote-count">${updatedData.upvotes || 0}</span>`;
+
+
+            if (userNowHasVoted) {
                 upvoteButton.classList.add('voted');
                 upvoteButton.title = 'Hai già votato';
             } else {
@@ -386,8 +448,8 @@ async function handleIssueUpvote(issueId) {
             }
         }
     } catch (error) {
-        console.error('Errore upvote issue:', error); // Log originale del tuo errore
-        showToast('Errore durante il voto.');
+        console.error('Errore upvote issue:', error); 
+        showToast('Errore durante il voto.', 'error');
     } finally {
         if (upvoteButton) upvoteButton.disabled = false;
     }
