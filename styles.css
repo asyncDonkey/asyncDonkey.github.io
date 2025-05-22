@@ -4090,6 +4090,13 @@ body.game-fullscreen-active main {
   color: var(--link-color);
 }
 
+.nickname-author-icon {
+  font-size: 1em;
+  vertical-align: text-bottom;
+  margin-left: 4px;
+  color: var(--link-color);
+}
+
 /* Stili per la lista issue nell'admin dashboard */
 #adminUserIssuesList .article-info small em {
   /* Enfasi per la descrizione */

@@ -636,7 +636,7 @@ function updateUIBasedOnAuthState(user, profileData) {
     console.log('[Main.js updateUIBasedOnAuthState] Fine aggiornamenti UI orchestrati.');
 }
 
-export { db, auth, firebaseConfig };
+export { db, auth, firebaseConfig, escapeHTML };
 
 async function loadHomeMiniLeaderboard() {
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');

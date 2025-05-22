@@ -1,5 +1,6 @@
 // js/comments.js
-import { db, auth, generateBlockieAvatar } from './main.js';
+import { db, auth, generateBlockieAvatar, escapeHTML } from './main.js';
+import { getAuthorIconHTML } from './uiUtils.js';
 import {
     collection,
     addDoc,
@@ -166,13 +167,14 @@ async function handleGuestbookCommentLike(event) {
 /**
  * Carica e visualizza i commenti del guestbook per la pagina corrente.
  */
+// --- FUNZIONE loadComments AGGIORNATA ---
 async function loadComments() {
     if (!commentsListDiv || !guestbookCollection) {
         if (commentsListDiv) commentsListDiv.innerHTML = '<p>Errore: Connessione al DB o elemento DOM mancante.</p>';
         return;
     }
     commentsListDiv.innerHTML = `<p>Caricamento commenti per ${currentPageId}...</p>`;
-    const currentUser = auth.currentUser; // Ottieni lo stato utente all'inizio della funzione
+    const currentUser = auth.currentUser;
 
     try {
         const q = query(
@@ -188,7 +190,6 @@ async function loadComments() {
             return;
         }
 
-        // --- Logica per fetchare i profili pubblici (invariata) ---
         const commenterIdsToFetch = [
             ...new Set(querySnapshot.docs.map((docSnap) => docSnap.data().userId).filter((id) => id)),
         ];
@@ -220,17 +221,14 @@ async function loadComments() {
                 );
             }
         }
-        // --- Fine logica profili ---
 
-        commentsListDiv.innerHTML = ''; // Pulisci prima di aggiungere
+        commentsListDiv.innerHTML = '';
         querySnapshot.forEach((docSnapshot) => {
             const commentData = docSnapshot.data();
             const commentId = docSnapshot.id;
             const commentElement = document.createElement('div');
             commentElement.classList.add('comment-item');
 
-            // ... (Creazione avatar, header, nome, data, messaggio come nel tuo codice esistente) ...
-            // (Ho omesso questa parte per brevità, ma è identica alla versione precedente che mi hai dato)
             const avatarImg = document.createElement('img');
             avatarImg.classList.add('comment-avatar-img');
             let commenterAvatarSrc = DEFAULT_AVATAR_COMMENT_PATH;
@@ -254,7 +252,7 @@ async function loadComments() {
                 const seedForGuestBlockie = commentData.name || `anon-g-${commentId}`;
                 commenterAvatarSrc = generateBlockieAvatar(seedForGuestBlockie, 40, { size: 8 });
             }
-             if (commenterAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH && !commenterAvatarSrc.startsWith('data:image/png;base64') && commenterProfilePublicUpdatedAt) {
+            if (commenterAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH && !commenterAvatarSrc.startsWith('data:image/png;base64') && commenterProfilePublicUpdatedAt) {
                 if (commenterProfilePublicUpdatedAt.seconds) {
                     commenterAvatarSrc += `?v=${commenterProfilePublicUpdatedAt.seconds}`;
                 } else if (commenterProfilePublicUpdatedAt instanceof Date) {
@@ -264,47 +262,57 @@ async function loadComments() {
             avatarImg.src = commenterAvatarSrc;
             avatarImg.alt = `Avatar di ${commenterNameDisplay}`;
             avatarImg.onerror = () => { avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH; avatarImg.onerror = null; };
+            
             const headerDiv = document.createElement('div');
-            headerDiv.classList.add('comment-header', 'd-flex', 'align-items-center', 'mb-2');
+            headerDiv.classList.add('comment-header', 'd-flex', 'align-items-center', 'mb-2'); // Utilizzo di classi Bootstrap/SCSS per allineamento
             headerDiv.appendChild(avatarImg);
+
             const nameAndDateDiv = document.createElement('div');
-            nameAndDateDiv.classList.add('ms-2');
+            nameAndDateDiv.classList.add('ms-2'); // Bootstrap margin start
+
             const nameStrong = document.createElement('strong');
-            if (commenterNationalityCode && commenterNationalityCode !== 'OTHER') { 
-                const flagSpan = document.createElement('span');
-                flagSpan.className = `fi fi-${commenterNationalityCode.toLowerCase()} me-1`;
-                nameStrong.appendChild(flagSpan);
-            }
-            if (commentData.userId) { 
+            const authorIconHTML = getAuthorIconHTML(commenterPublicProfile); // Recupera HTML dell'icona
+            const escapedCommenterName = escapeHTML(commenterNameDisplay);
+
+            if (commentData.userId) {
                 const userProfileLink = document.createElement('a');
                 userProfileLink.href = `profile.html?userId=${commentData.userId}`;
-                userProfileLink.textContent = commenterNameDisplay;
                 userProfileLink.classList.add('comment-author-link');
+                userProfileLink.innerHTML = escapedCommenterName + authorIconHTML; // Nome + Icona nel link
                 nameStrong.appendChild(userProfileLink);
-            } else { 
-                nameStrong.appendChild(document.createTextNode(commenterNameDisplay));
+            } else {
+                nameStrong.innerHTML = escapedCommenterName + authorIconHTML; // Nome + Icona (senza link se utente non registrato)
+            }
+
+            if (commenterNationalityCode && commenterNationalityCode !== 'OTHER') {
+                const flagSpan = document.createElement('span');
+                flagSpan.className = `fi fi-${commenterNationalityCode.toLowerCase()} ms-1`; // Bootstrap margin start
+                nameStrong.appendChild(flagSpan);
             }
             nameAndDateDiv.appendChild(nameStrong);
+
             const dateSmall = document.createElement('small');
             dateSmall.classList.add('text-muted', 'ms-2', 'comment-date-text');
             dateSmall.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
             nameAndDateDiv.appendChild(dateSmall);
+            
             headerDiv.appendChild(nameAndDateDiv);
+
             const messageP = document.createElement('p');
             messageP.classList.add('comment-message', 'mb-1', 'mt-1');
             messageP.textContent = commentData.message ? String(commentData.message).replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+            
             commentElement.appendChild(headerDiv);
             commentElement.appendChild(messageP);
-            // --- Fine creazione elementi standard ---
 
-
-            // --- Sezione Like Commento con WRAPPER (Modificata) ---
+            // --- Sezione Like Commento con WRAPPER (come nel tuo codice originale, ma assicurati che il currentUser sia passato/disponibile) ---
+            // ... (la logica dei like ai commenti, inclusa la gestione di currentUser, rimane invariata)
             const likesContainer = document.createElement('div');
             likesContainer.classList.add('likes-container', 'mt-1');
 
-            const likeInteractionWrapper = document.createElement('div'); // NUOVO WRAPPER
+            const likeInteractionWrapper = document.createElement('div');
             likeInteractionWrapper.style.display = 'inline-block'; 
-            likeInteractionWrapper.classList.add('comment-like-interaction-wrapper'); // Classe per CSS target
+            likeInteractionWrapper.classList.add('comment-like-interaction-wrapper');
 
             const likeButton = document.createElement('button');
             likeButton.classList.add('like-btn');
@@ -321,7 +329,6 @@ async function loadComments() {
             likeButton.classList.toggle('liked', userHasLikedThisComment);
             likeButton.title = userHasLikedThisComment ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
             
-            // Rimuovi vecchi listener prima di aggiungerne di nuovi per evitare duplicazioni
             const oldBtnHandler = likeButton.handlerAttached;
             if (oldBtnHandler) {
                 likeButton.removeEventListener('click', oldBtnHandler);
@@ -332,44 +339,38 @@ async function loadComments() {
                 likeInteractionWrapper.removeEventListener('click', oldGuestWrapperHandler);
                 delete likeInteractionWrapper.guestHandlerAttached;
             }
-            likeInteractionWrapper.classList.remove('guest-interactive'); // Resetta classe
+            likeInteractionWrapper.classList.remove('guest-interactive');
 
 
             if (currentUser) {
                 likeButton.disabled = false;
                 likeInteractionWrapper.style.cursor = 'pointer'; 
                 likeButton.addEventListener('click', handleGuestbookCommentLike);
-                likeButton.handlerAttached = handleGuestbookCommentLike; // Salva riferimento
+                likeButton.handlerAttached = handleGuestbookCommentLike;
             } else {
                 likeButton.disabled = true;
                 likeInteractionWrapper.style.cursor = 'pointer';
                 likeInteractionWrapper.title = "Accedi per mettere 'Mi piace'";
-                likeInteractionWrapper.classList.add('guest-interactive'); // AGGIUNGI CLASSE per CSS
+                likeInteractionWrapper.classList.add('guest-interactive');
 
                 const guestLikeHandler = (e) => {
-                    e.stopPropagation(); // Importante
-                    console.log('[comments.js] Wrapper GUESTBOOK COMMENT Like cliccato da GUEST!');
+                    e.stopPropagation();
                     showToast("Devi essere loggato per mettere 'Mi piace' ai commenti.", "info", 3000);
-                    // NESSUNA APERTURA MODALE QUI, come da richiesta specifica
-                    // const showLoginBtnGlobal = document.getElementById('showLoginBtn');
-                    // if (showLoginBtnGlobal) showLoginBtnGlobal.click();
                 };
                 likeInteractionWrapper.addEventListener('click', guestLikeHandler);
-                likeInteractionWrapper.guestHandlerAttached = guestLikeHandler; // Salva riferimento
+                likeInteractionWrapper.guestHandlerAttached = guestLikeHandler;
             }
             
             likeInteractionWrapper.appendChild(likeButton);
             likesContainer.appendChild(likeInteractionWrapper);
-            commentElement.appendChild(likesContainer); // Aggiungi al commentElement, non a commentContentDiv direttamente se vuoi che stia sotto il messaggio
-            // --- Fine Sezione Like Commento con WRAPPER ---
+            commentElement.appendChild(likesContainer);
             
-            // Logica per rendere cliccabile il numero di like (come nel tuo codice originale)
             const likeCountSpanInsideButton = likeButton.querySelector('.like-count');
             if (likeCountSpanInsideButton) {
                 const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
                 if (oldListener) likeCountSpanInsideButton.removeEventListener('click', oldListener);
                 
-                if (currentLikes > 0 && currentUser) { // Solo utenti loggati possono vedere la lista
+                if (currentLikes > 0 && currentUser) {
                     likeCountSpanInsideButton.classList.add('clickable-comment-like-count');
                     likeCountSpanInsideButton.title = 'Vedi a chi piace questo commento';
                     const newListener = (e) => {
@@ -389,6 +390,7 @@ async function loadComments() {
             commentsListDiv.appendChild(commentElement);
         });
     } catch (error) {
+        // ... (gestione errore invariata)
         console.error(`[comments.js] Errore caricamento commenti per pageId ${currentPageId}: `, error);
         if (error.code === 'failed-precondition' && commentsListDiv) {
             commentsListDiv.innerHTML = `<p>Errore: Indice Firestore mancante per filtrare i commenti. Controlla la console.</p>`;

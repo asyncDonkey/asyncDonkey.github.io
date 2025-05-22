@@ -23,6 +23,8 @@ import {
 
 import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
+import { getAuthorIconHTML } from './uiUtils.js'; // Assumendo che uiUtils.js sia nella stessa cartella js/
+import { escapeHTML } from './main.js'; 
 
 // --- RIFERIMENTI DOM (come dal tuo codice) ---
 const profileSectionTitle = document.querySelector('#profile h2');
@@ -205,25 +207,38 @@ function renderExternalLinks(linksArray, isOwnProfile) {
  * @param {string} uidLoaded - L'UID del profilo caricato.
  */
 function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
+    // profileDataForDisplay viene già popolato all'inizio di questa funzione nel tuo codice originale
     profileDataForDisplay = { ...data, userId: uidLoaded, isPublicSnapshot: !isOwnProfile };
 
     const profileNameForTitle = data.nickname || 'Utente';
     document.title = `Profilo di ${profileNameForTitle} - asyncDonkey.io`;
     if (profileSectionTitle) {
+        // MODIFICA QUI per il titolo della sezione, se vuoi l'icona anche lì (opzionale)
+        // Per ora, lasciamo il titolo della sezione H2 semplice come nel tuo codice originale.
+        // Se vuoi l'icona anche nel titolo H2 (es. "Profilo di NomeUtente [icona]"), fammelo sapere.
         profileSectionTitle.textContent = isOwnProfile ? 'Il Mio Profilo' : `Profilo di ${profileNameForTitle}`;
     }
 
     if (profileEmailRow) profileEmailRow.style.display = isOwnProfile && data.email ? 'flex' : 'none';
     if (profileEmailSpan && isOwnProfile) profileEmailSpan.textContent = data.email || 'N/A';
 
-    if (currentNicknameSpan) currentNicknameSpan.textContent = data.nickname || 'Non impostato';
+    // MODIFICA PER IL NICKNAME PRINCIPALE
+    if (currentNicknameSpan) {
+        const nicknameText = data.nickname || 'Non impostato';
+        // Usiamo profileDataForDisplay che include hasPublishedArticles (se presente dai dati pubblici)
+        // o data direttamente se è il profilo privato (userProfiles) che dovrebbe avere hasPublishedArticles.
+        // La funzione getAuthorIconHTML si aspetta un oggetto che contenga hasPublishedArticles.
+        // 'data' qui è l'oggetto del profilo (userProfiles o userPublicProfiles).
+        const authorIcon = getAuthorIconHTML(data); 
+        currentNicknameSpan.innerHTML = escapeHTML(nicknameText) + authorIcon;
+    }
 
     if (profileNationalitySpan) {
         // ... (logica nazionalità invariata)
         if (data.nationalityCode && data.nationalityCode !== 'OTHER') {
             const countryCodeOriginal = data.nationalityCode.toUpperCase();
             const countryCodeForLibrary = countryCodeOriginal.toLowerCase();
-            profileNationalitySpan.innerHTML = '';
+            profileNationalitySpan.innerHTML = ''; // Pulisci prima di aggiungere
             const flagIconSpan = document.createElement('span');
             flagIconSpan.classList.add('fi', `fi-${countryCodeForLibrary}`);
             flagIconSpan.style.marginRight = '8px';
@@ -238,7 +253,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
     }
 
     if (profileAvatarImg) {
-        // ... (logica avatar invariata dall'ultima versione)
+        // ... (logica avatar invariata)
         let avatarSrcToSet;
         let altText = `${profileNameForTitle}'s Avatar`;
         let cacheBusterTimestamp = null;
@@ -249,17 +264,18 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             cacheBusterTimestamp = data.profileUpdatedAt;
         } else if (!isOwnProfile && data.avatarUrls && data.avatarUrls.thumbnail) {
             mainAvatarUrl = data.avatarUrls.thumbnail;
-            cacheBusterTimestamp = data.profilePublicUpdatedAt;
-        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) {
+            cacheBusterTimestamp = data.profilePublicUpdatedAt; // o data.updatedAt se userPublicProfiles usa 'updatedAt'
+        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) { // Fallback per il proprio profilo
             mainAvatarUrl = data.avatarUrls.small;
             cacheBusterTimestamp = data.profileUpdatedAt;
         }
+
 
         if (mainAvatarUrl) {
             altText = `${profileNameForTitle}'s Custom Avatar`;
             if (cacheBusterTimestamp && cacheBusterTimestamp.seconds) {
                 avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.seconds}`;
-            } else if (cacheBusterTimestamp instanceof Date) {
+            } else if (cacheBusterTimestamp instanceof Date) { // Per alcuni timestamp legacy o se aggiornato da client
                 avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.getTime()}`;
             } else {
                 avatarSrcToSet = mainAvatarUrl;
@@ -268,14 +284,14 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             avatarSrcToSet = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
             altText = `${profileNameForTitle}'s Blockie Avatar`;
         } else {
-            avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH;
+            avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH; // Assicurati che sia definito
             altText = `${profileNameForTitle}'s Default Avatar`;
         }
 
         profileAvatarImg.src = avatarSrcToSet;
         profileAvatarImg.alt = altText;
         profileAvatarImg.onerror = () => {
-            console.warn(`[AthenaDev Debug - UpdateUI] Errore caricamento avatar: ${avatarSrcToSet}. Fallback.`);
+            console.warn(`[AthenaDev Debug - UpdateUI] Errore caricamento avatar: ${profileAvatarImg.src}. Fallback.`);
             if (uidLoaded) {
                 profileAvatarImg.src = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
                 profileAvatarImg.alt = `${profileNameForTitle}'s Blockie Avatar (fallback errore)`;
@@ -283,90 +299,104 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
                 profileAvatarImg.src = DEFAULT_AVATAR_IMAGE_PATH;
                 profileAvatarImg.alt = `${profileNameForTitle}'s Default Avatar (fallback errore critico)`;
             }
-            profileAvatarImg.onerror = null;
+            profileAvatarImg.onerror = null; // Rimuovi per evitare loop
         };
     }
 
-    // Gestione Status Message (ORA POTENZIALMENTE PUBBLICO)
+    // Gestione Status Message
     if (statusMessageSection && statusMessageDisplay) {
+        // ... (logica status message invariata)
         if (data.statusMessage && data.statusMessage.trim() !== '') {
             statusMessageSection.style.display = 'block';
             statusMessageDisplay.textContent = data.statusMessage;
         } else {
-            // Se è il profilo proprio e non c'è messaggio, mostra l'invito
             if (isOwnProfile) {
                 statusMessageSection.style.display = 'block';
                 statusMessageDisplay.innerHTML =
                     '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
             } else {
-                // Se è il profilo di un altro e non c'è messaggio pubblico, nascondi la sezione
                 statusMessageSection.style.display = 'none';
             }
         }
     }
 
-    // Gestione Bio (disponibile sia in userProfiles che userPublicProfiles)
-    if (bioSection) bioSection.style.display = 'block';
+    // Gestione Bio
+    if (bioSection) bioSection.style.display = 'block'; // La bio è sempre visibile se presente
     if (bioDisplay) {
         // ... (logica bio invariata)
         if (data.bio && data.bio.trim() !== '') {
             bioDisplay.textContent = data.bio;
         } else {
-            bioDisplay.innerHTML = `<p style="color: var(--text-color-muted);">Nessuna bio impostata.</p>`;
-        }
-    }
-
-    // Gestione Badges
-    if (badgesSection && badgesDisplayContainer && noBadgesMessage) {
-        // ... (logica badges invariata)
-        badgesDisplayContainer.innerHTML = '';
-        noBadgesMessage.style.display = 'none';
-        const earnedBadgesArray = isOwnProfile ? data.earnedBadges || [] : [];
-        if (earnedBadgesArray.length > 0) {
-            badgesSection.style.display = 'block';
-            earnedBadgesArray.forEach((badgeId) => {
-                const badgeInfo = BADGE_DEFINITIONS[badgeId];
-                if (badgeInfo) {
-                    const badgeIconElement = document.createElement('div');
-                    badgeIconElement.className = 'badge-icon-item';
-                    badgeIconElement.title = `${badgeInfo.name}\n${badgeInfo.description}`;
-                    badgeIconElement.setAttribute('role', 'button');
-                    badgeIconElement.setAttribute('tabindex', '0');
-                    badgeIconElement.setAttribute('aria-label', `Dettagli badge: ${badgeInfo.name}`);
-                    const iconSpan = document.createElement('span');
-                    iconSpan.className = 'material-symbols-rounded';
-                    iconSpan.textContent = badgeInfo.icon;
-                    iconSpan.style.color = badgeInfo.color || 'var(--text-color-primary)';
-                    if (badgeInfo.isNeon) iconSpan.classList.add('testo-neon-arcade');
-                    else if (badgeInfo.isAnimated && badgeInfo.animationClass)
-                        iconSpan.classList.add(badgeInfo.animationClass);
-                    badgeIconElement.appendChild(iconSpan);
-                    badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
-                    badgeIconElement.addEventListener('keydown', (event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            openBadgeDetailsModal(badgeId);
-                        }
-                    });
-                    badgesDisplayContainer.appendChild(badgeIconElement);
-                }
-            });
-        } else {
+             // Se è il proprio profilo, mostra un invito, altrimenti un messaggio neutro
             if (isOwnProfile) {
-                badgesSection.style.display = 'block';
-                noBadgesMessage.textContent = 'Nessun riconoscimento ancora ottenuto.';
-                noBadgesMessage.style.display = 'block';
+                bioDisplay.innerHTML = `<p style="color: var(--text-color-muted);">Nessuna bio ancora scritta. Aggiungine una qui sotto!</p>`;
             } else {
-                badgesSection.style.display = 'none';
+                bioDisplay.innerHTML = `<p style="color: var(--text-color-muted);">Questo utente non ha ancora scritto una bio.</p>`;
             }
         }
     }
+    
+    // Gestione Badges
+    if (badgesSection && badgesDisplayContainer && noBadgesMessage) {
+        // ... (logica badges invariata, i badge vengono mostrati solo per isOwnProfile=true)
+        badgesDisplayContainer.innerHTML = ''; // Pulisci prima
+        noBadgesMessage.style.display = 'none'; // Nascondi di default
+
+        const earnedBadgesArray = data.earnedBadges || []; // Prendi i badge dai dati del profilo (pubblico o privato)
+
+        // Decidi se mostrare la sezione badge in base a isOwnProfile O se ci sono badge pubblici (se mai implementato)
+        // Per ora, la tua logica originale mostra i badge solo per isOwnProfile. Manteniamola.
+        if (isOwnProfile) {
+            badgesSection.style.display = 'block'; // Mostra la sezione per il proprio profilo
+            if (earnedBadgesArray.length > 0) {
+                earnedBadgesArray.forEach((badgeId) => {
+                    const badgeInfo = BADGE_DEFINITIONS[badgeId];
+                    if (badgeInfo) {
+                        const badgeIconElement = document.createElement('div');
+                        badgeIconElement.className = 'badge-icon-item';
+                        badgeIconElement.title = `${badgeInfo.name}\n${badgeInfo.description}`;
+                        badgeIconElement.setAttribute('role', 'button');
+                        badgeIconElement.setAttribute('tabindex', '0');
+                        badgeIconElement.setAttribute('aria-label', `Dettagli badge: ${badgeInfo.name}`);
+
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = 'material-symbols-rounded';
+                        iconSpan.textContent = badgeInfo.icon;
+                        iconSpan.style.color = badgeInfo.color || 'var(--text-color-primary)';
+                        if (badgeInfo.isNeon) iconSpan.classList.add('testo-neon-arcade');
+                        else if (badgeInfo.isAnimated && badgeInfo.animationClass)
+                            iconSpan.classList.add(badgeInfo.animationClass);
+                        
+                        badgeIconElement.appendChild(iconSpan);
+                        badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
+                        badgeIconElement.addEventListener('keydown', (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                openBadgeDetailsModal(badgeId);
+                            }
+                        });
+                        badgesDisplayContainer.appendChild(badgeIconElement);
+                    }
+                });
+            } else {
+                noBadgesMessage.textContent = 'Nessun riconoscimento ancora ottenuto.';
+                noBadgesMessage.style.display = 'block';
+            }
+        } else {
+            // Se non è il profilo proprio, e NON vogliamo mostrare i badge di altri (come da logica originale)
+            badgesSection.style.display = 'none';
+        }
+    }
+
 
     // Mostra/nascondi sezioni e form di modifica basati su isOwnProfile
     if (isOwnProfile) {
+        // ... (logica per elementi solo propri come email verification, form di modifica, etc. invariata)
         if (emailVerificationBanner && loggedInUser && !loggedInUser.emailVerified) {
             emailVerificationBanner.style.display = 'block';
             if (resendEmailMessage) resendEmailMessage.textContent = '';
+        } else if (emailVerificationBanner) {
+            emailVerificationBanner.style.display = 'none';
         }
 
         if (updateStatusForm) {
@@ -380,19 +410,18 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             updateBioForm.style.display = 'block';
             if (bioInput) bioInput.placeholder = data.bio ? 'Modifica la tua bio...' : 'Scrivi qualcosa di te...';
         }
-
         if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
-        renderExternalLinks(data.externalLinks || [], true);
-
-        updateBioCharCounter();
+        renderExternalLinks(data.externalLinks || [], true); // Assicura che questo sia chiamato solo per isOwnProfile
+        updateBioCharCounter(); // Assicurati che bioInput sia disponibile
         if (avatarUploadSection) avatarUploadSection.style.display = 'block';
+
     } else {
         // Profilo di un altro utente
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
-        if (updateStatusForm) updateStatusForm.style.display = 'none'; // Form di modifica stato nascosto
+        if (updateStatusForm) updateStatusForm.style.display = 'none';
         if (updateBioForm) updateBioForm.style.display = 'none';
         if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'none';
-        if (externalLinksSection) externalLinksSection.style.display = 'none';
+        if (externalLinksSection) externalLinksSection.style.display = 'none'; // Nascondi anche la sezione che contiene la lista
         if (avatarUploadSection) avatarUploadSection.style.display = 'none';
     }
 

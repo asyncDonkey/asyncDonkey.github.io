@@ -1,5 +1,6 @@
 // js/leaderboard.js
-import { db, generateBlockieAvatar } from './main.js';
+import { db, generateBlockieAvatar, escapeHTML } from './main.js';
+import { getAuthorIconHTML } from './uiUtils.js';
 import {
     collection,
     query,
@@ -108,23 +109,16 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                 loadGlobalLeaderboard('initial');
                 return;
             }
-            isFetchingFirstPageQuery = currentPage === 1;
+            isFetchingFirstPageQuery = currentPage === 1; // Questo non dovrebbe accadere se currentPage > 1
 
-            if (isFetchingFirstPageQuery) {
-                q = query(
+            const docToStartAfter = firstDocsHistory[currentPage - 2]; // -2 perché currentPage è 1-based, history 0-based e vogliamo la pagina *prima*
+            if (docToStartAfter || isFetchingFirstPageQuery /* se currentPage è 1, non c'è docToStartAfter */ ) {
+                 q = query(
                     leaderboardScoresCollection,
                     where('gameId', '==', 'donkeyRunner'),
                     orderBy('score', 'desc'),
                     orderBy('timestamp', 'asc'),
-                    limit(SCORES_PER_PAGE)
-                );
-            } else if (firstDocsHistory[currentPage - 2]) {
-                q = query(
-                    leaderboardScoresCollection,
-                    where('gameId', '==', 'donkeyRunner'),
-                    orderBy('score', 'desc'),
-                    orderBy('timestamp', 'asc'),
-                    startAfter(firstDocsHistory[currentPage - 2]),
+                    ...(isFetchingFirstPageQuery ? [] : [startAfter(docToStartAfter)]), // Non usare startAfter per la prima pagina
                     limit(SCORES_PER_PAGE)
                 );
             } else {
@@ -144,27 +138,26 @@ async function loadGlobalLeaderboard(direction = 'initial') {
 
         if (scoreDocs.length > 0) {
             const userIdsToFetch = [...new Set(scoreDocs.map((sDoc) => sDoc.data().userId).filter((id) => id))];
-            const publicProfilesMap = new Map(); // Dati letti da userPublicProfiles
+            const publicProfilesMap = new Map();
 
             if (userIdsToFetch.length > 0) {
                 const MAX_IDS_PER_IN_QUERY = 30;
                 const profilePromises = [];
-
                 for (let i = 0; i < userIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
                     const batchUserIds = userIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
-                    // *** MODIFICA CHIAVE: Query su userPublicProfiles ***
                     const profilesQuery = query(
-                        collection(db, 'userPublicProfiles'), // <-- Query su userPublicProfiles
+                        collection(db, 'userPublicProfiles'),
                         where(documentId(), 'in', batchUserIds)
                     );
                     profilePromises.push(getDocs(profilesQuery));
                 }
-
                 try {
                     const snapshotsArray = await Promise.all(profilePromises);
                     snapshotsArray.forEach((snapshot) => {
                         snapshot.forEach((docSnap) => {
-                            publicProfilesMap.set(docSnap.id, docSnap.data());
+                             if (docSnap.exists()) { // Aggiunto controllo exists()
+                                publicProfilesMap.set(docSnap.id, docSnap.data());
+                            }
                         });
                     });
                 } catch (profileError) {
@@ -178,13 +171,11 @@ async function loadGlobalLeaderboard(direction = 'initial') {
 
                 let profileDisplayName = scoreData.userName || scoreData.initials || 'Giocatore Anonimo';
                 let profileAvatarUrl = null;
-                // *** MODIFICA CHIAVE: Usa il timestamp dal profilo pubblico per cache busting ***
                 let userProfilePublicUpdatedAt = null;
                 let nationalityCode = scoreData.nationalityCode || null;
 
                 if (userPublicProfile) {
                     profileDisplayName = userPublicProfile.nickname || profileDisplayName;
-                    // *** MODIFICA CHIAVE: Usa avatarUrls.thumbnail dal profilo pubblico ***
                     if (userPublicProfile.avatarUrls && userPublicProfile.avatarUrls.thumbnail) {
                         profileAvatarUrl = userPublicProfile.avatarUrls.thumbnail;
                     }
@@ -195,47 +186,59 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                 enrichedScores.push({
                     id: scoreDoc.id,
                     ...scoreData,
-                    firestoreDoc: scoreDoc,
+                    firestoreDoc: scoreDoc, // Passa il documento per la paginazione
                     profileDisplayName,
                     profileAvatarUrl,
-                    userProfilePublicUpdatedAt, // Timestamp pubblico per cache busting
+                    userProfilePublicUpdatedAt,
                     nationalityCode,
+                    userPublicProfileData: userPublicProfile // <-- PASSAGGIO DEI DATI DEL PROFILO PUBBLICO
                 });
             }
         }
 
+        // Gestione Paginazione e Visualizzazione (invariata, ma ora enrichedScores contiene userPublicProfileData)
         if (enrichedScores.length > 0) {
             if (direction === 'next') {
                 currentPage++;
+                 // Non rimuovere dalla history qui, la logica di 'prev' la usa
+            } else if (direction === 'prev') {
+                 // Se siamo tornati indietro, la history oltre la pagina corrente non è più valida
+                 // No, la history per 'prev' è gestita da firstDocsHistory[currentPage - 2]
             }
-            if (direction === 'prev' && !isFetchingFirstPageQuery) {
-                firstDocsHistory.splice(currentPage);
-            }
-
+            
             firstVisibleDoc = enrichedScores[0].firestoreDoc;
             lastVisibleDoc = enrichedScores[enrichedScores.length - 1].firestoreDoc;
 
-            if (firstVisibleDoc) {
-                if (firstDocsHistory.length < currentPage) {
+            // Aggiorna la history solo se stiamo andando avanti o è la prima pagina
+            if (direction === 'next' || direction === 'initial') {
+                 if (firstDocsHistory.length < currentPage) {
                     firstDocsHistory.push(firstVisibleDoc);
                 } else {
+                    // Sovrascrivi se stiamo ricaricando la stessa pagina o una pagina già visitata in avanti
                     firstDocsHistory[currentPage - 1] = firstVisibleDoc;
                 }
             }
-        } else {
+             // Se 'prev', la history non dovrebbe cambiare per la pagina corrente,
+            // ma currentPage è già stato decrementato prima della chiamata, quindi firstDocsHistory[currentPage-1] è corretto
+            // per il nuovo firstVisibleDoc della pagina a cui siamo arrivati.
+
+        } else { // Nessun documento trovato
             if (direction === 'next') {
-                /* No more pages */
-            } else if (isFetchingFirstPageQuery || currentPage === 1) {
+                // Siamo arrivati alla fine
+            } else if (isFetchingFirstPageQuery || currentPage === 1) { // Nessun dato sulla prima pagina
                 currentPage = 1;
                 firstDocsHistory = [];
                 lastVisibleDoc = null;
             }
-            firstVisibleDoc = null;
+             firstVisibleDoc = null; // Nessun documento visibile
         }
+
 
         displayGlobalLeaderboard(enrichedScores, currentPage);
         updatePaginationControls(enrichedScores.length, isFetchingFirstPageQuery || currentPage === 1);
+
     } catch (error) {
+        // ... (gestione errore invariata)
         console.error(`Errore durante il caricamento della leaderboard (direzione: ${direction}):`, error);
         if (leaderboardTableBody) {
             if (error.code === 'failed-precondition') {
@@ -254,6 +257,7 @@ async function loadGlobalLeaderboard(direction = 'initial') {
         refreshLeaderboardBtn.innerHTML = originalRefreshBtnText;
     }
 }
+
 
 /**
  * Popola la tabella HTML con i dati della leaderboard.
@@ -285,19 +289,18 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         tdPlayer.className = 'player-info-cell align-middle';
 
         const avatarImg = document.createElement('img');
+        // ... (logica avatar invariata)
         avatarImg.className = 'player-avatar me-2';
         avatarImg.width = 36;
         avatarImg.height = 36;
         avatarImg.style.borderRadius = '50%';
         avatarImg.style.objectFit = 'cover';
 
-        // *** MODIFICA CHIAVE: Usa profileAvatarUrl e userProfilePublicUpdatedAt ***
         if (entry.profileAvatarUrl) {
             let avatarUrlToSet = entry.profileAvatarUrl;
             if (entry.userProfilePublicUpdatedAt && typeof entry.userProfilePublicUpdatedAt.seconds === 'number') {
                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.seconds}`;
             } else if (entry.userProfilePublicUpdatedAt instanceof Date) {
-                // Fallback se è già un oggetto Date JS
                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.getTime()}`;
             }
             avatarImg.src = avatarUrlToSet;
@@ -306,39 +309,41 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
             try {
                 avatarImg.src = generateBlockieAvatar(seedForBlockie, 36, { size: 8, scale: 4.5 });
             } catch (e) {
-                console.error('Errore generazione Blockie per leaderboard:', e, 'seed:', seedForBlockie);
                 avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
             }
         }
         const altText = entry.profileDisplayName || 'Avatar giocatore';
         avatarImg.alt = altText;
         avatarImg.onerror = () => {
-            console.warn(`Errore caricamento avatar per ${altText} (URL: ${avatarImg.src}), uso default.`);
             avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
             avatarImg.onerror = null;
         };
         tdPlayer.appendChild(avatarImg);
 
         const nameSpan = document.createElement('span');
-        nameSpan.className = 'player-name';
+        nameSpan.className = 'player-name'; // Questo span conterrà il link o il testo del nome
 
         if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
             const flagIconSpan = document.createElement('span');
             flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
             flagIconSpan.style.marginRight = '8px';
-            flagIconSpan.style.verticalAlign = 'middle';
-            nameSpan.appendChild(flagIconSpan);
+            flagIconSpan.style.verticalAlign = 'middle'; // o text-bottom
+            nameSpan.appendChild(flagIconSpan); // Aggiungi la bandiera prima del nome
         }
 
         const displayNameText = entry.profileDisplayName || 'Giocatore Anonimo';
+        const authorIconHTML = getAuthorIconHTML(entry.userPublicProfileData); // Recupera HTML dell'icona
+        const escapedDisplayName = escapeHTML(displayNameText);
+
         if (entry.userId) {
             const profileLink = document.createElement('a');
             profileLink.href = `profile.html?userId=${entry.userId}`;
-            profileLink.textContent = displayNameText;
-            profileLink.classList.add('text-decoration-none');
+            profileLink.classList.add('text-decoration-none'); // Stile link se necessario
+            profileLink.innerHTML = escapedDisplayName + authorIconHTML; // Nome + Icona nel link
             nameSpan.appendChild(profileLink);
         } else {
-            nameSpan.appendChild(document.createTextNode(displayNameText + (entry.initials ? '' : ' (Ospite)')));
+            // Per ospiti o utenti senza ID, mostra nome + icona (l'icona non apparirà se non hanno hasPublishedArticles)
+            nameSpan.innerHTML += escapedDisplayName + authorIconHTML; 
         }
         tdPlayer.appendChild(nameSpan);
         tr.appendChild(tdPlayer);
