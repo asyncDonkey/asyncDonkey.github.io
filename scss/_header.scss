@@ -509,20 +509,46 @@ header .nav-link-icon-only .material-symbols-rounded {
 }
 /* Il tuo CSS esistente per i breakpoint */
 @media (max-width: 991px) {
-    header .desktop-nav {
+    // L'header diventa una colonna per impilare le due righe
+    header {
+        flex-direction: column;
+        align-items: stretch; // Le righe si estendono per tutta la larghezza
+        gap: 15px; // Spazio tra la riga superiore e quella inferiore
+    }
+
+    // Stile per la riga superiore (titolo e hamburger)
+    .header-top-row {
+        display: flex;
+        justify-content: space-between; // Titolo a sx, hamburger a dx
+        align-items: center; // <-- QUESTA RIGA È LA CHIAVE PER IL CENTRAGGIO VERTICALE
+        width: 100%;
+    }
+
+    // Nasconde la nav desktop e mostra l'hamburger
+    .header-top-row .desktop-nav {
         display: none;
     }
-    header .navbar-toggler {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+    .header-top-row .navbar-toggler {
+        // Potresti anche scrivere solo .navbar-toggler se non ci sono altri contesti
+        display: inline-flex; // Già così dovrebbe essere per mostrare l'icona hamburger
+        // Non servono altre proprietà specifiche qui per l'allineamento verticale del bottone stesso
+        // perché è gestito dal genitore .header-top-row con align-items: center.
+        // Potresti voler regolare padding o line-height SUL BOTTONE se l'icona interna non è centrata NEL BOTTONE.
     }
+
+    // Stile per la riga inferiore (tutti gli altri controlli)
+    .header-controls {
+        display: flex;
+        justify-content: flex-start; // Allinea tutte le icone a sinistra
+        align-items: center; // Centra verticalmente anche le icone in questa riga
+        width: 100%;
+        gap: 10px; // Spazio tra le icone in questa riga (puoi aggiustarlo)
+    }
+
+    // Nasconde il nome utente testuale per risparmiare spazio
     #userProfileContainer #userDisplayName {
         display: none;
-        white-space: nowrap;
     }
-    /* Qui potresti voler aggiungere stili specifici per #mobileNavMenu se necessario,
-       ma le regole generali sopra dovrebbero già funzionare. */
 }
 
 /* Il tuo CSS per breakpoint più piccoli, potrebbe sovrascrivere o aggiungere dettagli */
@@ -554,5 +580,125 @@ header .nav-link-icon-only .material-symbols-rounded {
     }
     #userProfileContainer .auth-button .material-symbols-rounded {
         font-size: 1.3em;
+    }
+}
+
+// Stili specifici per il contenitore della campanella e il pannello notifiche
+#notificationBellContainer {
+    position: relative; // Necessario per il posizionamento assoluto del pannello
+    // display: none; // La visibilità è gestita da JavaScript in base allo stato di login
+    margin-right: 15px; // Come da tuo HTML
+    align-self: center; // Come da tuo HTML
+
+    #notificationBellLink {
+        text-decoration: none; // Assicurati che non ci sia sottolineatura
+        position: relative; // Per posizionare correttamente il badge
+        display: inline-block; // Per far sì che il badge si posizioni correttamente
+    }
+
+    #notificationIcon {
+        font-size: 28px; // Come da tuo HTML
+        color: var(--text-color-navbar); // Come da tuo HTML, assicurati che --text-color-navbar sia definita
+        vertical-align: middle; // Come da tuo HTML
+    }
+
+    .notification-badge {
+        // Stile per #notificationCounter
+        position: absolute;
+        top: -5px;
+        right: -8px;
+        background-color: var(--accent-color-secondary, red); // Usa una variabile o un colore di accento
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.75em;
+        font-weight: bold;
+        line-height: 1;
+        // display: none; // La visibilità è gestita da JavaScript
+    }
+}
+
+#notification-panel {
+    display: none; // Visibilità iniziale gestita da JavaScript
+    width: 360px; // Larghezza desiderata
+    max-width: 95vw; // Non superare la larghezza dello schermo meno un piccolo margine
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    color: var(--text-color-primary);
+
+    // --- Stili per i figli del pannello (header, list, footer) ---
+    .notification-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color-secondary);
+        h2 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        #mark-all-as-read-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 4px 8px;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+    #notification-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 400px;
+        overflow-y: auto;
+        .notification-item-empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-color-muted);
+            p {
+                margin: 0;
+            }
+        }
+    }
+    .notification-panel-footer {
+        padding: 12px 16px;
+        border-top: 1px solid var(--border-color-secondary);
+        text-align: center;
+        #view-all-notifications-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9em;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    // --- Posizionamento ---
+    @media (min-width: 769px) {
+        // Desktop e schermi più grandi
+        position: absolute;
+        top: calc(100% + 10px); // Sotto la campanella
+        right: 0; // Allineato a destra di #notificationBellContainer
+        left: auto;
+        transform: translateX(0); // Reset trasformazione
+    }
+
+    @media (max-width: 768px) {
+        // Mobile
+        position: fixed; // POSIZIONAMENTO FISSO RISPETTO ALLA VIEWPORT
+        top: 70px; // Distanza dall'alto della viewport (aggiusta se necessario)
+        left: 50%; // Bordo sinistro del pannello al centro della viewport
+        transform: translateX(-50%); // Centra il pannello
+        // width: 90vw;         // Opzionale: se vuoi una larghezza relativa, altrimenti usa 360px e max-width
     }
 }

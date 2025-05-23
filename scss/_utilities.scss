@@ -49,13 +49,13 @@
 
 // Stile per l'icona "Autore" accanto al nickname
 .nickname-author-icon {
-  font-size: 1em; // Adatta la dimensione se necessario per allinearla bene al testo del nickname
-  vertical-align: text-bottom; // Prova anche 'middle' o 'baseline' per il miglior allineamento
-  margin-left: 4px; // Spazio tra il nickname e l'icona
-  color: var(--link-color); // Un colore distintivo, ma non troppo invadente. Puoi cambiarlo.
-  // Potresti voler aggiungere un leggero effetto hover se l'icona fosse cliccabile in futuro
-  // transition: color 0.2s ease-in-out;
-  // &:hover {
-  //   color: var(--link-hover-color);
-  // }
+    font-size: 1em; // Adatta la dimensione se necessario per allinearla bene al testo del nickname
+    vertical-align: text-bottom; // Prova anche 'middle' o 'baseline' per il miglior allineamento
+    margin-left: 4px; // Spazio tra il nickname e l'icona
+    color: var(--link-color); // Un colore distintivo, ma non troppo invadente. Puoi cambiarlo.
+    // Potresti voler aggiungere un leggero effetto hover se l'icona fosse cliccabile in futuro
+    // transition: color 0.2s ease-in-out;
+    // &:hover {
+    //   color: var(--link-hover-color);
+    // }
 }

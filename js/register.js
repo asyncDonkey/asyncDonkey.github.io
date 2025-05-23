@@ -128,7 +128,7 @@ const handleRegistration = async (event) => {
         showToast('Le password non coincidono.', 'warning');
         return;
     }
-    
+
     // La select per nazionalità avrà sempre un valore, "" se "Seleziona..."
     // Le Firestore Rules permettono nationalityCode: null, che la logica sotto gestisce.
     // Un controllo esplicito qui per `if (!nationality)` non è strettamente necessario
@@ -162,7 +162,7 @@ const handleRegistration = async (event) => {
             registrationSuccessMessageDiv.textContent =
                 'Registrazione completata con successo! Sarai reindirizzato a breve.';
             registrationSuccessMessageDiv.style.display = 'block';
-            if(registerForm) registerForm.style.display = 'none'; // Nascondi form dopo successo
+            if (registerForm) registerForm.style.display = 'none'; // Nascondi form dopo successo
         }
         showToast('Profilo utente creato con successo! Reindirizzamento...', 'success', 4000);
 
@@ -268,14 +268,13 @@ if (loginFormModal) {
             if (loginModal) loginModal.style.display = 'none';
             if (loginFormModal) loginFormModal.reset();
             showToast('Login effettuato con successo! Reindirizzamento...', 'success');
-            
+
             // Reindirizza alla pagina profilo o a quella specificata da 'redirect'
             const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/profile.html';
             // Un piccolo ritardo per permettere al toast di essere visto prima del redirect
             setTimeout(() => {
                 window.location.href = redirectUrl;
             }, 1500);
-
         } catch (error) {
             console.error('Errore login da modale:', error);
             const friendlyMessage = translateFirebaseError(error.code);
@@ -296,17 +295,17 @@ document.addEventListener('DOMContentLoaded', () => {
         registerForm.addEventListener('submit', handleRegistration);
         console.log("js/register.js: Event listener per 'submit' AGGIUNTO a 'registerForm'.");
     } else {
-        console.error(
-            "js/register.js: ERRORE CRITICO - Elemento form con ID 'registerForm' NON TROVATO."
-        );
+        console.error("js/register.js: ERRORE CRITICO - Elemento form con ID 'registerForm' NON TROVATO.");
     }
 
     if (emailInput && emailErrorDiv) emailInput.addEventListener('input', () => clearFieldError(emailErrorDiv));
-    if (passwordInput && passwordErrorDiv) passwordInput.addEventListener('input', () => clearFieldError(passwordErrorDiv));
+    if (passwordInput && passwordErrorDiv)
+        passwordInput.addEventListener('input', () => clearFieldError(passwordErrorDiv));
     if (confirmPasswordInput && confirmPasswordErrorDiv)
         confirmPasswordInput.addEventListener('input', () => clearFieldError(confirmPasswordErrorDiv));
-    if (nicknameInput && nicknameErrorDiv) nicknameInput.addEventListener('input', () => clearFieldError(nicknameErrorDiv));
-    
+    if (nicknameInput && nicknameErrorDiv)
+        nicknameInput.addEventListener('input', () => clearFieldError(nicknameErrorDiv));
+
     // Logica per authAction
     const urlParams = new URLSearchParams(window.location.search);
     const authAction = urlParams.get('authAction');
@@ -332,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         // Il form di registrazione dovrebbe essere visibile di default
     } else {
-        console.log("[Register.js] Nessuna authAction specifica o valore non riconosciuto. Comportamento di default.");
+        console.log('[Register.js] Nessuna authAction specifica o valore non riconosciuto. Comportamento di default.');
         if (currentLoginModal) {
             currentLoginModal.style.display = 'none'; // Assicurati che la modale sia chiusa
         }

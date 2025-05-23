@@ -6,10 +6,10 @@
  * @returns {string} L'HTML dell'icona o una stringa vuota.
  */
 export function getAuthorIconHTML(userPublicProfile) {
-  if (userPublicProfile && userPublicProfile.hasPublishedArticles === true) {
-    return '<span class="material-symbols-rounded nickname-author-icon" title="Autore">school</span>';
-  }
-  return '';
+    if (userPublicProfile && userPublicProfile.hasPublishedArticles === true) {
+        return '<span class="material-symbols-rounded nickname-author-icon" title="Autore">school</span>';
+    }
+    return '';
 }
 
 // AthenaDev - Utility UI per icone e altro.

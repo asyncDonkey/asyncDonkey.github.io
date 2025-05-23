@@ -112,8 +112,8 @@ async function loadGlobalLeaderboard(direction = 'initial') {
             isFetchingFirstPageQuery = currentPage === 1; // Questo non dovrebbe accadere se currentPage > 1
 
             const docToStartAfter = firstDocsHistory[currentPage - 2]; // -2 perché currentPage è 1-based, history 0-based e vogliamo la pagina *prima*
-            if (docToStartAfter || isFetchingFirstPageQuery /* se currentPage è 1, non c'è docToStartAfter */ ) {
-                 q = query(
+            if (docToStartAfter || isFetchingFirstPageQuery /* se currentPage è 1, non c'è docToStartAfter */) {
+                q = query(
                     leaderboardScoresCollection,
                     where('gameId', '==', 'donkeyRunner'),
                     orderBy('score', 'desc'),
@@ -155,7 +155,8 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                     const snapshotsArray = await Promise.all(profilePromises);
                     snapshotsArray.forEach((snapshot) => {
                         snapshot.forEach((docSnap) => {
-                             if (docSnap.exists()) { // Aggiunto controllo exists()
+                            if (docSnap.exists()) {
+                                // Aggiunto controllo exists()
                                 publicProfilesMap.set(docSnap.id, docSnap.data());
                             }
                         });
@@ -191,7 +192,7 @@ async function loadGlobalLeaderboard(direction = 'initial') {
                     profileAvatarUrl,
                     userProfilePublicUpdatedAt,
                     nationalityCode,
-                    userPublicProfileData: userPublicProfile // <-- PASSAGGIO DEI DATI DEL PROFILO PUBBLICO
+                    userPublicProfileData: userPublicProfile, // <-- PASSAGGIO DEI DATI DEL PROFILO PUBBLICO
                 });
             }
         }
@@ -200,43 +201,42 @@ async function loadGlobalLeaderboard(direction = 'initial') {
         if (enrichedScores.length > 0) {
             if (direction === 'next') {
                 currentPage++;
-                 // Non rimuovere dalla history qui, la logica di 'prev' la usa
+                // Non rimuovere dalla history qui, la logica di 'prev' la usa
             } else if (direction === 'prev') {
-                 // Se siamo tornati indietro, la history oltre la pagina corrente non è più valida
-                 // No, la history per 'prev' è gestita da firstDocsHistory[currentPage - 2]
+                // Se siamo tornati indietro, la history oltre la pagina corrente non è più valida
+                // No, la history per 'prev' è gestita da firstDocsHistory[currentPage - 2]
             }
-            
+
             firstVisibleDoc = enrichedScores[0].firestoreDoc;
             lastVisibleDoc = enrichedScores[enrichedScores.length - 1].firestoreDoc;
 
             // Aggiorna la history solo se stiamo andando avanti o è la prima pagina
             if (direction === 'next' || direction === 'initial') {
-                 if (firstDocsHistory.length < currentPage) {
+                if (firstDocsHistory.length < currentPage) {
                     firstDocsHistory.push(firstVisibleDoc);
                 } else {
                     // Sovrascrivi se stiamo ricaricando la stessa pagina o una pagina già visitata in avanti
                     firstDocsHistory[currentPage - 1] = firstVisibleDoc;
                 }
             }
-             // Se 'prev', la history non dovrebbe cambiare per la pagina corrente,
+            // Se 'prev', la history non dovrebbe cambiare per la pagina corrente,
             // ma currentPage è già stato decrementato prima della chiamata, quindi firstDocsHistory[currentPage-1] è corretto
             // per il nuovo firstVisibleDoc della pagina a cui siamo arrivati.
-
-        } else { // Nessun documento trovato
+        } else {
+            // Nessun documento trovato
             if (direction === 'next') {
                 // Siamo arrivati alla fine
-            } else if (isFetchingFirstPageQuery || currentPage === 1) { // Nessun dato sulla prima pagina
+            } else if (isFetchingFirstPageQuery || currentPage === 1) {
+                // Nessun dato sulla prima pagina
                 currentPage = 1;
                 firstDocsHistory = [];
                 lastVisibleDoc = null;
             }
-             firstVisibleDoc = null; // Nessun documento visibile
+            firstVisibleDoc = null; // Nessun documento visibile
         }
-
 
         displayGlobalLeaderboard(enrichedScores, currentPage);
         updatePaginationControls(enrichedScores.length, isFetchingFirstPageQuery || currentPage === 1);
-
     } catch (error) {
         // ... (gestione errore invariata)
         console.error(`Errore durante il caricamento della leaderboard (direzione: ${direction}):`, error);
@@ -257,7 +257,6 @@ async function loadGlobalLeaderboard(direction = 'initial') {
         refreshLeaderboardBtn.innerHTML = originalRefreshBtnText;
     }
 }
-
 
 /**
  * Popola la tabella HTML con i dati della leaderboard.
@@ -303,15 +302,15 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         avatarImg.width = 36;
         avatarImg.height = 36;
         // Stile borderRadius e objectFit potrebbero essere già nel CSS, ma per sicurezza:
-        avatarImg.style.borderRadius = '50%'; 
+        avatarImg.style.borderRadius = '50%';
         avatarImg.style.objectFit = 'cover';
-
 
         if (entry.profileAvatarUrl) {
             let avatarUrlToSet = entry.profileAvatarUrl;
             if (entry.userProfilePublicUpdatedAt && typeof entry.userProfilePublicUpdatedAt.seconds === 'number') {
                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.seconds}`;
-            } else if (entry.userProfilePublicUpdatedAt instanceof Date) { // Fallback per timestamp client-side
+            } else if (entry.userProfilePublicUpdatedAt instanceof Date) {
+                // Fallback per timestamp client-side
                 avatarUrlToSet = `${entry.profileAvatarUrl}?v=${entry.userProfilePublicUpdatedAt.getTime()}`;
             }
             avatarImg.src = avatarUrlToSet;
@@ -328,19 +327,19 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         avatarImg.alt = altText;
         avatarImg.onerror = () => {
             avatarImg.src = DEFAULT_AVATAR_LEADERBOARD_PATH;
-            avatarImg.onerror = null; 
+            avatarImg.onerror = null;
         };
         tdPlayer.appendChild(avatarImg);
 
         const nameSpan = document.createElement('span');
-        nameSpan.className = 'player-name'; 
+        nameSpan.className = 'player-name';
 
         if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
             const flagIconSpan = document.createElement('span');
             flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
-            flagIconSpan.style.marginRight = '8px'; 
-            flagIconSpan.style.verticalAlign = 'middle'; 
-            nameSpan.appendChild(flagIconSpan); 
+            flagIconSpan.style.marginRight = '8px';
+            flagIconSpan.style.verticalAlign = 'middle';
+            nameSpan.appendChild(flagIconSpan);
         }
 
         const displayNameText = entry.profileDisplayName || 'Giocatore Anonimo';
@@ -358,7 +357,7 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         if (entry.userId) {
             const profileLink = document.createElement('a');
             profileLink.href = `profile.html?userId=${entry.userId}`;
-            profileLink.classList.add('text-decoration-none'); 
+            profileLink.classList.add('text-decoration-none');
             profileLink.innerHTML = escapedDisplayName + authorIconHTML + glitchzillaInfo; // glitchzillaInfo è già qui
             nameSpan.appendChild(profileLink);
         } else {
@@ -380,7 +379,6 @@ function displayGlobalLeaderboard(leaderboardData, pageNumber) {
         leaderboardTableBody.appendChild(tr);
     });
 }
-
 
 function updatePaginationControls(countOnCurrentPage, isFirstPageResult = false) {
     if (!prevPageBtn || !nextPageBtn || !currentPageIndicator) return;

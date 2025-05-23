@@ -96,7 +96,8 @@ function createArticleCard(articleData, articleId, authorPublicProfile, gridCont
         authorNationalityCode = authorPublicProfile.nationalityCode || authorNationalityCode;
 
         let chosenAvatarUrl = null;
-        if (authorPublicProfile.avatarUrls && authorPublicProfile.avatarUrls.thumbnail) { // schema uses thumbnail
+        if (authorPublicProfile.avatarUrls && authorPublicProfile.avatarUrls.thumbnail) {
+            // schema uses thumbnail
             chosenAvatarUrl = authorPublicProfile.avatarUrls.thumbnail;
         }
         // No need to check for .small or .profile here if userPublicProfileSync maps them to .thumbnail
@@ -104,18 +105,21 @@ function createArticleCard(articleData, articleId, authorPublicProfile, gridCont
         if (chosenAvatarUrl) {
             authorAvatarSrc = chosenAvatarUrl;
             let timestampForCache;
-            if (authorPublicProfile.profilePublicUpdatedAt) { // Prioritize this from public profile
+            if (authorPublicProfile.profilePublicUpdatedAt) {
+                // Prioritize this from public profile
                 timestampForCache = authorPublicProfile.profilePublicUpdatedAt;
-            } else if (authorPublicProfile.profileUpdatedAt) { // Fallback if profileUpdatedAt is also synced
+            } else if (authorPublicProfile.profileUpdatedAt) {
+                // Fallback if profileUpdatedAt is also synced
                 timestampForCache = authorPublicProfile.profileUpdatedAt;
             }
 
             if (timestampForCache && typeof timestampForCache.seconds === 'number') {
                 authorAvatarSrc += `?v=${timestampForCache.seconds}`;
-            } else if (timestampForCache && typeof timestampForCache === 'number') { // e.g. a direct number timestamp
-                 authorAvatarSrc += `?v=${timestampForCache}`;
+            } else if (timestampForCache && typeof timestampForCache === 'number') {
+                // e.g. a direct number timestamp
+                authorAvatarSrc += `?v=${timestampForCache}`;
             } else if (timestampForCache instanceof Date) {
-                 authorAvatarSrc += `?v=${Math.floor(timestampForCache.getTime() / 1000)}`;
+                authorAvatarSrc += `?v=${Math.floor(timestampForCache.getTime() / 1000)}`;
             }
         } else if (articleData.authorId) {
             authorAvatarSrc = generateBlockieAvatar(articleData.authorId, 24);
@@ -230,7 +234,6 @@ export async function displayArticlesSection() {
     const featuredAuthorAvatarElement = document.getElementById('featuredArticleAuthorAvatar');
     const featuredAuthorNameElement = document.getElementById('featuredArticleAuthorName');
 
-
     if (!articlesSection || !articlesGrid) {
         console.error('[homePageFeatures.js] articlesSection o articlesGrid non trovato.');
         return;
@@ -278,11 +281,7 @@ export async function displayArticlesSection() {
 
         articlesGrid.innerHTML = '';
 
-        const authorIdsToFetch = [
-            ...new Set(
-                articlesFromDb.map((article) => article.authorId).filter((id) => id)
-            ),
-        ];
+        const authorIdsToFetch = [...new Set(articlesFromDb.map((article) => article.authorId).filter((id) => id))];
 
         const publicProfilesMap = new Map(); // Changed variable name for clarity
         if (authorIdsToFetch.length > 0) {
@@ -291,7 +290,10 @@ export async function displayArticlesSection() {
             for (let i = 0; i < authorIdsToFetch.length; i += MAX_IDS_PER_IN_QUERY) {
                 const batchUserIds = authorIdsToFetch.slice(i, i + MAX_IDS_PER_IN_QUERY);
                 // CORRECTED: Fetch from userPublicProfiles
-                const profilesQuery = query(collection(db, 'userPublicProfiles'), where(documentId(), 'in', batchUserIds));
+                const profilesQuery = query(
+                    collection(db, 'userPublicProfiles'),
+                    where(documentId(), 'in', batchUserIds)
+                );
                 profilePromises.push(getDocs(profilesQuery));
             }
             try {
@@ -304,7 +306,10 @@ export async function displayArticlesSection() {
                     });
                 });
             } catch (profileError) {
-                console.error('[homePageFeatures.js] Errore recupero profili pubblici autori per homepage:', profileError);
+                console.error(
+                    '[homePageFeatures.js] Errore recupero profili pubblici autori per homepage:',
+                    profileError
+                );
             }
         }
 
@@ -335,15 +340,17 @@ export async function displayArticlesSection() {
                     featAuthorName = featAuthorPublicProfile.nickname || featAuthorName;
                     let chosenFeatAvatarUrl = null;
                     if (featAuthorPublicProfile.avatarUrls && featAuthorPublicProfile.avatarUrls.thumbnail) {
-                         chosenFeatAvatarUrl = featAuthorPublicProfile.avatarUrls.thumbnail;
+                        chosenFeatAvatarUrl = featAuthorPublicProfile.avatarUrls.thumbnail;
                     }
 
                     if (chosenFeatAvatarUrl) {
                         featAuthorAvatarSrc = chosenFeatAvatarUrl;
                         let timestampForCache;
-                        if (featAuthorPublicProfile.profilePublicUpdatedAt) { // PRIORITIZE THIS
+                        if (featAuthorPublicProfile.profilePublicUpdatedAt) {
+                            // PRIORITIZE THIS
                             timestampForCache = featAuthorPublicProfile.profilePublicUpdatedAt;
-                        } else if (featAuthorPublicProfile.profileUpdatedAt) { // Fallback
+                        } else if (featAuthorPublicProfile.profileUpdatedAt) {
+                            // Fallback
                             timestampForCache = featAuthorPublicProfile.profileUpdatedAt;
                         }
 
@@ -361,7 +368,7 @@ export async function displayArticlesSection() {
                     featAuthorAvatarSrc = generateBlockieAvatar(actualFeaturedArticleData.authorId, 32);
                 }
 
-                if(featuredAuthorAvatarElement) {
+                if (featuredAuthorAvatarElement) {
                     featuredAuthorAvatarElement.src = featAuthorAvatarSrc;
                     featuredAuthorAvatarElement.alt = `Avatar di ${featAuthorName}`;
                     featuredAuthorAvatarElement.onerror = () => {
@@ -370,7 +377,7 @@ export async function displayArticlesSection() {
                     };
                 }
 
-                if(featuredAuthorNameElement) {
+                if (featuredAuthorNameElement) {
                     if (actualFeaturedArticleData.authorId) {
                         featuredAuthorNameElement.innerHTML = `<a href="profile.html?userId=${actualFeaturedArticleData.authorId}">${featAuthorName}</a>`;
                     } else {
@@ -388,7 +395,12 @@ export async function displayArticlesSection() {
                     const authorPublicProfileForCard = articleDataInLoop.authorId
                         ? publicProfilesMap.get(articleDataInLoop.authorId)
                         : null;
-                    createArticleCard(articleDataInLoop, articleDataInLoop.id, authorPublicProfileForCard, articlesGrid);
+                    createArticleCard(
+                        articleDataInLoop,
+                        articleDataInLoop.id,
+                        authorPublicProfileForCard,
+                        articlesGrid
+                    );
                     articlesAddedToGrid++;
                 }
             }
@@ -412,7 +424,6 @@ export async function displayArticlesSection() {
         if (featuredArticleCard && featuredElementsPresent) featuredArticleCard.style.display = 'none';
     }
 }
-
 
 /**
  * Mostra il banner dell'ultimo giocatore che ha sconfitto Glitchzilla.

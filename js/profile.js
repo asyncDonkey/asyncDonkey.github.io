@@ -24,7 +24,7 @@ import {
 import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
 import { getAuthorIconHTML } from './uiUtils.js'; // Assumendo che uiUtils.js sia nella stessa cartella js/
-import { escapeHTML } from './main.js'; 
+import { escapeHTML } from './main.js';
 
 // --- RIFERIMENTI DOM (come dal tuo codice) ---
 const profileSectionTitle = document.querySelector('#profile h2');
@@ -229,7 +229,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         // o data direttamente se è il profilo privato (userProfiles) che dovrebbe avere hasPublishedArticles.
         // La funzione getAuthorIconHTML si aspetta un oggetto che contenga hasPublishedArticles.
         // 'data' qui è l'oggetto del profilo (userProfiles o userPublicProfiles).
-        const authorIcon = getAuthorIconHTML(data); 
+        const authorIcon = getAuthorIconHTML(data);
         currentNicknameSpan.innerHTML = escapeHTML(nicknameText) + authorIcon;
     }
 
@@ -265,17 +265,18 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         } else if (!isOwnProfile && data.avatarUrls && data.avatarUrls.thumbnail) {
             mainAvatarUrl = data.avatarUrls.thumbnail;
             cacheBusterTimestamp = data.profilePublicUpdatedAt; // o data.updatedAt se userPublicProfiles usa 'updatedAt'
-        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) { // Fallback per il proprio profilo
+        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) {
+            // Fallback per il proprio profilo
             mainAvatarUrl = data.avatarUrls.small;
             cacheBusterTimestamp = data.profileUpdatedAt;
         }
-
 
         if (mainAvatarUrl) {
             altText = `${profileNameForTitle}'s Custom Avatar`;
             if (cacheBusterTimestamp && cacheBusterTimestamp.seconds) {
                 avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.seconds}`;
-            } else if (cacheBusterTimestamp instanceof Date) { // Per alcuni timestamp legacy o se aggiornato da client
+            } else if (cacheBusterTimestamp instanceof Date) {
+                // Per alcuni timestamp legacy o se aggiornato da client
                 avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.getTime()}`;
             } else {
                 avatarSrcToSet = mainAvatarUrl;
@@ -327,7 +328,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         if (data.bio && data.bio.trim() !== '') {
             bioDisplay.textContent = data.bio;
         } else {
-             // Se è il proprio profilo, mostra un invito, altrimenti un messaggio neutro
+            // Se è il proprio profilo, mostra un invito, altrimenti un messaggio neutro
             if (isOwnProfile) {
                 bioDisplay.innerHTML = `<p style="color: var(--text-color-muted);">Nessuna bio ancora scritta. Aggiungine una qui sotto!</p>`;
             } else {
@@ -335,7 +336,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             }
         }
     }
-    
+
     // Gestione Badges
     if (badgesSection && badgesDisplayContainer && noBadgesMessage) {
         // ... (logica badges invariata, i badge vengono mostrati solo per isOwnProfile=true)
@@ -366,7 +367,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
                         if (badgeInfo.isNeon) iconSpan.classList.add('testo-neon-arcade');
                         else if (badgeInfo.isAnimated && badgeInfo.animationClass)
                             iconSpan.classList.add(badgeInfo.animationClass);
-                        
+
                         badgeIconElement.appendChild(iconSpan);
                         badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
                         badgeIconElement.addEventListener('keydown', (event) => {
@@ -387,7 +388,6 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             badgesSection.style.display = 'none';
         }
     }
-
 
     // Mostra/nascondi sezioni e form di modifica basati su isOwnProfile
     if (isOwnProfile) {
@@ -414,7 +414,6 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         renderExternalLinks(data.externalLinks || [], true); // Assicura che questo sia chiamato solo per isOwnProfile
         updateBioCharCounter(); // Assicurati che bioInput sia disponibile
         if (avatarUploadSection) avatarUploadSection.style.display = 'block';
-
     } else {
         // Profilo di un altro utente
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
@@ -436,12 +435,10 @@ function loadProfileData(uidToLoad, isOwnProfile) {
     // Riferimento al div per il messaggio ai guest, se esiste nella pagina
     const guestMsgDiv = document.getElementById('guestProfileViewMessage');
 
-
     if (profileLoadingMessage) profileLoadingMessage.style.display = 'block';
     if (profileContent) profileContent.style.display = 'none';
     if (profileLoginMessage) profileLoginMessage.style.display = 'none';
     if (guestMsgDiv) guestMsgDiv.style.display = 'none'; // Nascondi messaggio guest inizialmente
-
 
     if (profileAvatarImg) {
         if (uidToLoad) {
@@ -483,7 +480,7 @@ function loadProfileData(uidToLoad, isOwnProfile) {
             if (docSnap.exists()) {
                 const profileData = docSnap.data();
                 updateProfilePageUI(profileData, isOwnProfile, uidToLoad);
-                
+
                 // Mostra il messaggio per i guest SE è il profilo di un altro utente E l'utente corrente non è loggato
                 if (guestMsgDiv) {
                     if (!isOwnProfile && !loggedInUser) {
@@ -501,9 +498,8 @@ function loadProfileData(uidToLoad, isOwnProfile) {
                         guestMsgDiv.style.display = 'none';
                     }
                 }
-                 if (profileContent) profileContent.style.display = 'block'; // Mostra contenuto principale
-                 if (profileLoginMessage) profileLoginMessage.style.display = 'none'; // Nascondi messaggio login generale
-
+                if (profileContent) profileContent.style.display = 'block'; // Mostra contenuto principale
+                if (profileLoginMessage) profileLoginMessage.style.display = 'none'; // Nascondi messaggio login generale
             } else {
                 // Documento profilo (privato o pubblico) non trovato
                 document.title = 'Profilo Non Trovato - asyncDonkey.io';
@@ -1145,10 +1141,11 @@ onAuthStateChanged(auth, (user) => {
         currentProfileListenerUnsubscribe = null;
     }
 
-    if (profileUserIdFromUrl) { // Sta visitando un profilo specifico (potrebbe essere il proprio o di un altro)
+    if (profileUserIdFromUrl) {
+        // Sta visitando un profilo specifico (potrebbe essere il proprio o di un altro)
         const isOwn = loggedInUser ? loggedInUser.uid === profileUserIdFromUrl : false;
         loadProfileData(profileUserIdFromUrl, isOwn);
-        
+
         if (isOwn) {
             if (myArticlesSection) myArticlesSection.style.display = 'block';
             loadMyArticles(profileUserIdFromUrl);
@@ -1160,7 +1157,8 @@ onAuthStateChanged(auth, (user) => {
             // che appaia solo se il profilo dell'altro utente viene caricato con successo.
             // Se !loggedInUser, loadProfileData lo gestirà.
         }
-    } else if (loggedInUser) { // Nessun userId nell'URL, ma l'utente è loggato -> carica il proprio profilo
+    } else if (loggedInUser) {
+        // Nessun userId nell'URL, ma l'utente è loggato -> carica il proprio profilo
         loadProfileData(loggedInUser.uid, true);
         if (myArticlesSection) myArticlesSection.style.display = 'block';
         loadMyArticles(loggedInUser.uid);
@@ -1174,7 +1172,7 @@ onAuthStateChanged(auth, (user) => {
             profileLoginMessage.style.display = 'block';
             profileLoginMessage.innerHTML =
                 '<p>Per visualizzare o modificare un profilo, <a href="#" id="profilePageLoginLink" style="color: var(--link-color); text-decoration: underline;">accedi</a> o <a href="register.html" style="color: var(--link-color); text-decoration: underline;">registrati</a>.</p>';
-            
+
             const profilePageLoginLink = document.getElementById('profilePageLoginLink');
             if (profilePageLoginLink && !profilePageLoginLink.hasAttribute('data-listener-attached')) {
                 profilePageLoginLink.addEventListener('click', (e) => {
@@ -1186,7 +1184,7 @@ onAuthStateChanged(auth, (user) => {
             }
         }
         if (guestMsgDiv) guestMsgDiv.style.display = 'none'; // Nessun profilo specifico visualizzato
-        
+
         // Nascondi tutte le sezioni specifiche del profilo
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
         if (statusMessageSection) statusMessageSection.style.display = 'none';
@@ -1250,7 +1248,7 @@ if (toggleAddLinkFormBtn) {
             if (isVisible) {
                 resetAndHideExternalLinkForm();
             } else {
-                resetAndHideExternalLinkForm(); 
+                resetAndHideExternalLinkForm();
                 externalLinkFormContainer.style.display = 'block';
                 toggleAddLinkFormBtn.textContent = 'Nascondi Form';
                 if (externalLinkTitleInput) externalLinkTitleInput.focus();

@@ -33,7 +33,10 @@
     border-radius: var(--border-radius-sm, 0.25rem);
     line-height: 1.5;
     cursor: pointer;
-    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    transition:
+        background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out,
+        color 0.15s ease-in-out;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -121,12 +124,15 @@
             .player-score,
             .player-date,
             .player-rank, // Rank
-            .glitchzilla-debunked .material-symbols-rounded { // Icona Glitchzilla
-                color: var(--button-text-primary) !important; // Potrebbe servire !important per sovrascrivere stili specifici
+            .glitchzilla-debunked .material-symbols-rounded {
+                // Icona Glitchzilla
+                color: var(
+                    --button-text-primary
+                ) !important; // Potrebbe servire !important per sovrascrivere stili specifici
             }
-             // Esempio per l'icona autore, se ha un colore specifico
+            // Esempio per l'icona autore, se ha un colore specifico
             .author-icon .material-symbols-rounded {
-                 color: var(--button-text-primary) !important;
+                color: var(--button-text-primary) !important;
             }
         }
 
@@ -159,7 +165,8 @@
         // vertical-align: middle; // Non più necessario se la cella è flex o td ha vertical-align:middle
     }
 
-    .player-info-cell { // La cella che contiene avatar e nome
+    .player-info-cell {
+        // La cella che contiene avatar e nome
         display: flex;
         align-items: center;
     }
@@ -171,7 +178,8 @@
         align-items: center;
         gap: 6px; // Spazio tra bandiera, nome, icona autore, icona glitchzilla
 
-        a { // Stili per il link del nome utente
+        a {
+            // Stili per il link del nome utente
             color: inherit; // Eredita il colore da .player-name
             text-decoration: none;
             &:hover {
@@ -182,27 +190,28 @@
         // Se la riga è hoverata e .player-name a deve essere bianco:
         // La regola tr:hover .player-name a dovrebbe già coprire questo
 
-        .fi { // Flag icon
+        .fi {
+            // Flag icon
             font-size: 1.2em;
             // vertical-align: middle; // Già coperto da display:flex su .player-name
         }
     }
-    
-    .glitchzilla-debunked { // Contenitore per l'icona "Glitchzilla Debunked!"
+
+    .glitchzilla-debunked {
+        // Contenitore per l'icona "Glitchzilla Debunked!"
         display: inline-flex; // Per allineare l'icona correttamente
         align-items: center;
-        
+
         .material-symbols-rounded {
             font-size: 1.2em; // Leggermente più grande del testo normale
             // L'animazione .testo-neon-arcade è applicata via JS
             // Il colore base è già definito da .testo-neon-arcade,
             // ma se vuoi un colore statico non animato, scommenta e modifica:
-            // color: var(--success-color, #28a745); 
-            vertical-align: text-bottom; 
+            // color: var(--success-color, #28a745);
+            vertical-align: text-bottom;
             // margin-left: 4px; // Ora gestito da gap su .player-name
         }
     }
-
 
     .player-score {
         font-weight: bold;
@@ -219,7 +228,8 @@
 
     // Messaggi di stato
     .loading-leaderboard td, // Applicalo direttamente al td
-    .no-scores td {         // Applicalo direttamente al td
+    .no-scores td {
+        // Applicalo direttamente al td
         text-align: center;
         font-size: 1.1em;
         padding: 20px;
@@ -231,7 +241,7 @@
 body.dark-mode {
     #leaderboardTable {
         tr:nth-child(even) {
-            background-color: var(--surface-bg-secondary-dark-transparent, rgba(42, 42, 42, 0.5)); 
+            background-color: var(--surface-bg-secondary-dark-transparent, rgba(42, 42, 42, 0.5));
             // Suggerisco una variabile per questo, es. --surface-bg-secondary-dark-transparent
         }
         // Potresti voler aggiustare il colore di .current-user-highlight per dark mode
@@ -240,7 +250,6 @@ body.dark-mode {
         // }
     }
 }
-
 
 // Controlli di paginazione
 #paginationControls {
@@ -288,13 +297,13 @@ body.dark-mode {
     }
 }
 
-
 // --- Media Queries per Responsività ---
 @media (max-width: 768px) {
     #leaderboardTable {
         // font-size: 0.95em; // Opzionale
 
-        th, td {
+        th,
+        td {
             padding: 10px 8px;
         }
 
@@ -309,7 +318,8 @@ body.dark-mode {
     #leaderboardTable {
         font-size: 0.9em;
 
-        th, td {
+        th,
+        td {
             padding: 8px 6px;
         }
 

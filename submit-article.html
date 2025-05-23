@@ -189,53 +189,90 @@
         </header>
 
         <main>
-            <section id="articleSubmissionSection" class="form-section-container"> <h2 class="page-main-title">Invia Nuovo Articolo</h2>
+            <section id="articleSubmissionSection" class="form-section-container">
+                <h2 class="page-main-title">Invia Nuovo Articolo</h2>
 
-    <div id="authRequiredMessage" class="auth-required-prompt" style="display: none; text-align: center; padding: 20px 25px; background-color: var(--surface-bg-secondary); border-radius: var(--border-radius-standard); margin-bottom: 25px; border: 1px solid var(--border-color-secondary);">
-        <h3 style="margin-top:0; margin-bottom:10px; font-size: 1.4em; color: var(--heading-color);">Accesso Richiesto</h3>
-        <p style="margin-bottom: 20px; font-size: 1.05em; color: var(--text-color-secondary);">Devi essere autenticato per poter inviare un nuovo articolo o modificare le tue bozze.</p>
-        <div class="auth-prompt-actions" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-            <a href="register.html?authAction=login" class="game-button primary-action">
-                <span class="material-symbols-rounded" style="margin-right: 6px; vertical-align: bottom;">login</span>Accedi
-            </a> 
-            <a href="register.html?authAction=signup" class="game-button alt secondary-action">
-                <span class="material-symbols-rounded" style="margin-right: 6px; vertical-align: bottom;">person_add</span>Registrati
-            </a>
-        </div>
-        <p style="margin-top: 25px; font-size:0.9em;">
-            <a href="index.html" style="color: var(--link-color); text-decoration: underline;">&larr; Oppure torna alla Homepage</a>
-        </p>
-    </div>
+                <div
+                    id="authRequiredMessage"
+                    class="auth-required-prompt"
+                    style="
+                        display: none;
+                        text-align: center;
+                        padding: 20px 25px;
+                        background-color: var(--surface-bg-secondary);
+                        border-radius: var(--border-radius-standard);
+                        margin-bottom: 25px;
+                        border: 1px solid var(--border-color-secondary);
+                    "
+                >
+                    <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 1.4em; color: var(--heading-color)">
+                        Accesso Richiesto
+                    </h3>
+                    <p style="margin-bottom: 20px; font-size: 1.05em; color: var(--text-color-secondary)">
+                        Devi essere autenticato per poter inviare un nuovo articolo o modificare le tue bozze.
+                    </p>
+                    <div
+                        class="auth-prompt-actions"
+                        style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap"
+                    >
+                        <a href="register.html?authAction=login" class="game-button primary-action">
+                            <span class="material-symbols-rounded" style="margin-right: 6px; vertical-align: bottom"
+                                >login</span
+                            >Accedi
+                        </a>
+                        <a href="register.html?authAction=signup" class="game-button alt secondary-action">
+                            <span class="material-symbols-rounded" style="margin-right: 6px; vertical-align: bottom"
+                                >person_add</span
+                            >Registrati
+                        </a>
+                    </div>
+                    <p style="margin-top: 25px; font-size: 0.9em">
+                        <a href="index.html" style="color: var(--link-color); text-decoration: underline"
+                            >&larr; Oppure torna alla Homepage</a
+                        >
+                    </p>
+                </div>
 
-    <form id="articleSubmissionForm" style="display: none;">
-        <div>
-            <label for="articleTitle">Titolo Articolo:<span class="required-indicator">*</span></label>
-            <input type="text" id="articleTitle" name="articleTitle" required maxlength="150">
-        </div>
-        <div>
-            <label for="articleContent">Contenuto (Markdown):<span class="required-indicator">*</span></label>
-            <textarea id="articleContent" name="articleContent" rows="15" required></textarea>
-        </div>
-        <div>
-            <label for="articleSnippet">Snippet / Riassunto Breve (max 300 caratteri):</label>
-            <textarea id="articleSnippet" name="articleSnippet" rows="3" maxlength="300"></textarea>
-        </div>
-        <div>
-            <label for="articleTags">Tag (separati da virgola, es. javascript, webdev, firebase):</label>
-            <input type="text" id="articleTags" name="articleTags">
-        </div>
-        <div>
-            <label for="articleCoverImageUrl">URL Immagine di Copertina (Opzionale):</label>
-            <input type="url" id="articleCoverImageUrl" name="articleCoverImageUrl" placeholder="https://esempio.com/immagine.jpg">
-        </div>
-        
-        <div class="form-actions">
-            <button type="submit" id="submitArticleForReviewBtn" class="game-button primary-action">Invia per Revisione</button>
-            <button type="button" id="saveArticleDraftBtn" class="game-button secondary-action">Salva Bozza</button>
-        </div>
-    </form>
-    <div id="submissionMessage" class="submission-status-message" style="margin-top:15px;"></div>
-</section>
+                <form id="articleSubmissionForm" style="display: none">
+                    <div>
+                        <label for="articleTitle">Titolo Articolo:<span class="required-indicator">*</span></label>
+                        <input type="text" id="articleTitle" name="articleTitle" required maxlength="150" />
+                    </div>
+                    <div>
+                        <label for="articleContent"
+                            >Contenuto (Markdown):<span class="required-indicator">*</span></label
+                        >
+                        <textarea id="articleContent" name="articleContent" rows="15" required></textarea>
+                    </div>
+                    <div>
+                        <label for="articleSnippet">Snippet / Riassunto Breve (max 300 caratteri):</label>
+                        <textarea id="articleSnippet" name="articleSnippet" rows="3" maxlength="300"></textarea>
+                    </div>
+                    <div>
+                        <label for="articleTags">Tag (separati da virgola, es. javascript, webdev, firebase):</label>
+                        <input type="text" id="articleTags" name="articleTags" />
+                    </div>
+                    <div>
+                        <label for="articleCoverImageUrl">URL Immagine di Copertina (Opzionale):</label>
+                        <input
+                            type="url"
+                            id="articleCoverImageUrl"
+                            name="articleCoverImageUrl"
+                            placeholder="https://esempio.com/immagine.jpg"
+                        />
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="submitArticleForReviewBtn" class="game-button primary-action">
+                            Invia per Revisione
+                        </button>
+                        <button type="button" id="saveArticleDraftBtn" class="game-button secondary-action">
+                            Salva Bozza
+                        </button>
+                    </div>
+                </form>
+                <div id="submissionMessage" class="submission-status-message" style="margin-top: 15px"></div>
+            </section>
             <div class="back-to-home-link" style="margin-top: 30px">
                 <a href="index.html">&larr; Torna alla Homepage</a>
             </div>

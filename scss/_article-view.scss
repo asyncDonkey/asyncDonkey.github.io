@@ -233,9 +233,11 @@
 }
 
 // Per i like ai commenti (se usi una classe wrapper comune)
-.comment-like-interaction-wrapper { // Assumendo che aggiungi questa classe al wrapper del like del commento
+.comment-like-interaction-wrapper {
+    // Assumendo che aggiungi questa classe al wrapper del like del commento
     &.guest-interactive {
-        button.like-btn { // Targettiamo il bottone like-btn interno
+        button.like-btn {
+            // Targettiamo il bottone like-btn interno
             pointer-events: none;
         }
     }

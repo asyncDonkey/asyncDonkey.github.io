@@ -165,6 +165,35 @@ function escapeHTML(str) {
     return div.innerHTML;
 }
 
+function setupThemeSwitcher() {
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    if (!themeToggleBtn) {
+        console.error('[Main.js setupThemeSwitcher] Pulsante themeToggleBtn NON TROVATO nel DOM.');
+        return;
+    }
+    const bodyElement = document.body;
+    const moonIconName = 'dark_mode';
+    const sunIconName = 'light_mode';
+    const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded');
+
+    function applyTheme(theme) {
+        bodyElement.classList.toggle('dark-mode', theme === 'dark');
+        if (iconSpan) iconSpan.textContent = theme === 'dark' ? sunIconName : moonIconName;
+        localStorage.setItem('theme', theme);
+        themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
+        themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+
+    themeToggleBtn.addEventListener('click', () => {
+        applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
+    });
+    console.log('[Main.js setupThemeSwitcher] Theme switcher inizializzato.');
+}
+
 // Funzione loadHeaderUserProfileDisplay (modificata per caricare avatar personalizzato)
 async function loadHeaderUserProfileDisplay(user, profileData) {
     const userDisplayNameElement = document.getElementById('userDisplayName');
@@ -1083,13 +1112,19 @@ function clearNotificationBellListener() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    // ... (codice invariato, inclusa la chiamata a initializeNewNavbar)
-    initializeNewNavbar();
+    console.log('[Main.js DOMContentLoaded] DOM completamente caricato e parsato.'); // Log di conferma
+
+    // Inizializzazioni principali
+    initializeNewNavbar(); // Chiama setupDesktopCommunityDropdown e populateMobileMenu
+    setupThemeSwitcher(); // Inizializza il theme switcher
+
+    // Variabili e funzioni locali a DOMContentLoaded (se necessarie)
     const loginForm = document.getElementById('loginForm');
     const scrollToTopBtn = document.getElementById('scrollToTopBtn');
     const loginModal = document.getElementById('loginModal');
     const showLoginBtn = document.getElementById('showLoginBtn');
     const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
+
     const openModal = (modal) => {
         if (modal) modal.style.display = 'block';
     };
@@ -1108,11 +1143,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 } catch (error) {
-                    /* Gestisci errore selettore */
+                    console.error('Errore smooth scrolling:', error);
                 }
             });
         });
     }
+
     function setupScrollToTopButton() {
         if (!scrollToTopBtn) return;
         window.addEventListener('scroll', () => {
@@ -1122,6 +1158,7 @@ document.addEventListener('DOMContentLoaded', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
+
     function setupInteractiveSkills() {
         const skillBadges = document.querySelectorAll('#skills ul li[data-skill-name]');
         const skillDetailsContainer = document.getElementById('skillDetails');
@@ -1140,27 +1177,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-    function setupThemeSwitcher() {
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        if (!themeToggleBtn) return;
-        const bodyElement = document.body;
-        const moonIconName = 'dark_mode';
-        const sunIconName = 'light_mode';
-        const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded');
-        function applyTheme(theme) {
-            bodyElement.classList.toggle('dark-mode', theme === 'dark');
-            if (iconSpan) iconSpan.textContent = theme === 'dark' ? sunIconName : moonIconName;
-            localStorage.setItem('theme', theme);
-            themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
-            themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
-        }
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
-        themeToggleBtn.addEventListener('click', () => {
-            applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
-        });
-    }
 
     function setupModalControls() {
         if (showLoginBtn && loginModal) {
@@ -1176,19 +1192,21 @@ document.addEventListener('DOMContentLoaded', function () {
             if (event.target === loginModal) closeModal(loginModal);
         });
     }
+
+    // Chiamate alle funzioni di setup del DOM
     setupSmoothScrolling();
     setupScrollToTopButton();
     setupInteractiveSkills();
-    setupThemeSwitcher();
     setupModalControls();
 
+    // Caricamento contenuti specifici della homepage
     if (document.getElementById('homeMiniLeaderboardList')) {
         loadHomeMiniLeaderboard();
     }
     if (document.getElementById('articlesSection')) {
         displayArticlesSection()
             .then(() => {
-                /* Interazioni inizializzate da onAuthStateChanged */
+                /* Interazioni inizializzate dopo auth state change */
             })
             .catch((error) => {
                 console.error('Errore durante displayArticlesSection in DOMContentLoaded:', error);
@@ -1197,146 +1215,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('glitchzillaDefeatedBanner')) {
         displayGlitchzillaBanner();
     }
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = loginForm.loginEmail.value;
-            const password = loginForm.loginPassword.value;
-            const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
-            if (loginModalErrorDiv) loginModalErrorDiv.style.display = 'none';
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                loginForm.reset();
-                closeModal(loginModal);
-                showToast('Login effettuato con successo!', 'success');
-            } catch (error) {
-                const friendlyError = traduireErroreFirebase(error.code);
-                if (loginModalErrorDiv) {
-                    loginModalErrorDiv.textContent = friendlyError;
-                    loginModalErrorDiv.style.display = 'block';
-                } else {
-                    showToast('Errore Login: ' + friendlyError, 'error');
-                }
-            }
-        });
-    }
-});
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Funzioni di setup originali del DOMContentLoaded
-    initializeNewNavbar();
-    const loginForm = document.getElementById('loginForm');
-    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-    const loginModal = document.getElementById('loginModal');
-    const showLoginBtn = document.getElementById('showLoginBtn');
-    const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
-    const openModal = (modal) => {
-        if (modal) modal.style.display = 'block';
-    };
-    const closeModal = (modal) => {
-        if (modal) modal.style.display = 'none';
-    };
-
-    function setupSmoothScrolling() {
-        document.querySelectorAll('header nav a[href^="#"]').forEach((link) => {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                try {
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                } catch (error) {
-                    /* Gestisci errore selettore */
-                }
-            });
-        });
-    }
-    function setupScrollToTopButton() {
-        if (!scrollToTopBtn) return;
-        window.addEventListener('scroll', () => {
-            scrollToTopBtn.classList.toggle('show', window.pageYOffset > 200);
-        });
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-    function setupInteractiveSkills() {
-        const skillBadges = document.querySelectorAll('#skills ul li[data-skill-name]');
-        const skillDetailsContainer = document.getElementById('skillDetails');
-        if (!skillDetailsContainer || skillBadges.length === 0) return;
-        let currentlyActiveSkillBadge = null;
-        skillBadges.forEach((badge) => {
-            badge.addEventListener('click', function () {
-                if (currentlyActiveSkillBadge) {
-                    currentlyActiveSkillBadge.classList.remove('active-skill');
-                }
-                this.classList.add('active-skill');
-                currentlyActiveSkillBadge = this;
-                const skillName = this.dataset.skillName || 'Skill';
-                const skillDescription = this.dataset.description || 'Nessun dettaglio disponibile.';
-                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
-            });
-        });
-    }
-    function setupThemeSwitcher() {
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        if (!themeToggleBtn) return;
-        const bodyElement = document.body;
-        const moonIconName = 'dark_mode';
-        const sunIconName = 'light_mode';
-        const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded');
-        function applyTheme(theme) {
-            bodyElement.classList.toggle('dark-mode', theme === 'dark');
-            if (iconSpan) iconSpan.textContent = theme === 'dark' ? sunIconName : moonIconName;
-            localStorage.setItem('theme', theme);
-            themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
-            themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Attiva Tema Chiaro' : 'Attiva Tema Scuro');
-        }
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
-        themeToggleBtn.addEventListener('click', () => {
-            applyTheme(bodyElement.classList.contains('dark-mode') ? 'light' : 'dark');
-        });
-    }
-
-    function setupModalControls() {
-        if (showLoginBtn && loginModal) {
-            showLoginBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal(loginModal);
-            });
-        }
-        if (closeLoginBtn) {
-            closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
-        }
-        window.addEventListener('click', (event) => {
-            if (event.target === loginModal) closeModal(loginModal);
-        });
-    }
-    setupSmoothScrolling();
-    setupScrollToTopButton();
-    setupInteractiveSkills();
-    setupThemeSwitcher();
-    setupModalControls();
-
-    if (document.getElementById('homeMiniLeaderboardList')) {
-        loadHomeMiniLeaderboard();
-    }
-    if (document.getElementById('articlesSection')) {
-        displayArticlesSection()
-            .then(() => {
-                /* Interazioni inizializzate da onAuthStateChanged */
-            })
-            .catch((error) => {
-                console.error('Errore durante displayArticlesSection in DOMContentLoaded:', error);
-            });
-    }
-    if (document.getElementById('glitchzillaDefeatedBanner')) {
-        displayGlitchzillaBanner();
-    }
+    // Setup form di login
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1361,7 +1241,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- LOGICA DI AUTENTICAZIONE SPOSTATA QUI DENTRO ---
+    // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
     onAuthStateChanged(auth, async (user) => {
         console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
         loggedInUser = user;
@@ -1376,17 +1256,15 @@ document.addEventListener('DOMContentLoaded', function () {
             // Utente AUTENTICATO
             const userIdForEvent = user.uid;
             const userProfileRef = doc(db, 'userProfiles', userIdForEvent);
-            console.log(`[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${userIdForEvent}`);
-            
+            console.log(
+                `[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${userIdForEvent}`
+            );
+
             currentUserProfileUnsubscribe = onSnapshot(
                 userProfileRef,
                 (docSnap) => {
                     const userProfileData = docSnap.exists() ? docSnap.data() : null;
-                    if (docSnap.exists()) {
-                        console.log('[Main.js onSnapshot Navbar] Dati profilo ricevuti/aggiornati per navbar:', userProfileData);
-                    } else {
-                        console.warn(`[Main.js onSnapshot Navbar] Profilo per UID ${userIdForEvent} non trovato. La navbar userà dati Auth di fallback.`);
-                    }
+                    // Logica interna di updateUIBasedOnAuthState gestirà i console.log specifici
                     updateUIBasedOnAuthState(user, userProfileData);
                 },
                 (error) => {
@@ -1395,9 +1273,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             );
 
-            setupNotificationBellListener(userIdForEvent);
-            loadContentSpecificFeatures(user);
-            
+            setupNotificationBellListener(userIdForEvent); // Setup notifiche per utente loggato
+            loadContentSpecificFeatures(user); // Carica feature specifiche dopo login
+
             console.log(`[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con userId: ${userIdForEvent}`);
             document.dispatchEvent(
                 new CustomEvent('userAuthenticated', {
@@ -1405,13 +1283,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
             );
             console.log('[Main.js onAuthStateChanged] Operazioni per utente autenticato completate.');
-
         } else {
             // Utente NON AUTENTICATO (logout)
             console.log('[Main.js onAuthStateChanged] Utente non loggato.');
-            updateUIBasedOnAuthState(null, null);
-            clearNotificationBellListener();
-            loadContentSpecificFeatures(null);
+            updateUIBasedOnAuthState(null, null); // Aggiorna UI per stato logout
+            clearNotificationBellListener(); // Pulisce listener notifiche
+            loadContentSpecificFeatures(null); // Gestisce feature per utente non loggato
 
             console.log('[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con utente nullo (logout).');
             document.dispatchEvent(
@@ -1421,6 +1298,7 @@ document.addEventListener('DOMContentLoaded', function () {
             );
             console.log('[Main.js onAuthStateChanged] Operazioni per utente non autenticato completate.');
         }
-        console.log('[Main.js onAuthStateChanged] Aggiornamento UI di base completato (dettagli profilo via onSnapshot se loggato).');
+        // Rimosso log duplicato, updateUIBasedOnAuthState contiene già i suoi log.
     });
-});
+    console.log('[Main.js DOMContentLoaded] Tutte le inizializzazioni del DOM e Auth listener sono state impostate.');
+}); // Fine dell'UNICO DOMContentLoaded

@@ -82,7 +82,7 @@ async function handleGuestbookCommentLike(event) {
     }
     if (!commentId || !guestbookCollection) {
         console.error('[comments.js] handleGuestbookCommentLike: commentId o guestbookCollection mancante.');
-        showToast("Errore nell'azione di like.", "error");
+        showToast("Errore nell'azione di like.", 'error');
         return;
     }
 
@@ -132,7 +132,7 @@ async function handleGuestbookCommentLike(event) {
 
             button.classList.toggle('liked', userNowHasLiked);
             button.title = userNowHasLiked ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
-            
+
             const likeCountSpanInsideButton = button.querySelector('.like-count');
             if (likeCountSpanInsideButton) {
                 const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
@@ -234,7 +234,9 @@ async function loadComments() {
             let commenterAvatarSrc = DEFAULT_AVATAR_COMMENT_PATH;
             let commenterNameDisplay = commentData.userName || commentData.name || 'Anonimo';
             let commenterNationalityCode = commentData.nationalityCode || null;
-            const commenterPublicProfile = commentData.userId ? commenterPublicProfilesMap.get(commentData.userId) : null;
+            const commenterPublicProfile = commentData.userId
+                ? commenterPublicProfilesMap.get(commentData.userId)
+                : null;
             let commenterProfilePublicUpdatedAt = null;
 
             if (commenterPublicProfile) {
@@ -252,7 +254,11 @@ async function loadComments() {
                 const seedForGuestBlockie = commentData.name || `anon-g-${commentId}`;
                 commenterAvatarSrc = generateBlockieAvatar(seedForGuestBlockie, 40, { size: 8 });
             }
-            if (commenterAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH && !commenterAvatarSrc.startsWith('data:image/png;base64') && commenterProfilePublicUpdatedAt) {
+            if (
+                commenterAvatarSrc !== DEFAULT_AVATAR_COMMENT_PATH &&
+                !commenterAvatarSrc.startsWith('data:image/png;base64') &&
+                commenterProfilePublicUpdatedAt
+            ) {
                 if (commenterProfilePublicUpdatedAt.seconds) {
                     commenterAvatarSrc += `?v=${commenterProfilePublicUpdatedAt.seconds}`;
                 } else if (commenterProfilePublicUpdatedAt instanceof Date) {
@@ -261,8 +267,11 @@ async function loadComments() {
             }
             avatarImg.src = commenterAvatarSrc;
             avatarImg.alt = `Avatar di ${commenterNameDisplay}`;
-            avatarImg.onerror = () => { avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH; avatarImg.onerror = null; };
-            
+            avatarImg.onerror = () => {
+                avatarImg.src = DEFAULT_AVATAR_COMMENT_PATH;
+                avatarImg.onerror = null;
+            };
+
             const headerDiv = document.createElement('div');
             headerDiv.classList.add('comment-header', 'd-flex', 'align-items-center', 'mb-2'); // Utilizzo di classi Bootstrap/SCSS per allineamento
             headerDiv.appendChild(avatarImg);
@@ -295,13 +304,15 @@ async function loadComments() {
             dateSmall.classList.add('text-muted', 'ms-2', 'comment-date-text');
             dateSmall.textContent = ` - ${formatFirebaseTimestamp(commentData.timestamp)}`;
             nameAndDateDiv.appendChild(dateSmall);
-            
+
             headerDiv.appendChild(nameAndDateDiv);
 
             const messageP = document.createElement('p');
             messageP.classList.add('comment-message', 'mb-1', 'mt-1');
-            messageP.textContent = commentData.message ? String(commentData.message).replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
-            
+            messageP.textContent = commentData.message
+                ? String(commentData.message).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                : '';
+
             commentElement.appendChild(headerDiv);
             commentElement.appendChild(messageP);
 
@@ -311,7 +322,7 @@ async function loadComments() {
             likesContainer.classList.add('likes-container', 'mt-1');
 
             const likeInteractionWrapper = document.createElement('div');
-            likeInteractionWrapper.style.display = 'inline-block'; 
+            likeInteractionWrapper.style.display = 'inline-block';
             likeInteractionWrapper.classList.add('comment-like-interaction-wrapper');
 
             const likeButton = document.createElement('button');
@@ -328,7 +339,7 @@ async function loadComments() {
             likeButton.innerHTML = `<span class="material-symbols-rounded">${iconName}</span> <span class="like-count">${currentLikes}</span>`;
             likeButton.classList.toggle('liked', userHasLikedThisComment);
             likeButton.title = userHasLikedThisComment ? "Togli il 'Mi piace'" : "Metti 'Mi piace'";
-            
+
             const oldBtnHandler = likeButton.handlerAttached;
             if (oldBtnHandler) {
                 likeButton.removeEventListener('click', oldBtnHandler);
@@ -341,10 +352,9 @@ async function loadComments() {
             }
             likeInteractionWrapper.classList.remove('guest-interactive');
 
-
             if (currentUser) {
                 likeButton.disabled = false;
-                likeInteractionWrapper.style.cursor = 'pointer'; 
+                likeInteractionWrapper.style.cursor = 'pointer';
                 likeButton.addEventListener('click', handleGuestbookCommentLike);
                 likeButton.handlerAttached = handleGuestbookCommentLike;
             } else {
@@ -355,21 +365,21 @@ async function loadComments() {
 
                 const guestLikeHandler = (e) => {
                     e.stopPropagation();
-                    showToast("Devi essere loggato per mettere 'Mi piace' ai commenti.", "info", 3000);
+                    showToast("Devi essere loggato per mettere 'Mi piace' ai commenti.", 'info', 3000);
                 };
                 likeInteractionWrapper.addEventListener('click', guestLikeHandler);
                 likeInteractionWrapper.guestHandlerAttached = guestLikeHandler;
             }
-            
+
             likeInteractionWrapper.appendChild(likeButton);
             likesContainer.appendChild(likeInteractionWrapper);
             commentElement.appendChild(likesContainer);
-            
+
             const likeCountSpanInsideButton = likeButton.querySelector('.like-count');
             if (likeCountSpanInsideButton) {
                 const oldListener = likeCountSpanInsideButton.handleLikeCountClick;
                 if (oldListener) likeCountSpanInsideButton.removeEventListener('click', oldListener);
-                
+
                 if (currentLikes > 0 && currentUser) {
                     likeCountSpanInsideButton.classList.add('clickable-comment-like-count');
                     likeCountSpanInsideButton.title = 'Vedi a chi piace questo commento';
