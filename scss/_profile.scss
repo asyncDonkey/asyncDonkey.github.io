@@ -708,3 +708,17 @@ section#profile h3 {
     /* Per applicare il neon anche all'icona grande nella modale */
     /* Gli stili neon sono già in .testo-neon-arcade */
 }
+
+.confirm-avatar-upload-button {
+    display: inline-block; // JS lo imposta, ma averlo qui non fa male
+    padding: 10px 15px;
+    color: white;
+    background-color: var(--bs-success); // Già inline, ma per sicurezza
+    border: 1px solid #ccc; // Un bordo visibile
+    min-width: 100px;
+    min-height: 30px;
+    font-size: 1em;
+    line-height: normal;
+    opacity: 1;
+    visibility: visible;
+}

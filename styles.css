@@ -3038,6 +3038,20 @@ section#profile h3 {
     /* Gli stili neon sono già in .testo-neon-arcade */
 }
 
+.confirm-avatar-upload-button {
+    display: inline-block;
+    padding: 10px 15px;
+    color: white;
+    background-color: var(--bs-success);
+    border: 1px solid #ccc;
+    min-width: 100px;
+    min-height: 30px;
+    font-size: 1em;
+    line-height: normal;
+    opacity: 1;
+    visibility: visible;
+}
+
 /* ===== Componenti Riutilizzabili (Form Commenti, Lista Commenti, Modali) ===== */
 /* Form Commenti (usato per Guestbook e Articoli) */
 .comment-form-container {

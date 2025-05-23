@@ -76,25 +76,25 @@ function formatTimeAgo(firestoreTimestamp) {
 }
 
 function updatePanelState() {
-  if (!notificationList || !noNotificationsPlaceholder || !viewAllNotificationsLink) return;
+    if (!notificationList || !noNotificationsPlaceholder || !viewAllNotificationsLink) return;
 
-  const hasNotifications = notificationList.children.length > 0;
+    const hasNotifications = notificationList.children.length > 0;
 
-  // Mostra/nasconde il messaggio "Nessuna nuova notifica"
-  noNotificationsPlaceholder.style.display = hasNotifications ? 'none' : 'block';
-  if (!hasNotifications) {
-    noNotificationsPlaceholder.querySelector('p').textContent = 'Nessuna nuova notifica.';
-  }
+    // Mostra/nasconde il messaggio "Nessuna nuova notifica"
+    noNotificationsPlaceholder.style.display = hasNotifications ? 'none' : 'block';
+    if (!hasNotifications) {
+        noNotificationsPlaceholder.querySelector('p').textContent = 'Nessuna nuova notifica.';
+    }
 
-  // Task NOTIF.1.2.B: Assicura che il link 'Vedi tutte' sia sempre visibile se ci sono o non ci sono notifiche.
-  // La sua visibilità dipende solo dallo stato di login, che è gestito in loadNotifications.
-  viewAllNotificationsLink.style.display = 'inline-block';
+    // Task NOTIF.1.2.B: Assicura che il link 'Vedi tutte' sia sempre visibile se ci sono o non ci sono notifiche.
+    // La sua visibilità dipende solo dallo stato di login, che è gestito in loadNotifications.
+    viewAllNotificationsLink.style.display = 'inline-block';
 
-  // Controlla la visibilità del bottone "Segna tutti come letti"
-  const hasUnread = notificationList.querySelector('li.notification-item.unread');
-  if (markAllAsReadBtn) {
-    markAllAsReadBtn.style.display = hasUnread ? 'inline-block' : 'none';
-  }
+    // Controlla la visibilità del bottone "Segna tutti come letti"
+    const hasUnread = notificationList.querySelector('li.notification-item.unread');
+    if (markAllAsReadBtn) {
+        markAllAsReadBtn.style.display = hasUnread ? 'inline-block' : 'none';
+    }
 }
 
 function createNotificationElement(notification) {
@@ -135,52 +135,52 @@ function createNotificationElement(notification) {
 }
 
 async function loadNotifications() {
-  if (!currentUserId || !db) {
-    console.warn(
-      `[NotificationHandler by Athena] loadNotifications: UserID (${currentUserId}) or DB (${!!db}) not ready.`
-    );
-    if (noNotificationsPlaceholder && notificationList) {
-      notificationList.innerHTML = '';
-      noNotificationsPlaceholder.style.display = 'block';
-      noNotificationsPlaceholder.querySelector('p').textContent = currentUserId
-        ? 'Errore caricamento (DB non pronto?)'
-        : 'Effettua il login.';
-    }
-    if (markAllAsReadBtn) markAllAsReadBtn.style.display = 'none';
-    // AthenaDev: Nascondiamo il link "Vedi tutte" solo se l'utente non è loggato.
-    if(viewAllNotificationsLink) viewAllNotificationsLink.style.display = 'none';
-    return;
-  }
-
-  console.log(`[NotificationHandler by Athena] Caricamento notifiche per utente: ${currentUserId}`);
-  if (notificationList) notificationList.innerHTML = '';
-  if (noNotificationsPlaceholder) noNotificationsPlaceholder.style.display = 'none';
-
-  try {
-    const notificationsRef = collection(db, 'userProfiles', currentUserId, 'notifications');
-    const q = query(notificationsRef, orderBy('timestamp', 'desc'), limit(10));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      querySnapshot.forEach((docSnapshot) => {
-        const notification = { id: docSnapshot.id, ...docSnapshot.data() };
-        // Mostriamo solo le notifiche non lette nel pannello
-        if (!notification.read) {
-          const notificationElement = createNotificationElement(notification);
-          if (notificationList) notificationList.appendChild(notificationElement);
+    if (!currentUserId || !db) {
+        console.warn(
+            `[NotificationHandler by Athena] loadNotifications: UserID (${currentUserId}) or DB (${!!db}) not ready.`
+        );
+        if (noNotificationsPlaceholder && notificationList) {
+            notificationList.innerHTML = '';
+            noNotificationsPlaceholder.style.display = 'block';
+            noNotificationsPlaceholder.querySelector('p').textContent = currentUserId
+                ? 'Errore caricamento (DB non pronto?)'
+                : 'Effettua il login.';
         }
-      });
+        if (markAllAsReadBtn) markAllAsReadBtn.style.display = 'none';
+        // AthenaDev: Nascondiamo il link "Vedi tutte" solo se l'utente non è loggato.
+        if (viewAllNotificationsLink) viewAllNotificationsLink.style.display = 'none';
+        return;
     }
-  } catch (error) {
-    console.error('[NotificationHandler by Athena] Errore nel caricare le notifiche:', error);
-    if (noNotificationsPlaceholder) {
-      noNotificationsPlaceholder.style.display = 'block';
-      noNotificationsPlaceholder.querySelector('p').textContent = 'Errore nel caricare le notifiche.';
+
+    console.log(`[NotificationHandler by Athena] Caricamento notifiche per utente: ${currentUserId}`);
+    if (notificationList) notificationList.innerHTML = '';
+    if (noNotificationsPlaceholder) noNotificationsPlaceholder.style.display = 'none';
+
+    try {
+        const notificationsRef = collection(db, 'userProfiles', currentUserId, 'notifications');
+        const q = query(notificationsRef, orderBy('timestamp', 'desc'), limit(10));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach((docSnapshot) => {
+                const notification = { id: docSnapshot.id, ...docSnapshot.data() };
+                // Mostriamo solo le notifiche non lette nel pannello
+                if (!notification.read) {
+                    const notificationElement = createNotificationElement(notification);
+                    if (notificationList) notificationList.appendChild(notificationElement);
+                }
+            });
+        }
+    } catch (error) {
+        console.error('[NotificationHandler by Athena] Errore nel caricare le notifiche:', error);
+        if (noNotificationsPlaceholder) {
+            noNotificationsPlaceholder.style.display = 'block';
+            noNotificationsPlaceholder.querySelector('p').textContent = 'Errore nel caricare le notifiche.';
+        }
+    } finally {
+        // AthenaDev: Usiamo la nuova funzione centralizzata per gestire la UI.
+        updatePanelState();
     }
-  } finally {
-    // AthenaDev: Usiamo la nuova funzione centralizzata per gestire la UI.
-    updatePanelState();
-  }
 }
 
 // --- Panel Management Logic (Module Scope) ---
@@ -254,84 +254,80 @@ function handleClickOutsidePanel(event) {
 // --- End Panel Management Logic ---
 
 async function markNotificationAsRead(notificationId) {
-  if (!currentUserId || !db) {
-    console.error('[NotificationHandler by Athena] User ID or DB not available. Cannot mark as read.');
-    throw new Error('User ID or DB not available.');
-  }
-  console.log(
-    `[NotificationHandler by Athena] Operation: Attempting to mark notification ${notificationId} as read for user ${currentUserId}.`
-  );
-  const notifRef = doc(db, 'userProfiles', currentUserId, 'notifications', notificationId);
-  try {
-    // AthenaDev: La funzione ora aggiorna solo i dati, non più la UI.
-    await updateDoc(notifRef, {
-      read: true,
-      updatedAt: serverTimestamp(),
-    });
+    if (!currentUserId || !db) {
+        console.error('[NotificationHandler by Athena] User ID or DB not available. Cannot mark as read.');
+        throw new Error('User ID or DB not available.');
+    }
     console.log(
-      `[NotificationHandler by Athena] Notification ${notificationId} successfully marked as read in Firestore.`
+        `[NotificationHandler by Athena] Operation: Attempting to mark notification ${notificationId} as read for user ${currentUserId}.`
     );
-  } catch (error) {
-    console.error(
-      `[NotificationHandler by Athena] Firestore error marking notification ${notificationId} as read:`,
-      error
-    );
-    throw error; // Rilancia l'errore per essere gestito dal chiamante.
-  }
+    const notifRef = doc(db, 'userProfiles', currentUserId, 'notifications', notificationId);
+    try {
+        // AthenaDev: La funzione ora aggiorna solo i dati, non più la UI.
+        await updateDoc(notifRef, {
+            read: true,
+            updatedAt: serverTimestamp(),
+        });
+        console.log(
+            `[NotificationHandler by Athena] Notification ${notificationId} successfully marked as read in Firestore.`
+        );
+    } catch (error) {
+        console.error(
+            `[NotificationHandler by Athena] Firestore error marking notification ${notificationId} as read:`,
+            error
+        );
+        throw error; // Rilancia l'errore per essere gestito dal chiamante.
+    }
 }
 async function handleNotificationClick(event) {
-  const clickedItem = event.target.closest('.notification-item');
-  if (!clickedItem) return;
+    const clickedItem = event.target.closest('.notification-item');
+    if (!clickedItem) return;
 
-  const notificationId = clickedItem.dataset.notificationId;
-  if (!notificationId) return;
+    const notificationId = clickedItem.dataset.notificationId;
+    if (!notificationId) return;
 
-  // Preveniamo la chiusura immediata del pannello se si clicca su un item
-  event.stopPropagation();
+    // Preveniamo la chiusura immediata del pannello se si clicca su un item
+    event.stopPropagation();
 
-  const isUnread = clickedItem.classList.contains('unread');
-  const linkElement = clickedItem.querySelector('a.notification-item-link');
-  const targetUrl = linkElement ? linkElement.href : null;
+    const isUnread = clickedItem.classList.contains('unread');
+    const linkElement = clickedItem.querySelector('a.notification-item-link');
+    const targetUrl = linkElement ? linkElement.href : null;
 
-  // Se è non letta, la marchiamo come tale e la rimuoviamo dalla UI
-  if (isUnread) {
-    try {
-      // 1. Marchiamo come letta su Firestore
-      await markNotificationAsRead(notificationId);
+    // Se è non letta, la marchiamo come tale e la rimuoviamo dalla UI
+    if (isUnread) {
+        try {
+            // 1. Marchiamo come letta su Firestore
+            await markNotificationAsRead(notificationId);
 
-      // 2. Rimuoviamo l'elemento dalla UI con una transizione
-      clickedItem.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-      clickedItem.style.opacity = '0';
-      clickedItem.style.transform = 'scale(0.9)';
+            // 2. Rimuoviamo l'elemento dalla UI con una transizione
+            clickedItem.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            clickedItem.style.opacity = '0';
+            clickedItem.style.transform = 'scale(0.9)';
 
-      setTimeout(() => {
-        clickedItem.remove();
-        // 3. Aggiorniamo lo stato del pannello (mostra placeholder se vuoto)
-        updatePanelState();
+            setTimeout(() => {
+                clickedItem.remove();
+                // 3. Aggiorniamo lo stato del pannello (mostra placeholder se vuoto)
+                updatePanelState();
 
-        // 4. Se c'era un link, navighiamo solo dopo che la UI è stata gestita
-        if (targetUrl) {
-          window.location.href = targetUrl;
-        } else {
-          // Se non c'è link, e abbiamo finito l'animazione, potremmo voler chiudere il pannello?
-          // Per ora, lo lasciamo aperto per coerenza.
+                // 4. Se c'era un link, navighiamo solo dopo che la UI è stata gestita
+                if (targetUrl) {
+                    window.location.href = targetUrl;
+                } else {
+                    // Se non c'è link, e abbiamo finito l'animazione, potremmo voler chiudere il pannello?
+                    // Per ora, lo lasciamo aperto per coerenza.
+                }
+            }, 300); // Durata della transizione
+        } catch (error) {
+            console.error(`[NotificationHandler by Athena] Failed to process click for ${notificationId}.`, error);
+            // Se l'update su Firestore fallisce, navighiamo comunque se c'è un link
+            if (targetUrl) {
+                window.location.href = targetUrl;
+            }
         }
-      }, 300); // Durata della transizione
-
-    } catch (error) {
-      console.error(
-        `[NotificationHandler by Athena] Failed to process click for ${notificationId}.`,
-        error
-      );
-      // Se l'update su Firestore fallisce, navighiamo comunque se c'è un link
-      if (targetUrl) {
+    } else if (targetUrl) {
+        // Se la notifica è già letta ma ha un link, navighiamo semplicemente
         window.location.href = targetUrl;
-      }
     }
-  } else if (targetUrl) {
-    // Se la notifica è già letta ma ha un link, navighiamo semplicemente
-    window.location.href = targetUrl;
-  }
 }
 
 // --- NUOVA FUNZIONE PER TASK A.5.4.6 ---

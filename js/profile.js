@@ -1057,7 +1057,10 @@ function handleAvatarFileSelection(event) {
         if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'none';
     };
     reader.readAsDataURL(file);
-    if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'inline-block';
+    if (confirmAvatarUploadBtn) {
+        confirmAvatarUploadBtn.style.display = 'inline-block'; // O 'block'
+        // NON aggiungere opacity o visibility qui per ora
+    }
     if (avatarUploadStatus) avatarUploadStatus.textContent = `File selezionato: ${file.name}`;
     if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
 }
@@ -1095,6 +1098,10 @@ async function handleConfirmAvatarUpload() {
             if (confirmAvatarUploadBtn) {
                 confirmAvatarUploadBtn.disabled = false;
                 confirmAvatarUploadBtn.textContent = 'Conferma e Carica';
+                // AthenaDev: Assicura che il bottone sia visibile per un nuovo tentativo
+                confirmAvatarUploadBtn.style.display = 'inline-block';
+                confirmAvatarUploadBtn.style.opacity = '1';
+                confirmAvatarUploadBtn.style.visibility = 'visible';
             }
             if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
             selectedAvatarFile = null;
