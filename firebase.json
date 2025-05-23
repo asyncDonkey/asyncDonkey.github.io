@@ -1,38 +1,125 @@
 {
-    "storage": {
-        "rules": "storage.rules"
-    },
+  "storage": {
+    "rules": "storage.rules"
+  },
   "firestore": {
     "rules": "firestore.rules"
   },
-    "functions": [
-        {
-            "source": "functions",
-            "codebase": "default",
-            "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"],
-            "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run lint"]
-        }
-    ],
-    "emulators": {
-        "auth": {
-            "port": 9099
-        },
-        "functions": {
-            "port": 5001
-        },
-        "firestore": {
-            "port": 8080,
-           
-            "rules": "./firestore.rules"
-            
-        },
-        "ui": {
-            "enabled": true,
-            "port": 4000
-        },
-        "singleProjectMode": true,
-        "storage": {
-            "port": 9199
-        }
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
     }
+  ],
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080,
+      "rules": "./firestore.rules"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "singleProjectMode": true,
+    "storage": {
+      "port": 9199
+    }
+  },
+  "hosting": {
+  "public": ".",
+  "ignore": [
+    "firebase.json",
+    ".firebaserc",
+    "firestore.rules",
+    "storage.rules",
+    "**/.*",
+    "**/node_modules/**",
+    "functions/**",
+    "scss/**",
+    "documentation/**",
+    "package-lock.json",
+    "package.json",
+    "README.md"
+  ],
+  "rewrites": [
+    {
+      "source": "/profile",
+      "destination": "/profile.html"
+    },
+    {
+      "source": "/leaderboard",
+      "destination": "/leaderboard.html"
+    },
+    {
+      "source": "/contribute",
+      "destination": "/contribute.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/register.html"
+    },
+    {
+        "source": "/donkey-runner",
+        "destination": "/donkeyRunner.html"
+    },
+    {
+        "source": "/submit-article",
+        "destination": "/submit-article.html"
+    },
+    {
+        "source": "/view-article",
+        "destination": "/view-article.html"
+    },
+    {
+        "source": "/about",
+        "destination": "/about.html"
+    },
+    {
+        "source": "/all-notifications",
+        "destination": "/all-notifications.html"
+    },
+    {
+        "source": "/admin-dashboard",
+        "destination": "/admin-dashboard.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "**/*.@(jpg|jpeg|gif|png|svg|webp|js|css|woff|woff2|eot|ttf|otf)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "**/*.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}
 }
