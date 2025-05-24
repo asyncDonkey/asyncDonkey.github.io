@@ -3038,18 +3038,48 @@ section#profile h3 {
     /* Gli stili neon sono già in .testo-neon-arcade */
 }
 
-.confirm-avatar-upload-button {
-    display: inline-block;
-    padding: 10px 15px;
-    color: white;
-    background-color: var(--bs-success);
-    border: 1px solid #ccc;
-    min-width: 100px;
-    min-height: 30px;
+/* Stili per i bottoni della modale di conferma Avatar */
+.button-modal-confirm,
+.button-modal-cancel {
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
     font-size: 1em;
-    line-height: normal;
-    opacity: 1;
-    visibility: visible;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    -webkit-transition: all 0.2s ease-out;
+    transition: all 0.2s ease-out;
+    color: white;
+}
+
+.button-modal-confirm {
+    background-color: #28a745;
+}
+
+.button-modal-confirm:hover {
+    background-color: #218838;
+    -webkit-transform: translateY(-2px);
+    transform: translateY(-2px);
+    -webkit-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.button-modal-cancel {
+    background-color: #6c757d;
+}
+
+.button-modal-cancel:hover {
+    background-color: #5a6268;
 }
 
 /* ===== Componenti Riutilizzabili (Form Commenti, Lista Commenti, Modali) ===== */

@@ -709,16 +709,35 @@ section#profile h3 {
     /* Gli stili neon sono già in .testo-neon-arcade */
 }
 
-.confirm-avatar-upload-button {
-    display: inline-block; // JS lo imposta, ma averlo qui non fa male
-    padding: 10px 15px;
-    color: white;
-    background-color: var(--bs-success); // Già inline, ma per sicurezza
-    border: 1px solid #ccc; // Un bordo visibile
-    min-width: 100px;
-    min-height: 30px;
+/* Stili per i bottoni della modale di conferma Avatar */
+.button-modal-confirm,
+.button-modal-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
     font-size: 1em;
-    line-height: normal;
-    opacity: 1;
-    visibility: visible;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    color: white;
+}
+
+.button-modal-confirm {
+    background-color: #28a745; // Verde Successo
+}
+.button-modal-confirm:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.button-modal-cancel {
+    background-color: #6c757d; // Grigio secondario
+}
+.button-modal-cancel:hover {
+    background-color: #5a6268;
 }

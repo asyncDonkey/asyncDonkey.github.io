@@ -1,10 +1,10 @@
-# DEVELOPMENT PLAN (v4.0.4 - Rifiniture Navbar & Notifiche - Athena Session Update) 🚀
+# DEVELOPMENT PLAN (v4.0.6 - Sessione Athena Vittoriosa!) 🚀
 
-**Data Ultimo Aggiornamento:** 23 Maggio 2025 (Athena Update)
-**Visione Progetto:** Consolidare e stabilizzare la piattaforma esistente, migliorando la documentazione, la sicurezza, l'UX e risolvendo il debito tecnico. Le funzionalità attuali, come Donkey Runner e il sistema di articoli, saranno mantenute e ottimizzate, con un focus sul miglioramento dell'esperienza utente per le notifiche.
+**Data Ultimo Aggiornamento:** 24 Maggio 2025 (Athena Update - Fine Sessione Epica!)
+**Visione Progetto:** Consolidare e stabilizzare la piattaforma esistente, migliorando la documentazione, la sicurezza, l'UX e risolvendo il debito tecnico. Le funzionalità attuali, come Donkey Runner e il sistema di articoli, saranno mantenute e ottimizzate, con un focus sul miglioramento dell'esperienza utente per le notifiche e la pagina profilo.
 
 **Stato Generale del Progetto:**
-Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inclusa la correzione di bug critici di visibilità e layout responsive. La migrazione a Firebase Hosting è stata avviata e configurata localmente. Il focus si sposta ora sulle rifiniture del sistema di notifiche e sul completamento della migrazione dell'hosting.
+La sessione odierna è stata una vera e propria impresa eroica! Abbiamo affrontato e **definitivamente RISOLTO** il temibile `BUG-PROF-AVATAR-BTN-001`, che affliggeva la visibilità del pulsante di conferma per l'upload dell'avatar. La vittoria è stata ottenuta tramite un refactoring intelligente dell'interfaccia utente, che ora prevede una **modale di conferma dedicata**, più robusta e immune ai conflitti CSS che ci hanno dato del filo da torcere. Con questo macigno tolto, la strada è spianata per le prossime rifiniture sulla pagina profilo!
 
 **Legenda Stati:**
 
@@ -31,7 +31,7 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
 - `[x]` **INFRA-001.1:** Revisionare la documentazione `firebaseHostingMigration.md` per i passi necessari.
 - `[x]` **INFRA-001.2:** Configurare il progetto Firebase per Firebase Hosting (file `firebase.json` aggiornato con la sezione `hosting`).
 - `[x]` **INFRA-001.3:** Affinare la configurazione di hosting in `firebase.json` (public, ignore, rewrites, headers, cleanUrls, trailingSlash).
-- `[x]` **INFRA-001.4 (Test Locali):** Eseguire test con `firebase emulators:start` per validare la configurazione di hosting. (Precedentemente INFRA-001.5 per la parte locale)
+- `[x]` **INFRA-001.4 (Test Locali):** Eseguire test con `firebase emulators:start` per validare la configurazione di hosting.
 - `[ ]` **INFRA-001.5 (Deploy Staging):** Distribuire su un canale di anteprima (`firebase hosting:channel:deploy NOME_CANALE`).
 - `[ ]` **INFRA-001.6 (Test Staging):** Eseguire test approfonditi sul canale di anteprima.
 - `[ ]` **INFRA-001.7 (Dominio Custom):** Configurare il dominio personalizzato (se applicabile).
@@ -67,9 +67,9 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
     - ✅ **NAV.1.1.1:** Risolvere bug: pulsante logout non funzionante in versione desktop.
     - ✅ **NAV.1.1.2 (Visibilità Pulsanti Auth):** Assicurare che tutti i pulsanti (Login, Registrazione, Profilo, Logout) siano sempre presenti e visibili/nascosti correttamente in base allo stato dell'utente su tutte le pagine HTML.
         - `[x]` **NAV.1.1.2.A (Visibilità `userDisplayName`):** Corretta la visibilità di `userDisplayName` per utente loggato.
-        - ✅ **NAV.1.1.2.B (Visibilità Logout Utente Non Autenticato - `index.html`):** Risolto il bug per cui il pulsante logout era visibile per utenti non autenticati su `index.html` (causa: errore strutturale HTML in `index.html`).
-            - ➡️ **NAV.1.1.2.B.1:** Investigare potenziale influenza di `homePageFeatures.js` (OBSOLETO - Ipotesi errata).
-            - ➡️ **NAV.1.1.2.B.2:** Verificare se `updateHeaderAuthContainersVisibility` viene chiamata più volte (OBSOLETO - Causa identificata nell'HTML).
+        - ✅ **NAV.1.1.2.B (Visibilità Logout Utente Non Autenticato - `index.html`):** Risolto il bug per cui il pulsante logout era visibile per utenti non autenticati su `index.html`.
+            - ➡️ **NAV.1.1.2.B.1:** Investigare potenziale influenza di `homePageFeatures.js` (OBSOLETO).
+            - ➡️ **NAV.1.1.2.B.2:** Verificare se `updateHeaderAuthContainersVisibility` viene chiamata più volte (OBSOLETO).
     - `[ ]` **NAV.1.1.3:** Verificare e correggere la logica di popolamento dinamico dei link utente (profilo, logout) e dei link admin (se presenti in navbar) nel menu desktop e mobile.
 - `[P]` **NAV.1.2 (Layout Icone e Testo):**
     - `[ ]` **NAV.1.2.1:** Rivedere e ottimizzare la disposizione e lo stile delle icone e del testo per i link nella navbar (sia desktop che mobile) per massima chiarezza, coerenza visiva e accessibilità (es. `title` attributes).
@@ -77,12 +77,12 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
     - 🆕 `[ ]` **NAV.1.2.3 (Miglioramento UX Link Profilo):** Valutare rimozione di `a#profileNavIconLink` e rendere `img#headerUserAvatar` il link cliccabile per la pagina profilo. Include aggiunta event listener a `img#headerUserAvatar` (o contenitore) per reindirizzamento e stile `cursor: pointer`.
     - 🆕 `[ ]` **NAV.1.2.4 (Differenziazione Icone Login/Logout):** Se necessario, valutare modifica icone `login`/`logout` per maggiore distinguibilità (bassa priorità).
     - 🆕 ✅ **NAV.1.2.5 (Layout Header Mobile):** Riorganizzare layout icone utente (`#userProfileContainer` e figli) e `themeToggleBtn` su mobile.
-        - `[x]` **NAV.1.2.5.A:** Le icone utente e il toggle tema appaiono in riga, sotto il titolo, allineate a sinistra. (COMPLETATO con fix HTML e CSS)
-        - `[x]` **NAV.1.2.5.B:** Il pulsante hamburger (`#navbarToggler`) è allineato a destra, sulla stessa "riga virtuale" del titolo. (COMPLETATO con fix HTML e CSS)
+        - `[x]` **NAV.1.2.5.A:** Le icone utente e il toggle tema appaiono in riga, sotto il titolo, allineate a sinistra.
+        - `[x]` **NAV.1.2.5.B:** Il pulsante hamburger (`#navbarToggler`) è allineato a destra, sulla stessa "riga virtuale" del titolo.
         - ✨ **NAV.1.2.5.C (Centraggio Hamburger):** Allineare verticalmente l'icona hamburger su mobile. (COMPLETATO)
 - `[ ]` **NAV.1.3 (Struttura Link e Dropdown):**
     - `[ ]` **NAV.1.3.1:** Rivedere quali sezioni/pagine sono accessibili direttamente dalla navbar e quali tramite il dropdown "Community".
-    - ✅ **NAV.1.3.2 (Dropdown Community Desktop):** Assicurare il corretto funzionamento e l'aspetto del dropdown "Community" su desktop. (RISOLTA REGRESSIONE)
+    - ✅ **NAV.1.3.2 (Dropdown Community Desktop):** Assicurare il corretto funzionamento e l'aspetto del dropdown "Community" su desktop.
     - `[ ]` **NAV.1.3.3 (Dropdown Community Mobile):** Assicurare il corretto funzionamento e l'aspetto del dropdown "Community" su mobile.
     - `[ ]` **NAV.1.3.4:** Garantire che i link "Scrivi Articolo" (`#navWriteArticleDropdown`) e "Contribuisci" siano visibili/nascosti correttamente in base allo stato di login e ai permessi.
 
@@ -90,23 +90,26 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
 
 ## 🐞 BUG TRACKING 🐞
 
-- ➡️ **BUG-NAV-RESP-001: Scroll orizzontale homepage (`index.html`) su mobile post-login.** (OBSOLETO - Risolto come side-effect del fix HTML per NAV.1.1.2.B).
+- ➡️ **BUG-NAV-RESP-001: Scroll orizzontale homepage (`index.html`) su mobile post-login.** (OBSOLETO - Risolto).
+- ✅ 🐞 **BUG-PROF-AVATAR-BTN-001: Pulsante "Conferma e Carica Avatar" (`#confirmAvatarUploadBtn`) invisibile ma cliccabile in `profile.html`.**
+    - **Descrizione:** Nonostante il JS impostasse `display: inline-block` e altri stili per la visibilità, il pulsante non appariva visivamente dopo la selezione di un file, pur rimanendo funzionale se cliccato "alla cieca".
+    - ✅ **Stato:** COMPLETATO (Risolto con un'epica battaglia e un refactoring dell'UI, introducendo una modale di conferma per l'upload dell'avatar. La robustezza ha prevalso!)
 
 ---
 
 ## ✨ TASK DI RIFINITURA E NUOVE FUNZIONALITÀ (Derivati dalla sessione) ✨
 
-🆕 **Task NOTIF.1: Miglioramento UX Pannello Notifiche Popup**
+✅ **Task NOTIF.1: Miglioramento UX Pannello Notifiche Popup**
 
 - **Descrizione:** Ottimizzare l'interazione e la presentazione del pannello notifiche accessibile dalla campanella.
-- `[ ]` **NOTIF.1.1 (Rimozione Notifica Lette dal Pannello):** Quando una notifica nel pannello popup viene cliccata:
-    - `[ ]` **NOTIF.1.1.A:** Lo stato della notifica su Firestore deve essere impostato su `read: true`.
-    - `[ ]` **NOTIF.1.1.B:** La notifica deve essere rimossa dinamicamente dalla lista nel pannello popup.
-    - `[ ]` **NOTIF.1.1.C:** La notifica (anche se letta) deve rimanere visibile nella pagina `all-notifications.html`.
-- `[ ]` **NOTIF.1.2 (Gestione Pannello Vuoto e Footer):**
-    - `[ ]` **NOTIF.1.2.A:** Se non ci sono notifiche attive da mostrare nel pannello popup, il messaggio "Nessuna nuova notifica al momento." (`#no-notifications-placeholder`) deve essere visibile.
-    - `[ ]` **NOTIF.1.2.B (Link "Vedi tutte" Sempre Visibile):** Il link/pulsante "Vedi tutte le notifiche" (`#view-all-notifications-link`) nel footer del pannello popup deve essere **sempre visibile**.
-- ✨ **NOTIF.1.3 (Posizionamento Pannello Notifiche Mobile):** Su mobile, il pannello notifiche (`#notification-panel`) deve aprirsi centrato orizzontalmente rispetto allo schermo/viewport. (COMPLETATO)
+- ✅ **NOTIF.1.1 (Rimozione Notifica Lette dal Pannello):** Quando una notifica nel pannello popup viene cliccata:
+    - `[x]` **NOTIF.1.1.A:** Lo stato della notifica su Firestore deve essere impostato su `read: true`.
+    - `[x]` **NOTIF.1.1.B:** La notifica deve essere rimossa dinamicamente dalla lista nel pannello popup.
+    - `[x]` **NOTIF.1.1.C:** La notifica (anche se letta) deve rimanere visibile nella pagina `all-notifications.html`.
+- ✅ **NOTIF.1.2 (Gestione Pannello Vuoto e Footer):**
+    - `[x]` **NOTIF.1.2.A:** Se non ci sono notifiche attive da mostrare nel pannello popup, il messaggio "Nessuna nuova notifica." (`#no-notifications-placeholder`) deve essere visibile.
+    - `[x]` **NOTIF.1.2.B (Link "Vedi tutte" Sempre Visibile):** Il link/pulsante "Vedi tutte le notifiche" (`#view-all-notifications-link`) nel footer del pannello popup deve essere **sempre visibile** (per utenti loggati).
+- ✨ ✅ **NOTIF.1.3 (Posizionamento Pannello Notifiche Mobile):** Su mobile, il pannello notifiche (`#notification-panel`) deve aprirsi centrato orizzontalmente rispetto allo schermo/viewport. (COMPLETATO)
 
 🆕 **Task NOTIF.2: Espansione Tipi di Notifiche In-App**
 
@@ -151,11 +154,27 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
 - `[ ]` Proporre e implementare miglioramenti per leggibilità, spaziatura, e coerenza visiva.
 - `[ ]` Testare su diverse risoluzioni.
 
+🆕 ✨ **Task PROF-STYLE.1: Rendere quadrati i contenitori avatar (Priorità MEDIA)**
+
+- `[ ]` **PROF-STYLE.1.1:** Rendere quadrato il contenitore dell'immagine per l'upload in `profile.html` (`#avatarPreview` e il suo contenitore `div` genitore nella modale).
+- `[ ]` **PROF-STYLE.1.2:** Rendere quadrato il visualizzatore dell'avatar nell'header globale (`#headerUserAvatar`).
+- `[ ]` **PROF-STYLE.1.3:** Valutare e applicare stile quadrato avatar anche in `view-article.html` per l'autore.
+
+🆕 ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo (Priorità MEDIA)**
+
+- `[ ]` **PROF-STYLE.2.1:** Rivedere e migliorare CSS per la box di sottomissione della Mini-Bio (`#updateBioForm` e `#bioInput`) in `profile.html`.
+- `[ ]` **PROF-STYLE.2.2:** Rivedere e migliorare CSS per la box di sottomissione dello Stato d'Animo (`#updateStatusForm` e `#statusMessageInput`) in `profile.html`.
+
 ---
 
 ## 🔧 TECHNICAL DEBT & REFACTORING (Legacy) 🔧
 
 ➡️ **Task TECH-DEBT-001: Unificare Sistemi di Gestione Commenti.** (OBSOLETO)
+
+- 🆕💡 **Task TECH-DEBT-BTN-STYLE-001: Unificare e razionalizzare stili dei bottoni `.game-button`.** (Priorità BASSA)
+    - `[ ]` Analizzare le definizioni multiple di `.game-button` (es. in `_main-content.scss`, `_donkey-runner.scss`).
+    - `[ ]` Definire uno stile base per `.game-button` in un unico file (es. `_buttons.scss` o consolidare in `_main-content.scss`).
+    - `[ ]` Utilizzare classi modificatrici (es. `.game-button--primary`, `.game-button--donkey-runner`) per le variazioni specifiche.
 
 ---
 
@@ -166,14 +185,14 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
 - `[x]` A.4.2.6.A (Admin UI): Textarea per `rejectionReason`.
 - **Task A.5: Sistema di Notifiche In-App (Base).**
     - `[x]` (Funzionalità base pannello e pagina "Tutte le Notifiche" COMPLETATE)
-    - `[x]` Corretta struttura HTML per `notificationBellContainer` e `notification-panel` in `index.html` header. (Verificato durante fix navbar)
+    - `[x]` Corretta struttura HTML per `notificationBellContainer` e `notification-panel` in `index.html` header.
     - `⚠️ [ON HOLD]` **Sub-task A.5.5: Notifiche per Interazioni Sociali Avanzate.** (Legate a KOD - Ora potenzialmente integrabili con NOTIF.2)
 
 ### Sezione AUTH: Gestione Autenticazione e Profilo Utente ✨👤
 
-**🆕 Task PROF.1: Risoluzione Problemi e Miglioramenti Pagina Profilo (`profile.html`)** (Derivato da feedback utente)
+**Task PROF.1: Risoluzione Problemi e Miglioramenti Pagina Profilo (`profile.html`)**
 
-- `[ ]` 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** Il campo per aggiornare lo "Stato d'Animo" non compare su mobile. (Priorità ALTA)
+- ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** Il campo per aggiornare lo "Stato d'Animo" non compare su mobile. (RISOLTO dall'utente con fix all'header)
 - `[ ]` **PROF.1.2 (Layout Riconoscimenti - Desktop & Mobile):** (Priorità MEDIA)
     - `[ ]` Correggere allineamento attuale dei badge (spostati a destra).
     - `[ ]` Valutare/implementare sezione dedicata per i badge (es. griglia di card) per migliore presentazione.
@@ -207,7 +226,7 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
 
 ### Sezione C: Funzionalità Specifiche Giochi/Piattaforma 🎮 & Contenuti Esistenti
 
-- ✅ **Task C.1: Gestione Avatar Utente Personalizzato.**
+- ✅ **Task C.1: Gestione Avatar Utente Personalizzato.** (Include BUG-PROF-AVATAR-BTN-001 risolto)
 - **Task C.2: Donkey Runner (Gioco Esistente)**
     - `[x]` C.2.4 (Donkey Runner): Leggibilità testi e usabilità form fullscreen.
     - `[ ]` Task C.2.8 (Donkey Runner): Risolvere problemi file audio mancanti (`game_over.mp3`, `shield_block.mp3`). (Priorità BASSA)
@@ -230,7 +249,7 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
 - ➡️ **Task D.UI-HP-FEATURED:** (SUPERSEDED)
 - **Task D.LEADERBOARD-UX: Migliorare UI/UX della Leaderboard**
     - ✅ **D.LEADERBOARD-UX.1:** Stilizzare il pulsante di refresh della leaderboard. (COMPLETATO)
-    - ➡️ **D.LEADERBOARD-UX.2:** Verificare e migliorare la responsività della tabella dei punteggi. (OBSOLETO - Sostituito da fix parziali e valutazione)
+    - ➡️ **D.LEADERBOARD-UX.2:** Verificare e migliorare la responsività della tabella dei punteggi. (OBSOLETO)
     - ➡️ **D.LEADERBOARD-UX.3:** Progettare/implementare visualizzazione compatta/espandibile per le righe. (OBSOLETO)
 
 ### Sezione Sicurezza & Stabilità (Derivata da ANALYSIS-001.4) 🛡️
@@ -248,7 +267,7 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
 
 ---
 
-## ✅ TASK COMPLETATI RECENTEMENTE (Sessione Corrente Inclusa) ✅
+## ✅ TASK COMPLETATI (Sessione Corrente del 24 Maggio 2025 Inclusa) ✅
 
 - Task REGRESS-001, REGRESS-002, TEXT-001, REGRESS-003.4, (Da ANALYSIS-001), REGRESS-NAV-AVATAR-001, REGRESS-003.3, REGRESS-003.1 & REGRESS-003.2, C.1 / REGRESS-003.5, REGRESS-004, REGRESS-005.
 - Task A.5 (Notifiche In-App via Cloud Functions) - FUNZIONALITÀ BASE COMPLETATE.
@@ -275,9 +294,12 @@ Progressi significativi sono stati fatti sulla stabilizzazione della navbar, inc
 - ✅ **NAV.1.2.5.C (Centraggio Hamburger):** Allineato verticalmente l'icona hamburger su mobile.
 - ✅ **NAV.1.3.2 (Dropdown Community Desktop):** Funzionalità ripristinata.
 - ✅ **NAV.THEME-TOGGLER:** Funzionalità Theme Toggler ripristinata (desktop e mobile).
-- ✨ **NOTIF.1.3 (Posizionamento Pannello Notifiche Mobile):** Centrato pannello rispetto alla viewport.
+- ✨ ✅ **NOTIF.1.3 (Posizionamento Pannello Notifiche Mobile):** Centrato pannello rispetto alla viewport.
+- ✅ **Task NOTIF.1: Miglioramento UX Pannello Notifiche Popup** (Completati NOTIF.1.1 e NOTIF.1.2).
+- ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** Risolto (dall'utente, tramite fix all'header).
+- ✅ 🐞 **BUG-PROF-AVATAR-BTN-001: Pulsante "Conferma e Carica Avatar" invisibile.** (RISOLTO CON SUCCESSO TRAMITE REFACTOR A MODALE!)
 
 ---
 
-// DevPlan v4.0.4 - Canvas Markdown - AthenaDev 🏛️✨
-// Prossimo focus: NOTIF.1.1 e NOTIF.1.2
+// DevPlan v4.0.6 - Canvas Markdown - AthenaDev 🏛️✨ Fine Sessione Gloriosa!
+// La vittoria sull'avatar ci ha temprati! Pronti per nuove sfide!

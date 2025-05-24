@@ -95,6 +95,14 @@ const avatarUploadProgressBar = document.getElementById('avatarUploadProgressBar
 const avatarUploadProgressText = document.getElementById('avatarUploadProgressText');
 const avatarUploadStatus = document.getElementById('avatarUploadStatus');
 
+const avatarConfirmationArea = document.getElementById('avatarConfirmationArea');
+const cancelAvatarSelectionBtn = document.getElementById('cancelAvatarSelectionBtn');
+
+const avatarConfirmationModal = document.getElementById('avatarConfirmationModal');
+const modalAvatarPreview = document.getElementById('modalAvatarPreview');
+const modalAvatarStatus = document.getElementById('modalAvatarStatus');
+const modalConfirmUploadBtn = document.getElementById('modalConfirmUploadBtn');
+const modalCancelUploadBtn = document.getElementById('modalCancelUploadBtn');
 // --- STATO DEL MODULO E COSTANTI ---
 let loggedInUser = null;
 let profileDataForDisplay = null; // Mantiene l'ultimo stato noto dei dati del profilo visualizzato
@@ -197,6 +205,16 @@ function renderExternalLinks(linksArray, isOwnProfile) {
         li.appendChild(actionsDiv);
         externalLinksListUL.appendChild(li);
     });
+}
+
+/**
+ * Annulla la selezione dell'avatar e ripristina la UI iniziale.
+ */
+function handleCancelAvatarSelection() {
+    selectedAvatarFile = null;
+    if (avatarUploadInput) avatarUploadInput.value = '';
+    if (avatarConfirmationArea) avatarConfirmationArea.style.display = 'none';
+    if (selectAvatarFileBtn) selectAvatarFileBtn.style.display = 'inline-block';
 }
 
 /**
@@ -1021,63 +1039,76 @@ function openBadgeDetailsModal(badgeId) {
     badgeDetailModal.style.display = 'block';
 }
 
+function closeModalAndReset() {
+    if (avatarConfirmationModal) avatarConfirmationModal.style.display = 'none';
+    selectedAvatarFile = null;
+    if (avatarUploadInput) avatarUploadInput.value = '';
+    // Riabilita i bottoni nel caso fossero stati disabilitati
+    if (modalConfirmUploadBtn) modalConfirmUploadBtn.disabled = false;
+    if (modalCancelUploadBtn) modalCancelUploadBtn.disabled = false;
+}
+
+/**
+ * Handles the change event of the avatar file input.
+ * Validates the file and displays a preview.
+ * @param {Event} event - The file input change event.
+ */
 function handleAvatarFileSelection(event) {
     const file = event.target.files[0];
-    if (!file) {
-        selectedAvatarFile = null;
-        if (avatarPreview) avatarPreview.style.display = 'none';
-        if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'flex';
-        if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'none';
-        if (avatarUploadStatus) avatarUploadStatus.textContent = '';
-        return;
-    }
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-        showToast('Formato file non supportato (JPG, PNG, WebP).', 'error');
-        if (avatarUploadStatus) avatarUploadStatus.textContent = 'Formato file non valido.';
+    const cleanup = () => {
         selectedAvatarFile = null;
         if (avatarUploadInput) avatarUploadInput.value = '';
+    };
+
+    if (!file) {
+        cleanup();
+        return;
+    }
+
+    // Validazione
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        showToast('Formato file non supportato.', 'error');
+        cleanup();
         return;
     }
     const maxSize = MAX_AVATAR_SIZE_MB * 1024 * 1024;
     if (file.size > maxSize) {
         showToast(`File troppo grande (max ${MAX_AVATAR_SIZE_MB}MB).`, 'error');
-        if (avatarUploadStatus) avatarUploadStatus.textContent = `File troppo grande (max ${MAX_AVATAR_SIZE_MB}MB).`;
-        selectedAvatarFile = null;
-        if (avatarUploadInput) avatarUploadInput.value = '';
+        cleanup();
         return;
     }
+
+    // Se il file è valido, popola e apri la modale
     selectedAvatarFile = file;
     const reader = new FileReader();
     reader.onload = (e) => {
-        if (avatarPreview) {
-            avatarPreview.src = e.target.result;
-            avatarPreview.style.display = 'block';
-        }
-        if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'none';
+        if (modalAvatarPreview) modalAvatarPreview.src = e.target.result;
     };
     reader.readAsDataURL(file);
-    if (confirmAvatarUploadBtn) {
-        confirmAvatarUploadBtn.style.display = 'inline-block'; // O 'block'
-        // NON aggiungere opacity o visibility qui per ora
-    }
-    if (avatarUploadStatus) avatarUploadStatus.textContent = `File selezionato: ${file.name}`;
-    if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
+
+    if (modalAvatarStatus) modalAvatarStatus.textContent = `Caricare il file: ${file.name}?`;
+    if (avatarConfirmationModal) avatarConfirmationModal.style.display = 'flex';
 }
 
 async function handleConfirmAvatarUpload() {
     if (!selectedAvatarFile || !loggedInUser) {
-        showToast('Nessun file selezionato o utente non loggato.', 'warning');
-        return;
+        // Chiudi la modale anche se c'è un errore preventivo
+        if (avatarConfirmationModal) closeModalAndReset();
+        return showToast('Nessun file selezionato o utente non loggato.', 'warning');
     }
-    if (confirmAvatarUploadBtn) {
-        confirmAvatarUploadBtn.disabled = true;
-        confirmAvatarUploadBtn.textContent = 'Caricamento...';
-    }
-    if (avatarUploadStatus) avatarUploadStatus.textContent = 'Inizio upload...';
+
+    // Disabilita i bottoni della modale per prevenire doppi click
+    if (modalConfirmUploadBtn) modalConfirmUploadBtn.disabled = true;
+    if (modalCancelUploadBtn) modalCancelUploadBtn.disabled = true;
+
+    // Mostra la barra di progresso
     if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'block';
     if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = '0%';
     if (avatarUploadProgressText) avatarUploadProgressText.textContent = '0%';
+
+    // Aggiorna lo status nella modale, se vuoi
+    if (modalAvatarStatus) modalAvatarStatus.textContent = 'Caricamento in corso...';
 
     const fileExtension = selectedAvatarFile.name.split('.').pop();
     const filePath = `user-avatars/${loggedInUser.uid}/original_${Date.now()}.${fileExtension}`;
@@ -1092,43 +1123,27 @@ async function handleConfirmAvatarUpload() {
             if (avatarUploadProgressText) avatarUploadProgressText.textContent = Math.round(progress) + '%';
         },
         (error) => {
+            // In caso di ERRORE
             console.error('Errore upload avatar su Storage:', error);
-            showToast(`Errore upload: ${error.code}`, 'error'); // Mostra error.code che è più utile a volte
-            if (avatarUploadStatus) avatarUploadStatus.textContent = `Errore upload: ${error.code}`;
-            if (confirmAvatarUploadBtn) {
-                confirmAvatarUploadBtn.disabled = false;
-                confirmAvatarUploadBtn.textContent = 'Conferma e Carica';
-                // AthenaDev: Assicura che il bottone sia visibile per un nuovo tentativo
-                confirmAvatarUploadBtn.style.display = 'inline-block';
-                confirmAvatarUploadBtn.style.opacity = '1';
-                confirmAvatarUploadBtn.style.visibility = 'visible';
-            }
+            showToast(`Errore upload: ${error.code}`, 'error');
+
+            // FIX: Chiudi la modale, resetta lo stato e nascondi la barra di progresso
+            closeModalAndReset();
             if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
-            selectedAvatarFile = null;
-            if (avatarUploadInput) avatarUploadInput.value = ''; // Resetta input
         },
         () => {
-            // Upload completato con successo su Storage
+            // In caso di SUCCESSO
             showToast('Immagine caricata! In attesa di elaborazione...', 'info', 7000);
-            if (avatarUploadStatus)
-                avatarUploadStatus.textContent = "Elaborazione in corso... L'immagine si aggiornerà a breve.";
-            if (confirmAvatarUploadBtn) confirmAvatarUploadBtn.style.display = 'none'; // Nascondi bottone dopo successo
-            if (avatarUploadInput) avatarUploadInput.value = '';
-            if (avatarPreview) avatarPreview.style.display = 'none';
-            if (avatarPreviewPlaceholder) avatarPreviewPlaceholder.style.display = 'flex';
-            selectedAvatarFile = null; // Resetta file dopo upload per evitare re-upload accidentali
 
-            // L'UI si aggiornerà grazie a onSnapshot in loadProfileData
-            // Non è necessario un refresh manuale o un richiamo a loadProfileData
+            // FIX: Chiudi la modale e resetta lo stato
+            closeModalAndReset();
 
-            // setTimeout per resettare il bottone se l'utente volesse caricare un altro file dopo un po'
-            // Ma dato che nascondiamo il bottone, questo è meno rilevante.
-            // setTimeout(() => {
-            //    if (confirmAvatarUploadBtn) {
-            //        confirmAvatarUploadBtn.disabled = false;
-            //        confirmAvatarUploadBtn.textContent = 'Conferma e Carica';
-            //    }
-            // }, 1500);
+            // Nascondi la barra di progresso dopo un breve ritardo per mostrare il 100%
+            setTimeout(() => {
+                if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
+            }, 1500);
+
+            // L'UI principale si aggiornerà grazie a onSnapshot
         }
     );
 }
@@ -1269,14 +1284,27 @@ if (cancelEditExtLinkBtn) cancelEditExtLinkBtn.addEventListener('click', resetAn
 if (bioInput) bioInput.addEventListener('input', updateBioCharCounter);
 if (updateBioForm) updateBioForm.addEventListener('submit', handleBioUpdate);
 
-if (selectAvatarFileBtn && avatarUploadInput) {
+if (selectAvatarFileBtn) {
+    // Il bottone originale "Scegli Immagine"
     selectAvatarFileBtn.addEventListener('click', () => avatarUploadInput.click());
 }
 if (avatarUploadInput) {
     avatarUploadInput.addEventListener('change', handleAvatarFileSelection);
 }
-if (confirmAvatarUploadBtn) {
-    confirmAvatarUploadBtn.addEventListener('click', handleConfirmAvatarUpload);
+// Nuovi listener per la modale
+if (modalConfirmUploadBtn) {
+    modalConfirmUploadBtn.addEventListener('click', handleConfirmAvatarUpload);
+}
+if (modalCancelUploadBtn) {
+    modalCancelUploadBtn.addEventListener('click', closeModalAndReset);
+}
+// Permette di chiudere la modale cliccando fuori
+if (avatarConfirmationModal) {
+    avatarConfirmationModal.addEventListener('click', (event) => {
+        if (event.target === avatarConfirmationModal) {
+            closeModalAndReset();
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
