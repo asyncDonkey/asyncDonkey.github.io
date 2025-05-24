@@ -248,22 +248,25 @@
                         </div>
                     </div>
 
-                    <div id="statusMessageSection" style="display: none">
+                    <div id="statusMessageSection" class="profile-input-box" style="display: none">
                         <h3 style="margin-bottom: 10px">Stato d'Animo:</h3>
                         <div id="statusMessageDisplay">Caricamento stato...</div>
                         <form id="updateStatusForm" style="margin-top: 10px">
-                            <input
-                                type="text"
-                                id="statusMessageInput"
-                                name="statusMessageInput"
-                                placeholder="Come ti senti oggi?"
-                                maxlength="150"
-                            />
-                            <button type="submit" id="updateStatusBtn" class="game-button" style="padding: 10px 15px">
-                                Aggiorna
-                            </button>
+                            <div class="input-action-container">
+                                <input
+                                    type="text"
+                                    id="statusMessageInput"
+                                    name="statusMessageInput"
+                                    class="input-field"
+                                    placeholder="Come ti senti oggi?"
+                                    maxlength="150"
+                                />
+                                <button type="submit" id="updateStatusBtn" class="game-button">Aggiorna</button>
+                            </div>
+                            <div class="form-actions">
+                                <div id="statusUpdateMessage" class="update-message"></div>
+                            </div>
                         </form>
-                        <div id="statusUpdateMessage"></div>
                     </div>
 
                     <div id="externalLinksSection" style="display: none">
@@ -330,63 +333,39 @@
                             </div>
                         </div>
                     </div>
-                    <div
-                        id="bioSection"
-                        style="
-                            margin-top: 20px;
-                            padding-top: 20px;
-                            border-top: 1px dashed var(--border-color-secondary);
-                            display: none;
-                        "
-                    >
+                    
+                    <div id="bioSection" class="profile-input-box" style="display: none;">
                         <h3 style="margin-bottom: 10px">Mini-Bio:</h3>
-                        <div
-                            id="bioDisplay"
-                            style="
-                                white-space: pre-wrap;
-                                word-wrap: break-word;
-                                padding: 10px;
-                                background-color: var(--surface-bg-secondary);
-                                border-radius: 4px;
-                                min-height: 3em;
-                                margin-bottom: 10px;
-                            "
-                        >
+                        <div id="bioDisplay">
                             <p style="color: var(--text-color-muted)">Nessuna bio impostata.</p>
                         </div>
-                        <form id="updateBioForm" style="display: none">
+                        <form id="updateBioForm" style="display: none; margin-top: 10px;">
                             <div>
                                 <label for="bioInput">Modifica la tua bio (max 300 caratteri):</label>
                                 <textarea
                                     id="bioInput"
                                     name="bioInput"
+                                    class="input-field"
                                     rows="4"
                                     maxlength="300"
-                                    style="width: 100%; margin-top: 5px"
                                 ></textarea>
-                                <p
-                                    id="bioCharCount"
-                                    style="
-                                        font-size: 0.8em;
-                                        text-align: right;
-                                        margin-top: 2px;
-                                        color: var(--text-color-muted);
-                                    "
-                                >
+                            </div>
+                            <div class="form-actions">
+                                 <div id="bioUpdateMessage" class="update-message"></div>
+                                <p id="bioCharCount">
                                     <span id="bioCurrentChars">0</span>/300
                                 </p>
+                                <button
+                                    type="submit"
+                                    id="updateBioBtn"
+                                    class="game-button"
+                                >
+                                    Salva Bio
+                                </button>
                             </div>
-                            <button
-                                type="submit"
-                                id="updateBioBtn"
-                                class="game-button"
-                                style="padding: 10px 15px; margin-top: 5px"
-                            >
-                                Salva Bio
-                            </button>
                         </form>
-                        <div id="bioUpdateMessage" style="font-size: 0.9em; margin-top: 5px"></div>
                     </div>
+
                     <div
                         id="emailVerificationBanner"
                         class="info-section"
@@ -408,7 +387,6 @@
                         </p>
                         <div id="resendEmailMessage" style="font-size: 0.9em; margin-top: 8px"></div>
                     </div>
-                </div>
                 <div id="profileLoadingMessage">
                     <p>Caricamento profilo...</p>
                 </div>

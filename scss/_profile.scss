@@ -392,41 +392,131 @@ section#profile h3 {
     border-color: #bd2130;
 }
 
-/* Stili aggiuntivi per la sezione Stato d'Animo */
-#statusMessageSection {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px dashed var(--border-color-secondary);
-}
-#statusMessageDisplay {
-    font-style: italic;
-    color: var(--text-color-secondary);
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: var(--surface-bg-secondary);
-    border-radius: 4px;
-    min-height: 2em; /* Per dare spazio anche se vuoto */
-}
-#statusMessageDisplay:empty::before {
-    content: "Nessuno stato d'animo impostato.";
-    color: var(--text-color-muted);
-}
-#updateStatusForm {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-#statusMessageInput {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid var(--border-color-primary);
-    border-radius: 4px;
-    background-color: var(--bg-color);
-    color: var(--text-color-primary);
-}
-#statusUpdateMessage {
-    font-size: 0.9em;
-    margin-top: 5px;
+/* ===== Stili Unificati e Responsivi per Sezioni Input Profilo (Status, Bio, etc.) ===== */
+
+.profile-input-box {
+    h3 {
+        margin-bottom: 15px;
+    }
+
+    // Stile per i display (dove appaiono bio e status attuali)
+    #bioDisplay,
+    #statusMessageDisplay {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        padding: 12px 15px;
+        background-color: var(--surface-bg-secondary);
+        border: 1px solid var(--border-color-secondary);
+        border-radius: 6px;
+        min-height: 3em;
+        margin-bottom: 15px;
+        color: var(--text-color-secondary);
+        font-style: italic;
+    }
+
+    #bioDisplay:has(p),
+    #statusMessageDisplay:has(p) {
+        padding: 0;
+        border: none;
+        background-color: transparent;
+        min-height: auto;
+    }
+
+    // Stile per i campi di testo (input e textarea)
+    .input-field {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--input-border-color, var(--border-color-primary));
+        border-radius: 6px;
+        background-color: var(--input-bg, var(--surface-bg-primary));
+        color: var(--text-color-primary);
+        font-family: inherit;
+        font-size: 1em;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        resize: vertical;
+
+        &:focus {
+            outline: none;
+            border-color: var(--link-color);
+            box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25);
+        }
+
+        &::placeholder {
+            color: var(--text-color-muted);
+        }
+    }
+
+    // Flex container per allineare campo e bottone (usato per lo Status)
+    #updateStatusForm .input-action-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        .input-field {
+            flex-grow: 1;
+        }
+        .game-button {
+            flex-shrink: 0; // Evita che il bottone si restringa
+        }
+    }
+
+    // Contenitore per le azioni del form (pulsante e messaggi)
+    .form-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end; // Allinea a destra
+        align-items: center;
+        gap: 15px;
+    }
+
+    // Specifico per la Bio per avere il counter a sx e bottone a dx
+    #updateBioForm .form-actions {
+        justify-content: space-between;
+    }
+
+    #bioCharCount {
+        font-size: 0.85em;
+        color: var(--text-color-muted);
+    }
+
+    .update-message {
+        font-size: 0.9em;
+        color: var(--text-color-muted);
+        font-style: italic;
+    }
+
+    // ===============================================
+    // ======= MEDIA QUERY PER LA RESPONSIVITA' ========
+    // ===============================================
+    @media (max-width: 768px) {
+        // Status form: impila input e bottone
+        #updateStatusForm .input-action-container {
+            flex-direction: column;
+            align-items: stretch; // Fa sì che entrambi occupino tutta la larghezza
+
+            .game-button {
+                width: 100%; // Bottone a larghezza piena
+            }
+        }
+
+        // Bio form: impila messaggi e bottone
+        #updateBioForm .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+
+            // Inverti l'ordine per avere il bottone per ultimo
+            flex-direction: column-reverse; 
+            
+            .game-button {
+                width: 100%;
+            }
+
+            #bioCharCount {
+                text-align: center; // Centra il contatore caratteri
+            }
+        }
+    }
 }
 
 /* NUOVI STILI PER LINK ESTERNI */
@@ -638,7 +728,11 @@ section#profile h3 {
 
 /* Stili per la sezione Riconoscimenti/Badge */
 #badgesSection {
-    /* ... eventuali stili per la section ... */
+    max-width: 600px; // La stessa max-width della sezione profilo
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 #badgesDisplayContainer {
@@ -741,3 +835,5 @@ section#profile h3 {
 .button-modal-cancel:hover {
     background-color: #5a6268;
 }
+
+
