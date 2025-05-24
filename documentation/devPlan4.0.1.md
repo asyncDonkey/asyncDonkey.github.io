@@ -1,10 +1,10 @@
-# DEVELOPMENT PLAN (v4.0.8 - Sessione Athena - Layout Profilo Completato) 🚀
+# DEVELOPMENT PLAN (v4.0.9 - Sessione Athena - Refactoring Navbar Completato) 🚀
 
-**Data Ultimo Aggiornamento:** 24 Maggio 2025 (Athena Update - Fine Sessione)
+**Data Ultimo Aggiornamento:** 25 Maggio 2025 (Athena Update - Fine Sessione)
 **Visione Progetto:** Consolidare e stabilizzare la piattaforma esistente, migliorando la documentazione, la sicurezza, l'UX e risolvendo il debito tecnico. Le funzionalità attuali, come Donkey Runner e il sistema di articoli, saranno mantenute e ottimizzate, con un focus sul miglioramento dell'esperienza utente per le notifiche e la pagina profilo.
 
 **Stato Generale del Progetto:**
-Sessione estremamente produttiva! Abbiamo affrontato con successo i problemi rimanenti sulla pagina profilo. La visualizzazione dei **Riconoscimenti (badge)** sui profili pubblici (`PROF.1.3`) è stata **RISOLTA** correggendo la Cloud Function `userPublicProfileSync.js` per sincronizzare correttamente il campo `earnedBadges` e la logica client in `profile.js` per visualizzarli. Successivamente, abbiamo **COMPLETATO** il task `PROF.1.4` rivedendo e migliorando significativamente il **layout generale di `profile.html`** e gli stili associati in `scss/_profile.scss`. Questa riorganizzazione ha portato a una struttura più semantica e a una migliore presentazione visiva, risolvendo anche alcuni problemi di visualizzazione dei dettagli utente (nickname, nazionalità) che erano emersi sui profili pubblici. La pagina profilo ora è molto più robusta e coerente.
+Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo della Navbar (Task NAV.1)**. Questo ha incluso la trasformazione dell'avatar utente nel link principale al profilo (`NAV.1.2.3`) e l'aggiunta di un pulsante "Home" accanto al theme toggler (`NAV.1.2.4` - nuovo), con le relative correzioni di layout. Abbiamo anche confermato che la logica di popolamento dinamico dei link (`NAV.1.1.3`), la visibilità condizionale dei link "Scrivi Articolo" e "Contribuisci" (`NAV.1.3.4`), e il funzionamento del dropdown "Community" su mobile (`NAV.1.3.3`) sono già corretti e quindi marcati come `OBSOLETO` o `COMPLETATO`. Anche la revisione strategica dei link (`NAV.1.3.1`) e l'ottimizzazione generale di stili e icone (`NAV.1.2.1 & .2`) sono state considerate completate. Il tentativo di implementare un sistema di email personalizzate (`EMAIL-001`) è stato **ABBANDONATO** a causa di complessità tecniche e per mantenere la stabilità del sistema attuale, con i relativi sub-task (miglioramento template, email di attivazione) marcati come `OBSOLETO`.
 
 **Legenda Stati:**
 
@@ -37,7 +37,7 @@ Sessione estremamente produttiva! Abbiamo affrontato con successo i problemi rim
 - `[ ]` **INFRA-001.7 (Dominio Custom):** Configurare il dominio personalizzato (se applicabile).
 - `[ ]` **INFRA-001.8 (Go-Live):** Eseguire il deployment in produzione (`firebase deploy --only hosting`).
 - `[ ]` **INFRA-001.9 (Post-GoLive):** Aggiornare la documentazione del progetto con le nuove informazioni di hosting e configurare CI/CD.
-- **Nota:** Questo task è stato dettagliato e i primi passi sono stati completati con successo.
+- **Nota:** Questo task è stato dettagliato e i primi passi sono stati completati con successo. Decisione utente: posticipare il deploy staging dopo altri task di codice.
 
 ---
 
@@ -60,31 +60,31 @@ Sessione estremamente produttiva! Abbiamo affrontato con successo i problemi rim
 
 ## 💈 TASK NAVBAR (PRIORITÀ CRITICA) 💈
 
-**Task NAV.1: Refactoring Completo Funzionalità e UI Navbar**
+**✅ Task NAV.1: Refactoring Completo Funzionalità e UI Navbar**
 
 - **Descrizione:** Revisionare e aggiornare la funzionalità, l'aspetto e la coerenza della navbar principale.
-- `[P]` **NAV.1.1 (Funzionalità):**
+- ✅ **NAV.1.1 (Funzionalità):**
     - ✅ **NAV.1.1.1:** Risolvere bug: pulsante logout non funzionante in versione desktop.
     - ✅ **NAV.1.1.2 (Visibilità Pulsanti Auth):** Assicurare che tutti i pulsanti (Login, Registrazione, Profilo, Logout) siano sempre presenti e visibili/nascosti correttamente in base allo stato dell'utente su tutte le pagine HTML.
         - `[x]` **NAV.1.1.2.A (Visibilità `userDisplayName`):** Corretta la visibilità di `userDisplayName` per utente loggato.
         - ✅ **NAV.1.1.2.B (Visibilità Logout Utente Non Autenticato - `index.html`):** Risolto il bug per cui il pulsante logout era visibile per utenti non autenticati su `index.html`.
             - ➡️ **NAV.1.1.2.B.1:** Investigare potenziale influenza di `homePageFeatures.js` (OBSOLETO).
             - ➡️ **NAV.1.1.2.B.2:** Verificare se `updateHeaderAuthContainersVisibility` viene chiamata più volte (OBSOLETO).
-    - `[ ]` **NAV.1.1.3:** Verificare e correggere la logica di popolamento dinamico dei link utente (profilo, logout) e dei link admin (se presenti in navbar) nel menu desktop e mobile.
-- `[P]` **NAV.1.2 (Layout Icone e Testo):**
-    - `[ ]` **NAV.1.2.1:** Rivedere e ottimizzare la disposizione e lo stile delle icone e del testo per i link nella navbar (sia desktop che mobile) per massima chiarezza, coerenza visiva e accessibilità (es. `title` attributes).
-    - `[ ]` **NAV.1.2.2:** Assicurare che i pulsanti solo-icona siano correttamente dimensionati e che le icone siano centrate.
-    - 🆕 `[ ]` **NAV.1.2.3 (Miglioramento UX Link Profilo):** Valutare rimozione di `a#profileNavIconLink` e rendere `img#headerUserAvatar` il link cliccabile per la pagina profilo. Include aggiunta event listener a `img#headerUserAvatar` (o contenitore) per reindirizzamento e stile `cursor: pointer`.
-    - 🆕 `[ ]` **NAV.1.2.4 (Differenziazione Icone Login/Logout):** Se necessario, valutare modifica icone `login`/`logout` per maggiore distinguibilità (bassa priorità).
+    - ➡️ **NAV.1.1.3:** Verificare e correggere la logica di popolamento dinamico dei link utente (profilo, logout) e dei link admin (se presenti in navbar) nel menu desktop e mobile. (OBSOLETO - Funzionalità attuale confermata come corretta)
+- ✅ **NAV.1.2 (Layout Icone e Testo):**
+    - ✅ **NAV.1.2.1:** Rivedere e ottimizzare la disposizione e lo stile delle icone e del testo per i link nella navbar (sia desktop che mobile) per massima chiarezza, coerenza visiva e accessibilità (es. `title` attributes). (COMPLETATO - Stato attuale giudicato buono)
+    - ✅ **NAV.1.2.2:** Assicurare che i pulsanti solo-icona siano correttamente dimensionati e che le icone siano centrate. (COMPLETATO - Stato attuale giudicato buono)
+    - ✅ **NAV.1.2.3 (Miglioramento UX Link Profilo):** Rimosso `a#profileNavIconLink` e reso `img#headerUserAvatar` il link cliccabile per la pagina profilo. Include aggiunta event listener a `img#headerUserAvatar` e stile `cursor: pointer`. (COMPLETATO)
+    - 🆕 ✅ **NAV.1.2.4 (Pulsante Home Aggiuntivo):** Aggiunto pulsante Home (solo icona) nel blocco `.header-controls` accanto al theme toggler, con fix di layout per corretto posizionamento. (COMPLETATO)
     - 🆕 ✅ **NAV.1.2.5 (Layout Header Mobile):** Riorganizzare layout icone utente (`#userProfileContainer` e figli) e `themeToggleBtn` su mobile.
         - `[x]` **NAV.1.2.5.A:** Le icone utente e il toggle tema appaiono in riga, sotto il titolo, allineate a sinistra.
         - `[x]` **NAV.1.2.5.B:** Il pulsante hamburger (`#navbarToggler`) è allineato a destra, sulla stessa "riga virtuale" del titolo.
         - ✨ **NAV.1.2.5.C (Centraggio Hamburger):** Allineare verticalmente l'icona hamburger su mobile. (COMPLETATO)
-- `[ ]` **NAV.1.3 (Struttura Link e Dropdown):**
-    - `[ ]` **NAV.1.3.1:** Rivedere quali sezioni/pagine sono accessibili direttamente dalla navbar e quali tramite il dropdown "Community".
+- ✅ **NAV.1.3 (Struttura Link e Dropdown):**
+    - ✅ **NAV.1.3.1:** Rivedere quali sezioni/pagine sono accessibili direttamente dalla navbar e quali tramite il dropdown "Community". (COMPLETATO - Struttura attuale confermata)
     - ✅ **NAV.1.3.2 (Dropdown Community Desktop):** Assicurare il corretto funzionamento e l'aspetto del dropdown "Community" su desktop.
-    - `[ ]` **NAV.1.3.3 (Dropdown Community Mobile):** Assicurare il corretto funzionamento e l'aspetto del dropdown "Community" su mobile.
-    - `[ ]` **NAV.1.3.4:** Garantire che i link "Scrivi Articolo" (`#navWriteArticleDropdown`) e "Contribuisci" siano visibili/nascosti correttamente in base allo stato di login e ai permessi.
+    - ✅ **NAV.1.3.3 (Dropdown Community Mobile):** Assicurare il corretto funzionamento e l'aspetto del dropdown "Community" su mobile. (COMPLETATO - Funzionalità attuale confermata)
+    - ➡️ **NAV.1.3.4:** Garantire che i link "Scrivi Articolo" (`#navWriteArticleDropdown`) e "Contribuisci" siano visibili/nascosti correttamente in base allo stato di login e ai permessi. (OBSOLETO - Funzionalità attuale confermata come corretta)
 
 ---
 
@@ -124,6 +124,9 @@ Sessione estremamente produttiva! Abbiamo affrontato con successo i problemi rim
     - 💡 Risposta a un commento.
     - 💡 (Admin) Nuovo articolo in attesa di approvazione.
     - 💡 (Admin) Nuova richiesta di cambio nickname.
+- ➡️ **NOTIF.EMAIL-TEMPLATES (Miglioramento/Creazione Email):** (OBSOLETO - Task abbandonato a causa di complessità con Firebase Spark Plan e configurazione SMTP)
+    - ➡️ **NOTIF.EMAIL-TEMPLATES.1:** Migliorare template email di verifica esistente.
+    - ➡️ **NOTIF.EMAIL-TEMPLATES.2:** Creare nuovo template email di "Benvenuto/Attivazione Confermata".
 
 ---
 
@@ -275,7 +278,7 @@ Sessione estremamente produttiva! Abbiamo affrontato con successo i problemi rim
 
 ---
 
-## ✅ TASK COMPLETATI (Sessioni Precedenti e Sessione Corrente del 24 Maggio 2025 Inclusa) ✅
+## ✅ TASK COMPLETATI (Sessioni Precedenti e Sessione Corrente del 25 Maggio 2025 Inclusa) ✅
 
 - Task REGRESS-001, REGRESS-002, TEXT-001, REGRESS-003.4, (Da ANALYSIS-001), REGRESS-NAV-AVATAR-001, REGRESS-003.3, REGRESS-003.1 & REGRESS-003.2, C.1 / REGRESS-003.5, REGRESS-004, REGRESS-005.
 - Task A.5 (Notifiche In-App via Cloud Functions) - FUNZIONALITÀ BASE COMPLETATE.
@@ -310,8 +313,16 @@ Sessione estremamente produttiva! Abbiamo affrontato con successo i problemi rim
 - ✅ **PROF.1.2.A:** Corretto allineamento sezione badge (`#badgesSection`) per centrarsi nella pagina.
 - ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** RISOLTO.
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** COMPLETATO.
+- ✅ **Task NAV.1: Refactoring Completo Funzionalità e UI Navbar (INTERO TASK COMPLETATO)**
+    - ➡️ **NAV.1.1.3:** (OBSOLETO - Funzionalità confermata)
+    - ✅ **NAV.1.2.1 & .2:** (COMPLETATO - Stato attuale buono)
+    - ✅ **NAV.1.2.3:** (COMPLETATO - Avatar come link)
+    - 🆕 ✅ **NAV.1.2.4:** (COMPLETATO - Pulsante Home aggiuntivo)
+    - ✅ **NAV.1.3.1:** (COMPLETATO - Struttura confermata)
+    - ✅ **NAV.1.3.3:** (COMPLETATO - Dropdown mobile confermato)
+    - ➡️ **NAV.1.3.4:** (OBSOLETO - Funzionalità confermata)
 
 ---
 
-// DevPlan v4.0.8 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa.
-// Pagina profilo stabilizzata e layout migliorato! Ottimo lavoro.
+// DevPlan v4.0.9 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa.
+// Navbar rifinita! Ottimo lavoro di resilienza e collaborazione.
