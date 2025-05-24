@@ -1198,7 +1198,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setupScrollToTopButton();
     setupInteractiveSkills();
     setupModalControls();
-
+    setupAvatarClickListener();
     // Caricamento contenuti specifici della homepage
     if (document.getElementById('homeMiniLeaderboardList')) {
         loadHomeMiniLeaderboard();
@@ -1239,6 +1239,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
+    }
+
+    function setupAvatarClickListener() {
+        const headerUserAvatar = document.getElementById('headerUserAvatar');
+        if (headerUserAvatar) {
+            headerUserAvatar.addEventListener('click', () => {
+                // Controlla se l'utente è loggato prima di reindirizzare
+                if (auth.currentUser) {
+                    window.location.href = 'profile.html';
+                }
+            });
+        }
     }
 
     // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---

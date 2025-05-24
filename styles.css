@@ -298,6 +298,19 @@ header nav a:hover {
   border: 1px solid var(--border-color-secondary);
   -ms-flex-negative: 0;
       flex-shrink: 0;
+  /* --- INIZIO MODIFICHE --- */
+  cursor: pointer;
+  -webkit-transition: -webkit-transform 0.2s ease-in-out, -webkit-box-shadow 0.2s ease-in-out;
+  transition: -webkit-transform 0.2s ease-in-out, -webkit-box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, -webkit-transform 0.2s ease-in-out, -webkit-box-shadow 0.2s ease-in-out;
+  /* --- FINE MODIFICHE --- */
+}
+#headerUserAvatar:hover {
+  -webkit-transform: scale(1.05);
+          transform: scale(1.05);
+  -webkit-box-shadow: 0 0 8px var(--accent-color-light);
+          box-shadow: 0 0 8px var(--accent-color-light);
 }
 
 .auth-button {
@@ -796,9 +809,9 @@ header .nav-link-icon-only .material-symbols-rounded {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
-    -webkit-box-pack: start;
-        -ms-flex-pack: start;
-            justify-content: flex-start;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
     -webkit-box-align: center;
         -ms-flex-align: center;
             align-items: center;

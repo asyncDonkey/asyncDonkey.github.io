@@ -96,6 +96,16 @@ header nav a:hover {
     object-fit: cover;
     border: 1px solid var(--border-color-secondary);
     flex-shrink: 0;
+
+    /* --- INIZIO MODIFICHE --- */
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 8px var(--accent-color-light);
+    }
+    /* --- FINE MODIFICHE --- */
 }
 .auth-button {
     background-color: transparent;
@@ -538,18 +548,20 @@ header .nav-link-icon-only .material-symbols-rounded {
 
     // Stile per la riga inferiore (tutti gli altri controlli)
     .header-controls {
-        display: flex;
-        justify-content: flex-start; // Allinea tutte le icone a sinistra
-        align-items: center; // Centra verticalmente anche le icone in questa riga
-        width: 100%;
-        gap: 10px; // Spazio tra le icone in questa riga (puoi aggiustarlo)
-    }
+    display: flex;
+    justify-content: center; // <-- MODIFICATO
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+  }
 
     // Nasconde il nome utente testuale per risparmiare spazio
     #userProfileContainer #userDisplayName {
         display: none;
     }
 }
+
+
 
 /* Il tuo CSS per breakpoint più piccoli, potrebbe sovrascrivere o aggiungere dettagli */
 @media (max-width: 576px) {
