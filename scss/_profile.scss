@@ -1,54 +1,117 @@
 /* ===== Sezione Profilo Utente (profile.html) ===== */
 section#profile {
-    max-width: 600px; /* Eredita altri stili da main section */
+    max-width: 800px; 
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+
+    // Assicura che i figli diretti della section#profile siano blocchi e abbiano spazio sotto
+    // Questo include #badgesSection, #profileContent (o il suo wrapper se ne hai uno), #myArticlesSection
+    > div,
+    > section { // Si applica a #badgesSection, #profileContentContainer (ipotetico), #myArticlesSection, ecc.
+        width: 100%;
+        margin-bottom: 35px; 
+        
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    // Titolo principale della sezione profilo (h2#profileSectionTitle)
+    > h2#profileSectionTitle {
+        font-size: 1.8em; 
+        color: var(--heading-color);
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color-primary);
+    }
+    
+    // Stile base per gli H3 diretti figli di #profile o dentro i suoi contenitori principali
+    h3 { 
+        margin-top: 0; 
+        margin-bottom: 15px;
+        font-size: 1.4em; 
+        color: var(--heading-color);
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color-secondary);
+    }
 }
-section#profile h3 {
-    margin-top: 30px;
-    font-size: 1.5em; /* Eredita da main h2 */
+
+// Contenitore per i contenuti specifici del profilo (dettagli, bio, stato, link)
+// Assumendo che questo ID esista o che tu abbia un wrapper simile
+#profileContentContainer, // Se usi il wrapper che ti ho mostrato nell'HTML
+#profileContent { // Fallback se #profileContent è ancora il contenitore diretto
+    width: 100%; // Assicura che occupi tutta la larghezza disponibile
+    
+    // Assicura che i figli diretti (es. .profile-main-details-container, .profile-input-box) siano blocchi
+    > div, 
+    > section { // Si applica a .profile-main-details-container, .profile-input-box
+        width: 100%;
+        margin-bottom: 25px; // Spazio tra questi blocchi interni
+         &:last-child {
+            margin-bottom: 0;
+        }
+    }
 }
-#profileDetailsDisplay p {
-    margin-bottom: 10px;
-    font-size: 1.05em;
+
+
+// Contenitore dei dettagli principali (avatar, info testuali)
+.profile-main-details-container {
+    display: flex;
+    align-items: flex-start; 
+    flex-wrap: wrap; // Permette di andare a capo su schermi piccoli
+    gap: 25px; 
+    // margin-bottom: 30px; // Spazio gestito dal genitore #profileContent > div
+    
+    .profile-avatar-column {
+        flex-basis: 130px; 
+        flex-shrink: 0;
+        text-align: center; 
+
+        #profileAvatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            image-rendering: pixelated; 
+            background-color: var(--surface-bg-secondary); 
+            border: 2px solid var(--border-color-secondary);
+            object-fit: cover;
+            margin: 0 auto 10px auto; 
+        }
+
+        #avatarUploadSection { 
+            margin-top: 10px; 
+            .game-button.small { 
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+        }
+    }
+
+    #profileDetailsDisplay {
+        flex-grow: 1;
+        min-width: 250px; 
+
+        h3 { // Titolo "Dettagli Utente"
+            margin-bottom: 12px;
+            font-size: 1.2em; 
+            border-bottom: none; 
+            padding-bottom: 0;
+            color: var(--text-color-primary); 
+        }
+
+        p {
+            margin-bottom: 10px;
+            font-size: 1em; 
+            strong {
+                color: var(--text-color-primary);
+                font-weight: 600; 
+            }
+        }
+    }
 }
-#profileDetailsDisplay strong {
-    color: var(--text-color-primary);
-}
-#profileUpdateForm div {
-    margin-bottom: 20px;
-}
-#profileUpdateForm label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: var(--text-color-primary);
-}
-#profileUpdateForm input[type='text'] {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color-primary);
-    border-radius: 4px;
-    background-color: var(--bg-color);
-    color: var(--text-color-primary);
-    font-size: 1em;
-}
-#profileUpdateForm input[type='text']:focus {
-    outline: none;
-    border-color: var(--link-color);
-    box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25);
-}
-#profileUpdateForm button[type='submit'].game-button {
-    display: block;
-    width: 100%;
-    margin-top: 10px;
-}
-#profileMessage {
-    text-align: center;
-    font-weight: bold;
-    margin-top: 20px;
-}
-#profileAvatar {
-    image-rendering: pixelated;
-}
+
 #profileNationality .fi {
     display: inline-block;
     width: 1.33333333em;
@@ -60,346 +123,24 @@ section#profile h3 {
     background-repeat: no-repeat;
 }
 
-/* Stili per la sezione "I Miei Articoli" in profile.html */
-#myArticlesSection {
-    background-color: var(--surface-bg-primary);
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 30px; /* Spazio dalla sezione profilo */
-    border: 1px solid var(--border-color-secondary);
-}
-
-#myArticlesSection h2 {
-    color: var(--heading-color);
-    border-bottom: 1px solid var(--border-color-primary);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
-
-#myArticlesSection h3 {
-    /* Per i titoli delle sottosezioni (Bozze, In Revisione, etc.) */
-    color: var(--heading-color);
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-size: 1.3em;
-}
-#myArticlesSection #myArticlesTabs h3 {
-    /* Stile specifico per il titolo "Le Mie Bozze" dentro i tabs */
-    margin-top: 0;
-    font-size: 1.2em; /* Leggermente più piccolo se dentro i tabs */
-}
-
-.my-article-item {
-    background-color: var(--surface-bg-secondary);
-    padding: 15px;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    border: 1px solid var(--border-color-primary);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* Stili specifici per lo stato dell'articolo (puoi personalizzarli) */
-.my-article-status-draft {
-    font-style: italic;
-    color: var(--text-color-muted);
-    background-color: var(--surface-bg-primary); /* Leggero bg diverso */
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px dashed var(--text-color-muted);
-    display: inline-block; /* Per far funzionare padding/margin correttamente */
-    margin-left: 5px;
-}
-.my-article-status-pendingReview {
-    font-style: italic;
-    color: #ffa000; /* Arancione */
-    background-color: rgba(255, 160, 0, 0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px dashed #ffa000;
-    display: inline-block;
-    margin-left: 5px;
-}
-.my-article-status-published {
-    color: #388e3c; /* Verde */
-    background-color: rgba(56, 142, 60, 0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px dashed #388e3c;
-    display: inline-block;
-    margin-left: 5px;
-}
-.my-article-status-rejected {
-    color: #d32f2f; /* Rosso */
-    background-color: rgba(211, 47, 47, 0.1);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px dashed #d32f2f;
-    display: inline-block;
-    margin-left: 5px;
-}
-
-.my-article-rejection-reason {
-    /* Per il motivo del rifiuto */
-    font-size: 0.85em;
-    color: var(--text-color-muted);
-    padding: 8px;
-    background-color: var(--bg-color); /* Sfondo leggermente diverso */
-    border-left: 3px solid var(--link-color);
-    margin-top: 8px;
-    border-radius: 0 4px 4px 0;
-}
-
-/* Stili per la Griglia e le Card degli Articoli dell'Utente in profile.html */
-.my-articles-grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Crea colonne responsive */
-    gap: 20px; /* Spazio tra le card */
-    padding-top: 10px;
-}
-
-.my-article-profile-card {
-    background-color: var(--surface-bg-secondary); /* Leggermente diverso dalle card principali */
-    border: 1px solid var(--border-color-primary);
-    border-radius: 8px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Spinge le azioni in basso */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
-    transition:
-        transform 0.2s ease-out,
-        box-shadow 0.2s ease-out;
-}
-
-.my-article-profile-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.my-article-card-title {
-    font-size: 1.15em;
-    color: var(--heading-color);
-    margin-top: 0;
-    margin-bottom: 8px;
-    word-break: break-word; /* Per titoli lunghi */
-}
-
-.my-article-card-meta {
-    font-size: 0.8em;
-    color: var(--text-color-muted);
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column; /* Stato e data uno sotto l'altro */
-    gap: 4px;
-}
-
-.my-article-card-status {
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.9em;
-    display: inline-block; /* Per far funzionare padding */
-    margin-bottom: 4px; /* Spazio se data è sotto */
-    text-align: center;
-}
-
-.my-article-item strong {
-    color: var(--text-color-primary);
-    font-size: 1.1em;
-}
-
-.my-article-item small {
-    color: var(--text-color-muted);
-    font-size: 0.9em;
-    display: block; /* Per far andare a capo la data */
-}
-
-.my-article-status-draft {
-    font-style: italic;
-    color: var(--text-color-muted);
-}
-/* Aggiungi qui classi per .my-article-status-pending, .my-article-status-published, .my-article-status-rejected se necessario */
-
-.my-article-actions {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap; /* Permetti ai bottoni di andare a capo */
-}
-
-.my-article-button,
-.my-article-button-delete {
-    padding: 8px 15px;
-    font-size: 0.9em;
-    text-decoration: none; /* Per i link stilizzati come bottoni */
-}
-
-.my-article-button-delete {
-    background-color: #dc3545; /* Rosso per eliminare */
-    border-color: #dc3545;
-    color: white;
-}
-.my-article-button-delete:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
-}
-
-#myDraftsLoadingMessage,
-#myPendingLoadingMessage,
-#myPublishedLoadingMessage,
-#myRejectedLoadingMessage {
-    /* Stili per i messaggi di caricamento */
-    color: var(--text-color-muted);
-    font-style: italic;
-}
-
-.my-articles-subsection {
-    /* Nuovo contenitore per ogni stato */
-    margin-bottom: 25px;
-}
-
-.my-articles-subsection h3 {
-    color: var(--heading-color);
-    border-bottom: 1px solid var(--border-color-secondary);
-    padding-bottom: 8px;
-    margin-bottom: 15px;
-    font-size: 1.3em;
-}
-
-.my-articles-grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Crea colonne responsive */
-    gap: 20px; /* Spazio tra le card */
-    padding-top: 10px;
-}
-
-.my-article-profile-card {
-    background-color: var(--surface-bg-secondary); /* Leggermente diverso dalle card principali */
-    border: 1px solid var(--border-color-primary);
-    border-radius: 8px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Spinge le azioni in basso */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
-    transition:
-        transform 0.2s ease-out,
-        box-shadow 0.2s ease-out;
-}
-
-.my-article-profile-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.my-article-card-title {
-    font-size: 1.15em;
-    color: var(--heading-color);
-    margin-top: 0;
-    margin-bottom: 8px;
-    word-break: break-word; /* Per titoli lunghi */
-}
-
-.my-article-card-meta {
-    font-size: 0.8em;
-    color: var(--text-color-muted);
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column; /* Stato e data uno sotto l'altro */
-    gap: 4px;
-}
-
-.my-article-card-status {
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.9em;
-    display: inline-block; /* Per far funzionare padding */
-    margin-bottom: 4px; /* Spazio se data è sotto */
-    text-align: center;
-}
-
-/* Stili specifici per status (riutilizza quelli già definiti se possibile) */
-.status-draft {
-    background-color: var(--surface-bg-primary);
-    border: 1px dashed var(--text-color-muted);
-    color: var(--text-color-muted);
-}
-.status-pendingReview {
-    background-color: rgba(255, 160, 0, 0.1);
-    border: 1px dashed #ffa000;
-    color: #ffa000;
-}
-.status-published {
-    background-color: rgba(56, 142, 60, 0.1);
-    border: 1px dashed #388e3c;
-    color: #388e3c;
-}
-.status-rejected {
-    background-color: rgba(211, 47, 47, 0.1);
-    border: 1px dashed #d32f2f;
-    color: #d32f2f;
-}
-.status-unknown {
-    background-color: var(--text-color-muted);
-    color: var(--button-text-primary);
-}
-
-.my-article-card-rejection-reason {
-    font-size: 0.85em;
-    color: var(--text-color-primary); /* Più leggibile del muted per il motivo */
-    background-color: var(--bg-color);
-    padding: 8px;
-    border-left: 3px solid var(--link-color); /* Usa un colore tema per evidenziare */
-    margin-top: 8px;
-    margin-bottom: 8px;
-    border-radius: 0 4px 4px 0;
-    font-style: italic;
-}
-
-.my-article-card-snippet {
-    /* Se decidi di aggiungerlo */
-    font-size: 0.9em;
-    color: var(--text-color-secondary);
-    margin-bottom: 12px;
-    flex-grow: 1; /* Se vuoi che occupi spazio */
-}
-
-.my-article-card-actions {
-    margin-top: auto; /* Spinge le azioni in fondo alla card */
-    padding-top: 10px; /* Spazio sopra i bottoni */
-    border-top: 1px solid var(--border-color-primary); /* Separatore opzionale */
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap; /* Bottoni a capo se non c'è spazio */
-    justify-content: flex-end; /* Allinea bottoni a destra */
-}
-
-.my-article-action-button {
-    /* Stile per i bottoni dentro la card */
-    padding: 6px 12px;
-    font-size: 0.85em;
-}
-.my-article-action-button.delete {
-    background-color: #dc3545;
-    border-color: #dc3545;
-    color: white;
-}
-.my-article-action-button.delete:hover {
-    background-color: #c82333;
-    border-color: #bd2130;
-}
-
-/* ===== Stili Unificati e Responsivi per Sezioni Input Profilo (Status, Bio, etc.) ===== */
-
+/* Stili Unificati e Responsivi per Sezioni Input Profilo (Status, Bio, Link, etc.) */
 .profile-input-box {
-    h3 {
+    // margin-bottom: 25px; // Spazio gestito da #profileContent > div o section#profile > div
+    padding: 20px;
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-secondary);
+    border-radius: 8px;
+    width: 100%; // Assicura che occupi tutta la larghezza
+    box-sizing: border-box; // Importante se usi padding e width 100%
+
+    h3 { // Titoli interni ai box (Mini-Bio, Stato d'Animo, Link Esterni)
+        margin-top:0; // Sovrascrive l'h3 generale di section#profile se necessario
         margin-bottom: 15px;
+        font-size: 1.2em; 
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color-light);
     }
 
-    // Stile per i display (dove appaiono bio e status attuali)
     #bioDisplay,
     #statusMessageDisplay {
         white-space: pre-wrap;
@@ -412,18 +153,20 @@ section#profile h3 {
         margin-bottom: 15px;
         color: var(--text-color-secondary);
         font-style: italic;
+
+        &:has(p) { 
+            padding: 0;
+            border: none;
+            background-color: transparent;
+            min-height: auto;
+            font-style: normal; 
+             p {
+                color: var(--text-color-muted); 
+             }
+        }
     }
 
-    #bioDisplay:has(p),
-    #statusMessageDisplay:has(p) {
-        padding: 0;
-        border: none;
-        background-color: transparent;
-        min-height: auto;
-    }
-
-    // Stile per i campi di testo (input e textarea)
-    .input-field {
+    .input-field { // Si applica sia a input[type=text] che a textarea
         width: 100%;
         padding: 12px;
         border: 1px solid var(--input-border-color, var(--border-color-primary));
@@ -433,7 +176,9 @@ section#profile h3 {
         font-family: inherit;
         font-size: 1em;
         transition: border-color 0.2s, box-shadow 0.2s;
-        resize: vertical;
+        resize: vertical; // Per textarea
+        margin-bottom: 10px; 
+        box-sizing: border-box;
 
         &:focus {
             outline: none;
@@ -445,33 +190,43 @@ section#profile h3 {
             color: var(--text-color-muted);
         }
     }
-
-    // Flex container per allineare campo e bottone (usato per lo Status)
-    #updateStatusForm .input-action-container {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-
-        .input-field {
-            flex-grow: 1;
+    
+    // Layout per il form dello Stato d'Animo
+    #updateStatusForm {
+        .input-action-container { // Questo div non è più strettamente necessario se impiliamo di default
+            // Se vuoi ancora il div per raggruppare input e bottone semanticamente:
+            // display: flex; // Rimosso per impilare
+            // flex-direction: column; 
+            // align-items: stretch;   
+            // gap: 10px;
         }
-        .game-button {
-            flex-shrink: 0; // Evita che il bottone si restringa
+        // L'input field prenderà stile da .input-field
+        // #statusMessageInput { margin-bottom: 10px; // Spazio prima del bottone }
+
+        .game-button { // Bottone "Aggiorna" per lo stato
+             width: 100%; 
+             margin-top: 0; // Se l'input ha già margin-bottom
         }
+         .form-actions { // Contenitore per il messaggio di update
+            justify-content: center; 
+            min-height: 1.5em; 
+            margin-top: 10px; // Spazio sopra il messaggio
+         }
     }
 
-    // Contenitore per le azioni del form (pulsante e messaggi)
-    .form-actions {
-        margin-top: 10px;
+    .form-actions { // Stile generale per i contenitori di azioni dei form
+        margin-top: 15px; 
         display: flex;
-        justify-content: flex-end; // Allinea a destra
+        justify-content: flex-end;
         align-items: center;
         gap: 15px;
     }
 
-    // Specifico per la Bio per avere il counter a sx e bottone a dx
-    #updateBioForm .form-actions {
+    #updateBioForm .form-actions { // Specifico per la Bio
         justify-content: space-between;
+         .game-button { 
+            min-width: 120px; 
+         }
     }
 
     #bioCharCount {
@@ -483,47 +238,233 @@ section#profile h3 {
         font-size: 0.9em;
         color: var(--text-color-muted);
         font-style: italic;
+        flex-grow: 1; 
     }
 
-    // ===============================================
-    // ======= MEDIA QUERY PER LA RESPONSIVITA' ========
-    // ===============================================
     @media (max-width: 768px) {
-        // Status form: impila input e bottone
-        #updateStatusForm .input-action-container {
-            flex-direction: column;
-            align-items: stretch; // Fa sì che entrambi occupino tutta la larghezza
+        // Il form dello stato è già impilato di default ora.
 
-            .game-button {
-                width: 100%; // Bottone a larghezza piena
-            }
-        }
-
-        // Bio form: impila messaggi e bottone
         #updateBioForm .form-actions {
-            flex-direction: column;
+            flex-direction: column-reverse; 
             align-items: stretch;
             gap: 12px;
 
-            // Inverti l'ordine per avere il bottone per ultimo
-            flex-direction: column-reverse; 
-            
             .game-button {
                 width: 100%;
             }
-
             #bioCharCount {
-                text-align: center; // Centra il contatore caratteri
+                text-align: center;
             }
         }
     }
 }
 
-/* NUOVI STILI PER LINK ESTERNI */
+/* Stili per la Sezione Riconoscimenti (badgesSection) */
+#badgesSection {
+    // max-width, margin-left/right, padding-left/right sono ereditati da section#profile
+    // border-bottom e padding-bottom sono gestiti da section#profile > div
+    // margin-bottom è gestito da section#profile > div
+
+    h3 { // Titolo "Riconoscimenti Ottenuti"
+        font-size: 1.2em; 
+        border-bottom: none; 
+        padding-bottom: 0;
+        margin-bottom: 15px; 
+    }
+}
+
+#badgesDisplayContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-start; 
+}
+
+.badge-icon-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-secondary);
+    cursor: pointer;
+    transition:
+        transform 0.2s ease-out,
+        box-shadow 0.2s ease-out;
+    min-width: 48px;
+    min-height: 48px;
+    box-sizing: border-box;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .material-symbols-rounded {
+        font-size: 2em;
+        line-height: 1;
+    }
+
+    & .author-rookie-icon-animated { // Specifico per l'icona dentro .badge-icon-item
+        animation: soft-color-pulse 3s infinite ease-in-out;
+    }
+}
+
+@keyframes soft-color-pulse {
+    0%,
+    100% { color: var(--bs-teal); } // Colore come da palette originale per 'author-rookie'
+    50% { color: #66d9b8; } // Tonalità più chiara per l'effetto pulse
+}
+
+/* Stili per la sezione "I Miei Articoli" */
+#myArticlesSection {
+    background-color: transparent; 
+    padding: 0; 
+    border: none; 
+    margin-top: 0; 
+    
+    h3 { // Titolo "I Miei Articoli" (prima era h2)
+        // Stili già definiti in section#profile h3, ma puoi sovrascrivere se necessario
+        font-size: 1.3em; 
+        margin-bottom: 20px; // Spazio prima delle sottosezioni di articoli
+    }
+
+    .my-articles-subsection {
+        margin-bottom: 25px;
+        
+        .my-articles-subsection-title { // Titoli h4 per Bozze, In Revisione etc.
+            color: var(--heading-color-secondary, var(--text-color-primary));
+            margin-top: 20px; 
+            margin-bottom: 10px;
+            font-size: 1.1em; 
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color-light);
+        }
+    }
+}
+
+.my-articles-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding-top: 10px;
+}
+
+.my-article-profile-card {
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.my-article-card-title {
+    font-size: 1.15em;
+    color: var(--heading-color);
+    margin-top: 0;
+    margin-bottom: 8px;
+    word-break: break-word;
+}
+
+.my-article-card-meta {
+    font-size: 0.8em;
+    color: var(--text-color-muted);
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.my-article-card-status {
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 4px;
+    text-align: center;
+
+    // Classi specifiche per status
+    &.status-draft {
+        background-color: var(--surface-bg-primary);
+        border: 1px dashed var(--text-color-muted);
+        color: var(--text-color-muted);
+        font-style: italic;
+    }
+    &.status-pendingReview {
+        background-color: rgba(255, 160, 0, 0.1);
+        border: 1px dashed #ffa000;
+        color: #ffa000;
+        font-style: italic;
+    }
+    &.status-published {
+        background-color: rgba(56, 142, 60, 0.1);
+        border: 1px dashed #388e3c;
+        color: #388e3c;
+    }
+    &.status-rejected {
+        background-color: rgba(211, 47, 47, 0.1);
+        border: 1px dashed #d32f2f;
+        color: #d32f2f;
+    }
+    &.status-unknown {
+        background-color: var(--text-color-muted);
+        color: var(--button-text-primary);
+    }
+}
+
+.my-article-card-rejection-reason {
+    font-size: 0.85em;
+    color: var(--text-color-primary); 
+    background-color: var(--bg-color);
+    padding: 8px;
+    border-left: 3px solid var(--link-color); 
+    margin-top: 8px;
+    margin-bottom: 8px;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+}
+
+.my-article-card-actions {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color-primary);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.my-article-action-button {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    // Assicurati che erediti da .game-button o abbia stili base simili
+    &.delete {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        &:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+    }
+}
+
+/* Stili per Link Esterni (dentro .profile-input-box) */
 #externalLinksSection {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px dashed var(--border-color-secondary);
+    // Non servono più stili specifici di margine/padding/bordo qui
+    // perché .profile-input-box li gestisce
+    h3 { /* Già stilizzato da .profile-input-box h3 */ }
 }
 .external-links-list {
     list-style: none;
@@ -538,21 +479,21 @@ section#profile h3 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* Per responsività */
+    flex-wrap: wrap; 
 }
 .external-links-list .link-display a {
     font-weight: 500;
     color: var(--link-color);
     text-decoration: none;
-}
-.external-links-list .link-display a:hover {
-    text-decoration: underline;
+    &:hover {
+        text-decoration: underline;
+    }
 }
 .external-links-list .link-url {
     font-size: 0.85em;
     color: var(--text-color-muted);
     margin-left: 10px;
-    word-break: break-all; /* Per URL lunghi */
+    word-break: break-all; 
 }
 .external-links-list .link-actions button {
     margin-left: 8px;
@@ -565,245 +506,45 @@ section#profile h3 {
     border-radius: 6px;
     margin-top: 15px;
     border: 1px solid var(--border-color-primary);
+    div { margin-bottom: 10px; }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    input[type='text'],
+    input[type='url'] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--border-color-primary);
+        border-radius: 4px;
+        box-sizing: border-box; // Aggiunto per coerenza con .input-field
+    }
 }
-#externalLinkFormContainer div {
-    margin-bottom: 10px;
-}
-#externalLinkFormContainer label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-}
-#externalLinkFormContainer input[type='text'],
-#externalLinkFormContainer input[type='url'] {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid var(--border-color-primary);
-    border-radius: 4px;
-}
-#externalLinkError {
-    color: red;
-    font-size: 0.9em;
-    margin-top: 5px;
-}
-.form-actions-links {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-}
+#externalLinkError { color: red; font-size: 0.9em; margin-top: 5px; }
+.form-actions-links { margin-top: 10px; display: flex; gap: 10px; }
 
-/* NUOVI STILI PER LA SEZIONE CONDIVISIONE */
-#articleShareSection {
-    margin-top: 20px;
-    margin-bottom: 30px;
-    padding: 15px;
-    background-color: var(--surface-bg-secondary);
-    border-radius: 6px;
-    text-align: center; /* Centra i pulsanti se sono inline-block */
-}
-#articleShareSection h4 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: var(--heading-color);
-}
-.share-buttons-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center; /* Centra i pulsanti nel contenitore flex */
-}
-.share-button {
-    padding: 8px 15px;
-    font-size: 0.9em;
-    border-radius: 20px; /* Pulsanti più arrotondati */
-    text-decoration: none;
-    display: inline-flex; /* Per allineare icona e testo se presenti */
-    align-items: center;
-    gap: 6px;
-    transition:
-        background-color 0.2s,
-        color 0.2s;
-}
-/* Stile base per i bottoni social, poi specifico per ognuno */
-.share-button.social-x {
-    background-color: #1da1f2;
-    color: white;
-}
-.share-button.social-x:hover {
-    background-color: #0c85d0;
-}
-.share-button.social-facebook {
-    background-color: #1877f2;
-    color: white;
-}
-.share-button.social-facebook:hover {
-    background-color: #125db0;
-}
-.share-button.social-linkedin {
-    background-color: #0a66c2;
-    color: white;
-}
-.share-button.social-linkedin:hover {
-    background-color: #084d94;
-}
-.share-button.social-whatsapp {
-    background-color: #25d366;
-    color: white;
-}
-.share-button.social-whatsapp:hover {
-    background-color: #1da851;
-}
-.share-button.social-email {
-    background-color: #7f8c8d;
-    color: white;
-} /* Grigio per email */
-.share-button.social-email:hover {
-    background-color: #606c6d;
-}
 
-.share-button.copy-link-btn {
-    background-color: var(--button-bg-primary);
-    color: var(--button-text-primary);
-}
-.share-button.copy-link-btn:hover {
-    background-color: var(--button-hover-bg-primary);
-}
+// Stili obsoleti o ridondanti da #profileUpdateForm (commentati o rimossi)
+// #profileUpdateForm div { /* ... */ }
+// #profileUpdateForm label { /* ... */ }
+// #profileUpdateForm input[type='text'] { /* ... */ }
+// #profileUpdateForm button[type='submit'].game-button { /* ... */ }
 
-.share-button.native-share-btn {
-    background-color: var(--link-color); /* Colore distintivo per il native share */
-    color: white;
+#profileMessage { 
+    text-align: center;
     font-weight: bold;
-}
-.share-button.native-share-btn:hover {
-    background-color: var(--link-hover-color);
-}
-/* Potresti voler aggiungere SVG o icone font qui */
-.share-button svg,
-.share-button i {
-    margin-right: 5px;
+    margin-top: 20px;
 }
 
-#badgesSection h3 {
-    /* Stile per il titolo della sezione badge */
-    /* margin-bottom: 15px; è già nel tuo HTML inline */
-}
 
-#badgesDisplayContainer {
-    /* display: flex; flex-wrap: wrap; gap: 15px; è già nel tuo HTML inline */
-    /* Potresti aggiungere padding o altro se necessario */
-}
-
-.badge-item {
-    /* Stili base per ogni badge, alcuni sono già inline nel JS per flessibilità,
-       ma potresti volerli centralizzare qui */
-    transition: transform 0.2s ease-out;
-    cursor: help; /* Indica che c'è un tooltip */
-    /* text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Leggera ombra per il testo */
-}
-
-.badge-item:hover {
-    transform: translateY(-2px);
-    /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */
-}
-
-.badge-item .material-symbols-rounded {
-    font-size: 1.4em; /* Dimensione dell'icona del badge */
-    margin-right: 8px; /* Spazio tra icona e nome badge, già gestito da 'gap' nel JS */
-    vertical-align: middle; /* Buon allineamento se non usi flex */
-}
-
-/* La classe .testo-neon-arcade è già definita e dovrebbe applicare l'effetto neon */
-/* Se vuoi un effetto specifico solo per le icone badge neon: */
-/*
-.badge-item .material-symbols-rounded.neon-badge-icon {
-    animation: cambio-colore-neon 2s infinite steps(1, end);
-    text-shadow: 0 0 3px rgba(255,255,255,0.5), 0 0 6px currentColor; // Esempio ombra neon
-}
-*/
-
-#noBadgesMessage {
-    /* font-style: italic; */
-    /* color: var(--text-color-muted); è già inline nel JS */
-}
-
-/* Stili per la sezione Riconoscimenti/Badge */
-#badgesSection {
-    max-width: 600px; // La stessa max-width della sezione profilo
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-#badgesDisplayContainer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px; /* Spazio tra le icone dei badge */
-    justify-content: flex-start; /* O 'center' se preferisci */
-    margin-top: 10px;
-}
-
-.badge-icon-item {
-    /* Contenitore per la singola icona badge cliccabile */
-    display: inline-flex; /* Per allineare l'icona se avesse testo (ma non ne avrà) */
-    align-items: center;
-    justify-content: center;
-    padding: 8px; /* Padding attorno all'icona */
-    border-radius: 50%; /* Rende il contenitore circolare */
-    background-color: var(--surface-bg-secondary);
-    border: 1px solid var(--border-color-secondary);
-    cursor: pointer;
-    transition:
-        transform 0.2s ease-out,
-        box-shadow 0.2s ease-out;
-    min-width: 48px; /* Dimensione minima per il cerchio */
-    min-height: 48px;
-    box-sizing: border-box;
-}
-
-.badge-icon-item:hover {
-    transform: scale(1.1);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-}
-
-.badge-icon-item .material-symbols-rounded {
-    font-size: 2em; /* Dimensione dell'icona del badge */
-    line-height: 1; /* Per un buon allineamento verticale */
-    /* Il colore sarà impostato da BADGE_DEFINITIONS via JS o da classi specifiche */
-}
-
-/* Animazione per badge "Autore Debuttante" (es. un soft pulse o cambio colore) */
-.badge-icon-item .material-symbols-rounded.author-rookie-icon-animated {
-    /* Esempio: animazione di cambio colore "soft" */
-    animation: soft-color-pulse 3s infinite ease-in-out;
-    /* Oppure potresti usare un'altra animazione neon ma con colori diversi */
-}
-
-@keyframes soft-color-pulse {
-    0%,
-    100% {
-        color: var(--bs-success); /* Colore base del badge */
-    }
-    50% {
-        color: #a3e4a3; /* Una tonalità leggermente diversa e più chiara del verde */
-    }
-}
-
-/* La classe .testo-neon-arcade è già definita e si applicherà
-   all'icona Glitchzilla Slayer se specificato in BADGE_DEFINITIONS */
-
-/* Stili per la Modale Dettagli Badge */
+/* Stili Modali (non modificati qui, ma assicurati che siano corretti) */
 .badge-detail-modal-content {
-    /* Puoi personalizzare ulteriormente lo stile della modale qui se necessario */
     padding: 25px;
 }
-
 #badgeDetailModalIcon.testo-neon-arcade {
-    /* Per applicare il neon anche all'icona grande nella modale */
-    /* Gli stili neon sono già in .testo-neon-arcade */
+    // Se vuoi animazioni neon specifiche per la modale, aggiungile qui
 }
-
-/* Stili per i bottoni della modale di conferma Avatar */
 .button-modal-confirm,
 .button-modal-cancel {
     display: inline-flex;
@@ -819,21 +560,19 @@ section#profile h3 {
     transition: all 0.2s ease-out;
     color: white;
 }
-
 .button-modal-confirm {
-    background-color: #28a745; // Verde Successo
+    background-color: #28a745; 
+    &:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 }
-.button-modal-confirm:hover {
-    background-color: #218838;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 .button-modal-cancel {
-    background-color: #6c757d; // Grigio secondario
-}
-.button-modal-cancel:hover {
-    background-color: #5a6268;
+    background-color: #6c757d; 
+    &:hover {
+        background-color: #5a6268;
+    }
 }
 
 

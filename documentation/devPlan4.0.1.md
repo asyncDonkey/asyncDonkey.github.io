@@ -1,10 +1,10 @@
-# DEVELOPMENT PLAN (v4.0.6 - Sessione Athena Vittoriosa!) 🚀
+# DEVELOPMENT PLAN (v4.0.8 - Sessione Athena - Layout Profilo Completato) 🚀
 
-**Data Ultimo Aggiornamento:** 24 Maggio 2025 (Athena Update - Fine Sessione Epica!)
+**Data Ultimo Aggiornamento:** 24 Maggio 2025 (Athena Update - Fine Sessione)
 **Visione Progetto:** Consolidare e stabilizzare la piattaforma esistente, migliorando la documentazione, la sicurezza, l'UX e risolvendo il debito tecnico. Le funzionalità attuali, come Donkey Runner e il sistema di articoli, saranno mantenute e ottimizzate, con un focus sul miglioramento dell'esperienza utente per le notifiche e la pagina profilo.
 
 **Stato Generale del Progetto:**
-La sessione odierna è stata una vera e propria impresa eroica! Abbiamo affrontato e **definitivamente RISOLTO** il temibile `BUG-PROF-AVATAR-BTN-001`, che affliggeva la visibilità del pulsante di conferma per l'upload dell'avatar. La vittoria è stata ottenuta tramite un refactoring intelligente dell'interfaccia utente, che ora prevede una **modale di conferma dedicata**, più robusta e immune ai conflitti CSS che ci hanno dato del filo da torcere. Con questo macigno tolto, la strada è spianata per le prossime rifiniture sulla pagina profilo!
+Sessione estremamente produttiva! Abbiamo affrontato con successo i problemi rimanenti sulla pagina profilo. La visualizzazione dei **Riconoscimenti (badge)** sui profili pubblici (`PROF.1.3`) è stata **RISOLTA** correggendo la Cloud Function `userPublicProfileSync.js` per sincronizzare correttamente il campo `earnedBadges` e la logica client in `profile.js` per visualizzarli. Successivamente, abbiamo **COMPLETATO** il task `PROF.1.4` rivedendo e migliorando significativamente il **layout generale di `profile.html`** e gli stili associati in `scss/_profile.scss`. Questa riorganizzazione ha portato a una struttura più semantica e a una migliore presentazione visiva, risolvendo anche alcuni problemi di visualizzazione dei dettagli utente (nickname, nazionalità) che erano emersi sui profili pubblici. La pagina profilo ora è molto più robusta e coerente.
 
 **Legenda Stati:**
 
@@ -46,7 +46,7 @@ La sessione odierna è stata una vera e propria impresa eroica! Abbiamo affronta
 **Task ANALYSIS-001.4 Follow-up (Priorità CRITICA): Implementare le raccomandazioni dell'analisi firestore.rules.**
 
 - ✅ **ANALYSIS-001.4.1 / SEC-RULE-001:** Revisionare e restringere l'accesso in lettura a `/userProfiles/{userId}`.
-    - `[x]` (Tutti i sub-task completati)
+  - `[x]` (Tutti i sub-task completati)
 - ⚠️ **ANALYSIS-001.4.2 / SEC-RULE-002:** Implementare validazione completa per `externalLinks` negli aggiornamenti del profilo utente. (ON HOLD / DECISIONE PRESA)
 - ➡️ **ANALYSIS-001.4.3 / SEC-RULE-003:** Mettere in sicurezza meccanismo `commentCount`. (OBSOLETO)
 - ➡️ **ANALYSIS-001.4.4 / SEC-RULE-004:** Reintrodurre validazione chiavi `userIssues`. (OBSOLETO)
@@ -154,16 +154,14 @@ La sessione odierna è stata una vera e propria impresa eroica! Abbiamo affronta
 - `[ ]` Proporre e implementare miglioramenti per leggibilità, spaziatura, e coerenza visiva.
 - `[ ]` Testare su diverse risoluzioni.
 
-🆕 ✨ **Task PROF-STYLE.1: Rendere quadrati i contenitori avatar (Priorità MEDIA)**
-
+➡️ ✨ **Task PROF-STYLE.1: Rendere quadrati i contenitori avatar (Priorità MEDIA)** (OBSOLETO - Decisione utente del 24/05/2025)
 - `[ ]` **PROF-STYLE.1.1:** Rendere quadrato il contenitore dell'immagine per l'upload in `profile.html` (`#avatarPreview` e il suo contenitore `div` genitore nella modale).
 - `[ ]` **PROF-STYLE.1.2:** Rendere quadrato il visualizzatore dell'avatar nell'header globale (`#headerUserAvatar`).
 - `[ ]` **PROF-STYLE.1.3:** Valutare e applicare stile quadrato avatar anche in `view-article.html` per l'autore.
 
-🆕 ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo (Priorità MEDIA)**
-
-- `[ ]` **PROF-STYLE.2.1:** Rivedere e migliorare CSS per la box di sottomissione della Mini-Bio (`#updateBioForm` e `#bioInput`) in `profile.html`.
-- `[ ]` **PROF-STYLE.2.2:** Rivedere e migliorare CSS per la box di sottomissione dello Stato d'Animo (`#updateStatusForm` e `#statusMessageInput`) in `profile.html`.
+✅ ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo (Priorità MEDIA)**
+    - `[x]` **PROF-STYLE.2.1:** Riveduto e migliorato CSS per la box di sottomissione della Mini-Bio (`#updateBioForm` e `#bioInput`) in `profile.html`. Include stile responsivo.
+    - `[x]` **PROF-STYLE.2.2:** Riveduto e migliorato CSS per la box di sottomissione dello Stato d'Animo (`#updateStatusForm` e `#statusMessageInput`) in `profile.html`. Include stile responsivo.
 
 ---
 
@@ -193,11 +191,21 @@ La sessione odierna è stata una vera e propria impresa eroica! Abbiamo affronta
 **Task PROF.1: Risoluzione Problemi e Miglioramenti Pagina Profilo (`profile.html`)**
 
 - ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** Il campo per aggiornare lo "Stato d'Animo" non compare su mobile. (RISOLTO dall'utente con fix all'header)
-- `[ ]` **PROF.1.2 (Layout Riconoscimenti - Desktop & Mobile):** (Priorità MEDIA)
-    - `[ ]` Correggere allineamento attuale dei badge (spostati a destra).
-    - `[ ]` Valutare/implementare sezione dedicata per i badge (es. griglia di card) per migliore presentazione.
-- `[ ]` **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** La sezione dei riconoscimenti (badge) non è visibile quando si visualizza il profilo di un altro utente. (Priorità MEDIA)
-- `[ ]` **PROF.1.4 (Layout Generale Pagina Profilo):** Rivedere il layout generale di `profile.html` per migliorare organizzazione e presentazione. (Priorità MEDIA)
+- `[P]` **PROF.1.2 (Layout Riconoscimenti - Desktop & Mobile):** (Priorità MEDIA)
+    - ✅ **PROF.1.2.A:** Corretto allineamento sezione badge (`#badgesSection`) per centrarsi nella pagina, in linea con `#profile`. (Effettuato tramite aggiunta di `max-width` e `margin: auto` a `#badgesSection` in `scss/_profile.scss`).
+    - `[ ]` **PROF.1.2.B:** Valutare/implementare sezione dedicata per i badge (es. griglia di card) per migliore presentazione (se l'attuale visualizzazione solo icone non è sufficiente). (*Decisione Utente 24/05/2025: Per ora va bene così, rimane più pulito*).
+- ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** La sezione dei riconoscimenti (badge) non è visibile quando si visualizza il profilo di un altro utente. **RISOLTO**
+    - `[x]` Modificata Cloud Function `userPublicProfileSync.js` per includere `earnedBadges` nella sincronizzazione.
+    - `[x]` Modificato `js/profile.js` (`updateProfilePageUI`) per visualizzare correttamente la sezione badge sui profili pubblici.
+    - `[x]` Verificato corretto deploy della Cloud Function.
+- ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** Rivedere il layout generale di `profile.html` per migliorare organizzazione e presentazione. **COMPLETATO**
+    - `[x]` Ristrutturato HTML di `profile.html` per raggruppare semanticamente tutte le sezioni del profilo (Riconoscimenti e Articoli inclusi in `<section id="profile">`).
+    - `[x]` Spostata la sezione Riconoscimenti (`badgesSection`) in alto, subito dopo il titolo principale.
+    - `[x]` Uniformata la gerarchia dei titoli (h2 per profilo, h3 per sottosezioni).
+    - `[x]` Semplificata `avatarUploadSection` (rimossa anteprima inline e messaggi di stato).
+    - `[x]` Aggiornato `scss/_profile.scss` per riflettere la nuova struttura, correggendo problemi di layout (sezioni su righe separate, layout form "Stato d'Animo").
+    - `[x]` Come effetto secondario positivo, la correzione del CSS ha risolto anche problemi di visualizzazione dei dettagli utente (nickname, nazionalità) sui profili pubblici.
+
 
 **🆕 Task FUNC.1 (Revisione 2): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA)
 
@@ -213,7 +221,7 @@ La sessione odierna è stata una vera e propria impresa eroica! Abbiamo affronta
 - **Task AUTH.3: Miglioramenti Funzionali Pagina Profilo Utente (`profile.html`)**
     - `[x]` Mini-Bio Utente (AUTH.3.4).
     - `[x]` Link Esterni (AUTH.3.2).
-    - `[x]` Visualizzazione Badge/Riconoscimenti Utente (Base, ma vedi PROF.1.2 e PROF.1.3 per problemi).
+    - `[x]` Visualizzazione Badge/Riconoscimenti Utente (Base, risolti problemi con PROF.1.3).
     - `[ ]` Sub-task AUTH.3.2.2 (Miglioramento Visivo Link Esterni): Anteprime/icone sito (Priorità MEDIA-BASSA).
     - **Sub-task AUTH.3.4 (Opzionale/Idee Future):**
         - `[ ]` Contatori Semplici (Data registrazione). (Priorità BASSA)
@@ -267,7 +275,7 @@ La sessione odierna è stata una vera e propria impresa eroica! Abbiamo affronta
 
 ---
 
-## ✅ TASK COMPLETATI (Sessione Corrente del 24 Maggio 2025 Inclusa) ✅
+## ✅ TASK COMPLETATI (Sessioni Precedenti e Sessione Corrente del 24 Maggio 2025 Inclusa) ✅
 
 - Task REGRESS-001, REGRESS-002, TEXT-001, REGRESS-003.4, (Da ANALYSIS-001), REGRESS-NAV-AVATAR-001, REGRESS-003.3, REGRESS-003.1 & REGRESS-003.2, C.1 / REGRESS-003.5, REGRESS-004, REGRESS-005.
 - Task A.5 (Notifiche In-App via Cloud Functions) - FUNZIONALITÀ BASE COMPLETATE.
@@ -298,8 +306,12 @@ La sessione odierna è stata una vera e propria impresa eroica! Abbiamo affronta
 - ✅ **Task NOTIF.1: Miglioramento UX Pannello Notifiche Popup** (Completati NOTIF.1.1 e NOTIF.1.2).
 - ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** Risolto (dall'utente, tramite fix all'header).
 - ✅ 🐞 **BUG-PROF-AVATAR-BTN-001: Pulsante "Conferma e Carica Avatar" invisibile.** (RISOLTO CON SUCCESSO TRAMITE REFACTOR A MODALE!)
+- ✅ ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo (Priorità MEDIA)** (Migliorato stile CSS per Mini-Bio e Stato d'Animo, inclusa responsività).
+- ✅ **PROF.1.2.A:** Corretto allineamento sezione badge (`#badgesSection`) per centrarsi nella pagina.
+- ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** RISOLTO.
+- ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** COMPLETATO.
 
 ---
 
-// DevPlan v4.0.6 - Canvas Markdown - AthenaDev 🏛️✨ Fine Sessione Gloriosa!
-// La vittoria sull'avatar ci ha temprati! Pronti per nuove sfide!
+// DevPlan v4.0.8 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa.
+// Pagina profilo stabilizzata e layout migliorato! Ottimo lavoro.

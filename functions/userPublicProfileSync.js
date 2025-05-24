@@ -1,9 +1,13 @@
-// functions/userPublicProfileSync.js
+// File: functions/userPublicProfileSync.js
 
 const { logger } = require('firebase-functions');
 const admin = require('firebase-admin');
 const { FieldValue } = require('firebase-admin/firestore');
 
+// Assicurati che db sia inizializzato qui se non lo importi da index.js
+// if (admin.apps.length === 0) { // Potrebbe non essere necessario se index.js lo fa sempre per primo
+// admin.initializeApp();
+// }
 const db = admin.firestore();
 
 /**
@@ -15,10 +19,11 @@ function preparePublicProfileData(userProfileData) {
     const publicData = {
         nickname: userProfileData.nickname || null,
         bio: userProfileData.bio || null,
-        statusMessage: userProfileData.statusMessage || null, // <-- AGGIUNTO QUI
+        statusMessage: userProfileData.statusMessage || null,
         nationalityCode: userProfileData.nationalityCode || null,
         hasPublishedArticles: userProfileData.hasPublishedArticles || false,
         hasDefeatedGlitchzilla: userProfileData.hasDefeatedGlitchzilla || false,
+        earnedBadges: userProfileData.earnedBadges || [], // Assicura che sia un array
         kodComplimentsReceived: userProfileData.kodComplimentsReceived || 0,
         kodRank: userProfileData.kodRank || null,
         profilePublicUpdatedAt: FieldValue.serverTimestamp(),
@@ -69,34 +74,40 @@ async function handleCreateUserPublicProfile(event) {
  */
 async function handleUpdateUserPublicProfile(event) {
     const userId = event.params.userId;
+    logger.info(`[CF:handleUpdateUserPublicProfile] Triggered for userId: ${userId}`);
+
+    if (!event.data || !event.data.before || !event.data.after) {
+        logger.warn(`[CF:handleUpdateUserPublicProfile] Event data, before, or after snapshot is missing for userId: ${userId}. Exiting.`);
+        return null;
+    }
+
     const newData = event.data.after.data();
     const oldData = event.data.before.data();
 
     if (!newData || !oldData) {
-        logger.info(
-            `[CF:handleUpdateUserPublicProfile] Snapshot data (before or after) for ${userId} is missing. Exiting.`
-        );
+        logger.warn(`[CF:handleUpdateUserPublicProfile] Snapshot data (newData or oldData) for ${userId} is missing after access. Exiting.`);
         return null;
     }
 
     const relevantFields = [
         'nickname',
         'bio',
-        'statusMessage', // <-- AGGIUNTO QUI
+        'statusMessage',
         'avatarUrls',
         'nationalityCode',
         'hasPublishedArticles',
         'hasDefeatedGlitchzilla',
         'kodComplimentsReceived',
         'kodRank',
+        'earnedBadges',
     ];
 
     let changed = false;
     for (const field of relevantFields) {
         if (JSON.stringify(newData[field]) !== JSON.stringify(oldData[field])) {
             changed = true;
-            logger.info(`[CF:handleUpdateUserPublicProfile] Field '${field}' changed for user ${userId}.`);
-            break;
+            logger.info(`[CF:handleUpdateUserPublicProfile] Field '${field}' changed for user ${userId}. Triggering update.`);
+            break; 
         }
     }
 
@@ -107,7 +118,6 @@ async function handleUpdateUserPublicProfile(event) {
         return null;
     }
 
-    logger.info(`[CF:handleUpdateUserPublicProfile] Updating public profile for user: ${userId}`);
     const publicProfileDataToUpdate = preparePublicProfileData(newData);
 
     try {
