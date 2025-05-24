@@ -17,6 +17,15 @@ const os = require('os');
 const fs = require('fs-extra'); // For file system operations
 const sharp = require('sharp'); // For image processing
 
+const { initializeApp } = require("firebase-admin/app");
+
+// Inizializza l'app Firebase Admin UNA SOLA VOLTA
+initializeApp();
+
+// Importa ed esporta la tua nuova funzione per l'invio delle email
+const verificationEmail = require("./sendVerificationEmail");
+exports.sendVerificationEmail = verificationEmail.sendVerificationEmail;
+
 // Initialize Firebase Admin SDK if not already initialized
 if (admin.apps.length === 0) {
     admin.initializeApp();
