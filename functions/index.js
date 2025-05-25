@@ -102,6 +102,69 @@ exports.handleArticleStatusNotifications = onDocumentUpdated('articles/{articleI
     }
 });
 
+// --- NOTIFY ADMINS ON NEW NICKNAME REQUEST ---
+exports.notifyAdminsOnNewNicknameRequest = onDocumentCreated('nicknameChangeRequests/{requestId}', async (event) => {
+    const functionName = 'notifyAdminsOnNewNicknameRequest';
+    logger.info(`[CF:${functionName}] Triggered for requestId: ${event.params.requestId}`);
+
+    if (!event.data) {
+        logger.warn(`[CF:${functionName}] Event data is missing. Exiting.`);
+        return;
+    }
+
+    const requestData = event.data.data();
+    const requestingUserId = requestData.userId;
+    const requestedNickname = requestData.requestedNickname;
+
+    if (!requestingUserId || !requestedNickname) {
+        logger.error(`[CF:${functionName}] Missing 'userId' or 'requestedNickname' in the request document.`, { data: requestData });
+        return;
+    }
+
+    // Per una notifica più ricca, usiamo il nickname attuale fornito nella richiesta.
+    const currentNickname = requestData.currentNickname || 'un utente'; // Fallback se il campo non esiste
+
+    try {
+        // 1. Trova tutti gli profili degli amministratori
+        const adminsSnapshot = await db.collection('userProfiles').where('isAdmin', '==', true).get();
+        
+        if (adminsSnapshot.empty) {
+            logger.warn(`[CF:${functionName}] No admin users found to notify.`);
+            return;
+        }
+
+        const adminIds = adminsSnapshot.docs.map(doc => doc.id);
+        logger.info(`[CF:${functionName}] Found ${adminIds.length} admin(s) to notify:`, adminIds);
+
+        // 2. Prepara il payload della notifica
+        const notificationPayload = {
+            type: 'admin_new_nickname_request',
+            title: 'Nuova Richiesta Nickname',
+            message: `L'utente ${currentNickname} ha richiesto il nuovo nickname: "${requestedNickname}".`,
+            link: '/admin-dashboard.html#nickname-requests-section', // Link diretto alla sezione nel pannello admin
+            icon: 'manage_accounts',
+            relatedItemId: event.params.requestId
+        };
+
+        // 3. Crea una promessa di notifica per ogni admin
+        const notificationPromises = adminIds.map(adminId => {
+            // Un admin non dovrebbe ricevere una notifica per una sua stessa richiesta (caso limite).
+            if (adminId === requestingUserId) {
+                logger.info(`[CF:${functionName}] Admin ${adminId} is the requester. Skipping notification for them.`);
+                return null;
+            }
+            return createNotification(adminId, notificationPayload);
+        });
+
+        // 4. Esegui tutte le promesse in parallelo
+        await Promise.all(notificationPromises.filter(p => p !== null));
+        logger.info(`[CF:${functionName}] Notifications for new nickname request have been sent successfully to relevant admins.`);
+
+    } catch (error) {
+        logger.error(`[CF:${functionName}] Failed to send nickname request notifications to admins.`, { error: error });
+    }
+});
+
 
 // --- BADGE AND AUTHOR UPDATE LOGIC ---
 exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}', async (event) => {
