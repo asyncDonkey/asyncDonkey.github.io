@@ -2908,6 +2908,17 @@ section#profile h3 {
   color: var(--warning-color, orange);
 }
 
+.cooldown-timer {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--accent-color-secondary);
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: var(--surface-bg-secondary);
+  border-radius: 4px;
+}
+
 /* _comments.scss - Stili per la sezione commenti */
 /* ===== Componenti Riutilizzabili (Form Commenti, Lista Commenti) ===== */
 /* Form Commenti (usato per Guestbook e Articoli) */

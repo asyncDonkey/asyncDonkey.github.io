@@ -219,9 +219,9 @@
                             <div id="nicknameDisplayContainer" class="nickname-container" style="margin-bottom: 8px; font-size: 1.05em;">
     <strong>Nickname:</strong> 
     <span id="currentNickname" style="margin-left: 5px;">Caricamento...</span>
-    <button type="button" id="requestNicknameChangeBtn" class="icon-button" title="Richiedi cambio nickname" style="display: none; margin-left: 8px;">
-        <span class="material-symbols-rounded">edit_square</span>
-    </button>
+    <button type="button" id="requestNicknameChangeBtn" class="icon-button" title="Richiedi cambio nickname" style="margin-left: 8px;">
+    <span class="material-symbols-rounded">edit_square</span>
+</button>
 </div>
                             <p style="margin-bottom: 8px; font-size: 1.05em">
                                 <strong>Nazionalità:</strong> <span id="profileNationality">Caricamento...</span>
@@ -485,7 +485,8 @@
 
         <div id="nicknameChangeCooldownView" style="display: none;">
             <h4>Richiesta Recente</h4>
-            <p>Hai già richiesto un cambio nickname di recente. Potrai effettuare una nuova richiesta tra <span id="nicknameCooldownDays"></span> giorni.</p>
+            <p>Hai già richiesto un cambio nickname di recente. Potrai effettuare una nuova richiesta tra:</p>
+<div id="nicknameCooldownTimer" class="cooldown-timer">-- giorni, -- ore, -- minuti, -- secondi</div>
             <p>Se pensi ci sia un errore, contatta il supporto.</p>
         </div>
          <div id="nicknameChangeProcessedView" style="display: none;">

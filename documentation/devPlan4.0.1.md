@@ -1,11 +1,12 @@
-# DEVELOPMENT PLAN (v4.0.11 - Sessione Athena - Nickname Change UI & Firestore Rules Block) 🚀
+# DEVELOPMENT PLAN (v4.0.12 - Sessione Athena - Ripristino e Focus Stati Modale Nickname) 🚀
 
-**Data Ultimo Aggiornamento:** 25 Maggio 2025 (Athena Update - Fine Sessione)
+**Data Ultimo Aggiornamento:** 25 Maggio 2025 (Athena Update - Inizio Sessione Post-Ripristino)
 **Visione Progetto:** Consolidare e stabilizzare la piattaforma esistente, migliorando la documentazione, la sicurezza, l'UX e risolvendo il debito tecnico. Le funzionalità attuali, come Donkey Runner e il sistema di articoli, saranno mantenute e ottimizzate, con un focus sul miglioramento dell'esperienza utente per le notifiche e la pagina profilo.
 
 **Stato Generale del Progetto:**
-Sessione dedicata all'implementazione della richiesta di cambio nickname (`FUNC.1`). Abbiamo **COMPLETATO** l'interfaccia utente base in `profile.html` (icona e struttura modale - `FUNC.1.1`), e implementato la logica JavaScript iniziale per l'apertura/chiusura della modale e la gestione della visualizzazione dello stato di cooldown (`FUNC.1.2` parzialmente completato). La logica client-side per l'invio della richiesta (`FUNC.1.3`) è stata scritta, ma le **operazioni di scrittura su Firestore sono attualmente bloccate dalle regole di sicurezza**. Questo sarà il task prioritario da risolvere nella prossima sessione. L'utente ripristinerà le regole Firestore a una versione stabile precedente nel frattempo.
-È stato anche implementato con successo un **task ausiliario non tracciato**: l'aggiunta di un link per il pannello admin nel footer, visibile solo agli amministratori, per facilitare i test.
+Sessione precedente dedicata all'implementazione della richiesta di cambio nickname (`FUNC.1`). Abbiamo **COMPLETATO** l'interfaccia utente base in `profile.html` (`FUNC.1.1`) e la logica JavaScript per la Cloud Function (`FUNC.1.3`). L'utente ha ripristinato il codice a una versione precedente all'implementazione del contatore dinamico per il cooldown, a causa di problemi riscontrati.
+**Il focus attuale è risolvere il comportamento dell'icona di modifica nickname (che dovrebbe essere sempre visibile sul proprio profilo) e assicurare la corretta gestione dei vari stati della modale (Eleggibile, Richiesta Inviata, In Cooldown) prima di reintrodurre miglioramenti UX come il contatore.**
+Il task ausiliario (link admin nel footer) rimane completato.
 
 **Legenda Stati:**
 
@@ -26,139 +27,119 @@ Sessione dedicata all'implementazione della richiesta di cambio nickname (`FUNC.
 ## 🎯 FASE 0: INFRASTRUTTURA E DEPLOYMENT 🎯
 
 **Task INFRA-001: Migrazione Hosting su Firebase Hosting**
-
 - **Descrizione:** Completare la migrazione del sito da GitHub Pages a Firebase Hosting per sfruttare meglio l'integrazione con gli altri servizi Firebase (Auth, Firestore, Functions).
 - `[P]` **Stato Generale:** Inizializzazione e test locali completati.
-- `[x]` **INFRA-001.1:** Revisionare la documentazione `firebaseHostingMigration.md` per i passi necessari.
-- `[x]` **INFRA-001.2:** Configurare il progetto Firebase per Firebase Hosting (file `firebase.json` aggiornato con la sezione `hosting`).
-- `[x]` **INFRA-001.3:** Affinare la configurazione di hosting in `firebase.json` (public, ignore, rewrites, headers, cleanUrls, trailingSlash).
-- `[x]` **INFRA-001.4 (Test Locali):** Eseguire test con `firebase emulators:start` per validare la configurazione di hosting.
-- `[ ]` **INFRA-001.5 (Deploy Staging):** Distribuire su un canale di anteprima (`firebase hosting:channel:deploy NOME_CANALE`).
+- `[x]` **INFRA-001.1:** Revisionare la documentazione `firebaseHostingMigration.md`.
+- `[x]` **INFRA-001.2:** Configurare il progetto Firebase per Firebase Hosting.
+- `[x]` **INFRA-001.3:** Affinare la configurazione di hosting in `firebase.json`.
+- `[x]` **INFRA-001.4 (Test Locali):** Eseguire test con `firebase emulators:start`.
+- `[ ]` **INFRA-001.5 (Deploy Staging):** Distribuire su un canale di anteprima.
 - `[ ]` **INFRA-001.6 (Test Staging):** Eseguire test approfonditi sul canale di anteprima.
-- `[ ]` **INFRA-001.7 (Dominio Custom):** Configurare il dominio personalizzato (se applicabile).
-- `[ ]` **INFRA-001.8 (Go-Live):** Eseguire il deployment in produzione (`firebase deploy --only hosting`).
-- `[ ]` **INFRA-001.9 (Post-GoLive):** Aggiornare la documentazione del progetto con le nuove informazioni di hosting e configurare CI/CD.
-- **Nota:** Questo task è stato dettagliato e i primi passi sono stati completati con successo. Decisione utente: posticipare il deploy staging dopo altri task di codice.
+- `[ ]` **INFRA-001.7 (Dominio Custom):** Configurare il dominio personalizzato.
+- `[ ]` **INFRA-001.8 (Go-Live):** Eseguire il deployment in produzione.
+- `[ ]` **INFRA-001.9 (Post-GoLive):** Aggiornare la documentazione e configurare CI/CD.
+- **Nota:** Posticipare il deploy staging dopo altri task di codice.
 
 ---
 
 ## 🎯 FASE 1: STABILIZZAZIONE E DOCUMENTAZIONE (PRIORITÀ CRITICA) 🎯
 
-**Task ANALYSIS-001.4 Follow-up (Priorità CRITICA): Implementare le raccomandazioni dell'analisi firestore.rules.**
-
+**Task ANALYSIS-001.4 Follow-up: Implementare le raccomandazioni dell'analisi firestore.rules.**
 - ✅ **ANALYSIS-001.4.1 / SEC-RULE-001:** Revisionare e restringere l'accesso in lettura a `/userProfiles/{userId}`.
-  - `[x]` (Tutti i sub-task completati)
-- ⚠️ **ANALYSIS-001.4.2 / SEC-RULE-002:** Implementare validazione completa per `externalLinks` negli aggiornamenti del profilo utente. (ON HOLD / DECISIONE PRESA)
-- ➡️ **ANALYSIS-001.4.3 / SEC-RULE-003:** Mettere in sicurezza meccanismo `commentCount`. (OBSOLETO)
+- ⚠️ **ANALYSIS-001.4.2 / SEC-RULE-002:** Implementare validazione completa per `externalLinks`. (ON HOLD / DECISIONE PRESA)
+- ➡️ **ANALYSIS-001.4.3 / SEC-RULE-003:** Mettere in sicurezza `commentCount`. (OBSOLETO)
 - ➡️ **ANALYSIS-001.4.4 / SEC-RULE-004:** Reintrodurre validazione chiavi `userIssues`. (OBSOLETO)
 - ✅ **ANALYSIS-001.4.5:** Risolto problema caricamento `firestore.rules` in emulatore.
 
-✅ **Task SCHEMA-001: Aggiornare `firestore-schema.md` (Priorità ALTA)**
-
-- `[x]` (Tutti i sub-task completati)
+✅ **Task SCHEMA-001: Aggiornare `firestore-schema.md`**
+- `[x]` (Tutti i sub-task completati, inclusa l'aggiunta di `nicknameChangeRequests` e `lastNicknameRequestTimestamp`).
 
 ---
 
 ## 💈 TASK NAVBAR (PRIORITÀ CRITICA) 💈
 
-**✅ Task NAV.1: Refactoring Completo Funzionalità e UI Navbar**
-
-- **Descrizione:** Revisionare e aggiornare la funzionalità, l'aspetto e la coerenza della navbar principale.
-- ✅ **NAV.1.1 (Funzionalità):** (Tutti i sub-task rilevanti completati o obsoleti)
-- ✅ **NAV.1.2 (Layout Icone e Testo):** (Tutti i sub-task rilevanti completati)
-- ✅ **NAV.1.3 (Struttura Link e Dropdown):** (Tutti i sub-task rilevanti completati o obsoleti)
+✅ **Task NAV.1: Refactoring Completo Funzionalità e UI Navbar**
+- `[x]` (TUTTI I SUB-TASK COMPLETATI)
 
 ---
 
 ## 🐞 BUG TRACKING 🐞
 
-- ➡️ **BUG-NAV-RESP-001: Scroll orizzontale homepage (`index.html`) su mobile post-login.** (OBSOLETO - Risolto).
-- ✅ 🐞 **BUG-PROF-AVATAR-BTN-001: Pulsante "Conferma e Carica Avatar" (`#confirmAvatarUploadBtn`) invisibile ma cliccabile in `profile.html`.** (RISOLTO)
+- ➡️ **BUG-NAV-RESP-001:** Scroll orizzontale homepage su mobile. (OBSOLETO - Risolto).
+- ✅ 🐞 **BUG-PROF-AVATAR-BTN-001:** Pulsante "Conferma e Carica Avatar" invisibile. (RISOLTO)
 
 ---
 
-## ✨ TASK DI RIFINITURA E NUOVE FUNZIONALITÀ (Derivati dalla sessione) ✨
+## ✨ TASK DI RIFINITURA E NUOVE FUNZIONALITÀ ✨
 
 ✅ **Task NOTIF.1: Miglioramento UX Pannello Notifiche Popup**
-
 - `[x]` (Tutti i sub-task completati)
 
 🆕 **Task NOTIF.2: Espansione Tipi di Notifiche In-App**
-
-- **Descrizione:** Introdurre nuove notifiche per migliorare il coinvolgimento e guidare l'utente.
+- **Descrizione:** Introdurre nuove notifiche per migliorare il coinvolgimento.
 - `[ ]` **NOTIF.2.1 (Notifica Conferma Email):**
-    - `[ ]` **NOTIF.2.1.A (Creazione Logica Cloud Function):** Generare notifica Firestore per utente che deve confermare email.
-    - `[ ]` **NOTIF.2.1.B (Testo e Azione Notifica):** Definire testo e comportamento al click.
-    - `[ ]` **NOTIF.2.1.C (Persistenza e Rimozione):** Gestire la visibilità della notifica in base allo stato di verifica email.
+    - `[ ]` **NOTIF.2.1.A (Creazione Logica Cloud Function):** Generare notifica Firestore.
+    - `[ ]` **NOTIF.2.1.B (Testo e Azione Notifica):** Definire testo e comportamento.
+    - `[ ]` **NOTIF.2.1.C (Persistenza e Rimozione):** Gestire visibilità.
 - `[ ]` **NOTIF.2.2 (Brainstorming e Implementazione Altre Notifiche):**
     - 💡 Primo articolo pubblicato.
     - 💡 Badge sbloccato.
     - 💡 Risposta a un commento.
     - 💡 (Admin) Nuovo articolo in attesa di approvazione.
-    - 💡 (Admin) Nuova richiesta di cambio nickname.
-- ➡️ **NOTIF.EMAIL-TEMPLATES (Miglioramento/Creazione Email):** (OBSOLETO)
+    - 💡 (Admin) Nuova richiesta di cambio nickname (vedi FUNC.1.4).
+- ➡️ **NOTIF.EMAIL-TEMPLATES:** (OBSOLETO)
 
 ---
 
-## 💅 MIGLIORAMENTI STRUTTURALI E UI/UX (Legacy & Nuovi) 💅
+## 💅 MIGLIORAMENTI STRUTTURALI E UI/UX 💅
 
-✅ **Task CSS-REFACTOR-001: Refactoring CSS con SCSS (Priorità ALTA)**
-
+✅ **Task CSS-REFACTOR-001: Refactoring CSS con SCSS**
 - `[x]` (Tutti i sub-task completati)
 
-✅ **Task UI-FIX-001: Correzione Visualizzazione Dati Utente in Mini-Leaderboards (Priorità ALTA)**
-
+✅ **Task UI-FIX-001: Correzione Visualizzazione Dati Utente in Mini-Leaderboards**
 - `[x]` (Tutti i sub-task completati)
 
-✅ **Task D.9: Migliorare UX per Utente Non Registrato. (Priorità MEDIA)**
-
+✅ **Task D.9: Migliorare UX per Utente Non Registrato.**
 - `[x]` (Tutti i sub-task completati eccetto D.9.5)
-    - `[ ]` **D.9.5 (Coerenza Modali e Notifiche):** Verificare la presenza e il funzionamento dei modali di login su tutte le pagine rilevanti. Assicurare che l'header delle notifiche sia consistente. (Priorità MEDIA-BASSA)
+    - `[ ]` **D.9.5 (Coerenza Modali e Notifiche):** Verificare modali di login e header notifiche. (Priorità MEDIA-BASSA)
 
-🆕 **Task UI-ICON-UPDATE-001: Aggiornamento Icone con Material Symbols (Priorità BASSA)**
-
+🆕 **Task UI-ICON-UPDATE-001: Aggiornamento Icone con Material Symbols**
 - `[x]` **UI-ICON-UPDATE-001.1 (Upvote Issue):** Completato.
 - `[x]` **UI-ICON-UPDATE-001.2 (Contribute.html Headers):** Completato.
-- `[ ]` **UI-ICON-UPDATE-001.3 (Altre Sezioni):** Valutare altre aree del sito per aggiornamenti icone.
+- `[ ]` **UI-ICON-UPDATE-001.3 (Altre Sezioni):** Valutare altre aree.
 
-✅ **Task UI-GB-STYLE-001: Rivedere stile commenti nel Guestbook (Priorità MEDIA-BASSA)**
-- `[x]` Analizzato SCSS (`_comments.scss`) e HTML relativi.
-- `[x]` Proposte e applicate (dall'utente) modifiche HTML per coerenza selettori in `about.html`, `donkeyRunner.html`, `view-article.html`.
-- `[x]` Fornito SCSS rivisto per `_comments.scss` per migliorare leggibilità, spaziatura e interazione.
-- `[x]` Creati nuovi stili SCSS specifici per i bottoni di condivisione (`#nativeShareBtn`, `#copyLinkBtn`) in `view-article.html`, trasformandoli in bottoni solo-icona.
+✅ **Task UI-GB-STYLE-001: Rivedere stile commenti nel Guestbook**
+- `[x]` (Tutti i sub-task completati)
 
-➡️ ✨ **Task PROF-STYLE.1: Rendere quadrati i contenitori avatar (Priorità MEDIA)** (OBSOLETO - Decisione utente del 24/05/2025)
+➡️ ✨ **Task PROF-STYLE.1: Rendere quadrati i contenitori avatar.** (OBSOLETO)
 
-✅ ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo (Priorità MEDIA)**
-    - `[x]` (Tutti i sub-task completati)
+✅ ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo.**
+- `[x]` (Tutti i sub-task completati)
 
 ---
 
-## 🔧 TECHNICAL DEBT & REFACTORING (Legacy & Nuovi) 🔧
+## 🔧 TECHNICAL DEBT & REFACTORING 🔧
 
 ➡️ **Task TECH-DEBT-001: Unificare Sistemi di Gestione Commenti.** (OBSOLETO)
 
 🆕💡 **Task TECH-DEBT-BTN-STYLE-001: Unificare e razionalizzare stili dei bottoni `.game-button`.** (Priorità BASSA)
-    - `[ ]` Analizzare le definizioni multiple di `.game-button` (es. in `_main-content.scss`, `_donkey-runner.scss`).
-    - `[ ]` Definire uno stile base per `.game-button` in un unico file (es. `_buttons.scss` o consolidare in `_main-content.scss`).
-    - `[ ]` Utilizzare classi modificatrici (es. `.game-button--primary`, `.game-button--donkey-runner`) per le variazioni specifiche.
+- `[ ]` Analizzare le definizioni multiple.
+- `[ ]` Definire uno stile base unico.
+- `[ ]` Utilizzare classi modificatrici.
 
 ---
 
-## 📚 PIANO DI SVILUPPO INTEGRATO (Stato Attuale & Funzionalità Esistenti) 📚
+## 📚 PIANO DI SVILUPPO INTEGRATO 📚
 
 ### Sezione A: Gestione Contributi e Moderazione 🖋️
-
 - `[x]` A.4.2.6.A (Admin UI): Textarea per `rejectionReason`.
 - **Task A.5: Sistema di Notifiche In-App (Base).**
-    - `[x]` (Funzionalità base pannello e pagina "Tutte le Notifiche" COMPLETATE)
-    - `[x]` Corretta struttura HTML per `notificationBellContainer` e `notification-panel` in `index.html` header.
-    - `⚠️ [ON HOLD]` **Sub-task A.5.5: Notifiche per Interazioni Sociali Avanzate.** (Legate a KOD - Ora potenzialmente integrabili con NOTIF.2)
+    - `[x]` (Funzionalità base completate)
+    - `⚠️ [ON HOLD]` **Sub-task A.5.5: Notifiche per Interazioni Sociali Avanzate.** (Potenzialmente integrabili con NOTIF.2)
 
 ### Sezione AUTH: Gestione Autenticazione e Profilo Utente ✨👤
 
 **Task PROF.1: Risoluzione Problemi e Miglioramenti Pagina Profilo (`profile.html`)**
-
 - ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** (RISOLTO)
 - `[P]` **PROF.1.2 (Layout Riconoscimenti - Desktop & Mobile):** (Priorità MEDIA)
     - ✅ **PROF.1.2.A:** Corretto allineamento sezione badge.
@@ -166,29 +147,34 @@ Sessione dedicata all'implementazione della richiesta di cambio nickname (`FUNC.
 - ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** (RISOLTO)
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** (COMPLETATO)
 
-**Task FUNC.1 (Revisione 2): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA) `[P] IN PROGRESSO`
-- **Descrizione:** Implementare funzionalità in `profile.html` per richiedere cambio nickname agli admin, con feedback chiaro sullo stato della richiesta e notifiche.
-- `[x]` **FUNC.1.1 (UI Profilo):** Aggiunta icona e struttura modale in `profile.html`. Stili base SCSS per icona e modale.
-- `[P]` **FUNC.1.2 (Modale Richiesta Nickname - Logica Visualizzazione Dinamica):** Gestire stati: Iniziale, Richiesta Inviata, Nickname Cambiato di Recente.
+**Task FUNC.1 (Revisione 3): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA) `[P] IN PROGRESSO`
+- **Descrizione:** Implementare funzionalità in `profile.html` per richiedere cambio nickname.
+- `[x]` **FUNC.1.1 (UI Profilo):** Aggiunta icona e struttura modale in `profile.html`. Stili base SCSS.
+- `[P]` **FUNC.1.2 (Modale Richiesta Nickname - Logica Visualizzazione Dinamica):** Gestire stati: Iniziale, Richiesta Inviata, In Cooldown.
     - `[x]` Implementata logica base apertura/chiusura modale e visualizzazione vista iniziale.
     - `[x]` Implementata visualizzazione vista cooldown (client-side) basata su `lastNicknameRequestTimestamp`.
-    - `[x]` Gestita visibilità icona "modifica nickname" in base a `isOwnProfile` e stato cooldown.
-    - `[ ]` Gestione completa e robusta degli stati modale (Richiesta Inviata, Richiesta Processata) basata sui dati Firestore (es. collezione `nicknameChangeRequests` o campi di stato sul profilo utente).
-- `[P]` **FUNC.1.3 (Logica Invio e Gestione Richiesta):** Validazione, creazione documento in `/nicknameChangeRequests`, update `userProfiles.lastNicknameRequestTimestamp`, controllo intervallo 90 giorni, toast feedback.
+    - `[P]` **Gestione robusta stati modale (Richiesta Inviata, In Cooldown) basata sui dati Firestore e visibilità icona.** (FOCUS ATTUALE)
+        - `[ ]` Assicurare che l'icona `#requestNicknameChangeBtn` sia sempre visibile se `isOwnProfile`.
+        - `[ ]` Modificare `openNicknameChangeModal` per:
+            - `[ ]` Controllare se esiste una richiesta `pending` per l'utente su `nicknameChangeRequests`. Se sì, mostrare `nicknameChangeRequestSentView`.
+            - `[ ]` Altrimenti, controllare `getNicknameCooldownStatus`. Se in cooldown, mostrare `nicknameChangeCooldownView`.
+            - `[ ]` Altrimenti, mostrare `nicknameChangeInitialView`.
+    - `[ ]` **(DA FARE DOPO STABILIZZAZIONE STATI)** Implementare contatore dinamico (giorni, ore, minuti, secondi) per la vista `nicknameChangeCooldownView`.
+- `[x]` **FUNC.1.3 (Logica Invio e Gestione Richiesta - Cloud Function):** Validazione, creazione documento in `/nicknameChangeRequests`, update `userProfiles.lastNicknameRequestTimestamp`, controllo intervallo 90 giorni, feedback tramite Cloud Function.
     - `[x]` Implementata validazione input client-side.
-    - `[x]` Implementata logica client-side per preparare e tentare l'invio della richiesta (creazione documento in `nicknameChangeRequests` e aggiornamento `lastNicknameRequestTimestamp` su `userProfiles`).
-    - `[x]` Implementato feedback tramite toast per successo/errore (lato client).
-    - `[ ]` **(BLOCCATO - PRIORITÀ PROSSIMA SESSIONE)** Risolvere problemi con regole Firestore per permettere la scrittura sicura su `nicknameChangeRequests` e l'aggiornamento di `lastNicknameRequestTimestamp` su `userProfiles`.
+    - `[x]` Creata Cloud Function `requestNicknameChange` per la logica backend (unicità nickname case-insensitive, cooldown, scrittura su Firestore).
+    - `[x]` Modificato `js/profile.js` per chiamare la Cloud Function.
+    - `[x]` Implementato feedback tramite toast per successo/errore da Cloud Function.
 - `[ ]` **FUNC.1.4 (Notifiche):**
-    - `[ ]` Notifica all'utente per approvazione/rifiuto.
+    - `[ ]` Notifica all'utente per approvazione/rifiuto (da implementare quando la gestione admin è pronta).
     - 💡 (Opzionale/Futuro) Notifica automatica agli Admin alla creazione di una richiesta (vedi NOTIF.2.2).
 - `[ ]` **FUNC.1.5 (Gestione Admin nel Pannello):** Visualizzazione richieste, possibilità di segnare come "processata".
-- **Nota:** L'utente ripristinerà le regole Firestore a una versione stabile. Il focus della prossima sessione sarà la definizione e il test delle nuove regole specifiche per questa funzionalità.
+- **Nota:** Focus attuale su `FUNC.1.2` per la corretta visualizzazione dell'icona e gestione degli stati della modale.
 
 - **Task AUTH.3: Miglioramenti Funzionali Pagina Profilo Utente (`profile.html`)**
     - `[x]` Mini-Bio Utente (AUTH.3.4).
     - `[x]` Link Esterni (AUTH.3.2).
-    - `[x]` Visualizzazione Badge/Riconoscimenti Utente (Base, risolti problemi con PROF.1.3).
+    - `[x]` Visualizzazione Badge/Riconoscimenti Utente (Base).
     - `[ ]` Sub-task AUTH.3.2.2 (Miglioramento Visivo Link Esterni): Anteprime/icone sito (Priorità MEDIA-BASSA).
     - **Sub-task AUTH.3.4 (Opzionale/Idee Future):**
         - `[ ]` Contatori Semplici (Data registrazione). (Priorità BASSA)
@@ -200,50 +186,41 @@ Sessione dedicata all'implementazione della richiesta di cambio nickname (`FUNC.
     - ➡️ **Sub-task AUTH.3.7: Sistema di Amicizie/Followers.** (OBSOLETO)
 
 ### Sezione C: Funzionalità Specifiche Giochi/Piattaforma 🎮 & Contenuti Esistenti
-
-- ✅ **Task C.1: Gestione Avatar Utente Personalizzato.** (Include BUG-PROF-AVATAR-BTN-001 risolto)
+- ✅ **Task C.1: Gestione Avatar Utente Personalizzato.**
 - **Task C.2: Donkey Runner (Gioco Esistente)**
     - `[x]` C.2.4 (Donkey Runner): Leggibilità testi e usabilità form fullscreen.
-    - `[ ]` Task C.2.8 (Donkey Runner): Risolvere problemi file audio mancanti (`game_over.mp3`, `shield_block.mp3`). (Priorità BASSA)
-    - 🆕 `[ ]` **C.2.9 (Review Stili e Allineamento):** Revisionare gli stili generali e l'allineamento degli elementi in `donkeyRunner.html` e `donkeyRunner.js` per coerenza e pulizia. (Priorità MEDIA)
-    - 🆕 `[ ]` **C.2.10 (Invito Amici / Sfida):** Aggiungere un pulsante/sezione per "Invita i tuoi amici a giocare" o "Sfida qualcuno a battere il tuo punteggio". (Priorità MEDIA-BASSA)
-        - `[ ]` **C.2.10.1:** Definire UI (pulsante/link, posizione).
-        - `[ ]` **C.2.10.2:** Implementare logica (potrebbe usare `navigator.share` o link precompilati per social).
-    - 🆕 🤔 **C.2.11 (Condivisione Punteggio Partita):** Valutare la complessità e la fattibilità di permettere la condivisione diretta di un punteggio specifico ottenuto in una partita di CodeDash (DonkeyRunner). (Priorità BASSA - INVESTIGARE)
-        - `[ ]` **C.2.11.1:** Analisi tecnica: come salvare/identificare un punteggio di una singola partita in modo condivisibile (es. URL con parametri, immagine generata).
-        - `[ ]` **C.2.11.2:** Design UI per l'opzione di condivisione post-partita.
-- ✅ **Task C.3: Miglioramenti Leaderboard & Info Glitchzilla** (Priorità MEDIA - Parzialmente Completato)
-    - `[x]` Avatar aggiornati e performanti sulla Leaderboard (REGRESS-004).
-    - `[x]` Pulsante refresh stilizzato con icona (D.LEADERBOARD-UX.1).
-    - `[x]` Responsività base tabella (scroll orizzontale, colonna Data nascosta su mobile) (D.LEADERBOARD-UX.2 parziale).
-    - `[x]` Evidenziazione utente loggato.
-    - `[x]` Indicatore "Glitchzilla Debunked!" con icona animata.
-    - `[ ]` (Restante da C.3) Valutare ulteriori miglioramenti funzionali o di UI specifici per "Info Glitchzilla" se non coperti.
+    - `[ ]` Task C.2.8 (Donkey Runner): Risolvere problemi file audio mancanti. (Priorità BASSA)
+    - 🆕 `[ ]` **C.2.9 (Review Stili e Allineamento):** Revisionare stili e allineamento in `donkeyRunner.html` e `.js`. (Priorità MEDIA)
+    - 🆕 `[ ]` **C.2.10 (Invito Amici / Sfida):** Aggiungere pulsante/sezione "Invita amici". (Priorità MEDIA-BASSA)
+        - `[ ]` **C.2.10.1:** Definire UI.
+        - `[ ]` **C.2.10.2:** Implementare logica (es. `navigator.share`).
+    - 🆕 🤔 **C.2.11 (Condivisione Punteggio Partita):** Valutare fattibilità condivisione punteggio CodeDash. (Priorità BASSA - INVESTIGARE)
+        - `[ ]` **C.2.11.1:** Analisi tecnica.
+        - `[ ]` **C.2.11.2:** Design UI.
+- ✅ **Task C.3: Miglioramenti Leaderboard & Info Glitchzilla** (Parzialmente Completato)
+    - `[x]` (Molti sub-task già completati)
+    - `[ ]` (Restante da C.3) Valutare ulteriori miglioramenti per "Info Glitchzilla".
 - **Task C.5: Migliorare UI/UX di Donkey Runner Game** (Priorità MEDIA-BASSA).
-    - _Da definire focus specifico, potrebbe includere C.2.9_
+    - _Potrebbe includere C.2.9_
 - ➡️ **Task C.NEW_FEATURE_HP_ACTIVITY:** (SUPERSEDED)
 
 ### Sezione D: Miglioramenti UI/UX e Ottimizzazioni Generali ✨
-
 - `[x]` Correzione ESLint `showConfirmationModal` in `js/profile.js`.
 - `[x]` Task D.3.B.6: Revisionare e aggiornare README.md.
-- `[ ]` Sub-task D.1.A.1: Aggiungere notifiche toast per conferma/errore like (su azioni di like/unlike _effettive_ degli utenti loggati). (Priorità MEDIA-BASSA).
+- `[ ]` Sub-task D.1.A.1: Aggiungere notifiche toast per conferma/errore like. (Priorità MEDIA-BASSA).
 - ➡️ **Task D.UI-HP_FEATURED:** (SUPERSEDED)
 - **Task D.LEADERBOARD-UX: Migliorare UI/UX della Leaderboard**
-    - ✅ **D.LEADERBOARD-UX.1:** Stilizzare il pulsante di refresh della leaderboard. (COMPLETATO)
-    - ➡️ **D.LEADERBOARD-UX.2:** Verificare e migliorare la responsività della tabella dei punteggi. (OBSOLETO)
-    - ➡️ **D.LEADERBOARD-UX.3:** Progettare/implementare visualizzazione compatta/espandibile per le righe. (OBSOLETO)
+    - ✅ **D.LEADERBOARD-UX.1:** Stilizzare pulsante refresh. (COMPLETATO)
+    - ➡️ **D.LEADERBOARD-UX.2:** Responsività tabella. (OBSOLETO)
+    - ➡️ **D.LEADERBOARD-UX.3:** Visualizzazione compatta/espandibile. (OBSOLETO)
 
-### Sezione Sicurezza & Stabilità (Derivata da ANALYSIS-001.4) 🛡️
-
+### Sezione Sicurezza & Stabilità 🛡️
 - ✅ **Task ANALYSIS-001.4: Analisi storage.rules e firestore.rules.** (ANALISI COMPLETATA)
 
 ### Sezione E: Ricerca e Sviluppo a Lungo Termine 🔬📈
-
 - ✅ **Task E.4: Adozione e Implementazione Cloud Functions.** (COMPLETATO)
 
 ### Sezione F: Fase di Perfezionamento Finale (Polish) 💅🎨
-
 - `[x]` F.2.4.3.A.1 (Icone Like/Commenti Homepage).
 - `[x]` F.2.4.3.A.2 (Icone Portal Card Homepage).
 
@@ -257,7 +234,7 @@ Sessione dedicata all'implementazione della richiesta di cambio nickname (`FUNC.
 - Task UI-FIX-001: Correzione Visualizzazione Dati Utente in Mini-Leaderboards.
 - Task CSS-REFACTOR-001: Refactoring CSS con SCSS.
 - ANALYSIS-001.4.5: Risolto problema caricamento `firestore.rules` in emulatore.
-- SCHEMA-001: Aggiornato `firestore-schema.md`.
+- SCHEMA-001: Aggiornato `firestore-schema.md` (include `nicknameChangeRequests`).
 - D.9 (Parziale): Migliorata UX Utente Non Registrato.
 - UI-ICON-UPDATE-001 (Parziale): Aggiornate icone Upvote e Headers in `contribute.html`.
 - D.9.6 (Messaggio Interattivo Contribute - Form Invio Issue).
@@ -274,9 +251,11 @@ Sessione dedicata all'implementazione della richiesta di cambio nickname (`FUNC.
 - ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** RISOLTO.
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** COMPLETATO.
 - ✅ **UI-GB-STYLE-001 (Stili Commenti e Bottoni Condivisione ArticleViewer):** COMPLETATO.
-- ✅ **Task Ausiliario (Footer Admin Link):** Aggiunto link al pannello admin nel footer, visibile solo agli amministratori. (COMPLETATO - Sessione 25 Maggio 2025)
+- ✅ **FUNC.1.1 (UI Profilo - Modale Nickname):** COMPLETATO.
+- ✅ **FUNC.1.3 (Logica Invio Richiesta Nickname - Cloud Function):** COMPLETATO.
+- ✅ **Task Ausiliario (Footer Admin Link):** COMPLETATO.
 
 ---
 
-// DevPlan v4.0.11 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa.
-// Ottimo lavoro nel debug e nell'implementazione della UI per il cambio nickname. Prossimo passo: regole Firestore!
+// DevPlan v4.0.12 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Pronta per Riprendere.
+// Focus: Risolvere FUNC.1.2 (visibilità icona e stati modale nickname).

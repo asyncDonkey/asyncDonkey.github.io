@@ -663,3 +663,14 @@ section#profile {
         color: var(--warning-color, orange);
     }
 }
+
+.cooldown-timer {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--accent-color-secondary); // O un colore che preferisci
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: var(--surface-bg-secondary);
+  border-radius: 4px;
+}
