@@ -382,6 +382,9 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
 
 // Aggiungi questa riga alla fine del file, dopo tutti gli altri exports
 exports.requestNicknameChange = require('./nicknameRequestHandler').requestNicknameChange;
+const nicknameHandlers = require('./nicknameRequestHandler');
+exports.approveNicknameChange = nicknameHandlers.approveNicknameChange;
+exports.rejectNicknameChange = nicknameHandlers.rejectNicknameChange;
 
 // --- EXISTING FUNCTION: processUploadedAvatar ---
 const AVATAR_THUMBNAIL_SIZE = 48;

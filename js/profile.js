@@ -143,6 +143,8 @@ let selectedAvatarFile = null;
 const MAX_AVATAR_SIZE_MB = 5;
 const DEFAULT_AVATAR_IMAGE_PATH = 'assets/images/default-avatar.png'; // Definisci il percorso del tuo avatar di default
 
+
+
 const storage = getStorage();
 const functions = getFunctions();
 

@@ -122,3 +122,233 @@ exports.requestNicknameChange = onCall(async (request) => {
         throw new HttpsError('internal', 'Si è verificato un errore interno. Riprova più tardi.');
     }
 });
+
+/**
+ * Approva una richiesta di cambio nickname.
+ * Richiede che il chiamante sia un admin.
+ */
+exports.approveNicknameChange = onCall(async (request) => {
+    logger.info('Inizio approveNicknameChange. Dati richiesta:', request.data);
+    // 1. Autenticazione e Autorizzazione Admin
+    if (!request.auth) {
+        logger.warn('approveNicknameChange: Chiamata non autenticata.');
+        throw new HttpsError('unauthenticated', 'Devi essere autenticato per eseguire questa operazione.');
+    }
+    const adminUid = request.auth.uid;
+    const adminProfileRef = db.collection('userProfiles').doc(adminUid);
+    let isAdminUser = false;
+    try {
+        const adminProfileSnap = await adminProfileRef.get();
+        if (adminProfileSnap.exists && adminProfileSnap.data().isAdmin === true) {
+            isAdminUser = true;
+        }
+    } catch (error) {
+        logger.error('approveNicknameChange: Errore nel recuperare il profilo admin:', error);
+        throw new HttpsError('internal', 'Errore durante la verifica dei permessi admin.');
+    }
+
+    if (!isAdminUser) {
+        logger.warn(`approveNicknameChange: Utente ${adminUid} non è admin.`);
+        throw new HttpsError('permission-denied', 'Non hai i permessi per eseguire questa operazione.');
+    }
+
+    // 2. Validazione Input
+    const { requestId, userId, newNickname } = request.data;
+    if (!requestId || typeof requestId !== 'string') {
+        throw new HttpsError('invalid-argument', 'ID richiesta non valido.');
+    }
+    if (!userId || typeof userId !== 'string') {
+        throw new HttpsError('invalid-argument', 'ID utente non valido.');
+    }
+    if (!newNickname || typeof newNickname !== 'string' || newNickname.length < 3 || newNickname.length > 20) {
+        throw new HttpsError('invalid-argument', 'Nuovo nickname non valido (3-20 caratteri).');
+    }
+    const nicknameRegex = /^[a-zA-Z0-9_-]+$/;
+    if (!nicknameRegex.test(newNickname)) {
+        throw new HttpsError('invalid-argument', "Il nuovo nickname può contenere solo lettere, numeri, '_' e '-'.");
+    }
+
+    // Riferimenti ai documenti
+    const nicknameRequestRef = db.collection('nicknameChangeRequests').doc(requestId);
+    const userProfileRef = db.collection('userProfiles').doc(userId);
+    const userPublicProfileRef = db.collection('userPublicProfiles').doc(userId);
+
+    logger.info(`approveNicknameChange: Admin ${adminUid} sta approvando la richiesta ${requestId} per l'utente ${userId} con il nuovo nickname "${newNickname}".`);
+
+    try {
+        // Controllo unicità nickname (importante farlo anche qui, nel caso fosse cambiato nel frattempo)
+        if (await isNicknameTaken(newNickname, userId)) {
+            logger.warn(`approveNicknameChange: Il nickname "${newNickname}" è stato preso nel frattempo.`);
+            // In questo caso, potresti voler respingere automaticamente la richiesta invece di lanciare un errore generico.
+            // Per ora, segnaliamo all'admin che deve rivalutare o l'utente deve scegliere un altro nome.
+            // Potrebbe anche essere gestito aggiornando la richiesta a "failed_approval" con un motivo.
+            await nicknameRequestRef.update({
+                status: 'failed_approval_name_taken',
+                processedAt: FieldValue.serverTimestamp(),
+                processedBy: adminUid,
+                notes: `Tentativo di approvazione fallito: il nickname '${newNickname}' è stato preso nel frattempo.`
+            });
+            throw new HttpsError('already-exists', `Il nickname "${newNickname}" è già in uso o è stato preso. La richiesta non può essere approvata con questo nome.`);
+        }
+
+        await db.runTransaction(async (transaction) => {
+            const requestSnap = await transaction.get(nicknameRequestRef);
+            if (!requestSnap.exists) {
+                throw new HttpsError('not-found', 'Richiesta di cambio nickname non trovata.');
+            }
+            if (requestSnap.data().status !== 'pending') {
+                throw new HttpsError('failed-precondition', `La richiesta non è più in stato 'pending' (stato attuale: ${requestSnap.data().status}).`);
+            }
+
+            // 1. Aggiorna la richiesta di nickname
+            transaction.update(nicknameRequestRef, {
+                status: 'approved',
+                processedAt: FieldValue.serverTimestamp(),
+                processedBy: adminUid,
+                finalNickname: newNickname // Salviamo il nickname con cui è stata approvata
+            });
+
+            // 2. Aggiorna il profilo privato dell'utente
+            // Non aggiorniamo lastNicknameRequestTimestamp come da tua preferenza.
+            transaction.update(userProfileRef, {
+                nickname: newNickname,
+                // Se necessario, potresti voler aggiungere un campo come 'nicknameLastChangedAt: FieldValue.serverTimestamp()'
+                updatedAt: FieldValue.serverTimestamp() // Assicurati che il profilo abbia un campo updatedAt per scopi generali
+            });
+
+            // 3. Aggiorna il profilo pubblico dell'utente
+            // La funzione userPublicProfileSync dovrebbe già gestire l'aggiornamento
+            // del profilo pubblico quando userProfiles cambia.
+            // Tuttavia, per garantire l'aggiornamento immediato e corretto del nickname
+            // e per evitare dipendenze da tempistiche di altre funzioni trigger,
+            // è una buona pratica aggiornarlo esplicitamente anche qui.
+            // Se hai un campo 'displayName' che deve rispecchiare il nickname, aggiornalo.
+            transaction.update(userPublicProfileRef, {
+                nickname: newNickname,
+                // displayName: newNickname, // Se hai anche displayName da aggiornare
+                // Assicurati che anche il profilo pubblico abbia un campo 'updatedAt' o simile
+                // che userPublicProfileSync potrebbe usare per non sovrascrivere.
+                // Se userPublicProfileSync è robusta, questo aggiornamento qui è una sicurezza aggiuntiva.
+                // Considera la logica di userPublicProfileSync per evitare conflitti di scrittura.
+                // Un approccio potrebbe essere aggiornare un timestamp specifico qui, che userPublicProfileSync rispetta.
+                profilePublicUpdatedAt: FieldValue.serverTimestamp() // Esempio, se usi questo campo
+            });
+
+            // TODO (FUNC.1.4): Qui si potrebbe inserire la logica per creare una notifica per l'utente.
+            // Ad esempio, scrivendo un nuovo documento nella sua subcollection 'notifications'.
+            // const userNotificationsRef = userProfileRef.collection('notifications').doc();
+            // transaction.set(userNotificationsRef, {
+            // type: 'nickname_approved',
+            // title: 'Nickname Approvato!',
+            // message: `Il tuo nuovo nickname "${newNickname}" è stato approvato ed è ora attivo.`,
+            // timestamp: FieldValue.serverTimestamp(),
+            // read: false,
+            // icon: 'check_circle' // o un'icona appropriata
+            // });
+        });
+
+        logger.info(`approveNicknameChange: Richiesta ${requestId} approvata con successo per l'utente ${userId}.`);
+        return { success: true, message: 'Nickname approvato e aggiornato con successo!' };
+
+    } catch (error) {
+        logger.error(`approveNicknameChange: Errore durante l'approvazione della richiesta ${requestId} per l'utente ${userId}:`, error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
+        throw new HttpsError('internal', "Si è verificato un errore interno durante l'approvazione. Riprova.");
+    }
+});
+
+
+/**
+ * Rifiuta una richiesta di cambio nickname.
+ * Richiede che il chiamante sia un admin.
+ */
+exports.rejectNicknameChange = onCall(async (request) => {
+    logger.info('Inizio rejectNicknameChange. Dati richiesta:', request.data);
+
+    // 1. Autenticazione e Autorizzazione Admin (simile a approveNicknameChange)
+    if (!request.auth) {
+        logger.warn('rejectNicknameChange: Chiamata non autenticata.');
+        throw new HttpsError('unauthenticated', 'Devi essere autenticato per eseguire questa operazione.');
+    }
+    const adminUid = request.auth.uid;
+    const adminProfileRef = db.collection('userProfiles').doc(adminUid);
+    let isAdminUser = false;
+    try {
+        const adminProfileSnap = await adminProfileRef.get();
+        if (adminProfileSnap.exists && adminProfileSnap.data().isAdmin === true) {
+            isAdminUser = true;
+        }
+    } catch (error) {
+        logger.error('rejectNicknameChange: Errore nel recuperare il profilo admin:', error);
+        throw new HttpsError('internal', 'Errore durante la verifica dei permessi admin.');
+    }
+    if (!isAdminUser) {
+        logger.warn(`rejectNicknameChange: Utente ${adminUid} non è admin.`);
+        throw new HttpsError('permission-denied', 'Non hai i permessi per eseguire questa operazione.');
+    }
+
+    // 2. Validazione Input
+    const { requestId, userId, reason } = request.data; // 'reason' è opzionale
+    if (!requestId || typeof requestId !== 'string') {
+        throw new HttpsError('invalid-argument', 'ID richiesta non valido.');
+    }
+    if (!userId || typeof userId !== 'string') { // Aggiunto controllo userId anche se non lo usiamo per scrivere sul profilo utente
+        throw new HttpsError('invalid-argument', 'ID utente della richiesta non valido.');
+    }
+    if (reason && typeof reason !== 'string') {
+        throw new HttpsError('invalid-argument', 'Il motivo del rifiuto deve essere una stringa.');
+    }
+    const trimmedReason = reason ? reason.trim() : null;
+
+    const nicknameRequestRef = db.collection('nicknameChangeRequests').doc(requestId);
+    logger.info(`rejectNicknameChange: Admin ${adminUid} sta rifiutando la richiesta ${requestId}. Motivo: "${trimmedReason || 'Nessuno'}".`);
+
+    try {
+        await db.runTransaction(async (transaction) => {
+            const requestSnap = await transaction.get(nicknameRequestRef);
+            if (!requestSnap.exists) {
+                throw new HttpsError('not-found', 'Richiesta di cambio nickname non trovata.');
+            }
+            if (requestSnap.data().status !== 'pending') {
+                throw new HttpsError('failed-precondition', `La richiesta non è più in stato 'pending' (stato attuale: ${requestSnap.data().status}).`);
+            }
+
+            // Aggiorna la richiesta di nickname
+            const updateData = {
+                status: 'rejected',
+                processedAt: FieldValue.serverTimestamp(),
+                processedBy: adminUid,
+            };
+            if (trimmedReason) {
+                updateData.rejectionReason = trimmedReason;
+            }
+            transaction.update(nicknameRequestRef, updateData);
+
+            // Non aggiorniamo lastNicknameRequestTimestamp come da tua preferenza.
+
+            // TODO (FUNC.1.4): Qui si potrebbe inserire la logica per creare una notifica per l'utente.
+            // const userProfileRef = db.collection('userProfiles').doc(requestSnap.data().userId); // Ottieni userId dalla richiesta
+            // const userNotificationsRef = userProfileRef.collection('notifications').doc();
+            // transaction.set(userNotificationsRef, {
+            // type: 'nickname_rejected',
+            // title: 'Richiesta Nickname Rifiutata',
+            // message: `La tua richiesta per il nickname "${requestSnap.data().requestedNickname}" è stata rifiutata.` + (trimmedReason ? ` Motivo: ${trimmedReason}` : ''),
+            // timestamp: FieldValue.serverTimestamp(),
+            // read: false,
+            // icon: 'cancel' // o un'icona appropriata
+            // });
+        });
+
+        logger.info(`rejectNicknameChange: Richiesta ${requestId} rifiutata con successo.`);
+        return { success: true, message: 'Richiesta di cambio nickname rifiutata.' };
+
+    } catch (error) {
+        logger.error(`rejectNicknameChange: Errore durante il rifiuto della richiesta ${requestId}:`, error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
+        throw new HttpsError('internal', 'Si è verificato un errore interno durante il rifiuto. Riprova.');
+    }
+});

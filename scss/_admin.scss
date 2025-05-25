@@ -85,3 +85,99 @@
 .guideline-content li {
     margin-bottom: 6px;
 }
+
+// Stile base per gli item nelle liste admin (se non già definito)
+.admin-list-item {
+    border-bottom: 1px solid var(--border-color-secondary);
+    padding: 15px 10px; // Aumentato un po' il padding verticale
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    background-color: var(--surface-bg-primary); // Sfondo leggermente diverso per distinguerli
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+    .article-info { // Riusiamo il nome della classe interna per info, ma potrebbe essere rinominata
+        flex-basis: 60%; // Adatta a seconda del contenuto
+        line-height: 1.5;
+
+        strong {
+            color: var(--heading-color);
+        }
+        small {
+            display: block;
+            color: var(--text-color-muted);
+            margin-top: 4px;
+            font-size: 0.85em;
+        }
+    }
+
+    .actions {
+        flex-basis: 40%; // Adatta
+        text-align: right;
+
+        .game-button { // Stile specifico per i bottoni game-button dentro le actions admin
+            padding: 6px 12px;
+            font-size: 0.9em;
+            margin-left: 8px;
+            margin-bottom: 5px; // Per quando vanno a capo
+        }
+    }
+}
+
+// Stili specifici per gli item delle richieste di nickname
+.nickname-request-item {
+    // Qui puoi aggiungere sovrascritture o stili unici se .admin-list-item non basta
+    // Esempio:
+    // border-left: 3px solid var(--accent-color); 
+
+    .article-info { // Se vuoi adattare lo spazio per nickname-request-item
+         flex-basis: 65%;
+    }
+    .actions {
+        flex-basis: 35%;
+    }
+}
+
+// Responsive per .admin-list-item (se non già gestito globalmente per admin)
+@media (max-width: 768px) {
+    .admin-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .article-info,
+        .actions {
+            flex-basis: 100%;
+            width: 100%;
+        }
+
+        .actions {
+            text-align: left; 
+            margin-top: 15px;
+
+            .game-button {
+                margin-left: 0;
+                margin-right: 8px; 
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
+    }
+}
+
+// Stili per la sezione generale delle richieste nickname
+#nicknameRequestsSection {
+    h2 {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color-primary);
+    }
+    #nicknameRequestsList {
+        p { // Stile per i messaggi "Caricamento..." o "Nessuna richiesta..."
+            color: var(--text-color-muted);
+            font-style: italic;
+        }
+    }
+}

@@ -1,12 +1,21 @@
-# DEVELOPMENT PLAN (v4.0.12 - Sessione Athena - Ripristino e Focus Stati Modale Nickname) 🚀
+---
+title: DEVELOPMENT PLAN (v4.0.13 - Sessione Athena - Admin Nickname & Preparazione Notifiche)
+date: 2025-05-25
+version: 4.0.13
+author: AthenaDev
+status: In Corso
+---
 
-**Data Ultimo Aggiornamento:** 25 Maggio 2025 (Athena Update - Inizio Sessione Post-Ripristino)
+# DEVELOPMENT PLAN (v4.0.13 - Sessione Athena - Admin Nickname & Preparazione Notifiche) 🚀
+
+**Data Ultimo Aggiornamento:** 25 Maggio 2025 (Athena Update - Fine Sessione)
 **Visione Progetto:** Consolidare e stabilizzare la piattaforma esistente, migliorando la documentazione, la sicurezza, l'UX e risolvendo il debito tecnico. Le funzionalità attuali, come Donkey Runner e il sistema di articoli, saranno mantenute e ottimizzate, con un focus sul miglioramento dell'esperienza utente per le notifiche e la pagina profilo.
 
 **Stato Generale del Progetto:**
-Sessione precedente dedicata all'implementazione della richiesta di cambio nickname (`FUNC.1`). Abbiamo **COMPLETATO** l'interfaccia utente base in `profile.html` (`FUNC.1.1`) e la logica JavaScript per la Cloud Function (`FUNC.1.3`). L'utente ha ripristinato il codice a una versione precedente all'implementazione del contatore dinamico per il cooldown, a causa di problemi riscontrati.
-**Il focus attuale è risolvere il comportamento dell'icona di modifica nickname (che dovrebbe essere sempre visibile sul proprio profilo) e assicurare la corretta gestione dei vari stati della modale (Eleggibile, Richiesta Inviata, In Cooldown) prima di reintrodurre miglioramenti UX come il contatore.**
-Il task ausiliario (link admin nel footer) rimane completato.
+Sessione odierna dedicata alla stabilizzazione della funzionalità di richiesta cambio nickname (`FUNC.1.2`) e all'avvio dell'implementazione della gestione admin (`FUNC.1.5`).
+Abbiamo **COMPLETATO** la correzione della visibilità dell'icona di modifica nickname, la gestione robusta degli stati della modale (Eleggibile, Richiesta Inviata, In Cooldown) e l'implementazione del contatore dinamico per il cooldown.
+Abbiamo inoltre **AVVIATO** il task `FUNC.1.5` creando l'interfaccia base nel pannello admin per visualizzare le richieste di cambio nickname e la logica client-side per chiamare le future Cloud Functions di approvazione/rifiuto. Le Cloud Functions (`approveNicknameChange`, `rejectNicknameChange`) sono state definite e deployate.
+Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions per l'approvazione/rifiuto e implementare le notifiche utente (`FUNC.1.4`).
 
 **Legenda Stati:**
 
@@ -50,6 +59,7 @@ Il task ausiliario (link admin nel footer) rimane completato.
 - ➡️ **ANALYSIS-001.4.3 / SEC-RULE-003:** Mettere in sicurezza `commentCount`. (OBSOLETO)
 - ➡️ **ANALYSIS-001.4.4 / SEC-RULE-004:** Reintrodurre validazione chiavi `userIssues`. (OBSOLETO)
 - ✅ **ANALYSIS-001.4.5:** Risolto problema caricamento `firestore.rules` in emulatore.
+- ✅ **SEC-RULE-005 (Nickname Requests):** Aggiunta regola di sicurezza per `/nicknameChangeRequests` per permettere lettura agli admin e agli utenti delle proprie richieste. (COMPLETATO DURANTE SESSIONE DEL 25/05)
 
 ✅ **Task SCHEMA-001: Aggiornare `firestore-schema.md`**
 - `[x]` (Tutti i sub-task completati, inclusa l'aggiunta di `nicknameChangeRequests` e `lastNicknameRequestTimestamp`).
@@ -81,12 +91,12 @@ Il task ausiliario (link admin nel footer) rimane completato.
     - `[ ]` **NOTIF.2.1.A (Creazione Logica Cloud Function):** Generare notifica Firestore.
     - `[ ]` **NOTIF.2.1.B (Testo e Azione Notifica):** Definire testo e comportamento.
     - `[ ]` **NOTIF.2.1.C (Persistenza e Rimozione):** Gestire visibilità.
-- `[ ]` **NOTIF.2.2 (Brainstorming e Implementazione Altre Notifiche):**
-    - 💡 Primo articolo pubblicato.
-    - 💡 Badge sbloccato.
-    - 💡 Risposta a un commento.
-    - 💡 (Admin) Nuovo articolo in attesa di approvazione.
-    - 💡 (Admin) Nuova richiesta di cambio nickname (vedi FUNC.1.4).
+- `[P]` **NOTIF.2.2 (Brainstorming e Implementazione Altre Notifiche):** (IN PROGRESSO - vedi FUNC.1.4)
+    - 💡 Primo articolo pubblicato. (GESTITO DA `updateAuthorOnArticlePublish`)
+    - 💡 Badge sbloccato. (GESTITO DA `updateAuthorOnArticlePublish` e `awardGlitchzillaSlayer`)
+    - 💡 Risposta a un commento. (DA FARE)
+    - `[P]` **(Admin) Nuova richiesta di cambio nickname:** (Parzialmente coperto da FUNC.1.4, notifica automatica admin)
+    - `[P]` **(Utente) Esito richiesta cambio nickname:** (Parzialmente coperto da FUNC.1.4, vedi sotto)
 - ➡️ **NOTIF.EMAIL-TEMPLATES:** (OBSOLETO)
 
 ---
@@ -127,6 +137,12 @@ Il task ausiliario (link admin nel footer) rimane completato.
 - `[ ]` Definire uno stile base unico.
 - `[ ]` Utilizzare classi modificatrici.
 
+🆕💡 **Task REFACTOR-NOTIF-UTILS-001: Refactoring della funzione `createNotification`.** (Priorità MEDIA - *Identificato il 25/05*)
+- `[ ]` **REFACTOR-NOTIF-UTILS-001.1:** Spostare `createNotification` da `functions/index.js` a un nuovo file helper dedicato (es. `functions/notificationUtils.js`).
+- `[ ]` **REFACTOR-NOTIF-UTILS-001.2:** Esportare la funzione dal nuovo file.
+- `[ ]` **REFACTOR-NOTIF-UTILS-001.3:** Importare e utilizzare `createNotification` in `functions/index.js` e `functions/nicknameRequestHandler.js` (e ovunque serva).
+- **Motivazione:** Migliorare la modularità e riutilizzabilità della logica di creazione notifiche.
+
 ---
 
 ## 📚 PIANO DI SVILUPPO INTEGRATO 📚
@@ -147,29 +163,36 @@ Il task ausiliario (link admin nel footer) rimane completato.
 - ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** (RISOLTO)
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** (COMPLETATO)
 
-**Task FUNC.1 (Revisione 3): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA) `[P] IN PROGRESSO`
+✅ **Task FUNC.1 (Revisione 3): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA)
 - **Descrizione:** Implementare funzionalità in `profile.html` per richiedere cambio nickname.
 - `[x]` **FUNC.1.1 (UI Profilo):** Aggiunta icona e struttura modale in `profile.html`. Stili base SCSS.
-- `[P]` **FUNC.1.2 (Modale Richiesta Nickname - Logica Visualizzazione Dinamica):** Gestire stati: Iniziale, Richiesta Inviata, In Cooldown.
+- ✅ **FUNC.1.2 (Modale Richiesta Nickname - Logica Visualizzazione Dinamica):** Gestire stati: Iniziale, Richiesta Inviata, In Cooldown. (COMPLETATO DURANTE SESSIONE DEL 25/05)
     - `[x]` Implementata logica base apertura/chiusura modale e visualizzazione vista iniziale.
     - `[x]` Implementata visualizzazione vista cooldown (client-side) basata su `lastNicknameRequestTimestamp`.
-    - `[P]` **Gestione robusta stati modale (Richiesta Inviata, In Cooldown) basata sui dati Firestore e visibilità icona.** (FOCUS ATTUALE)
-        - `[ ]` Assicurare che l'icona `#requestNicknameChangeBtn` sia sempre visibile se `isOwnProfile`.
-        - `[ ]` Modificare `openNicknameChangeModal` per:
-            - `[ ]` Controllare se esiste una richiesta `pending` per l'utente su `nicknameChangeRequests`. Se sì, mostrare `nicknameChangeRequestSentView`.
-            - `[ ]` Altrimenti, controllare `getNicknameCooldownStatus`. Se in cooldown, mostrare `nicknameChangeCooldownView`.
-            - `[ ]` Altrimenti, mostrare `nicknameChangeInitialView`.
-    - `[ ]` **(DA FARE DOPO STABILIZZAZIONE STATI)** Implementare contatore dinamico (giorni, ore, minuti, secondi) per la vista `nicknameChangeCooldownView`.
+    - `[x]` **Gestione robusta stati modale (Richiesta Inviata, In Cooldown) basata sui dati Firestore e visibilità icona.**
+        - `[x]` Assicurato che l'icona `#requestNicknameChangeBtn` sia sempre visibile se `isOwnProfile`.
+        - `[x]` Modificato `openNicknameChangeModal` per:
+            - `[x]` Controllare se esiste una richiesta `pending` per l'utente su `nicknameChangeRequests`. Se sì, mostrare `nicknameChangeRequestSentView`.
+            - `[x]` Altrimenti, controllare `getNicknameCooldownStatus`. Se in cooldown, mostrare `nicknameChangeCooldownView`.
+            - `[x]` Altrimenti, mostrare `nicknameChangeInitialView`.
+    - `[x]` **Implementato contatore dinamico (giorni, ore, minuti, secondi) per la vista `nicknameChangeCooldownView`.** (COMPLETATO DURANTE SESSIONE DEL 25/05)
 - `[x]` **FUNC.1.3 (Logica Invio e Gestione Richiesta - Cloud Function):** Validazione, creazione documento in `/nicknameChangeRequests`, update `userProfiles.lastNicknameRequestTimestamp`, controllo intervallo 90 giorni, feedback tramite Cloud Function.
     - `[x]` Implementata validazione input client-side.
     - `[x]` Creata Cloud Function `requestNicknameChange` per la logica backend (unicità nickname case-insensitive, cooldown, scrittura su Firestore).
     - `[x]` Modificato `js/profile.js` per chiamare la Cloud Function.
     - `[x]` Implementato feedback tramite toast per successo/errore da Cloud Function.
-- `[ ]` **FUNC.1.4 (Notifiche):**
-    - `[ ]` Notifica all'utente per approvazione/rifiuto (da implementare quando la gestione admin è pronta).
-    - 💡 (Opzionale/Futuro) Notifica automatica agli Admin alla creazione di una richiesta (vedi NOTIF.2.2).
-- `[ ]` **FUNC.1.5 (Gestione Admin nel Pannello):** Visualizzazione richieste, possibilità di segnare come "processata".
-- **Nota:** Focus attuale su `FUNC.1.2` per la corretta visualizzazione dell'icona e gestione degli stati della modale.
+- `[P]` **FUNC.1.4 (Notifiche):** (IN PROGRESSO - Collegato a NOTIF.2.2)
+    - `[ ]` **Notifica all'utente per approvazione/rifiuto:** (DA FARE - Dipende da FUNC.1.5 e REFACTOR-NOTIF-UTILS-001)
+        - `[ ]` Modificare Cloud Functions `approveNicknameChange` e `rejectNicknameChange` per chiamare `createNotification`.
+    - `[ ]` **(Opzionale/Futuro) Notifica automatica agli Admin alla creazione di una richiesta:** (DA FARE - Valutare implementazione via Cloud Function triggerata da scrittura su `nicknameChangeRequests`)
+- `[P]` **FUNC.1.5 (Gestione Admin nel Pannello):** Visualizzazione richieste, possibilità di segnare come "processata". (IN PROGRESSO - UI Base e Logica Client implementate il 25/05)
+    - `[x]` **FUNC.1.5.A (UI Admin Dashboard):** Creata sezione in `admin-dashboard.html` per visualizzare richieste nickname pendenti.
+    - `[x]` **FUNC.1.5.B (JS Admin Dashboard - Visualizzazione):** Implementata funzione `loadNicknameChangeRequests` per caricare e mostrare le richieste da Firestore (`status: 'pending'`).
+    - `[x]` **FUNC.1.5.C (JS Admin Dashboard - Chiamata Cloud Functions):** Implementata logica in `handleApproveNicknameClick` e `handleRejectNicknameClick` per chiamare le Cloud Functions `approveNicknameChange` e `rejectNicknameChange`.
+    - `[x]` **FUNC.1.5.D (Cloud Functions - Base):** Create e deployate Cloud Functions `approveNicknameChange` e `rejectNicknameChange` con logica di base per aggiornare Firestore (status richiesta, profili utente).
+    - `[ ]` **FUNC.1.5.E (Cloud Functions - Notifiche):** Integrare la creazione di notifiche utente in `approveNicknameChange` e `rejectNicknameChange` (vedi FUNC.1.4).
+    - `[ ]` **FUNC.1.5.F (UI Admin - Feedback Dettagliato):** Migliorare il feedback per l'admin dopo approvazione/rifiuto (es. dettagli su cosa è stato aggiornato).
+- **Nota:** Focus attuale è stato su `FUNC.1.2` (completato) e avvio di `FUNC.1.5`. Prossimo passo per `FUNC.1` è completare la logica di notifica in `FUNC.1.4` e `FUNC.1.5.E`.
 
 - **Task AUTH.3: Miglioramenti Funzionali Pagina Profilo Utente (`profile.html`)**
     - `[x]` Mini-Bio Utente (AUTH.3.4).
@@ -252,10 +275,16 @@ Il task ausiliario (link admin nel footer) rimane completato.
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** COMPLETATO.
 - ✅ **UI-GB-STYLE-001 (Stili Commenti e Bottoni Condivisione ArticleViewer):** COMPLETATO.
 - ✅ **FUNC.1.1 (UI Profilo - Modale Nickname):** COMPLETATO.
+- ✅ **FUNC.1.2 (Modale Richiesta Nickname - Logica Visualizzazione Dinamica & Contatore):** COMPLETATO (Sessione 25/05).
 - ✅ **FUNC.1.3 (Logica Invio Richiesta Nickname - Cloud Function):** COMPLETATO.
+- ✅ **FUNC.1.5.A (UI Admin Dashboard - Nickname Requests):** COMPLETATO (Sessione 25/05).
+- ✅ **FUNC.1.5.B (JS Admin Dashboard - Visualizzazione Nickname Requests):** COMPLETATO (Sessione 25/05).
+- ✅ **FUNC.1.5.C (JS Admin Dashboard - Chiamata Cloud Functions Nickname):** COMPLETATO (Sessione 25/05).
+- ✅ **FUNC.1.5.D (Cloud Functions Nickname - Base Approve/Reject):** COMPLETATO (Sessione 25/05).
+- ✅ **SEC-RULE-005 (Nickname Requests):** COMPLETATO (Sessione 25/05).
 - ✅ **Task Ausiliario (Footer Admin Link):** COMPLETATO.
 
 ---
 
-// DevPlan v4.0.12 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Pronta per Riprendere.
-// Focus: Risolvere FUNC.1.2 (visibilità icona e stati modale nickname).
+// DevPlan v4.0.13 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa. Ottimi progressi!
+// Prossima Sessione: Focus su FUNC.1.4 (Notifiche Utente per Cambio Nickname) e REFACTOR-NOTIF-UTILS-001.

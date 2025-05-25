@@ -4713,6 +4713,97 @@ body.dark-mode #leaderboardTable tr:nth-child(even) {
   margin-bottom: 6px;
 }
 
+.admin-list-item {
+  border-bottom: 1px solid var(--border-color-secondary);
+  padding: 15px 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-bottom: 12px;
+  background-color: var(--surface-bg-primary);
+  border-radius: 4px;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.admin-list-item .article-info {
+  -ms-flex-preferred-size: 60%;
+      flex-basis: 60%;
+  line-height: 1.5;
+}
+.admin-list-item .article-info strong {
+  color: var(--heading-color);
+}
+.admin-list-item .article-info small {
+  display: block;
+  color: var(--text-color-muted);
+  margin-top: 4px;
+  font-size: 0.85em;
+}
+.admin-list-item .actions {
+  -ms-flex-preferred-size: 40%;
+      flex-basis: 40%;
+  text-align: right;
+}
+.admin-list-item .actions .game-button {
+  padding: 6px 12px;
+  font-size: 0.9em;
+  margin-left: 8px;
+  margin-bottom: 5px;
+}
+
+.nickname-request-item .article-info {
+  -ms-flex-preferred-size: 65%;
+      flex-basis: 65%;
+}
+.nickname-request-item .actions {
+  -ms-flex-preferred-size: 35%;
+      flex-basis: 35%;
+}
+
+@media (max-width: 768px) {
+  .admin-list-item {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+  }
+  .admin-list-item .article-info,
+  .admin-list-item .actions {
+    -ms-flex-preferred-size: 100%;
+        flex-basis: 100%;
+    width: 100%;
+  }
+  .admin-list-item .actions {
+    text-align: left;
+    margin-top: 15px;
+  }
+  .admin-list-item .actions .game-button {
+    margin-left: 0;
+    margin-right: 8px;
+  }
+  .admin-list-item .actions .game-button:last-child {
+    margin-right: 0;
+  }
+}
+#nicknameRequestsSection h2 {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color-primary);
+}
+#nicknameRequestsSection #nicknameRequestsList p {
+  color: var(--text-color-muted);
+  font-style: italic;
+}
+
 /* styles.css - Stili per Notifiche Toast */
 #toast-container {
   position: fixed;

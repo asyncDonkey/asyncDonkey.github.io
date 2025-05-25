@@ -15,6 +15,13 @@ import {
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
 
+// --- NUOVO IMPORT PER CHIAMARE LE CLOUD FUNCTIONS ---
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+
+// Inizializza Firebase Functions
+const functions = getFunctions(); 
+// --- FINE NUOVO IMPORT ---
+
 const adminAuthMessageDiv = document.getElementById('adminAuthMessage');
 const adminDashboardContentDiv = document.getElementById('adminDashboardContent');
 const pendingArticlesListDiv = document.getElementById('pendingArticlesList');
@@ -54,6 +61,8 @@ const rejectingArticleIdInput = document.getElementById('rejectingArticleId'); /
 const rejectionReasonTextarea = document.getElementById('rejectionReasonTextarea');
 const cancelRejectReasonBtn = document.getElementById('cancelRejectReasonBtn');
 // submitRejectReasonBtn sarà gestito dall'event listener del form
+
+const nicknameRequestsListDiv = document.getElementById('nicknameRequestsList');
 
 let currentArticleIdToReject = null; // Variabile per tenere traccia dell'ID durante il processo di rifiuto
 
@@ -251,6 +260,158 @@ async function handleRejectArticleClick(e) {
         // if (reasonFallback !== null) { // Se l'utente non preme annulla sul prompt
         //     await processArticleRejection(articleId, reasonFallback);
         // }
+    }
+}
+
+async function loadNicknameChangeRequests() {
+    if (!nicknameRequestsListDiv) {
+        console.warn('Elemento nicknameRequestsListDiv non trovato.');
+        return;
+    }
+    nicknameRequestsListDiv.innerHTML = '<p>Caricamento richieste cambio nickname...</p>';
+    try {
+        const requestsRef = collection(db, 'nicknameChangeRequests');
+        const q = query(requestsRef, where('status', '==', 'pending'), orderBy('requestedAt', 'asc'));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            nicknameRequestsListDiv.innerHTML = '<p>Nessuna richiesta di cambio nickname in sospeso.</p>';
+            return;
+        }
+
+        nicknameRequestsListDiv.innerHTML = ''; // Clear loading message
+        querySnapshot.forEach((docSnapshot) => {
+            const request = docSnapshot.data();
+            const requestId = docSnapshot.id;
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('admin-list-item', 'nickname-request-item'); // Riutilizziamo lo stile
+
+            const requestedDate = request.requestedAt?.toDate ?
+                                  request.requestedAt.toDate().toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Data non disponibile';
+            const userIdentifier = request.userEmail || request.userId;
+
+            itemDiv.innerHTML = `
+                <span class="article-info" style="flex-basis: 65%;"> Utente: <strong>${userIdentifier}</strong> (ID: ${request.userId})<br>
+                    <small>
+                        Nickname Attuale: <em>${request.currentNickname || 'Non specificato'}</em><br>
+                        Nuovo Nickname Richiesto: <strong>${request.requestedNickname}</strong><br>
+                        Data Richiesta: ${requestedDate}
+                    </small>
+                </span>
+                <span class="actions" style="flex-basis: 35%; text-align:right;">
+                    <button class="game-button approve-nickname-btn" data-id="${requestId}" data-userid="${request.userId}" data-newnickname="${request.requestedNickname}" style="background-color: var(--game-border-color); color: white; margin-bottom: 5px;">Approva</button>
+                    <button class="game-button reject-nickname-btn" data-id="${requestId}" data-userid="${request.userId}" data-currentnickname="${request.currentNickname}" data-requestednickname="${request.requestedNickname}" data-useremail="${userIdentifier}" style="background-color: #dc3545; color: white;">Rifiuta</button>
+                </span>
+            `;
+            nicknameRequestsListDiv.appendChild(itemDiv);
+        });
+        
+        addEventListenersToNicknameRequestButtons(); // Aggiungiamo i listener ai nuovi bottoni
+    } catch (error) {
+        console.error('Errore caricamento richieste cambio nickname:', error);
+        nicknameRequestsListDiv.innerHTML = '<p>Errore nel caricamento delle richieste. Controlla la console.</p>';
+        if (error.code === 'failed-precondition' && error.message.includes('index')) {
+            nicknameRequestsListDiv.innerHTML += '<p style="color:red;"><b>Nota:</b> Sembra mancare un indice Firestore per questa query. Controlla la console per il link per crearlo.</p>';
+        }
+    }
+}
+
+function addEventListenersToNicknameRequestButtons() {
+    document.querySelectorAll('#nicknameRequestsList .approve-nickname-btn').forEach(button => {
+        button.removeEventListener('click', handleApproveNicknameClick); // Prevenire doppi listener
+        button.addEventListener('click', handleApproveNicknameClick);
+    });
+    document.querySelectorAll('#nicknameRequestsList .reject-nickname-btn').forEach(button => {
+        button.removeEventListener('click', handleRejectNicknameClick); // Prevenire doppi listener
+        button.addEventListener('click', handleRejectNicknameClick);
+    });
+}
+
+async function handleApproveNicknameClick(e) {
+    const button = e.currentTarget;
+    const requestId = button.dataset.id;
+    const userId = button.dataset.userid;
+    const newNickname = button.dataset.newnickname;
+
+    if (!requestId || !userId || !newNickname) {
+        showToast('Dati mancanti per approvare la richiesta.', 'error');
+        return;
+    }
+
+    const confirmed = await showConfirmationModal(
+        'Conferma Approvazione Nickname',
+        `Sei sicuro di voler APPROVARE il nickname "${newNickname}" per l'utente (ID: ${userId})?`
+    );
+
+    if (!confirmed) {
+        showToast('Approvazione annullata.', 'info');
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Approvazione...';
+
+    try {
+        const approveNicknameFunction = httpsCallable(functions, 'approveNicknameChange');
+        const result = await approveNicknameFunction({ requestId, userId, newNickname });
+
+        if (result.data.success) {
+            showToast(result.data.message || 'Nickname approvato con successo!', 'success');
+            loadNicknameChangeRequests(); // Ricarica la lista per rimuovere la richiesta processata
+        } else {
+            // Questo caso potrebbe non essere mai raggiunto se la funzione lancia sempre HttpsError
+            throw new Error(result.data.message || 'Errore sconosciuto durante l\'approvazione.');
+        }
+    } catch (error) {
+        console.error('Errore durante la chiamata a approveNicknameChange:', error);
+        const errorMessage = error.message || "Si è verificato un errore. Riprova più tardi.";
+        showToast(`Errore approvazione: ${errorMessage}`, 'error');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Approva';
+    }
+}
+
+async function handleRejectNicknameClick(e) {
+    const button = e.currentTarget;
+    const requestId = button.dataset.id;
+    const userId = button.dataset.userid;
+    // const userEmail = button.dataset.useremail; // Disponibile se serve per il prompt
+    // const currentNickname = button.dataset.currentnickname; // Disponibile se serve
+    const requestedNickname = button.dataset.requestednickname; // Disponibile se serve
+
+    if (!requestId || !userId) {
+        showToast('Dati mancanti per rifiutare la richiesta.', 'error');
+        return;
+    }
+
+    const reason = prompt(`Inserisci un motivo per RIFIUTARE la richiesta per "${requestedNickname}" (utente ID: ${userId}). Lascia vuoto se nessun motivo specifico.`);
+
+    if (reason === null) { // Utente ha premuto "Annulla" sul prompt
+        showToast('Rifiuto annullato.', 'info');
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Rifiuto...';
+
+    try {
+        const rejectNicknameFunction = httpsCallable(functions, 'rejectNicknameChange');
+        const result = await rejectNicknameFunction({ requestId, userId, reason: reason.trim() });
+
+        if (result.data.success) {
+            showToast(result.data.message || 'Richiesta rifiutata con successo!', 'success');
+            loadNicknameChangeRequests(); // Ricarica la lista
+        } else {
+            throw new Error(result.data.message || 'Errore sconosciuto durante il rifiuto.');
+        }
+    } catch (error) {
+        console.error('Errore durante la chiamata a rejectNicknameChange:', error);
+        const errorMessage = error.message || "Si è verificato un errore. Riprova più tardi.";
+        showToast(`Errore rifiuto: ${errorMessage}`, 'error');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Rifiuta';
     }
 }
 
@@ -790,6 +951,7 @@ async function checkAdminPermissions() {
                 initializeGuidelineToggles();
                 loadDraftArticlesForAdmin();
                 loadRejectedArticlesForAdmin();
+                loadNicknameChangeRequests();
             } else {
                 if (adminAuthMessageDiv)
                     adminAuthMessageDiv.innerHTML = '<p>Accesso negato. <a href="index.html">Home</a></p>';
