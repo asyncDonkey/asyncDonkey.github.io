@@ -1,3 +1,16 @@
+$blue:    #0d6efd !default;
+$indigo:  #6610f2 !default;
+$cyan:    #0dcaf0 !default; // Questo è il colore "info" di Bootstrap
+
+$primary:       $blue !default;
+$secondary:     #6c757d !default; // Puoi usare valori letterali o altre variabili SASS
+$success:       #198754 !default;
+$info:          $cyan !default;   // <= LA VARIABILE SASS $info
+$warning:       #ffc107 !default;
+$danger:        #dc3545 !default;
+$light:         #f8f9fa !default;
+$dark:          #212529 !default;
+
 :root {
     /* Light Theme Palette (Default) */
     --bg-color: #f8f9fa;
@@ -37,7 +50,18 @@
     --game-button-border: #5ab9a8;
     --game-button-active-bg: rgba(0, 70, 100, 0.8);
     --game-border-color-rgb: 0, 185, 190; /* For canvas shadow */
+
+    --bs-blue: #{$blue};
+  --bs-indigo: #{$indigo};
+  --bs-cyan: #{$cyan};
+  --bs-primary: #{$primary};
+  --bs-secondary: #{$secondary};
+  --bs-success: #{$success};
+  --bs-info: #{$info}; // <= LA VARIABILE CSS --bs-info creata da $info
+  
 }
+
+
 
 body.dark-mode {
     /* Dark Theme Palette */
@@ -70,3 +94,5 @@ body.dark-mode {
     --game-button-active-bg: rgba(30, 90, 120, 0.9);
     --game-border-color-rgb: 90, 185, 168; /* For canvas shadow in dark mode */
 }
+
+

@@ -323,6 +323,9 @@ section#profile {
         // Specifico per l'icona dentro .badge-icon-item
         animation: soft-color-pulse 3s infinite ease-in-out;
     }
+    & .verified-user-icon-pulse { // Applica all'icona (.material-symbols-rounded)
+    animation: verified-user-pulse 2.5s infinite ease-in-out;
+  }
 }
 
 @keyframes soft-color-pulse {
@@ -577,6 +580,8 @@ section#profile {
 #badgeDetailModalIcon.testo-neon-arcade {
     // Se vuoi animazioni neon specifiche per la modale, aggiungile qui
 }
+
+
 .button-modal-confirm,
 .button-modal-cancel {
     display: inline-flex;

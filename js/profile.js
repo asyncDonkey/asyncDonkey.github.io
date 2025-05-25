@@ -171,6 +171,15 @@ const BADGE_DEFINITIONS = {
         isNeon: false,
         isAnimated: false,
     },
+'verified-user': {
+        name: 'Utente Verificato',
+        icon: 'verified_user',
+        description: 'Hai verificato con successo il tuo indirizzo email.',
+        color: 'var(--bs-info)', // Colore base dell'icona (Bootstrap "info" è ciano/blu chiaro)
+        isNeon: false,          // Decidiamo di non usare l'animazione neon generica
+        isAnimated: true,       // Flag per attivare l'animazione
+        animationClass: 'verified-user-icon-pulse' // Nuova classe per l'animazione specifica
+    }
 };
 
 // --- FUNZIONI DI RENDERING UI (non modificate significativamente, tranne dove `profileDataForDisplay` viene usato) ---
