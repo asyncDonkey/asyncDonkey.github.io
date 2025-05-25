@@ -529,146 +529,147 @@
     </head>
     <body class="donkey-runner-page">
         <header>
-    <div class="header-top-row">
-        <a href="index.html" style="text-decoration: none">
-            <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
-        </a>
-        <nav class="desktop-nav">
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px">
-                <li>
-                    <a href="index.html" class="auth-button nav-link-icon-only" title="Home"
-                        ><span class="material-symbols-rounded">home</span
-                        ><span class="visually-hidden">Home</span></a
-                    >
-                </li>
-                <li>
-                    <a href="donkeyRunner.html" class="auth-button nav-link-icon-text" title="Gioca a codeDash!"
-                        ><span class="material-symbols-rounded">stadia_controller</span
-                        ><span class="nav-text">codeDash!</span></a
-                    >
-                </li>
-                <li>
-                    <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica"
-                        ><span class="material-symbols-rounded">leaderboard</span
-                        ><span class="nav-text">Leaderboard</span></a
-                    >
-                </li>
-                <li class="nav-dropdown-container">
-                    <button
-                        class="auth-button nav-link-icon-text dropdown-toggle"
-                        id="communityDropdownToggle"
-                        aria-expanded="false"
-                        aria-controls="communityDropdownMenu"
-                    >
-                        <span class="material-symbols-rounded">groups</span
-                        ><span class="nav-text">Community</span
-                        ><span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
-                    </button>
-                    <ul class="dropdown-menu" id="communityDropdownMenu">
-                        <li>
-                            <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item"
-                                ><span class="material-symbols-rounded">edit_note</span
-                                ><span class="nav-text">Contribuisci</span></a
-                            >
-                        </li>
-                        <li id="navWriteArticleDropdown" style="display: none">
-                            <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item"
-                                ><span class="material-symbols-rounded">article</span
-                                ><span class="nav-text">Scrivi Articolo</span></a
-                            >
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-        <button
-            class="navbar-toggler"
-            id="navbarToggler"
-            aria-label="Toggle Navigazione"
-            aria-expanded="false"
-            aria-controls="mobileNavMenu"
-        >
-            <span class="material-symbols-rounded">menu</span>
-        </button>
-    </div>
-
-    <div class="header-controls">
-        <div id="authContainer">
-            <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login"
-                ><span class="material-symbols-rounded">login</span><span class="visually-hidden">Login</span></a
-            >
-            <a href="register.html" id="showSignupBtn" class="auth-button nav-link-icon-only" title="Registrati"
-                ><span class="material-symbols-rounded">person_add</span
-                ><span class="visually-hidden">Registrati</span></a
-            >
-        </div>
-        <div id="userProfileContainer" style="display: none; align-items: center; gap: 8px">
-            <div
-                id="notificationBellContainer"
-                style="position: relative; display: none; margin-right: 15px; align-self: center"
-            >
-                <a href="#" id="notificationBellLink" title="Notifiche">
-                    <i
-                        class="material-symbols-rounded"
-                        id="notificationIcon"
-                        style="font-size: 28px; color: var(--text-color-navbar); vertical-align: middle"
-                        >notifications</i
-                    >
-                    <span id="notificationCounter" class="notification-badge" style="display: none">0</span>
+            <div class="header-top-row">
+                <a href="index.html" style="text-decoration: none">
+                    <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
                 </a>
-                <div id="notification-panel" class="notification-panel" style="display: none">
-                    <div class="notification-panel-header">
-                        <h2 style="margin: 0; font-size: 1.1em; font-weight: 600">Notifiche</h2>
-                        <button
-                            id="mark-all-as-read-btn"
-                            class="button-link-sm"
-                            title="Segna tutte come lette"
-                            style="display: none"
-                        >
-                            Segna tutte come lette
-                        </button>
-                    </div>
-                    <ul id="notification-list" class="notification-list">
-                        <li
-                            id="no-notifications-placeholder"
-                            class="notification-item-empty"
-                            style="display: none"
-                        >
-                            <p style="margin: 0">Nessuna nuova notifica.</p>
+                <nav class="desktop-nav">
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px">
+                        <li>
+                            <a href="index.html" class="auth-button nav-link-icon-only" title="Home"
+                                ><span class="material-symbols-rounded">home</span
+                                ><span class="visually-hidden">Home</span></a
+                            >
+                        </li>
+                        <li>
+                            <a href="donkeyRunner.html" class="auth-button nav-link-icon-text" title="Gioca a codeDash!"
+                                ><span class="material-symbols-rounded">stadia_controller</span
+                                ><span class="nav-text">codeDash!</span></a
+                            >
+                        </li>
+                        <li>
+                            <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica"
+                                ><span class="material-symbols-rounded">leaderboard</span
+                                ><span class="nav-text">Leaderboard</span></a
+                            >
+                        </li>
+                        <li class="nav-dropdown-container">
+                            <button
+                                class="auth-button nav-link-icon-text dropdown-toggle"
+                                id="communityDropdownToggle"
+                                aria-expanded="false"
+                                aria-controls="communityDropdownMenu"
+                            >
+                                <span class="material-symbols-rounded">groups</span
+                                ><span class="nav-text">Community</span
+                                ><span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
+                            </button>
+                            <ul class="dropdown-menu" id="communityDropdownMenu">
+                                <li>
+                                    <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item"
+                                        ><span class="material-symbols-rounded">edit_note</span
+                                        ><span class="nav-text">Contribuisci</span></a
+                                    >
+                                </li>
+                                <li id="navWriteArticleDropdown" style="display: none">
+                                    <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item"
+                                        ><span class="material-symbols-rounded">article</span
+                                        ><span class="nav-text">Scrivi Articolo</span></a
+                                    >
+                                </li>
+                            </ul>
                         </li>
                     </ul>
-                    <div class="notification-panel-footer">
-                        <a href="/all-notifications.html" id="view-all-notifications-link" style="display: none"
-                            >Vedi tutte le notifiche</a
-                        >
+                </nav>
+                <button
+                    class="navbar-toggler"
+                    id="navbarToggler"
+                    aria-label="Toggle Navigazione"
+                    aria-expanded="false"
+                    aria-controls="mobileNavMenu"
+                >
+                    <span class="material-symbols-rounded">menu</span>
+                </button>
+            </div>
+
+            <div class="header-controls">
+                <div id="authContainer">
+                    <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login"
+                        ><span class="material-symbols-rounded">login</span
+                        ><span class="visually-hidden">Login</span></a
+                    >
+                    <a href="register.html" id="showSignupBtn" class="auth-button nav-link-icon-only" title="Registrati"
+                        ><span class="material-symbols-rounded">person_add</span
+                        ><span class="visually-hidden">Registrati</span></a
+                    >
+                </div>
+                <div id="userProfileContainer" style="display: none; align-items: center; gap: 8px">
+                    <div
+                        id="notificationBellContainer"
+                        style="position: relative; display: none; margin-right: 15px; align-self: center"
+                    >
+                        <a href="#" id="notificationBellLink" title="Notifiche">
+                            <i
+                                class="material-symbols-rounded"
+                                id="notificationIcon"
+                                style="font-size: 28px; color: var(--text-color-navbar); vertical-align: middle"
+                                >notifications</i
+                            >
+                            <span id="notificationCounter" class="notification-badge" style="display: none">0</span>
+                        </a>
+                        <div id="notification-panel" class="notification-panel" style="display: none">
+                            <div class="notification-panel-header">
+                                <h2 style="margin: 0; font-size: 1.1em; font-weight: 600">Notifiche</h2>
+                                <button
+                                    id="mark-all-as-read-btn"
+                                    class="button-link-sm"
+                                    title="Segna tutte come lette"
+                                    style="display: none"
+                                >
+                                    Segna tutte come lette
+                                </button>
+                            </div>
+                            <ul id="notification-list" class="notification-list">
+                                <li
+                                    id="no-notifications-placeholder"
+                                    class="notification-item-empty"
+                                    style="display: none"
+                                >
+                                    <p style="margin: 0">Nessuna nuova notifica.</p>
+                                </li>
+                            </ul>
+                            <div class="notification-panel-footer">
+                                <a href="/all-notifications.html" id="view-all-notifications-link" style="display: none"
+                                    >Vedi tutte le notifiche</a
+                                >
+                            </div>
+                        </div>
                     </div>
+                    <img id="headerUserAvatar" alt="User Avatar" />
+                    <span id="userDisplayName"></span>
+                    <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
+                        <span class="material-symbols-rounded">logout</span><span class="visually-hidden">Logout</span>
+                    </button>
+                </div>
+
+                <div class="header-action-buttons">
+                    <a href="index.html" class="auth-button nav-link-icon-only" title="Torna alla Home">
+                        <span class="material-symbols-rounded">home</span>
+                        <span class="visually-hidden">Home</span>
+                    </a>
+                    <button
+                        id="themeToggleBtn"
+                        aria-label="Toggle Tema Chiaro/Scuro"
+                        title="Toggle Tema"
+                        class="auth-button nav-link-icon-only"
+                    >
+                        <span class="material-symbols-rounded">light_mode</span>
+                    </button>
                 </div>
             </div>
-            <img id="headerUserAvatar" alt="User Avatar" />
-            <span id="userDisplayName"></span>
-            <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
-                <span class="material-symbols-rounded">logout</span><span class="visually-hidden">Logout</span>
-            </button>
-        </div>
-        
-        <div class="header-action-buttons">
-            <a href="index.html" class="auth-button nav-link-icon-only" title="Torna alla Home">
-                <span class="material-symbols-rounded">home</span>
-                <span class="visually-hidden">Home</span>
-            </a>
-            <button
-                id="themeToggleBtn"
-                aria-label="Toggle Tema Chiaro/Scuro"
-                title="Toggle Tema"
-                class="auth-button nav-link-icon-only"
-            >
-                <span class="material-symbols-rounded">light_mode</span>
-            </button>
-        </div>
-    </div>
 
-    <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true"></nav>
-</header>
+            <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true"></nav>
+        </header>
 
         <main>
             <div id="gameInstructions" style="text-align: center; margin-bottom: 15px">
@@ -743,7 +744,7 @@
                     </div>
                     <button type="submit" id="submitCommentBtn" class="game-button">Invia Commento</button>
                 </form>
-               <div id="commentsListContainer" data-page-id="donkeyRunnerGame" class="comments-list-section">
+                <div id="commentsListContainer" data-page-id="donkeyRunnerGame" class="comments-list-section">
                     <h3>Commenti Recenti:</h3>
                     <div id="commentsList" class="comments-list"><p>Caricamento commenti...</p></div>
                 </div>

@@ -99,7 +99,9 @@ header nav a:hover {
 
     /* --- INIZIO MODIFICHE --- */
     cursor: pointer;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    transition:
+        transform 0.2s ease-in-out,
+        box-shadow 0.2s ease-in-out;
 
     &:hover {
         transform: scale(1.05);
@@ -548,20 +550,18 @@ header .nav-link-icon-only .material-symbols-rounded {
 
     // Stile per la riga inferiore (tutti gli altri controlli)
     .header-controls {
-    display: flex;
-    justify-content: center; // <-- MODIFICATO
-    align-items: center;
-    width: 100%;
-    gap: 10px;
-  }
+        display: flex;
+        justify-content: center; // <-- MODIFICATO
+        align-items: center;
+        width: 100%;
+        gap: 10px;
+    }
 
     // Nasconde il nome utente testuale per risparmiare spazio
     #userProfileContainer #userDisplayName {
         display: none;
     }
 }
-
-
 
 /* Il tuo CSS per breakpoint più piccoli, potrebbe sovrascrivere o aggiungere dettagli */
 @media (max-width: 576px) {

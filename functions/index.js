@@ -50,10 +50,18 @@ const BADGE_DETAILS = {
 // --- HELPER FUNCTION createNotification ORA È STATA SPOSTATA in notificationUtils.js ---
 
 // --- USER PUBLIC PROFILE SYNC FUNCTIONS ---
-exports.createUserPublicProfile = onDocumentCreated('userProfiles/{userId}', userPublicProfileSync.handleCreateUserPublicProfile);
-exports.updateUserPublicProfile = onDocumentUpdated('userProfiles/{userId}', userPublicProfileSync.handleUpdateUserPublicProfile);
-exports.deleteUserPublicProfile = onDocumentDeleted('userProfiles/{userId}', userPublicProfileSync.handleDeleteUserPublicProfile);
-
+exports.createUserPublicProfile = onDocumentCreated(
+    'userProfiles/{userId}',
+    userPublicProfileSync.handleCreateUserPublicProfile
+);
+exports.updateUserPublicProfile = onDocumentUpdated(
+    'userProfiles/{userId}',
+    userPublicProfileSync.handleUpdateUserPublicProfile
+);
+exports.deleteUserPublicProfile = onDocumentDeleted(
+    'userProfiles/{userId}',
+    userPublicProfileSync.handleDeleteUserPublicProfile
+);
 
 // --- ARTICLE STATUS NOTIFICATIONS ---
 exports.handleArticleStatusNotifications = onDocumentUpdated('articles/{articleId}', async (event) => {
@@ -117,7 +125,9 @@ exports.notifyAdminsOnNewNicknameRequest = onDocumentCreated('nicknameChangeRequ
     const requestedNickname = requestData.requestedNickname;
 
     if (!requestingUserId || !requestedNickname) {
-        logger.error(`[CF:${functionName}] Missing 'userId' or 'requestedNickname' in the request document.`, { data: requestData });
+        logger.error(`[CF:${functionName}] Missing 'userId' or 'requestedNickname' in the request document.`, {
+            data: requestData,
+        });
         return;
     }
 
@@ -127,13 +137,13 @@ exports.notifyAdminsOnNewNicknameRequest = onDocumentCreated('nicknameChangeRequ
     try {
         // 1. Trova tutti gli profili degli amministratori
         const adminsSnapshot = await db.collection('userProfiles').where('isAdmin', '==', true).get();
-        
+
         if (adminsSnapshot.empty) {
             logger.warn(`[CF:${functionName}] No admin users found to notify.`);
             return;
         }
 
-        const adminIds = adminsSnapshot.docs.map(doc => doc.id);
+        const adminIds = adminsSnapshot.docs.map((doc) => doc.id);
         logger.info(`[CF:${functionName}] Found ${adminIds.length} admin(s) to notify:`, adminIds);
 
         // 2. Prepara il payload della notifica
@@ -143,11 +153,11 @@ exports.notifyAdminsOnNewNicknameRequest = onDocumentCreated('nicknameChangeRequ
             message: `L'utente ${currentNickname} ha richiesto il nuovo nickname: "${requestedNickname}".`,
             link: '/admin-dashboard.html#nickname-requests-section', // Link diretto alla sezione nel pannello admin
             icon: 'manage_accounts',
-            relatedItemId: event.params.requestId
+            relatedItemId: event.params.requestId,
         };
 
         // 3. Crea una promessa di notifica per ogni admin
-        const notificationPromises = adminIds.map(adminId => {
+        const notificationPromises = adminIds.map((adminId) => {
             // Un admin non dovrebbe ricevere una notifica per una sua stessa richiesta (caso limite).
             if (adminId === requestingUserId) {
                 logger.info(`[CF:${functionName}] Admin ${adminId} is the requester. Skipping notification for them.`);
@@ -157,14 +167,14 @@ exports.notifyAdminsOnNewNicknameRequest = onDocumentCreated('nicknameChangeRequ
         });
 
         // 4. Esegui tutte le promesse in parallelo
-        await Promise.all(notificationPromises.filter(p => p !== null));
-        logger.info(`[CF:${functionName}] Notifications for new nickname request have been sent successfully to relevant admins.`);
-
+        await Promise.all(notificationPromises.filter((p) => p !== null));
+        logger.info(
+            `[CF:${functionName}] Notifications for new nickname request have been sent successfully to relevant admins.`
+        );
     } catch (error) {
         logger.error(`[CF:${functionName}] Failed to send nickname request notifications to admins.`, { error: error });
     }
 });
-
 
 // --- BADGE AND AUTHOR UPDATE LOGIC ---
 exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}', async (event) => {
@@ -290,12 +300,10 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
     }
 });
 
-
 // --- NICKNAME CHANGE HANDLERS ---
 exports.requestNicknameChange = nicknameHandlers.requestNicknameChange;
 exports.approveNicknameChange = nicknameHandlers.approveNicknameChange;
 exports.rejectNicknameChange = nicknameHandlers.rejectNicknameChange;
-
 
 // --- AVATAR PROCESSING ---
 const AVATAR_THUMBNAIL_SIZE = 48;
@@ -318,7 +326,11 @@ exports.processUploadedAvatar = onObjectFinalized(
         if (!contentType || !contentType.startsWith('image/')) return null;
         if (!filePath || !filePath.startsWith('user-avatars/')) return null;
         if (filePath.includes('/processed/')) return null;
-        if (filePath.includes(`avatar_${AVATAR_THUMBNAIL_SIZE}.webp`) || filePath.includes(`avatar_${AVATAR_PROFILE_SIZE}.webp`)) return null;
+        if (
+            filePath.includes(`avatar_${AVATAR_THUMBNAIL_SIZE}.webp`) ||
+            filePath.includes(`avatar_${AVATAR_PROFILE_SIZE}.webp`)
+        )
+            return null;
 
         const parts = filePath.split('/');
         if (parts.length < 3) return null;
@@ -333,22 +345,37 @@ exports.processUploadedAvatar = onObjectFinalized(
         try {
             await bucket.file(filePath).download({ destination: tempLocalOriginalPath });
 
-            await sharp(tempLocalOriginalPath).resize(AVATAR_THUMBNAIL_SIZE, AVATAR_THUMBNAIL_SIZE, { fit: 'cover' }).webp({ quality: 80 }).toFile(tempLocalThumbPath);
-            await sharp(tempLocalOriginalPath).resize(AVATAR_PROFILE_SIZE, AVATAR_PROFILE_SIZE, { fit: 'cover' }).webp({ quality: 80 }).toFile(tempLocalProfilePath);
+            await sharp(tempLocalOriginalPath)
+                .resize(AVATAR_THUMBNAIL_SIZE, AVATAR_THUMBNAIL_SIZE, { fit: 'cover' })
+                .webp({ quality: 80 })
+                .toFile(tempLocalThumbPath);
+            await sharp(tempLocalOriginalPath)
+                .resize(AVATAR_PROFILE_SIZE, AVATAR_PROFILE_SIZE, { fit: 'cover' })
+                .webp({ quality: 80 })
+                .toFile(tempLocalProfilePath);
 
             const thumbStoragePath = `user-avatars/${userId}/processed/avatar_small.webp`;
             const profileStoragePath = `user-avatars/${userId}/processed/avatar_profile.webp`;
 
-            const [thumbUploadResponse] = await bucket.upload(tempLocalThumbPath, { destination: thumbStoragePath, metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' } });
-            const [profileUploadResponse] = await bucket.upload(tempLocalProfilePath, { destination: profileStoragePath, metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' } });
+            const [thumbUploadResponse] = await bucket.upload(tempLocalThumbPath, {
+                destination: thumbStoragePath,
+                metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' },
+            });
+            const [profileUploadResponse] = await bucket.upload(tempLocalProfilePath, {
+                destination: profileStoragePath,
+                metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' },
+            });
 
             await thumbUploadResponse.makePublic();
             await profileUploadResponse.makePublic();
 
-            await db.collection('userProfiles').doc(userId).update({
-                avatarUrls: { small: thumbUploadResponse.publicUrl(), profile: profileUploadResponse.publicUrl() },
-                profileUpdatedAt: FieldValue.serverTimestamp(),
-            });
+            await db
+                .collection('userProfiles')
+                .doc(userId)
+                .update({
+                    avatarUrls: { small: thumbUploadResponse.publicUrl(), profile: profileUploadResponse.publicUrl() },
+                    profileUpdatedAt: FieldValue.serverTimestamp(),
+                });
 
             await bucket.file(filePath).delete();
         } catch (error) {

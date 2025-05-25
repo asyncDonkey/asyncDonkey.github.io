@@ -15,10 +15,7 @@ import {
     serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-import {
-    getFunctions,
-    httpsCallable
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 
 import {
     getStorage,
@@ -111,7 +108,7 @@ const modalConfirmUploadBtn = document.getElementById('modalConfirmUploadBtn');
 const modalCancelUploadBtn = document.getElementById('modalCancelUploadBtn');
 
 const requestNicknameChangeBtn = document.getElementById('requestNicknameChangeBtn');
-console.log('[Athena DEBUG] requestNicknameChangeBtn all\'avvio dello script:', requestNicknameChangeBtn); // <--- AGGIUNGI QUI
+console.log("[Athena DEBUG] requestNicknameChangeBtn all'avvio dello script:", requestNicknameChangeBtn); // <--- AGGIUNGI QUI
 const requestNicknameChangeModal = document.getElementById('requestNicknameChangeModal');
 const closeNicknameChangeModalBtn = document.getElementById('closeNicknameChangeModalBtn');
 const nicknameChangeModalTitle = document.getElementById('nicknameChangeModalTitle');
@@ -142,8 +139,6 @@ const MAX_BIO_CHARS = 300;
 let selectedAvatarFile = null;
 const MAX_AVATAR_SIZE_MB = 5;
 const DEFAULT_AVATAR_IMAGE_PATH = 'assets/images/default-avatar.png'; // Definisci il percorso del tuo avatar di default
-
-
 
 const storage = getStorage();
 const functions = getFunctions();
@@ -302,7 +297,8 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         } else if (!isOwnProfile && data.avatarUrls && data.avatarUrls.thumbnail) {
             mainAvatarUrl = data.avatarUrls.thumbnail;
             cacheBusterTimestamp = data.profilePublicUpdatedAt;
-        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) { // Fallback
+        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) {
+            // Fallback
             mainAvatarUrl = data.avatarUrls.small;
             cacheBusterTimestamp = data.profileUpdatedAt;
         }
@@ -789,13 +785,13 @@ async function checkForPendingNicknameChange(userId) {
     if (!userId) return false;
     const requestsRef = collection(db, 'nicknameChangeRequests');
     const q = query(requestsRef, where('userId', '==', userId), where('status', '==', 'pending'));
-    
+
     try {
         const querySnapshot = await getDocs(q);
         return !querySnapshot.empty; // Se non è vuoto, c'è almeno una richiesta pendente
     } catch (error) {
-        console.error("Errore nel controllo delle richieste di nickname pendenti:", error);
-        showToast("Errore nel verificare lo stato della richiesta. Riprova.", "error");
+        console.error('Errore nel controllo delle richieste di nickname pendenti:', error);
+        showToast('Errore nel verificare lo stato della richiesta. Riprova.', 'error');
         return false; // In caso di errore, assumiamo che non ci siano richieste per sicurezza.
     }
 }
@@ -819,7 +815,7 @@ function startCooldownTimer(cooldownEndDate) {
 
         if (distance < 0) {
             clearInterval(nicknameCooldownInterval);
-            timerElement.textContent = "Cooldown terminato! Puoi fare una nuova richiesta.";
+            timerElement.textContent = 'Cooldown terminato! Puoi fare una nuova richiesta.';
             // Potremmo anche chiudere la modale e riaprirla per mostrare la vista giusta
             closeNicknameChangeModal();
             openNicknameChangeModal(); // Riaprendola, la logica mostrerà la vista corretta
@@ -834,7 +830,6 @@ function startCooldownTimer(cooldownEndDate) {
         timerElement.textContent = `${days}g ${hours}h ${minutes}m ${seconds}s`;
     }, 1000);
 }
-
 
 // NUOVA FUNZIONE HELPER per calcolare lo stato del cooldown
 /**
@@ -867,10 +862,11 @@ function renderNicknameModalView(viewToShowID) {
         nicknameChangeInitialView,
         nicknameChangeRequestSentView,
         nicknameChangeCooldownView,
-        nicknameChangeProcessedView
+        nicknameChangeProcessedView,
     ];
-    views.forEach(view => {
-        if (view) { // Controlla che l'elemento esista
+    views.forEach((view) => {
+        if (view) {
+            // Controlla che l'elemento esista
             view.style.display = view.id === viewToShowID ? 'block' : 'none';
         }
     });
@@ -882,11 +878,11 @@ function renderNicknameModalView(viewToShowID) {
  */
 async function openNicknameChangeModal() {
     if (!requestNicknameChangeModal || !loggedInUser) {
-        showToast("Errore: modale o utente non disponibile.", "error");
+        showToast('Errore: modale o utente non disponibile.', 'error');
         return;
     }
     if (!profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
-        showToast("Puoi richiedere il cambio nickname solo dal tuo profilo.", "warning");
+        showToast('Puoi richiedere il cambio nickname solo dal tuo profilo.', 'warning');
         return;
     }
 
@@ -903,7 +899,7 @@ async function openNicknameChangeModal() {
     const cooldownStatus = getNicknameCooldownStatus(profileDataForDisplay);
     if (cooldownStatus.inCooldown) {
         renderNicknameModalView('nicknameChangeCooldownView');
-        
+
         // --- MODIFICA CHIAVE: AVVIO TIMER ---
         const lastRequestDate = profileDataForDisplay.lastNicknameRequestTimestamp.toDate();
         const cooldownEndDate = new Date(lastRequestDate.getTime() + NICKNAME_CHANGE_COOLDOWN_MS);
@@ -921,7 +917,6 @@ async function openNicknameChangeModal() {
     }
 }
 
-
 /**
  * Chiude la modale per la richiesta di cambio nickname.
  */
@@ -929,7 +924,7 @@ function closeNicknameChangeModal() {
     if (requestNicknameChangeModal) {
         requestNicknameChangeModal.style.display = 'none';
     }
-    
+
     // --- MODIFICA CHIAVE: INTERRUZIONE TIMER ---
     // Questo è FONDAMENTALE per evitare che il timer continui a girare in background.
     if (nicknameCooldownInterval) {
@@ -943,8 +938,14 @@ function closeNicknameChangeModal() {
  * Gestisce l'invio della richiesta di cambio nickname.
  */
 async function handleSubmitNicknameChangeRequest() {
-    if (!loggedInUser || !profileDataForDisplay || !newNicknameInput || !nicknameChangeError || !submitNicknameChangeRequestBtn) {
-        showToast("Errore: componenti UI o dati utente mancanti.", "error");
+    if (
+        !loggedInUser ||
+        !profileDataForDisplay ||
+        !newNicknameInput ||
+        !nicknameChangeError ||
+        !submitNicknameChangeRequestBtn
+    ) {
+        showToast('Errore: componenti UI o dati utente mancanti.', 'error');
         return;
     }
 
@@ -952,7 +953,7 @@ async function handleSubmitNicknameChangeRequest() {
 
     // La validazione client-side rimane utile per un feedback immediato
     if (requestedNickname.length < 3 || requestedNickname.length > 20) {
-        nicknameChangeError.textContent = "Il nickname deve avere tra 3 e 20 caratteri.";
+        nicknameChangeError.textContent = 'Il nickname deve avere tra 3 e 20 caratteri.';
         newNicknameInput.focus();
         return;
     }
@@ -963,7 +964,7 @@ async function handleSubmitNicknameChangeRequest() {
         return;
     }
     if (requestedNickname === profileDataForDisplay.nickname) {
-        nicknameChangeError.textContent = "Il nuovo nickname deve essere diverso da quello attuale.";
+        nicknameChangeError.textContent = 'Il nuovo nickname deve essere diverso da quello attuale.';
         newNicknameInput.focus();
         return;
     }
@@ -974,37 +975,34 @@ async function handleSubmitNicknameChangeRequest() {
 
     // Chiama la Cloud Function
     const requestNicknameChange = httpsCallable(functions, 'requestNicknameChange');
-    
+
     try {
         const result = await requestNicknameChange({ requestedNickname: requestedNickname });
-        
+
         if (result.data.success) {
             showToast('Richiesta di cambio nickname inviata con successo!', 'success');
             renderNicknameModalView('nicknameChangeRequestSentView');
-            
+
             // Nascondi l'icona di modifica perché l'utente entra in cooldown/richiesta pendente
             if (requestNicknameChangeBtn) {
                 requestNicknameChangeBtn.style.display = 'none';
             }
         } else {
-             // Questo caso non dovrebbe verificarsi se la funzione lancia sempre un HttpsError
-             throw new Error(result.data.message || "Errore sconosciuto dalla funzione.");
+            // Questo caso non dovrebbe verificarsi se la funzione lancia sempre un HttpsError
+            throw new Error(result.data.message || 'Errore sconosciuto dalla funzione.');
         }
-
     } catch (error) {
         console.error("Errore durante la chiamata alla funzione 'requestNicknameChange':", error);
-        
+
         // La libreria client di Firebase Functions converte gli HttpsError in un oggetto con 'code' e 'message'
-        const errorMessage = error.message || "Si è verificato un errore. Riprova più tardi.";
+        const errorMessage = error.message || 'Si è verificato un errore. Riprova più tardi.';
         nicknameChangeError.textContent = errorMessage;
         showToast(errorMessage, 'error');
-
     } finally {
         submitNicknameChangeRequestBtn.disabled = false;
         submitNicknameChangeRequestBtn.textContent = 'Invia Richiesta';
     }
 }
-
 
 /**
  * Inizializza i listener per la modale di cambio nickname.
@@ -1016,10 +1014,12 @@ function initializeNicknameChangeModalListeners() {
     if (closeNicknameChangeModalBtn) {
         closeNicknameChangeModalBtn.addEventListener('click', closeNicknameChangeModal);
     }
-    if (cancelNicknameChangeRequestBtn) { // Bottone "Annulla" nella vista iniziale
+    if (cancelNicknameChangeRequestBtn) {
+        // Bottone "Annulla" nella vista iniziale
         cancelNicknameChangeRequestBtn.addEventListener('click', closeNicknameChangeModal);
     }
-    if (requestNicknameChangeModal) { // Chiudi cliccando fuori dalla modale
+    if (requestNicknameChangeModal) {
+        // Chiudi cliccando fuori dalla modale
         requestNicknameChangeModal.addEventListener('click', (event) => {
             if (event.target === requestNicknameChangeModal) {
                 closeNicknameChangeModal();

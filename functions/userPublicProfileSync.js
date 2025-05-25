@@ -77,7 +77,9 @@ async function handleUpdateUserPublicProfile(event) {
     logger.info(`[CF:handleUpdateUserPublicProfile] Triggered for userId: ${userId}`);
 
     if (!event.data || !event.data.before || !event.data.after) {
-        logger.warn(`[CF:handleUpdateUserPublicProfile] Event data, before, or after snapshot is missing for userId: ${userId}. Exiting.`);
+        logger.warn(
+            `[CF:handleUpdateUserPublicProfile] Event data, before, or after snapshot is missing for userId: ${userId}. Exiting.`
+        );
         return null;
     }
 
@@ -85,7 +87,9 @@ async function handleUpdateUserPublicProfile(event) {
     const oldData = event.data.before.data();
 
     if (!newData || !oldData) {
-        logger.warn(`[CF:handleUpdateUserPublicProfile] Snapshot data (newData or oldData) for ${userId} is missing after access. Exiting.`);
+        logger.warn(
+            `[CF:handleUpdateUserPublicProfile] Snapshot data (newData or oldData) for ${userId} is missing after access. Exiting.`
+        );
         return null;
     }
 
@@ -106,8 +110,10 @@ async function handleUpdateUserPublicProfile(event) {
     for (const field of relevantFields) {
         if (JSON.stringify(newData[field]) !== JSON.stringify(oldData[field])) {
             changed = true;
-            logger.info(`[CF:handleUpdateUserPublicProfile] Field '${field}' changed for user ${userId}. Triggering update.`);
-            break; 
+            logger.info(
+                `[CF:handleUpdateUserPublicProfile] Field '${field}' changed for user ${userId}. Triggering update.`
+            );
+            break;
         }
     }
 

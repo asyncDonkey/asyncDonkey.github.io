@@ -36,6 +36,7 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 ## 🎯 FASE 0: INFRASTRUTTURA E DEPLOYMENT 🎯
 
 **Task INFRA-001: Migrazione Hosting su Firebase Hosting**
+
 - **Descrizione:** Completare la migrazione del sito da GitHub Pages a Firebase Hosting per sfruttare meglio l'integrazione con gli altri servizi Firebase (Auth, Firestore, Functions).
 - `[P]` **Stato Generale:** Inizializzazione e test locali completati.
 - `[x]` **INFRA-001.1:** Revisionare la documentazione `firebaseHostingMigration.md`.
@@ -54,6 +55,7 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 ## 🎯 FASE 1: STABILIZZAZIONE E DOCUMENTAZIONE (PRIORITÀ CRITICA) 🎯
 
 **Task ANALYSIS-001.4 Follow-up: Implementare le raccomandazioni dell'analisi firestore.rules.**
+
 - ✅ **ANALYSIS-001.4.1 / SEC-RULE-001:** Revisionare e restringere l'accesso in lettura a `/userProfiles/{userId}`.
 - ⚠️ **ANALYSIS-001.4.2 / SEC-RULE-002:** Implementare validazione completa per `externalLinks`. (ON HOLD / DECISIONE PRESA)
 - ➡️ **ANALYSIS-001.4.3 / SEC-RULE-003:** Mettere in sicurezza `commentCount`. (OBSOLETO)
@@ -62,6 +64,7 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 - ✅ **SEC-RULE-005 (Nickname Requests):** Aggiunta regola di sicurezza per `/nicknameChangeRequests` per permettere lettura agli admin e agli utenti delle proprie richieste. (COMPLETATO DURANTE SESSIONE DEL 25/05)
 
 ✅ **Task SCHEMA-001: Aggiornare `firestore-schema.md`**
+
 - `[x]` (Tutti i sub-task completati, inclusa l'aggiunta di `nicknameChangeRequests` e `lastNicknameRequestTimestamp`).
 
 ---
@@ -69,6 +72,7 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 ## 💈 TASK NAVBAR (PRIORITÀ CRITICA) 💈
 
 ✅ **Task NAV.1: Refactoring Completo Funzionalità e UI Navbar**
+
 - `[x]` (TUTTI I SUB-TASK COMPLETATI)
 
 ---
@@ -83,9 +87,11 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 ## ✨ TASK DI RIFINITURA E NUOVE FUNZIONALITÀ ✨
 
 ✅ **Task NOTIF.1: Miglioramento UX Pannello Notifiche Popup**
+
 - `[x]` (Tutti i sub-task completati)
 
 🆕 **Task NOTIF.2: Espansione Tipi di Notifiche In-App**
+
 - **Descrizione:** Introdurre nuove notifiche per migliorare il coinvolgimento.
 - `[ ]` **NOTIF.2.1 (Notifica Conferma Email):**
     - `[ ]` **NOTIF.2.1.A (Creazione Logica Cloud Function):** Generare notifica Firestore.
@@ -104,26 +110,32 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 ## 💅 MIGLIORAMENTI STRUTTURALI E UI/UX 💅
 
 ✅ **Task CSS-REFACTOR-001: Refactoring CSS con SCSS**
+
 - `[x]` (Tutti i sub-task completati)
 
 ✅ **Task UI-FIX-001: Correzione Visualizzazione Dati Utente in Mini-Leaderboards**
+
 - `[x]` (Tutti i sub-task completati)
 
 ✅ **Task D.9: Migliorare UX per Utente Non Registrato.**
+
 - `[x]` (Tutti i sub-task completati eccetto D.9.5)
     - `[ ]` **D.9.5 (Coerenza Modali e Notifiche):** Verificare modali di login e header notifiche. (Priorità MEDIA-BASSA)
 
 🆕 **Task UI-ICON-UPDATE-001: Aggiornamento Icone con Material Symbols**
+
 - `[x]` **UI-ICON-UPDATE-001.1 (Upvote Issue):** Completato.
 - `[x]` **UI-ICON-UPDATE-001.2 (Contribute.html Headers):** Completato.
 - `[ ]` **UI-ICON-UPDATE-001.3 (Altre Sezioni):** Valutare altre aree.
 
 ✅ **Task UI-GB-STYLE-001: Rivedere stile commenti nel Guestbook**
+
 - `[x]` (Tutti i sub-task completati)
 
 ➡️ ✨ **Task PROF-STYLE.1: Rendere quadrati i contenitori avatar.** (OBSOLETO)
 
 ✅ ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo.**
+
 - `[x]` (Tutti i sub-task completati)
 
 ---
@@ -133,11 +145,13 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 ➡️ **Task TECH-DEBT-001: Unificare Sistemi di Gestione Commenti.** (OBSOLETO)
 
 🆕💡 **Task TECH-DEBT-BTN-STYLE-001: Unificare e razionalizzare stili dei bottoni `.game-button`.** (Priorità BASSA)
+
 - `[ ]` Analizzare le definizioni multiple.
 - `[ ]` Definire uno stile base unico.
 - `[ ]` Utilizzare classi modificatrici.
 
-🆕💡 **Task REFACTOR-NOTIF-UTILS-001: Refactoring della funzione `createNotification`.** (Priorità MEDIA - *Identificato il 25/05*)
+🆕💡 **Task REFACTOR-NOTIF-UTILS-001: Refactoring della funzione `createNotification`.** (Priorità MEDIA - _Identificato il 25/05_)
+
 - `[ ]` **REFACTOR-NOTIF-UTILS-001.1:** Spostare `createNotification` da `functions/index.js` a un nuovo file helper dedicato (es. `functions/notificationUtils.js`).
 - `[ ]` **REFACTOR-NOTIF-UTILS-001.2:** Esportare la funzione dal nuovo file.
 - `[ ]` **REFACTOR-NOTIF-UTILS-001.3:** Importare e utilizzare `createNotification` in `functions/index.js` e `functions/nicknameRequestHandler.js` (e ovunque serva).
@@ -148,6 +162,7 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 ## 📚 PIANO DI SVILUPPO INTEGRATO 📚
 
 ### Sezione A: Gestione Contributi e Moderazione 🖋️
+
 - `[x]` A.4.2.6.A (Admin UI): Textarea per `rejectionReason`.
 - **Task A.5: Sistema di Notifiche In-App (Base).**
     - `[x]` (Funzionalità base completate)
@@ -156,14 +171,16 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 ### Sezione AUTH: Gestione Autenticazione e Profilo Utente ✨👤
 
 **Task PROF.1: Risoluzione Problemi e Miglioramenti Pagina Profilo (`profile.html`)**
+
 - ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** (RISOLTO)
 - `[P]` **PROF.1.2 (Layout Riconoscimenti - Desktop & Mobile):** (Priorità MEDIA)
     - ✅ **PROF.1.2.A:** Corretto allineamento sezione badge.
-    - `[ ]` **PROF.1.2.B:** Valutare/implementare sezione dedicata per i badge. (*Decisione Utente 24/05/2025: Per ora va bene così*).
+    - `[ ]` **PROF.1.2.B:** Valutare/implementare sezione dedicata per i badge. (_Decisione Utente 24/05/2025: Per ora va bene così_).
 - ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** (RISOLTO)
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** (COMPLETATO)
 
 ✅ **Task FUNC.1 (Revisione 3): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA)
+
 - **Descrizione:** Implementare funzionalità in `profile.html` per richiedere cambio nickname.
 - `[x]` **FUNC.1.1 (UI Profilo):** Aggiunta icona e struttura modale in `profile.html`. Stili base SCSS.
 - ✅ **FUNC.1.2 (Modale Richiesta Nickname - Logica Visualizzazione Dinamica):** Gestire stati: Iniziale, Richiesta Inviata, In Cooldown. (COMPLETATO DURANTE SESSIONE DEL 25/05)
@@ -209,6 +226,7 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
     - ➡️ **Sub-task AUTH.3.7: Sistema di Amicizie/Followers.** (OBSOLETO)
 
 ### Sezione C: Funzionalità Specifiche Giochi/Piattaforma 🎮 & Contenuti Esistenti
+
 - ✅ **Task C.1: Gestione Avatar Utente Personalizzato.**
 - **Task C.2: Donkey Runner (Gioco Esistente)**
     - `[x]` C.2.4 (Donkey Runner): Leggibilità testi e usabilità form fullscreen.
@@ -228,6 +246,7 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
 - ➡️ **Task C.NEW_FEATURE_HP_ACTIVITY:** (SUPERSEDED)
 
 ### Sezione D: Miglioramenti UI/UX e Ottimizzazioni Generali ✨
+
 - `[x]` Correzione ESLint `showConfirmationModal` in `js/profile.js`.
 - `[x]` Task D.3.B.6: Revisionare e aggiornare README.md.
 - `[ ]` Sub-task D.1.A.1: Aggiungere notifiche toast per conferma/errore like. (Priorità MEDIA-BASSA).
@@ -238,12 +257,15 @@ Il prossimo passo per `FUNC.1` sarà completare la logica delle Cloud Functions 
     - ➡️ **D.LEADERBOARD-UX.3:** Visualizzazione compatta/espandibile. (OBSOLETO)
 
 ### Sezione Sicurezza & Stabilità 🛡️
+
 - ✅ **Task ANALYSIS-001.4: Analisi storage.rules e firestore.rules.** (ANALISI COMPLETATA)
 
 ### Sezione E: Ricerca e Sviluppo a Lungo Termine 🔬📈
+
 - ✅ **Task E.4: Adozione e Implementazione Cloud Functions.** (COMPLETATO)
 
 ### Sezione F: Fase di Perfezionamento Finale (Polish) 💅🎨
+
 - `[x]` F.2.4.3.A.1 (Icone Like/Commenti Homepage).
 - `[x]` F.2.4.3.A.2 (Icone Portal Card Homepage).
 

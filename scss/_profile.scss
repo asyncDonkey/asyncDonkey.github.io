@@ -1,6 +1,6 @@
 /* ===== Sezione Profilo Utente (profile.html) ===== */
 section#profile {
-    max-width: 800px; 
+    max-width: 800px;
     margin-left: auto;
     margin-right: auto;
     padding: 20px;
@@ -8,10 +8,11 @@ section#profile {
     // Assicura che i figli diretti della section#profile siano blocchi e abbiano spazio sotto
     // Questo include #badgesSection, #profileContent (o il suo wrapper se ne hai uno), #myArticlesSection
     > div,
-    > section { // Si applica a #badgesSection, #profileContentContainer (ipotetico), #myArticlesSection, ecc.
+    > section {
+        // Si applica a #badgesSection, #profileContentContainer (ipotetico), #myArticlesSection, ecc.
         width: 100%;
-        margin-bottom: 35px; 
-        
+        margin-bottom: 35px;
+
         &:last-child {
             margin-bottom: 0;
         }
@@ -19,18 +20,18 @@ section#profile {
 
     // Titolo principale della sezione profilo (h2#profileSectionTitle)
     > h2#profileSectionTitle {
-        font-size: 1.8em; 
+        font-size: 1.8em;
         color: var(--heading-color);
         margin-bottom: 25px;
         padding-bottom: 10px;
         border-bottom: 1px solid var(--border-color-primary);
     }
-    
+
     // Stile base per gli H3 diretti figli di #profile o dentro i suoi contenitori principali
-    h3 { 
-        margin-top: 0; 
+    h3 {
+        margin-top: 0;
         margin-bottom: 15px;
-        font-size: 1.4em; 
+        font-size: 1.4em;
         color: var(--heading-color);
         padding-bottom: 8px;
         border-bottom: 1px solid var(--border-color-secondary);
@@ -40,49 +41,50 @@ section#profile {
 // Contenitore per i contenuti specifici del profilo (dettagli, bio, stato, link)
 // Assumendo che questo ID esista o che tu abbia un wrapper simile
 #profileContentContainer, // Se usi il wrapper che ti ho mostrato nell'HTML
-#profileContent { // Fallback se #profileContent è ancora il contenitore diretto
+#profileContent {
+    // Fallback se #profileContent è ancora il contenitore diretto
     width: 100%; // Assicura che occupi tutta la larghezza disponibile
-    
+
     // Assicura che i figli diretti (es. .profile-main-details-container, .profile-input-box) siano blocchi
-    > div, 
-    > section { // Si applica a .profile-main-details-container, .profile-input-box
+    > div,
+    > section {
+        // Si applica a .profile-main-details-container, .profile-input-box
         width: 100%;
         margin-bottom: 25px; // Spazio tra questi blocchi interni
-         &:last-child {
+        &:last-child {
             margin-bottom: 0;
         }
     }
 }
 
-
 // Contenitore dei dettagli principali (avatar, info testuali)
 .profile-main-details-container {
     display: flex;
-    align-items: flex-start; 
+    align-items: flex-start;
     flex-wrap: wrap; // Permette di andare a capo su schermi piccoli
-    gap: 25px; 
+    gap: 25px;
     // margin-bottom: 30px; // Spazio gestito dal genitore #profileContent > div
-    
+
     .profile-avatar-column {
-        flex-basis: 130px; 
+        flex-basis: 130px;
         flex-shrink: 0;
-        text-align: center; 
+        text-align: center;
 
         #profileAvatar {
             display: block;
             width: 120px;
             height: 120px;
             border-radius: 8px;
-            image-rendering: pixelated; 
-            background-color: var(--surface-bg-secondary); 
+            image-rendering: pixelated;
+            background-color: var(--surface-bg-secondary);
             border: 2px solid var(--border-color-secondary);
             object-fit: cover;
-            margin: 0 auto 10px auto; 
+            margin: 0 auto 10px auto;
         }
 
-        #avatarUploadSection { 
-            margin-top: 10px; 
-            .game-button.small { 
+        #avatarUploadSection {
+            margin-top: 10px;
+            .game-button.small {
                 padding: 8px 12px;
                 font-size: 0.9em;
             }
@@ -91,22 +93,23 @@ section#profile {
 
     #profileDetailsDisplay {
         flex-grow: 1;
-        min-width: 250px; 
+        min-width: 250px;
 
-        h3 { // Titolo "Dettagli Utente"
+        h3 {
+            // Titolo "Dettagli Utente"
             margin-bottom: 12px;
-            font-size: 1.2em; 
-            border-bottom: none; 
+            font-size: 1.2em;
+            border-bottom: none;
             padding-bottom: 0;
-            color: var(--text-color-primary); 
+            color: var(--text-color-primary);
         }
 
         p {
             margin-bottom: 10px;
-            font-size: 1em; 
+            font-size: 1em;
             strong {
                 color: var(--text-color-primary);
-                font-weight: 600; 
+                font-weight: 600;
             }
         }
     }
@@ -133,10 +136,11 @@ section#profile {
     width: 100%; // Assicura che occupi tutta la larghezza
     box-sizing: border-box; // Importante se usi padding e width 100%
 
-    h3 { // Titoli interni ai box (Mini-Bio, Stato d'Animo, Link Esterni)
-        margin-top:0; // Sovrascrive l'h3 generale di section#profile se necessario
+    h3 {
+        // Titoli interni ai box (Mini-Bio, Stato d'Animo, Link Esterni)
+        margin-top: 0; // Sovrascrive l'h3 generale di section#profile se necessario
         margin-bottom: 15px;
-        font-size: 1.2em; 
+        font-size: 1.2em;
         padding-bottom: 8px;
         border-bottom: 1px solid var(--border-color-light);
     }
@@ -154,19 +158,20 @@ section#profile {
         color: var(--text-color-secondary);
         font-style: italic;
 
-        &:has(p) { 
+        &:has(p) {
             padding: 0;
             border: none;
             background-color: transparent;
             min-height: auto;
-            font-style: normal; 
-             p {
-                color: var(--text-color-muted); 
-             }
+            font-style: normal;
+            p {
+                color: var(--text-color-muted);
+            }
         }
     }
 
-    .input-field { // Si applica sia a input[type=text] che a textarea
+    .input-field {
+        // Si applica sia a input[type=text] che a textarea
         width: 100%;
         padding: 12px;
         border: 1px solid var(--input-border-color, var(--border-color-primary));
@@ -175,9 +180,11 @@ section#profile {
         color: var(--text-color-primary);
         font-family: inherit;
         font-size: 1em;
-        transition: border-color 0.2s, box-shadow 0.2s;
+        transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
         resize: vertical; // Per textarea
-        margin-bottom: 10px; 
+        margin-bottom: 10px;
         box-sizing: border-box;
 
         &:focus {
@@ -190,43 +197,48 @@ section#profile {
             color: var(--text-color-muted);
         }
     }
-    
+
     // Layout per il form dello Stato d'Animo
     #updateStatusForm {
-        .input-action-container { // Questo div non è più strettamente necessario se impiliamo di default
+        .input-action-container {
+            // Questo div non è più strettamente necessario se impiliamo di default
             // Se vuoi ancora il div per raggruppare input e bottone semanticamente:
             // display: flex; // Rimosso per impilare
-            // flex-direction: column; 
-            // align-items: stretch;   
+            // flex-direction: column;
+            // align-items: stretch;
             // gap: 10px;
         }
         // L'input field prenderà stile da .input-field
         // #statusMessageInput { margin-bottom: 10px; // Spazio prima del bottone }
 
-        .game-button { // Bottone "Aggiorna" per lo stato
-             width: 100%; 
-             margin-top: 0; // Se l'input ha già margin-bottom
+        .game-button {
+            // Bottone "Aggiorna" per lo stato
+            width: 100%;
+            margin-top: 0; // Se l'input ha già margin-bottom
         }
-         .form-actions { // Contenitore per il messaggio di update
-            justify-content: center; 
-            min-height: 1.5em; 
+        .form-actions {
+            // Contenitore per il messaggio di update
+            justify-content: center;
+            min-height: 1.5em;
             margin-top: 10px; // Spazio sopra il messaggio
-         }
+        }
     }
 
-    .form-actions { // Stile generale per i contenitori di azioni dei form
-        margin-top: 15px; 
+    .form-actions {
+        // Stile generale per i contenitori di azioni dei form
+        margin-top: 15px;
         display: flex;
         justify-content: flex-end;
         align-items: center;
         gap: 15px;
     }
 
-    #updateBioForm .form-actions { // Specifico per la Bio
+    #updateBioForm .form-actions {
+        // Specifico per la Bio
         justify-content: space-between;
-         .game-button { 
-            min-width: 120px; 
-         }
+        .game-button {
+            min-width: 120px;
+        }
     }
 
     #bioCharCount {
@@ -238,14 +250,14 @@ section#profile {
         font-size: 0.9em;
         color: var(--text-color-muted);
         font-style: italic;
-        flex-grow: 1; 
+        flex-grow: 1;
     }
 
     @media (max-width: 768px) {
         // Il form dello stato è già impilato di default ora.
 
         #updateBioForm .form-actions {
-            flex-direction: column-reverse; 
+            flex-direction: column-reverse;
             align-items: stretch;
             gap: 12px;
 
@@ -265,11 +277,12 @@ section#profile {
     // border-bottom e padding-bottom sono gestiti da section#profile > div
     // margin-bottom è gestito da section#profile > div
 
-    h3 { // Titolo "Riconoscimenti Ottenuti"
-        font-size: 1.2em; 
-        border-bottom: none; 
+    h3 {
+        // Titolo "Riconoscimenti Ottenuti"
+        font-size: 1.2em;
+        border-bottom: none;
         padding-bottom: 0;
-        margin-bottom: 15px; 
+        margin-bottom: 15px;
     }
 }
 
@@ -277,7 +290,7 @@ section#profile {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    justify-content: flex-start; 
+    justify-content: flex-start;
 }
 
 .badge-icon-item {
@@ -306,38 +319,45 @@ section#profile {
         line-height: 1;
     }
 
-    & .author-rookie-icon-animated { // Specifico per l'icona dentro .badge-icon-item
+    & .author-rookie-icon-animated {
+        // Specifico per l'icona dentro .badge-icon-item
         animation: soft-color-pulse 3s infinite ease-in-out;
     }
 }
 
 @keyframes soft-color-pulse {
     0%,
-    100% { color: var(--bs-teal); } // Colore come da palette originale per 'author-rookie'
-    50% { color: #66d9b8; } // Tonalità più chiara per l'effetto pulse
+    100% {
+        color: var(--bs-teal);
+    } // Colore come da palette originale per 'author-rookie'
+    50% {
+        color: #66d9b8;
+    } // Tonalità più chiara per l'effetto pulse
 }
 
 /* Stili per la sezione "I Miei Articoli" */
 #myArticlesSection {
-    background-color: transparent; 
-    padding: 0; 
-    border: none; 
-    margin-top: 0; 
-    
-    h3 { // Titolo "I Miei Articoli" (prima era h2)
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    margin-top: 0;
+
+    h3 {
+        // Titolo "I Miei Articoli" (prima era h2)
         // Stili già definiti in section#profile h3, ma puoi sovrascrivere se necessario
-        font-size: 1.3em; 
+        font-size: 1.3em;
         margin-bottom: 20px; // Spazio prima delle sottosezioni di articoli
     }
 
     .my-articles-subsection {
         margin-bottom: 25px;
-        
-        .my-articles-subsection-title { // Titoli h4 per Bozze, In Revisione etc.
+
+        .my-articles-subsection-title {
+            // Titoli h4 per Bozze, In Revisione etc.
             color: var(--heading-color-secondary, var(--text-color-primary));
-            margin-top: 20px; 
+            margin-top: 20px;
             margin-bottom: 10px;
-            font-size: 1.1em; 
+            font-size: 1.1em;
             padding-bottom: 6px;
             border-bottom: 1px solid var(--border-color-light);
         }
@@ -360,7 +380,9 @@ section#profile {
     flex-direction: column;
     justify-content: space-between;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    transition:
+        transform 0.2s ease-out,
+        box-shadow 0.2s ease-out;
 
     &:hover {
         transform: translateY(-3px);
@@ -425,10 +447,10 @@ section#profile {
 
 .my-article-card-rejection-reason {
     font-size: 0.85em;
-    color: var(--text-color-primary); 
+    color: var(--text-color-primary);
     background-color: var(--bg-color);
     padding: 8px;
-    border-left: 3px solid var(--link-color); 
+    border-left: 3px solid var(--link-color);
     margin-top: 8px;
     margin-bottom: 8px;
     border-radius: 0 4px 4px 0;
@@ -464,7 +486,9 @@ section#profile {
 #externalLinksSection {
     // Non servono più stili specifici di margine/padding/bordo qui
     // perché .profile-input-box li gestisce
-    h3 { /* Già stilizzato da .profile-input-box h3 */ }
+    h3 {
+        /* Già stilizzato da .profile-input-box h3 */
+    }
 }
 .external-links-list {
     list-style: none;
@@ -479,7 +503,7 @@ section#profile {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
 }
 .external-links-list .link-display a {
     font-weight: 500;
@@ -493,7 +517,7 @@ section#profile {
     font-size: 0.85em;
     color: var(--text-color-muted);
     margin-left: 10px;
-    word-break: break-all; 
+    word-break: break-all;
 }
 .external-links-list .link-actions button {
     margin-left: 8px;
@@ -506,7 +530,9 @@ section#profile {
     border-radius: 6px;
     margin-top: 15px;
     border: 1px solid var(--border-color-primary);
-    div { margin-bottom: 10px; }
+    div {
+        margin-bottom: 10px;
+    }
     label {
         display: block;
         margin-bottom: 5px;
@@ -521,9 +547,16 @@ section#profile {
         box-sizing: border-box; // Aggiunto per coerenza con .input-field
     }
 }
-#externalLinkError { color: red; font-size: 0.9em; margin-top: 5px; }
-.form-actions-links { margin-top: 10px; display: flex; gap: 10px; }
-
+#externalLinkError {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+.form-actions-links {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
 
 // Stili obsoleti o ridondanti da #profileUpdateForm (commentati o rimossi)
 // #profileUpdateForm div { /* ... */ }
@@ -531,12 +564,11 @@ section#profile {
 // #profileUpdateForm input[type='text'] { /* ... */ }
 // #profileUpdateForm button[type='submit'].game-button { /* ... */ }
 
-#profileMessage { 
+#profileMessage {
     text-align: center;
     font-weight: bold;
     margin-top: 20px;
 }
-
 
 /* Stili Modali (non modificati qui, ma assicurati che siano corretti) */
 .badge-detail-modal-content {
@@ -561,7 +593,7 @@ section#profile {
     color: white;
 }
 .button-modal-confirm {
-    background-color: #28a745; 
+    background-color: #28a745;
     &:hover {
         background-color: #218838;
         transform: translateY(-2px);
@@ -569,7 +601,7 @@ section#profile {
     }
 }
 .button-modal-cancel {
-    background-color: #6c757d; 
+    background-color: #6c757d;
     &:hover {
         background-color: #5a6268;
     }
@@ -581,8 +613,9 @@ section#profile {
     align-items: center; // Allinea verticalmente il testo del nickname e l'icona
     flex-wrap: nowrap; // Evita che l'icona vada a capo se lo spazio è poco (improbabile qui)
 
-    strong { // Mantieni lo stile del "Nickname:" label
-        margin-right: 5px; 
+    strong {
+        // Mantieni lo stile del "Nickname:" label
+        margin-right: 5px;
     }
 
     #currentNickname {
@@ -610,8 +643,9 @@ section#profile {
         &:hover .material-symbols-rounded {
             color: var(--link-hover-color);
         }
-        
-        &:focus-visible { // Stile per il focus accessibile
+
+        &:focus-visible {
+            // Stile per il focus accessibile
             outline: 2px solid var(--link-color);
             outline-offset: 2px;
         }
@@ -639,12 +673,12 @@ section#profile {
     }
 
     .error-message {
-      min-height: 1.2em; // Per evitare salti di layout quando appare/scompare
+        min-height: 1.2em; // Per evitare salti di layout quando appare/scompare
     }
-    
+
     // Potresti voler aggiungere stili per #nicknameChangeRequestSentView, #nicknameChangeCooldownView, etc.
     // se hanno bisogno di un layout diverso da quello base.
-    #nicknameChangeRequestSentView, 
+    #nicknameChangeRequestSentView,
     #nicknameChangeCooldownView,
     #nicknameChangeProcessedView {
         text-align: center;
@@ -659,18 +693,18 @@ section#profile {
             margin-bottom: 15px;
         }
     }
-     #nicknameChangeCooldownView h4 {
+    #nicknameChangeCooldownView h4 {
         color: var(--warning-color, orange);
     }
 }
 
 .cooldown-timer {
-  font-size: 1.1em;
-  font-weight: bold;
-  color: var(--accent-color-secondary); // O un colore che preferisci
-  text-align: center;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: var(--surface-bg-secondary);
-  border-radius: 4px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--accent-color-secondary); // O un colore che preferisci
+    text-align: center;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: var(--surface-bg-secondary);
+    border-radius: 4px;
 }

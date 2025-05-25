@@ -30,10 +30,9 @@ async function isNicknameTaken(nickname, currentUserId) {
             }
         }
     }
-    
+
     return false;
 }
-
 
 exports.requestNicknameChange = onCall(async (request) => {
     // 1. Autenticazione
@@ -44,7 +43,9 @@ exports.requestNicknameChange = onCall(async (request) => {
 
     const userId = request.auth.uid;
     const { requestedNickname } = request.data;
-    logger.info(`requestNicknameChange: Ricevuta richiesta da userId: ${userId} per il nickname: "${requestedNickname}"`);
+    logger.info(
+        `requestNicknameChange: Ricevuta richiesta da userId: ${userId} per il nickname: "${requestedNickname}"`
+    );
 
     // 2. Validazione Input Base
     if (!requestedNickname || typeof requestedNickname !== 'string') {
@@ -73,22 +74,25 @@ exports.requestNicknameChange = onCall(async (request) => {
             const lastRequestDate = profileData.lastNicknameRequestTimestamp.toDate();
             const timeSinceLastRequest = new Date().getTime() - lastRequestDate.getTime();
             if (timeSinceLastRequest < NICKNAME_CHANGE_COOLDOWN_MS) {
-                 const remainingMs = NICKNAME_CHANGE_COOLDOWN_MS - timeSinceLastRequest;
-                 const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+                const remainingMs = NICKNAME_CHANGE_COOLDOWN_MS - timeSinceLastRequest;
+                const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
                 logger.warn(`Utente ${userId} in cooldown. Rimanenti: ${remainingDays} giorni.`);
-                throw new HttpsError('failed-precondition', `Sei in periodo di cooldown. Potrai fare una nuova richiesta tra ${remainingDays} giorni.`);
+                throw new HttpsError(
+                    'failed-precondition',
+                    `Sei in periodo di cooldown. Potrai fare una nuova richiesta tra ${remainingDays} giorni.`
+                );
             }
         }
-        
+
         // 4. Controllo Unicità Nickname (Case-Insensitive)
         if (await isNicknameTaken(trimmedNickname, userId)) {
-             logger.warn(`Il nickname "${trimmedNickname}" (o una sua variante case) è già stato preso.`);
+            logger.warn(`Il nickname "${trimmedNickname}" (o una sua variante case) è già stato preso.`);
             throw new HttpsError('already-exists', 'Questo nickname è già in uso. Scegline un altro.');
         }
 
         // 5. Creazione della richiesta e aggiornamento profilo utente
         const requestDocRef = db.collection('nicknameChangeRequests').doc();
-        
+
         await db.runTransaction(async (transaction) => {
             transaction.set(requestDocRef, {
                 userId: userId,
@@ -96,17 +100,16 @@ exports.requestNicknameChange = onCall(async (request) => {
                 requestedNickname: trimmedNickname,
                 status: 'pending',
                 requestedAt: FieldValue.serverTimestamp(),
-                userEmail: profileData.email 
+                userEmail: profileData.email,
             });
 
             transaction.update(userProfileRef, {
-                lastNicknameRequestTimestamp: FieldValue.serverTimestamp()
+                lastNicknameRequestTimestamp: FieldValue.serverTimestamp(),
             });
         });
 
         logger.info(`Richiesta cambio nickname per l'utente ${userId} creata con successo (ID: ${requestDocRef.id}).`);
         return { success: true, message: 'Richiesta inviata con successo!' };
-
     } catch (error) {
         logger.error(`Errore durante la richiesta di cambio nickname per l'utente ${userId}:`, error);
         if (error instanceof HttpsError) {
@@ -146,7 +149,14 @@ exports.approveNicknameChange = onCall(async (request) => {
 
     // 2. Validazione Input
     const { requestId, userId, newNickname } = request.data;
-    if (!requestId || !userId || !newNickname || typeof newNickname !== 'string' || newNickname.length < 3 || newNickname.length > 20) {
+    if (
+        !requestId ||
+        !userId ||
+        !newNickname ||
+        typeof newNickname !== 'string' ||
+        newNickname.length < 3 ||
+        newNickname.length > 20
+    ) {
         throw new HttpsError('invalid-argument', 'Parametri non validi.');
     }
     const nicknameRegex = /^[a-zA-Z0-9_-]+$/;
@@ -157,7 +167,9 @@ exports.approveNicknameChange = onCall(async (request) => {
     const nicknameRequestRef = db.collection('nicknameChangeRequests').doc(requestId);
     const userProfileRef = db.collection('userProfiles').doc(userId);
 
-    logger.info(`approveNicknameChange: Admin ${adminUid} sta approvando la richiesta ${requestId} per l'utente ${userId} con il nuovo nickname "${newNickname}".`);
+    logger.info(
+        `approveNicknameChange: Admin ${adminUid} sta approvando la richiesta ${requestId} per l'utente ${userId} con il nuovo nickname "${newNickname}".`
+    );
 
     try {
         if (await isNicknameTaken(newNickname, userId)) {
@@ -166,9 +178,12 @@ exports.approveNicknameChange = onCall(async (request) => {
                 status: 'failed_approval_name_taken',
                 processedAt: FieldValue.serverTimestamp(),
                 processedBy: adminUid,
-                notes: `Tentativo di approvazione fallito: il nickname '${newNickname}' è stato preso nel frattempo.`
+                notes: `Tentativo di approvazione fallito: il nickname '${newNickname}' è stato preso nel frattempo.`,
             });
-            throw new HttpsError('already-exists', `Il nickname "${newNickname}" è già in uso. La richiesta non può essere approvata.`);
+            throw new HttpsError(
+                'already-exists',
+                `Il nickname "${newNickname}" è già in uso. La richiesta non può essere approvata.`
+            );
         }
 
         await db.runTransaction(async (transaction) => {
@@ -185,13 +200,13 @@ exports.approveNicknameChange = onCall(async (request) => {
                 status: 'approved',
                 processedAt: FieldValue.serverTimestamp(),
                 processedBy: adminUid,
-                finalNickname: newNickname
+                finalNickname: newNickname,
             });
 
             // 2. Aggiorna il profilo utente
             transaction.update(userProfileRef, {
                 nickname: newNickname,
-                updatedAt: FieldValue.serverTimestamp()
+                updatedAt: FieldValue.serverTimestamp(),
             });
 
             // L'aggiornamento del profilo pubblico è gestito dalla funzione trigger `updateUserPublicProfile`
@@ -208,7 +223,6 @@ exports.approveNicknameChange = onCall(async (request) => {
 
         logger.info(`approveNicknameChange: Richiesta ${requestId} approvata con successo per l'utente ${userId}.`);
         return { success: true, message: 'Nickname approvato e aggiornato con successo!' };
-
     } catch (error) {
         logger.error(`approveNicknameChange: Errore durante l'approvazione della richiesta ${requestId}:`, error);
         if (error instanceof HttpsError) {
@@ -217,7 +231,6 @@ exports.approveNicknameChange = onCall(async (request) => {
         throw new HttpsError('internal', "Si è verificato un errore interno durante l'approvazione.");
     }
 });
-
 
 /**
  * Rifiuta una richiesta di cambio nickname.
@@ -258,7 +271,9 @@ exports.rejectNicknameChange = onCall(async (request) => {
     const trimmedReason = reason ? reason.trim() : null;
 
     const nicknameRequestRef = db.collection('nicknameChangeRequests').doc(requestId);
-    logger.info(`rejectNicknameChange: Admin ${adminUid} sta rifiutando la richiesta ${requestId}. Motivo: "${trimmedReason || 'Nessuno'}".`);
+    logger.info(
+        `rejectNicknameChange: Admin ${adminUid} sta rifiutando la richiesta ${requestId}. Motivo: "${trimmedReason || 'Nessuno'}".`
+    );
 
     try {
         let requestedNickname = '';
@@ -288,8 +303,9 @@ exports.rejectNicknameChange = onCall(async (request) => {
         });
 
         // 3. INVIA NOTIFICA DI RIFIUTO (FUNC.1.4)
-        const rejectionMessage = `La tua richiesta per il nickname "${requestedNickname}" è stata rifiutata.` +
-                                 (trimmedReason ? ` Motivo: ${trimmedReason}` : '');
+        const rejectionMessage =
+            `La tua richiesta per il nickname "${requestedNickname}" è stata rifiutata.` +
+            (trimmedReason ? ` Motivo: ${trimmedReason}` : '');
         await createNotification(userId, {
             type: 'nickname_rejected',
             title: 'Richiesta Nickname Rifiutata',
@@ -298,10 +314,8 @@ exports.rejectNicknameChange = onCall(async (request) => {
             icon: 'cancel',
         });
 
-
         logger.info(`rejectNicknameChange: Richiesta ${requestId} rifiutata con successo.`);
         return { success: true, message: 'Richiesta di cambio nickname rifiutata.' };
-
     } catch (error) {
         logger.error(`rejectNicknameChange: Errore durante il rifiuto della richiesta ${requestId}:`, error);
         if (error instanceof HttpsError) {

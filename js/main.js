@@ -617,11 +617,10 @@ async function updateAdminDashboardLink(user, profileData) {
 
         // La nostra nuova fonte di verità: il campo nel documento!
         const isAdmin = profileData.isAdmin === true;
-        
+
         console.log(`[Athena] L'utente è admin (secondo Firestore)? ${isAdmin}`);
 
         adminDashboardLinkFooter.style.display = isAdmin ? 'block' : 'none';
-
     } else {
         // Se non c'è utente o non ci sono dati del profilo, nascondi il link.
         adminDashboardLinkFooter.style.display = 'none';
@@ -682,7 +681,7 @@ function updateUIBasedOnAuthState(user, profileData) {
     } else {
         console.warn('[Main.js updateUIBasedOnAuthState] Pulsante logoutButton desktop non trovato.');
     }
-    
+
     console.log('[Main.js updateUIBasedOnAuthState] Fine aggiornamenti UI orchestrati.');
 }
 
