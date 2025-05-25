@@ -380,6 +380,9 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
     // La funzione termina qui implicitamente se nessuna delle condizioni precedenti ha causato un return.
 });
 
+// Aggiungi questa riga alla fine del file, dopo tutti gli altri exports
+exports.requestNicknameChange = require('./nicknameRequestHandler').requestNicknameChange;
+
 // --- EXISTING FUNCTION: processUploadedAvatar ---
 const AVATAR_THUMBNAIL_SIZE = 48;
 const AVATAR_PROFILE_SIZE = 160;

@@ -16,6 +16,11 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 import {
+    getFunctions,
+    httpsCallable
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+
+import {
     getStorage,
     ref as storageRef,
     uploadBytesResumable,
@@ -138,6 +143,7 @@ const MAX_AVATAR_SIZE_MB = 5;
 const DEFAULT_AVATAR_IMAGE_PATH = 'assets/images/default-avatar.png'; // Definisci il percorso del tuo avatar di default
 
 const storage = getStorage();
+const functions = getFunctions();
 
 const BADGE_DEFINITIONS = {
     'author-rookie': {
@@ -901,14 +907,12 @@ async function handleSubmitNicknameChangeRequest() {
 
     const requestedNickname = newNicknameInput.value.trim();
 
-    // Validazione Nickname (esempio base, puoi renderla più robusta)
+    // La validazione client-side rimane utile per un feedback immediato
     if (requestedNickname.length < 3 || requestedNickname.length > 20) {
         nicknameChangeError.textContent = "Il nickname deve avere tra 3 e 20 caratteri.";
         newNicknameInput.focus();
         return;
     }
-    // Regex per consentire lettere (maiuscole/minuscole), numeri, underscore e trattini.
-    // Non consente spazi o altri caratteri speciali.
     const nicknameRegex = /^[a-zA-Z0-9_-]+$/;
     if (!nicknameRegex.test(requestedNickname)) {
         nicknameChangeError.textContent = "Il nickname può contenere solo lettere, numeri, '_' e '-'.";
@@ -925,43 +929,39 @@ async function handleSubmitNicknameChangeRequest() {
     submitNicknameChangeRequestBtn.disabled = true;
     submitNicknameChangeRequestBtn.textContent = 'Invio in corso...';
 
+    // Chiama la Cloud Function
+    const requestNicknameChange = httpsCallable(functions, 'requestNicknameChange');
+    
     try {
-        // 1. Crea la richiesta nella collezione 'nicknameChangeRequests'
-        const requestsCollectionRef = collection(db, 'nicknameChangeRequests');
-        await addDoc(requestsCollectionRef, {
-            userId: loggedInUser.uid,
-            currentNickname: profileDataForDisplay.nickname || '',
-            requestedNickname: requestedNickname,
-            status: 'pending', // Stati possibili: pending, approved, rejected
-            requestedAt: serverTimestamp(),
-            userEmail: loggedInUser.email // Può essere utile per gli admin
-        });
-
-        // 2. Aggiorna lastNicknameRequestTimestamp nel profilo dell'utente
-        const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
-        await updateDoc(userProfileRef, {
-            lastNicknameRequestTimestamp: serverTimestamp(),
-            // Potresti voler aggiungere un campo come 'activeNicknameRequestId' se l'ID della richiesta
-            // generato da addDoc fosse necessario qui, ma per ora il timestamp è sufficiente per il cooldown.
-        });
-
-        showToast('Richiesta di cambio nickname inviata con successo!', 'success');
-        renderNicknameModalView('nicknameChangeRequestSentView');
+        const result = await requestNicknameChange({ requestedNickname: requestedNickname });
         
-        // Nascondi l'icona di modifica perché l'utente entra in cooldown/richiesta pendente
-        if(requestNicknameChangeBtn) {
-            requestNicknameChangeBtn.style.display = 'none';
+        if (result.data.success) {
+            showToast('Richiesta di cambio nickname inviata con successo!', 'success');
+            renderNicknameModalView('nicknameChangeRequestSentView');
+            
+            // Nascondi l'icona di modifica perché l'utente entra in cooldown/richiesta pendente
+            if (requestNicknameChangeBtn) {
+                requestNicknameChangeBtn.style.display = 'none';
+            }
+        } else {
+             // Questo caso non dovrebbe verificarsi se la funzione lancia sempre un HttpsError
+             throw new Error(result.data.message || "Errore sconosciuto dalla funzione.");
         }
 
     } catch (error) {
-        console.error("Errore durante l'invio della richiesta di cambio nickname:", error);
-        showToast("Si è verificato un errore durante l'invio della richiesta. Riprova.", 'error');
-        nicknameChangeError.textContent = "Errore server. Riprova più tardi.";
+        console.error("Errore durante la chiamata alla funzione 'requestNicknameChange':", error);
+        
+        // La libreria client di Firebase Functions converte gli HttpsError in un oggetto con 'code' e 'message'
+        const errorMessage = error.message || "Si è verificato un errore. Riprova più tardi.";
+        nicknameChangeError.textContent = errorMessage;
+        showToast(errorMessage, 'error');
+
     } finally {
         submitNicknameChangeRequestBtn.disabled = false;
         submitNicknameChangeRequestBtn.textContent = 'Invia Richiesta';
     }
 }
+
 
 /**
  * Inizializza i listener per la modale di cambio nickname.
