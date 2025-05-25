@@ -982,9 +982,33 @@ footer {
   -webkit-transition: background-color 0.3s, border-color 0.3s;
   transition: background-color 0.3s, border-color 0.3s;
 }
-
 footer a {
   color: var(--link-color);
+  text-decoration: none;
+}
+footer a:hover {
+  text-decoration: underline;
+}
+footer .admin-link {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  color: var(--text-color-muted);
+  -webkit-transition: color 0.3s ease;
+  transition: color 0.3s ease;
+}
+footer .admin-link .material-symbols-rounded {
+  font-size: 28px;
+}
+footer .admin-link:hover {
+  color: var(--link-hover-color);
+  text-decoration: none;
 }
 
 @media (max-width: 576px) {

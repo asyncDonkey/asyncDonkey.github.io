@@ -10,9 +10,32 @@ footer {
     transition:
         background-color 0.3s,
         border-color 0.3s;
-}
-footer a {
-    color: var(--link-color);
+
+    a {
+        color: var(--link-color);
+        text-decoration: none; // Aggiunto per consistenza
+        &:hover {
+            text-decoration: underline; // Aggiunto per consistenza
+        }
+    }
+
+    // Stile per il nuovo link admin
+    .admin-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-color-muted); // Colore più discreto
+        transition: color 0.3s ease;
+
+        .material-symbols-rounded {
+            font-size: 28px; // Dimensione icona
+        }
+
+        &:hover {
+            color: var(--link-hover-color); // Evidenzia al passaggio del mouse
+            text-decoration: none; // Niente sottolineatura per l'icona
+        }
+    }
 }
 
 @media (max-width: 576px) {

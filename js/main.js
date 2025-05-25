@@ -605,19 +605,25 @@ async function updateLoginLogoutLinks(user) {
     }
 }
 
-async function updateAdminDashboardLink(user) {
-    // ... (codice invariato)
+async function updateAdminDashboardLink(user, profileData) {
     const adminDashboardLinkFooter = document.getElementById('admin-dashboard-footer-link');
-    if (!adminDashboardLinkFooter) return;
-    if (user) {
-        try {
-            const idTokenResult = await user.getIdTokenResult();
-            adminDashboardLinkFooter.style.display = idTokenResult.claims.admin ? '' : 'none';
-        } catch (error) {
-            console.error("Errore nel verificare i custom claims dell'admin:", error);
-            adminDashboardLinkFooter.style.display = 'none';
-        }
+    if (!adminDashboardLinkFooter) {
+        return; // Esce se il link non è in questa pagina
+    }
+
+    // L'utente deve essere loggato E avere un profilo caricato
+    if (user && profileData) {
+        console.log('[Athena] Controllo lo stato di admin dai dati del profilo Firestore:', profileData);
+
+        // La nostra nuova fonte di verità: il campo nel documento!
+        const isAdmin = profileData.isAdmin === true;
+        
+        console.log(`[Athena] L'utente è admin (secondo Firestore)? ${isAdmin}`);
+
+        adminDashboardLinkFooter.style.display = isAdmin ? 'block' : 'none';
+
     } else {
+        // Se non c'è utente o non ci sono dati del profilo, nascondi il link.
         adminDashboardLinkFooter.style.display = 'none';
     }
 }
@@ -647,7 +653,7 @@ function updateUIBasedOnAuthState(user, profileData) {
         navWriteArticleDropdownDesktop.style.display = user ? 'list-item' : 'none';
     }
 
-    updateAdminDashboardLink(user);
+    updateAdminDashboardLink(user, profileData);
 
     if (document.getElementById('articlesSection')) {
         initializeHomepageArticleInteractions(user);
@@ -676,7 +682,7 @@ function updateUIBasedOnAuthState(user, profileData) {
     } else {
         console.warn('[Main.js updateUIBasedOnAuthState] Pulsante logoutButton desktop non trovato.');
     }
-
+    
     console.log('[Main.js updateUIBasedOnAuthState] Fine aggiornamenti UI orchestrati.');
 }
 
