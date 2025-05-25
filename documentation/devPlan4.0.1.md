@@ -1,10 +1,11 @@
-# DEVELOPMENT PLAN (v4.0.10 - Sessione Athena - Style Share Buttons & Fine Sessione) 🚀
+# DEVELOPMENT PLAN (v4.0.11 - Sessione Athena - Nickname Change UI & Firestore Rules Block) 🚀
 
 **Data Ultimo Aggiornamento:** 25 Maggio 2025 (Athena Update - Fine Sessione)
 **Visione Progetto:** Consolidare e stabilizzare la piattaforma esistente, migliorando la documentazione, la sicurezza, l'UX e risolvendo il debito tecnico. Le funzionalità attuali, come Donkey Runner e il sistema di articoli, saranno mantenute e ottimizzate, con un focus sul miglioramento dell'esperienza utente per le notifiche e la pagina profilo.
 
 **Stato Generale del Progetto:**
-Sessione produttiva! Abbiamo **COMPLETATO** con successo il **Refactoring degli stili per i commenti (`UI-GB-STYLE-001`)**, assicurando coerenza tra `about.html`, `donkeyRunner.html` e `view-article.html`. Abbiamo anche creato **NUOVI stili SCSS specifici per i bottoni di condivisione** (`#nativeShareBtn`, `#copyLinkBtn`) in `view-article.html`, trasformandoli in bottoni solo-icona con Material Symbols, come richiesto. Sono stati aggiunti nuovi task per migliorare `donkeyRunner.js`. La Navbar è stabile.
+Sessione dedicata all'implementazione della richiesta di cambio nickname (`FUNC.1`). Abbiamo **COMPLETATO** l'interfaccia utente base in `profile.html` (icona e struttura modale - `FUNC.1.1`), e implementato la logica JavaScript iniziale per l'apertura/chiusura della modale e la gestione della visualizzazione dello stato di cooldown (`FUNC.1.2` parzialmente completato). La logica client-side per l'invio della richiesta (`FUNC.1.3`) è stata scritta, ma le **operazioni di scrittura su Firestore sono attualmente bloccate dalle regole di sicurezza**. Questo sarà il task prioritario da risolvere nella prossima sessione. L'utente ripristinerà le regole Firestore a una versione stabile precedente nel frattempo.
+È stato anche implementato con successo un **task ausiliario non tracciato**: l'aggiunta di un link per il pannello admin nel footer, visibile solo agli amministratori, per facilitare i test.
 
 **Legenda Stati:**
 
@@ -165,17 +166,24 @@ Sessione produttiva! Abbiamo **COMPLETATO** con successo il **Refactoring degli 
 - ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** (RISOLTO)
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** (COMPLETATO)
 
-
-🆕 **Task FUNC.1 (Revisione 2): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA)
-
+**Task FUNC.1 (Revisione 2): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA) `[P] IN PROGRESSO`
 - **Descrizione:** Implementare funzionalità in `profile.html` per richiedere cambio nickname agli admin, con feedback chiaro sullo stato della richiesta e notifiche.
-- `[ ]` **FUNC.1.1 (UI Profilo):** Aggiungere icona e modale in `profile.html`.
-- `[ ]` **FUNC.1.2 (Modale Richiesta Nickname - Logica Visualizzazione Dinamica):** Gestire stati: Iniziale, Richiesta Inviata, Nickname Cambiato di Recente.
-- `[ ]` **FUNC.1.3 (Logica Invio e Gestione Richiesta):** Validazione, creazione documento in `/nicknameChangeRequests`, update `userProfiles.lastNicknameRequestTimestamp`, controllo intervallo 90 giorni, toast feedback.
+- `[x]` **FUNC.1.1 (UI Profilo):** Aggiunta icona e struttura modale in `profile.html`. Stili base SCSS per icona e modale.
+- `[P]` **FUNC.1.2 (Modale Richiesta Nickname - Logica Visualizzazione Dinamica):** Gestire stati: Iniziale, Richiesta Inviata, Nickname Cambiato di Recente.
+    - `[x]` Implementata logica base apertura/chiusura modale e visualizzazione vista iniziale.
+    - `[x]` Implementata visualizzazione vista cooldown (client-side) basata su `lastNicknameRequestTimestamp`.
+    - `[x]` Gestita visibilità icona "modifica nickname" in base a `isOwnProfile` e stato cooldown.
+    - `[ ]` Gestione completa e robusta degli stati modale (Richiesta Inviata, Richiesta Processata) basata sui dati Firestore (es. collezione `nicknameChangeRequests` o campi di stato sul profilo utente).
+- `[P]` **FUNC.1.3 (Logica Invio e Gestione Richiesta):** Validazione, creazione documento in `/nicknameChangeRequests`, update `userProfiles.lastNicknameRequestTimestamp`, controllo intervallo 90 giorni, toast feedback.
+    - `[x]` Implementata validazione input client-side.
+    - `[x]` Implementata logica client-side per preparare e tentare l'invio della richiesta (creazione documento in `nicknameChangeRequests` e aggiornamento `lastNicknameRequestTimestamp` su `userProfiles`).
+    - `[x]` Implementato feedback tramite toast per successo/errore (lato client).
+    - `[ ]` **(BLOCCATO - PRIORITÀ PROSSIMA SESSIONE)** Risolvere problemi con regole Firestore per permettere la scrittura sicura su `nicknameChangeRequests` e l'aggiornamento di `lastNicknameRequestTimestamp` su `userProfiles`.
 - `[ ]` **FUNC.1.4 (Notifiche):**
     - `[ ]` Notifica all'utente per approvazione/rifiuto.
     - 💡 (Opzionale/Futuro) Notifica automatica agli Admin alla creazione di una richiesta (vedi NOTIF.2.2).
 - `[ ]` **FUNC.1.5 (Gestione Admin nel Pannello):** Visualizzazione richieste, possibilità di segnare come "processata".
+- **Nota:** L'utente ripristinerà le regole Firestore a una versione stabile. Il focus della prossima sessione sarà la definizione e il test delle nuove regole specifiche per questa funzionalità.
 
 - **Task AUTH.3: Miglioramenti Funzionali Pagina Profilo Utente (`profile.html`)**
     - `[x]` Mini-Bio Utente (AUTH.3.4).
@@ -266,8 +274,9 @@ Sessione produttiva! Abbiamo **COMPLETATO** con successo il **Refactoring degli 
 - ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** RISOLTO.
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** COMPLETATO.
 - ✅ **UI-GB-STYLE-001 (Stili Commenti e Bottoni Condivisione ArticleViewer):** COMPLETATO.
+- ✅ **Task Ausiliario (Footer Admin Link):** Aggiunto link al pannello admin nel footer, visibile solo agli amministratori. (COMPLETATO - Sessione 25 Maggio 2025)
 
 ---
 
-// DevPlan v4.0.10 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa.
-// Ottimo lavoro sui dettagli UI! Il Donkey Runner attende i prossimi miglioramenti.
+// DevPlan v4.0.11 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa.
+// Ottimo lavoro nel debug e nell'implementazione della UI per il cambio nickname. Prossimo passo: regole Firestore!

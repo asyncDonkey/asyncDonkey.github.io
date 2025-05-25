@@ -6,6 +6,7 @@ import {
     onSnapshot, // Per ascoltare le modifiche in tempo reale
     updateDoc,
     collection,
+    addDoc,
     query,
     where,
     getDocs, // Mantenuto per caricare gli articoli utente
@@ -103,6 +104,27 @@ const modalAvatarPreview = document.getElementById('modalAvatarPreview');
 const modalAvatarStatus = document.getElementById('modalAvatarStatus');
 const modalConfirmUploadBtn = document.getElementById('modalConfirmUploadBtn');
 const modalCancelUploadBtn = document.getElementById('modalCancelUploadBtn');
+
+const requestNicknameChangeBtn = document.getElementById('requestNicknameChangeBtn');
+console.log('[Athena DEBUG] requestNicknameChangeBtn all\'avvio dello script:', requestNicknameChangeBtn); // <--- AGGIUNGI QUI
+const requestNicknameChangeModal = document.getElementById('requestNicknameChangeModal');
+const closeNicknameChangeModalBtn = document.getElementById('closeNicknameChangeModalBtn');
+const nicknameChangeModalTitle = document.getElementById('nicknameChangeModalTitle');
+
+const nicknameChangeInitialView = document.getElementById('nicknameChangeInitialView');
+const newNicknameInput = document.getElementById('newNicknameInput');
+const newNicknameHint = document.getElementById('newNicknameHint'); // Aggiunto per completezza
+const nicknameChangeError = document.getElementById('nicknameChangeError');
+const submitNicknameChangeRequestBtn = document.getElementById('submitNicknameChangeRequestBtn');
+const cancelNicknameChangeRequestBtn = document.getElementById('cancelNicknameChangeRequestBtn');
+
+const nicknameChangeRequestSentView = document.getElementById('nicknameChangeRequestSentView');
+const nicknameChangeCooldownView = document.getElementById('nicknameChangeCooldownView');
+const nicknameCooldownDaysSpan = document.getElementById('nicknameCooldownDays'); // Corretto da nicknameCooldownDays a nicknameCooldownDaysSpan
+const nicknameChangeProcessedView = document.getElementById('nicknameChangeProcessedView');
+
+const NICKNAME_CHANGE_COOLDOWN_DAYS = 90;
+const NICKNAME_CHANGE_COOLDOWN_MS = NICKNAME_CHANGE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
 // --- STATO DEL MODULO E COSTANTI ---
 let loggedInUser = null;
 let profileDataForDisplay = null; // Mantiene l'ultimo stato noto dei dati del profilo visualizzato
@@ -219,8 +241,7 @@ function handleCancelAvatarSelection() {
 
 /**
  * Aggiorna l'interfaccia utente con i dati del profilo.
- * Questa funzione viene chiamata dal callback di onSnapshot.
- * @param {object} data - Dati del profilo (da userProfiles o userPublicProfiles).
+ * @param {object} data - Dati del profilo.
  * @param {boolean} isOwnProfile - True se è il profilo dell'utente loggato.
  * @param {string} uidLoaded - L'UID del profilo caricato.
  */
@@ -238,7 +259,7 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
 
     if (currentNicknameSpan) {
         const nicknameText = data.nickname || 'Non impostato';
-        const authorIcon = getAuthorIconHTML(data);
+        const authorIcon = getAuthorIconHTML(data); // Assumendo che questa funzione esista e funzioni
         currentNicknameSpan.innerHTML = escapeHTML(nicknameText) + authorIcon;
     }
 
@@ -272,10 +293,11 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         } else if (!isOwnProfile && data.avatarUrls && data.avatarUrls.thumbnail) {
             mainAvatarUrl = data.avatarUrls.thumbnail;
             cacheBusterTimestamp = data.profilePublicUpdatedAt;
-        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) {
-            mainAvatarUrl = data.avatarUrls.small;
-            cacheBusterTimestamp = data.profileUpdatedAt;
+        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) { // Fallback per profili propri se profile non c'è
+             mainAvatarUrl = data.avatarUrls.small;
+             cacheBusterTimestamp = data.profileUpdatedAt;
         }
+
 
         if (mainAvatarUrl) {
             altText = `${profileNameForTitle}'s Custom Avatar`;
@@ -293,7 +315,6 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH;
             altText = `${profileNameForTitle}'s Default Avatar`;
         }
-
         profileAvatarImg.src = avatarSrcToSet;
         profileAvatarImg.alt = altText;
         profileAvatarImg.onerror = () => {
@@ -308,8 +329,37 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             profileAvatarImg.onerror = null;
         };
     }
+    
+    // Log di diagnostica per l'icona di cambio nickname
+    console.log('[Athena DEBUG] Dentro updateProfilePageUI - isOwnProfile:', isOwnProfile);
+    console.log('[Athena DEBUG] Dentro updateProfilePageUI - requestNicknameChangeBtn:', requestNicknameChangeBtn);
+    
+    if (requestNicknameChangeBtn) {
+        if (isOwnProfile) {
+            const cooldownStatus = getNicknameCooldownStatus(profileDataForDisplay);
+            // TODO: Qui andrà anche il controllo se c'è una richiesta PENDENTE.
+            // Per ora, ci basiamo solo sul cooldown per la visibilità dell'icona.
+            // Se l'utente è in cooldown, o se c'è una richiesta pendente (da implementare), l'icona non appare.
+            if (cooldownStatus.inCooldown /* || hasPendingRequest */) {
+                console.log('[Athena DEBUG] Utente in cooldown per cambio nickname. Nascondo icona.');
+                requestNicknameChangeBtn.style.display = 'none';
+            } else {
+                console.log('[Athena DEBUG] Mostro requestNicknameChangeBtn (nessun cooldown / profilo proprio).');
+                requestNicknameChangeBtn.style.display = 'inline-flex';
+            }
+        } else {
+            console.log('[Athena DEBUG] Nascondo requestNicknameChangeBtn (non è il profilo proprio).');
+            requestNicknameChangeBtn.style.display = 'none';
+        }
+    } else {
+        console.log('[Athena DEBUG] requestNicknameChangeBtn è null o undefined qui!');
+    }
 
-    if (statusMessageSection && statusMessageDisplay) {
+    // ... (resto della logica di updateProfilePageUI per bio, link, banner verifica email, etc. come nel tuo file) ...
+    // Assicurati che il codice da qui in poi sia identico a quello che hai già.
+    // La parte dei badge, email verification, status, bio, link esterni e articoli utente.
+
+     if (statusMessageSection && statusMessageDisplay) {
         if (data.statusMessage && data.statusMessage.trim() !== '') {
             statusMessageSection.style.display = 'block';
             statusMessageDisplay.textContent = data.statusMessage;
@@ -337,15 +387,12 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         }
     }
     
-    // *** MODIFICA LOGICA BADGE ***
     if (badgesSection && badgesDisplayContainer && noBadgesMessage) {
         badgesDisplayContainer.innerHTML = '';
         const earnedBadgesArray = data.earnedBadges || [];
-
         if (earnedBadgesArray.length > 0) {
-            badgesSection.style.display = 'block'; // Mostra la sezione se ci sono badge
+            badgesSection.style.display = 'block';
             noBadgesMessage.style.display = 'none';
-
             earnedBadgesArray.forEach((badgeId) => {
                 const badgeInfo = BADGE_DEFINITIONS[badgeId];
                 if (badgeInfo) {
@@ -355,7 +402,6 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
                     badgeIconElement.setAttribute('role', 'button');
                     badgeIconElement.setAttribute('tabindex', '0');
                     badgeIconElement.setAttribute('aria-label', `Dettagli badge: ${badgeInfo.name}`);
-
                     const iconSpan = document.createElement('span');
                     iconSpan.className = 'material-symbols-rounded';
                     iconSpan.textContent = badgeInfo.icon;
@@ -363,7 +409,6 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
                     if (badgeInfo.isNeon) iconSpan.classList.add('testo-neon-arcade');
                     else if (badgeInfo.isAnimated && badgeInfo.animationClass)
                         iconSpan.classList.add(badgeInfo.animationClass);
-
                     badgeIconElement.appendChild(iconSpan);
                     badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
                     badgeIconElement.addEventListener('keydown', (event) => {
@@ -376,17 +421,15 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
                 }
             });
         } else {
-             // Se non ci sono badge, mostra il messaggio solo sul proprio profilo
             if (isOwnProfile) {
                 badgesSection.style.display = 'block';
                 noBadgesMessage.textContent = 'Nessun riconoscimento ancora ottenuto.';
                 noBadgesMessage.style.display = 'block';
             } else {
-                badgesSection.style.display = 'none'; // Nascondi completamente la sezione sui profili altrui se non hanno badge
+                badgesSection.style.display = 'none';
             }
         }
     }
-
 
     if (isOwnProfile) {
         if (emailVerificationBanner && loggedInUser && !loggedInUser.emailVerified) {
@@ -395,7 +438,6 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         } else if (emailVerificationBanner) {
             emailVerificationBanner.style.display = 'none';
         }
-
         if (updateStatusForm) {
             updateStatusForm.style.display = 'flex';
             if (statusMessageInput)
@@ -412,7 +454,6 @@ function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         updateBioCharCounter(); 
         if (avatarUploadSection) avatarUploadSection.style.display = 'block';
     } else {
-        // Profilo di un altro utente
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
         if (updateStatusForm) updateStatusForm.style.display = 'none';
         if (updateBioForm) updateBioForm.style.display = 'none';
@@ -754,6 +795,200 @@ async function handleStatusMessageUpdate(event) {
     }
 }
 
+// NUOVA FUNZIONE HELPER per calcolare lo stato del cooldown
+/**
+ * Controlla lo stato del cooldown per il cambio nickname.
+ * @param {object} profileData I dati del profilo utente.
+ * @returns {{inCooldown: boolean, daysRemaining: number}} Oggetto con stato e giorni rimanenti.
+ */
+function getNicknameCooldownStatus(profileData) {
+    if (profileData && profileData.lastNicknameRequestTimestamp) {
+        const lastRequestDate = profileData.lastNicknameRequestTimestamp.toDate(); // Firestore Timestamp to JS Date
+        const now = new Date();
+        const timeSinceLastRequest = now.getTime() - lastRequestDate.getTime();
+
+        if (timeSinceLastRequest < NICKNAME_CHANGE_COOLDOWN_MS) {
+            const remainingMs = NICKNAME_CHANGE_COOLDOWN_MS - timeSinceLastRequest;
+            const remainingDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+            return { inCooldown: true, daysRemaining: remainingDays };
+        }
+    }
+    // Se non c'è un timestamp o il cooldown è scaduto
+    return { inCooldown: false, daysRemaining: 0 };
+}
+
+/**
+ * Mostra una specifica vista all'interno della modale di cambio nickname.
+ * @param {string} viewToShowID L'ID della vista da mostrare (es. 'nicknameChangeInitialView').
+ */
+function renderNicknameModalView(viewToShowID) {
+    const views = [
+        nicknameChangeInitialView,
+        nicknameChangeRequestSentView,
+        nicknameChangeCooldownView,
+        nicknameChangeProcessedView
+    ];
+    views.forEach(view => {
+        if (view) { // Controlla che l'elemento esista
+            view.style.display = view.id === viewToShowID ? 'block' : 'none';
+        }
+    });
+}
+
+/**
+ * Apre la modale per la richiesta di cambio nickname.
+ * Determina quale vista mostrare in base allo stato dell'utente.
+ */
+async function openNicknameChangeModal() {
+    if (!requestNicknameChangeModal || !loggedInUser) {
+        showToast("Errore: modale o utente non disponibile.", "error");
+        return;
+    }
+    if (!profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
+        showToast("Puoi richiedere il cambio nickname solo dal tuo profilo.", "warning");
+        return;
+    }
+
+    // Resetta campi e messaggi di errore per la vista iniziale
+    if (newNicknameInput) newNicknameInput.value = '';
+    if (nicknameChangeError) nicknameChangeError.textContent = '';
+    
+    const cooldownStatus = getNicknameCooldownStatus(profileDataForDisplay);
+
+    // TODO FUNC.1.3: Qui andrà anche il controllo di una richiesta PENDENTE.
+    // Esempio: const pendingRequest = await checkForPendingNicknameChange(loggedInUser.uid);
+    // if (pendingRequest) {
+    //     renderNicknameModalView('nicknameChangeRequestSentView'); // o una vista "Pending"
+    //     // Potresti voler nascondere l'icona #requestNicknameChangeBtn anche qui
+    // } else 
+    if (cooldownStatus.inCooldown) {
+        if (nicknameCooldownDaysSpan) {
+            nicknameCooldownDaysSpan.textContent = cooldownStatus.daysRemaining;
+        }
+        renderNicknameModalView('nicknameChangeCooldownView');
+        // Nascondiamo l'icona se l'utente è in cooldown, questo viene già gestito anche da updateProfilePageUI
+        // ma è bene essere sicuri qui se la modale viene aperta per qualche via imprevista.
+        if(requestNicknameChangeBtn) requestNicknameChangeBtn.style.display = 'none';
+    } else {
+        // Nessun cooldown (o timestamp non esistente), l'utente può fare una richiesta.
+        renderNicknameModalView('nicknameChangeInitialView');
+    }
+    
+    requestNicknameChangeModal.style.display = 'flex';
+    // Focus sull'input solo se la vista iniziale è quella attiva
+    if (newNicknameInput && nicknameChangeInitialView && nicknameChangeInitialView.style.display === 'block') {
+        newNicknameInput.focus();
+    }
+}
+
+/**
+ * Chiude la modale per la richiesta di cambio nickname.
+ */
+function closeNicknameChangeModal() {
+    if (requestNicknameChangeModal) {
+        requestNicknameChangeModal.style.display = 'none';
+    }
+}
+
+/**
+ * Gestisce l'invio della richiesta di cambio nickname.
+ */
+async function handleSubmitNicknameChangeRequest() {
+    if (!loggedInUser || !profileDataForDisplay || !newNicknameInput || !nicknameChangeError || !submitNicknameChangeRequestBtn) {
+        showToast("Errore: componenti UI o dati utente mancanti.", "error");
+        return;
+    }
+
+    const requestedNickname = newNicknameInput.value.trim();
+
+    // Validazione Nickname (esempio base, puoi renderla più robusta)
+    if (requestedNickname.length < 3 || requestedNickname.length > 20) {
+        nicknameChangeError.textContent = "Il nickname deve avere tra 3 e 20 caratteri.";
+        newNicknameInput.focus();
+        return;
+    }
+    // Regex per consentire lettere (maiuscole/minuscole), numeri, underscore e trattini.
+    // Non consente spazi o altri caratteri speciali.
+    const nicknameRegex = /^[a-zA-Z0-9_-]+$/;
+    if (!nicknameRegex.test(requestedNickname)) {
+        nicknameChangeError.textContent = "Il nickname può contenere solo lettere, numeri, '_' e '-'.";
+        newNicknameInput.focus();
+        return;
+    }
+    if (requestedNickname === profileDataForDisplay.nickname) {
+        nicknameChangeError.textContent = "Il nuovo nickname deve essere diverso da quello attuale.";
+        newNicknameInput.focus();
+        return;
+    }
+
+    nicknameChangeError.textContent = ''; // Pulisce errori precedenti
+    submitNicknameChangeRequestBtn.disabled = true;
+    submitNicknameChangeRequestBtn.textContent = 'Invio in corso...';
+
+    try {
+        // 1. Crea la richiesta nella collezione 'nicknameChangeRequests'
+        const requestsCollectionRef = collection(db, 'nicknameChangeRequests');
+        await addDoc(requestsCollectionRef, {
+            userId: loggedInUser.uid,
+            currentNickname: profileDataForDisplay.nickname || '',
+            requestedNickname: requestedNickname,
+            status: 'pending', // Stati possibili: pending, approved, rejected
+            requestedAt: serverTimestamp(),
+            userEmail: loggedInUser.email // Può essere utile per gli admin
+        });
+
+        // 2. Aggiorna lastNicknameRequestTimestamp nel profilo dell'utente
+        const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
+        await updateDoc(userProfileRef, {
+            lastNicknameRequestTimestamp: serverTimestamp(),
+            // Potresti voler aggiungere un campo come 'activeNicknameRequestId' se l'ID della richiesta
+            // generato da addDoc fosse necessario qui, ma per ora il timestamp è sufficiente per il cooldown.
+        });
+
+        showToast('Richiesta di cambio nickname inviata con successo!', 'success');
+        renderNicknameModalView('nicknameChangeRequestSentView');
+        
+        // Nascondi l'icona di modifica perché l'utente entra in cooldown/richiesta pendente
+        if(requestNicknameChangeBtn) {
+            requestNicknameChangeBtn.style.display = 'none';
+        }
+
+    } catch (error) {
+        console.error("Errore durante l'invio della richiesta di cambio nickname:", error);
+        showToast("Si è verificato un errore durante l'invio della richiesta. Riprova.", 'error');
+        nicknameChangeError.textContent = "Errore server. Riprova più tardi.";
+    } finally {
+        submitNicknameChangeRequestBtn.disabled = false;
+        submitNicknameChangeRequestBtn.textContent = 'Invia Richiesta';
+    }
+}
+
+/**
+ * Inizializza i listener per la modale di cambio nickname.
+ */
+function initializeNicknameChangeModalListeners() {
+    if (requestNicknameChangeBtn) {
+        requestNicknameChangeBtn.addEventListener('click', openNicknameChangeModal);
+    }
+    if (closeNicknameChangeModalBtn) {
+        closeNicknameChangeModalBtn.addEventListener('click', closeNicknameChangeModal);
+    }
+    if (cancelNicknameChangeRequestBtn) { // Bottone "Annulla" nella vista iniziale
+        cancelNicknameChangeRequestBtn.addEventListener('click', closeNicknameChangeModal);
+    }
+    if (requestNicknameChangeModal) { // Chiudi cliccando fuori dalla modale
+        requestNicknameChangeModal.addEventListener('click', (event) => {
+            if (event.target === requestNicknameChangeModal) {
+                closeNicknameChangeModal();
+            }
+        });
+    }
+
+    // AGGIUNGI QUESTO LISTENER:
+    if (submitNicknameChangeRequestBtn) {
+        submitNicknameChangeRequestBtn.addEventListener('click', handleSubmitNicknameChangeRequest);
+    }
+}
 function updateBioCharCounter() {
     if (bioInput && bioCurrentCharsSpan && bioCharCountDisplay) {
         const currentLength = bioInput.value.length;
@@ -1287,6 +1522,7 @@ if (avatarConfirmationModal) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    initializeNicknameChangeModalListeners(); // Aggiungi questa chiamata
     badgeDetailModal = document.getElementById('badgeDetailModal');
     if (badgeDetailModal) {
         closeBadgeDetailModalBtn = badgeDetailModal.querySelector('#closeBadgeDetailModalBtn');

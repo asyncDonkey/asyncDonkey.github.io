@@ -575,4 +575,91 @@ section#profile {
     }
 }
 
+// Stili per il contenitore Nickname e Icona Modifica
+.nickname-container {
+    display: flex;
+    align-items: center; // Allinea verticalmente il testo del nickname e l'icona
+    flex-wrap: nowrap; // Evita che l'icona vada a capo se lo spazio è poco (improbabile qui)
 
+    strong { // Mantieni lo stile del "Nickname:" label
+        margin-right: 5px; 
+    }
+
+    #currentNickname {
+        // Eventuali stili specifici per il nickname se necessario
+    }
+
+    // Stile per il bottone-icona di modifica nickname
+    .icon-button#requestNicknameChangeBtn {
+        background-color: transparent;
+        border: none;
+        padding: 4px; // Leggero padding per l'area cliccabile
+        margin-left: 8px; // Spazio tra nickname e icona
+        cursor: pointer;
+        color: var(--link-color); // Usa il colore dei link per coerenza
+        border-radius: 50%; // Rendi il focus tondo se usi un bordo al focus
+        display: inline-flex; // Per allineare l'icona span interna
+        align-items: center;
+        justify-content: center;
+
+        .material-symbols-rounded {
+            font-size: 20px; // Dimensione dell'icona
+            transition: color 0.2s ease;
+        }
+
+        &:hover .material-symbols-rounded {
+            color: var(--link-hover-color);
+        }
+        
+        &:focus-visible { // Stile per il focus accessibile
+            outline: 2px solid var(--link-color);
+            outline-offset: 2px;
+        }
+    }
+}
+
+// Stili per la modale di cambio nickname (se servono stili più specifici oltre a _modals.scss)
+#requestNicknameChangeModal {
+    .modal-content {
+        // Eventuali sovrascritture o aggiunte specifiche per questa modale
+        // Ad esempio, se vuoi che sia leggermente più larga o più stretta di default
+    }
+
+    #newNicknameInput {
+        // Già stilizzato da .input-field, ma puoi aggiungere specificità se serve
+        margin-bottom: 5px; // Riduci un po' il margine inferiore per far posto all'hint
+    }
+
+    .input-hint {
+        font-size: 0.8em;
+        color: var(--text-color-muted);
+        display: block; // Assicura che vada a capo
+        margin-top: 2px; // Piccolo spazio sopra l'hint
+        margin-bottom: 10px; // Spazio sotto l'hint prima del messaggio di errore
+    }
+
+    .error-message {
+      min-height: 1.2em; // Per evitare salti di layout quando appare/scompare
+    }
+    
+    // Potresti voler aggiungere stili per #nicknameChangeRequestSentView, #nicknameChangeCooldownView, etc.
+    // se hanno bisogno di un layout diverso da quello base.
+    #nicknameChangeRequestSentView, 
+    #nicknameChangeCooldownView,
+    #nicknameChangeProcessedView {
+        text-align: center;
+        padding: 10px 0;
+        p {
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        h4 {
+            color: var(--success-color, green); // O un altro colore a seconda del tema
+            margin-bottom: 15px;
+        }
+    }
+     #nicknameChangeCooldownView h4 {
+        color: var(--warning-color, orange);
+    }
+}

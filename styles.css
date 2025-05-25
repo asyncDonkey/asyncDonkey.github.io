@@ -2828,6 +2828,86 @@ section#profile h3 {
   background-color: #5a6268;
 }
 
+.nickname-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+}
+.nickname-container strong {
+  margin-right: 5px;
+}
+.nickname-container .icon-button#requestNicknameChangeBtn {
+  background-color: transparent;
+  border: none;
+  padding: 4px;
+  margin-left: 8px;
+  cursor: pointer;
+  color: var(--link-color);
+  border-radius: 50%;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+.nickname-container .icon-button#requestNicknameChangeBtn .material-symbols-rounded {
+  font-size: 20px;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+.nickname-container .icon-button#requestNicknameChangeBtn:hover .material-symbols-rounded {
+  color: var(--link-hover-color);
+}
+.nickname-container .icon-button#requestNicknameChangeBtn:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+#requestNicknameChangeModal #newNicknameInput {
+  margin-bottom: 5px;
+}
+#requestNicknameChangeModal .input-hint {
+  font-size: 0.8em;
+  color: var(--text-color-muted);
+  display: block;
+  margin-top: 2px;
+  margin-bottom: 10px;
+}
+#requestNicknameChangeModal .error-message {
+  min-height: 1.2em;
+}
+#requestNicknameChangeModal #nicknameChangeRequestSentView,
+#requestNicknameChangeModal #nicknameChangeCooldownView,
+#requestNicknameChangeModal #nicknameChangeProcessedView {
+  text-align: center;
+  padding: 10px 0;
+}
+#requestNicknameChangeModal #nicknameChangeRequestSentView p,
+#requestNicknameChangeModal #nicknameChangeCooldownView p,
+#requestNicknameChangeModal #nicknameChangeProcessedView p {
+  margin-bottom: 10px;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+#requestNicknameChangeModal #nicknameChangeRequestSentView h4,
+#requestNicknameChangeModal #nicknameChangeCooldownView h4,
+#requestNicknameChangeModal #nicknameChangeProcessedView h4 {
+  color: var(--success-color, green);
+  margin-bottom: 15px;
+}
+#requestNicknameChangeModal #nicknameChangeCooldownView h4 {
+  color: var(--warning-color, orange);
+}
+
 /* _comments.scss - Stili per la sezione commenti */
 /* ===== Componenti Riutilizzabili (Form Commenti, Lista Commenti) ===== */
 /* Form Commenti (usato per Guestbook e Articoli) */

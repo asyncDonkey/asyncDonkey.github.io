@@ -216,9 +216,13 @@
                             <p style="margin-bottom: 8px; font-size: 1.05em" id="profileEmailRow">
                                 <strong>Email:</strong> <span id="profileEmail">Caricamento...</span>
                             </p>
-                            <p style="margin-bottom: 8px; font-size: 1.05em">
-                                <strong>Nickname:</strong> <span id="currentNickname">Caricamento...</span>
-                            </p>
+                            <div id="nicknameDisplayContainer" class="nickname-container" style="margin-bottom: 8px; font-size: 1.05em;">
+    <strong>Nickname:</strong> 
+    <span id="currentNickname" style="margin-left: 5px;">Caricamento...</span>
+    <button type="button" id="requestNicknameChangeBtn" class="icon-button" title="Richiedi cambio nickname" style="display: none; margin-left: 8px;">
+        <span class="material-symbols-rounded">edit_square</span>
+    </button>
+</div>
                             <p style="margin-bottom: 8px; font-size: 1.05em">
                                 <strong>Nazionalità:</strong> <span id="profileNationality">Caricamento...</span>
                             </p>
@@ -452,6 +456,45 @@
                     </div>
                 </div>
             </div>
+
+            <div id="requestNicknameChangeModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="close-modal-btn" id="closeNicknameChangeModalBtn">&times;</span>
+        <h3 id="nicknameChangeModalTitle">Richiedi Cambio Nickname</h3>
+        
+        <div id="nicknameChangeInitialView">
+            <p>Stai per richiedere un cambio di nickname. Gli amministratori esamineranno la tua richiesta.</p>
+            <p>Ricorda che puoi richiedere un cambio nickname solo una volta ogni 90 giorni.</p>
+            <div class="input-field-container">
+                <label for="newNicknameInput">Nuovo Nickname Desiderato:</label>
+                <input type="text" id="newNicknameInput" class="input-field" placeholder="Min 3, Max 20 caratteri" maxlength="20" minlength="3">
+                <small id="newNicknameHint" class="input-hint">Il nickname può contenere lettere, numeri, trattini e underscore.</small>
+            </div>
+            <div id="nicknameChangeError" class="error-message" style="margin-top:10px; margin-bottom:15px;"></div>
+            <div class="form-actions" style="margin-top: 20px;">
+                <button type="button" id="submitNicknameChangeRequestBtn" class="game-button">Invia Richiesta</button>
+                <button type="button" id="cancelNicknameChangeRequestBtn" class="game-button secondary-button">Annulla</button>
+            </div>
+        </div>
+
+        <div id="nicknameChangeRequestSentView" style="display: none;">
+            <h4>Richiesta Inviata!</h4>
+            <p>La tua richiesta di cambio nickname è stata inviata con successo. Riceverai una notifica quando verrà processata dagli amministratori.</p>
+            <p>Puoi chiudere questa finestra.</p>
+        </div>
+
+        <div id="nicknameChangeCooldownView" style="display: none;">
+            <h4>Richiesta Recente</h4>
+            <p>Hai già richiesto un cambio nickname di recente. Potrai effettuare una nuova richiesta tra <span id="nicknameCooldownDays"></span> giorni.</p>
+            <p>Se pensi ci sia un errore, contatta il supporto.</p>
+        </div>
+         <div id="nicknameChangeProcessedView" style="display: none;">
+            <h4>Richiesta Processata</h4>
+            <p>La tua precedente richiesta di cambio nickname è stata processata. Se il nickname è stato approvato, dovresti già vederlo aggiornato. In caso di rifiuto, la motivazione sarà indicata nella notifica relativa.</p>
+            <p>Potrai fare una nuova richiesta dopo che saranno trascorsi 90 giorni dalla data dell'ultima richiesta approvata o rifiutata, o immediatamente se la tua ultima richiesta è stata annullata prima dell'elaborazione.</p>
+        </div>
+    </div>
+</div>
         </main>
 
         <footer>
