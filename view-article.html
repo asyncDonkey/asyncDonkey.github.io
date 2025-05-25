@@ -189,33 +189,14 @@
                     <section id="articleShareSection" style="display: none">
                         <h4>Condividi questo articolo:</h4>
                         <div class="share-buttons-container">
-                            <button id="nativeShareBtn" class="share-button native-share-btn" style="display: none">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    height="1em"
-                                    viewBox="0 0 448 512"
-                                    fill="currentColor"
-                                    style="margin-right: 6px"
-                                >
-                                    <path
-                                        d="M448 248L288 96v80c-153.6 16.27-224 101.6-224 202.7 0 17.03 5.188 33.06 13.12 47.03 1.625 2.844 5.312 3.875 8.281 2.312 100.4-52.5 159.3-126.7 202.6-193.5V352L448 248zM320 0v0c-17.67 0-32 14.33-32 32v0c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v-96c0-17.67-14.33-32-32-32h-96zM416 336c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h0c17.67 0 32-14.33 32-32v-96c0-17.67-14.33-32-32-32h0zM32 320v0c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v0c0-17.67-14.33-32-32-32h-96zM32 144v0c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v0c0-17.67-14.33-32-32-32h-96z"
-                                    />
-                                </svg>
-                                Condividi...
-                            </button>
-                            <button id="copyLinkBtn" class="share-button copy-link-btn">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    height="1em"
-                                    viewBox="0 0 448 512"
-                                    fill="currentColor"
-                                    style="margin-right: 6px"
-                                >
-                                    <path
-                                        d="M320 64H32C14.33 64 0 78.33 0 96v320c0 17.67 14.33 32 32 32h288c17.67 0 32-14.33 32-32V96c0-17.67-14.33-32-32-32zM192 399.1c-17.03 0-31.84-11.53-37.38-28H64v-192h256v92.62c9.469-1.891 19.22-2.922 29.19-3.125L352 128H64V96h256L320 96zM416 192h-96c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h96c17.67 0 32-14.33 32-32v-96c0-17.67-14.33-32-32-32z"
-                                    />
-                                </svg>
-                                Copia Link
+                            <button id="nativeShareBtn" class="share-button native-share-btn" title="Condividi articolo" style="display: none;">
+    <span class="material-symbols-rounded">share</span>
+    <span class="visually-hidden">Condividi articolo</span>
+</button>
+                            <button id="copyLinkBtn" class="share-button copy-link-btn" title="Copia link">
+    <span class="material-symbols-rounded">link</span>
+    <span class="visually-hidden">Copia link</span>
+</button>Link
                             </button>
                             <div id="fallbackShareButtons" class="share-buttons-container" style="display: contents">
                                 <a
@@ -287,8 +268,8 @@
         </form>
     </div>
 
-    <div id="articleCommentsListContainer">
-        <h4>Commenti Recenti:</h4>
+    <div id="articleCommentsListContainer" class="comments-list-section">
+        <h3>Commenti Recenti:</h3>
         <div id="articleCommentsList" class="comments-list"><p>Caricamento commenti...</p></div>
     </div>
 </div>

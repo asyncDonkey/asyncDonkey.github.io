@@ -358,7 +358,7 @@
             <section id="guestbook">
                 <h2>Guestbook Generale</h2>
                 <p>Lascia un commento o un saluto!</p>
-                <form id="commentForm">
+                <form id="commentForm" class="comment-form-container">
                     <div id="commentNameSection">
                         <label for="commentName">Nome:</label>
                         <input type="text" id="commentName" name="commentName" required maxlength="50" />
@@ -375,9 +375,9 @@
                     </div>
                     <button type="submit" id="submitCommentBtn" class="game-button">Invia Commento</button>
                 </form>
-                <div id="commentsListContainer" data-page-id="mainGuestbook">
+                <div id="commentsListContainer" data-page-id="mainGuestbook" class="comments-list-section">
                     <h3>Commenti Recenti:</h3>
-                    <div id="commentsList">
+                    <div id="commentsList" class="comments-list">
                         <p>Caricamento commenti...</p>
                     </div>
                 </div>

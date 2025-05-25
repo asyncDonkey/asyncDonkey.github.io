@@ -242,3 +242,153 @@
         }
     }
 }
+
+#articleShareSection {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: var(--surface-bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color-secondary);
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--heading-color);
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+}
+
+// Stili per la sezione condivisione articolo
+#articleShareSection {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  padding: 20px 25px; // Aumentato padding laterale
+  background-color: var(--surface-bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color-secondary);
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 20px; // Più spazio sotto il titolo
+    color: var(--heading-color);
+    font-size: 1.15em; // Leggermente più grande
+    font-weight: 600;
+  }
+}
+
+// Contenitore principale dei bottoni visibili e di quelli nel fallback (se usati)
+#articleShareSection {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  padding: 20px 25px;
+  background-color: var(--surface-bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color-secondary);
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--heading-color);
+    font-size: 1.15em;
+    font-weight: 600;
+  }
+}
+
+.share-buttons-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; // Ridotto il gap leggermente per bottoni solo icona
+  align-items: center;
+
+  &[style*="display: contents"] {
+    display: contents;
+  }
+}
+
+// Placeholder per stili comuni dei bottoni di condivisione
+%share-button-common {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; // Dimensione fissa per bottoni quadrati/rotondi solo icona
+  height: 40px;
+  padding: 0; // Rimuovi padding se l'icona deve riempire il bottone
+  border-radius: 50%; // Bottoni rotondi
+  text-decoration: none;
+  border: 1px solid var(--border-color-primary);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  // gap non serve più se c'è solo l'icona
+
+  .material-symbols-rounded {
+    font-size: 22px; // Ajusta la dimensione dell'icona come preferisci
+    // vertical-align: middle; // Già gestito da flex
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  &:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  // Per nascondere il testo ma mantenerlo per gli screen reader
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+// Bottone "Condividi..." (Nativo)
+#nativeShareBtn {
+  @extend %share-button-common;
+  background-color: var(--button-bg-primary);
+  color: var(--button-text-primary);
+  border-color: var(--button-bg-primary);
+
+  .material-symbols-rounded {
+    // Eventuali aggiustamenti specifici per questa icona
+  }
+
+  &:hover {
+    background-color: var(--button-hover-bg-primary);
+    border-color: var(--button-hover-bg-primary);
+    color: var(--button-text-primary);
+  }
+}
+
+// Bottone "Copia Link"
+#copyLinkBtn {
+  @extend %share-button-common;
+  background-color: var(--surface-bg-primary);
+  color: var(--text-color-primary);
+  border-color: var(--border-color-secondary);
+
+  .material-symbols-rounded {
+     // Eventuali aggiustamenti specifici per questa icona
+  }
+
+  &:hover {
+    background-color: var(--surface-bg-secondary);
+    border-color: var(--link-color);
+    color: var(--link-color);
+  }
+}
+
+// Fallback per i bottoni social (se dovessero diventare visibili o se vuoi stilare quelli nella modale nativa, anche se è difficile)
+// Per ora li lasciamo con uno stile base, dato che sono gestiti dalla UI nativa.
+// Se la tua modale nativa mostra link testuali, potremmo aggiungere qui stili per a.social-*
+
+

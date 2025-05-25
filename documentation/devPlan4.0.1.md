@@ -1,10 +1,10 @@
-# DEVELOPMENT PLAN (v4.0.9 - Sessione Athena - Refactoring Navbar Completato) 🚀
+# DEVELOPMENT PLAN (v4.0.10 - Sessione Athena - Style Share Buttons & Fine Sessione) 🚀
 
 **Data Ultimo Aggiornamento:** 25 Maggio 2025 (Athena Update - Fine Sessione)
 **Visione Progetto:** Consolidare e stabilizzare la piattaforma esistente, migliorando la documentazione, la sicurezza, l'UX e risolvendo il debito tecnico. Le funzionalità attuali, come Donkey Runner e il sistema di articoli, saranno mantenute e ottimizzate, con un focus sul miglioramento dell'esperienza utente per le notifiche e la pagina profilo.
 
 **Stato Generale del Progetto:**
-Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo della Navbar (Task NAV.1)**. Questo ha incluso la trasformazione dell'avatar utente nel link principale al profilo (`NAV.1.2.3`) e l'aggiunta di un pulsante "Home" accanto al theme toggler (`NAV.1.2.4` - nuovo), con le relative correzioni di layout. Abbiamo anche confermato che la logica di popolamento dinamico dei link (`NAV.1.1.3`), la visibilità condizionale dei link "Scrivi Articolo" e "Contribuisci" (`NAV.1.3.4`), e il funzionamento del dropdown "Community" su mobile (`NAV.1.3.3`) sono già corretti e quindi marcati come `OBSOLETO` o `COMPLETATO`. Anche la revisione strategica dei link (`NAV.1.3.1`) e l'ottimizzazione generale di stili e icone (`NAV.1.2.1 & .2`) sono state considerate completate. Il tentativo di implementare un sistema di email personalizzate (`EMAIL-001`) è stato **ABBANDONATO** a causa di complessità tecniche e per mantenere la stabilità del sistema attuale, con i relativi sub-task (miglioramento template, email di attivazione) marcati come `OBSOLETO`.
+Sessione produttiva! Abbiamo **COMPLETATO** con successo il **Refactoring degli stili per i commenti (`UI-GB-STYLE-001`)**, assicurando coerenza tra `about.html`, `donkeyRunner.html` e `view-article.html`. Abbiamo anche creato **NUOVI stili SCSS specifici per i bottoni di condivisione** (`#nativeShareBtn`, `#copyLinkBtn`) in `view-article.html`, trasformandoli in bottoni solo-icona con Material Symbols, come richiesto. Sono stati aggiunti nuovi task per migliorare `donkeyRunner.js`. La Navbar è stabile.
 
 **Legenda Stati:**
 
@@ -63,37 +63,16 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
 **✅ Task NAV.1: Refactoring Completo Funzionalità e UI Navbar**
 
 - **Descrizione:** Revisionare e aggiornare la funzionalità, l'aspetto e la coerenza della navbar principale.
-- ✅ **NAV.1.1 (Funzionalità):**
-    - ✅ **NAV.1.1.1:** Risolvere bug: pulsante logout non funzionante in versione desktop.
-    - ✅ **NAV.1.1.2 (Visibilità Pulsanti Auth):** Assicurare che tutti i pulsanti (Login, Registrazione, Profilo, Logout) siano sempre presenti e visibili/nascosti correttamente in base allo stato dell'utente su tutte le pagine HTML.
-        - `[x]` **NAV.1.1.2.A (Visibilità `userDisplayName`):** Corretta la visibilità di `userDisplayName` per utente loggato.
-        - ✅ **NAV.1.1.2.B (Visibilità Logout Utente Non Autenticato - `index.html`):** Risolto il bug per cui il pulsante logout era visibile per utenti non autenticati su `index.html`.
-            - ➡️ **NAV.1.1.2.B.1:** Investigare potenziale influenza di `homePageFeatures.js` (OBSOLETO).
-            - ➡️ **NAV.1.1.2.B.2:** Verificare se `updateHeaderAuthContainersVisibility` viene chiamata più volte (OBSOLETO).
-    - ➡️ **NAV.1.1.3:** Verificare e correggere la logica di popolamento dinamico dei link utente (profilo, logout) e dei link admin (se presenti in navbar) nel menu desktop e mobile. (OBSOLETO - Funzionalità attuale confermata come corretta)
-- ✅ **NAV.1.2 (Layout Icone e Testo):**
-    - ✅ **NAV.1.2.1:** Rivedere e ottimizzare la disposizione e lo stile delle icone e del testo per i link nella navbar (sia desktop che mobile) per massima chiarezza, coerenza visiva e accessibilità (es. `title` attributes). (COMPLETATO - Stato attuale giudicato buono)
-    - ✅ **NAV.1.2.2:** Assicurare che i pulsanti solo-icona siano correttamente dimensionati e che le icone siano centrate. (COMPLETATO - Stato attuale giudicato buono)
-    - ✅ **NAV.1.2.3 (Miglioramento UX Link Profilo):** Rimosso `a#profileNavIconLink` e reso `img#headerUserAvatar` il link cliccabile per la pagina profilo. Include aggiunta event listener a `img#headerUserAvatar` e stile `cursor: pointer`. (COMPLETATO)
-    - 🆕 ✅ **NAV.1.2.4 (Pulsante Home Aggiuntivo):** Aggiunto pulsante Home (solo icona) nel blocco `.header-controls` accanto al theme toggler, con fix di layout per corretto posizionamento. (COMPLETATO)
-    - 🆕 ✅ **NAV.1.2.5 (Layout Header Mobile):** Riorganizzare layout icone utente (`#userProfileContainer` e figli) e `themeToggleBtn` su mobile.
-        - `[x]` **NAV.1.2.5.A:** Le icone utente e il toggle tema appaiono in riga, sotto il titolo, allineate a sinistra.
-        - `[x]` **NAV.1.2.5.B:** Il pulsante hamburger (`#navbarToggler`) è allineato a destra, sulla stessa "riga virtuale" del titolo.
-        - ✨ **NAV.1.2.5.C (Centraggio Hamburger):** Allineare verticalmente l'icona hamburger su mobile. (COMPLETATO)
-- ✅ **NAV.1.3 (Struttura Link e Dropdown):**
-    - ✅ **NAV.1.3.1:** Rivedere quali sezioni/pagine sono accessibili direttamente dalla navbar e quali tramite il dropdown "Community". (COMPLETATO - Struttura attuale confermata)
-    - ✅ **NAV.1.3.2 (Dropdown Community Desktop):** Assicurare il corretto funzionamento e l'aspetto del dropdown "Community" su desktop.
-    - ✅ **NAV.1.3.3 (Dropdown Community Mobile):** Assicurare il corretto funzionamento e l'aspetto del dropdown "Community" su mobile. (COMPLETATO - Funzionalità attuale confermata)
-    - ➡️ **NAV.1.3.4:** Garantire che i link "Scrivi Articolo" (`#navWriteArticleDropdown`) e "Contribuisci" siano visibili/nascosti correttamente in base allo stato di login e ai permessi. (OBSOLETO - Funzionalità attuale confermata come corretta)
+- ✅ **NAV.1.1 (Funzionalità):** (Tutti i sub-task rilevanti completati o obsoleti)
+- ✅ **NAV.1.2 (Layout Icone e Testo):** (Tutti i sub-task rilevanti completati)
+- ✅ **NAV.1.3 (Struttura Link e Dropdown):** (Tutti i sub-task rilevanti completati o obsoleti)
 
 ---
 
 ## 🐞 BUG TRACKING 🐞
 
 - ➡️ **BUG-NAV-RESP-001: Scroll orizzontale homepage (`index.html`) su mobile post-login.** (OBSOLETO - Risolto).
-- ✅ 🐞 **BUG-PROF-AVATAR-BTN-001: Pulsante "Conferma e Carica Avatar" (`#confirmAvatarUploadBtn`) invisibile ma cliccabile in `profile.html`.**
-    - **Descrizione:** Nonostante il JS impostasse `display: inline-block` e altri stili per la visibilità, il pulsante non appariva visivamente dopo la selezione di un file, pur rimanendo funzionale se cliccato "alla cieca".
-    - ✅ **Stato:** COMPLETATO (Risolto con un'epica battaglia e un refactoring dell'UI, introducendo una modale di conferma per l'upload dell'avatar. La robustezza ha prevalso!)
+- ✅ 🐞 **BUG-PROF-AVATAR-BTN-001: Pulsante "Conferma e Carica Avatar" (`#confirmAvatarUploadBtn`) invisibile ma cliccabile in `profile.html`.** (RISOLTO)
 
 ---
 
@@ -101,15 +80,7 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
 
 ✅ **Task NOTIF.1: Miglioramento UX Pannello Notifiche Popup**
 
-- **Descrizione:** Ottimizzare l'interazione e la presentazione del pannello notifiche accessibile dalla campanella.
-- ✅ **NOTIF.1.1 (Rimozione Notifica Lette dal Pannello):** Quando una notifica nel pannello popup viene cliccata:
-    - `[x]` **NOTIF.1.1.A:** Lo stato della notifica su Firestore deve essere impostato su `read: true`.
-    - `[x]` **NOTIF.1.1.B:** La notifica deve essere rimossa dinamicamente dalla lista nel pannello popup.
-    - `[x]` **NOTIF.1.1.C:** La notifica (anche se letta) deve rimanere visibile nella pagina `all-notifications.html`.
-- ✅ **NOTIF.1.2 (Gestione Pannello Vuoto e Footer):**
-    - `[x]` **NOTIF.1.2.A:** Se non ci sono notifiche attive da mostrare nel pannello popup, il messaggio "Nessuna nuova notifica." (`#no-notifications-placeholder`) deve essere visibile.
-    - `[x]` **NOTIF.1.2.B (Link "Vedi tutte" Sempre Visibile):** Il link/pulsante "Vedi tutte le notifiche" (`#view-all-notifications-link`) nel footer del pannello popup deve essere **sempre visibile** (per utenti loggati).
-- ✨ ✅ **NOTIF.1.3 (Posizionamento Pannello Notifiche Mobile):** Su mobile, il pannello notifiche (`#notification-panel`) deve aprirsi centrato orizzontalmente rispetto allo schermo/viewport. (COMPLETATO)
+- `[x]` (Tutti i sub-task completati)
 
 🆕 **Task NOTIF.2: Espansione Tipi di Notifiche In-App**
 
@@ -124,9 +95,7 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
     - 💡 Risposta a un commento.
     - 💡 (Admin) Nuovo articolo in attesa di approvazione.
     - 💡 (Admin) Nuova richiesta di cambio nickname.
-- ➡️ **NOTIF.EMAIL-TEMPLATES (Miglioramento/Creazione Email):** (OBSOLETO - Task abbandonato a causa di complessità con Firebase Spark Plan e configurazione SMTP)
-    - ➡️ **NOTIF.EMAIL-TEMPLATES.1:** Migliorare template email di verifica esistente.
-    - ➡️ **NOTIF.EMAIL-TEMPLATES.2:** Creare nuovo template email di "Benvenuto/Attivazione Confermata".
+- ➡️ **NOTIF.EMAIL-TEMPLATES (Miglioramento/Creazione Email):** (OBSOLETO)
 
 ---
 
@@ -151,28 +120,24 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
 - `[x]` **UI-ICON-UPDATE-001.2 (Contribute.html Headers):** Completato.
 - `[ ]` **UI-ICON-UPDATE-001.3 (Altre Sezioni):** Valutare altre aree del sito per aggiornamenti icone.
 
-🆕 **Task UI-GB-STYLE-001: Rivedere stile commenti nel Guestbook (Priorità MEDIA-BASSA)**
-
-- `[ ]` Analizzare CSS attuale per `.comment-item` in `scss/_comments.scss`.
-- `[ ]` Proporre e implementare miglioramenti per leggibilità, spaziatura, e coerenza visiva.
-- `[ ]` Testare su diverse risoluzioni.
+✅ **Task UI-GB-STYLE-001: Rivedere stile commenti nel Guestbook (Priorità MEDIA-BASSA)**
+- `[x]` Analizzato SCSS (`_comments.scss`) e HTML relativi.
+- `[x]` Proposte e applicate (dall'utente) modifiche HTML per coerenza selettori in `about.html`, `donkeyRunner.html`, `view-article.html`.
+- `[x]` Fornito SCSS rivisto per `_comments.scss` per migliorare leggibilità, spaziatura e interazione.
+- `[x]` Creati nuovi stili SCSS specifici per i bottoni di condivisione (`#nativeShareBtn`, `#copyLinkBtn`) in `view-article.html`, trasformandoli in bottoni solo-icona.
 
 ➡️ ✨ **Task PROF-STYLE.1: Rendere quadrati i contenitori avatar (Priorità MEDIA)** (OBSOLETO - Decisione utente del 24/05/2025)
-- `[ ]` **PROF-STYLE.1.1:** Rendere quadrato il contenitore dell'immagine per l'upload in `profile.html` (`#avatarPreview` e il suo contenitore `div` genitore nella modale).
-- `[ ]` **PROF-STYLE.1.2:** Rendere quadrato il visualizzatore dell'avatar nell'header globale (`#headerUserAvatar`).
-- `[ ]` **PROF-STYLE.1.3:** Valutare e applicare stile quadrato avatar anche in `view-article.html` per l'autore.
 
 ✅ ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo (Priorità MEDIA)**
-    - `[x]` **PROF-STYLE.2.1:** Riveduto e migliorato CSS per la box di sottomissione della Mini-Bio (`#updateBioForm` e `#bioInput`) in `profile.html`. Include stile responsivo.
-    - `[x]` **PROF-STYLE.2.2:** Riveduto e migliorato CSS per la box di sottomissione dello Stato d'Animo (`#updateStatusForm` e `#statusMessageInput`) in `profile.html`. Include stile responsivo.
+    - `[x]` (Tutti i sub-task completati)
 
 ---
 
-## 🔧 TECHNICAL DEBT & REFACTORING (Legacy) 🔧
+## 🔧 TECHNICAL DEBT & REFACTORING (Legacy & Nuovi) 🔧
 
 ➡️ **Task TECH-DEBT-001: Unificare Sistemi di Gestione Commenti.** (OBSOLETO)
 
-- 🆕💡 **Task TECH-DEBT-BTN-STYLE-001: Unificare e razionalizzare stili dei bottoni `.game-button`.** (Priorità BASSA)
+🆕💡 **Task TECH-DEBT-BTN-STYLE-001: Unificare e razionalizzare stili dei bottoni `.game-button`.** (Priorità BASSA)
     - `[ ]` Analizzare le definizioni multiple di `.game-button` (es. in `_main-content.scss`, `_donkey-runner.scss`).
     - `[ ]` Definire uno stile base per `.game-button` in un unico file (es. `_buttons.scss` o consolidare in `_main-content.scss`).
     - `[ ]` Utilizzare classi modificatrici (es. `.game-button--primary`, `.game-button--donkey-runner`) per le variazioni specifiche.
@@ -193,24 +158,15 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
 
 **Task PROF.1: Risoluzione Problemi e Miglioramenti Pagina Profilo (`profile.html`)**
 
-- ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** Il campo per aggiornare lo "Stato d'Animo" non compare su mobile. (RISOLTO dall'utente con fix all'header)
+- ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** (RISOLTO)
 - `[P]` **PROF.1.2 (Layout Riconoscimenti - Desktop & Mobile):** (Priorità MEDIA)
-    - ✅ **PROF.1.2.A:** Corretto allineamento sezione badge (`#badgesSection`) per centrarsi nella pagina, in linea con `#profile`. (Effettuato tramite aggiunta di `max-width` e `margin: auto` a `#badgesSection` in `scss/_profile.scss`).
-    - `[ ]` **PROF.1.2.B:** Valutare/implementare sezione dedicata per i badge (es. griglia di card) per migliore presentazione (se l'attuale visualizzazione solo icone non è sufficiente). (*Decisione Utente 24/05/2025: Per ora va bene così, rimane più pulito*).
-- ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** La sezione dei riconoscimenti (badge) non è visibile quando si visualizza il profilo di un altro utente. **RISOLTO**
-    - `[x]` Modificata Cloud Function `userPublicProfileSync.js` per includere `earnedBadges` nella sincronizzazione.
-    - `[x]` Modificato `js/profile.js` (`updateProfilePageUI`) per visualizzare correttamente la sezione badge sui profili pubblici.
-    - `[x]` Verificato corretto deploy della Cloud Function.
-- ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** Rivedere il layout generale di `profile.html` per migliorare organizzazione e presentazione. **COMPLETATO**
-    - `[x]` Ristrutturato HTML di `profile.html` per raggruppare semanticamente tutte le sezioni del profilo (Riconoscimenti e Articoli inclusi in `<section id="profile">`).
-    - `[x]` Spostata la sezione Riconoscimenti (`badgesSection`) in alto, subito dopo il titolo principale.
-    - `[x]` Uniformata la gerarchia dei titoli (h2 per profilo, h3 per sottosezioni).
-    - `[x]` Semplificata `avatarUploadSection` (rimossa anteprima inline e messaggi di stato).
-    - `[x]` Aggiornato `scss/_profile.scss` per riflettere la nuova struttura, correggendo problemi di layout (sezioni su righe separate, layout form "Stato d'Animo").
-    - `[x]` Come effetto secondario positivo, la correzione del CSS ha risolto anche problemi di visualizzazione dei dettagli utente (nickname, nazionalità) sui profili pubblici.
+    - ✅ **PROF.1.2.A:** Corretto allineamento sezione badge.
+    - `[ ]` **PROF.1.2.B:** Valutare/implementare sezione dedicata per i badge. (*Decisione Utente 24/05/2025: Per ora va bene così*).
+- ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** (RISOLTO)
+- ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** (COMPLETATO)
 
 
-**🆕 Task FUNC.1 (Revisione 2): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA)
+🆕 **Task FUNC.1 (Revisione 2): Richiesta Cambio Nickname via Modale con Feedback Dettagliato e Notifiche Admin/Utente** (Priorità MEDIA)
 
 - **Descrizione:** Implementare funzionalità in `profile.html` per richiedere cambio nickname agli admin, con feedback chiaro sullo stato della richiesta e notifiche.
 - `[ ]` **FUNC.1.1 (UI Profilo):** Aggiungere icona e modale in `profile.html`.
@@ -241,6 +197,13 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
 - **Task C.2: Donkey Runner (Gioco Esistente)**
     - `[x]` C.2.4 (Donkey Runner): Leggibilità testi e usabilità form fullscreen.
     - `[ ]` Task C.2.8 (Donkey Runner): Risolvere problemi file audio mancanti (`game_over.mp3`, `shield_block.mp3`). (Priorità BASSA)
+    - 🆕 `[ ]` **C.2.9 (Review Stili e Allineamento):** Revisionare gli stili generali e l'allineamento degli elementi in `donkeyRunner.html` e `donkeyRunner.js` per coerenza e pulizia. (Priorità MEDIA)
+    - 🆕 `[ ]` **C.2.10 (Invito Amici / Sfida):** Aggiungere un pulsante/sezione per "Invita i tuoi amici a giocare" o "Sfida qualcuno a battere il tuo punteggio". (Priorità MEDIA-BASSA)
+        - `[ ]` **C.2.10.1:** Definire UI (pulsante/link, posizione).
+        - `[ ]` **C.2.10.2:** Implementare logica (potrebbe usare `navigator.share` o link precompilati per social).
+    - 🆕 🤔 **C.2.11 (Condivisione Punteggio Partita):** Valutare la complessità e la fattibilità di permettere la condivisione diretta di un punteggio specifico ottenuto in una partita di CodeDash (DonkeyRunner). (Priorità BASSA - INVESTIGARE)
+        - `[ ]` **C.2.11.1:** Analisi tecnica: come salvare/identificare un punteggio di una singola partita in modo condivisibile (es. URL con parametri, immagine generata).
+        - `[ ]` **C.2.11.2:** Design UI per l'opzione di condivisione post-partita.
 - ✅ **Task C.3: Miglioramenti Leaderboard & Info Glitchzilla** (Priorità MEDIA - Parzialmente Completato)
     - `[x]` Avatar aggiornati e performanti sulla Leaderboard (REGRESS-004).
     - `[x]` Pulsante refresh stilizzato con icona (D.LEADERBOARD-UX.1).
@@ -249,7 +212,7 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
     - `[x]` Indicatore "Glitchzilla Debunked!" con icona animata.
     - `[ ]` (Restante da C.3) Valutare ulteriori miglioramenti funzionali o di UI specifici per "Info Glitchzilla" se non coperti.
 - **Task C.5: Migliorare UI/UX di Donkey Runner Game** (Priorità MEDIA-BASSA).
-    - _Da definire focus specifico_
+    - _Da definire focus specifico, potrebbe includere C.2.9_
 - ➡️ **Task C.NEW_FEATURE_HP_ACTIVITY:** (SUPERSEDED)
 
 ### Sezione D: Miglioramenti UI/UX e Ottimizzazioni Generali ✨
@@ -257,7 +220,7 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
 - `[x]` Correzione ESLint `showConfirmationModal` in `js/profile.js`.
 - `[x]` Task D.3.B.6: Revisionare e aggiornare README.md.
 - `[ ]` Sub-task D.1.A.1: Aggiungere notifiche toast per conferma/errore like (su azioni di like/unlike _effettive_ degli utenti loggati). (Priorità MEDIA-BASSA).
-- ➡️ **Task D.UI-HP-FEATURED:** (SUPERSEDED)
+- ➡️ **Task D.UI-HP_FEATURED:** (SUPERSEDED)
 - **Task D.LEADERBOARD-UX: Migliorare UI/UX della Leaderboard**
     - ✅ **D.LEADERBOARD-UX.1:** Stilizzare il pulsante di refresh della leaderboard. (COMPLETATO)
     - ➡️ **D.LEADERBOARD-UX.2:** Verificare e migliorare la responsività della tabella dei punteggi. (OBSOLETO)
@@ -295,34 +258,16 @@ Sessione intensa. Abbiamo **COMPLETATO** con successo il **Refactoring completo 
 - C.3 / D.LEADERBOARD-UX.2 parziale (Responsività base Leaderboard).
 - C.3 (Highlight Utente Loggato in Leaderboard).
 - C.3 (Indicatore "Glitchzilla Debunked!" in Leaderboard con animazione).
-- ✅ **NAV.1.1.1:** Risolto bug pulsante logout desktop.
-- ✅ Corretto errore di export `db` in `main.js`.
-- ✅ Corretta struttura HTML `userProfileContainer` in `index.html` (annidamento) e successiva ristrutturazione dell'header per layout mobile.
-- ✅ Corretta visibilità `userDisplayName` per utente loggato.
-- ✅ **NAV.1.1.2.B (Visibilità Logout Utente Non Autenticato - `index.html`):** Risolto.
-- ➡️ **BUG-NAV-RESP-001:** Risolto come side-effect di fix HTML.
-- ✅ **NAV.1.2.5 (Layout Header Mobile):** Riorganizzato layout per corretto posizionamento su due righe (titolo/hamburger + controlli).
-- ✅ **NAV.1.2.5.C (Centraggio Hamburger):** Allineato verticalmente l'icona hamburger su mobile.
-- ✅ **NAV.1.3.2 (Dropdown Community Desktop):** Funzionalità ripristinata.
-- ✅ **NAV.THEME-TOGGLER:** Funzionalità Theme Toggler ripristinata (desktop e mobile).
-- ✨ ✅ **NOTIF.1.3 (Posizionamento Pannello Notifiche Mobile):** Centrato pannello rispetto alla viewport.
-- ✅ **Task NOTIF.1: Miglioramento UX Pannello Notifiche Popup** (Completati NOTIF.1.1 e NOTIF.1.2).
-- ✅ 🐞 **PROF.1.1 (Bug Mobile - Stato d'Animo):** Risolto (dall'utente, tramite fix all'header).
-- ✅ 🐞 **BUG-PROF-AVATAR-BTN-001: Pulsante "Conferma e Carica Avatar" invisibile.** (RISOLTO CON SUCCESSO TRAMITE REFACTOR A MODALE!)
-- ✅ ✨ **Task PROF-STYLE.2: Migliorare CSS per box di input pagina profilo (Priorità MEDIA)** (Migliorato stile CSS per Mini-Bio e Stato d'Animo, inclusa responsività).
-- ✅ **PROF.1.2.A:** Corretto allineamento sezione badge (`#badgesSection`) per centrarsi nella pagina.
+- ✅ **NAV.1 (Intero Task Refactoring Navbar):** COMPLETATO.
+- ✅ **NOTIF.1 (Miglioramento UX Pannello Notifiche):** COMPLETATO.
+- ✅ 🐞 **BUG-PROF-AVATAR-BTN-001:** RISOLTO.
+- ✅ ✨ **PROF-STYLE.2 (CSS Box Input Profilo):** COMPLETATO.
+- ✅ **PROF.1.2.A (Allineamento Badge Profilo):** COMPLETATO.
 - ✅ **PROF.1.3 (Visibilità Riconoscimenti Profilo Pubblico):** RISOLTO.
 - ✅ **PROF.1.4 (Layout Generale Pagina Profilo):** COMPLETATO.
-- ✅ **Task NAV.1: Refactoring Completo Funzionalità e UI Navbar (INTERO TASK COMPLETATO)**
-    - ➡️ **NAV.1.1.3:** (OBSOLETO - Funzionalità confermata)
-    - ✅ **NAV.1.2.1 & .2:** (COMPLETATO - Stato attuale buono)
-    - ✅ **NAV.1.2.3:** (COMPLETATO - Avatar come link)
-    - 🆕 ✅ **NAV.1.2.4:** (COMPLETATO - Pulsante Home aggiuntivo)
-    - ✅ **NAV.1.3.1:** (COMPLETATO - Struttura confermata)
-    - ✅ **NAV.1.3.3:** (COMPLETATO - Dropdown mobile confermato)
-    - ➡️ **NAV.1.3.4:** (OBSOLETO - Funzionalità confermata)
+- ✅ **UI-GB-STYLE-001 (Stili Commenti e Bottoni Condivisione ArticleViewer):** COMPLETATO.
 
 ---
 
-// DevPlan v4.0.9 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa.
-// Navbar rifinita! Ottimo lavoro di resilienza e collaborazione.
+// DevPlan v4.0.10 - Canvas Markdown - AthenaDev 🏛️✨ Sessione Conclusa.
+// Ottimo lavoro sui dettagli UI! Il Donkey Runner attende i prossimi miglioramenti.
