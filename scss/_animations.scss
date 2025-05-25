@@ -60,3 +60,38 @@
     // --- FINE MODIFICA CHIAVE ---
   }
 }
+
+// Animazione per il badge "The Debuggator"
+@keyframes debuggator-flash-red {
+  0%, 100% {
+    // Assumendo che il colore di default del badge sia --bs-success come definito in Firestore
+    color: var(--bs-success); 
+    opacity: 1;
+  }
+  50% {
+    color: var(--bs-danger); // Rosso di Bootstrap
+    opacity: 0.8; // Leggermente trasparente per un effetto "flash"
+  }
+}
+
+.debuggator-icon-flash-red {
+  animation: debuggator-flash-red 1.2s infinite ease-in-out;
+}
+
+@keyframes debuggator-pulse-alert {
+  0%, 100% {
+    color: #C62828; // Un rosso più scuro e profondo
+    text-shadow: none;
+    opacity: 0.7; // Leggermente meno opaco alla base del pulse
+  }
+  50% {
+    color: #FF5252; // Un rosso brillante e acceso
+    text-shadow: 0 0 5px rgba(255, 82, 82, 0.7), // Bagliore rosso chiaro
+                 0 0 10px rgba(255, 82, 82, 0.5);
+    opacity: 1;
+  }
+}
+
+.debuggator-icon-pulse-alert {
+  animation: debuggator-pulse-alert 1.3s infinite ease-in-out;
+}

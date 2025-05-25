@@ -1,9 +1,9 @@
-// functions/index.js
+// functions/index.js (Versione Corretta e Refattorizzata)
 
 // Firebase Functions v2 imports
 const { onDocumentUpdated, onDocumentCreated, onDocumentDeleted } = require('firebase-functions/v2/firestore');
 const { onObjectFinalized } = require('firebase-functions/v2/storage');
-const { HttpsError, onCall } = require('firebase-functions/v2/https'); // <-- MODIFICA: Aggiunto HttpsError e onCall
+const { HttpsError, onCall } = require('firebase-functions/v2/https');
 const { logger } = require('firebase-functions');
 
 // Firebase Admin SDK imports
@@ -20,7 +20,7 @@ const sharp = require('sharp');
 
 // Initialize Firebase Admin SDK if not already initialized
 if (admin.apps.length === 0) {
-admin.initializeApp();
+    admin.initializeApp();
 }
 
 const db = admin.firestore();
@@ -31,31 +31,33 @@ const { createNotification } = require('./notificationUtils');
 const nicknameHandlers = require('./nicknameRequestHandler');
 
 // --- CONSTANTS ---
+// BADGE_DETAILS è stato rimosso. Ora leggiamo le definizioni direttamente da Firestore.
 const BADGE_ID_AUTORE_DEBUTTANTE = 'author-rookie';
 const BADGE_ID_GLITCHZILLA_SLAYER = 'glitchzilla-slayer';
-const BADGE_ID_VERIFIED_USER = 'verified-user'; // <-- NUOVO: ID Badge utente verificato
+const BADGE_ID_VERIFIED_USER = 'verified-user';
+const BADGE_ID_THE_DEBUGGATOR = 'the-debuggator'; // Nuovo ID
 
-const BADGE_DETAILS = {
-[BADGE_ID_AUTORE_DEBUTTANTE]: {
-name: 'Autore Debuttante',
-description: 'Hai pubblicato il tuo primo articolo!',
-icon: 'emoji_events',
-linkPath: '#badgesSection',
-},
-[BADGE_ID_GLITCHZILLA_SLAYER]: {
-name: 'Glitchzilla Slayer',
-description: 'Hai sconfitto Glitchzilla nel leggendario Donkey Runner!',
-icon: 'whatshot',
-linkPath: '#badgesSection',
-},
-    // <-- NUOVO: Dettagli del nuovo badge -->
-[BADGE_ID_VERIFIED_USER]: {
-name: 'Utente Verificato',
-description: 'Hai verificato con successo il tuo indirizzo email.',
-icon: 'verified_user',
-linkPath: '#badgesSection',
-},
-};
+/**
+ * Helper per recuperare i dettagli di un badge da Firestore.
+ * Potremmo aggiungere un livello di cache qui in futuro se necessario.
+ * @param {string} badgeId L'ID del badge da recuperare.
+ * @returns {Promise<object|null>} I dati del badge o null se non trovato.
+ */
+async function getBadgeDetails(badgeId) {
+    try {
+        const badgeRef = db.collection('badgeDefinitions').doc(badgeId);
+        const doc = await badgeRef.get();
+        if (doc.exists) {
+            return doc.data();
+        }
+        logger.warn(`[getBadgeDetails] Dettagli non trovati per il badge ID: ${badgeId}`);
+        return null;
+    } catch (error) {
+        logger.error(`[getBadgeDetails] Errore nel recuperare i dettagli del badge ${badgeId}:`, error);
+        return null;
+    }
+}
+
 
 // --- USER PUBLIC PROFILE SYNC FUNCTIONS ---
 exports.createUserPublicProfile = onDocumentCreated('userProfiles/{userId}', userPublicProfileSync.handleCreateUserPublicProfile);
@@ -64,151 +66,138 @@ exports.deleteUserPublicProfile = onDocumentDeleted('userProfiles/{userId}', use
 
 // --- ARTICLE STATUS NOTIFICATIONS ---
 exports.handleArticleStatusNotifications = onDocumentUpdated('articles/{articleId}', async (event) => {
-// (Il codice di questa funzione rimane invariato)
-if (!event.data) return;
-const articleAfter = event.data.after.data();
-const articleBefore = event.data.before.data();
-const articleId = event.params.articleId;
-if (!articleAfter || !articleBefore) return;
-const authorId = articleAfter.authorId;
-if (!authorId) return;
+    if (!event.data) return;
+    const articleAfter = event.data.after.data();
+    const articleBefore = event.data.before.data();
+    const articleId = event.params.articleId;
+    if (!articleAfter || !articleBefore) return;
+    const authorId = articleAfter.authorId;
+    if (!authorId) return;
 
-if (articleBefore.status !== articleAfter.status) {
-if (articleAfter.status === 'published') {
-await createNotification(authorId, { type: 'article_published', title: 'Articolo Pubblicato!', message: `Il tuo articolo "${articleAfter.title || 'Senza titolo'}" è stato pubblicato.`, link: `/view-article.html?id=${articleId}`, icon: 'check_circle', relatedItemId: articleId });
-} else if (articleAfter.status === 'rejected') {
-const reason = articleAfter.rejectionReason || 'Nessun motivo specificato.';
-await createNotification(authorId, { type: 'article_rejected', title: 'Articolo Respinto', message: `Il tuo articolo "${articleAfter.title || 'Senza titolo'}" è stato respinto. Motivo: ${reason}`, link: `/submit-article.html?id=${articleId}`, icon: 'error', relatedItemId: articleId });
-}
-}
+    if (articleBefore.status !== articleAfter.status) {
+        if (articleAfter.status === 'published') {
+            await createNotification(authorId, { type: 'article_published', title: 'Articolo Pubblicato!', message: `Il tuo articolo "${articleAfter.title || 'Senza titolo'}" è stato pubblicato.`, link: `/view-article.html?id=${articleId}`, icon: 'check_circle', relatedItemId: articleId });
+        } else if (articleAfter.status === 'rejected') {
+            const reason = articleAfter.rejectionReason || 'Nessun motivo specificato.';
+            await createNotification(authorId, { type: 'article_rejected', title: 'Articolo Respinto', message: `Il tuo articolo "${articleAfter.title || 'Senza titolo'}" è stato respinto. Motivo: ${reason}`, link: `/submit-article.html?id=${articleId}`, icon: 'error', relatedItemId: articleId });
+        }
+    }
 });
 
 // --- NOTIFY ADMINS ON NEW NICKNAME REQUEST ---
 exports.notifyAdminsOnNewNicknameRequest = onDocumentCreated('nicknameChangeRequests/{requestId}', async (event) => {
-    // (Il codice di questa funzione rimane invariato)
     const functionName = 'notifyAdminsOnNewNicknameRequest';
-if (!event.data) return;
-const requestData = event.data.data();
-const requestingUserId = requestData.userId;
-const requestedNickname = requestData.requestedNickname;
-if (!requestingUserId || !requestedNickname) return;
-const currentNickname = requestData.currentNickname || 'un utente';
+    if (!event.data) return;
+    const requestData = event.data.data();
+    const requestingUserId = requestData.userId;
+    const requestedNickname = requestData.requestedNickname;
+    if (!requestingUserId || !requestedNickname) return;
+    const currentNickname = requestData.currentNickname || 'un utente';
 
-try {
-const adminsSnapshot = await db.collection('userProfiles').where('isAdmin', '==', true).get();
-if (adminsSnapshot.empty) return;
-const adminIds = adminsSnapshot.docs.map((doc) => doc.id);
-const notificationPayload = { type: 'admin_new_nickname_request', title: 'Nuova Richiesta Nickname', message: `L'utente ${currentNickname} ha richiesto il nuovo nickname: "${requestedNickname}".`, link: '/admin-dashboard.html#nickname-requests-section', icon: 'manage_accounts', relatedItemId: event.params.requestId };
-const notificationPromises = adminIds.map((adminId) => {
-if (adminId === requestingUserId) return null;
-return createNotification(adminId, notificationPayload);
-});
-await Promise.all(notificationPromises.filter((p) => p !== null));
-} catch (error) {
-logger.error(`[CF:${functionName}] Failed to send nickname request notifications.`, { error: error });
-}
+    try {
+        const adminsSnapshot = await db.collection('userProfiles').where('isAdmin', '==', true).get();
+        if (adminsSnapshot.empty) return;
+        const adminIds = adminsSnapshot.docs.map((doc) => doc.id);
+        const notificationPayload = { type: 'admin_new_nickname_request', title: 'Nuova Richiesta Nickname', message: `L'utente ${currentNickname} ha richiesto il nuovo nickname: "${requestedNickname}".`, link: '/admin-dashboard.html#nickname-requests-section', icon: 'manage_accounts', relatedItemId: event.params.requestId };
+        const notificationPromises = adminIds.map((adminId) => {
+            if (adminId === requestingUserId) return null;
+            return createNotification(adminId, notificationPayload);
+        });
+        await Promise.all(notificationPromises.filter((p) => p !== null));
+    } catch (error) {
+        logger.error(`[CF:${functionName}] Failed to send nickname request notifications.`, { error: error });
+    }
 });
 
 // --- BADGE AND AUTHOR UPDATE LOGIC ---
 exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}', async (event) => {
-    // (Il codice di questa funzione rimane invariato)
-if (!event.data) return;
-const newValue = event.data.after.data();
-const previousValue = event.data.before.data();
-if (!newValue || !previousValue) return;
+    if (!event.data) return;
+    const newValue = event.data.after.data();
+    const previousValue = event.data.before.data();
+    if (!newValue || !previousValue) return;
 
-if (newValue.status === 'published' && previousValue.status !== 'published') {
-const authorId = newValue.authorId;
-if (!authorId) return;
-const userProfileRef = db.collection('userProfiles').doc(authorId);
-try {
-await db.runTransaction(async (transaction) => {
-const userProfileSnap = await transaction.get(userProfileRef);
-if (!userProfileSnap.exists) return;
-const userProfileData = userProfileSnap.data();
-let profileUpdates = {};
-let newBadgeAwardedId = null;
+    if (newValue.status === 'published' && previousValue.status !== 'published') {
+        const authorId = newValue.authorId;
+        if (!authorId) return;
+        const userProfileRef = db.collection('userProfiles').doc(authorId);
+        try {
+            await db.runTransaction(async (transaction) => {
+                const userProfileSnap = await transaction.get(userProfileRef);
+                if (!userProfileSnap.exists) return;
+                const userProfileData = userProfileSnap.data();
+                let profileUpdates = {};
+                let newBadgeAwardedId = null;
 
-if (userProfileData.hasPublishedArticles !== true) profileUpdates.hasPublishedArticles = true;
-const earnedBadges = userProfileData.earnedBadges || [];
-if (!earnedBadges.includes(BADGE_ID_AUTORE_DEBUTTANTE)) {
-profileUpdates.earnedBadges = FieldValue.arrayUnion(BADGE_ID_AUTORE_DEBUTTANTE);
-newBadgeAwardedId = BADGE_ID_AUTORE_DEBUTTANTE;
-}
+                if (userProfileData.hasPublishedArticles !== true) profileUpdates.hasPublishedArticles = true;
+                const earnedBadges = userProfileData.earnedBadges || [];
+                if (!earnedBadges.includes(BADGE_ID_AUTORE_DEBUTTANTE)) {
+                    profileUpdates.earnedBadges = FieldValue.arrayUnion(BADGE_ID_AUTORE_DEBUTTANTE);
+                    newBadgeAwardedId = BADGE_ID_AUTORE_DEBUTTANTE;
+                }
 
-if (Object.keys(profileUpdates).length > 0) {
-profileUpdates.updatedAt = FieldValue.serverTimestamp();
-transaction.update(userProfileRef, profileUpdates);
-if (newBadgeAwardedId && BADGE_DETAILS[newBadgeAwardedId]) {
-const badgeInfo = BADGE_DETAILS[newBadgeAwardedId];
-await createNotification(authorId, { type: 'new_badge', title: 'Nuovo Badge Sbloccato!', message: `Hai ottenuto il badge: ${badgeInfo.name}. ${badgeInfo.description}`, link: `/profile.html?uid=${authorId}${badgeInfo.linkPath || ''}`, icon: badgeInfo.icon, relatedItemId: newBadgeAwardedId });
-}
-}
-});
-} catch (error) {
-logger.error('updateAuthorOnArticlePublish: Error in transaction:', error, { authorId });
-}
-}
+                if (Object.keys(profileUpdates).length > 0) {
+                    profileUpdates.updatedAt = FieldValue.serverTimestamp();
+                    transaction.update(userProfileRef, profileUpdates);
+                    if (newBadgeAwardedId) {
+                        const badgeInfo = await getBadgeDetails(newBadgeAwardedId);
+                        if (badgeInfo) {
+                           await createNotification(authorId, { type: 'new_badge', title: 'Nuovo Badge Sbloccato!', message: `Hai ottenuto il badge: "${badgeInfo.name}".`, link: `/profile.html?uid=${authorId}#badgesSection`, icon: badgeInfo.icon, relatedItemId: newBadgeAwardedId });
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            logger.error('updateAuthorOnArticlePublish: Error in transaction:', error, { authorId });
+        }
+    }
 });
 
 exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}', async (event) => {
-    // (Il codice di questa funzione rimane invariato)
-if (!event.data) return;
-const scoreData = event.data.data();
-if (scoreData.userId && scoreData.glitchzillaDefeated === true) {
-const userId = scoreData.userId;
-const userProfileRef = db.collection('userProfiles').doc(userId);
-try {
-await db.runTransaction(async (transaction) => {
-const userProfileSnap = await transaction.get(userProfileRef);
-if (!userProfileSnap.exists) return;
-const userProfileData = userProfileSnap.data();
-let profileUpdates = {};
-let newBadgeAwardedId = null;
+    if (!event.data) return;
+    const scoreData = event.data.data();
+    if (scoreData.userId && scoreData.glitchzillaDefeated === true) {
+        const userId = scoreData.userId;
+        const userProfileRef = db.collection('userProfiles').doc(userId);
+        try {
+            await db.runTransaction(async (transaction) => {
+                const userProfileSnap = await transaction.get(userProfileRef);
+                if (!userProfileSnap.exists) return;
+                const userProfileData = userProfileSnap.data();
+                let profileUpdates = {};
+                let newBadgeAwardedId = null;
 
-if (userProfileData.hasDefeatedGlitchzilla !== true) profileUpdates.hasDefeatedGlitchzilla = true;
-const earnedBadges = userProfileData.earnedBadges || [];
-if (!earnedBadges.includes(BADGE_ID_GLITCHZILLA_SLAYER)) {
-profileUpdates.earnedBadges = FieldValue.arrayUnion(BADGE_ID_GLITCHZILLA_SLAYER);
-newBadgeAwardedId = BADGE_ID_GLITCHZILLA_SLAYER;
-}
+                if (userProfileData.hasDefeatedGlitchzilla !== true) profileUpdates.hasDefeatedGlitchzilla = true;
+                const earnedBadges = userProfileData.earnedBadges || [];
+                if (!earnedBadges.includes(BADGE_ID_GLITCHZILLA_SLAYER)) {
+                    profileUpdates.earnedBadges = FieldValue.arrayUnion(BADGE_ID_GLITCHZILLA_SLAYER);
+                    newBadgeAwardedId = BADGE_ID_GLITCHZILLA_SLAYER;
+                }
 
-if (Object.keys(profileUpdates).length > 0) {
-profileUpdates.updatedAt = FieldValue.serverTimestamp();
-transaction.update(userProfileRef, profileUpdates);
-if (newBadgeAwardedId && BADGE_DETAILS[newBadgeAwardedId]) {
-const badgeInfo = BADGE_DETAILS[newBadgeAwardedId];
-await createNotification(userId, { type: 'new_badge', title: 'Nuovo Badge Sbloccato!', message: `Hai ottenuto il badge: ${badgeInfo.name}. ${badgeInfo.description}`, link: `/profile.html?uid=${userId}${badgeInfo.linkPath || ''}`, icon: badgeInfo.icon, relatedItemId: newBadgeAwardedId });
-}
-}
+                if (Object.keys(profileUpdates).length > 0) {
+                    profileUpdates.updatedAt = FieldValue.serverTimestamp();
+                    transaction.update(userProfileRef, profileUpdates);
+                    if (newBadgeAwardedId) {
+                        const badgeInfo = await getBadgeDetails(newBadgeAwardedId);
+                        if (badgeInfo) {
+                            await createNotification(userId, { type: 'new_badge', title: 'Nuovo Badge Sbloccato!', message: `Hai ottenuto il badge: "${badgeInfo.name}".`, link: `/profile.html?uid=${userId}#badgesSection`, icon: badgeInfo.icon, relatedItemId: newBadgeAwardedId });
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            logger.error('awardGlitchzillaSlayer: Error in transaction:', error, { userId });
+        }
+    }
 });
-} catch (error) {
-logger.error('awardGlitchzillaSlayer: Error in transaction:', error, { userId });
-}
-}
-});
 
-
-// --- NUOVA FUNZIONE CALLABLE ---
-/**
- * Assegna il badge 'Utente Verificato' e invia una notifica.
- * Questa funzione è chiamata dal client dopo che ha verificato che user.emailVerified è true.
- */
+// --- CALLABLE FUNCTIONS ---
 exports.grantVerificationBadge = onCall({ region: 'us-central1' }, async (request) => {
     const functionName = 'grantVerificationBadge';
-    logger.info(`[CF:${functionName}] Function triggered.`);
-
-    // 1. Controlla l'autenticazione
     if (!request.auth || !request.auth.uid) {
-        logger.warn(`[CF:${functionName}] Unauthorized call. Auth context missing.`);
         throw new HttpsError('unauthenticated', 'Devi essere autenticato per eseguire questa operazione.');
     }
     const userId = request.auth.uid;
-    const userEmail = request.auth.token.email || 'N/A';
-
-    // 2. Controlla che l'email sia effettivamente verificata (doppio controllo)
     if (!request.auth.token.email_verified) {
-        logger.warn(`[CF:${functionName}] User ${userId} (${userEmail}) called function without a verified email.`);
         throw new HttpsError('failed-precondition', 'La tua email non risulta ancora verificata.');
     }
     
@@ -216,50 +205,93 @@ exports.grantVerificationBadge = onCall({ region: 'us-central1' }, async (reques
     const newBadgeId = BADGE_ID_VERIFIED_USER;
     
     try {
-        // 3. Esegui una transazione per garantire l'atomicità
         await db.runTransaction(async (transaction) => {
             const userProfileSnap = await transaction.get(userProfileRef);
-
-            if (!userProfileSnap.exists) {
-                logger.error(`[CF:${functionName}] User profile for ${userId} does not exist.`);
-                // Non lanciare un errore qui, potrebbe essere una condizione di race. Logghiamo e usciamo.
-                return; 
-            }
+            if (!userProfileSnap.exists) { return; }
             const userProfileData = userProfileSnap.data();
             const earnedBadges = userProfileData.earnedBadges || [];
 
-            // 4. Controlla se il badge è già stato assegnato per evitare duplicati
-            if (earnedBadges.includes(newBadgeId)) {
-                logger.info(`[CF:${functionName}] User ${userId} already has the '${newBadgeId}' badge. No action needed.`);
-                return;
-            }
+            if (earnedBadges.includes(newBadgeId)) { return; }
             
-            // 5. Assegna il badge
             logger.info(`[CF:${functionName}] Awarding '${newBadgeId}' badge to user ${userId}.`);
             transaction.update(userProfileRef, {
                 earnedBadges: FieldValue.arrayUnion(newBadgeId),
                 updatedAt: FieldValue.serverTimestamp(),
             });
 
-            // 6. Invia la notifica (fuori dalla transazione se `createNotification` non è idempotente)
-            // Poiché createNotification scrive su un'altra collection, è sicuro chiamarla dopo aver preparato l'update.
-            const badgeInfo = BADGE_DETAILS[newBadgeId];
-            await createNotification(userId, {
-                type: 'new_badge',
-                title: 'Nuovo Badge Sbloccato!',
-                message: `Hai ottenuto il badge: "${badgeInfo.name}". ${badgeInfo.description}`,
-                link: `/profile.html${badgeInfo.linkPath || ''}`, // Link al profilo utente, sezione badge
-                icon: badgeInfo.icon,
-                relatedItemId: newBadgeId,
-            });
+            const badgeInfo = await getBadgeDetails(newBadgeId);
+            if (badgeInfo) {
+                await createNotification(userId, {
+                    type: 'new_badge',
+                    title: 'Nuovo Badge Sbloccato!',
+                    message: `Hai ottenuto il badge: "${badgeInfo.name}".`,
+                    link: `/profile.html#badgesSection`,
+                    icon: badgeInfo.icon,
+                    relatedItemId: newBadgeId,
+                });
+            }
         });
-
-        logger.info(`[CF:${functionName}] Badge e notifica per ${userId} processati con successo.`);
         return { success: true, message: 'Badge assegnato con successo!' };
-
     } catch (error) {
         logger.error(`[CF:${functionName}] Errore durante l'assegnazione del badge di verifica a ${userId}:`, error);
         throw new HttpsError('internal', 'Impossibile assegnare il badge. Riprova più tardi.');
+    }
+});
+
+// --- NUOVA FUNZIONE PER BADGE 'THE DEBUGGATOR' ---
+exports.awardDebuggatorBadgeOnNewHighScore = onDocumentCreated("leaderboardScores/{scoreId}", async (event) => {
+    const functionName = 'awardDebuggatorBadgeOnNewHighScore';
+    if (!event.data) return;
+    
+    const scoreData = event.data.data();
+    const score = scoreData.score;
+    const userId = scoreData.userId;
+
+    if (!userId) {
+        logger.info(`[CF:${functionName}] Punteggio registrato da un guest. Nessun badge da assegnare.`);
+        return;
+    }
+
+    if (score < 2000) {
+        return;
+    }
+
+    const userProfileRef = db.collection("userProfiles").doc(userId);
+    const newBadgeId = BADGE_ID_THE_DEBUGGATOR;
+
+    try {
+        const userProfileSnap = await userProfileRef.get();
+        if (!userProfileSnap.exists) {
+            logger.error(`[CF:${functionName}] Profilo utente ${userId} non trovato.`);
+            return;
+        }
+
+        const userProfile = userProfileSnap.data();
+        const earnedBadges = userProfile.earnedBadges || [];
+
+        if (earnedBadges.includes(newBadgeId)) {
+            logger.info(`[CF:${functionName}] L'utente ${userId} possiede già il badge '${newBadgeId}'.`);
+            return;
+        }
+
+        logger.info(`[CF:${functionName}] Assegnazione del badge '${newBadgeId}' all'utente ${userId}.`);
+        await userProfileRef.update({
+            earnedBadges: FieldValue.arrayUnion(newBadgeId),
+        });
+
+        const badgeInfo = await getBadgeDetails(newBadgeId);
+        if (badgeInfo) {
+            await createNotification(userId, {
+                type: "new_badge",
+                title: "Nuovo Riconoscimento!",
+                message: `Hai sbloccato il badge "${badgeInfo.name}" per il tuo punteggio epico in Donkey Runner!`,
+                icon: badgeInfo.icon,
+                link: '/profile.html#badgesSection',
+                relatedItemId: newBadgeId,
+            });
+        }
+    } catch (error) {
+        logger.error(`[CF:${functionName}] Errore durante l'assegnazione del badge '${newBadgeId}' a ${userId}:`, error);
     }
 });
 
@@ -270,21 +302,20 @@ exports.approveNicknameChange = nicknameHandlers.approveNicknameChange;
 exports.rejectNicknameChange = nicknameHandlers.rejectNicknameChange;
 
 // --- AVATAR PROCESSING ---
-// (Il codice di questa funzione rimane invariato)
 const AVATAR_THUMBNAIL_SIZE = 48;
 const AVATAR_PROFILE_SIZE = 160;
 exports.processUploadedAvatar = onObjectFinalized({ bucket: 'asyncdonkey.firebasestorage.app', memory: '512MiB', timeoutSeconds: 120, cpu: 1 }, async (event) => {
-    // ... codice esistente ...
     const fileObject = event.data;
     const filePath = fileObject.name;
     const contentType = fileObject.contentType;
     const bucketName = fileObject.bucket;
-    if (!contentType || !contentType.startsWith('image/')) return null;
-    if (!filePath || !filePath.startsWith('user-avatars/')) return null;
-    if (filePath.includes('/processed/')) return null;
-    if (filePath.includes(`avatar_${AVATAR_THUMBNAIL_SIZE}.webp`) || filePath.includes(`avatar_${AVATAR_PROFILE_SIZE}.webp`)) return null;
+    if (!contentType || !contentType.startsWith('image/')) return;
+    if (!filePath || !filePath.startsWith('user-avatars/')) return;
+    if (filePath.includes('/processed/')) return;
+    if (filePath.includes(`avatar_${AVATAR_THUMBNAIL_SIZE}.webp`) || filePath.includes(`avatar_${AVATAR_PROFILE_SIZE}.webp`)) return;
+    
     const parts = filePath.split('/');
-    if (parts.length < 3) return null;
+    if (parts.length < 3) return;
     const userId = parts[1];
     const originalFileName = parts[parts.length - 1];
     const bucket = admin.storage().bucket(bucketName);
@@ -292,16 +323,21 @@ exports.processUploadedAvatar = onObjectFinalized({ bucket: 'asyncdonkey.firebas
     const tempFileNameBaseForLocal = `${userId}_${Date.now()}`;
     const tempLocalThumbPath = path.join(os.tmpdir(), `thumb_${tempFileNameBaseForLocal}.webp`);
     const tempLocalProfilePath = path.join(os.tmpdir(), `profile_${tempFileNameBaseForLocal}.webp`);
+
     try {
         await bucket.file(filePath).download({ destination: tempLocalOriginalPath });
         await sharp(tempLocalOriginalPath).resize(AVATAR_THUMBNAIL_SIZE, AVATAR_THUMBNAIL_SIZE, { fit: 'cover' }).webp({ quality: 80 }).toFile(tempLocalThumbPath);
         await sharp(tempLocalOriginalPath).resize(AVATAR_PROFILE_SIZE, AVATAR_PROFILE_SIZE, { fit: 'cover' }).webp({ quality: 80 }).toFile(tempLocalProfilePath);
+        
         const thumbStoragePath = `user-avatars/${userId}/processed/avatar_small.webp`;
         const profileStoragePath = `user-avatars/${userId}/processed/avatar_profile.webp`;
+        
         const [thumbUploadResponse] = await bucket.upload(tempLocalThumbPath, { destination: thumbStoragePath, metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' }});
         const [profileUploadResponse] = await bucket.upload(tempLocalProfilePath, { destination: profileStoragePath, metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=3600' }});
+        
         await thumbUploadResponse.makePublic();
         await profileUploadResponse.makePublic();
+        
         await db.collection('userProfiles').doc(userId).update({ avatarUrls: { small: thumbUploadResponse.publicUrl(), profile: profileUploadResponse.publicUrl() }, profileUpdatedAt: FieldValue.serverTimestamp() });
         await bucket.file(filePath).delete();
     } catch (error) {
@@ -315,5 +351,4 @@ exports.processUploadedAvatar = onObjectFinalized({ bucket: 'asyncdonkey.firebas
             logger.warn('processUploadedAvatar: Error deleting temporary files:', cleanupError);
         }
     }
-    return null;
 });

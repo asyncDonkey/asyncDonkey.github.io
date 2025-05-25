@@ -186,6 +186,61 @@ a:hover {
     text-shadow: 0 0 7px #54dbf6;
   }
 }
+@-webkit-keyframes debuggator-flash-red {
+  0%, 100% {
+    color: var(--bs-success);
+    opacity: 1;
+  }
+  50% {
+    color: var(--bs-danger);
+    opacity: 0.8;
+  }
+}
+@keyframes debuggator-flash-red {
+  0%, 100% {
+    color: var(--bs-success);
+    opacity: 1;
+  }
+  50% {
+    color: var(--bs-danger);
+    opacity: 0.8;
+  }
+}
+.debuggator-icon-flash-red {
+  -webkit-animation: debuggator-flash-red 1.2s infinite ease-in-out;
+          animation: debuggator-flash-red 1.2s infinite ease-in-out;
+}
+
+@-webkit-keyframes debuggator-pulse-alert {
+  0%, 100% {
+    color: #C62828;
+    text-shadow: none;
+    opacity: 0.7;
+  }
+  50% {
+    color: #FF5252;
+    text-shadow: 0 0 5px rgba(255, 82, 82, 0.7), 0 0 10px rgba(255, 82, 82, 0.5);
+    opacity: 1;
+  }
+}
+
+@keyframes debuggator-pulse-alert {
+  0%, 100% {
+    color: #C62828;
+    text-shadow: none;
+    opacity: 0.7;
+  }
+  50% {
+    color: #FF5252;
+    text-shadow: 0 0 5px rgba(255, 82, 82, 0.7), 0 0 10px rgba(255, 82, 82, 0.5);
+    opacity: 1;
+  }
+}
+.debuggator-icon-pulse-alert {
+  -webkit-animation: debuggator-pulse-alert 1.3s infinite ease-in-out;
+          animation: debuggator-pulse-alert 1.3s infinite ease-in-out;
+}
+
 /* ===== Header Styles ===== */
 header {
   background-color: var(--surface-bg-primary);
