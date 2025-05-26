@@ -207,64 +207,61 @@ async function loadHeaderUserProfileDisplay(user, profileData) {
     }
 
     if (!user) {
-        // Se l'utente non è loggato, assicurati che questi siano nascosti
         userDisplayNameElement.textContent = '';
-        userDisplayNameElement.style.display = 'none'; // Assicura che il nome sia nascosto
-        headerUserAvatarElement.src = ''; // Pulisci src per evitare di mostrare vecchio avatar
-        headerUserAvatarElement.alt = 'User Avatar'; // Resetta alt text
+        userDisplayNameElement.style.display = 'none';
+        userDisplayNameElement.className = ''; // NUOVA MODIFICA PER STILE NICKNAME: Reset classe
+        headerUserAvatarElement.src = '';
+        headerUserAvatarElement.alt = 'User Avatar';
         headerUserAvatarElement.style.display = 'none';
         return;
     }
 
-    // Se l'utente è loggato, procedi
-    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente'; // Fallback iniziale
-    let avatarSrcToSet = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 }); // Default Blockie per navbar
+    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente';
+    let avatarSrcToSet = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 });
     let altText = `${nicknameToShow}'s Blockie Avatar`;
+    let activeNicknameAnimClass = null; // NUOVA MODIFICA PER STILE NICKNAME
 
     if (profileData) {
-        // Se abbiamo i dati del profilo (da onSnapshot)
         if (profileData.nickname) {
             nicknameToShow = profileData.nickname;
         }
-        altText = `${nicknameToShow}'s Avatar`; // Aggiorna alt text con nickname corretto
+        altText = `${nicknameToShow}'s Avatar`;
+        activeNicknameAnimClass = profileData.activeNicknameAnimation || null; // NUOVA MODIFICA PER STILE NICKNAME
 
         if (profileData.avatarUrls && (profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile)) {
-            let baseUrl = profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile; // Preferisci thumbnail
-
-            // Applica cache busting
+            let baseUrl = profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile;
             if (profileData.profileUpdatedAt && profileData.profileUpdatedAt.seconds) {
                 avatarSrcToSet = `${baseUrl}?v=${profileData.profileUpdatedAt.seconds}`;
             } else if (profileData.profileUpdatedAt instanceof Date) {
                 avatarSrcToSet = `${baseUrl}?v=${profileData.profileUpdatedAt.getTime()}`;
             } else {
-                avatarSrcToSet = baseUrl; // Nessun timestamp per cache busting
+                avatarSrcToSet = baseUrl;
             }
             altText = `${nicknameToShow}'s Custom Avatar`;
         }
-        // Se profileData esiste ma non ci sono avatarUrls, avatarSrcToSet rimane il Blockie generato sopra.
     }
-    // Se profileData è null (es. profilo non ancora creato o errore nel fetch),
-    // nicknameToShow e avatarSrcToSet useranno i fallback basati su `user` e Blockie.
-
-    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`; // escapeHTML è già nel tuo codice
-    userDisplayNameElement.style.display = 'inline'; // <-- ***** MODIFICA CHIAVE: Mostra il nome utente *****
+    
+    // NUOVA MODIFICA PER STILE NICKNAME: Applica classe animazione
+    userDisplayNameElement.className = ''; // Resetta classi precedenti
+    if (activeNicknameAnimClass) {
+        userDisplayNameElement.classList.add(activeNicknameAnimClass);
+    }
+    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
+    userDisplayNameElement.style.display = 'inline';
 
     headerUserAvatarElement.src = avatarSrcToSet;
-    headerUserAvatarElement.alt = altText; // Usa l'alt text determinato
+    headerUserAvatarElement.alt = altText;
     headerUserAvatarElement.style.display = 'inline-block';
     headerUserAvatarElement.style.backgroundColor = 'transparent';
-
     headerUserAvatarElement.onerror = () => {
-        console.warn(
-            `[Main.js Navbar] Errore caricamento avatar: ${headerUserAvatarElement.src}. Fallback finale a Blockie.`
-        );
+        console.warn(`[Main.js Navbar] Errore caricamento avatar: ${headerUserAvatarElement.src}. Fallback.`);
         if (user && user.uid) {
-            // Assicurati che user.uid sia ancora accessibile
             headerUserAvatarElement.src = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 });
             headerUserAvatarElement.alt = `${nicknameToShow}'s Blockie Avatar (fallback errore)`;
         } else {
-            headerUserAvatarElement.style.display = 'none'; // Nascondi se non si può generare Blockie
+            headerUserAvatarElement.style.display = 'none';
         }
+        headerUserAvatarElement.onerror = null;
     };
 }
 

@@ -499,6 +499,67 @@ a:hover {
           animation: soda-cap-patron-glow-effect 1.9s infinite ease-in-out;
 }
 
+@-webkit-keyframes glitchzilla-nickname-effect {
+  0%, 100% {
+    color: #ff00ff; /* Magenta Neon */
+    text-shadow: 0 0 5px rgba(255, 0, 255, 0.7), 0 0 10px rgba(255, 0, 255, 0.5), 1px 1px 1px rgba(0, 255, 255, 0.5), -1px -1px 1px rgba(255, 255, 0, 0.5); /* Leggero offset giallo */
+    -webkit-transform: skewX(-2deg) translateX(1px);
+            transform: skewX(-2deg) translateX(1px);
+  }
+  25% {
+    color: #39ff14; /* Verde Lime Neon */
+    text-shadow: 0 0 5px rgba(57, 255, 20, 0.7), 0 0 10px rgba(57, 255, 20, 0.5), -1px 1px 1px rgba(255, 0, 255, 0.5), 1px -1px 1px rgba(0, 255, 0, 0.5);
+    -webkit-transform: skewX(2deg) translateX(-1px);
+            transform: skewX(2deg) translateX(-1px);
+  }
+  50% {
+    color: #00ffff; /* Ciano Neon */
+    opacity: 0.9;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.7), 0 0 15px rgba(0, 255, 255, 0.6), 0 0 1px #fff; /* Flash bianco */
+    -webkit-transform: skewX(0deg) translateX(0px);
+            transform: skewX(0deg) translateX(0px);
+  }
+  75% {
+    color: #A020F0; /* Viola Elettrico */
+    text-shadow: 0 0 6px rgba(160, 32, 240, 0.7), 0 0 12px rgba(160, 32, 240, 0.5), 1px 0px 1px rgba(57, 255, 20, 0.5), 0px 1px 1px rgba(255, 0, 255, 0.5);
+    -webkit-transform: skewX(-1deg) translateX(0.5px);
+            transform: skewX(-1deg) translateX(0.5px);
+  }
+}
+
+@keyframes glitchzilla-nickname-effect {
+  0%, 100% {
+    color: #ff00ff; /* Magenta Neon */
+    text-shadow: 0 0 5px rgba(255, 0, 255, 0.7), 0 0 10px rgba(255, 0, 255, 0.5), 1px 1px 1px rgba(0, 255, 255, 0.5), -1px -1px 1px rgba(255, 255, 0, 0.5); /* Leggero offset giallo */
+    -webkit-transform: skewX(-2deg) translateX(1px);
+            transform: skewX(-2deg) translateX(1px);
+  }
+  25% {
+    color: #39ff14; /* Verde Lime Neon */
+    text-shadow: 0 0 5px rgba(57, 255, 20, 0.7), 0 0 10px rgba(57, 255, 20, 0.5), -1px 1px 1px rgba(255, 0, 255, 0.5), 1px -1px 1px rgba(0, 255, 0, 0.5);
+    -webkit-transform: skewX(2deg) translateX(-1px);
+            transform: skewX(2deg) translateX(-1px);
+  }
+  50% {
+    color: #00ffff; /* Ciano Neon */
+    opacity: 0.9;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.7), 0 0 15px rgba(0, 255, 255, 0.6), 0 0 1px #fff; /* Flash bianco */
+    -webkit-transform: skewX(0deg) translateX(0px);
+            transform: skewX(0deg) translateX(0px);
+  }
+  75% {
+    color: #A020F0; /* Viola Elettrico */
+    text-shadow: 0 0 6px rgba(160, 32, 240, 0.7), 0 0 12px rgba(160, 32, 240, 0.5), 1px 0px 1px rgba(57, 255, 20, 0.5), 0px 1px 1px rgba(255, 0, 255, 0.5);
+    -webkit-transform: skewX(-1deg) translateX(0.5px);
+            transform: skewX(-1deg) translateX(0.5px);
+  }
+}
+.glitchzilla-nickname-style {
+  -webkit-animation: glitchzilla-nickname-effect 0.7s infinite steps(1, end);
+          animation: glitchzilla-nickname-effect 0.7s infinite steps(1, end);
+  font-family: "Source Code Pro", monospace;
+}
+
 /* ===== Header Styles ===== */
 header {
   background-color: var(--surface-bg-primary);
@@ -3198,7 +3259,8 @@ section#profile h3 {
 .nickname-container strong {
   margin-right: 5px;
 }
-.nickname-container .icon-button#requestNicknameChangeBtn {
+.nickname-container #requestNicknameChangeBtn,
+.nickname-container #customizeNicknameBtn {
   background-color: transparent;
   border: none;
   padding: 4px;
@@ -3215,16 +3277,21 @@ section#profile h3 {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
+  line-height: 1;
 }
-.nickname-container .icon-button#requestNicknameChangeBtn .material-symbols-rounded {
+.nickname-container #requestNicknameChangeBtn .material-symbols-rounded,
+.nickname-container #customizeNicknameBtn .material-symbols-rounded {
   font-size: 20px;
   -webkit-transition: color 0.2s ease;
   transition: color 0.2s ease;
+  vertical-align: middle;
 }
-.nickname-container .icon-button#requestNicknameChangeBtn:hover .material-symbols-rounded {
+.nickname-container #requestNicknameChangeBtn:hover .material-symbols-rounded,
+.nickname-container #customizeNicknameBtn:hover .material-symbols-rounded {
   color: var(--link-hover-color);
 }
-.nickname-container .icon-button#requestNicknameChangeBtn:focus-visible {
+.nickname-container #requestNicknameChangeBtn:focus-visible,
+.nickname-container #customizeNicknameBtn:focus-visible {
   outline: 2px solid var(--link-color);
   outline-offset: 2px;
 }
@@ -3827,6 +3894,106 @@ img.comment-avatar-img {
   font-size: 0.9em;
   color: var(--text-color-secondary);
   line-height: 1.5;
+}
+
+/* Stili per la Modale di Selezione Animazione Nickname */
+#nicknameAnimationModal .modal-content {
+  max-width: 550px;
+}
+#nicknameAnimationModal .modal-body {
+  padding-top: 15px;
+  padding-bottom: 20px;
+}
+#nicknameAnimationModal .modal-body p:first-of-type {
+  margin-bottom: 20px;
+  font-size: 0.95em;
+  color: var(--text-color-secondary);
+}
+#nicknameAnimationModal .animation-selection-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color-secondary);
+  border-radius: var(--border-radius-sm);
+  padding: 10px;
+  background-color: var(--surface-bg-secondary);
+}
+#nicknameAnimationModal .animation-list-item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color-light);
+  background-color: var(--surface-bg-primary);
+  border-radius: var(--border-radius-xs);
+  margin-bottom: 8px;
+}
+#nicknameAnimationModal .animation-list-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+#nicknameAnimationModal .animation-list-item .animation-preview-text {
+  font-weight: 500;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  margin-right: 15px;
+}
+#nicknameAnimationModal .switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+#nicknameAnimationModal .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+#nicknameAnimationModal .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-color-secondary);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+#nicknameAnimationModal .slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+#nicknameAnimationModal input:checked + .slider {
+  background-color: var(--primary-color);
+}
+#nicknameAnimationModal input:focus-visible + .slider {
+  -webkit-box-shadow: 0 0 1px var(--primary-color), 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px var(--primary-color-focus);
+          box-shadow: 0 0 1px var(--primary-color), 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px var(--primary-color-focus);
+}
+#nicknameAnimationModal input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+          transform: translateX(26px);
 }
 
 /* ===== Donkey Runner Game Page Specific Styles ===== */

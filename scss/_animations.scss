@@ -275,3 +275,48 @@
 .soda-cap-patron-glow {
     animation: soda-cap-patron-glow-effect 1.9s infinite ease-in-out;
 }
+
+@keyframes glitchzilla-nickname-effect {
+    0%, 100% {
+        color: #ff00ff; /* Magenta Neon */
+        text-shadow:
+            0 0 5px rgba(255, 0, 255, 0.7),
+            0 0 10px rgba(255, 0, 255, 0.5),
+            1px 1px 1px rgba(0,255,255,0.5), /* Leggero offset ciano */
+            -1px -1px 1px rgba(255,255,0,0.5); /* Leggero offset giallo */
+        transform: skewX(-2deg) translateX(1px);
+    }
+    25% {
+        color: #39ff14; /* Verde Lime Neon */
+        text-shadow:
+            0 0 5px rgba(57, 255, 20, 0.7),
+            0 0 10px rgba(57, 255, 20, 0.5),
+            -1px 1px 1px rgba(255,0,255,0.5),
+            1px -1px 1px rgba(0,255,0,0.5);
+        transform: skewX(2deg) translateX(-1px);
+    }
+    50% {
+        color: #00ffff; /* Ciano Neon */
+        opacity: 0.9;
+        text-shadow:
+            0 0 5px rgba(0, 255, 255, 0.7),
+            0 0 15px rgba(0, 255, 255, 0.6),
+            0 0 1px #fff; /* Flash bianco */
+        transform: skewX(0deg) translateX(0px);
+    }
+    75% {
+        color: #A020F0; /* Viola Elettrico */
+        text-shadow:
+            0 0 6px rgba(160, 32, 240, 0.7),
+            0 0 12px rgba(160, 32, 240, 0.5),
+            1px 0px 1px rgba(57,255,20,0.5),
+            0px 1px 1px rgba(255,0,255,0.5);
+        transform: skewX(-1deg) translateX(0.5px);
+    }
+}
+
+.glitchzilla-nickname-style { // Nome della classe CSS da usare
+    animation: glitchzilla-nickname-effect 0.7s infinite steps(1, end); // 'steps' per un effetto più scattoso
+    // Potresti voler aggiungere un font più "digitale" o squadrato se lo usi
+    font-family: 'Source Code Pro', monospace;
+}

@@ -1,11 +1,11 @@
-// js/profile.js (Versione Corretta e Completa)
-import { db, auth, generateBlockieAvatar, showConfirmationModal } from './main.js';
+// js/profile.js (Versione Definitiva Completa con Nickname Animation)
+import { db, auth, generateBlockieAvatar, showConfirmationModal, escapeHTML } from './main.js';
 import {
     doc,
     onSnapshot,
     updateDoc,
     collection,
-    addDoc,
+    // addDoc, // Non usato direttamente, rimosso se non serve per altre parti non mostrate
     query,
     where,
     getDocs,
@@ -25,7 +25,6 @@ import {
 import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
 import { getAuthorIconHTML, showInfoModal } from './uiUtils.js';
-import { escapeHTML } from './main.js';
 
 // --- RIFERIMENTI DOM ---
 const profileSectionTitle = document.querySelector('#profile h2');
@@ -81,15 +80,15 @@ const noBadgesMessage = document.getElementById('noBadgesMessage');
 const avatarUploadSection = document.getElementById('avatarUploadSection');
 const avatarUploadInput = document.getElementById('avatarUploadInput');
 const selectAvatarFileBtn = document.getElementById('selectAvatarFileBtn');
-const avatarPreview = document.getElementById('avatarPreview');
-const avatarPreviewPlaceholder = document.getElementById('avatarPreviewPlaceholder');
-const confirmAvatarUploadBtn = document.getElementById('confirmAvatarUploadBtn');
+// const avatarPreview = document.getElementById('avatarPreview'); // Non usato nel tuo codice per la modale
+// const avatarPreviewPlaceholder = document.getElementById('avatarPreviewPlaceholder'); // Non usato
+// const confirmAvatarUploadBtn = document.getElementById('confirmAvatarUploadBtn'); // Non usato
 const avatarUploadProgressContainer = document.getElementById('avatarUploadProgressContainer');
 const avatarUploadProgressBar = document.getElementById('avatarUploadProgressBar');
 const avatarUploadProgressText = document.getElementById('avatarUploadProgressText');
-const avatarUploadStatus = document.getElementById('avatarUploadStatus');
-const avatarConfirmationArea = document.getElementById('avatarConfirmationArea');
-const cancelAvatarSelectionBtn = document.getElementById('cancelAvatarSelectionBtn');
+// const avatarUploadStatus = document.getElementById('avatarUploadStatus'); // Non usato
+// const avatarConfirmationArea = document.getElementById('avatarConfirmationArea'); // Non usato
+
 const avatarConfirmationModal = document.getElementById('avatarConfirmationModal');
 const modalAvatarPreview = document.getElementById('modalAvatarPreview');
 const modalAvatarStatus = document.getElementById('modalAvatarStatus');
@@ -98,17 +97,24 @@ const modalCancelUploadBtn = document.getElementById('modalCancelUploadBtn');
 const requestNicknameChangeBtn = document.getElementById('requestNicknameChangeBtn');
 const requestNicknameChangeModal = document.getElementById('requestNicknameChangeModal');
 const closeNicknameChangeModalBtn = document.getElementById('closeNicknameChangeModalBtn');
-const nicknameChangeModalTitle = document.getElementById('nicknameChangeModalTitle');
+// const nicknameChangeModalTitle = document.getElementById('nicknameChangeModalTitle'); // Non usato attivamente
 const nicknameChangeInitialView = document.getElementById('nicknameChangeInitialView');
 const newNicknameInput = document.getElementById('newNicknameInput');
-const newNicknameHint = document.getElementById('newNicknameHint');
+// const newNicknameHint = document.getElementById('newNicknameHint'); // Non usato nel tuo codice originale
 const nicknameChangeError = document.getElementById('nicknameChangeError');
 const submitNicknameChangeRequestBtn = document.getElementById('submitNicknameChangeRequestBtn');
 const cancelNicknameChangeRequestBtn = document.getElementById('cancelNicknameChangeRequestBtn');
 const nicknameChangeRequestSentView = document.getElementById('nicknameChangeRequestSentView');
 const nicknameChangeCooldownView = document.getElementById('nicknameChangeCooldownView');
-const nicknameCooldownDaysSpan = document.getElementById('nicknameCooldownDays');
+// const nicknameCooldownDaysSpan = document.getElementById('nicknameCooldownDays'); // Non usato
 const nicknameChangeProcessedView = document.getElementById('nicknameChangeProcessedView');
+
+// NUOVI RIFERIMENTI DOM per Nickname Animation
+const customizeNicknameBtn = document.getElementById('customizeNicknameBtn');
+const nicknameAnimationModal = document.getElementById('nicknameAnimationModal');
+const closeNicknameAnimationModalBtn = document.getElementById('closeNicknameAnimationModalBtn');
+const nicknameAnimationListUL = document.getElementById('nicknameAnimationList');
+const noNicknameAnimationsMessage = document.getElementById('noNicknameAnimationsMessage');
 
 // --- STATO DEL MODULO E COSTANTI ---
 let loggedInUser = null;
@@ -129,31 +135,21 @@ const storage = getStorage();
 const functions = getFunctions();
 
 // =================================================================================
-// --- NUOVO SISTEMA DI GESTIONE BADGE DA FIRESTORE ---
+// --- SISTEMA DI GESTIONE BADGE DA FIRESTORE ---
 // =================================================================================
-
-// Cache per conservare le definizioni dei badge dopo il primo caricamento.
 let badgeDefinitionsCache = null;
 
-/**
- * Carica le definizioni dei badge da Firestore e le mette in cache.
- * Se le definizioni sono già in cache, restituisce quelle per evitare letture multiple.
- * @returns {Promise<Object>} Un oggetto con le definizioni dei badge, indicizzato per ID.
- */
 async function fetchAndCacheBadgeDefinitions() {
     if (badgeDefinitionsCache) {
         return badgeDefinitionsCache;
     }
-
     try {
-        console.log('[AthenaDev] Fetching badge definitions from Firestore...');
         const querySnapshot = await getDocs(collection(db, 'badgeDefinitions'));
         const badges = {};
         querySnapshot.forEach((doc) => {
             badges[doc.id] = doc.data();
         });
         badgeDefinitionsCache = badges;
-        console.log('[AthenaDev] Badge definitions cached:', badgeDefinitionsCache);
         return badgeDefinitionsCache;
     } catch (error) {
         console.error('[AthenaDev] Errore nel caricare le definizioni dei badge:', error);
@@ -161,41 +157,29 @@ async function fetchAndCacheBadgeDefinitions() {
         return {};
     }
 }
-
 fetchAndCacheBadgeDefinitions();
-/**
- * Renderizza i badge dell'utente nel contenitore apposito.
- * @param {string[]} earnedBadgesArray - L'array degli ID dei badge guadagnati dall'utente.
- * @param {boolean} isOwnProfile - Flag per determinare se si sta visualizzando il proprio profilo.
- */
+
 async function renderBadges(earnedBadgesArray = [], isOwnProfile) {
     if (!badgesSection || !badgesDisplayContainer || !noBadgesMessage) return;
-
     badgesDisplayContainer.innerHTML = '';
-    
     if (earnedBadgesArray.length > 0 || isOwnProfile) {
         badgesSection.style.display = 'block';
     } else {
         badgesSection.style.display = 'none';
         return;
     }
-
     if (earnedBadgesArray.length === 0) {
         noBadgesMessage.textContent = 'Nessun riconoscimento ancora ottenuto.';
         noBadgesMessage.style.display = 'block';
         return;
     }
-    
     noBadgesMessage.style.display = 'none';
-
     const badgeDefinitions = await fetchAndCacheBadgeDefinitions();
-    
     if (Object.keys(badgeDefinitions).length === 0) {
         noBadgesMessage.textContent = 'Non è stato possibile caricare le informazioni sui badge.';
         noBadgesMessage.style.display = 'block';
         return;
     }
-
     earnedBadgesArray.forEach((badgeId) => {
         const badgeInfo = badgeDefinitions[badgeId];
         if (badgeInfo) {
@@ -205,16 +189,13 @@ async function renderBadges(earnedBadgesArray = [], isOwnProfile) {
             badgeIconElement.setAttribute('role', 'button');
             badgeIconElement.setAttribute('tabindex', '0');
             badgeIconElement.setAttribute('aria-label', `Dettagli badge: ${badgeInfo.name}`);
-
             const iconSpan = document.createElement('span');
             iconSpan.className = 'material-symbols-rounded';
             iconSpan.textContent = badgeInfo.icon;
             iconSpan.style.color = badgeInfo.color || 'var(--text-color-primary)';
-            
             if (badgeInfo.isNeon) iconSpan.classList.add('testo-neon-arcade');
             else if (badgeInfo.isAnimated && badgeInfo.animationClass)
                 iconSpan.classList.add(badgeInfo.animationClass);
-            
             badgeIconElement.appendChild(iconSpan);
             badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
             badgeIconElement.addEventListener('keydown', (event) => {
@@ -230,34 +211,23 @@ async function renderBadges(earnedBadgesArray = [], isOwnProfile) {
     });
 }
 
-/**
- * Gestisce l'apertura della modale informativa con tutti i badge.
- */
 async function handleShowAllBadgesInfo() {
     const badgesInfoBtn = document.getElementById('badgesInfoBtn');
-    if (badgesInfoBtn) {
-        badgesInfoBtn.disabled = true; // Previene doppi click
-    }
-
+    if (badgesInfoBtn) badgesInfoBtn.disabled = true;
     try {
         const badgeDefinitions = await fetchAndCacheBadgeDefinitions();
         if (!badgeDefinitions || Object.keys(badgeDefinitions).length === 0) {
             showInfoModal('Informazioni Badge', '<p>Non è stato possibile caricare le informazioni sui badge.</p>');
             return;
         }
-
-        // Ordina i badge per nome per una visualizzazione più pulita
-        const sortedBadgeIds = Object.keys(badgeDefinitions).sort((a, b) => {
-            return (badgeDefinitions[a].name || '').localeCompare(badgeDefinitions[b].name || '');
-        });
-
+        const sortedBadgeIds = Object.keys(badgeDefinitions).sort((a, b) =>
+            (badgeDefinitions[a].name || '').localeCompare(badgeDefinitions[b].name || '')
+        );
         let contentHtml = '<ul class="badge-info-list">';
-
         for (const badgeId of sortedBadgeIds) {
             const badge = badgeDefinitions[badgeId];
             const iconClass = `material-symbols-rounded badge-icon ${badge.isAnimated && badge.animationClass ? badge.animationClass : ''}`;
             const iconColor = badge.color || 'var(--text-color-primary)';
-            
             contentHtml += `
                 <li class="badge-info-item">
                     <span class="${iconClass}" style="color: ${iconColor};">${badge.icon}</span>
@@ -265,87 +235,57 @@ async function handleShowAllBadgesInfo() {
                         <span class="badge-name">${escapeHTML(badge.name)}</span>
                         <span class="badge-howto">${escapeHTML(badge.howToEarn || badge.description)}</span>
                     </div>
-                </li>
-            `;
+                </li>`;
         }
-
         contentHtml += '</ul>';
         showInfoModal('Come Ottenere i Riconoscimenti', contentHtml);
-
     } catch (error) {
         console.error("Errore nel mostrare la modale informativa dei badge:", error);
         showToast('Errore nel caricare le informazioni.', 'error');
     } finally {
-        if (badgesInfoBtn) {
-            badgesInfoBtn.disabled = false;
-        }
+        if (badgesInfoBtn) badgesInfoBtn.disabled = false;
     }
 }
 
-
-// Dentro l'evento 'DOMContentLoaded', in fondo, aggiungi l'event listener.
-document.addEventListener('DOMContentLoaded', () => {
-    // ... (tutto il codice esistente in DOMContentLoaded)
-
-    // Aggiunta del nuovo listener per l'icona info dei badge
-    const badgesInfoBtn = document.getElementById('badgesInfoBtn');
-    if (badgesInfoBtn) {
-        badgesInfoBtn.addEventListener('click', handleShowAllBadgesInfo);
-    }
-});
-
-/**
- * Apre la modale con i dettagli di un badge specifico.
- * @param {string} badgeId L'ID del badge di cui mostrare i dettagli.
- */
 async function openBadgeDetailsModal(badgeId) {
     if (!badgeDetailModal || !badgeDetailModalIcon || !badgeDetailModalName || !badgeDetailModalDescription) {
         console.error('[AthenaDev] Elementi della modale badge non trovati nel DOM.');
         return;
     }
-    
     const badgeDefinitions = await fetchAndCacheBadgeDefinitions();
     const badgeInfo = badgeDefinitions[badgeId];
-
     if (!badgeInfo) {
         console.error(`[AthenaDev] Dettagli non trovati per il badge: ${badgeId}`);
         showToast('Informazioni per questo badge non disponibili.', 'error');
         return;
     }
-
     badgeDetailModalIcon.textContent = badgeInfo.icon;
     badgeDetailModalIcon.style.color = badgeInfo.color || 'inherit';
     badgeDetailModalIcon.className = 'material-symbols-rounded';
     if (badgeInfo.isNeon) badgeDetailModalIcon.classList.add('testo-neon-arcade');
     else if (badgeInfo.isAnimated && badgeInfo.animationClass)
         badgeDetailModalIcon.classList.add(badgeInfo.animationClass);
-    
     badgeDetailModalName.textContent = badgeInfo.name;
     badgeDetailModalDescription.textContent = badgeInfo.howToEarn || badgeInfo.description;
-    
     badgeDetailModal.style.display = 'block';
 }
 
 // =================================================================================
-// --- FUNZIONI DI RENDERING E GESTIONE UI ---
+// --- FUNZIONI DI RENDERING E GESTIONE UI (PROFILO) ---
 // =================================================================================
-
 function renderExternalLinks(linksArray, isOwnProfile) {
     if (!externalLinksListUL || !noExternalLinksMessage) return;
     externalLinksListUL.innerHTML = '';
-
     if (!isOwnProfile || !externalLinksSection) {
         if (externalLinksSection) externalLinksSection.style.display = 'none';
         return;
     }
     externalLinksSection.style.display = 'block';
-
     if (!linksArray || linksArray.length === 0) {
         if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'list-item';
         return;
     }
     if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'none';
-
     linksArray.forEach((link, index) => {
         const li = document.createElement('li');
         const linkDisplayDiv = document.createElement('div');
@@ -382,15 +322,8 @@ function renderExternalLinks(linksArray, isOwnProfile) {
     });
 }
 
-/**
- * Aggiorna l'interfaccia utente con i dati del profilo.
- * @param {object} data - Dati del profilo.
- * @param {boolean} isOwnProfile - True se è il profilo dell'utente loggato.
- * @param {string} uidLoaded - L'UID del profilo caricato.
- */
 async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
     profileDataForDisplay = { ...data, userId: uidLoaded, isPublicSnapshot: !isOwnProfile };
-
     const profileNameForTitle = data.nickname || 'Utente';
     document.title = `Profilo di ${profileNameForTitle} - asyncDonkey.io`;
     if (profileSectionTitle) {
@@ -400,10 +333,25 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
     if (profileEmailRow) profileEmailRow.style.display = isOwnProfile && data.email ? 'flex' : 'none';
     if (profileEmailSpan && isOwnProfile) profileEmailSpan.textContent = data.email || 'N/A';
 
+    // Gestione NICKNAME e STILE NICKNAME
     if (currentNicknameSpan) {
         const nicknameText = data.nickname || 'Non impostato';
-        const authorIcon = getAuthorIconHTML(data);
+        const authorIcon = getAuthorIconHTML(data); // Funzione esistente
+        const currentAnimationClass = data.activeNicknameAnimation || '';
+
+        currentNicknameSpan.className = ''; // Pulisce classi di animazione precedenti
+        if (currentAnimationClass) {
+            currentNicknameSpan.classList.add(currentAnimationClass);
+        }
         currentNicknameSpan.innerHTML = escapeHTML(nicknameText) + authorIcon;
+    }
+
+    // VISIBILITÀ PULSANTI NICKNAME
+    if (requestNicknameChangeBtn) {
+        requestNicknameChangeBtn.style.display = isOwnProfile ? 'inline-flex' : 'none';
+    }
+    if (customizeNicknameBtn) { // Gestione visibilità nuovo pulsante
+        customizeNicknameBtn.style.display = isOwnProfile ? 'inline-flex' : 'none';
     }
 
     if (profileNationalitySpan) {
@@ -429,14 +377,13 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         let altText = `${profileNameForTitle}'s Avatar`;
         let cacheBusterTimestamp = null;
         let mainAvatarUrl = null;
-
         if (isOwnProfile && data.avatarUrls && data.avatarUrls.profile) {
             mainAvatarUrl = data.avatarUrls.profile;
             cacheBusterTimestamp = data.profileUpdatedAt;
         } else if (!isOwnProfile && data.avatarUrls && data.avatarUrls.thumbnail) {
             mainAvatarUrl = data.avatarUrls.thumbnail;
-            cacheBusterTimestamp = data.profilePublicUpdatedAt;
-        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) {
+            cacheBusterTimestamp = data.profilePublicUpdatedAt; // Sincronizzato da userPublicProfileSync
+        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) { // Fallback per avatar profilo
             mainAvatarUrl = data.avatarUrls.small;
             cacheBusterTimestamp = data.profileUpdatedAt;
         }
@@ -445,13 +392,13 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             altText = `${profileNameForTitle}'s Custom Avatar`;
             if (cacheBusterTimestamp && cacheBusterTimestamp.seconds) {
                 avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.seconds}`;
-            } else if (cacheBusterTimestamp instanceof Date) {
+            } else if (cacheBusterTimestamp instanceof Date) { // Se fosse un oggetto Date JS
                 avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.getTime()}`;
             } else {
                 avatarSrcToSet = mainAvatarUrl;
             }
         } else if (uidLoaded) {
-            avatarSrcToSet = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
+            avatarSrcToSet = generateBlockieAvatar(uidLoaded, 120, { size: 10, scale: 6 }); // Aumentate dimensioni per profilo
             altText = `${profileNameForTitle}'s Blockie Avatar`;
         } else {
             avatarSrcToSet = DEFAULT_AVATAR_IMAGE_PATH;
@@ -462,18 +409,14 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         profileAvatarImg.onerror = () => {
             console.warn(`[AthenaDev] Errore caricamento avatar: ${profileAvatarImg.src}. Fallback.`);
             if (uidLoaded) {
-                profileAvatarImg.src = generateBlockieAvatar(uidLoaded, 80, { size: 8 });
+                profileAvatarImg.src = generateBlockieAvatar(uidLoaded, 120, { size: 10, scale: 6 });
                 profileAvatarImg.alt = `${profileNameForTitle}'s Blockie Avatar (fallback errore)`;
             } else {
                 profileAvatarImg.src = DEFAULT_AVATAR_IMAGE_PATH;
                 profileAvatarImg.alt = `${profileNameForTitle}'s Default Avatar (fallback errore critico)`;
             }
-            profileAvatarImg.onerror = null;
+            profileAvatarImg.onerror = null; // Evita loop se anche il fallback fallisce
         };
-    }
-
-    if (requestNicknameChangeBtn) {
-        requestNicknameChangeBtn.style.display = isOwnProfile ? 'inline-flex' : 'none';
     }
 
     if (statusMessageSection && statusMessageDisplay) {
@@ -502,8 +445,7 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             }
         }
     }
-
-    await renderBadges(data.earnedBadges, isOwnProfile);
+    await renderBadges(data.earnedBadges || [], isOwnProfile);
 
     if (isOwnProfile) {
         if (emailVerificationBanner && loggedInUser && !loggedInUser.emailVerified) {
@@ -513,7 +455,7 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             emailVerificationBanner.style.display = 'none';
         }
         if (updateStatusForm) {
-            updateStatusForm.style.display = 'flex';
+            updateStatusForm.style.display = 'flex'; // o 'block' se preferisci
             if (statusMessageInput)
                 statusMessageInput.placeholder = data.statusMessage ? 'Modifica il tuo stato attuale...' : 'Come ti senti oggi?';
         }
@@ -523,8 +465,8 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         }
         if (manageExternalLinksUI) manageExternalLinksUI.style.display = 'block';
         renderExternalLinks(data.externalLinks || [], true);
-        updateBioCharCounter();
-        if (avatarUploadSection) avatarUploadSection.style.display = 'block';
+        updateBioCharCounter(); // Chiama per inizializzare
+        if (avatarUploadSection) avatarUploadSection.style.display = 'block'; // o 'flex' o 'grid'
     } else {
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
         if (updateStatusForm) updateStatusForm.style.display = 'none';
@@ -538,13 +480,8 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
     if (profileContent) profileContent.style.display = 'block';
 }
 
-/**
- * Carica i dati del profilo utente (privato o pubblico) e imposta un listener.
- */
 function loadProfileData(uidToLoad, isOwnProfile) {
-    console.log(`[AthenaDev Debug - Load] Inizio loadProfileData per UID: ${uidToLoad}, isOwnProfile: ${isOwnProfile}`);
     const guestMsgDiv = document.getElementById('guestProfileViewMessage');
-
     if (profileLoadingMessage) profileLoadingMessage.style.display = 'block';
     if (profileContent) profileContent.style.display = 'none';
     if (profileLoginMessage) profileLoginMessage.style.display = 'none';
@@ -552,13 +489,13 @@ function loadProfileData(uidToLoad, isOwnProfile) {
 
     if (profileAvatarImg) {
         if (uidToLoad) {
-            profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 80, { size: 8 });
+            profileAvatarImg.src = generateBlockieAvatar(uidToLoad, 120, { size: 10, scale: 6 });
             profileAvatarImg.alt = 'Caricamento avatar... (Blockie)';
         } else {
-            profileAvatarImg.src = '';
+            profileAvatarImg.src = ''; // O un placeholder
             profileAvatarImg.alt = 'Caricamento avatar...';
         }
-        profileAvatarImg.style.display = 'block';
+        profileAvatarImg.style.display = 'block'; // Assicurati sia visibile
     }
     if (profileEmailSpan) profileEmailSpan.textContent = 'Caricamento...';
     if (currentNicknameSpan) currentNicknameSpan.textContent = 'Caricamento...';
@@ -569,26 +506,18 @@ function loadProfileData(uidToLoad, isOwnProfile) {
     if (noBadgesMessage) noBadgesMessage.style.display = 'none';
 
     if (currentProfileListenerUnsubscribe) {
-        console.log('[AthenaDev Debug - Load] Annullamento iscrizione dal listener precedente.');
         currentProfileListenerUnsubscribe();
         currentProfileListenerUnsubscribe = null;
     }
-
     const collectionPath = isOwnProfile ? 'userProfiles' : 'userPublicProfiles';
     const userProfileRef = doc(db, collectionPath, uidToLoad);
-
-    console.log(`[AthenaDev Debug - Load] Ascolto su: ${collectionPath}/${uidToLoad}`);
-
     currentProfileListenerUnsubscribe = onSnapshot(
         userProfileRef,
         async (docSnap) => {
-            console.log(`[AthenaDev Debug - onSnapshot] Dati da ${collectionPath} ricevuti/aggiornati per ${uidToLoad}.`);
             if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
-
             if (docSnap.exists()) {
                 const profileData = docSnap.data();
                 await updateProfilePageUI(profileData, isOwnProfile, uidToLoad);
-
                 if (guestMsgDiv) {
                     if (!isOwnProfile && !loggedInUser) {
                         guestMsgDiv.style.display = 'block';
@@ -616,7 +545,6 @@ function loadProfileData(uidToLoad, isOwnProfile) {
                     profileLoginMessage.innerHTML = `<p>Errore: Profilo utente con ID "${uidToLoad}" non trovato.</p> <p><a href="index.html">Torna alla Homepage</a></p>`;
                 }
                 if (guestMsgDiv) guestMsgDiv.style.display = 'none';
-
                 if (myArticlesSection) myArticlesSection.style.display = 'none';
                 if (avatarUploadSection) avatarUploadSection.style.display = 'none';
                 if (statusMessageSection) statusMessageSection.style.display = 'none';
@@ -640,8 +568,122 @@ function loadProfileData(uidToLoad, isOwnProfile) {
     );
 }
 
-// --- FUNZIONI DI GESTIONE (TUTTE INCLUSE) ---
+// =================================================================================
+// --- NUOVA LOGICA PER MODALE PERSONALIZZAZIONE NICKNAME ---
+// =================================================================================
 
+async function openNicknameAnimationModal() {
+    if (!nicknameAnimationModal || !nicknameAnimationListUL || !noNicknameAnimationsMessage || !profileDataForDisplay || !loggedInUser) {
+        console.error("Elementi modale animazione nickname, dati profilo o utente loggato mancanti.");
+        showToast("Errore nell'aprire la personalizzazione.", "error");
+        return;
+    }
+
+    nicknameAnimationListUL.innerHTML = '';
+    const badgeDefinitions = await fetchAndCacheBadgeDefinitions();
+    const earnedBadges = profileDataForDisplay.earnedBadges || [];
+    const activeUserAnimation = profileDataForDisplay.activeNicknameAnimation || null;
+
+    let availableAnimationsCount = 0;
+
+    for (const badgeId of earnedBadges) {
+        const badgeDef = badgeDefinitions[badgeId];
+        if (badgeDef && badgeDef.nicknameAnimationClass) {
+            availableAnimationsCount++;
+            const li = document.createElement('li');
+            li.className = 'animation-list-item';
+
+            const previewText = document.createElement('span');
+            previewText.className = `animation-preview-text ${badgeDef.nicknameAnimationClass}`;
+            previewText.textContent = badgeDef.name;
+            previewText.title = `Animazione sbloccata da: ${badgeDef.name}`;
+
+            const toggleLabel = document.createElement('label');
+            toggleLabel.className = 'switch';
+            const toggleInput = document.createElement('input');
+            toggleInput.type = 'checkbox';
+            toggleInput.dataset.animationClass = badgeDef.nicknameAnimationClass;
+            toggleInput.checked = activeUserAnimation === badgeDef.nicknameAnimationClass;
+            toggleInput.addEventListener('change', handleNicknameAnimationToggle);
+
+            const sliderSpan = document.createElement('span');
+            sliderSpan.className = 'slider round';
+
+            toggleLabel.appendChild(toggleInput);
+            toggleLabel.appendChild(sliderSpan);
+
+            li.appendChild(previewText);
+            li.appendChild(toggleLabel);
+            nicknameAnimationListUL.appendChild(li);
+        }
+    }
+
+    if (availableAnimationsCount === 0) {
+        noNicknameAnimationsMessage.style.display = 'block';
+        nicknameAnimationListUL.style.display = 'none';
+    } else {
+        noNicknameAnimationsMessage.style.display = 'none';
+        nicknameAnimationListUL.style.display = 'block';
+    }
+    nicknameAnimationModal.style.display = 'flex';
+}
+
+async function handleNicknameAnimationToggle(event) {
+    if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
+        showToast("Azione non permessa.", "error");
+        if (event.target) event.target.checked = !event.target.checked;
+        return;
+    }
+
+    const selectedAnimationClass = event.target.dataset.animationClass;
+    const isChecked = event.target.checked;
+    let newActiveAnimation = null;
+
+    if (isChecked) {
+        newActiveAnimation = selectedAnimationClass;
+    }
+
+    if (isChecked) {
+        const allToggles = nicknameAnimationListUL.querySelectorAll('input[type="checkbox"]');
+        allToggles.forEach(toggle => {
+            if (toggle !== event.target) {
+                toggle.checked = false;
+            }
+        });
+    }
+
+    try {
+        const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
+        await updateDoc(userProfileRef, {
+            activeNicknameAnimation: newActiveAnimation,
+            updatedAt: serverTimestamp(),
+        });
+        showToast(newActiveAnimation ? "Stile nickname applicato!" : "Stile nickname rimosso.", "success");
+
+        if (currentNicknameSpan && profileDataForDisplay) {
+            currentNicknameSpan.className = '';
+            if (newActiveAnimation) {
+                currentNicknameSpan.classList.add(newActiveAnimation);
+            }
+            const nicknameText = profileDataForDisplay.nickname || 'Non impostato';
+            const authorIcon = getAuthorIconHTML(profileDataForDisplay);
+            currentNicknameSpan.innerHTML = escapeHTML(nicknameText) + authorIcon;
+            profileDataForDisplay.activeNicknameAnimation = newActiveAnimation; // Update local state
+        }
+    } catch (error) {
+        console.error("Errore aggiornamento stile nickname:", error);
+        showToast("Errore durante l'aggiornamento dello stile.", "error");
+        if (event.target) event.target.checked = !event.target.checked;
+    }
+}
+
+function closeNicknameAnimationModal() {
+    if (nicknameAnimationModal) {
+        nicknameAnimationModal.style.display = 'none';
+    }
+}
+
+// --- FUNZIONI DI GESTIONE ESISTENTI ---
 function openExternalLinkFormForEdit(index) {
     if (!profileDataForDisplay || !profileDataForDisplay.externalLinks || !externalLinkFormContainer) return;
     const linkToEdit = profileDataForDisplay.externalLinks[index];
@@ -664,11 +706,9 @@ async function handleExternalLinkFormSubmit(event) {
         showToast('Azione non permessa o errore interfaccia.', 'error');
         return;
     }
-    
     const title = externalLinkTitleInput.value.trim();
     const url = externalLinkUrlInput.value.trim();
     const editingIndex = parseInt(editingLinkIndexInput.value, 10);
-
     if (!title || !url) {
         if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = 'Titolo e URL sono obbligatori.';
         showToast('Titolo e URL sono obbligatori.', 'warning');
@@ -680,10 +720,7 @@ async function handleExternalLinkFormSubmit(event) {
         return;
     }
     if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = '';
-
-    let currentLinks = Array.isArray(profileDataForDisplay.externalLinks)
-        ? [...profileDataForDisplay.externalLinks]
-        : [];
+    let currentLinks = Array.isArray(profileDataForDisplay.externalLinks) ? [...profileDataForDisplay.externalLinks] : [];
     if (editingIndex > -1) {
         if (editingIndex < currentLinks.length) {
             currentLinks[editingIndex] = { title, url };
@@ -698,12 +735,10 @@ async function handleExternalLinkFormSubmit(event) {
         }
         currentLinks.push({ title, url });
     }
-
     if (saveExternalLinkBtn) {
         saveExternalLinkBtn.disabled = true;
         saveExternalLinkBtn.textContent = 'Salvataggio...';
     }
-
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
         await updateDoc(userProfileRef, {
@@ -719,6 +754,7 @@ async function handleExternalLinkFormSubmit(event) {
     } finally {
         if (saveExternalLinkBtn) {
             saveExternalLinkBtn.disabled = false;
+            // Il testo del bottone viene resettato da resetAndHideExternalLinkForm
         }
     }
 }
@@ -733,16 +769,13 @@ async function handleDeleteExternalLink(indexToDelete) {
         showToast('Link non trovato per eliminazione.', 'error');
         return;
     }
-
     const confirmed = await showConfirmationModal('Conferma Eliminazione Link', `Sei sicuro di voler eliminare il link "${linkToDelete.title || 'Senza titolo'}"?`);
     if (!confirmed) {
         showToast('Eliminazione link annullata.', 'info');
         return;
     }
-
     let currentLinks = [...profileDataForDisplay.externalLinks];
     currentLinks.splice(indexToDelete, 1);
-
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
         await updateDoc(userProfileRef, {
@@ -801,13 +834,11 @@ async function handleStatusMessageUpdate(event) {
         showToast('Nessuna modifica allo stato.', 'info');
         return;
     }
-
     const updateBtn = updateStatusForm ? updateStatusForm.querySelector('button[type="submit"]') : null;
     if (updateBtn) {
         updateBtn.disabled = true;
         updateBtn.textContent = 'Aggiornamento...';
     }
-
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
         await updateDoc(userProfileRef, {
@@ -833,7 +864,6 @@ async function checkForPendingNicknameChange(userId) {
     if (!userId) return false;
     const requestsRef = collection(db, 'nicknameChangeRequests');
     const q = query(requestsRef, where('userId', '==', userId), where('status', '==', 'pending'));
-
     try {
         const querySnapshot = await getDocs(q);
         return !querySnapshot.empty;
@@ -847,15 +877,12 @@ async function checkForPendingNicknameChange(userId) {
 function startCooldownTimer(cooldownEndDate) {
     const timerElement = document.getElementById('nicknameCooldownTimer');
     if (!timerElement) return;
-
     if (nicknameCooldownInterval) {
         clearInterval(nicknameCooldownInterval);
     }
-
     nicknameCooldownInterval = setInterval(() => {
         const now = new Date().getTime();
         const distance = cooldownEndDate.getTime() - now;
-
         if (distance < 0) {
             clearInterval(nicknameCooldownInterval);
             timerElement.textContent = 'Cooldown terminato! Puoi fare una nuova richiesta.';
@@ -863,12 +890,10 @@ function startCooldownTimer(cooldownEndDate) {
             openNicknameChangeModal();
             return;
         }
-
         const days = Math.floor(distance / (1000 * 60 * 60 * 24));
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
         timerElement.textContent = `${days}g ${hours}h ${minutes}m ${seconds}s`;
     }, 1000);
 }
@@ -878,7 +903,6 @@ function getNicknameCooldownStatus(profileData) {
         const lastRequestDate = profileData.lastNicknameRequestTimestamp.toDate();
         const now = new Date();
         const timeSinceLastRequest = now.getTime() - lastRequestDate.getTime();
-
         if (timeSinceLastRequest < NICKNAME_CHANGE_COOLDOWN_MS) {
             const remainingMs = NICKNAME_CHANGE_COOLDOWN_MS - timeSinceLastRequest;
             const remainingDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
@@ -911,17 +935,14 @@ async function openNicknameChangeModal() {
         showToast('Puoi richiedere il cambio nickname solo dal tuo profilo.', 'warning');
         return;
     }
-
     if (newNicknameInput) newNicknameInput.value = '';
     if (nicknameChangeError) nicknameChangeError.textContent = '';
-
     const hasPendingRequest = await checkForPendingNicknameChange(loggedInUser.uid);
     if (hasPendingRequest) {
         renderNicknameModalView('nicknameChangeRequestSentView');
         requestNicknameChangeModal.style.display = 'flex';
         return;
     }
-
     const cooldownStatus = getNicknameCooldownStatus(profileDataForDisplay);
     if (cooldownStatus.inCooldown) {
         renderNicknameModalView('nicknameChangeCooldownView');
@@ -931,12 +952,9 @@ async function openNicknameChangeModal() {
         requestNicknameChangeModal.style.display = 'flex';
         return;
     }
-
     renderNicknameModalView('nicknameChangeInitialView');
     requestNicknameChangeModal.style.display = 'flex';
-    if (newNicknameInput) {
-        newNicknameInput.focus();
-    }
+    if (newNicknameInput) newNicknameInput.focus();
 }
 
 function closeNicknameChangeModal() {
@@ -954,9 +972,7 @@ async function handleSubmitNicknameChangeRequest() {
         showToast('Errore: componenti UI o dati utente mancanti.', 'error');
         return;
     }
-
     const requestedNickname = newNicknameInput.value.trim();
-
     if (requestedNickname.length < 3 || requestedNickname.length > 20) {
         nicknameChangeError.textContent = 'Il nickname deve avere tra 3 e 20 caratteri.';
         newNicknameInput.focus();
@@ -973,22 +989,16 @@ async function handleSubmitNicknameChangeRequest() {
         newNicknameInput.focus();
         return;
     }
-
     nicknameChangeError.textContent = '';
     submitNicknameChangeRequestBtn.disabled = true;
     submitNicknameChangeRequestBtn.textContent = 'Invio in corso...';
-
     const requestNicknameChange = httpsCallable(functions, 'requestNicknameChange');
-
     try {
         const result = await requestNicknameChange({ requestedNickname: requestedNickname });
-
         if (result.data.success) {
             showToast('Richiesta di cambio nickname inviata con successo!', 'success');
             renderNicknameModalView('nicknameChangeRequestSentView');
-            if (requestNicknameChangeBtn) {
-                requestNicknameChangeBtn.style.display = 'none';
-            }
+            if (requestNicknameChangeBtn) requestNicknameChangeBtn.style.display = 'none';
         } else {
             throw new Error(result.data.message || 'Errore sconosciuto dalla funzione.');
         }
@@ -1004,25 +1014,15 @@ async function handleSubmitNicknameChangeRequest() {
 }
 
 function initializeNicknameChangeModalListeners() {
-    if (requestNicknameChangeBtn) {
-        requestNicknameChangeBtn.addEventListener('click', openNicknameChangeModal);
-    }
-    if (closeNicknameChangeModalBtn) {
-        closeNicknameChangeModalBtn.addEventListener('click', closeNicknameChangeModal);
-    }
-    if (cancelNicknameChangeRequestBtn) {
-        cancelNicknameChangeRequestBtn.addEventListener('click', closeNicknameChangeModal);
-    }
+    if (requestNicknameChangeBtn) requestNicknameChangeBtn.addEventListener('click', openNicknameChangeModal);
+    if (closeNicknameChangeModalBtn) closeNicknameChangeModalBtn.addEventListener('click', closeNicknameChangeModal);
+    if (cancelNicknameChangeRequestBtn) cancelNicknameChangeRequestBtn.addEventListener('click', closeNicknameChangeModal);
     if (requestNicknameChangeModal) {
         requestNicknameChangeModal.addEventListener('click', (event) => {
-            if (event.target === requestNicknameChangeModal) {
-                closeNicknameChangeModal();
-            }
+            if (event.target === requestNicknameChangeModal) closeNicknameChangeModal();
         });
     }
-    if (submitNicknameChangeRequestBtn) {
-        submitNicknameChangeRequestBtn.addEventListener('click', handleSubmitNicknameChangeRequest);
-    }
+    if (submitNicknameChangeRequestBtn) submitNicknameChangeRequestBtn.addEventListener('click', handleSubmitNicknameChangeRequest);
 }
 
 function updateBioCharCounter() {
@@ -1054,13 +1054,11 @@ async function handleBioUpdate(event) {
         showToast('Nessuna modifica alla bio.', 'info');
         return;
     }
-
     const updateBtn = updateBioForm ? updateBioForm.querySelector('button[type="submit"]') : null;
     if (updateBtn) {
         updateBtn.disabled = true;
         updateBtn.textContent = 'Salvataggio Bio...';
     }
-
     const userProfileRef = doc(db, 'userProfiles', loggedInUser.uid);
     try {
         await updateDoc(userProfileRef, {
@@ -1068,7 +1066,7 @@ async function handleBioUpdate(event) {
             updatedAt: serverTimestamp(),
         });
         showToast('Bio aggiornata!', 'success');
-        if (bioInput) bioInput.value = '';
+        // if (bioInput) bioInput.value = ''; // Commentato per non svuotare il campo
         if (bioUpdateMessage) bioUpdateMessage.textContent = '';
         updateBioCharCounter();
     } catch (error) {
@@ -1083,24 +1081,17 @@ async function handleBioUpdate(event) {
     }
 }
 
-// ...[LE ALTRE FUNZIONI HELPER COME formatMyArticleTimestamp, handleDeleteArticle, etc. sono qui sotto]...
-// (Ho incluso tutto il resto del file per completezza)
 function formatMyArticleTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
         return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
+            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
         });
     }
     return 'N/A';
 }
 
 async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
-    const statusText =
-        currentStatus === 'draft' ? 'bozza' : currentStatus === 'rejected' ? 'articolo respinto' : 'articolo';
+    const statusText = currentStatus === 'draft' ? 'bozza' : currentStatus === 'rejected' ? 'articolo respinto' : 'articolo';
     const userConfirmed = await showConfirmationModal(
         `Conferma Eliminazione ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
         `Sei sicuro di voler eliminare ${statusText} "${articleTitle || 'Senza Titolo'}"? L'azione è irreversibile.`
@@ -1112,11 +1103,8 @@ async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
     try {
         const articleRef = doc(db, 'articles', articleId);
         await deleteDoc(articleRef);
-        showToast(
-            `${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato.`,
-            'success'
-        );
-        if (loggedInUser) loadMyArticles(loggedInUser.uid); // Ricarica la lista
+        showToast(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato.`, 'success');
+        if (loggedInUser) loadMyArticles(loggedInUser.uid);
     } catch (error) {
         console.error(`Errore eliminazione ${statusText}:`, error);
         showToast(`Errore eliminazione. Riprova.`, 'error');
@@ -1154,7 +1142,7 @@ function createMyArticleItemElement(article, articleId) {
     if (article.status === 'rejected' && article.rejectionReason) {
         const reasonEl = document.createElement('p');
         reasonEl.className = 'my-article-card-rejection-reason';
-        reasonEl.innerHTML = `<strong>Motivo:</strong> ${article.rejectionReason}`;
+        reasonEl.innerHTML = `<strong>Motivo:</strong> ${escapeHTML(article.rejectionReason)}`;
         cardDiv.appendChild(reasonEl);
     }
     const actionsDiv = document.createElement('div');
@@ -1165,7 +1153,6 @@ function createMyArticleItemElement(article, articleId) {
         editButton.className = 'game-button my-article-action-button';
         editButton.textContent = 'Modifica';
         actionsDiv.appendChild(editButton);
-
         const deleteButton = document.createElement('button');
         deleteButton.className = 'game-button my-article-action-button delete';
         deleteButton.textContent = 'Elimina';
@@ -1192,7 +1179,6 @@ function createMyArticleItemElement(article, articleId) {
         resubmitButton.textContent = 'Crea da Questo Articolo';
         resubmitButton.title = 'Crea una nuova sottomissione pre-compilata con il contenuto di questo articolo respinto';
         actionsDiv.appendChild(resubmitButton);
-
         const deleteButton = document.createElement('button');
         deleteButton.className = 'game-button my-article-action-button delete';
         deleteButton.textContent = 'Elimina Respinto';
@@ -1220,7 +1206,6 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
         if (myArticlesSection) myArticlesSection.style.display = 'none';
         return;
     }
-
     for (const S of articleStatusesToLoad) {
         if (S.listDiv && S.loadingMsg) {
             S.loadingMsg.style.display = 'block';
@@ -1235,10 +1220,7 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
                 const querySnapshot = await getDocs(q);
                 S.loadingMsg.style.display = 'none';
                 if (querySnapshot.empty) S.listDiv.innerHTML = `<p>Nessun articolo "${S.title}".</p>`;
-                else
-                    querySnapshot.forEach((docSnapshot) =>
-                        S.listDiv.appendChild(createMyArticleItemElement(docSnapshot.data(), docSnapshot.id))
-                    );
+                else querySnapshot.forEach((docSnapshot) => S.listDiv.appendChild(createMyArticleItemElement(docSnapshot.data(), docSnapshot.id)));
             } catch (error) {
                 console.error(`Errore caricamento articoli ${S.status}:`, error);
                 S.loadingMsg.style.display = 'none';
@@ -1248,19 +1230,15 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
     }
 }
 
-function handleCancelAvatarSelection() {
-    selectedAvatarFile = null;
-    if (avatarUploadInput) avatarUploadInput.value = '';
-    if (avatarConfirmationArea) avatarConfirmationArea.style.display = 'none';
-    if (selectAvatarFileBtn) selectAvatarFileBtn.style.display = 'inline-block';
-}
-
 function closeModalAndReset() {
     if (avatarConfirmationModal) avatarConfirmationModal.style.display = 'none';
     selectedAvatarFile = null;
     if (avatarUploadInput) avatarUploadInput.value = '';
     if (modalConfirmUploadBtn) modalConfirmUploadBtn.disabled = false;
     if (modalCancelUploadBtn) modalCancelUploadBtn.disabled = false;
+    if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
+    if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = '0%';
+    if (avatarUploadProgressText) avatarUploadProgressText.textContent = '0%';
 }
 
 function handleAvatarFileSelection(event) {
@@ -1269,15 +1247,13 @@ function handleAvatarFileSelection(event) {
         selectedAvatarFile = null;
         if (avatarUploadInput) avatarUploadInput.value = '';
     };
-
     if (!file) {
         cleanup();
         return;
     }
-
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-        showToast('Formato file non supportato.', 'error');
+        showToast('Formato file non supportato (JPEG, PNG, WebP).', 'error');
         cleanup();
         return;
     }
@@ -1287,14 +1263,12 @@ function handleAvatarFileSelection(event) {
         cleanup();
         return;
     }
-
     selectedAvatarFile = file;
     const reader = new FileReader();
     reader.onload = (e) => {
         if (modalAvatarPreview) modalAvatarPreview.src = e.target.result;
     };
     reader.readAsDataURL(file);
-
     if (modalAvatarStatus) modalAvatarStatus.textContent = `Caricare il file: ${file.name}?`;
     if (avatarConfirmationModal) avatarConfirmationModal.style.display = 'flex';
 }
@@ -1304,21 +1278,16 @@ async function handleConfirmAvatarUpload() {
         if (avatarConfirmationModal) closeModalAndReset();
         return showToast('Nessun file selezionato o utente non loggato.', 'warning');
     }
-
     if (modalConfirmUploadBtn) modalConfirmUploadBtn.disabled = true;
     if (modalCancelUploadBtn) modalCancelUploadBtn.disabled = true;
-
     if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'block';
     if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = '0%';
     if (avatarUploadProgressText) avatarUploadProgressText.textContent = '0%';
-
     if (modalAvatarStatus) modalAvatarStatus.textContent = 'Caricamento in corso...';
-
-    const fileExtension = selectedAvatarFile.name.split('.').pop();
+    const fileExtension = selectedAvatarFile.name.split('.').pop().toLowerCase();
     const filePath = `user-avatars/${loggedInUser.uid}/original_${Date.now()}.${fileExtension}`;
     const fileStorageRef = storageRef(storage, filePath);
     const uploadTask = uploadBytesResumable(fileStorageRef, selectedAvatarFile);
-
     uploadTask.on(
         'state_changed',
         (snapshot) => {
@@ -1330,14 +1299,10 @@ async function handleConfirmAvatarUpload() {
             console.error('Errore upload avatar su Storage:', error);
             showToast(`Errore upload: ${error.code}`, 'error');
             closeModalAndReset();
-            if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
         },
         () => {
             showToast('Immagine caricata! In attesa di elaborazione...', 'info', 7000);
             closeModalAndReset();
-            setTimeout(() => {
-                if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'none';
-            }, 1500);
         }
     );
 }
@@ -1350,7 +1315,6 @@ onAuthStateChanged(auth, (user) => {
     const guestMsgDiv = document.getElementById('guestProfileViewMessage');
 
     if (currentProfileListenerUnsubscribe) {
-        console.log('[AthenaDev Debug - Auth] Annullamento iscrizione dal listener profilo precedente (cambio auth/utente).');
         currentProfileListenerUnsubscribe();
         currentProfileListenerUnsubscribe = null;
     }
@@ -1361,10 +1325,10 @@ onAuthStateChanged(auth, (user) => {
         if (isOwn) {
             if (myArticlesSection) myArticlesSection.style.display = 'block';
             loadMyArticles(profileUserIdFromUrl);
-            if (guestMsgDiv) guestMsgDiv.style.display = 'none';
         } else {
             if (myArticlesSection) myArticlesSection.style.display = 'none';
         }
+        if (guestMsgDiv) guestMsgDiv.style.display = (!isOwn && !loggedInUser) ? 'block' : 'none';
     } else if (loggedInUser) {
         loadProfileData(loggedInUser.uid, true);
         if (myArticlesSection) myArticlesSection.style.display = 'block';
@@ -1377,7 +1341,6 @@ onAuthStateChanged(auth, (user) => {
         if (profileLoginMessage) {
             profileLoginMessage.style.display = 'block';
             profileLoginMessage.innerHTML = '<p>Per visualizzare o modificare un profilo, <a href="#" id="profilePageLoginLink" style="color: var(--link-color); text-decoration: underline;">accedi</a> o <a href="register.html" style="color: var(--link-color); text-decoration: underline;">registrati</a>.</p>';
-
             const profilePageLoginLink = document.getElementById('profilePageLoginLink');
             if (profilePageLoginLink && !profilePageLoginLink.hasAttribute('data-listener-attached')) {
                 profilePageLoginLink.addEventListener('click', (e) => {
@@ -1389,7 +1352,6 @@ onAuthStateChanged(auth, (user) => {
             }
         }
         if (guestMsgDiv) guestMsgDiv.style.display = 'none';
-
         if (emailVerificationBanner) emailVerificationBanner.style.display = 'none';
         if (statusMessageSection) statusMessageSection.style.display = 'none';
         if (externalLinksSection) externalLinksSection.style.display = 'none';
@@ -1398,7 +1360,6 @@ onAuthStateChanged(auth, (user) => {
         if (badgesSection) badgesSection.style.display = 'none';
         if (myArticlesSection) myArticlesSection.style.display = 'none';
         if (avatarUploadSection) avatarUploadSection.style.display = 'none';
-
         document.title = 'Profilo Utente - asyncDonkey.io';
         if (profileSectionTitle) profileSectionTitle.textContent = 'Profilo Utente';
     }
@@ -1406,6 +1367,22 @@ onAuthStateChanged(auth, (user) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeNicknameChangeModalListeners();
+
+    // NUOVI LISTENER PER MODALE ANIMAZIONE NICKNAME
+    if (customizeNicknameBtn) {
+        customizeNicknameBtn.addEventListener('click', openNicknameAnimationModal);
+    }
+    if (closeNicknameAnimationModalBtn) {
+        closeNicknameAnimationModalBtn.addEventListener('click', closeNicknameAnimationModal);
+    }
+    if (nicknameAnimationModal) {
+        nicknameAnimationModal.addEventListener('click', (event) => {
+            if (event.target === nicknameAnimationModal) {
+                closeNicknameAnimationModal();
+            }
+        });
+    }
+    
     badgeDetailModal = document.getElementById('badgeDetailModal');
     if (badgeDetailModal) {
         closeBadgeDetailModalBtn = badgeDetailModal.querySelector('#closeBadgeDetailModalBtn');
@@ -1421,7 +1398,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.target === badgeDetailModal) badgeDetailModal.style.display = 'none';
         });
     }
-    
+
+    const badgesInfoBtn = document.getElementById('badgesInfoBtn');
+    if (badgesInfoBtn) {
+        badgesInfoBtn.addEventListener('click', handleShowAllBadgesInfo);
+    }
+
     if (updateStatusForm) updateStatusForm.addEventListener('submit', handleStatusMessageUpdate);
     if (resendVerificationEmailBtn && emailVerificationBanner) {
         resendVerificationEmailBtn.addEventListener('click', async () => {
@@ -1457,7 +1439,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
     if (toggleAddLinkFormBtn) {
         toggleAddLinkFormBtn.addEventListener('click', () => {
             if (externalLinkFormContainer) {
@@ -1465,7 +1446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isVisible) {
                     resetAndHideExternalLinkForm();
                 } else {
-                    resetAndHideExternalLinkForm();
+                    resetAndHideExternalLinkForm(); // Resetta prima di mostrare
                     externalLinkFormContainer.style.display = 'block';
                     toggleAddLinkFormBtn.textContent = 'Nascondi Form';
                     if (externalLinkTitleInput) externalLinkTitleInput.focus();
@@ -1473,7 +1454,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
     if (externalLinkForm) externalLinkForm.addEventListener('submit', handleExternalLinkFormSubmit);
     if (cancelEditExtLinkBtn) cancelEditExtLinkBtn.addEventListener('click', resetAndHideExternalLinkForm);
     if (bioInput) bioInput.addEventListener('input', updateBioCharCounter);
@@ -1498,6 +1478,5 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    if (bioInput && bioInput.offsetParent !== null) updateBioCharCounter();
+    if (bioInput && bioInput.offsetParent !== null) updateBioCharCounter(); // Inizializza se visibile
 });

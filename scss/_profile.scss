@@ -615,11 +615,10 @@ section#profile {
 // Stili per il contenitore Nickname e Icona Modifica
 .nickname-container {
     display: flex;
-    align-items: center; // Allinea verticalmente il testo del nickname e l'icona
-    flex-wrap: nowrap; // Evita che l'icona vada a capo se lo spazio è poco (improbabile qui)
+    align-items: center; 
+    flex-wrap: nowrap; 
 
     strong {
-        // Mantieni lo stile del "Nickname:" label
         margin-right: 5px;
     }
 
@@ -627,22 +626,25 @@ section#profile {
         // Eventuali stili specifici per il nickname se necessario
     }
 
-    // Stile per il bottone-icona di modifica nickname
-    .icon-button#requestNicknameChangeBtn {
+    // Stile specifico per i bottoni-icona nel container nickname usando il loro ID
+    #requestNicknameChangeBtn,
+    #customizeNicknameBtn { // Applicato a entrambi gli ID
         background-color: transparent;
         border: none;
-        padding: 4px; // Leggero padding per l'area cliccabile
-        margin-left: 8px; // Spazio tra nickname e icona
+        padding: 4px; 
+        margin-left: 8px; 
         cursor: pointer;
-        color: var(--link-color); // Usa il colore dei link per coerenza
-        border-radius: 50%; // Rendi il focus tondo se usi un bordo al focus
-        display: inline-flex; // Per allineare l'icona span interna
+        color: var(--link-color); 
+        border-radius: 50%; 
+        display: inline-flex; 
         align-items: center;
         justify-content: center;
+        line-height: 1; // Aggiunto per un miglior allineamento verticale dell'icona
 
         .material-symbols-rounded {
-            font-size: 20px; // Dimensione dell'icona
+            font-size: 20px; 
             transition: color 0.2s ease;
+            vertical-align: middle; // Migliora allineamento icona
         }
 
         &:hover .material-symbols-rounded {
@@ -650,7 +652,6 @@ section#profile {
         }
 
         &:focus-visible {
-            // Stile per il focus accessibile
             outline: 2px solid var(--link-color);
             outline-offset: 2px;
         }

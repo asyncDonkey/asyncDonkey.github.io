@@ -251,3 +251,108 @@
         }
     }
 }
+
+
+/* Stili per la Modale di Selezione Animazione Nickname */
+#nicknameAnimationModal {
+    .modal-content {
+        max-width: 550px; // Leggermente più larga per la lista
+    }
+
+    .modal-body {
+        padding-top: 15px;
+        padding-bottom: 20px;
+
+        p:first-of-type { // Il paragrafo introduttivo
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            color: var(--text-color-secondary);
+        }
+    }
+
+    .animation-selection-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 300px; // Limita altezza e abilita scroll se necessario
+        overflow-y: auto;
+        border: 1px solid var(--border-color-secondary);
+        border-radius: var(--border-radius-sm);
+        padding: 10px;
+        background-color: var(--surface-bg-secondary);
+    }
+
+    .animation-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--border-color-light);
+        background-color: var(--surface-bg-primary); // Sfondo per ogni item
+        border-radius: var(--border-radius-xs);
+        margin-bottom: 8px;
+
+        &:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .animation-preview-text {
+            font-weight: 500;
+            flex-grow: 1;
+            margin-right: 15px;
+            // Le classi di animazione specifiche verranno applicate qui dal JS
+        }
+    }
+
+    // Stili per il Toggle Switch (standard)
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px; // Larghezza ridotta per adattarsi meglio
+        height: 24px; // Altezza ridotta
+        flex-shrink: 0; // Evita che si restringa
+
+        input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--border-color-secondary); // Colore base quando spento
+        transition: .4s;
+        border-radius: 24px; // Per renderlo pillola
+
+        &:before {
+            position: absolute;
+            content: "";
+            height: 18px; // Dimensione del pallino
+            width: 18px;  // Dimensione del pallino
+            left: 3px;    // Posizione iniziale del pallino
+            bottom: 3px;  // Posizione iniziale del pallino
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+    }
+
+    input:checked + .slider {
+        background-color: var(--primary-color); // Colore quando attivo
+    }
+
+    input:focus-visible + .slider { // Stile focus per accessibilità
+        box-shadow: 0 0 1px var(--primary-color), 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px var(--primary-color-focus);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px); // Spostamento del pallino
+    }
+}

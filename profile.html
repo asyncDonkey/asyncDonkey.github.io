@@ -106,8 +106,8 @@
                                 style="font-size: 28px; color: var(--text-color-navbar); vertical-align: middle"
                                 >notifications</i
                             >
-                            <span id="notificationCounter" class="notification-badge" style="display: none">0</span>
                         </a>
+                        <span id="notificationCounter" class="notification-badge" style="display: none">0</span>
                         <div id="notification-panel" class="notification-panel" style="display: none">
                             <div class="notification-panel-header">
                                 <h2 style="margin: 0; font-size: 1.1em; font-weight: 600">Notifiche</h2>
@@ -183,29 +183,29 @@
                 </div>
 
                 <div
-    id="badgesSection"
-    style="
-        display: none;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 1px dashed var(--border-color-secondary);
-    "
->
-    <div class="section-header-interactive">
-        <h3>Riconoscimenti Ottenuti</h3>
-        <button id="badgesInfoBtn" class="icon-button" title="Come ottenere i riconoscimenti?">
-            <span class="material-symbols-rounded">help_outline</span>
-        </button>
-    </div>
-    <div
-        id="badgesDisplayContainer"
-        style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px"
-    >
-        <p id="noBadgesMessage" style="color: var(--text-color-muted); display: none">
-            Nessun riconoscimento ancora ottenuto.
-        </p>
-    </div>
-</div>
+                    id="badgesSection"
+                    style="
+                        display: none;
+                        margin-bottom: 30px;
+                        padding-bottom: 20px;
+                        border-bottom: 1px dashed var(--border-color-secondary);
+                    "
+                >
+                    <div class="section-header-interactive">
+                        <h3>Riconoscimenti Ottenuti</h3>
+                        <button id="badgesInfoBtn" class="icon-button" title="Come ottenere i riconoscimenti?">
+                            <span class="material-symbols-rounded">help_outline</span>
+                        </button>
+                    </div>
+                    <div
+                        id="badgesDisplayContainer"
+                        style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px"
+                    >
+                        <p id="noBadgesMessage" style="color: var(--text-color-muted); display: none">
+                            Nessun riconoscimento ancora ottenuto.
+                        </p>
+                    </div>
+                </div>
 
                 <div id="profileContent" style="display: none">
                     <div
@@ -220,7 +220,7 @@
                                 width="120"
                                 height="120"
                                 style="
-                                    border-radius: 8px; /* Smussato un po' */
+                                    border-radius: 8px;
                                     image-rendering: pixelated;
                                     background-color: #eee;
                                     border: 2px solid var(--border-color-secondary);
@@ -248,7 +248,7 @@
                             <div
                                 id="nicknameDisplayContainer"
                                 class="nickname-container"
-                                style="margin-bottom: 8px; font-size: 1.05em"
+                                style="margin-bottom: 8px; font-size: 1.05em; align-items: center; display: flex;" 
                             >
                                 <strong>Nickname:</strong>
                                 <span id="currentNickname" style="margin-left: 5px">Caricamento...</span>
@@ -261,7 +261,16 @@
                                 >
                                     <span class="material-symbols-rounded">edit_square</span>
                                 </button>
-                            </div>
+                                <button
+                                    type="button"
+                                    id="customizeNicknameBtn"
+                                    class="icon-button"
+                                    title="Personalizza stile nickname"
+                                    style="margin-left: 8px;"
+                                >
+                                    <span class="material-symbols-rounded">palette</span>
+                                </button>
+                                </div>
                             <p style="margin-bottom: 8px; font-size: 1.05em">
                                 <strong>Nazionalità:</strong> <span id="profileNationality">Caricamento...</span>
                             </p>
@@ -375,7 +384,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> 
                 <div
                     id="emailVerificationBanner"
                     class="info-section"
@@ -453,6 +462,7 @@
                     ></p>
                 </div>
             </div>
+
             <div id="confirmationModal" class="modal" style="display: none">
                 <div class="modal-content" style="max-width: 400px">
                     <h3 id="confirmationModalTitle">Conferma Azione</h3>
@@ -469,6 +479,7 @@
                     </div>
                 </div>
             </div>
+
             <div id="avatarConfirmationModal" class="modal" style="display: none">
                 <div class="modal-content" style="max-width: 450px; text-align: center">
                     <h3 style="margin-top: 0; margin-bottom: 20px">Conferma Nuovo Avatar</h3>
@@ -494,6 +505,12 @@
                         />
                     </div>
                     <p id="modalAvatarStatus" style="font-size: 0.9em; margin-bottom: 25px"></p>
+                    <div id="avatarUploadProgressContainer" style="display: none; margin-bottom: 15px; width: 80%; margin-left: auto; margin-right: auto;">
+                        <div class="progress-bar-container" style="background-color: var(--surface-bg-secondary); border-radius: 4px; padding: 2px;">
+                            <div id="avatarUploadProgressBar" class="progress-bar-fill" style="height: 10px; background-color: var(--primary-color); width: 0%; border-radius: 2px; transition: width 0.2s ease-in-out;"></div>
+                        </div>
+                        <p id="avatarUploadProgressText" style="font-size: 0.85em; margin-top: 5px; color: var(--text-color-muted);"></p>
+                    </div>
                     <div style="display: flex; gap: 15px; justify-content: center">
                         <button type="button" id="modalConfirmUploadBtn" class="button-modal-confirm">
                             <span class="material-symbols-rounded">check_circle</span>
@@ -511,7 +528,6 @@
                 <div class="modal-content" style="max-width: 500px">
                     <span class="close-modal-btn" id="closeNicknameChangeModalBtn">&times;</span>
                     <h3 id="nicknameChangeModalTitle">Richiedi Cambio Nickname</h3>
-
                     <div id="nicknameChangeInitialView">
                         <p>
                             Stai per richiedere un cambio di nickname. Gli amministratori esamineranno la tua richiesta.
@@ -549,7 +565,6 @@
                             </button>
                         </div>
                     </div>
-
                     <div id="nicknameChangeRequestSentView" style="display: none">
                         <h4>Richiesta Inviata!</h4>
                         <p>
@@ -558,7 +573,6 @@
                         </p>
                         <p>Puoi chiudere questa finestra.</p>
                     </div>
-
                     <div id="nicknameChangeCooldownView" style="display: none">
                         <h4>Richiesta Recente</h4>
                         <p>
@@ -584,7 +598,23 @@
                     </div>
                 </div>
             </div>
-        </main>
+            <div id="nicknameAnimationModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h3>Personalizza Stile Nickname</h3>
+                    <span class="close-modal-btn" id="closeNicknameAnimationModalBtn" title="Chiudi">&times;</span>
+                  </div>
+                  <div class="modal-body">
+                    <p>Seleziona uno stile sbloccato tramite i tuoi riconoscimenti. L'animazione scelta sarà visibile principalmente sulla tua pagina profilo.</p>
+                    <ul id="nicknameAnimationList" class="animation-selection-list">
+                      </ul>
+                    <div id="noNicknameAnimationsMessage" style="display: none; margin-top:15px; text-align:center;">
+                       <p style="color: var(--text-color-muted);">Non hai ancora sbloccato personalizzazioni per il nickname.<br>Ottieni altri badge per sbloccarle!</p>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            </main>
 
         <footer>
             <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>

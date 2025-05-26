@@ -4,10 +4,6 @@ const { logger } = require('firebase-functions');
 const admin = require('firebase-admin');
 const { FieldValue } = require('firebase-admin/firestore');
 
-// Assicurati che db sia inizializzato qui se non lo importi da index.js
-// if (admin.apps.length === 0) { // Potrebbe non essere necessario se index.js lo fa sempre per primo
-// admin.initializeApp();
-// }
 const db = admin.firestore();
 
 /**
@@ -23,9 +19,10 @@ function preparePublicProfileData(userProfileData) {
         nationalityCode: userProfileData.nationalityCode || null,
         hasPublishedArticles: userProfileData.hasPublishedArticles || false,
         hasDefeatedGlitchzilla: userProfileData.hasDefeatedGlitchzilla || false,
-        earnedBadges: userProfileData.earnedBadges || [], // Assicura che sia un array
+        earnedBadges: userProfileData.earnedBadges || [],
         kodComplimentsReceived: userProfileData.kodComplimentsReceived || 0,
         kodRank: userProfileData.kodRank || null,
+        activeNicknameAnimation: userProfileData.activeNicknameAnimation || null, // NUOVO
         profilePublicUpdatedAt: FieldValue.serverTimestamp(),
     };
 
@@ -104,6 +101,7 @@ async function handleUpdateUserPublicProfile(event) {
         'kodComplimentsReceived',
         'kodRank',
         'earnedBadges',
+        'activeNicknameAnimation', // NUOVO
     ];
 
     let changed = false;
