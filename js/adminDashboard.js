@@ -63,6 +63,10 @@ const cancelRejectReasonBtn = document.getElementById('cancelRejectReasonBtn');
 
 const nicknameRequestsListDiv = document.getElementById('nicknameRequestsList');
 
+// --- NUOVI RIFERIMENTI DOM PER MONITORAGGIO TESTER ---
+const testerMonitoringListContainer = document.getElementById('tester-monitoring-list-container');
+const testTasksSummaryContainer = document.getElementById('test-tasks-summary-container');
+
 let currentArticleIdToReject = null; // Variabile per tenere traccia dell'ID durante il processo di rifiuto
 
 function initializeOrUpdateEditMarkdownEditor(content = '') {
@@ -245,6 +249,168 @@ async function handleRejectArticleClick(e) {
     } else {
         showToast('Errore critico: la modale per inserire il motivo del rifiuto non è stata trovata.', 'error');
         console.error('La modale #rejectReasonModal non è stata trovata nel DOM!');
+    }
+}
+
+// =================================================================================
+// ============== NUOVE FUNZIONI PER IL MONITORAGGIO DEI TESTER ====================
+// =================================================================================
+
+/**
+ * Crea l'HTML per la card di un singolo tester con le sue statistiche.
+ * @param {object} testerProfile - I dati del profilo del tester (es. { nickname, email }).
+ * @param {object} stats - Le statistiche aggregate (es. { total, success, failure, lastSubmissionDate }).
+ * @returns {string} La stringa HTML per la card del tester.
+ */
+function createTesterCardHTML(testerProfile, stats) {
+    const successRate = stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : 0;
+    const failureRate = stats.total > 0 ? ((stats.failure / stats.total) * 100).toFixed(1) : 0;
+    const lastSubmission = stats.lastSubmissionDate 
+        ? stats.lastSubmissionDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })
+        : 'N/A';
+
+    return `
+        <div class="article-list-item tester-card">
+            <span class="article-info">
+                <strong>${testerProfile.nickname || 'Nickname non disponibile'}</strong><br>
+                <small>Email: ${testerProfile.email || 'N/A'} | Ultimo feedback: ${lastSubmission}</small>
+            </span>
+            <span class="actions tester-stats" style="text-align: right;">
+                <span title="Task Completati">Completati: <strong>${stats.total}</strong></span>
+                <span title="Successi" style="color: var(--success-color);">Successi: <strong>${stats.success} (${successRate}%)</strong></span>
+                <span title="Fallimenti" style="color: var(--error-color);">Fallimenti: <strong>${stats.failure} (${failureRate}%)</strong></span>
+            </span>
+        </div>
+    `;
+}
+
+/**
+ * Crea l'HTML per la riga di riepilogo di un singolo task.
+ * @param {object} taskInfo - I dati del task (es. { id, title }).
+ * @param {object} stats - Le statistiche aggregate per quel task (es. { total, success, failure }).
+ * @returns {string} La stringa HTML per la riga del task.
+ */
+function createTaskSummaryHTML(taskInfo, stats) {
+    const successRate = stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : 0;
+
+    return `
+        <div class="article-list-item task-summary-item">
+            <span class="article-info">
+                <strong>${taskInfo.title || 'Titolo non disponibile'}</strong><br>
+                <small>Task ID: ${taskInfo.id}</small>
+            </span>
+            <span class="actions task-stats" style="text-align: right;">
+                 <span>Feedback Totali: <strong>${stats.total}</strong></span>
+                 <span style="color: var(--success-color);">% Successo: <strong>${successRate}%</strong></span>
+            </span>
+        </div>
+    `;
+}
+
+
+/**
+ * Carica e aggrega i dati dai profili dei tester e i loro risultati di test.
+ */
+async function loadTesterMonitoringData() {
+    if (!testerMonitoringListContainer || !testTasksSummaryContainer) return;
+
+    try {
+        // 1. Recupera le definizioni dei task per avere i titoli a disposizione
+        const tasksDefSnapshot = await getDocs(collection(db, 'testTasksDefinition'));
+        const tasksDefinitions = new Map();
+        tasksDefSnapshot.forEach(doc => {
+            tasksDefinitions.set(doc.id, doc.data());
+        });
+
+
+        // 2. Recupera tutti gli utenti che sono tester
+        const testersQuery = query(collection(db, 'userProfiles'), where('isTestUser', '==', true));
+        const testersSnapshot = await getDocs(testersQuery);
+
+        if (testersSnapshot.empty) {
+            testerMonitoringListContainer.innerHTML = '<p>Nessun utente tester trovato.</p>';
+            testTasksSummaryContainer.innerHTML = '<p>Nessun dato da visualizzare.</p>';
+            return;
+        }
+
+        const taskAggregates = new Map(); // Per aggregare i risultati per task
+        let testerPromises = []; // Array per contenere le promise di elaborazione di ogni tester
+
+        // 3. Itera su ogni tester per recuperare e aggregare i suoi risultati
+        testersSnapshot.forEach(testerDoc => {
+            const testerProfile = testerDoc.data();
+            const testerId = testerDoc.id;
+
+            const promise = (async () => {
+                const resultsCollectionRef = collection(db, 'userProfiles', testerId, 'testResults');
+                const resultsSnapshot = await getDocs(resultsCollectionRef);
+
+                const stats = {
+                    total: resultsSnapshot.size,
+                    success: 0,
+                    failure: 0,
+                    lastSubmissionDate: null
+                };
+
+                resultsSnapshot.forEach(resultDoc => {
+                    const resultData = resultDoc.data();
+                    
+                    // Aggiorna statistiche del singolo tester
+                    if (resultData.outcome === 'success') stats.success++;
+                    if (resultData.outcome === 'failure') stats.failure++;
+                    
+                    const timestamp = resultData.timestamp?.toDate();
+                    if (timestamp && (!stats.lastSubmissionDate || timestamp > stats.lastSubmissionDate)) {
+                        stats.lastSubmissionDate = timestamp;
+                    }
+
+                    // Aggiorna statistiche globali per task
+                    const taskId = resultData.taskId;
+                    if (!taskAggregates.has(taskId)) {
+                        taskAggregates.set(taskId, { total: 0, success: 0, failure: 0 });
+                    }
+                    const currentTaskStats = taskAggregates.get(taskId);
+                    currentTaskStats.total++;
+                    if (resultData.outcome === 'success') currentTaskStats.success++;
+                    if (resultData.outcome === 'failure') currentTaskStats.failure++;
+                });
+
+                return { profile: testerProfile, stats: stats };
+            })();
+            
+            testerPromises.push(promise);
+        });
+
+        // 4. Attendi che tutti i dati dei tester siano stati processati
+        const allTestersData = await Promise.all(testerPromises);
+
+        // 5. Renderizza l'HTML
+        // Panoramica per Tester
+        let testersHTML = '';
+        allTestersData
+            .sort((a, b) => b.stats.total - a.stats.total) // Ordina per numero di task completati
+            .forEach(data => {
+                testersHTML += createTesterCardHTML(data.profile, data.stats);
+            });
+        testerMonitoringListContainer.innerHTML = testersHTML || '<p>Nessun risultato sottomesso dai tester.</p>';
+
+        // Panoramica per Task
+        let tasksSummaryHTML = '';
+        taskAggregates.forEach((stats, taskId) => {
+            const taskInfo = {
+                id: taskId,
+                title: tasksDefinitions.get(taskId)?.title || `Task ${taskId}`
+            };
+            tasksSummaryHTML += createTaskSummaryHTML(taskInfo, stats);
+        });
+        testTasksSummaryContainer.innerHTML = tasksSummaryHTML || '<p>Ancora nessun feedback ricevuto per i task di test.</p>';
+
+
+    } catch (error) {
+        console.error("Errore nel caricare i dati di monitoraggio dei tester:", error);
+        testerMonitoringListContainer.innerHTML = '<p style="color: var(--error-color);">Errore nel caricamento dei dati dei tester.</p>';
+        testTasksSummaryContainer.innerHTML = '<p style="color: var(--error-color);">Errore nel caricamento del riepilogo dei task.</p>';
+        showToast('Errore nel caricamento dei dati di monitoraggio.', 'error');
     }
 }
 
@@ -948,6 +1114,7 @@ async function checkAdminPermissions() {
                 loadDraftArticlesForAdmin();
                 loadRejectedArticlesForAdmin();
                 loadNicknameChangeRequests();
+                loadTesterMonitoringData();
             } else {
                 if (adminAuthMessageDiv)
                     adminAuthMessageDiv.innerHTML = '<p>Accesso negato. <a href="index.html">Home</a></p>';

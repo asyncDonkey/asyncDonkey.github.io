@@ -1,5 +1,5 @@
 // js/test-zone.js
-import { auth, db, escapeHTML } from './main.js'; // Aggiunto escapeHTML
+import { auth, db, escapeHTML } from './main.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
     doc,
@@ -10,24 +10,29 @@ import {
     getDocs,
     orderBy,
     serverTimestamp,
-    addDoc,
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'; // Aggiunte nuove importazioni
+    setDoc, // MODIFICATO: Usiamo setDoc invece di addDoc per creare/aggiornare documenti con ID specifici
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { showToast } from './toastNotifications.js';
+
 // --- RIFERIMENTI DOM ---
 const loader = document.getElementById('test-zone-loader');
 const accessDeniedMessage = document.getElementById('access-denied-message');
 const testZoneContent = document.getElementById('test-zone-content');
 const testTasksListContainer = document.getElementById('test-tasks-list-container');
+// --- NUOVI RIFERIMENTI PER GUIDELINES TOAST ---
+const guidelinesToast = document.getElementById('guidelines-toast');
+const dismissGuidelinesToastBtn = document.getElementById('dismiss-guidelines-toast');
 
-let currentUserForTestZone = null; // Per memorizzare l'utente loggato
+let currentUserForTestZone = null;
 
 /**
- * Crea l'HTML per una singola card di un task di test.
+ * // MODIFICATO: La funzione ora accetta i risultati esistenti per renderizzare la card in modo condizionale.
  * @param {object} taskData I dati del task.
  * @param {string} taskId L'ID del task.
+ * @param {object|null} existingResult Il risultato del test già sottomesso dall'utente per questo task.
  * @returns {string} La stringa HTML per la task card.
  */
-function createTaskCardHTML(taskData, taskId) {
+function createTaskCardHTML(taskData, taskId, existingResult) {
     const stepsHTML = taskData.stepsToReproduce
         ? `<div class="test-task-details-section"><strong>Passaggi:</strong><div class="formatted-text">${escapeHTML(taskData.stepsToReproduce).replace(/\n/g, '<br>')}</div></div>`
         : '';
@@ -38,13 +43,24 @@ function createTaskCardHTML(taskData, taskId) {
         ? `<p class="test-task-area"><strong>Area:</strong> ${escapeHTML(taskData.area)}</p>`
         : '';
 
-    return `
-        <div class="test-task-card" id="task-card-${taskId}" data-task-id="${taskId}">
-            <h3>${escapeHTML(taskData.title) || 'Task Senza Titolo'}</h3>
-            <p class="test-task-description">${escapeHTML(taskData.description) || 'Nessuna descrizione.'}</p>
-            ${areaHTML}
-            ${stepsHTML}
-            ${expectedHTML}
+    // NUOVO: Logica per mostrare lo stato "sottomesso" o i pulsanti di azione
+    let actionsOrStatusHTML;
+    if (existingResult) {
+        const outcomeClass = existingResult.outcome === 'success' ? 'success' : 'failure';
+        const outcomeText = existingResult.outcome === 'success' ? 'Successo' : 'Fallimento';
+        actionsOrStatusHTML = `
+            <div id="feedback-submitted-message-${taskId}" class="feedback-submitted-message" style="display: block; margin-top: 15px; padding: 10px; background-color: var(--${outcomeClass}-bg-light); border-left: 4px solid var(--${outcomeClass}-color); color: var(--${outcomeClass}-color-dark);">
+                <p style="margin:0;"><strong>Esito inviato: ${outcomeText}</strong></p>
+                ${existingResult.comment ? `<p style="margin:5px 0 0 0; font-style: italic;">"${escapeHTML(existingResult.comment)}"</p>` : ''}
+            </div>
+            <div class="task-actions" id="task-actions-${taskId}" style="margin-top: 10px;">
+                <button class="game-button secondary-button edit-feedback-button" data-task-id="${taskId}">
+                    <span class="material-symbols-rounded">edit</span> Modifica Esito
+                </button>
+            </div>
+        `;
+    } else {
+        actionsOrStatusHTML = `
             <div class="task-actions" id="task-actions-${taskId}" style="margin-top: 15px;">
                 <p style="font-weight: bold; margin-bottom: 8px;">Questo task è stato completato con successo?</p>
                 <button class="game-button success-button outcome-button" data-task-id="${taskId}" data-outcome="success">
@@ -54,23 +70,33 @@ function createTaskCardHTML(taskData, taskId) {
                     <span class="material-symbols-rounded">cancel</span> No, Fallimento
                 </button>
             </div>
+        `;
+    }
+
+    return `
+        <div class="test-task-card" id="task-card-${taskId}" data-task-id="${taskId}">
+            <h3>${escapeHTML(taskData.title) || 'Task Senza Titolo'}</h3>
+            <p class="test-task-description">${escapeHTML(taskData.description) || 'Nessuna descrizione.'}</p>
+            ${areaHTML}
+            ${stepsHTML}
+            ${expectedHTML}
+
+            ${actionsOrStatusHTML}
+
             <div id="feedback-form-container-${taskId}" class="feedback-form-container" style="display: none; margin-top: 15px;">
                 <h4>Fornisci Feedback per "${escapeHTML(taskData.title)}"</h4>
-                <textarea id="feedback-comment-${taskId}" class="input-field" placeholder="Aggiungi un commento (opzionale, max 2000 caratteri)..." maxlength="2000" rows="4"></textarea>
+                <textarea id="feedback-comment-${taskId}" class="input-field" placeholder="Aggiungi un commento (opzionale, max 2000 caratteri)..." maxlength="2000" rows="4">${existingResult ? escapeHTML(existingResult.comment) : ''}</textarea>
                 <div class="form-actions" style="margin-top:10px;">
-                    <button class="game-button submit-feedback-button" data-task-id="${taskId}">Invia Feedback</button>
+                    <button class="game-button submit-feedback-button" data-task-id="${taskId}">${existingResult ? 'Aggiorna Feedback' : 'Invia Feedback'}</button>
                     <button class="game-button secondary-button cancel-feedback-button" data-task-id="${taskId}" style="margin-left: 10px;">Annulla</button>
                 </div>
-            </div>
-            <div id="feedback-submitted-message-${taskId}" class="feedback-submitted-message" style="display: none; margin-top: 15px; padding: 10px; background-color: var(--success-bg-light); border-left: 4px solid var(--success-color); color: var(--success-color-dark);">
-                <p style="margin:0;">Grazie per il tuo feedback!</p>
             </div>
         </div>
     `;
 }
 
 /**
- * Salva il risultato del test in Firestore.
+ * // MODIFICATO: Salva o aggiorna il risultato del test in Firestore usando setDoc.
  * @param {string} taskId L'ID del task.
  * @param {string} outcome L'esito ('success' o 'failure').
  * @param {string} comment Il commento dell'utente.
@@ -88,25 +114,22 @@ async function saveTestResult(taskId, outcome, comment) {
     }
 
     try {
-        const testResultsCollectionRef = collection(db, 'userProfiles', currentUserForTestZone.uid, 'testResults');
-        await addDoc(testResultsCollectionRef, {
+        // NUOVO: Creiamo un riferimento al documento usando l'ID del task.
+        const testResultDocRef = doc(db, 'userProfiles', currentUserForTestZone.uid, 'testResults', taskId);
+
+        await setDoc(testResultDocRef, {
             taskId: taskId,
             outcome: outcome,
-            comment: comment || '', // Salva stringa vuota se non c'è commento
+            comment: comment || '',
             timestamp: serverTimestamp(),
-            testerId: currentUserForTestZone.uid, // Aggiunto per completezza, anche se è nella subcollection
+            testerId: currentUserForTestZone.uid,
         });
 
         showToast('Feedback inviato con successo!', 'success');
+        
+        // NUOVO: Ricarica solo i task per aggiornare la UI in modo consistente
+        await loadTestTasks();
 
-        // Nascondi il form e i pulsanti di outcome, mostra messaggio di ringraziamento
-        const feedbackFormContainer = document.getElementById(`feedback-form-container-${taskId}`);
-        const taskActionsContainer = document.getElementById(`task-actions-${taskId}`);
-        const feedbackSubmittedMessage = document.getElementById(`feedback-submitted-message-${taskId}`);
-
-        if (feedbackFormContainer) feedbackFormContainer.style.display = 'none';
-        if (taskActionsContainer) taskActionsContainer.style.display = 'none'; // Nasconde i pulsanti Successo/Fallimento
-        if (feedbackSubmittedMessage) feedbackSubmittedMessage.style.display = 'block';
     } catch (error) {
         console.error('Errore nel salvare il risultato del test:', error);
         showToast('Errore durante il salvataggio del feedback. Riprova.', 'error');
@@ -117,18 +140,18 @@ async function saveTestResult(taskId, outcome, comment) {
     }
 }
 
+
 /**
- * Gestisce i click sui pulsanti all'interno delle task card.
+ * // MODIFICATO: Gestisce i click anche per il nuovo pulsante "Modifica Esito".
  */
 function setupTaskFeedbackListeners() {
     if (!testTasksListContainer) return;
 
-    // Variabile per memorizzare l'esito scelto
     let currentOutcomeForTask = {};
 
     testTasksListContainer.addEventListener('click', async (event) => {
         const target = event.target;
-        const button = target.closest('button'); // Trova il bottone più vicino se si clicca su un'icona interna
+        const button = target.closest('button');
 
         if (!button) return;
 
@@ -136,67 +159,114 @@ function setupTaskFeedbackListeners() {
         if (!taskId) return;
 
         const feedbackFormContainer = document.getElementById(`feedback-form-container-${taskId}`);
+        const taskActionsContainer = document.getElementById(`task-actions-${taskId}`);
         const commentTextarea = document.getElementById(`feedback-comment-${taskId}`);
 
         // Gestione pulsanti "Successo" / "Fallimento"
         if (button.classList.contains('outcome-button')) {
-            currentOutcomeForTask[taskId] = button.dataset.outcome; // Memorizza l'esito per questo task
+            currentOutcomeForTask[taskId] = button.dataset.outcome;
             if (feedbackFormContainer) {
                 feedbackFormContainer.style.display = 'block';
                 if (commentTextarea) commentTextarea.focus();
             }
-            console.log(`Task ${taskId} outcome scelto: ${currentOutcomeForTask[taskId]}`);
         }
-        // Gestione pulsante "Invia Feedback"
+        // NUOVO: Gestione pulsante "Modifica Esito"
+        else if (button.classList.contains('edit-feedback-button')) {
+            if (taskActionsContainer) taskActionsContainer.style.display = 'none';
+            if (feedbackFormContainer) feedbackFormContainer.style.display = 'block';
+        }
+        // Gestione pulsante "Invia Feedback" / "Aggiorna Feedback"
         else if (button.classList.contains('submit-feedback-button')) {
-            const outcome = currentOutcomeForTask[taskId]; // Recupera l'esito memorizzato
+            // Se l'outcome non è stato scelto (es. in modalità modifica), lo recuperiamo dallo stato precedente
+            if (!currentOutcomeForTask[taskId]) {
+                const card = document.getElementById(`task-card-${taskId}`);
+                if (card.querySelector('.feedback-submitted-message.success')) {
+                    currentOutcomeForTask[taskId] = 'success';
+                } else if (card.querySelector('.feedback-submitted-message.failure')) {
+                    currentOutcomeForTask[taskId] = 'failure';
+                }
+            }
+             // Cerca di inferire l'esito dalla UI se non è stato cliccato un nuovo pulsante
+            if (!currentOutcomeForTask[taskId]) {
+                const submittedMessage = document.querySelector(`#feedback-submitted-message-${taskId} p strong`);
+                if (submittedMessage) {
+                    const text = submittedMessage.textContent.toLowerCase();
+                    if (text.includes('successo')) {
+                        currentOutcomeForTask[taskId] = 'success';
+                    } else if (text.includes('fallimento')) {
+                        currentOutcomeForTask[taskId] = 'failure';
+                    }
+                }
+            }
+
+
+            const outcome = currentOutcomeForTask[taskId];
             const comment = commentTextarea ? commentTextarea.value.trim() : '';
 
             if (!outcome) {
-                showToast("Per favore, seleziona prima 'Successo' o 'Fallimento'.", 'warning');
+                showToast("Errore critico: impossibile determinare l'esito. Selezionalo di nuovo.", 'error');
                 return;
             }
             await saveTestResult(taskId, outcome, comment);
-            delete currentOutcomeForTask[taskId]; // Pulisce l'esito memorizzato dopo l'invio
+            delete currentOutcomeForTask[taskId];
         }
-        // Gestione pulsante "Annulla" (nel form di feedback)
+        // Gestione pulsante "Annulla"
         else if (button.classList.contains('cancel-feedback-button')) {
-            if (feedbackFormContainer) feedbackFormContainer.style.display = 'none';
-            if (commentTextarea) commentTextarea.value = ''; // Pulisce il commento
-            delete currentOutcomeForTask[taskId]; // Pulisce l'esito memorizzato
-            console.log(`Feedback annullato per task ${taskId}`);
+            // Semplicemente ricarichiamo per tornare allo stato salvato, è la via più semplice e robusta
+             await loadTestTasks();
         }
-    });
+    if (event.target.tagName.toLowerCase() === 'textarea') {
+        event.target.style.height = 'auto';
+        event.target.style.height = `${event.target.scrollHeight}px`;
+    }
+});
 }
 
+
 /**
- * Funzione per caricare e visualizzare i task di test.
+ * // MODIFICATO: Carica sia i task sia i risultati esistenti del tester.
  */
 async function loadTestTasks() {
-    if (!testTasksListContainer) return;
+    if (!testTasksListContainer || !currentUserForTestZone) return;
     testTasksListContainer.innerHTML = '<p>Caricamento task di test...</p>';
 
     try {
+        // 1. NUOVO: Recupera i risultati dei test già sottomessi dall'utente
+        const testResultsCollectionRef = collection(db, 'userProfiles', currentUserForTestZone.uid, 'testResults');
+        const resultsSnapshot = await getDocs(testResultsCollectionRef);
+        const userResultsMap = new Map();
+        resultsSnapshot.forEach(doc => {
+            userResultsMap.set(doc.id, doc.data());
+        });
+
+        // 2. Recupera le definizioni dei task attivi
         const q = query(
             collection(db, 'testTasksDefinition'),
             where('status', '==', 'active'),
             orderBy('priority', 'asc'),
             orderBy('createdAt', 'desc')
         );
-        const querySnapshot = await getDocs(q);
+        const tasksSnapshot = await getDocs(q);
 
-        if (querySnapshot.empty) {
+        if (tasksSnapshot.empty) {
             testTasksListContainer.innerHTML =
                 '<p>Nessun task di test attivo al momento. Grazie per la tua disponibilità!</p>';
             return;
         }
 
+        // 3. Renderizza i task, passando i risultati esistenti
         let tasksHTML = '';
-        querySnapshot.forEach((doc) => {
-            tasksHTML += createTaskCardHTML(doc.data(), doc.id);
+        tasksSnapshot.forEach((taskDoc) => {
+            const taskId = taskDoc.id;
+            const taskData = taskDoc.data();
+            const existingResult = userResultsMap.get(taskId) || null;
+            tasksHTML += createTaskCardHTML(taskData, taskId, existingResult);
         });
         testTasksListContainer.innerHTML = tasksHTML;
-        setupTaskFeedbackListeners(); // Chiama per aggiungere i listener ai nuovi elementi
+        
+        // Listener viene settato una volta dopo il rendering completo
+        // La gestione è stata spostata in initializeTestZone per evitare duplicazioni
+
     } catch (error) {
         console.error('Errore nel caricare i task di test da Firestore:', error);
         testTasksListContainer.innerHTML =
@@ -204,6 +274,7 @@ async function loadTestTasks() {
         showToast('Errore nel caricamento dei task di test.', 'error');
     }
 }
+
 
 /**
  * Inizializza la pagina verificando lo stato di autenticazione e i permessi dell'utente.
@@ -213,8 +284,11 @@ function initializeTestZone() {
     if (accessDeniedMessage) accessDeniedMessage.style.display = 'none';
     if (testZoneContent) testZoneContent.style.display = 'none';
 
+    // NUOVO: Inizializza il listener una sola volta qui.
+    setupTaskFeedbackListeners(); 
+
     onAuthStateChanged(auth, async (user) => {
-        currentUserForTestZone = user; // Memorizza l'utente corrente
+        currentUserForTestZone = user;
         if (user) {
             const userProfileRef = doc(db, 'userProfiles', user.uid);
             try {
@@ -224,7 +298,20 @@ function initializeTestZone() {
                     if (loader) loader.style.display = 'none';
                     if (accessDeniedMessage) accessDeniedMessage.style.display = 'none';
                     if (testZoneContent) testZoneContent.style.display = 'block';
-                    loadTestTasks();
+                     // --- NUOVA LOGICA PER IL TOAST DELLE LINEE GUIDA ---
+                    if (guidelinesToast && dismissGuidelinesToastBtn) {
+                        // Mostra il toast solo se non è già stato chiuso in questa sessione
+                        if (sessionStorage.getItem('engineRoomToastDismissed') !== 'true') {
+                            guidelinesToast.style.display = 'flex';
+                        }
+                        
+                        // Aggiungi il listener per chiudere il toast
+                        dismissGuidelinesToastBtn.addEventListener('click', () => {
+                            guidelinesToast.style.display = 'none';
+                            sessionStorage.setItem('engineRoomToastDismissed', 'true');
+                        });
+                    }
+                    await loadTestTasks(); // Usa await per coerenza
                 } else {
                     console.log("Accesso negato. L'utente non è un tester o il profilo non esiste.");
                     if (loader) loader.style.display = 'none';
@@ -233,8 +320,7 @@ function initializeTestZone() {
                 }
             } catch (error) {
                 console.error('Errore nel recuperare il profilo utente:', error);
-                if (loader)
-                    loader.innerHTML = "<p style='color: var(--error-color);'>Errore nel verificare i permessi.</p>";
+                if (loader) loader.innerHTML = "<p style='color: var(--error-color);'>Errore nel verificare i permessi.</p>";
                 if (testZoneContent) testZoneContent.style.display = 'none';
                 if (accessDeniedMessage) accessDeniedMessage.style.display = 'block';
                 showToast('Errore verifica permessi.', 'error');
