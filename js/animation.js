@@ -1,12 +1,7 @@
-// js/animation.js
+// js/animation.js - (MODIFIED)
 
-// La costante ANIMATION_SPEED potrebbe essere importata da un file di configurazione in futuro,
-// ma per ora la definiamo qui se necessario o la passiamo come parametro.
-// Per ora, assumiamo che venga passata al costruttore o che usi un valore di default.
-
-export class Animation {
+export class SpriteAnimation {
     constructor(spritesheet, frameWidth, frameHeight, numFrames, animationSpeed = 0.1) {
-        // Default animation speed
         this.spritesheet = spritesheet;
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;

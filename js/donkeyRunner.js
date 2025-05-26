@@ -1,5 +1,5 @@
 // js/donkeyRunner.js
-import { Animation } from './animation.js';
+import { SpriteAnimation } from './animation.js';
 import {
     PowerUpItem,
     POWERUP_TYPE,
@@ -269,7 +269,7 @@ canvas.width = 800;
 canvas.height = 450;
 
 const groundHeight = 70;
-const gravity = 0.18;
+const gravity = 0.16;
 let gameSpeed = 220;
 const lineWidth = 2;
 const GLOBAL_SPRITE_SCALE_FACTOR = 1.5;
@@ -681,7 +681,7 @@ class Player {
         this.sprite = images['player'];
         this.walkAnimation = null;
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0) {
-            this.walkAnimation = new Animation(
+            this.walkAnimation = new SpriteAnimation(
                 this.sprite,
                 PLAYER_ACTUAL_FRAME_WIDTH,
                 PLAYER_ACTUAL_FRAME_HEIGHT,
@@ -931,7 +931,7 @@ class Obstacle {
         this.health = OBSTACLE_HEALTH;
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0) {
             if (OBSTACLE_NUM_FRAMES > 1) {
-                this.animation = new Animation(
+                this.animation = new SpriteAnimation(
                     this.sprite,
                     OBSTACLE_ACTUAL_FRAME_WIDTH,
                     OBSTACLE_ACTUAL_FRAME_HEIGHT,
@@ -1001,10 +1001,11 @@ class Projectile {
         this.damage = this.isUpgraded ? 2 : 1;
         this.sprite = this.isUpgraded ? images['playerUpgradedProjectile'] : images['playerProjectile'];
         this.animation = null;
+
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
-            this.animation = new Animation(
+            this.animation = new SpriteAnimation(
                 this.sprite,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH, // These constants are correct for initialization
                 PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
                 PLAYER_PROJECTILE_NUM_FRAMES,
                 PLAYER_PROJECTILE_ANIMATION_SPEED
@@ -1019,17 +1020,20 @@ class Projectile {
         const spriteUsable = this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0;
         if (this.animation && spriteUsable) {
             const frame = this.animation.getFrame();
+            // --- FIX START ---
+            // Using frame dimensions from the animation object, not hardcoded constants
             ctx.drawImage(
                 this.sprite,
                 frame.sx,
                 frame.sy,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                this.animation.frameWidth,  // Corrected
+                this.animation.frameHeight, // Corrected
                 this.x,
                 this.y,
                 this.width,
                 this.height
             );
+            // --- FIX END ---
         } else if (spriteUsable) {
             ctx.drawImage(
                 this.sprite,
@@ -1087,7 +1091,7 @@ class BaseEnemy {
     loadAnimation(spriteNameKeyToLoad, frameW, frameH, numFramesAnim, animationKey) {
         const spriteInstance = images[spriteNameKeyToLoad];
         if (spriteInstance && spriteInstance.complete && spriteInstance.naturalWidth > 0 && numFramesAnim > 0) {
-            this.animations[animationKey] = new Animation(spriteInstance, frameW, frameH, numFramesAnim);
+            this.animations[animationKey] = new SpriteAnimation(spriteInstance, frameW, frameH, numFramesAnim);
             if (animationKey === 'base' && !this.animation) {
                 this.animation = this.animations.base;
                 this.sprite = spriteInstance;
@@ -1258,7 +1262,7 @@ class EnemyProjectile {
         this.sprite = images[spriteNameKey];
         this.animation = null;
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && numFrames > 1) {
-            this.animation = new Animation(this.sprite, frameW, frameH, numFrames, 0.1);
+            this.animation = new SpriteAnimation(this.sprite, frameW, frameH, numFrames, 0.1);
         }
     }
     update(dt) {
@@ -2096,6 +2100,7 @@ function checkCollisions() {
         height: asyncDonkey.colliderHeight,
     };
 
+    // --- COLLISIONE CON OSTACOLI ---
     for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
         if (
@@ -2117,13 +2122,40 @@ function checkCollisions() {
                 continue;
             }
             gameOverTrigger = true;
+            AudioManager.playSound('playerHit');
+            processGameOver();
             return;
         }
     }
 
-    const allEnemyArrays = [
+    // --- NUOVA LOGICA: COLLISIONE CON NEMICI VOLANTI (POWER-UP CARRIER) ---
+    for (let i = flyingEnemies.length - 1; i >= 0; i--) {
+        const enemy = flyingEnemies[i];
+        if (
+            playerRect.x < enemy.x + enemy.width &&
+            playerRect.x + playerRect.width > enemy.x &&
+            playerRect.y < enemy.y + enemy.height &&
+            playerRect.y + playerRect.height > enemy.y
+        ) {
+            // È un power-up carrier, non una minaccia.
+            flyingEnemies.splice(i, 1);
+            score += enemy.scoreValue; // Assegna punti per la raccolta
+            AudioManager.playSound('powerUpCollect'); // Suono gratificante
+
+            // Garantisce il drop di un power-up
+            const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
+            const randomType = Object.values(POWERUP_TYPE)[randomTypeIndex];
+            powerUpItems.push(
+                new PowerUpItem(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, randomType, images)
+            );
+            // Non c'è gameOverTrigger qui, la collisione è benefica.
+        }
+    }
+
+    // --- LOGICA ESISTENTE: COLLISIONE CON TUTTI GLI ALTRI NEMICI DANNOSI ---
+    const allDamagingEnemyArrays = [
         enemies,
-        flyingEnemies,
+        // flyingEnemies è stato rimosso da questo array e gestito sopra
         fastEnemies,
         armoredEnemies,
         shootingEnemies,
@@ -2131,9 +2163,9 @@ function checkCollisions() {
         toughBasicEnemies,
         dangerousFlyingEnemies,
     ];
-    if (activeMiniboss) allEnemyArrays.push([activeMiniboss]);
+    if (activeMiniboss) allDamagingEnemyArrays.push([activeMiniboss]);
 
-    for (const enemyArray of allEnemyArrays) {
+    for (const enemyArray of allDamagingEnemyArrays) {
         for (let i = enemyArray.length - 1; i >= 0; i--) {
             const enemy = enemyArray[i];
             if (!enemy) continue;
@@ -2151,15 +2183,22 @@ function checkCollisions() {
                     continue;
                 }
                 gameOverTrigger = true;
+                AudioManager.playSound('playerHit');
+                processGameOver();
                 return;
             }
         }
     }
 
+    // --- GESTIONE PROIETTILI GIOCATORE ---
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const proj = projectiles[i];
+        if (!proj) continue; // Sanity check
         let projectileRemoved = false;
-        for (const enemyArray of allEnemyArrays) {
+
+        // Controlla collisione con nemici dannosi + flyingEnemies (possono essere sparati)
+        const allShootableEnemyArrays = [...allDamagingEnemyArrays, flyingEnemies];
+        for (const enemyArray of allShootableEnemyArrays) {
             if (projectileRemoved) break;
             for (let j = enemyArray.length - 1; j >= 0; j--) {
                 const enemy = enemyArray[j];
@@ -2174,11 +2213,18 @@ function checkCollisions() {
                     AudioManager.playSound('enemyHit');
                     projectiles.splice(i, 1);
                     projectileRemoved = true;
+
                     if (enemy.health <= 0) {
+                        // Nemico sconfitto
                         enemyArray.splice(j, 1);
                         score += enemy.scoreValue;
                         AudioManager.playSound('enemyExplode');
-                        if (enemy.isDangerousFlyer && Math.random() < POWER_UP_DROP_CHANCE_FROM_FLYING_ENEMY) {
+
+                        // Logica per il drop chance dai nemici volanti PERICOLOSI
+                        if (
+                            (enemy instanceof DangerousFlyingEnemy || enemy.isDangerousFlyer) && // Controllo più robusto
+                            Math.random() < POWER_UP_DROP_CHANCE_FROM_FLYING_ENEMY
+                        ) {
                             const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
                             const randomType = Object.values(POWERUP_TYPE)[randomTypeIndex];
                             powerUpItems.push(
@@ -2195,6 +2241,7 @@ function checkCollisions() {
                 }
             }
         }
+
         if (asyncDonkey && asyncDonkey.isBlockBreakerActive && !projectileRemoved) {
             for (let k = obstacles.length - 1; k >= 0; k--) {
                 const obs = obstacles[k];
@@ -2216,6 +2263,7 @@ function checkCollisions() {
         }
     }
 
+    // --- GESTIONE PROIETTILI NEMICI ---
     for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
         const eProj = enemyProjectiles[i];
         if (
@@ -2231,10 +2279,13 @@ function checkCollisions() {
                 continue;
             }
             gameOverTrigger = true;
+            AudioManager.playSound('playerHit');
+            processGameOver();
             return;
         }
     }
 
+    // --- GESTIONE RACCOLTA POWER-UP (già presente, solo per completezza) ---
     for (let i = powerUpItems.length - 1; i >= 0; i--) {
         const item = powerUpItems[i];
         if (
@@ -2248,10 +2299,7 @@ function checkCollisions() {
         }
     }
 
-    if (gameOverTrigger) {
-        AudioManager.playSound('playerHit');
-        processGameOver();
-    }
+    // Il check finale di gameOverTrigger è stato spostato direttamente dove avviene l'evento
 }
 
 function resetGame() {
