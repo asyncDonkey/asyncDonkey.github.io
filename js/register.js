@@ -141,19 +141,19 @@ const handleRegistration = async (event) => {
         showToast('Registrazione autenticazione avvenuta con successo!', 'success');
 
         const userProfileData = {
-    email: user.email,
-    nickname: nickname,
-    nationalityCode: nationality || null,
-    createdAt: serverTimestamp(),
-    isAdmin: false,
-    isTestUser: false, // <-- AGGIUNGI QUESTA RIGA
-    statusMessage: 'Nuovo utente!',
-    externalLinks: [],
-    earnedBadges: [],
-    bio: '',
-    hasPublishedArticles: false,
-    hasDefeatedGlitchzilla: false,
-};
+            email: user.email,
+            nickname: nickname,
+            nationalityCode: nationality || null,
+            createdAt: serverTimestamp(),
+            isAdmin: false,
+            isTestUser: false, // <-- AGGIUNGI QUESTA RIGA
+            statusMessage: 'Nuovo utente!',
+            externalLinks: [],
+            earnedBadges: [],
+            bio: '',
+            hasPublishedArticles: false,
+            hasDefeatedGlitchzilla: false,
+        };
 
         console.log('Dati del profilo da salvare:', userProfileData);
         await setDoc(doc(db, 'userProfiles', user.uid), userProfileData);

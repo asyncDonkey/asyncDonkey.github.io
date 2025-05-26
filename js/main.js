@@ -25,7 +25,11 @@ import {
 
 // IMPORT PER EMULATORE STORAGE
 import { getStorage, connectStorageEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
-import { getFunctions, connectFunctionsEmulator, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+import {
+    getFunctions,
+    connectFunctionsEmulator,
+    httpsCallable,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
@@ -240,7 +244,7 @@ async function loadHeaderUserProfileDisplay(user, profileData) {
             altText = `${nicknameToShow}'s Custom Avatar`;
         }
     }
-    
+
     // NUOVA MODIFICA PER STILE NICKNAME: Applica classe animazione
     userDisplayNameElement.className = ''; // Resetta classi precedenti
     if (activeNicknameAnimClass) {
@@ -1259,70 +1263,76 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
     onAuthStateChanged(auth, async (user) => {
-    console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
-    loggedInUser = user;
+        console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
+        loggedInUser = user;
 
-    if (currentUserProfileUnsubscribe) {
-        console.log('[Main.js onAuthStateChanged] Annullamento iscrizione dal listener profilo navbar precedente.');
-        currentUserProfileUnsubscribe();
-        currentUserProfileUnsubscribe = null;
-    }
+        if (currentUserProfileUnsubscribe) {
+            console.log('[Main.js onAuthStateChanged] Annullamento iscrizione dal listener profilo navbar precedente.');
+            currentUserProfileUnsubscribe();
+            currentUserProfileUnsubscribe = null;
+        }
 
-    if (user) {
-        // Utente AUTENTICATO
-        const userIdForEvent = user.uid;
-        const userProfileRef = doc(db, 'userProfiles', userIdForEvent);
-        console.log(`[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${userIdForEvent}`);
+        if (user) {
+            // Utente AUTENTICATO
+            const userIdForEvent = user.uid;
+            const userProfileRef = doc(db, 'userProfiles', userIdForEvent);
+            console.log(
+                `[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${userIdForEvent}`
+            );
 
-        currentUserProfileUnsubscribe = onSnapshot(
-            userProfileRef,
-            async (docSnap) => {
-                const userProfileData = docSnap.exists() ? docSnap.data() : null;
-                updateUIBasedOnAuthState(user, userProfileData);
+            currentUserProfileUnsubscribe = onSnapshot(
+                userProfileRef,
+                async (docSnap) => {
+                    const userProfileData = docSnap.exists() ? docSnap.data() : null;
+                    updateUIBasedOnAuthState(user, userProfileData);
 
-                // --- LOGICA REVISIONATA PER BADGE DI VERIFICA EMAIL ---
-                if (user.emailVerified && userProfileData) {
-                    const earnedBadges = userProfileData.earnedBadges || [];
-                    if (!earnedBadges.includes('verified-user')) {
-                        console.log('[Main.js] Utente verificato ma senza badge. Forzo il refresh del token e poi chiamo la Cloud Function...');
-                        try {
-                            // **MODIFICA CHIAVE**: Forza il refresh del token per ottenere le claims aggiornate (email_verified: true)
-                            await user.getIdToken(true);
+                    // --- LOGICA REVISIONATA PER BADGE DI VERIFICA EMAIL ---
+                    if (user.emailVerified && userProfileData) {
+                        const earnedBadges = userProfileData.earnedBadges || [];
+                        if (!earnedBadges.includes('verified-user')) {
+                            console.log(
+                                '[Main.js] Utente verificato ma senza badge. Forzo il refresh del token e poi chiamo la Cloud Function...'
+                            );
+                            try {
+                                // **MODIFICA CHIAVE**: Forza il refresh del token per ottenere le claims aggiornate (email_verified: true)
+                                await user.getIdToken(true);
 
-                            // Ora che il token è fresco, possiamo chiamare la funzione
-                            const grantVerificationBadge = httpsCallable(functions, 'grantVerificationBadge');
-                            const result = await grantVerificationBadge();
-                            console.log('[Main.js] Chiamata a grantVerificationBadge riuscita:', result.data);
-                        } catch (error) {
-                            console.error('[Main.js] Errore durante la chiamata a grantVerificationBadge:', error);
+                                // Ora che il token è fresco, possiamo chiamare la funzione
+                                const grantVerificationBadge = httpsCallable(functions, 'grantVerificationBadge');
+                                const result = await grantVerificationBadge();
+                                console.log('[Main.js] Chiamata a grantVerificationBadge riuscita:', result.data);
+                            } catch (error) {
+                                console.error('[Main.js] Errore durante la chiamata a grantVerificationBadge:', error);
+                            }
                         }
                     }
+                    // --- FINE LOGICA REVISIONATA ---
+                },
+                (error) => {
+                    console.error('[Main.js onSnapshot Navbar] Errore nel listener del profilo per navbar:', error);
+                    updateUIBasedOnAuthState(user, null);
                 }
-                // --- FINE LOGICA REVISIONATA ---
-            },
-            (error) => {
-                console.error('[Main.js onSnapshot Navbar] Errore nel listener del profilo per navbar:', error);
-                updateUIBasedOnAuthState(user, null);
-            }
-        );
+            );
 
-        setupNotificationBellListener(userIdForEvent);
-        loadContentSpecificFeatures(user);
+            setupNotificationBellListener(userIdForEvent);
+            loadContentSpecificFeatures(user);
 
-        console.log(`[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con userId: ${userIdForEvent}`);
-        document.dispatchEvent(new CustomEvent('userAuthenticated', { detail: { user: user, userId: userIdForEvent } }));
-        console.log('[Main.js onAuthStateChanged] Operazioni per utente autenticato completate.');
-    } else {
-        // Utente NON AUTENTICATO (logout)
-        console.log('[Main.js onAuthStateChanged] Utente non loggato.');
-        updateUIBasedOnAuthState(null, null);
-        clearNotificationBellListener();
-        loadContentSpecificFeatures(null);
+            console.log(`[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con userId: ${userIdForEvent}`);
+            document.dispatchEvent(
+                new CustomEvent('userAuthenticated', { detail: { user: user, userId: userIdForEvent } })
+            );
+            console.log('[Main.js onAuthStateChanged] Operazioni per utente autenticato completate.');
+        } else {
+            // Utente NON AUTENTICATO (logout)
+            console.log('[Main.js onAuthStateChanged] Utente non loggato.');
+            updateUIBasedOnAuthState(null, null);
+            clearNotificationBellListener();
+            loadContentSpecificFeatures(null);
 
-        console.log('[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con utente nullo (logout).');
-        document.dispatchEvent(new CustomEvent('userAuthenticated', { detail: { user: null, userId: null } }));
-        console.log('[Main.js onAuthStateChanged] Operazioni per utente non autenticato completate.');
-    }
-});
+            console.log('[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con utente nullo (logout).');
+            document.dispatchEvent(new CustomEvent('userAuthenticated', { detail: { user: null, userId: null } }));
+            console.log('[Main.js onAuthStateChanged] Operazioni per utente non autenticato completate.');
+        }
+    });
     console.log('[Main.js DOMContentLoaded] Tutte le inizializzazioni del DOM e Auth listener sono state impostate.');
 }); // Fine dell'UNICO DOMContentLoaded

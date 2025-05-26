@@ -248,7 +248,7 @@
                             <div
                                 id="nicknameDisplayContainer"
                                 class="nickname-container"
-                                style="margin-bottom: 8px; font-size: 1.05em; align-items: center; display: flex;" 
+                                style="margin-bottom: 8px; font-size: 1.05em; align-items: center; display: flex"
                             >
                                 <strong>Nickname:</strong>
                                 <span id="currentNickname" style="margin-left: 5px">Caricamento...</span>
@@ -266,14 +266,20 @@
                                     id="customizeNicknameBtn"
                                     class="icon-button"
                                     title="Personalizza stile nickname"
-                                    style="margin-left: 8px;"
+                                    style="margin-left: 8px"
                                 >
                                     <span class="material-symbols-rounded">palette</span>
                                 </button>
-                                <a href="test-zone.html" id="testZoneLink" class="icon-button" title="Accedi all'Area Tester" style="margin-left: 8px; display: none;">
-    <span class="material-symbols-rounded">science</span>
-</a>
-                                </div>
+                                <a
+                                    href="test-zone.html"
+                                    id="testZoneLink"
+                                    class="icon-button"
+                                    title="Accedi all'Area Tester"
+                                    style="margin-left: 8px; display: none"
+                                >
+                                    <span class="material-symbols-rounded">science</span>
+                                </a>
+                            </div>
                             <p style="margin-bottom: 8px; font-size: 1.05em">
                                 <strong>Nazionalità:</strong> <span id="profileNationality">Caricamento...</span>
                             </p>
@@ -387,7 +393,7 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
                 <div
                     id="emailVerificationBanner"
                     class="info-section"
@@ -508,11 +514,30 @@
                         />
                     </div>
                     <p id="modalAvatarStatus" style="font-size: 0.9em; margin-bottom: 25px"></p>
-                    <div id="avatarUploadProgressContainer" style="display: none; margin-bottom: 15px; width: 80%; margin-left: auto; margin-right: auto;">
-                        <div class="progress-bar-container" style="background-color: var(--surface-bg-secondary); border-radius: 4px; padding: 2px;">
-                            <div id="avatarUploadProgressBar" class="progress-bar-fill" style="height: 10px; background-color: var(--primary-color); width: 0%; border-radius: 2px; transition: width 0.2s ease-in-out;"></div>
+                    <div
+                        id="avatarUploadProgressContainer"
+                        style="display: none; margin-bottom: 15px; width: 80%; margin-left: auto; margin-right: auto"
+                    >
+                        <div
+                            class="progress-bar-container"
+                            style="background-color: var(--surface-bg-secondary); border-radius: 4px; padding: 2px"
+                        >
+                            <div
+                                id="avatarUploadProgressBar"
+                                class="progress-bar-fill"
+                                style="
+                                    height: 10px;
+                                    background-color: var(--primary-color);
+                                    width: 0%;
+                                    border-radius: 2px;
+                                    transition: width 0.2s ease-in-out;
+                                "
+                            ></div>
                         </div>
-                        <p id="avatarUploadProgressText" style="font-size: 0.85em; margin-top: 5px; color: var(--text-color-muted);"></p>
+                        <p
+                            id="avatarUploadProgressText"
+                            style="font-size: 0.85em; margin-top: 5px; color: var(--text-color-muted)"
+                        ></p>
                     </div>
                     <div style="display: flex; gap: 15px; justify-content: center">
                         <button type="button" id="modalConfirmUploadBtn" class="button-modal-confirm">
@@ -601,23 +626,31 @@
                     </div>
                 </div>
             </div>
-            <div id="nicknameAnimationModal" class="modal" style="display: none;">
+            <div id="nicknameAnimationModal" class="modal" style="display: none">
                 <div class="modal-content">
-                  <div class="modal-header">
-                    <h3>Personalizza Stile Nickname</h3>
-                    <span class="close-modal-btn" id="closeNicknameAnimationModalBtn" title="Chiudi">&times;</span>
-                  </div>
-                  <div class="modal-body">
-                    <p>Seleziona uno stile sbloccato tramite i tuoi riconoscimenti. L'animazione scelta sarà visibile principalmente sulla tua pagina profilo.</p>
-                    <ul id="nicknameAnimationList" class="animation-selection-list">
-                      </ul>
-                    <div id="noNicknameAnimationsMessage" style="display: none; margin-top:15px; text-align:center;">
-                       <p style="color: var(--text-color-muted);">Non hai ancora sbloccato personalizzazioni per il nickname.<br>Ottieni altri badge per sbloccarle!</p>
+                    <div class="modal-header">
+                        <h3>Personalizza Stile Nickname</h3>
+                        <span class="close-modal-btn" id="closeNicknameAnimationModalBtn" title="Chiudi">&times;</span>
                     </div>
-                  </div>
+                    <div class="modal-body">
+                        <p>
+                            Seleziona uno stile sbloccato tramite i tuoi riconoscimenti. L'animazione scelta sarà
+                            visibile principalmente sulla tua pagina profilo.
+                        </p>
+                        <ul id="nicknameAnimationList" class="animation-selection-list"></ul>
+                        <div
+                            id="noNicknameAnimationsMessage"
+                            style="display: none; margin-top: 15px; text-align: center"
+                        >
+                            <p style="color: var(--text-color-muted)">
+                                Non hai ancora sbloccato personalizzazioni per il nickname.<br />Ottieni altri badge per
+                                sbloccarle!
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            </main>
+        </main>
 
         <footer>
             <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>

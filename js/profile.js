@@ -194,8 +194,7 @@ async function renderBadges(earnedBadgesArray = [], isOwnProfile) {
             iconSpan.textContent = badgeInfo.icon;
             iconSpan.style.color = badgeInfo.color || 'var(--text-color-primary)';
             if (badgeInfo.isNeon) iconSpan.classList.add('testo-neon-arcade');
-            else if (badgeInfo.isAnimated && badgeInfo.animationClass)
-                iconSpan.classList.add(badgeInfo.animationClass);
+            else if (badgeInfo.isAnimated && badgeInfo.animationClass) iconSpan.classList.add(badgeInfo.animationClass);
             badgeIconElement.appendChild(iconSpan);
             badgeIconElement.addEventListener('click', () => openBadgeDetailsModal(badgeId));
             badgeIconElement.addEventListener('keydown', (event) => {
@@ -240,7 +239,7 @@ async function handleShowAllBadgesInfo() {
         contentHtml += '</ul>';
         showInfoModal('Come Ottenere i Riconoscimenti', contentHtml);
     } catch (error) {
-        console.error("Errore nel mostrare la modale informativa dei badge:", error);
+        console.error('Errore nel mostrare la modale informativa dei badge:', error);
         showToast('Errore nel caricare le informazioni.', 'error');
     } finally {
         if (badgesInfoBtn) badgesInfoBtn.disabled = false;
@@ -350,12 +349,14 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
     if (requestNicknameChangeBtn) {
         requestNicknameChangeBtn.style.display = isOwnProfile ? 'inline-flex' : 'none';
     }
-    if (customizeNicknameBtn) { // Gestione visibilità nuovo pulsante
+    if (customizeNicknameBtn) {
+        // Gestione visibilità nuovo pulsante
         customizeNicknameBtn.style.display = isOwnProfile ? 'inline-flex' : 'none';
     }
 
     const testZoneLink = document.getElementById('testZoneLink');
-    if (testZoneLink) { // Assicurati che l'elemento esista
+    if (testZoneLink) {
+        // Assicurati che l'elemento esista
         if (isOwnProfile && data.isTestUser === true) {
             testZoneLink.style.display = 'inline-flex'; // o 'inline-block' a seconda dello stile desiderato per l'icona
         } else {
@@ -392,7 +393,8 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         } else if (!isOwnProfile && data.avatarUrls && data.avatarUrls.thumbnail) {
             mainAvatarUrl = data.avatarUrls.thumbnail;
             cacheBusterTimestamp = data.profilePublicUpdatedAt; // Sincronizzato da userPublicProfileSync
-        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) { // Fallback per avatar profilo
+        } else if (isOwnProfile && data.avatarUrls && data.avatarUrls.small) {
+            // Fallback per avatar profilo
             mainAvatarUrl = data.avatarUrls.small;
             cacheBusterTimestamp = data.profileUpdatedAt;
         }
@@ -401,7 +403,8 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
             altText = `${profileNameForTitle}'s Custom Avatar`;
             if (cacheBusterTimestamp && cacheBusterTimestamp.seconds) {
                 avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.seconds}`;
-            } else if (cacheBusterTimestamp instanceof Date) { // Se fosse un oggetto Date JS
+            } else if (cacheBusterTimestamp instanceof Date) {
+                // Se fosse un oggetto Date JS
                 avatarSrcToSet = `${mainAvatarUrl}?v=${cacheBusterTimestamp.getTime()}`;
             } else {
                 avatarSrcToSet = mainAvatarUrl;
@@ -435,7 +438,8 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         } else {
             if (isOwnProfile) {
                 statusMessageSection.style.display = 'block';
-                statusMessageDisplay.innerHTML = '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
+                statusMessageDisplay.innerHTML =
+                    '<p style="color: var(--text-color-muted);">Nessuno stato d\'animo impostato. Scrivine uno qui sotto!</p>';
             } else {
                 statusMessageSection.style.display = 'none';
             }
@@ -466,7 +470,9 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         if (updateStatusForm) {
             updateStatusForm.style.display = 'flex'; // o 'block' se preferisci
             if (statusMessageInput)
-                statusMessageInput.placeholder = data.statusMessage ? 'Modifica il tuo stato attuale...' : 'Come ti senti oggi?';
+                statusMessageInput.placeholder = data.statusMessage
+                    ? 'Modifica il tuo stato attuale...'
+                    : 'Come ti senti oggi?';
         }
         if (updateBioForm) {
             updateBioForm.style.display = 'block';
@@ -565,7 +571,10 @@ function loadProfileData(uidToLoad, isOwnProfile) {
         (error) => {
             document.title = 'Errore Profilo - asyncDonkey.io';
             if (profileSectionTitle) profileSectionTitle.textContent = 'Errore Profilo';
-            console.error(`[AthenaDev Debug - onSnapshot] Errore nel listener del profilo ${collectionPath}/${uidToLoad}:`, error);
+            console.error(
+                `[AthenaDev Debug - onSnapshot] Errore nel listener del profilo ${collectionPath}/${uidToLoad}:`,
+                error
+            );
             if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
             if (profileContent) profileContent.style.display = 'none';
             if (profileLoginMessage) {
@@ -582,9 +591,15 @@ function loadProfileData(uidToLoad, isOwnProfile) {
 // =================================================================================
 
 async function openNicknameAnimationModal() {
-    if (!nicknameAnimationModal || !nicknameAnimationListUL || !noNicknameAnimationsMessage || !profileDataForDisplay || !loggedInUser) {
-        console.error("Elementi modale animazione nickname, dati profilo o utente loggato mancanti.");
-        showToast("Errore nell'aprire la personalizzazione.", "error");
+    if (
+        !nicknameAnimationModal ||
+        !nicknameAnimationListUL ||
+        !noNicknameAnimationsMessage ||
+        !profileDataForDisplay ||
+        !loggedInUser
+    ) {
+        console.error('Elementi modale animazione nickname, dati profilo o utente loggato mancanti.');
+        showToast("Errore nell'aprire la personalizzazione.", 'error');
         return;
     }
 
@@ -639,7 +654,7 @@ async function openNicknameAnimationModal() {
 
 async function handleNicknameAnimationToggle(event) {
     if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid) {
-        showToast("Azione non permessa.", "error");
+        showToast('Azione non permessa.', 'error');
         if (event.target) event.target.checked = !event.target.checked;
         return;
     }
@@ -654,7 +669,7 @@ async function handleNicknameAnimationToggle(event) {
 
     if (isChecked) {
         const allToggles = nicknameAnimationListUL.querySelectorAll('input[type="checkbox"]');
-        allToggles.forEach(toggle => {
+        allToggles.forEach((toggle) => {
             if (toggle !== event.target) {
                 toggle.checked = false;
             }
@@ -667,7 +682,7 @@ async function handleNicknameAnimationToggle(event) {
             activeNicknameAnimation: newActiveAnimation,
             updatedAt: serverTimestamp(),
         });
-        showToast(newActiveAnimation ? "Stile nickname applicato!" : "Stile nickname rimosso.", "success");
+        showToast(newActiveAnimation ? 'Stile nickname applicato!' : 'Stile nickname rimosso.', 'success');
 
         if (currentNicknameSpan && profileDataForDisplay) {
             currentNicknameSpan.className = '';
@@ -680,8 +695,8 @@ async function handleNicknameAnimationToggle(event) {
             profileDataForDisplay.activeNicknameAnimation = newActiveAnimation; // Update local state
         }
     } catch (error) {
-        console.error("Errore aggiornamento stile nickname:", error);
-        showToast("Errore durante l'aggiornamento dello stile.", "error");
+        console.error('Errore aggiornamento stile nickname:', error);
+        showToast("Errore durante l'aggiornamento dello stile.", 'error');
         if (event.target) event.target.checked = !event.target.checked;
     }
 }
@@ -729,7 +744,9 @@ async function handleExternalLinkFormSubmit(event) {
         return;
     }
     if (externalLinkErrorDiv) externalLinkErrorDiv.textContent = '';
-    let currentLinks = Array.isArray(profileDataForDisplay.externalLinks) ? [...profileDataForDisplay.externalLinks] : [];
+    let currentLinks = Array.isArray(profileDataForDisplay.externalLinks)
+        ? [...profileDataForDisplay.externalLinks]
+        : [];
     if (editingIndex > -1) {
         if (editingIndex < currentLinks.length) {
             currentLinks[editingIndex] = { title, url };
@@ -769,7 +786,12 @@ async function handleExternalLinkFormSubmit(event) {
 }
 
 async function handleDeleteExternalLink(indexToDelete) {
-    if (!loggedInUser || !profileDataForDisplay || profileDataForDisplay.userId !== loggedInUser.uid || !Array.isArray(profileDataForDisplay.externalLinks)) {
+    if (
+        !loggedInUser ||
+        !profileDataForDisplay ||
+        profileDataForDisplay.userId !== loggedInUser.uid ||
+        !Array.isArray(profileDataForDisplay.externalLinks)
+    ) {
         showToast('Azione non permessa o errore dati.', 'error');
         return;
     }
@@ -778,7 +800,10 @@ async function handleDeleteExternalLink(indexToDelete) {
         showToast('Link non trovato per eliminazione.', 'error');
         return;
     }
-    const confirmed = await showConfirmationModal('Conferma Eliminazione Link', `Sei sicuro di voler eliminare il link "${linkToDelete.title || 'Senza titolo'}"?`);
+    const confirmed = await showConfirmationModal(
+        'Conferma Eliminazione Link',
+        `Sei sicuro di voler eliminare il link "${linkToDelete.title || 'Senza titolo'}"?`
+    );
     if (!confirmed) {
         showToast('Eliminazione link annullata.', 'info');
         return;
@@ -792,7 +817,12 @@ async function handleDeleteExternalLink(indexToDelete) {
             updatedAt: serverTimestamp(),
         });
         showToast('Link eliminato con successo!', 'success');
-        if (externalLinkFormContainer && externalLinkFormContainer.style.display === 'block' && editingLinkIndexInput && parseInt(editingLinkIndexInput.value, 10) === indexToDelete) {
+        if (
+            externalLinkFormContainer &&
+            externalLinkFormContainer.style.display === 'block' &&
+            editingLinkIndexInput &&
+            parseInt(editingLinkIndexInput.value, 10) === indexToDelete
+        ) {
             resetAndHideExternalLinkForm();
         }
     } catch (error) {
@@ -977,7 +1007,13 @@ function closeNicknameChangeModal() {
 }
 
 async function handleSubmitNicknameChangeRequest() {
-    if (!loggedInUser || !profileDataForDisplay || !newNicknameInput || !nicknameChangeError || !submitNicknameChangeRequestBtn) {
+    if (
+        !loggedInUser ||
+        !profileDataForDisplay ||
+        !newNicknameInput ||
+        !nicknameChangeError ||
+        !submitNicknameChangeRequestBtn
+    ) {
         showToast('Errore: componenti UI o dati utente mancanti.', 'error');
         return;
     }
@@ -1025,13 +1061,15 @@ async function handleSubmitNicknameChangeRequest() {
 function initializeNicknameChangeModalListeners() {
     if (requestNicknameChangeBtn) requestNicknameChangeBtn.addEventListener('click', openNicknameChangeModal);
     if (closeNicknameChangeModalBtn) closeNicknameChangeModalBtn.addEventListener('click', closeNicknameChangeModal);
-    if (cancelNicknameChangeRequestBtn) cancelNicknameChangeRequestBtn.addEventListener('click', closeNicknameChangeModal);
+    if (cancelNicknameChangeRequestBtn)
+        cancelNicknameChangeRequestBtn.addEventListener('click', closeNicknameChangeModal);
     if (requestNicknameChangeModal) {
         requestNicknameChangeModal.addEventListener('click', (event) => {
             if (event.target === requestNicknameChangeModal) closeNicknameChangeModal();
         });
     }
-    if (submitNicknameChangeRequestBtn) submitNicknameChangeRequestBtn.addEventListener('click', handleSubmitNicknameChangeRequest);
+    if (submitNicknameChangeRequestBtn)
+        submitNicknameChangeRequestBtn.addEventListener('click', handleSubmitNicknameChangeRequest);
 }
 
 function updateBioCharCounter() {
@@ -1093,14 +1131,19 @@ async function handleBioUpdate(event) {
 function formatMyArticleTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
         return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
-            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
     }
     return 'N/A';
 }
 
 async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
-    const statusText = currentStatus === 'draft' ? 'bozza' : currentStatus === 'rejected' ? 'articolo respinto' : 'articolo';
+    const statusText =
+        currentStatus === 'draft' ? 'bozza' : currentStatus === 'rejected' ? 'articolo respinto' : 'articolo';
     const userConfirmed = await showConfirmationModal(
         `Conferma Eliminazione ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
         `Sei sicuro di voler eliminare ${statusText} "${articleTitle || 'Senza Titolo'}"? L'azione è irreversibile.`
@@ -1112,7 +1155,10 @@ async function handleDeleteArticle(articleId, articleTitle, currentStatus) {
     try {
         const articleRef = doc(db, 'articles', articleId);
         await deleteDoc(articleRef);
-        showToast(`${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato.`, 'success');
+        showToast(
+            `${statusText.charAt(0).toUpperCase() + statusText.slice(1)} "${articleTitle || 'Senza Titolo'}" eliminato.`,
+            'success'
+        );
         if (loggedInUser) loadMyArticles(loggedInUser.uid);
     } catch (error) {
         console.error(`Errore eliminazione ${statusText}:`, error);
@@ -1186,7 +1232,8 @@ function createMyArticleItemElement(article, articleId) {
         resubmitButton.href = `submit-article.html?rejectedArticleId=${articleId}`;
         resubmitButton.className = 'game-button my-article-action-button';
         resubmitButton.textContent = 'Crea da Questo Articolo';
-        resubmitButton.title = 'Crea una nuova sottomissione pre-compilata con il contenuto di questo articolo respinto';
+        resubmitButton.title =
+            'Crea una nuova sottomissione pre-compilata con il contenuto di questo articolo respinto';
         actionsDiv.appendChild(resubmitButton);
         const deleteButton = document.createElement('button');
         deleteButton.className = 'game-button my-article-action-button delete';
@@ -1201,9 +1248,24 @@ function createMyArticleItemElement(article, articleId) {
 async function loadMyArticles(userIdToLoadArticlesFor) {
     const articleStatusesToLoad = [
         { status: 'draft', listDiv: myDraftArticlesListDiv, loadingMsg: myDraftsLoadingMessage, title: 'Bozze' },
-        { status: 'pendingReview', listDiv: myPendingArticlesListDiv, loadingMsg: myPendingLoadingMessage, title: 'In Revisione' },
-        { status: 'published', listDiv: myPublishedArticlesListDiv, loadingMsg: myPublishedLoadingMessage, title: 'Pubblicati' },
-        { status: 'rejected', listDiv: myRejectedArticlesListDiv, loadingMsg: myRejectedLoadingMessage, title: 'Respinti' },
+        {
+            status: 'pendingReview',
+            listDiv: myPendingArticlesListDiv,
+            loadingMsg: myPendingLoadingMessage,
+            title: 'In Revisione',
+        },
+        {
+            status: 'published',
+            listDiv: myPublishedArticlesListDiv,
+            loadingMsg: myPublishedLoadingMessage,
+            title: 'Pubblicati',
+        },
+        {
+            status: 'rejected',
+            listDiv: myRejectedArticlesListDiv,
+            loadingMsg: myRejectedLoadingMessage,
+            title: 'Respinti',
+        },
     ];
     if (!userIdToLoadArticlesFor) {
         if (myArticlesSection) myArticlesSection.style.display = 'none';
@@ -1229,7 +1291,10 @@ async function loadMyArticles(userIdToLoadArticlesFor) {
                 const querySnapshot = await getDocs(q);
                 S.loadingMsg.style.display = 'none';
                 if (querySnapshot.empty) S.listDiv.innerHTML = `<p>Nessun articolo "${S.title}".</p>`;
-                else querySnapshot.forEach((docSnapshot) => S.listDiv.appendChild(createMyArticleItemElement(docSnapshot.data(), docSnapshot.id)));
+                else
+                    querySnapshot.forEach((docSnapshot) =>
+                        S.listDiv.appendChild(createMyArticleItemElement(docSnapshot.data(), docSnapshot.id))
+                    );
             } catch (error) {
                 console.error(`Errore caricamento articoli ${S.status}:`, error);
                 S.loadingMsg.style.display = 'none';
@@ -1337,7 +1402,7 @@ onAuthStateChanged(auth, (user) => {
         } else {
             if (myArticlesSection) myArticlesSection.style.display = 'none';
         }
-        if (guestMsgDiv) guestMsgDiv.style.display = (!isOwn && !loggedInUser) ? 'block' : 'none';
+        if (guestMsgDiv) guestMsgDiv.style.display = !isOwn && !loggedInUser ? 'block' : 'none';
     } else if (loggedInUser) {
         loadProfileData(loggedInUser.uid, true);
         if (myArticlesSection) myArticlesSection.style.display = 'block';
@@ -1349,7 +1414,8 @@ onAuthStateChanged(auth, (user) => {
         if (profileLoadingMessage) profileLoadingMessage.style.display = 'none';
         if (profileLoginMessage) {
             profileLoginMessage.style.display = 'block';
-            profileLoginMessage.innerHTML = '<p>Per visualizzare o modificare un profilo, <a href="#" id="profilePageLoginLink" style="color: var(--link-color); text-decoration: underline;">accedi</a> o <a href="register.html" style="color: var(--link-color); text-decoration: underline;">registrati</a>.</p>';
+            profileLoginMessage.innerHTML =
+                '<p>Per visualizzare o modificare un profilo, <a href="#" id="profilePageLoginLink" style="color: var(--link-color); text-decoration: underline;">accedi</a> o <a href="register.html" style="color: var(--link-color); text-decoration: underline;">registrati</a>.</p>';
             const profilePageLoginLink = document.getElementById('profilePageLoginLink');
             if (profilePageLoginLink && !profilePageLoginLink.hasAttribute('data-listener-attached')) {
                 profilePageLoginLink.addEventListener('click', (e) => {
@@ -1391,7 +1457,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     badgeDetailModal = document.getElementById('badgeDetailModal');
     if (badgeDetailModal) {
         closeBadgeDetailModalBtn = badgeDetailModal.querySelector('#closeBadgeDetailModalBtn');
@@ -1422,7 +1488,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     resendVerificationEmailBtn.textContent = 'Invio...';
                     if (resendEmailMessage) resendEmailMessage.textContent = '';
                     await sendEmailVerification(loggedInUser);
-                    showToast('Email di verifica inviata nuovamente! Controlla la tua casella di posta.', 'success', 6000);
+                    showToast(
+                        'Email di verifica inviata nuovamente! Controlla la tua casella di posta.',
+                        'success',
+                        6000
+                    );
                     if (resendEmailMessage) {
                         resendEmailMessage.textContent = 'Email inviata. Potrebbe volerci qualche minuto.';
                         resendEmailMessage.style.color = 'green';

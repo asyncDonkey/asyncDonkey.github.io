@@ -323,9 +323,10 @@ section#profile {
         // Specifico per l'icona dentro .badge-icon-item
         animation: soft-color-pulse 3s infinite ease-in-out;
     }
-    & .verified-user-icon-pulse { // Applica all'icona (.material-symbols-rounded)
-    animation: verified-user-pulse 2.5s infinite ease-in-out;
-  }
+    & .verified-user-icon-pulse {
+        // Applica all'icona (.material-symbols-rounded)
+        animation: verified-user-pulse 2.5s infinite ease-in-out;
+    }
 }
 
 @keyframes soft-color-pulse {
@@ -581,7 +582,6 @@ section#profile {
     // Se vuoi animazioni neon specifiche per la modale, aggiungile qui
 }
 
-
 .button-modal-confirm,
 .button-modal-cancel {
     display: inline-flex;
@@ -615,8 +615,8 @@ section#profile {
 // Stili per il contenitore Nickname e Icona Modifica
 .nickname-container {
     display: flex;
-    align-items: center; 
-    flex-wrap: nowrap; 
+    align-items: center;
+    flex-wrap: nowrap;
 
     strong {
         margin-right: 5px;
@@ -628,21 +628,22 @@ section#profile {
 
     // Stile specifico per i bottoni-icona nel container nickname usando il loro ID
     #requestNicknameChangeBtn,
-    #customizeNicknameBtn { // Applicato a entrambi gli ID
+    #customizeNicknameBtn {
+        // Applicato a entrambi gli ID
         background-color: transparent;
         border: none;
-        padding: 4px; 
-        margin-left: 8px; 
+        padding: 4px;
+        margin-left: 8px;
         cursor: pointer;
-        color: var(--link-color); 
-        border-radius: 50%; 
-        display: inline-flex; 
+        color: var(--link-color);
+        border-radius: 50%;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         line-height: 1; // Aggiunto per un miglior allineamento verticale dell'icona
 
         .material-symbols-rounded {
-            font-size: 20px; 
+            font-size: 20px;
             transition: color 0.2s ease;
             vertical-align: middle; // Migliora allineamento icona
         }

@@ -252,7 +252,6 @@
     }
 }
 
-
 /* Stili per la Modale di Selezione Animazione Nickname */
 #nicknameAnimationModal {
     .modal-content {
@@ -348,7 +347,10 @@
     }
 
     input:focus-visible + .slider {
-        box-shadow: 0 0 1px #00bfa5, 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px rgba(0, 191, 165, 0.5); /* Stile focus per accessibilità */
+        box-shadow:
+            0 0 1px #00bfa5,
+            0 0 0 2px var(--surface-bg-primary),
+            0 0 0 4px rgba(0, 191, 165, 0.5); /* Stile focus per accessibilità */
     }
 
     input:checked + .slider:before {

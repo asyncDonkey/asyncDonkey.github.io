@@ -23,22 +23,21 @@
                 <a href="index.html" style="text-decoration: none">
                     <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
                 </a>
-                <nav class="desktop-nav">
-                    </nav>
+                <nav class="desktop-nav"></nav>
                 <button class="navbar-toggler" id="navbarToggler" aria-label="Toggle Navigazione">
                     <span class="material-symbols-rounded">menu</span>
                 </button>
             </div>
             <div class="header-controls">
                 <div id="authContainer"></div>
-                <div id="userProfileContainer" style="display: none;"></div>
+                <div id="userProfileContainer" style="display: none"></div>
                 <div class="header-action-buttons">
-                     <a href="profile.html" class="auth-button nav-link-icon-only" title="Vai al Profilo">
+                    <a href="profile.html" class="auth-button nav-link-icon-only" title="Vai al Profilo">
                         <span class="material-symbols-rounded">account_circle</span>
-                     </a>
-                     <button id="themeToggleBtn" title="Toggle Tema" class="auth-button nav-link-icon-only">
+                    </a>
+                    <button id="themeToggleBtn" title="Toggle Tema" class="auth-button nav-link-icon-only">
                         <span class="material-symbols-rounded">light_mode</span>
-                     </button>
+                    </button>
                 </div>
             </div>
             <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true"></nav>
@@ -46,26 +45,33 @@
 
         <main>
             <section id="test-zone-section">
-                <h2><span class="material-symbols-rounded" style="vertical-align: bottom;">science</span> Area di Test</h2>
+                <h2>
+                    <span class="material-symbols-rounded" style="vertical-align: bottom">science</span> Area di Test
+                </h2>
 
                 <div id="test-zone-loader" class="loader-container">
                     <p>Verifica autorizzazione in corso...</p>
                     <div class="loader"></div>
                 </div>
 
-                <div id="access-denied-message" class="info-section error" style="display: none;">
+                <div id="access-denied-message" class="info-section error" style="display: none">
                     <p><strong>Accesso Negato.</strong></p>
-                    <p>Questa area è riservata agli utenti tester autorizzati. Se credi di dover avere accesso, contatta un amministratore.</p>
+                    <p>
+                        Questa area è riservata agli utenti tester autorizzati. Se credi di dover avere accesso,
+                        contatta un amministratore.
+                    </p>
                     <a href="profile.html" class="underline-link">Torna al tuo profilo</a>
                 </div>
 
-                <div id="test-zone-content" style="display: none;">
-                    <p>Benvenuto, Tester. Grazie per il tuo contributo a rendere la piattaforma migliore. Qui di seguito trovi i task di test attualmente attivi.</p>
-                    
+                <div id="test-zone-content" style="display: none">
+                    <p>
+                        Benvenuto, Tester. Grazie per il tuo contributo a rendere la piattaforma migliore. Qui di
+                        seguito trovi i task di test attualmente attivi.
+                    </p>
+
                     <div id="test-tasks-list-container">
                         <p>Caricamento task di test...</p>
                     </div>
-
                 </div>
             </section>
         </main>
