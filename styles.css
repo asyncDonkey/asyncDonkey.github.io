@@ -3967,7 +3967,7 @@ img.comment-avatar-img {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--border-color-secondary);
+  background-color: #6c757d; /* GRIGIO per lo stato 'spento' (colore hardcoded) */
   -webkit-transition: 0.4s;
   transition: 0.4s;
   border-radius: 24px;
@@ -3979,17 +3979,17 @@ img.comment-avatar-img {
   width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background-color: white; /* BIANCO per il pallino (colore hardcoded) */
   -webkit-transition: 0.4s;
   transition: 0.4s;
   border-radius: 50%;
 }
 #nicknameAnimationModal input:checked + .slider {
-  background-color: var(--primary-color);
+  background-color: #00bfa5; /* TEAL/VERDE per lo stato 'acceso' (colore hardcoded) */
 }
 #nicknameAnimationModal input:focus-visible + .slider {
-  -webkit-box-shadow: 0 0 1px var(--primary-color), 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px var(--primary-color-focus);
-          box-shadow: 0 0 1px var(--primary-color), 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px var(--primary-color-focus);
+  -webkit-box-shadow: 0 0 1px #00bfa5, 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px rgba(0, 191, 165, 0.5);
+          box-shadow: 0 0 1px #00bfa5, 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px rgba(0, 191, 165, 0.5); /* Stile focus per accessibilità */
 }
 #nicknameAnimationModal input:checked + .slider:before {
   -webkit-transform: translateX(26px);

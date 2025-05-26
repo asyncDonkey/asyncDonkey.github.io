@@ -256,14 +256,14 @@
 /* Stili per la Modale di Selezione Animazione Nickname */
 #nicknameAnimationModal {
     .modal-content {
-        max-width: 550px; // Leggermente più larga per la lista
+        max-width: 550px;
     }
 
     .modal-body {
         padding-top: 15px;
         padding-bottom: 20px;
 
-        p:first-of-type { // Il paragrafo introduttivo
+        p:first-of-type {
             margin-bottom: 20px;
             font-size: 0.95em;
             color: var(--text-color-secondary);
@@ -274,7 +274,7 @@
         list-style: none;
         padding: 0;
         margin: 0;
-        max-height: 300px; // Limita altezza e abilita scroll se necessario
+        max-height: 300px;
         overflow-y: auto;
         border: 1px solid var(--border-color-secondary);
         border-radius: var(--border-radius-sm);
@@ -288,7 +288,7 @@
         align-items: center;
         padding: 12px 15px;
         border-bottom: 1px solid var(--border-color-light);
-        background-color: var(--surface-bg-primary); // Sfondo per ogni item
+        background-color: var(--surface-bg-primary);
         border-radius: var(--border-radius-xs);
         margin-bottom: 8px;
 
@@ -301,17 +301,16 @@
             font-weight: 500;
             flex-grow: 1;
             margin-right: 15px;
-            // Le classi di animazione specifiche verranno applicate qui dal JS
         }
     }
 
-    // Stili per il Toggle Switch (standard)
+    // --- SEZIONE DELLO SWITCH CORRETTA ---
     .switch {
         position: relative;
         display: inline-block;
-        width: 50px; // Larghezza ridotta per adattarsi meglio
-        height: 24px; // Altezza ridotta
-        flex-shrink: 0; // Evita che si restringa
+        width: 50px;
+        height: 24px;
+        flex-shrink: 0;
 
         input {
             opacity: 0;
@@ -327,32 +326,33 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: var(--border-color-secondary); // Colore base quando spento
-        transition: .4s;
-        border-radius: 24px; // Per renderlo pillola
+        background-color: #6c757d; /* GRIGIO per lo stato 'spento' (colore hardcoded) */
+        transition: 0.4s;
+        border-radius: 24px;
 
         &:before {
             position: absolute;
-            content: "";
-            height: 18px; // Dimensione del pallino
-            width: 18px;  // Dimensione del pallino
-            left: 3px;    // Posizione iniziale del pallino
-            bottom: 3px;  // Posizione iniziale del pallino
-            background-color: white;
-            transition: .4s;
+            content: '';
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white; /* BIANCO per il pallino (colore hardcoded) */
+            transition: 0.4s;
             border-radius: 50%;
         }
     }
 
     input:checked + .slider {
-        background-color: var(--primary-color); // Colore quando attivo
+        background-color: #00bfa5; /* TEAL/VERDE per lo stato 'acceso' (colore hardcoded) */
     }
 
-    input:focus-visible + .slider { // Stile focus per accessibilità
-        box-shadow: 0 0 1px var(--primary-color), 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px var(--primary-color-focus);
+    input:focus-visible + .slider {
+        box-shadow: 0 0 1px #00bfa5, 0 0 0 2px var(--surface-bg-primary), 0 0 0 4px rgba(0, 191, 165, 0.5); /* Stile focus per accessibilità */
     }
 
     input:checked + .slider:before {
-        transform: translateX(26px); // Spostamento del pallino
+        transform: translateX(26px);
     }
+    // --- FINE SEZIONE CORRETTA ---
 }
