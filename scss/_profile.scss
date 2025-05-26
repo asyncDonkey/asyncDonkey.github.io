@@ -713,3 +713,47 @@ section#profile {
     background-color: var(--surface-bg-secondary);
     border-radius: 4px;
 }
+.section-header-interactive {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px; // Spazio tra l'header e il contenitore dei badge
+
+    h3 {
+        margin-bottom: 0; // Rimuove il margine da h3 perché gestito dal genitore
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .icon-button#badgesInfoBtn {
+        background-color: transparent;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        color: var(--text-color-muted);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        .material-symbols-rounded {
+            font-size: 24px;
+            transition: color 0.2s ease;
+        }
+
+        &:hover {
+            color: var(--link-color);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--link-color);
+            outline-offset: 2px;
+        }
+    }
+}
+
+#badgesSection h3 {
+    // Rimuoviamo il margin-bottom da qui ora che è gestito da .section-header-interactive
+    // Questo previene doppi margini nel caso l'header non venga usato altrove
+    margin-bottom: 0;
+}

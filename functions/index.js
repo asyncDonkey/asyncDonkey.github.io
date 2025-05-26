@@ -41,6 +41,9 @@ const BADGE_ID_ARTICLE_COMMENTER = 'article-commenter'; // Per 10 commenti su ar
 const BADGE_ID_GUESTBOOK_INTERACTIVE = 'guestbook-interactive'; // Per 15 commenti su guestbook
 const BADGE_ID_CONTENT_EXPLORER = 'content-explorer'; // Per commenti su 3 articoli diversi
 
+const BADGE_ID_ARTICLE_PATRON = 'article-patron'; // NUOVO: Per 5 like ad articoli diversi
+const BADGE_ID_EARLY_ADOPTER = 'early-adopter'; // NUOVO
+
 /**
 * Helper per recuperare i dettagli di un badge da Firestore.
 * Potremmo aggiungere un livello di cache qui in futuro se necessario.
@@ -502,4 +505,156 @@ exports.processUploadedAvatar = onObjectFinalized({ bucket: 'asyncdonkey.firebas
       logger.warn('processUploadedAvatar: Error deleting temporary files:', cleanupError);
     }
   }
+});
+
+// --- NUOVA FUNZIONE PER BADGE "MECENATE DEGLI ARTICOLI" ---
+exports.awardArticlePatronBadge = onDocumentUpdated("articles/{articleId}", async (event) => {
+    const functionName = 'awardArticlePatronBadge';
+    if (!event.data || !event.data.before || !event.data.after) {
+        logger.info(`[CF:${functionName}] Evento non valido o dati mancanti.`);
+        return;
+    }
+
+    const articleId = event.params.articleId;
+    const dataBefore = event.data.before.data();
+    const dataAfter = event.data.after.data();
+
+    const likedByBefore = dataBefore.likedByUsers || [];
+    const likedByAfter = dataAfter.likedByUsers || [];
+
+    const newLikers = likedByAfter.filter(userId => !likedByBefore.includes(userId));
+
+    if (newLikers.length === 0) {
+        return;
+    }
+
+    const badgeIdToAward = BADGE_ID_ARTICLE_PATRON;
+    const likeThreshold = 5; 
+
+    for (const userId of newLikers) {
+        if (!userId) continue;
+
+        const userProfileRef = db.collection("userProfiles").doc(userId);
+        try {
+            let badgeWasActuallyAwardedThisRun = false; 
+
+            await db.runTransaction(async (transaction) => {
+                const userProfileSnap = await transaction.get(userProfileRef);
+                if (!userProfileSnap.exists) {
+                    logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato.`);
+                    return;
+                }
+
+                const userProfile = userProfileSnap.data();
+                const earnedBadges = userProfile.earnedBadges || [];
+
+                if (earnedBadges.includes(badgeIdToAward)) {
+                    // L'utente ha già il badge. Potremmo comunque aggiornare likedArticleIds se non fosse una transazione di sola lettura per questo caso.
+                    // Per ora, se ha il badge, non facciamo nulla per mantenere semplice la logica del trigger.
+                    // Se volessimo tracciare comunque likedArticleIds, dovremmo togliere questo return
+                    // e fare l'update di likedArticleIds fuori dal check `if (newLikedArticlesSet.size >= likeThreshold)`.
+                    // Ma per ora, l'obiettivo è solo assegnare il badge la prima volta.
+                    return; 
+                }
+
+                // Calcola lo stato futuro di likedArticleIds
+                const currentLikedArticles = userProfile.likedArticleIds || [];
+                const newLikedArticlesSet = new Set(currentLikedArticles);
+                newLikedArticlesSet.add(articleId);
+
+                // Aggiornamenti base del profilo (sempre se l'utente non ha il badge)
+                const profileUpdates = {
+                    likedArticleIds: FieldValue.arrayUnion(articleId), // Aggiunge sempre l'articolo se l'utente non ha il badge
+                    updatedAt: FieldValue.serverTimestamp()
+                };
+
+                if (newLikedArticlesSet.size >= likeThreshold) {
+                    logger.info(`[CF:${functionName}] Utente ${userId} raggiunge soglia per badge '${badgeIdToAward}'.`);
+                    profileUpdates.earnedBadges = FieldValue.arrayUnion(badgeIdToAward);
+                    badgeWasActuallyAwardedThisRun = true; // Il badge sta per essere assegnato in questa transazione
+                }
+                
+                transaction.update(userProfileRef, profileUpdates);
+            });
+
+            // Post-transazione: Invia notifica solo se il badge è stato effettivamente aggiunto in questa esecuzione.
+            if (badgeWasActuallyAwardedThisRun) {
+                logger.info(`[CF:${functionName}] Transazione completata. Invio notifica per badge '${badgeIdToAward}' a utente ${userId}.`);
+                await sendNewBadgeNotification(userId, badgeIdToAward);
+            }
+
+        } catch (error) {
+            logger.error(`[CF:${functionName}] Errore durante la gestione del like per utente ${userId} e articolo ${articleId}:`, error);
+        }
+    }
+});
+// --- NUOVA FUNZIONE PER BADGE "EARLY ADOPTER" ---
+exports.awardEarlyAdopterBadge = onDocumentCreated("userProfiles/{userId}", async (event) => {
+    const functionName = 'awardEarlyAdopterBadge';
+    if (!event.data) {
+        logger.info(`[CF:${functionName}] Evento non valido o dati mancanti.`);
+        return;
+    }
+
+    const userData = event.data.data();
+    const userId = event.params.userId;
+
+    if (!userData.createdAt || !userId) {
+        logger.error(`[CF:${functionName}] Dati utente 'createdAt' o 'userId' mancanti per ${userId}.`, { userData });
+        return;
+    }
+
+    const createdAtTimestamp = userData.createdAt; // È già un Timestamp di Firestore
+    
+    // Definisci la data di lancio e la finestra di 3 mesi
+    // Data di lancio: 26 Maggio 2025 (00:00:00 UTC)
+    const launchDate = new Date(Date.UTC(2025, 4, 26, 0, 0, 0)); // Mesi sono 0-indicizzati (0=Gen, 4=Mag)
+    
+    const threeMonthsLater = new Date(launchDate.getTime());
+    threeMonthsLater.setUTCMonth(launchDate.getUTCMonth() + 3);
+    // Gestisci il caso in cui andando avanti di 3 mesi si superi la fine del mese (es. 30 Nov + 3 mesi -> 28/29 Feb)
+    // Se il giorno del mese originale era maggiore dell'ultimo giorno del mese di destinazione,
+    // Date.prototype.setMonth lo corregge automaticamente all'ultimo giorno del mese di destinazione.
+    // Per essere precisi sull'inclusione dell'ultimo giorno della finestra di 3 mesi, impostiamo l'ora alla fine del giorno.
+    threeMonthsLater.setUTCHours(23, 59, 59, 999);
+
+
+    const userRegistrationDate = createdAtTimestamp.toDate(); // Converti Timestamp Firestore in Date JS
+
+    const badgeIdToAward = BADGE_ID_EARLY_ADOPTER;
+
+    logger.info(`[CF:${functionName}] Controllo utente ${userId} (Registrato: ${userRegistrationDate.toISOString()}). Finestra Early Adopter: ${launchDate.toISOString()} - ${threeMonthsLater.toISOString()}`);
+
+    // Controlla se la data di registrazione rientra nella finestra
+    if (userRegistrationDate >= launchDate && userRegistrationDate <= threeMonthsLater) {
+        logger.info(`[CF:${functionName}] Utente ${userId} è idoneo per il badge '${badgeIdToAward}'.`);
+        
+        const userProfileRef = db.collection("userProfiles").doc(userId);
+        try {
+            // Non serve una transazione complessa qui perché stiamo solo aggiungendo un badge
+            // a un documento appena creato, e la condizione è già verificata.
+            // L'importante è assicurarsi che non venga aggiunto più volte se la funzione triggerasse per errore più volte.
+            const userProfileSnap = await userProfileRef.get(); // Rileggi per sicurezza, anche se è onCreate
+            if (userProfileSnap.exists) {
+                const userProfile = userProfileSnap.data();
+                const earnedBadges = userProfile.earnedBadges || [];
+                if (!earnedBadges.includes(badgeIdToAward)) {
+                    await userProfileRef.update({
+                        earnedBadges: FieldValue.arrayUnion(badgeIdToAward),
+                        updatedAt: FieldValue.serverTimestamp() // Aggiorna anche updatedAt
+                    });
+                    logger.info(`[CF:${functionName}] Badge '${badgeIdToAward}' assegnato a ${userId}. Invio notifica.`);
+                    await sendNewBadgeNotification(userId, badgeIdToAward);
+                } else {
+                    logger.info(`[CF:${functionName}] Utente ${userId} ha già il badge '${badgeIdToAward}' (improbabile su onCreate).`);
+                }
+            } else {
+                 logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato subito dopo la creazione (improbabile).`);
+            }
+        } catch (error) {
+            logger.error(`[CF:${functionName}] Errore durante l'assegnazione del badge '${badgeIdToAward}' a ${userId}:`, error);
+        }
+    } else {
+        logger.info(`[CF:${functionName}] Utente ${userId} non idoneo per il badge '${badgeIdToAward}'.`);
+    }
 });

@@ -447,6 +447,58 @@ a:hover {
           animation: synthwave-icon-glow 3s infinite linear;
 }
 
+@-webkit-keyframes gold-gb-sparkle-glow-effect {
+  0%, 100% {
+    color: #c8a04a;
+    text-shadow: 0 0 3px rgba(77, 34, 44, 0.6), 0 0 6px rgba(33, 11, 27, 0.4);
+  }
+  50% {
+    color: #f6f0b9;
+    text-shadow: 0 0 2px rgba(255, 255, 240, 0.95), 0 0 4px rgba(255, 255, 240, 0.8), 0 0 7px rgba(229, 210, 161, 0.9), 0 0 14px rgba(207, 171, 81, 0.7), 0 0 22px rgba(186, 147, 51, 0.5), 0 0 10px rgba(33, 11, 27, 0.6);
+  }
+}
+
+@keyframes gold-gb-sparkle-glow-effect {
+  0%, 100% {
+    color: #c8a04a;
+    text-shadow: 0 0 3px rgba(77, 34, 44, 0.6), 0 0 6px rgba(33, 11, 27, 0.4);
+  }
+  50% {
+    color: #f6f0b9;
+    text-shadow: 0 0 2px rgba(255, 255, 240, 0.95), 0 0 4px rgba(255, 255, 240, 0.8), 0 0 7px rgba(229, 210, 161, 0.9), 0 0 14px rgba(207, 171, 81, 0.7), 0 0 22px rgba(186, 147, 51, 0.5), 0 0 10px rgba(33, 11, 27, 0.6);
+  }
+}
+.gold-gb-early-glow {
+  -webkit-animation: gold-gb-sparkle-glow-effect 1.6s infinite ease-in-out;
+          animation: gold-gb-sparkle-glow-effect 1.6s infinite ease-in-out;
+}
+
+@-webkit-keyframes soda-cap-patron-glow-effect {
+  0%, 100% {
+    color: #ff7d6e;
+    text-shadow: 0 0 6px rgba(255, 79, 59, 0.6);
+  }
+  50% {
+    color: #ffc2bb;
+    text-shadow: 0 0 8px rgba(255, 216, 212, 0.9), 0 0 18px rgba(255, 125, 110, 0.7), 0 0 25px rgba(255, 239, 238, 0.5);
+  }
+}
+
+@keyframes soda-cap-patron-glow-effect {
+  0%, 100% {
+    color: #ff7d6e;
+    text-shadow: 0 0 6px rgba(255, 79, 59, 0.6);
+  }
+  50% {
+    color: #ffc2bb;
+    text-shadow: 0 0 8px rgba(255, 216, 212, 0.9), 0 0 18px rgba(255, 125, 110, 0.7), 0 0 25px rgba(255, 239, 238, 0.5);
+  }
+}
+.soda-cap-patron-glow {
+  -webkit-animation: soda-cap-patron-glow-effect 1.9s infinite ease-in-out;
+          animation: soda-cap-patron-glow-effect 1.9s infinite ease-in-out;
+}
+
 /* ===== Header Styles ===== */
 header {
   background-color: var(--surface-bg-primary);
@@ -3224,6 +3276,57 @@ section#profile h3 {
   border-radius: 4px;
 }
 
+.section-header-interactive {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-bottom: 15px;
+}
+.section-header-interactive h3 {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.section-header-interactive .icon-button#badgesInfoBtn {
+  background-color: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-color-muted);
+  border-radius: 50%;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+.section-header-interactive .icon-button#badgesInfoBtn .material-symbols-rounded {
+  font-size: 24px;
+  -webkit-transition: color 0.2s ease;
+  transition: color 0.2s ease;
+}
+.section-header-interactive .icon-button#badgesInfoBtn:hover {
+  color: var(--link-color);
+}
+.section-header-interactive .icon-button#badgesInfoBtn:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+#badgesSection h3 {
+  margin-bottom: 0;
+}
+
 /* _comments.scss - Stili per la sezione commenti */
 /* ===== Componenti Riutilizzabili (Form Commenti, Lista Commenti) ===== */
 /* Form Commenti (usato per Guestbook e Articoli) */
@@ -3634,6 +3737,98 @@ img.comment-avatar-img {
     font-size: 0.9em;
   }
 }
+/* Aggiungi questo alla fine del file */
+/* Stili per la Modale Informativa Generica */
+.modal.info-modal .modal-content {
+  max-width: 600px;
+  max-height: 80vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+.modal.info-modal .modal-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  border-bottom: 1px solid var(--border-color-secondary);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+.modal.info-modal .modal-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+.modal.info-modal .modal-header .close-modal-btn {
+  color: var(--text-color-muted);
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+}
+.modal.info-modal .modal-header .close-modal-btn:hover {
+  color: var(--text-color-primary);
+}
+.modal.info-modal .modal-body {
+  overflow-y: auto;
+  padding-right: 15px;
+}
+.modal.info-modal .badge-info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.modal.info-modal .badge-info-item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 15px;
+  padding: 12px 5px;
+  border-bottom: 1px solid var(--border-color-light);
+}
+.modal.info-modal .badge-info-item:last-child {
+  border-bottom: none;
+}
+.modal.info-modal .badge-info-item .badge-icon {
+  font-size: 2.5em;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  width: 40px;
+  text-align: center;
+}
+.modal.info-modal .badge-info-item .badge-details {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: 4px;
+}
+.modal.info-modal .badge-info-item .badge-details .badge-name {
+  font-weight: 600;
+  font-size: 1.05em;
+  color: var(--text-color-primary);
+}
+.modal.info-modal .badge-info-item .badge-details .badge-howto {
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+}
+
 /* ===== Donkey Runner Game Page Specific Styles ===== */
 /* body.donkey-runner-page è già definito con le variabili --game-* */
 .donkey-runner-page header .header-content h1 {

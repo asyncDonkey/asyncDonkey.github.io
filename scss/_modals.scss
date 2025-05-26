@@ -164,3 +164,90 @@
         font-size: 0.9em;
     }
 }
+
+/* Aggiungi questo alla fine del file */
+
+/* Stili per la Modale Informativa Generica */
+.modal.info-modal {
+    .modal-content {
+        max-width: 600px; // Un po' più larga per contenuti informativi
+        max-height: 80vh; // Limita l'altezza
+        display: flex;
+        flex-direction: column; // Per far funzionare lo scroll del corpo
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color-secondary);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+
+        h3 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .close-modal-btn {
+            // Usa lo stesso stile degli altri bottoni di chiusura
+            color: var(--text-color-muted);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+
+            &:hover {
+                color: var(--text-color-primary);
+            }
+        }
+    }
+
+    .modal-body {
+        overflow-y: auto; // Abilita lo scroll solo se il contenuto è troppo lungo
+        padding-right: 15px; // Per non sovrapporre la scrollbar al contenuto
+    }
+
+    .badge-info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .badge-info-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 5px;
+        border-bottom: 1px solid var(--border-color-light);
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        .badge-icon {
+            font-size: 2.5em;
+            flex-shrink: 0;
+            width: 40px;
+            text-align: center;
+        }
+
+        .badge-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .badge-name {
+                font-weight: 600;
+                font-size: 1.05em;
+                color: var(--text-color-primary);
+            }
+
+            .badge-howto {
+                font-size: 0.9em;
+                color: var(--text-color-secondary);
+                line-height: 1.5;
+            }
+        }
+    }
+}

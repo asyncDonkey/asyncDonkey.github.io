@@ -24,7 +24,7 @@ import {
 
 import { onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
-import { getAuthorIconHTML } from './uiUtils.js';
+import { getAuthorIconHTML, showInfoModal } from './uiUtils.js';
 import { escapeHTML } from './main.js';
 
 // --- RIFERIMENTI DOM ---
@@ -229,6 +229,70 @@ async function renderBadges(earnedBadgesArray = [], isOwnProfile) {
         }
     });
 }
+
+/**
+ * Gestisce l'apertura della modale informativa con tutti i badge.
+ */
+async function handleShowAllBadgesInfo() {
+    const badgesInfoBtn = document.getElementById('badgesInfoBtn');
+    if (badgesInfoBtn) {
+        badgesInfoBtn.disabled = true; // Previene doppi click
+    }
+
+    try {
+        const badgeDefinitions = await fetchAndCacheBadgeDefinitions();
+        if (!badgeDefinitions || Object.keys(badgeDefinitions).length === 0) {
+            showInfoModal('Informazioni Badge', '<p>Non è stato possibile caricare le informazioni sui badge.</p>');
+            return;
+        }
+
+        // Ordina i badge per nome per una visualizzazione più pulita
+        const sortedBadgeIds = Object.keys(badgeDefinitions).sort((a, b) => {
+            return (badgeDefinitions[a].name || '').localeCompare(badgeDefinitions[b].name || '');
+        });
+
+        let contentHtml = '<ul class="badge-info-list">';
+
+        for (const badgeId of sortedBadgeIds) {
+            const badge = badgeDefinitions[badgeId];
+            const iconClass = `material-symbols-rounded badge-icon ${badge.isAnimated && badge.animationClass ? badge.animationClass : ''}`;
+            const iconColor = badge.color || 'var(--text-color-primary)';
+            
+            contentHtml += `
+                <li class="badge-info-item">
+                    <span class="${iconClass}" style="color: ${iconColor};">${badge.icon}</span>
+                    <div class="badge-details">
+                        <span class="badge-name">${escapeHTML(badge.name)}</span>
+                        <span class="badge-howto">${escapeHTML(badge.howToEarn || badge.description)}</span>
+                    </div>
+                </li>
+            `;
+        }
+
+        contentHtml += '</ul>';
+        showInfoModal('Come Ottenere i Riconoscimenti', contentHtml);
+
+    } catch (error) {
+        console.error("Errore nel mostrare la modale informativa dei badge:", error);
+        showToast('Errore nel caricare le informazioni.', 'error');
+    } finally {
+        if (badgesInfoBtn) {
+            badgesInfoBtn.disabled = false;
+        }
+    }
+}
+
+
+// Dentro l'evento 'DOMContentLoaded', in fondo, aggiungi l'event listener.
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (tutto il codice esistente in DOMContentLoaded)
+
+    // Aggiunta del nuovo listener per l'icona info dei badge
+    const badgesInfoBtn = document.getElementById('badgesInfoBtn');
+    if (badgesInfoBtn) {
+        badgesInfoBtn.addEventListener('click', handleShowAllBadgesInfo);
+    }
+});
 
 /**
  * Apre la modale con i dettagli di un badge specifico.

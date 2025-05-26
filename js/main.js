@@ -174,8 +174,8 @@ function setupThemeSwitcher() {
         return;
     }
     const bodyElement = document.body;
-    const moonIconName = 'dark_mode';
-    const sunIconName = 'light_mode';
+    const moonIconName = 'nights_stay'; //dark_mode ex
+    const sunIconName = 'sunny'; //light_mode ex
     const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded');
 
     function applyTheme(theme) {

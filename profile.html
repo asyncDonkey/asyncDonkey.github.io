@@ -183,24 +183,29 @@
                 </div>
 
                 <div
-                    id="badgesSection"
-                    style="
-                        display: none;
-                        margin-bottom: 30px;
-                        padding-bottom: 20px;
-                        border-bottom: 1px dashed var(--border-color-secondary);
-                    "
-                >
-                    <h3>Riconoscimenti Ottenuti</h3>
-                    <div
-                        id="badgesDisplayContainer"
-                        style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px"
-                    >
-                        <p id="noBadgesMessage" style="color: var(--text-color-muted); display: none">
-                            Nessun riconoscimento ancora ottenuto.
-                        </p>
-                    </div>
-                </div>
+    id="badgesSection"
+    style="
+        display: none;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px dashed var(--border-color-secondary);
+    "
+>
+    <div class="section-header-interactive">
+        <h3>Riconoscimenti Ottenuti</h3>
+        <button id="badgesInfoBtn" class="icon-button" title="Come ottenere i riconoscimenti?">
+            <span class="material-symbols-rounded">help_outline</span>
+        </button>
+    </div>
+    <div
+        id="badgesDisplayContainer"
+        style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px"
+    >
+        <p id="noBadgesMessage" style="color: var(--text-color-muted); display: none">
+            Nessun riconoscimento ancora ottenuto.
+        </p>
+    </div>
+</div>
 
                 <div id="profileContent" style="display: none">
                     <div
