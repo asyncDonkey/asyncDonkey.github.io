@@ -354,6 +354,15 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         customizeNicknameBtn.style.display = isOwnProfile ? 'inline-flex' : 'none';
     }
 
+    const testZoneLink = document.getElementById('testZoneLink');
+    if (testZoneLink) { // Assicurati che l'elemento esista
+        if (isOwnProfile && data.isTestUser === true) {
+            testZoneLink.style.display = 'inline-flex'; // o 'inline-block' a seconda dello stile desiderato per l'icona
+        } else {
+            testZoneLink.style.display = 'none';
+        }
+    }
+
     if (profileNationalitySpan) {
         if (data.nationalityCode && data.nationalityCode !== 'OTHER') {
             const countryCodeOriginal = data.nationalityCode.toUpperCase();

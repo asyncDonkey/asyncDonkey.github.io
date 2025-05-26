@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Area Tester - asyncDonkey.io</title>
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
+    </head>
+    <body>
+        <header>
+            <div class="header-top-row">
+                <a href="index.html" style="text-decoration: none">
+                    <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
+                </a>
+                <nav class="desktop-nav">
+                    </nav>
+                <button class="navbar-toggler" id="navbarToggler" aria-label="Toggle Navigazione">
+                    <span class="material-symbols-rounded">menu</span>
+                </button>
+            </div>
+            <div class="header-controls">
+                <div id="authContainer"></div>
+                <div id="userProfileContainer" style="display: none;"></div>
+                <div class="header-action-buttons">
+                     <a href="profile.html" class="auth-button nav-link-icon-only" title="Vai al Profilo">
+                        <span class="material-symbols-rounded">account_circle</span>
+                     </a>
+                     <button id="themeToggleBtn" title="Toggle Tema" class="auth-button nav-link-icon-only">
+                        <span class="material-symbols-rounded">light_mode</span>
+                     </button>
+                </div>
+            </div>
+            <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true"></nav>
+        </header>
+
+        <main>
+            <section id="test-zone-section">
+                <h2><span class="material-symbols-rounded" style="vertical-align: bottom;">science</span> Area di Test</h2>
+
+                <div id="test-zone-loader" class="loader-container">
+                    <p>Verifica autorizzazione in corso...</p>
+                    <div class="loader"></div>
+                </div>
+
+                <div id="access-denied-message" class="info-section error" style="display: none;">
+                    <p><strong>Accesso Negato.</strong></p>
+                    <p>Questa area è riservata agli utenti tester autorizzati. Se credi di dover avere accesso, contatta un amministratore.</p>
+                    <a href="profile.html" class="underline-link">Torna al tuo profilo</a>
+                </div>
+
+                <div id="test-zone-content" style="display: none;">
+                    <p>Benvenuto, Tester. Grazie per il tuo contributo a rendere la piattaforma migliore. Qui di seguito trovi i task di test attualmente attivi.</p>
+                    
+                    <div id="test-tasks-list-container">
+                        <p>Caricamento task di test...</p>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>
+        </footer>
+
+        <div id="toast-container"></div>
+        <script>
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        </script>
+        <script src="js/main.js" type="module"></script>
+        <script src="js/test-zone.js" type="module"></script>
+    </body>
+</html>

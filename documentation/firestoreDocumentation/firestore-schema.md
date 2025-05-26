@@ -264,3 +264,19 @@ Consideriamo per ora una sottocollezione di `articles` per semplicità iniziale,
 _Nota: Aggiorneremo questa sezione man mano che le funzionalità KOD saranno ulteriormente definite._
 
 ---
+
+## 12. Sottocollezione: Risultati Test (`userProfiles/{userId}/testResults`)
+
+**(NUOVA COLLEZIONE)** Memorizza i risultati dei task di test completati da un utente `isTestUser`.
+
+**Percorso:** `/userProfiles/{userId}/testResults/{testResultId}`
+
+**Campi del Documento (`testResultId`):**
+
+| Campo       | Tipo      | Descrizione                                                     | Note e Vincoli                                   |
+| :---------- | :-------- | :-------------------------------------------------------------- | :----------------------------------------------- |
+| `taskId`      | string    | ID univoco del task di test a cui si riferisce il risultato.     | Obbligatorio.                                    |
+| `outcome`     | string    | Esito del test: 'success' o 'failure'.                        | Obbligatorio.                                    |
+| `comment`     | string    | Commento/feedback opzionale fornito dal tester.                 | Max ~2000 caratteri.                             |
+| `timestamp`   | timestamp | Data e ora di invio del risultato.                              | Impostato con `serverTimestamp()`.               |
+| `testerInfo`  | map       | (Opzionale) Info denormalizzate sul tester per analisi future. | Es. `{ nickname: 'TestUser1', userId: 'xyz' }`   |
