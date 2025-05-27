@@ -1245,3 +1245,136 @@ body.game-fullscreen-active main {
         }
     }
 }
+/* ===== Restyle Bottoni Donkey Runner (DR-STYLE-001) ===== */
+
+// Stile base per i bottoni di gioco JMP, SHT, e START mobile
+.donkey-runner-page .control-button,
+.donkey-runner-page #mobileStartButton {
+    font-family: 'Source Code Pro', monospace; // NUOVO FONT
+    background-color: #2c2137; // Viola scuro profondo
+    color: #a1ef8c; // Verde lime brillante
+    border: 3px solid #446176; // Blu-grigio acciaio, PIÙ SPESSO
+    padding: 12px 18px; // Padding per dare dimensione
+    font-size: 1.2em;   // Dimensione font per leggibilità
+    text-transform: uppercase;
+    border-radius: 5px; // Leggermente arrotondato
+    box-shadow: 3px 3px 0px #1a1423; // Ombra più scura e netta (derivata dal viola di sfondo)
+    transition: all 0.1s ease-out; // Transizione per tutti gli stati
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+    letter-spacing: 1px; // Un po' di respiro tra le lettere
+
+    &:hover {
+        background-color: #3b2d4a; // Viola leggermente più chiaro
+        color: #c4f0c2; // Verde ancora più brillante
+        box-shadow: 4px 4px 0px #3fac95; // Ombra teal verdastro in hover
+        transform: translate(-1px, -1px); // Leggero sollevamento
+    }
+
+    &:active {
+        background-color: #3fac95; // Teal verdastro quando premuto
+        color: #2c2137; // Testo viola scuro (invertito)
+        box-shadow: 1px 1px 0px #1a1423; // Ombra ridotta
+        transform: translate(2px, 2px); // Effetto "premuto" più marcato
+    }
+}
+
+// Specifiche per i bottoni JMP/SHT se necessario (ad es. dimensioni diverse)
+.donkey-runner-page .control-button {
+    flex-grow: 0; 
+    flex-basis: 45%; // Come prima per mantenere il layout a due
+    margin: 0 5px;
+    min-height: 60px; // Assicura un'altezza minima per la cliccabilità
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+@media (max-width: 480px) {
+    .donkey-runner-page .control-button {
+        padding: 10px 12px;
+        font-size: 1.1em; // Leggermente più piccolo su schermi ridotti
+        min-height: 50px;
+    }
+}
+
+
+// Stili specifici per #mobileStartButton (posizionamento e dimensione)
+.donkey-runner-page #mobileStartButton {
+    // display: none; // Gestito da JS (mantenuto da prima)
+    // position: absolute; // Mantenuto da prima
+    // top: 60%; // Mantenuto da prima
+    // left: 50%; // Mantenuto da prima
+    // transform: translate(-50%, -50%); // Mantenuto da prima
+    // z-index: 100; // Mantenuto da prima
+
+    padding: 15px 30px; // Padding specifico per il pulsante START
+    font-size: 1.6em;  // Font più grande per START
+    // Nota: le regole di posizionamento sono commentate qui perché dovrebbero già esistere
+    // nel tuo file. Se non ci sono, decommentale o assicurati che siano definite.
+}
+
+/* ===== Restyle Bottoni Form Punteggio (DR-STYLE-001) ===== */
+
+.donkey-runner-page #scoreInputContainerDonkey .score-buttons {
+    // Manteniamo il flex per allineare i bottoni
+    display: flex;
+    gap: 10px;
+    margin-top: 10px; // O il valore che preferisci
+
+    // Stile unificato per i bottoni Salva e Rigioca nel form del punteggio
+    #saveScoreBtnDonkey,
+    #restartGameBtnDonkey {
+        font-family: 'Source Code Pro', monospace; // NUOVO FONT
+        background-color: #2c2137; // Viola scuro profondo
+        color: #a1ef8c;           // Verde lime brillante
+        border: 2px solid #446176; // Blu-grigio acciaio (leggermente meno spesso dei control-button per differenziare)
+        padding: 10px 18px;      // Padding leggermente diverso per adattarsi al contesto del form
+        font-size: 0.95em;       // Dimensione font per leggibilità nel form
+        text-transform: uppercase;
+        border-radius: 5px;
+        box-shadow: 2px 2px 0px #1a1423; // Ombra più scura e netta
+        transition: all 0.1s ease-out;
+        user-select: none;
+        -webkit-user-select: none;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        min-width: 90px; // Larghezza minima per accomodare testo e icona
+        height: 42px;    // Altezza fissa per allineamento
+        display: inline-flex; // Per centrare l'icona o il testo
+        align-items: center;
+        justify-content: center;
+        margin: 0; // Rimuoviamo il margin individuale, gestito dal gap del parent
+
+        &:hover {
+            background-color: #3b2d4a; 
+            color: #c4f0c2; 
+            box-shadow: 3px 3px 0px #3fac95;
+            transform: translate(-1px, -1px);
+        }
+
+        &:active {
+            background-color: #3fac95; 
+            color: #2c2137; 
+            box-shadow: 1px 1px 0px #1a1423;
+            transform: translate(1px, 1px); // Leggermente meno "schiacciato" dei control-button
+        }
+
+        // Stile specifico per l'icona dentro il pulsante Rigioca
+        .material-symbols-rounded {
+            font-size: 20px; // Dimensione icona
+            // Non serve vertical-align con flex
+        }
+    }
+
+    // Se vuoi differenziare #saveScoreBtnDonkey (es. colore primario diverso)
+    // #saveScoreBtnDonkey {
+    //     // Esempio:
+    //     // background-color: #3fac95; 
+    //     // color: #1a1423;
+    //     // border-color: #2c2137;
+    //
+    //     // &:hover { ... }
+    //     // &:active { ... }
+    // }
+}
