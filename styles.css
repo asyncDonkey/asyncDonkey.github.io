@@ -5114,6 +5114,474 @@ body.game-fullscreen-active main {
   background-color: #1c1c1c;
 }
 
+/* Stili per le Schede Informative Espandibili (Accordion) */
+.donkey-runner-page .info-accordion-container {
+  width: 100%;
+  max-width: 700px;
+  margin: 30px auto;
+  border: 1px solid #0b8a8f;
+  border-radius: 6px;
+  background-color: #2c3034;
+  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.donkey-runner-page .accordion-item {
+  border-bottom: 1px solid #0b8a8f;
+}
+.donkey-runner-page .accordion-item:last-child {
+  border-bottom: none;
+}
+
+.donkey-runner-page .accordion-header {
+  background-color: #343a40;
+  color: #ecf0f1;
+  cursor: pointer;
+  padding: 15px 20px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  font-size: 1.1em;
+  font-family: "Source Code Pro", monospace;
+  -webkit-transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+.donkey-runner-page .accordion-header:hover {
+  background-color: #495057;
+}
+.donkey-runner-page .accordion-header.active {
+  background-color: #0eaf9b;
+  color: #1c1c1c;
+}
+.donkey-runner-page .accordion-header .accordion-icon {
+  -webkit-transition: -webkit-transform 0.3s ease;
+  transition: -webkit-transform 0.3s ease;
+  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, -webkit-transform 0.3s ease;
+}
+.donkey-runner-page .accordion-header.active .accordion-icon {
+  -webkit-transform: rotate(180deg);
+          transform: rotate(180deg);
+}
+
+.donkey-runner-page .accordion-panel {
+  padding: 0 20px;
+  background-color: #1c1e22;
+  max-height: 0;
+  overflow: hidden;
+  -webkit-transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+.donkey-runner-page .accordion-panel p {
+  color: #bdc3c7;
+  line-height: 1.6;
+  margin: 15px 0;
+}
+.donkey-runner-page .accordion-panel.open {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  border-top: 1px solid #0b8a8f;
+}
+
+.donkey-runner-page .tutorial-prompt {
+  color: #bdc3c7;
+  font-size: 1em;
+  margin: 0.5em 0;
+}
+.donkey-runner-page .tutorial-prompt a {
+  color: #30e1b9;
+  text-decoration: underline;
+  font-weight: bold;
+  cursor: pointer;
+}
+.donkey-runner-page .tutorial-prompt a:hover {
+  color: #89ffeb;
+}
+
+.donkey-runner-page .accordion-panel .tutorial-content .tutorial-intro {
+  background-color: #000000;
+  border: 1px solid #00ff00;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-family: "Source Code Pro", "Courier New", Courier, monospace;
+  -webkit-box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+          box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+}
+.donkey-runner-page .accordion-panel .tutorial-content .terminal-text {
+  color: #00ff00;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+  font-size: 0.95em;
+  white-space: pre-wrap;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .danger-text {
+  color: #ff0000;
+  font-weight: bold;
+  text-transform: uppercase;
+  -webkit-animation: blink-danger 1s infinite steps(1, end);
+          animation: blink-danger 1s infinite steps(1, end);
+}
+@-webkit-keyframes blink-danger {
+  0%, 100% {
+    color: #ff0000;
+  }
+  50% {
+    color: #8B0000;
+  }
+}
+@keyframes blink-danger {
+  0%, 100% {
+    color: #ff0000;
+  }
+  50% {
+    color: #8B0000;
+  }
+}
+.donkey-runner-page .accordion-panel .tutorial-content .status-ok {
+  color: #39ff14;
+  font-weight: bold;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .glitch-name {
+  color: #ff00ff;
+  font-weight: bold;
+  -webkit-animation: text-glitch 0.1s infinite alternate;
+          animation: text-glitch 0.1s infinite alternate;
+}
+@-webkit-keyframes text-glitch {
+  0% {
+    -webkit-transform: translate(0, 0);
+            transform: translate(0, 0);
+  }
+  25% {
+    -webkit-transform: translate(-1px, 1px);
+            transform: translate(-1px, 1px);
+  }
+  50% {
+    -webkit-transform: translate(1px, -1px);
+            transform: translate(1px, -1px);
+  }
+  75% {
+    -webkit-transform: translate(1px, 1px);
+            transform: translate(1px, 1px);
+  }
+  100% {
+    -webkit-transform: translate(-1px, -1px);
+            transform: translate(-1px, -1px);
+  }
+}
+@keyframes text-glitch {
+  0% {
+    -webkit-transform: translate(0, 0);
+            transform: translate(0, 0);
+  }
+  25% {
+    -webkit-transform: translate(-1px, 1px);
+            transform: translate(-1px, 1px);
+  }
+  50% {
+    -webkit-transform: translate(1px, -1px);
+            transform: translate(1px, -1px);
+  }
+  75% {
+    -webkit-transform: translate(1px, 1px);
+            transform: translate(1px, 1px);
+  }
+  100% {
+    -webkit-transform: translate(-1px, -1px);
+            transform: translate(-1px, -1px);
+  }
+}
+.donkey-runner-page .accordion-panel .tutorial-content .lore-text {
+  color: #00dd00;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px dashed #008000;
+  line-height: 1.6;
+}
+.donkey-runner-page .accordion-panel .tutorial-content h4 {
+  color: #0eaf9b;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed #34495e;
+  padding-bottom: 8px;
+  font-size: 1.1em;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .tutorial-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 20px;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .tutorial-list li {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  margin-bottom: 12px;
+  line-height: 1.5;
+  font-size: 0.95em;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .key-combo {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  margin-right: 12px;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .key-combo span:not(.key-icon) {
+  margin: 0 4px;
+  color: #868e96;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .key-icon {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding: 4px 8px;
+  border: 1px solid #495057;
+  border-radius: 4px;
+  background-color: #343a40;
+  color: #ecf0f1;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.9em;
+  min-width: 22px;
+  -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+          box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+.donkey-runner-page .accordion-panel .tutorial-content .key-icon.material-symbols-rounded {
+  font-size: 20px;
+  padding: 5px;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .action-desc {
+  color: #bdc3c7;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .action-desc strong {
+  color: #ffffff;
+  font-weight: 600;
+  margin-right: 5px;
+}
+.donkey-runner-page .accordion-panel .tutorial-content p {
+  color: #bdc3c7;
+  line-height: 1.6;
+  margin: 10px 0 15px 0;
+  font-size: 0.95em;
+}
+.donkey-runner-page .accordion-panel .tutorial-content em {
+  color: #adb5bd;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .glitchpedia-entry {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #343a40;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .glitchpedia-entry:last-child {
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  border-bottom: none;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .glitchpedia-entry .enemy-gif {
+  width: 64px;
+  height: 64px;
+  -o-object-fit: contain;
+     object-fit: contain;
+  margin-right: 15px;
+  border: 1px solid #495057;
+  border-radius: 4px;
+  background-color: #2c3034;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  -ms-interpolation-mode: nearest-neighbor;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: pixelated;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .glitchpedia-entry .enemy-info {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  color: #bdc3c7;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .glitchpedia-entry .enemy-info h5 {
+  color: #0eaf9b;
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.2em;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .glitchpedia-entry .enemy-info p {
+  margin-bottom: 6px;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .glitchpedia-entry .enemy-info p strong {
+  color: #ffffff;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .powerup-entry {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #343a40;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .powerup-entry:last-child {
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  border-bottom: none;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .powerup-entry .powerup-gif {
+  width: 48px;
+  height: 48px;
+  -o-object-fit: contain;
+     object-fit: contain;
+  margin-right: 15px;
+  border: 1px solid #495057;
+  border-radius: 4px;
+  background-color: #2c3034;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  -ms-interpolation-mode: nearest-neighbor;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: pixelated;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .powerup-entry .powerup-info {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  color: #bdc3c7;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .powerup-entry .powerup-info h5 {
+  color: #0eaf9b;
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.2em;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .powerup-entry .powerup-info p {
+  margin-bottom: 6px;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .powerup-entry .powerup-info p strong {
+  color: #ffffff;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .powerup-entry .powerup-info .inline-bullet-gif {
+  width: 24px;
+  height: auto;
+  vertical-align: middle;
+  margin: 0 3px;
+  -ms-interpolation-mode: nearest-neighbor;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: pixelated;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .boss-entry {
+  border-top: 2px solid #ff0000;
+  padding-top: 20px;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .boss-entry .boss-gif {
+  width: 96px;
+  height: 96px;
+  border-color: #ff0000;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .boss-entry .enemy-info h5 {
+  color: #ff0000;
+  font-size: 1.3em;
+}
+.donkey-runner-page .accordion-panel .tutorial-content .boss-entry .enemy-info .glitch-name {
+  color: #ff00ff;
+  font-weight: bold;
+  -webkit-animation: text-glitch 0.1s infinite alternate;
+          animation: text-glitch 0.1s infinite alternate;
+}
+
+/* Stili per il Prompt Orientamento/Fullscreen Mobile */
+.donkey-runner-page #orientationPrompt {
+  display: none;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 350px;
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #0eaf9b;
+  -webkit-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  z-index: 180;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 10px;
+}
+.donkey-runner-page #orientationPrompt .prompt-icon {
+  font-size: 36px;
+  color: #30e1b9;
+}
+.donkey-runner-page #orientationPrompt p {
+  margin: 0;
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+.donkey-runner-page #orientationPrompt #dismissOrientationPrompt {
+  background-color: #0eaf9b;
+  color: #1a1a1a;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 5px;
+  -webkit-transition: background-color 0.2s;
+  transition: background-color 0.2s;
+}
+.donkey-runner-page #orientationPrompt #dismissOrientationPrompt:hover {
+  background-color: #30e1b9;
+}
+
 #globalLeaderboardContainer {
   color: var(--text-color-secondary);
   background-color: var(--surface-bg-primary);

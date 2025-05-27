@@ -37,6 +37,11 @@ const MAX_LEADERBOARD_ENTRIES_MINI = 5;
 const creditsIconBtn = document.getElementById('creditsIconBtn');
 const creditsModal = document.getElementById('creditsModal');
 const closeCreditsModalBtn = document.getElementById('closeCreditsModalBtn');
+const accordionHeaders = document.querySelectorAll('.accordion-header');
+const scrollToTutorialLink = document.getElementById('scrollToTutorialLink');
+const orientationPromptEl = document.getElementById('orientationPrompt');
+const dismissOrientationPromptBtn = document.getElementById('dismissOrientationPrompt');
+
 
 function formatScoreTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp || typeof firebaseTimestamp.toDate !== 'function') {
@@ -54,6 +59,36 @@ function formatScoreTimestamp(firebaseTimestamp) {
         return 'Data errata';
     }
 }
+
+// --- Logica per il Prompt di Orientamento Mobile ---
+let orientationPromptDismissedSession = false;
+
+function checkAndDisplayOrientationPrompt() {
+    if (!orientationPromptEl || !isTouchDevice || orientationPromptDismissedSession) {
+        if(orientationPromptEl && orientationPromptEl.style.display !== 'none') { // Evita di settare display se già none
+             orientationPromptEl.style.display = 'none';
+        }
+        return;
+    }
+
+    const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+    // isFullscreenActive è una variabile globale che dovresti già avere,
+    // assicurati che sia aggiornata correttamente da handleFullscreenChange
+    // Se non è globale, passala come argomento o recuperala qui:
+    const isGameFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+
+
+    if (isPortrait && !isGameFullscreen) {
+        if (orientationPromptEl.style.display !== 'flex') { // Evita di settare display se già flex
+            orientationPromptEl.style.display = 'flex';
+        }
+    } else {
+        if (orientationPromptEl.style.display !== 'none') { // Evita di settare display se già none
+            orientationPromptEl.style.display = 'none';
+        }
+    }
+}
+// --- Fine Logica Prompt Orientamento ---
 
 async function loadDonkeyLeaderboard() {
     const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
@@ -623,6 +658,7 @@ async function loadAllAssets() {
         console.error('DB non pronto, impossibile caricare la leaderboard per DonkeyRunner.');
         if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Classifica non disponibile (DB error).</li>';
     }
+    checkAndDisplayOrientationPrompt();
 
     if (gameLoopRequestId === null && currentGameState === GAME_STATE.MENU) {
         console.log('Avvio game loop da loadAllAssets.');
@@ -2708,6 +2744,7 @@ function handleFullscreenChange() {
         }
         if (fullscreenButton) fullscreenButton.textContent = 'FULLSCREEN';
     }
+    checkAndDisplayOrientationPrompt();
 }
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -2812,6 +2849,78 @@ window.addEventListener('click', (event) => {
         creditsModal.style.display = 'none';
     }
 });
+
+// --- Logica per le Schede Informative Espandibili (Accordion) ---
+if (accordionHeaders.length > 0) {
+    accordionHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const currentlyActiveHeader = document.querySelector('.accordion-header.active');
+            if (currentlyActiveHeader && currentlyActiveHeader !== this) {
+                currentlyActiveHeader.classList.remove('active');
+                const activePanel = currentlyActiveHeader.nextElementSibling;
+                activePanel.style.maxHeight = null;
+                activePanel.classList.remove('open');
+            }
+
+            this.classList.toggle('active');
+            const panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+                panel.classList.remove('open');
+            } else {
+                panel.classList.add('open');
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    });
+}
+
+if (scrollToTutorialLink && accordionHeaders.length > 0) {
+    scrollToTutorialLink.addEventListener('click', function(event) {
+        event.preventDefault(); // Previene il comportamento di default del link anchor
+
+        const accordionContainer = document.getElementById('gameInfoAccordion');
+        if (accordionContainer) {
+            accordionContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Apri la prima scheda (Tutorial) se non è già aperta
+        const firstHeader = accordionHeaders[0];
+        const firstPanel = firstHeader.nextElementSibling;
+
+        if (!firstHeader.classList.contains('active')) {
+            // Chiudi eventuali altre schede aperte
+            const currentlyActiveHeader = document.querySelector('.accordion-header.active');
+            if (currentlyActiveHeader) {
+                currentlyActiveHeader.classList.remove('active');
+                const activePanel = currentlyActiveHeader.nextElementSibling;
+                activePanel.style.maxHeight = null;
+                activePanel.classList.remove('open');
+            }
+
+            // Apri la scheda tutorial
+            firstHeader.classList.add('active');
+            firstPanel.classList.add('open');
+            firstPanel.style.maxHeight = firstPanel.scrollHeight + "px";
+        }
+    });
+}
+
+// Event listener per il pulsante "Capito!" del prompt di orientamento
+if (dismissOrientationPromptBtn && orientationPromptEl) {
+    dismissOrientationPromptBtn.addEventListener('click', () => {
+        orientationPromptEl.style.display = 'none';
+        orientationPromptDismissedSession = true; 
+        console.log('Prompt orientamento chiuso dall utente per questa sessione.');
+    });
+}
+
+// Listener per il cambio di orientamento per il prompt
+if (window.matchMedia("(orientation: portrait)").addEventListener) {
+    window.matchMedia("(orientation: portrait)").addEventListener('change', checkAndDisplayOrientationPrompt);
+} else if (window.addEventListener) { // Fallback
+    window.addEventListener('orientationchange', checkAndDisplayOrientationPrompt);
+}
 
 window.addEventListener('keydown', (e) => {
     if (!resourcesInitialized) return;

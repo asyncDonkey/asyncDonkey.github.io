@@ -839,3 +839,409 @@ body.game-fullscreen-active main {
         background-color: #1c1c1c; // Sfondo leggermente diverso
     }
 }
+
+/* Stili per le Schede Informative Espandibili (Accordion) */
+.donkey-runner-page .info-accordion-container {
+    width: 100%;
+    max-width: 700px; // Stessa larghezza del guestbook per coerenza
+    margin: 30px auto;
+    border: 1px solid #0b8a8f; // Teal scuro per il bordo contenitore
+    border-radius: 6px;
+    background-color: #2c3034; // Uno sfondo scuro per il contenitore
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.donkey-runner-page .accordion-item {
+    border-bottom: 1px solid #0b8a8f; // Separatore tra item
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.donkey-runner-page .accordion-header {
+    background-color: #343a40; // Grigio scuro per l'header
+    color: #ecf0f1; // Testo chiaro
+    cursor: pointer;
+    padding: 15px 20px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    font-size: 1.1em;
+    font-family: 'Source Code Pro', monospace;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &:hover {
+        background-color: #495057; // Leggermente più chiaro in hover
+    }
+
+    &.active {
+        background-color: #0eaf9b; // Teal luminoso quando attivo
+        color: #1c1c1c; // Testo scuro quando attivo
+    }
+
+    .accordion-icon {
+        transition: transform 0.3s ease;
+    }
+
+    &.active .accordion-icon {
+        transform: rotate(180deg);
+    }
+}
+
+.donkey-runner-page .accordion-panel {
+    padding: 0 20px; // Padding solo laterale, il verticale lo dà il contenuto
+    background-color: #1c1e22; // Sfondo leggermente diverso per il pannello
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out; // Transizione fluida
+
+    p {
+        color: #bdc3c7; // Grigio chiaro per il testo interno
+        line-height: 1.6;
+        margin: 15px 0; // Aggiunge spazio verticale quando il pannello è aperto
+    }
+
+    &.open {
+        // max-height impostato da JS per adattarsi al contenuto
+        // Il padding verticale viene ripristinato qui per la transizione
+        padding-top: 15px;
+        padding-bottom: 15px;
+        border-top: 1px solid #0b8a8f; // Separatore visivo quando aperto
+    }
+}
+
+.donkey-runner-page .tutorial-prompt {
+    color: #bdc3c7; // Grigio chiaro
+    font-size: 1em;
+    margin: 0.5em 0;
+
+    a {
+        color: #30e1b9; // Teal brillante
+        text-decoration: underline;
+        font-weight: bold;
+        cursor: pointer;
+
+        &:hover {
+            color: #89ffeb; // Più brillante in hover
+        }
+    }
+}
+
+.donkey-runner-page .accordion-panel .tutorial-content {
+    .tutorial-intro {
+        background-color: #000000; // Sfondo nero per l'effetto terminale
+        border: 1px solid #00ff00; // Bordo verde brillante
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        font-family: 'Source Code Pro', 'Courier New', Courier, monospace;
+        box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+    }
+
+    .terminal-text {
+        color: #00ff00; // Colore testo verde brillante
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+        font-size: 0.95em; // Leggermente più piccolo per l'effetto terminale
+        white-space: pre-wrap; // Mantiene gli spazi, utile per simulare output
+    }
+
+    .danger-text {
+        color: #ff0000; // Rosso per il pericolo
+        font-weight: bold;
+        text-transform: uppercase;
+        animation: blink-danger 1s infinite steps(1, end);
+    }
+
+    @keyframes blink-danger {
+        0%, 100% { color: #ff0000; }
+        50% { color: #8B0000; } // Rosso più scuro per il lampeggio
+    }
+
+    .status-ok {
+        color: #39ff14; // Verde neon per status OK
+        font-weight: bold;
+    }
+
+    .glitch-name {
+        color: #ff00ff; // Magenta per il nome del glitch
+        font-weight: bold;
+        animation: text-glitch 0.1s infinite alternate;
+    }
+    
+    // Semplice animazione per il nome del glitch (opzionale, può essere più complessa)
+    @keyframes text-glitch {
+        0% { transform: translate(0,0); }
+        25% { transform: translate(-1px, 1px); }
+        50% { transform: translate(1px, -1px); }
+        75% { transform: translate(1px, 1px); }
+        100% { transform: translate(-1px, -1px); }
+    }
+
+    .lore-text {
+        color: #00dd00; // Un verde leggermente meno aggressivo per la lore
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px dashed #008000; // Separatore verde scuro
+        line-height: 1.6;
+    }
+
+    h4 {
+        color: #0eaf9b; // Teal per i sottotitoli
+        margin-top: 20px; // Aumentato un po' il margine superiore per staccare
+        margin-bottom: 10px; // Aumentato un po' il margine inferiore
+        border-bottom: 1px dashed #34495e;
+        padding-bottom: 8px; // Aumentato padding sotto il bordo
+        font-size: 1.1em; // Leggermente più grande
+    }
+
+    .tutorial-list { // Nuova classe per le liste del tutorial
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 20px; // Aumentato margine inferiore lista
+    }
+
+    .tutorial-list li {
+        display: flex; // Manteniamo flex per la riga principale
+        align-items: flex-start; // Allinea all'inizio per descrizioni lunghe
+        margin-bottom: 12px; // Aumentato spazio tra item
+        line-height: 1.5; // Migliora leggibilità generale
+        font-size: 0.95em; // Leggermente ridotto il font size base del testo descrittivo
+    }
+
+    .key-combo {
+        display: inline-flex; // Per allineare icone e slash
+        align-items: center;
+        margin-right: 12px; // Spazio tra key-combo e descrizione
+        flex-shrink: 0; // Non far restringere questo blocco
+        
+        span:not(.key-icon) { // Stile per lo slash "/" o altri testi non-icona
+            margin: 0 4px;
+            color: #868e96; // Grigio per lo slash
+        }
+    }
+
+    .key-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 8px; // Leggermente più padding
+        border: 1px solid #495057;
+        border-radius: 4px;
+        background-color: #343a40;
+        color: #ecf0f1;
+        font-family: 'Source Code Pro', monospace;
+        font-size: 0.9em; // Font per testo tasti
+        min-width: 22px; 
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+
+        &.material-symbols-rounded {
+            font-size: 20px; 
+            padding: 5px; 
+        }
+    }
+    
+    .action-desc {
+        color: #bdc3c7; // Colore base per la descrizione
+        flex-grow: 1; // Permette alla descrizione di usare lo spazio rimanente
+
+        strong { // "Salta:", "Spara:", etc.
+            color: #ffffff; 
+            font-weight: 600; // Già impostato, ma per chiarezza
+            margin-right: 5px; // Spazio dopo i due punti (se presenti nel testo)
+        }
+    }
+
+    p { 
+        color: #bdc3c7;
+        line-height: 1.6;
+        margin: 10px 0 15px 0;
+        font-size: 0.95em; // Applicato anche ai paragrafi generali
+    }
+
+    em { 
+        color: #adb5bd;
+    }
+.glitchpedia-entry {
+        display: flex;
+        align-items: flex-start; // Allinea l'immagine e il testo in alto
+        margin-bottom: 25px; // Spazio tra le voci
+        padding-bottom: 15px; // Padding sotto ogni voce
+        border-bottom: 1px dashed #343a40; // Separatore leggero
+
+        &:last-child {
+            margin-bottom: 5px; // Riduci margine per l'ultima voce
+            padding-bottom: 5px;
+            border-bottom: none;
+        }
+
+        .enemy-gif {
+            width: 64px; // Dimensione standard per le GIF dei nemici
+            height: 64px;
+            object-fit: contain; // Assicura che l'immagine si adatti senza distorsioni
+            margin-right: 15px;
+            border: 1px solid #495057; // Piccolo bordo per le GIF
+            border-radius: 4px;
+            background-color: #2c3034; // Sfondo per le gif se trasparenti
+            flex-shrink: 0; // Non far restringere l'immagine
+            image-rendering: pixelated; // Mantiene lo stile pixel-art
+        }
+
+        .enemy-info {
+            flex-grow: 1;
+            color: #bdc3c7; // Testo grigio chiaro
+
+            h5 {
+                color: #0eaf9b; // Teal per il nome del nemico
+                margin-top: 0;
+                margin-bottom: 8px;
+                font-size: 1.2em; // Nome nemico più grande
+            }
+
+            p {
+                margin-bottom: 6px;
+                font-size: 0.9em; // Testo descrittivo leggermente più piccolo
+                line-height: 1.5;
+
+                strong {
+                    color: #ffffff; // Bianco per evidenziare
+                }
+            }
+        }
+    }
+.powerup-entry {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #343a40;
+
+        &:last-child {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: none;
+        }
+
+        .powerup-gif {
+            width: 48px; // Leggermente più piccoli degli sprite dei nemici
+            height: 48px;
+            object-fit: contain;
+            margin-right: 15px;
+            border: 1px solid #495057;
+            border-radius: 4px;
+            background-color: #2c3034;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .powerup-info {
+            flex-grow: 1;
+            color: #bdc3c7;
+
+            h5 {
+                color: #0eaf9b; // Teal
+                margin-top: 0;
+                margin-bottom: 8px;
+                font-size: 1.2em;
+            }
+
+            p {
+                margin-bottom: 6px;
+                font-size: 0.9em;
+                line-height: 1.5;
+
+                strong {
+                    color: #ffffff;
+                }
+            }
+            
+            .inline-bullet-gif {
+                width: 24px; // Più piccolo per adattarsi al testo
+                height: auto;
+                vertical-align: middle; // Allinea bene con il testo
+                margin: 0 3px;
+                image-rendering: pixelated;
+            }
+        }
+    }
+.boss-entry {
+        border-top: 2px solid #ff0000; // Un bordo rosso per segnalare il boss
+        padding-top: 20px; // Più spazio sopra
+
+        .boss-gif {
+            width: 96px; // GIF più grande per il boss
+            height: 96px;
+            border-color: #ff0000; // Bordo rosso anche per la gif del boss
+        }
+
+        .enemy-info h5 {
+            color: #ff0000; // Nome del boss in rosso
+            font-size: 1.3em; // Nome più grande
+        }
+        
+        .enemy-info .glitch-name { 
+            // Riprendiamo l'animazione glitch per il nome del boss anche qui
+            color: #ff00ff;
+            font-weight: bold;
+            animation: text-glitch 0.1s infinite alternate;
+        }
+    }
+}
+
+/* Stili per il Prompt Orientamento/Fullscreen Mobile */
+.donkey-runner-page #orientationPrompt {
+    display: none; // Controllato da JS
+    position: absolute;
+    bottom: 20px; // Posizionato in basso, sopra i controlli mobili se visibili
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px); // Larghezza quasi totale con un po' di margine
+    max-width: 350px; // Limite per non essere troppo largo
+    background-color: #2c3e50; // Sfondo scuro, simile ad altri elementi UI
+    color: #ecf0f1; // Testo chiaro
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #0eaf9b; // Bordo teal
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    z-index: 180; // Sopra il canvas, ma sotto il form del punteggio o modali principali
+    display: flex; // Per allineare icona e testo
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    .prompt-icon {
+        font-size: 36px;
+        color: #30e1b9; // Icona teal brillante
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.95em;
+        line-height: 1.4;
+    }
+
+    // Stile per il pulsante "Capito!" (riutilizziamo/adattiamo uno stile esistente se possibile)
+    #dismissOrientationPrompt {
+        background-color: #0eaf9b;
+        color: #1a1a1a;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 0.9em;
+        font-weight: 500;
+        cursor: pointer;
+        text-transform: uppercase;
+        margin-top: 5px; // Un po' di spazio sopra il pulsante
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: #30e1b9;
+        }
+    }
+}
