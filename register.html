@@ -210,26 +210,26 @@
                     <hr style="margin: 25px 0" />
 
                     <div>
-                        <label for="registerNickname">Nickname<span class="required-indicator">*</span></label>
-                        <input
-                            type="text"
-                            id="registerNickname"
-                            name="registerNickname"
-                            required
-                            minlength="3"
-                            maxlength="25"
-                        />
-                        <div class="info-section">
-                            <p>
-                                Scegli con cura il tuo Nickname. Sarà il tuo identificativo pubblico sul sito.
-                                <strong>Per il momento, non potrà essere modificato</strong> dopo la registrazione.
-                            </p>
-                            <p style="font-size: 0.9em; color: var(--text-color-muted)">
-                                (Consentiti lettere, numeri, underscore, punto, trattino)
-                            </p>
-                        </div>
-                        <div id="nicknameError" class="error-message"></div>
-                    </div>
+    <label for="registerNickname">Nickname<span class="required-indicator">*</span></label>
+    <input
+        type="text"
+        id="registerNickname"
+        name="registerNickname"
+        required
+        minlength="3"
+        maxlength="25"
+    />
+    <div class="info-section">
+        <p>
+            Scegli con cura il tuo Nickname. Sarà il tuo identificativo pubblico sul sito.
+            <strong>Nota:</strong> Il tuo nickname è quasi immutabile, ma abbiamo previsto una finestra di modifica. Puoi inoltrare una richiesta di cambio a un amministratore una volta ogni 90 giorni. Consideralo un ciclo di deploy per il tuo nuovo nome!
+        </p>
+        <p style="font-size: 0.9em; color: var(--text-color-muted)">
+            (Consentiti lettere, numeri, underscore, punto, trattino)
+        </p>
+    </div>
+    <div id="nicknameError" class="error-message"></div>
+</div>
 
                     <div>
                         <label for="registerNationality">Nazionalità<span class="required-indicator">*</span></label>

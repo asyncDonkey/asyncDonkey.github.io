@@ -382,6 +382,24 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
         }
     }
 
+    // Aggiunto per mostrare la data di registrazione
+const registrationDateSpan = document.getElementById('registrationDate');
+if (registrationDateSpan) {
+    // La data di creazione è un dato privato di Auth, la mostriamo solo al proprietario del profilo.
+    if (isOwnProfile && loggedInUser && loggedInUser.metadata.creationTime) {
+        registrationDateSpan.textContent = new Date(loggedInUser.metadata.creationTime).toLocaleDateString('it-IT', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+        // Assicuriamoci che il paragrafo contenitore sia visibile
+        if(registrationDateSpan.parentElement) registrationDateSpan.parentElement.style.display = 'block';
+    } else {
+        // Se non siamo sul nostro profilo o il dato non è disponibile, nascondiamo l'intera riga.
+        if(registrationDateSpan.parentElement) registrationDateSpan.parentElement.style.display = 'none';
+    }
+}
+
     if (profileAvatarImg) {
         let avatarSrcToSet;
         let altText = `${profileNameForTitle}'s Avatar`;
