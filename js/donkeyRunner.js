@@ -34,6 +34,9 @@ const PALETTE = {
 
 const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
 const MAX_LEADERBOARD_ENTRIES_MINI = 5;
+const creditsIconBtn = document.getElementById('creditsIconBtn');
+const creditsModal = document.getElementById('creditsModal');
+const closeCreditsModalBtn = document.getElementById('closeCreditsModalBtn');
 
 function formatScoreTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp || typeof firebaseTimestamp.toDate !== 'function') {
@@ -2768,6 +2771,8 @@ if (restartGameBtnDonkey) {
         AudioManager.playMusic(false);
     });
 }
+
+
 // NUOVO Event Listener per il pulsante Start/Restart mobile
 if (mobileStartButton) {
     mobileStartButton.addEventListener('click', (e) => {
@@ -2786,6 +2791,27 @@ if (mobileStartButton) {
         }
     });
 }
+
+// --- Event Listeners per la Modale Crediti ---
+
+if (creditsIconBtn && creditsModal) {
+    creditsIconBtn.addEventListener('click', () => {
+        creditsModal.style.display = 'block';
+    });
+}
+
+if (closeCreditsModalBtn && creditsModal) {
+    closeCreditsModalBtn.addEventListener('click', () => {
+        creditsModal.style.display = 'none';
+    });
+}
+
+// Chiudi la modale se si clicca fuori dal contenuto
+window.addEventListener('click', (event) => {
+    if (event.target == creditsModal) {
+        creditsModal.style.display = 'none';
+    }
+});
 
 window.addEventListener('keydown', (e) => {
     if (!resourcesInitialized) return;

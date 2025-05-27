@@ -4961,6 +4961,159 @@ body.game-fullscreen-active main {
     height: 24px;
   }
 }
+/* Stili per la modale dei crediti e l'icona */
+@-webkit-keyframes pulse-glow {
+  0% {
+    -webkit-box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+            box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  50% {
+    -webkit-box-shadow: 0 0 10px rgba(14, 239, 185, 0.8);
+            box-shadow: 0 0 10px rgba(14, 239, 185, 0.8);
+    -webkit-transform: scale(1.05);
+            transform: scale(1.05);
+  }
+  100% {
+    -webkit-box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+            box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+@keyframes pulse-glow {
+  0% {
+    -webkit-box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+            box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+  50% {
+    -webkit-box-shadow: 0 0 10px rgba(14, 239, 185, 0.8);
+            box-shadow: 0 0 10px rgba(14, 239, 185, 0.8);
+    -webkit-transform: scale(1.05);
+            transform: scale(1.05);
+  }
+  100% {
+    -webkit-box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+            box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+}
+.donkey-runner-page .game-instructions-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  text-align: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.donkey-runner-page .instructions-text p {
+  margin: 0.2em 0;
+  color: #bdc3c7;
+  font-size: 0.9em;
+}
+
+.donkey-runner-page #creditsIconBtn {
+  background-color: transparent;
+  color: #0eaf9b;
+  border: 2px solid #0b8a8f;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  cursor: pointer;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  -webkit-animation: pulse-glow 3s infinite ease-in-out;
+          animation: pulse-glow 3s infinite ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+.donkey-runner-page #creditsIconBtn .material-symbols-rounded {
+  font-size: 24px;
+}
+.donkey-runner-page #creditsIconBtn:hover {
+  background-color: #0eaf9b;
+  color: #1c1c1c;
+  border-color: #30e1b9;
+  -webkit-transform: scale(1.1);
+          transform: scale(1.1);
+  -webkit-animation-play-state: paused;
+          animation-play-state: paused;
+}
+
+#creditsModal .modal-content h3 {
+  color: #0eaf9b;
+  margin-top: 0;
+  border-bottom: 1px solid #34495e;
+  padding-bottom: 10px;
+}
+#creditsModal .modal-content p {
+  line-height: 1.6;
+}
+#creditsModal .modal-content .credits-gif {
+  display: block;
+  margin: 5px auto 15px auto;
+  width: 72px;
+  height: auto;
+  -ms-interpolation-mode: nearest-neighbor;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: pixelated;
+}
+#creditsModal .modal-content .credits-section, #creditsModal .modal-content .license-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+#creditsModal .modal-content .credits-text {
+  font-size: 1.1em;
+  line-height: 1.5;
+  color: #34495e;
+}
+#creditsModal .modal-content .credits-text strong {
+  color: #000000;
+  font-weight: 600;
+}
+#creditsModal .modal-content .credits-text a {
+  color: #008f8a;
+  text-decoration: none;
+  font-weight: bold;
+}
+#creditsModal .modal-content .credits-text a:hover {
+  text-decoration: underline;
+}
+#creditsModal .modal-content #licenseTextContainer {
+  font-size: 0.9em;
+  color: #bdc3c7;
+  text-align: left;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #34495e;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: #1c1c1c;
+}
+
 #globalLeaderboardContainer {
   color: var(--text-color-secondary);
   background-color: var(--surface-bg-primary);

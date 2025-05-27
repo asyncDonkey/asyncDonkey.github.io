@@ -715,3 +715,127 @@ body.game-fullscreen-active main {
         height: 24px;
     }
 }
+
+/* Stili per la modale dei crediti e l'icona */
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(14, 239, 185, 0.8);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+        transform: scale(1);
+    }
+}
+
+.donkey-runner-page .game-instructions-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+    flex-wrap: wrap; // Per andare a capo su schermi piccoli
+}
+
+.donkey-runner-page .instructions-text p {
+    margin: 0.2em 0; // Riduci il margine verticale tra i paragrafi delle istruzioni
+    color: #bdc3c7; // Un grigio chiaro per le istruzioni
+    font-size: 0.9em;
+}
+
+.donkey-runner-page #creditsIconBtn {
+    background-color: transparent;
+    color: #0eaf9b; // Colore icona Teal luminoso
+    border: 2px solid #0b8a8f;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0; // Impedisce al pulsante di rimpicciolirsi
+    animation: pulse-glow 3s infinite ease-in-out;
+    transition: all 0.2s ease-in-out;
+
+    .material-symbols-rounded {
+        font-size: 24px;
+    }
+
+    &:hover {
+        background-color: #0eaf9b;
+        color: #1c1c1c; // Colore testo scuro su hover
+        border-color: #30e1b9;
+        transform: scale(1.1);
+        animation-play-state: paused;
+    }
+}
+
+// Stile per la modale (rimane valido)
+#creditsModal .modal-content {
+    h3 {
+        color: #0eaf9b; 
+        margin-top: 0;
+        border-bottom: 1px solid #34495e;
+        padding-bottom: 10px;
+    }
+
+    p {
+        line-height: 1.6;
+    }
+    .credits-gif {
+        display: block;
+        margin: 5px auto 15px auto;
+        width: 72px; // Dimensione adatta per una piccola animazione
+        height: auto;
+        image-rendering: pixelated; // Mantiene lo stile pixel-art se presente
+    }
+
+    .credits-section, .license-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .credits-text {
+    font-size: 1.1em;
+    line-height: 1.5;
+    // --- FIX ---
+    color: #34495e; // << CAMBIATO da #ecf0f1 a un grigio-blu scuro
+
+    strong {
+        // --- FIX ---
+        color: #000000; // << CAMBIATO da #ffffff a nero per massimo risalto
+        font-weight: 600;
+    }
+
+    a {
+        color: #008f8a; // << Leggermente scurito per un miglior contrasto su sfondo chiaro
+        text-decoration: none;
+        font-weight: bold;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+    
+    // Stile per il contenitore della licenza
+    #licenseTextContainer {
+        font-size: 0.9em;
+        color: #bdc3c7; // Grigio più chiaro per il testo legale
+        text-align: left;
+        max-height: 150px; // Altezza massima con scroll se il testo è lungo
+        overflow-y: auto;
+        border: 1px solid #34495e;
+        padding: 10px;
+        border-radius: 4px;
+        background-color: #1c1c1c; // Sfondo leggermente diverso
+    }
+}
