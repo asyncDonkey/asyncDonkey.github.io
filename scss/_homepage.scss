@@ -514,3 +514,140 @@
         max-width: none;
     }
 }
+// COPIA E INCOLLA QUESTO BLOCCO IN scss/_homepage.scss
+
+// ---- NUOVA SEZIONE ARTICOLI IBRIDA ----
+
+#articlesSection {
+    // Nascondiamo il link "Vedi tutti" se non ci sono articoli nel contenitore
+    &:has(:not(p)) .view-all-articles-container { // se ha qualcosa che non sia il paragrafo di loading
+        display: block;
+    }
+}
+
+// Stile per il container principale
+#articlesContainer {
+    padding: 0 5vw 1.5rem 5vw; // Padding laterale per vedere le card vicine
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; // Scrolling fluido per iOS
+    
+    // Nasconde la scrollbar per un look più pulito
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    scrollbar-width: none; // Per Firefox
+}
+
+// Stile per il link "Vedi tutti gli articoli"
+.view-all-articles-container {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    display: none; // Nascosto di default, mostrato da JS o CSS se ci sono articoli
+}
+
+// Stile per il bottone (se non hai già una classe .cta-button globale)
+.cta-button {
+    display: inline-block;
+    background-color: var(--link-color);
+    color: var(--button-text-primary);
+    padding: 12px 30px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--link-hover-color);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+}
+
+
+// Stile per le card all'interno del container
+.article-card {
+    flex: 0 0 85%; // Su mobile, ogni card occupa l'85% dello schermo
+    scroll-snap-align: center; // La card si centra quando si scorre
+    margin-right: 15px;
+
+    &:last-child {
+        margin-right: 0;
+    }
+
+    // Contenitore per il solo testo, per un miglior controllo del flex
+    .article-card-text-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; // Fa sì che questo contenitore riempia lo spazio della card
+        padding: 20px;
+    }
+
+    // Per la card normale, il padding è nel wrapper del testo
+    &:not(.is-featured) {
+        .article-card-text-content {
+             padding: 20px;
+        }
+    }
+    // Per la featured, il padding è azzerato perché lo gestiamo diversamente
+    &.is-featured {
+         .article-card-text-content {
+             padding: 0 20px 20px 20px;
+         }
+    }
+}
+
+// Gestione Immagini di Copertina
+.article-card .article-card-cover-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block; // Visibile di default
+}
+
+// Nascondi l'immagine sulle card NON in evidenza
+.article-card:not(.is-featured) .article-card-cover-image {
+    display: none;
+}
+
+// ----- MEDIA QUERY PER DESKTOP (Layout a Griglia) -----
+// ----- MEDIA QUERY PER DESKTOP (Layout a Griglia) - VERSIONE CORRETTA -----
+@media (min-width: 768px) {
+    #articlesContainer {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 25px;
+        overflow-x: visible;
+        padding: 0;
+
+        // REGOLA NIDIFICATA: si applica solo alle .article-card dentro #articlesContainer
+        .article-card {
+            flex: 1 1 auto; // Resetta le proprietà flex del carosello
+            margin-right: 0; // Rimuove il margine del carosello
+
+            // Stile per la card in evidenza QUANDO è in griglia
+            &.is-featured {
+                grid-column: 1 / -1;
+                display: flex; 
+                flex-direction: row;
+                align-items: center;
+                padding: 0; // Rimuoviamo padding dalla card genitore
+
+                .article-card-cover-image {
+                    flex: 0 0 45%;
+                    height: 300px;
+                    border-radius: 8px 0 0 8px; // Arrotonda solo gli angoli a sinistra
+                }
+
+                .article-card-text-content {
+                    flex: 1 1 55%;
+                    padding: 2rem;
+                }
+            }
+        }
+    }
+}

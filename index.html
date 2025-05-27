@@ -380,31 +380,28 @@
             </div>
 
             <div class="portal-card">
-                <span class="material-symbols-rounded card-icon" aria-label="Icona Guestbook">edit_note</span>
-                <h3>Guestbook Generale</h3>
-                <p>Lascia un saluto o un commento generale sul sito e sui progetti.</p>
-                <a href="about.html#guestbook" class="btn-portal">Visita Guestbook</a>
-            </div>
+            <span class="material-symbols-rounded card-icon" aria-label="Icona Guestbook">edit_note</span>
+            <h3>Guestbook Generale</h3>
+            <p>Lascia un saluto o un commento generale sul sito e sui progetti.</p>
+            <a href="about.html#guestbook" class="btn-portal">Visita Guestbook</a>
+        </div>
 
-            <div class="portal-card" id="featuredArticleCard" style="display:none;">
-                <span class="material-symbols-rounded card-icon" aria-label="Icona Articolo">article</span>
-                
-                <h3 id="featuredArticleTitle">Articolo in Evidenza</h3> 
-                <div id="featuredArticleAuthorInfo"> <img id="featuredArticleAuthorAvatar" src="" alt="Avatar autore" style="width:32px; height:32px; border-radius:50%;">
-    <span id="featuredArticleAuthorName"></span>
-</div>
-                <span id="featuredArticleActualTitle" style="display: block; font-weight: bold; margin-bottom: 10px; font-size: 1.2em; color: var(--text-color-primary);">Caricamento titolo...</span> <p id="featuredArticleSnippet">Dai un'occhiata agli ultimi approfondimenti e aggiornamenti...</p>
-                <a href="#articlesSection" id="featuredArticleLink" class="btn-portal">Leggi di più</a>
-            </div>
+    </div> <section id="articlesSection" style="display: none;">
+        <div class="portal-header">
+            <h2>Articoli Tecnici & Updates</h2>
+            <p>Approfondimenti su sviluppo, progetti ed esplorazioni tecnologiche.</p>
+        </div>
 
-        <section id="articlesSection"> <div class="portal-header"> <h2>Articoli Tecnici & Updates</h2>
-                <p>Approfondimenti su sviluppo, progetti ed esplorazioni tecnologiche.</p>
-            </div>
-            <div id="articlesGrid" class="portal-grid">
-                <p style="text-align:center; color:var(--text-color-muted); grid-column: 1 / -1;">Caricamento articoli...</p>
-            </div>
-        </section>
-    </main>
+        <div id="articlesContainer">
+            <p style="text-align:center; color:var(--text-color-muted); padding: 0 5%;">Caricamento articoli...</p>
+        </div>
+
+        <div class="view-all-articles-container">
+            <a href="articles.html" class="cta-button">Vedi tutti gli articoli</a>
+        </div>
+    </section>
+
+</main>
 
     <footer>
     <p>&copy; <span id="currentYear"></span> asyncDonkey.io.</p>
