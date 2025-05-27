@@ -358,3 +358,24 @@
     }
     // --- FINE SEZIONE CORRETTA ---
 }
+
+
+#avatarConfirmationModal .progress-bar-container {
+    background-color: #f0f0f0; 
+    border-radius: 4px;
+    padding: 2px;  // 2px sopra e 2px sotto la barra interna
+    height: 24px;  // Altezza totale per contenere una barra da 20px + 4px di padding verticale
+    box-sizing: border-box; 
+    // display: flex; /* Rimosso temporaneamente */
+    // align-items: center; /* Rimosso temporaneamente */
+}
+
+// Barra di riempimento effettiva (invariata rispetto al tuo ultimo aggiornamento)
+#avatarConfirmationModal #avatarUploadProgressBar.progress-bar-fill {
+    display: block; 
+    height: 20px;   
+    background-color: #00e0b0; 
+    width: 0%;
+    border-radius: 2px; 
+    transition: width 0.4s ease-out;
+}

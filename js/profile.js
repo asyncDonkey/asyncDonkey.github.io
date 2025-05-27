@@ -1371,12 +1371,27 @@ async function handleConfirmAvatarUpload() {
         return showToast('Nessun file selezionato o utente non loggato.', 'warning');
     }
     if (modalConfirmUploadBtn) modalConfirmUploadBtn.disabled = true;
-    if (modalCancelUploadBtn) modalCancelUploadBtn.disabled = true;
-    if (avatarUploadProgressContainer) avatarUploadProgressContainer.style.display = 'block';
-    if (avatarUploadProgressBar) avatarUploadProgressBar.style.width = '0%';
-    if (avatarUploadProgressText) avatarUploadProgressText.textContent = '0%';
-    if (modalAvatarStatus) modalAvatarStatus.textContent = 'Caricamento in corso...';
-    const fileExtension = selectedAvatarFile.name.split('.').pop().toLowerCase();
+if (modalCancelUploadBtn) modalCancelUploadBtn.disabled = true;
+
+if (avatarUploadProgressContainer) {
+    avatarUploadProgressContainer.style.display = 'block'; // Make container visible
+}
+if (avatarUploadProgressBar) {
+    avatarUploadProgressBar.style.width = '0%'; // Set initial width
+}
+if (avatarUploadProgressText) {
+    avatarUploadProgressText.textContent = '0%'; // Set initial text
+}
+
+// === NUOVA RIGA PER FORZARE IL REFLOW ===
+if (avatarUploadProgressBar) {
+    void avatarUploadProgressBar.offsetWidth; // Leggere una proprietà come offsetWidth forza il reflow
+}
+// === FINE NUOVA RIGA ===
+
+if (modalAvatarStatus) modalAvatarStatus.textContent = 'Caricamento in corso...';
+
+const fileExtension = selectedAvatarFile.name.split('.').pop().toLowerCase();
     const filePath = `user-avatars/${loggedInUser.uid}/original_${Date.now()}.${fileExtension}`;
     const fileStorageRef = storageRef(storage, filePath);
     const uploadTask = uploadBytesResumable(fileStorageRef, selectedAvatarFile);

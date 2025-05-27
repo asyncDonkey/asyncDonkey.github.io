@@ -3996,6 +3996,25 @@ img.comment-avatar-img {
           transform: translateX(26px);
 }
 
+#avatarConfirmationModal .progress-bar-container {
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  padding: 2px;
+  height: 24px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+#avatarConfirmationModal #avatarUploadProgressBar.progress-bar-fill {
+  display: block;
+  height: 20px;
+  background-color: #00e0b0;
+  width: 0%;
+  border-radius: 2px;
+  -webkit-transition: width 0.4s ease-out;
+  transition: width 0.4s ease-out;
+}
+
 /* ===== Donkey Runner Game Page Specific Styles ===== */
 /* body.donkey-runner-page è già definito con le variabili --game-* */
 .donkey-runner-page header .header-content h1 {
