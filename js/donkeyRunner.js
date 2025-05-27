@@ -421,9 +421,9 @@ const GLITCHZILLA_ACTUAL_FRAME_HEIGHT = 96;
 const GLITCHZILLA_NUM_FRAMES = 4;
 const GLITCHZILLA_TARGET_WIDTH = GLITCHZILLA_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
 const GLITCHZILLA_TARGET_HEIGHT = GLITCHZILLA_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
-const GLITCHZILLA_HEALTH = 30;
+const GLITCHZILLA_HEALTH = 40;
 const GLITCHZILLA_SCORE_VALUE = 500;
-const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 2500;
+const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 2000;
 
 const GLITCHZILLA_PROJECTILE_SPRITE_SRC = 'images/glitchzillaProjectile.png';
 const GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_WIDTH = 24;
@@ -522,6 +522,11 @@ let imagesLoadedCount = 0;
 let allImagesLoaded = false;
 let resourcesInitialized = false;
 let gameLoopRequestId = null;
+
+let bossFightImminent = false;
+let bossWarningTimer = 2.0; 
+let postBossCooldownActive = false;
+let postBossCooldownTimer = 2.0;
 
 let obstacles = [];
 let obstacleSpawnTimer = 0;
@@ -1542,16 +1547,26 @@ class Glitchzilla extends BaseEnemy {
         if (this.animation && this.animation.reset) this.animation.reset();
     }
     takeDamage(dmg = 1) {
-        super.takeDamage(dmg);
+        super.takeDamage(dmg); // This handles this.health -= dmg;
         console.log(`Glitchzilla took ${dmg} damage, HP: ${this.health}`);
         this.updateCurrentAnimation();
         AudioManager.playSound('glitchzillaHit');
+
         if (this.health <= 0) {
             console.log('Glitchzilla SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            AudioManager.playSound('glitchzillaDefeat');
+            AudioManager.playSound('glitchzillaDefeatedSuccessfully'); // Make sure 'audio/glitchzilla_victory.mp3' is loaded
+            
             score += this.scoreValue;
-            activeMiniboss = null;
-            hasGlitchzillaSpawnedThisGame = true;
+            activeMiniboss = null; // Boss is no longer active
+
+            // Initiate post-boss cooldown state
+            postBossCooldownActive = true;
+            postBossCooldownTimer = 2.0;    // Start the 2-second cooldown timer
+
+            bossFightImminent = false;      // CRITICAL: Prevent immediate re-trigger of boss warning
+                                            // hasGlitchzillaSpawnedThisGame remains true, preventing a new boss sequence for this game.
+            
+            console.log(`Glitchzilla defeated. postBossCooldownActive: ${postBossCooldownActive}, bossFightImminent: ${bossFightImminent}`);
         }
     }
     update(dt) {
@@ -2316,13 +2331,22 @@ function resetGame() {
     dangerousFlyingEnemies = [];
     enemyProjectiles = [];
     powerUpItems = [];
-    activeMiniboss = null;
-    hasGlitchzillaSpawnedThisGame = false;
+    
+    activeMiniboss = null; // Ensure boss is cleared
+
+    // Reset all boss-related state flags
+    bossFightImminent = false;
+    hasGlitchzillaSpawnedThisGame = false; // Allows one Glitchzilla encounter per new game
+    postBossCooldownActive = false;
+    bossWarningTimer = 2.0; // Reset timers too
+    postBossCooldownTimer = 2.0;
+
     score = 0;
     finalScore = 0;
     gameOverTrigger = false;
     canShoot = true;
     shootTimer = 0;
+
     obstacleSpawnTimer = 0;
     nextObstacleSpawnTime = calculateNextObstacleSpawnTime();
     enemyBaseSpawnTimer = 0;
@@ -2343,9 +2367,10 @@ function resetGame() {
     nextDangerousFlyingEnemySpawnTime = calculateNextGenericEnemySpawnTime(7, 10);
     powerUpSpawnTimer = 0;
     nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
+
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-    if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none'; // Nascondi il pulsante start/rigioca mobile
-    console.log('Gioco resettato.');
+    if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none';
+    console.log('Gioco resettato. Flags boss: imminent=', bossFightImminent, 'spawnedThisGame=', hasGlitchzillaSpawnedThisGame, 'cooldownActive=', postBossCooldownActive);
 }
 
 function drawTerminalBackgroundEffects() {
@@ -2442,26 +2467,80 @@ function drawMenuScreen() {
 
 function updatePlaying(dt) {
     if (!asyncDonkey) return;
+
+    // --- State Management Order is Important ---
+
+    // 1. Handle Post-Boss Cooldown State
+    if (postBossCooldownActive) {
+        postBossCooldownTimer -= dt;
+        if (postBossCooldownTimer <= 0) {
+            postBossCooldownActive = false; 
+            // Cooldown finished. bossFightImminent is already false.
+            // hasGlitchzillaSpawnedThisGame is true, so boss sequence won't re-trigger.
+            // Normal spawning will resume in the spawning logic block.
+            console.log('Post-boss cooldown terminato. Ripresa del gioco normale.');
+        }
+    }
+
+    // 2. Try to Initiate Boss Spawn Sequence (only if no boss stuff is happening)
+    if (
+        score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD && // Score condition
+        !activeMiniboss &&                            // No boss currently active
+        !hasGlitchzillaSpawnedThisGame &&             // Boss hasn't been encountered this game yet
+        !bossFightImminent &&                         // Boss sequence isn't already starting
+        !postBossCooldownActive                       // Not in post-boss cooldown
+    ) {
+        console.log('Soglia punteggio per Glitchzilla raggiunta. Avvio sequenza di spawn (2s warning).');
+        bossFightImminent = true;       // Start the pre-boss warning phase
+        bossWarningTimer = 2.0;         // Set the 2-second timer
+    }
+
+    // 3. Handle Boss Warning/Spawn Countdown
+    // This runs if imminent, no boss active, and not in post-boss cooldown
+    if (bossFightImminent && !activeMiniboss && !postBossCooldownActive) {
+        bossWarningTimer -= dt;
+        if (bossWarningTimer <= 0) {
+            console.log('Warning timer scaduto. Spawn di Glitchzilla!');
+            const bossY = canvas.height - groundHeight - GLITCHZILLA_TARGET_HEIGHT;
+            activeMiniboss = new Glitchzilla(canvas.width, bossY);
+            hasGlitchzillaSpawnedThisGame = true; // Mark that a boss has now been spawned in this game session
+            // bossFightImminent remains true while boss is active (to stop other spawns)
+            // It will be set to false in Glitchzilla's takeDamage upon defeat.
+        }
+    }
+
+    // --- Core Game Object Updates ---
     asyncDonkey.update(dt);
     updateShootCooldown(dt);
     updateProjectiles(dt);
     updateObstacles(dt);
-    updateAllEnemyTypes(dt);
+    updateAllEnemyTypes(dt); // This will update activeMiniboss if it exists
     updatePowerUpItems(dt);
-    spawnObstacleIfNeeded(dt);
-    spawnEnemyBaseIfNeeded(dt);
-    spawnFlyingEnemyIfNeeded(dt);
-    spawnFastEnemyIfNeeded(dt);
-    spawnArmoredEnemyIfNeeded(dt);
-    spawnShootingEnemyIfNeeded(dt);
-    spawnArmoredShootingEnemyIfNeeded(dt);
-    spawnToughBasicEnemyIfNeeded(dt);
-    spawnDangerousFlyingEnemyIfNeeded(dt);
-    spawnGlitchzillaIfNeeded();
-    spawnPowerUpAmbientIfNeeded(dt);
-    checkCollisions();
-    score += dt * 10;
-    gameSpeed += dt * 0.3;
+
+    // --- Regular Entity Spawning Logic ---
+    // Spawn if:
+    // 1. No boss is currently active AND
+    // 2. No boss fight is currently in its "imminent" warning phase AND
+    // 3. Not in the post-boss cooldown period.
+    if (!activeMiniboss && !bossFightImminent && !postBossCooldownActive) {
+        spawnObstacleIfNeeded(dt);
+        spawnEnemyBaseIfNeeded(dt);
+        spawnFlyingEnemyIfNeeded(dt);
+        spawnFastEnemyIfNeeded(dt);
+        spawnArmoredEnemyIfNeeded(dt);
+        spawnShootingEnemyIfNeeded(dt);
+        spawnArmoredShootingEnemyIfNeeded(dt);
+        spawnToughBasicEnemyIfNeeded(dt);
+        spawnDangerousFlyingEnemyIfNeeded(dt);
+        spawnPowerUpAmbientIfNeeded(dt);
+    }
+    
+    // --- Final Updates for the Frame ---
+    checkCollisions(); // Handles collisions and can trigger processGameOver
+    if (currentGameState === GAME_STATE.PLAYING) { // Only increment score if still playing
+      score += dt * 10;
+      gameSpeed += dt * 0.3;
+    }
 }
 
 function drawPlayingScreen() {
