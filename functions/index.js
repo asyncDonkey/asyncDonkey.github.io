@@ -210,21 +210,45 @@ exports.updateAuthorOnArticlePublish = onDocumentUpdated('articles/{articleId}',
 });
 
 exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}', async (event) => {
+    const functionName = 'awardGlitchzillaSlayerAndBannerUpdate';
     if (!event.data) return;
+
     const scoreData = event.data.data();
     if (scoreData.userId && scoreData.glitchzillaDefeated === true) {
         const userId = scoreData.userId;
         const userProfileRef = db.collection('userProfiles').doc(userId);
+        const glitchzillaStatsRef = db.collection('platformInfo').doc('glitchzillaStats');
+
         try {
+            // --- INIZIO MODIFICA CHIAVE ---
+            // Recuperiamo il profilo utente per ottenere il nickname canonico.
+            // Questo è più sicuro che fidarsi di un nickname inviato dal client.
+            const userProfileSnap = await userProfileRef.get();
+            if (!userProfileSnap.exists) {
+                logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato. Impossibile aggiornare il banner con un nickname corretto.`);
+                // Potremmo decidere di non fare nulla o usare un fallback. Per ora usiamo il fallback.
+            }
+            const userProfileData = userProfileSnap.data() || {};
+            const userNickname = userProfileData.nickname || 'Un Eroe Anonimo'; // Usa il nickname dal profilo, o il fallback.
+            // --- FINE MODIFICA CHIAVE ---
+
+
+            // Logica per assegnare il badge (ora usa userProfileSnap già recuperato)
             await db.runTransaction(async (transaction) => {
-                const userProfileSnap = await transaction.get(userProfileRef);
-                if (!userProfileSnap.exists) return;
-                const userProfileData = userProfileSnap.data();
+                // Non abbiamo più bisogno di ri-leggere il profilo nella transazione se l'oggetto non è cambiato.
+                // Ma per coerenza e sicurezza, la transazione può ri-leggerlo.
+                const freshUserProfileSnap = await transaction.get(userProfileRef);
+                if (!freshUserProfileSnap.exists) return;
+
+                const freshUserProfileData = freshUserProfileSnap.data();
                 let profileUpdates = {};
                 let newBadgeAwardedId = null;
 
-                if (userProfileData.hasDefeatedGlitchzilla !== true) profileUpdates.hasDefeatedGlitchzilla = true;
-                const earnedBadges = userProfileData.earnedBadges || [];
+                if (freshUserProfileData.hasDefeatedGlitchzilla !== true) {
+                    profileUpdates.hasDefeatedGlitchzilla = true;
+                }
+
+                const earnedBadges = freshUserProfileData.earnedBadges || [];
                 if (!earnedBadges.includes(BADGE_ID_GLITCHZILLA_SLAYER)) {
                     profileUpdates.earnedBadges = FieldValue.arrayUnion(BADGE_ID_GLITCHZILLA_SLAYER);
                     newBadgeAwardedId = BADGE_ID_GLITCHZILLA_SLAYER;
@@ -234,22 +258,24 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
                     profileUpdates.updatedAt = FieldValue.serverTimestamp();
                     transaction.update(userProfileRef, profileUpdates);
                     if (newBadgeAwardedId) {
-                        const badgeInfo = await getBadgeDetails(newBadgeAwardedId);
-                        if (badgeInfo) {
-                            await createNotification(userId, {
-                                type: 'new_badge',
-                                title: 'Nuovo Badge Sbloccato!',
-                                message: `Hai ottenuto il badge: "${badgeInfo.name}".`,
-                                link: `/profile.html?uid=${userId}#badgesSection`,
-                                icon: badgeInfo.icon,
-                                relatedItemId: newBadgeAwardedId,
-                            });
-                        }
+                        await sendNewBadgeNotification(userId, newBadgeAwardedId);
                     }
                 }
             });
+            logger.info(`[CF:${functionName}] Controllo badge per utente ${userId} completato.`);
+
+            // Aggiornamento del banner con il nickname corretto
+            const bannerUpdateData = {
+                lastWinnerNickname: userNickname, // Ora è il nickname corretto!
+                lastWinnerId: userId,
+                defeatedAt: FieldValue.serverTimestamp(),
+            };
+            
+            await glitchzillaStatsRef.set(bannerUpdateData);
+            logger.info(`[CF:${functionName}] Banner di Glitchzilla aggiornato con il vincitore: ${userNickname}.`);
+
         } catch (error) {
-            logger.error('awardGlitchzillaSlayer: Error in transaction:', error, { userId });
+            logger.error(`[CF:${functionName}] Errore nella transazione o nell'aggiornamento del banner:`, error, { userId });
         }
     }
 });

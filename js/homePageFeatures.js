@@ -7,6 +7,7 @@ import {
     orderBy,
     limit,
     doc,
+    getDoc,
     getDocs,
     Timestamp,
     documentId, // AGGIUNTO: Necessario per la query 'in
@@ -428,24 +429,52 @@ export async function displayArticlesSection() {
 /**
  * Mostra il banner dell'ultimo giocatore che ha sconfitto Glitchzilla.
  */
-export function displayGlitchzillaBanner() {
+/**
+ * Mostra il banner dell'ultimo giocatore che ha sconfitto Glitchzilla recuperando i dati da Firestore.
+ */
+export async function displayGlitchzillaBanner() {
     const bannerElement = document.getElementById('glitchzillaDefeatedBanner');
     const defeaterNameElement = document.getElementById('lastGlitchzillaDefeater');
 
     if (!bannerElement || !defeaterNameElement) {
+        console.warn('[homePageFeatures.js] Elementi del banner Glitchzilla non trovati.');
         return;
     }
 
-    // Dati placeholder, da sostituire con logica Firestore (Task C.3.4)
-    const lastDefeaterData = {
-        name: 'cYd3R_pUnK_2077',
-        defeated: true, // Simula che sia stato sconfitto per mostrare il banner
-    };
+    if (!db) {
+        console.error('[homePageFeatures.js] Istanza Firestore (db) non disponibile per il banner.');
+        bannerElement.style.display = 'none';
+        return;
+    }
 
-    if (lastDefeaterData && lastDefeaterData.defeated && lastDefeaterData.name) {
-        defeaterNameElement.textContent = lastDefeaterData.name;
-        bannerElement.style.display = 'block';
-    } else {
+    try {
+        const statsDocRef = doc(db, 'platformInfo', 'glitchzillaStats');
+        const docSnap = await getDoc(statsDocRef);
+
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const winnerNickname = data.lastWinnerNickname;
+            const winnerId = data.lastWinnerId;
+
+            if (winnerNickname) {
+                // Creiamo un link al profilo del giocatore
+                defeaterNameElement.innerHTML = ''; // Pulisce il contenuto precedente
+                const profileLink = document.createElement('a');
+                profileLink.href = winnerId ? `profile.html?userId=${winnerId}` : '#';
+                profileLink.textContent = winnerNickname;
+                profileLink.classList.add('player-link'); // Aggiungi una classe per lo stile se vuoi
+
+                defeaterNameElement.appendChild(profileLink);
+                bannerElement.style.display = 'block';
+            } else {
+                bannerElement.style.display = 'none';
+            }
+        } else {
+            // Il documento non esiste, quindi nessuno ha ancora battuto il boss
+            bannerElement.style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Errore nel recuperare i dati per il banner di Glitchzilla:", error);
         bannerElement.style.display = 'none';
     }
 }
