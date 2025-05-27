@@ -24,7 +24,7 @@ const DEFAULT_AUTHOR_AVATAR_PATH = 'assets/images/default-avatar.png';
  * @param {object|string|null|undefined} dateInput - Timestamp di Firestore o stringa data.
  * @returns {string} Data formattata.
  */
-function formatArticleDate(dateInput) {
+export function formatArticleDate(dateInput) {
     if (!dateInput) return 'Data non disponibile';
     try {
         let date;
@@ -50,7 +50,7 @@ function formatArticleDate(dateInput) {
  * @param {boolean} isFeatured - Se true, applica la classe 'is-featured'.
  * @returns {HTMLElement} L'elemento della card articolo.
  */
-function createArticleCard(articleData, articleId, authorPublicProfile, isFeatured = false) {
+export function createArticleCard(articleData, articleId, authorPublicProfile, isFeatured = false) {
     const card = document.createElement('div');
     card.className = 'article-card';
     if (isFeatured) {
