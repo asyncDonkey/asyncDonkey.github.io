@@ -33,6 +33,13 @@ const loginPasswordModalInput = document.getElementById('loginPasswordModal');
 const closeLoginModalBtn = document.getElementById('closeLoginModalBtn'); // DEVE ESSERE L'ID DEL BOTTONE DI CHIUSURA NELLA MODALE
 const loginModalErrorDiv = document.getElementById('loginModalError'); // Errore specifico per la modale di login
 
+const openTermsModalLink = document.getElementById('openTermsModalLink');
+const openPrivacyModalLink = document.getElementById('openPrivacyModalLink');
+const legalInfoModal = document.getElementById('legalInfoModal');
+const closeLegalInfoModalBtn = document.getElementById('closeLegalInfoModalBtn');
+const legalInfoModalTitle = document.getElementById('legalInfoModalTitle');
+const legalInfoModalContent = document.getElementById('legalInfoModalContent');
+
 // --- FUNZIONI DI VALIDAZIONE E UTILITY ---
 function showFieldError(errorDiv, message) {
     if (errorDiv) {
@@ -66,6 +73,95 @@ function clearAllFieldErrors() {
     if (loginModalErrorDiv && loginModal && loginModal.style.display !== 'block') {
         clearFieldError(loginModalErrorDiv);
     }
+}
+
+// Testi Placeholder (DA SOSTITUIRE CON I TESTI FINALI)
+const termsOfServiceText = `
+    <h2>Termini di Servizio di asyncDonkey.io</h2>
+    <p><strong>Ultimo aggiornamento:</strong> 28 Maggio 2025</p>
+    <p>Benvenuto su asyncDonkey.io!</p>
+    <p>L'utilizzo di questo sito implica l'accettazione dei seguenti termini e condizioni. Se non sei d'accordo con uno qualsiasi di questi termini, sei pregato di non utilizzare il nostro sito.</p>
+    <h4>1. Utilizzo del Sito</h4>
+    <p>asyncDonkey.io fornisce una piattaforma per giochi, articoli tecnici e interazione con la community. È vietato utilizzare il sito per scopi illegali o non autorizzati.</p>
+    <h4>2. Account Utente</h4>
+    <p>Per accedere ad alcune funzionalità, potrebbe essere necessario registrare un account. Sei responsabile della riservatezza delle tue credenziali e di tutte le attività che avvengono sul tuo account.</p>
+    <h4>3. Contenuti Generati dagli Utenti</h4>
+    <p>Se il sito permette la pubblicazione di contenuti (commenti, articoli, ecc.), sei l'unico responsabile dei contenuti che pubblichi. Non sono ammessi contenuti illegali, offensivi, o che violino i diritti di terzi. asyncDonkey.io si riserva il diritto di rimuovere tali contenuti a sua discrezione.</p>
+    <h4>4. Proprietà Intellettuale</h4>
+    <p>I contenuti originali del sito (esclusi i contenuti generati dagli utenti), le funzionalità e le caratteristiche sono e rimarranno di proprietà esclusiva di asyncDonkey.io e dei suoi licenziatari.</p>
+    <h4>5. Limitazione di Responsabilità</h4>
+    <p>Il sito è fornito "così com'è" e "come disponibile". Non garantiamo che il sito sia privo di errori, interruzioni o sicuro al 100%. L'utilizzo del sito è a tuo rischio.</p>
+    <h4>6. Modifiche ai Termini</h4>
+    <p>Ci riserviamo il diritto di modificare questi termini in qualsiasi momento. Le modifiche saranno efficaci immediatamente dopo la pubblicazione sul sito. È tua responsabilità controllare periodicamente questa pagina per eventuali aggiornamenti.</p>
+    <h4>7. Contatti</h4>
+    <p>Per qualsiasi domanda relativa a questi Termini di Servizio, contattaci tramite i canali forniti sul sito.</p>
+    <p><em>Questo è un testo placeholder generato da AI. Sostituiscilo con i tuoi Termini di Servizio completi e legalmente validi.</em></p>
+`;
+
+const privacyPolicyText = `
+    <h2>Privacy Policy di asyncDonkey.io</h2>
+    <p><strong>Ultimo aggiornamento:</strong> 28 Maggio 2025</p>
+    <p>Questa Privacy Policy descrive come asyncDonkey.io ("noi", "nostro") raccoglie, utilizza e protegge le tue informazioni personali quando utilizzi il nostro sito web.</p>
+    <h4>1. Informazioni che Raccogliamo</h4>
+    <p>Potremmo raccogliere le seguenti informazioni quando ti registri o utilizzi i nostri servizi:</p>
+    <ul>
+        <li><strong>Informazioni di identificazione personale:</strong> Indirizzo email, nickname, nazionalità (se fornita).</li>
+        <li><strong>Dati di utilizzo:</strong> Informazioni su come utilizzi il sito, come punteggi nei giochi, interazioni con articoli e commenti, attività sulla piattaforma.</li>
+        <li><strong>Informazioni tecniche:</strong> Indirizzo IP, tipo di browser, sistema operativo, e dati di log standard per analisi e sicurezza.</li>
+    </ul>
+    <h4>2. Come Utilizziamo le Tue Informazioni</h4>
+    <p>Utilizziamo le informazioni raccolte per:</p>
+    <ul>
+        <li>Fornire, operare e migliorare i nostri servizi e la piattaforma.</li>
+        <li>Personalizzare la tua esperienza utente.</li>
+        <li>Comunicare con te, ad esempio per inviare email di verifica, notifiche relative al tuo account o aggiornamenti importanti.</li>
+        <li>Garantire la sicurezza e l'integrità della nostra piattaforma.</li>
+        <li>Analizzare l'utilizzo del sito per capire come migliorarlo.</li>
+    </ul>
+    <h4>3. Condivisione delle Informazioni</h4>
+    <p>Non vendiamo, scambiamo o trasferiamo in altro modo a terzi le tue informazioni di identificazione personale senza il tuo consenso, tranne nei seguenti casi limitati:</p>
+    <ul>
+        <li>Per rispettare obblighi legali o richieste governative valide.</li>
+        <li>Per proteggere i nostri diritti, la nostra proprietà o la sicurezza di asyncDonkey.io, dei nostri utenti o del pubblico.</li>
+        <li>Con fornitori di servizi terzi che ci assistono nell'operare il nostro sito web o condurre la nostra attività, a condizione che tali parti accettino di mantenere riservate queste informazioni.</li>
+    </ul>
+    <p>Il tuo nickname e la tua nazionalità (se fornita) sono informazioni pubbliche visibili agli altri utenti sulla piattaforma.</p>
+    <h4>4. Sicurezza dei Dati</h4>
+    <p>Adottiamo misure di sicurezza appropriate per proteggere contro l'accesso non autorizzato, l'alterazione, la divulgazione o la distruzione delle tue informazioni personali. Tuttavia, nessun metodo di trasmissione su Internet o di archiviazione elettronica è sicuro al 100%.</p>
+    <h4>5. Cookie</h4>
+    <p>Il nostro sito potrebbe utilizzare cookie essenziali per il funzionamento della piattaforma (es. gestione della sessione utente). Non utilizziamo cookie di tracciamento di terze parti per scopi pubblicitari invasivi. Puoi istruire il tuo browser a rifiutare tutti i cookie o a indicare quando un cookie viene inviato, ma alcune parti del sito potrebbero non funzionare correttamente.</p>
+    <h4>6. I Tuoi Diritti (es. GDPR)</h4>
+    <p>A seconda della tua giurisdizione, potresti avere determinati diritti riguardo alle tue informazioni personali, come il diritto di accedere, correggere, aggiornare o richiedere la cancellazione dei tuoi dati. Per esercitare tali diritti, puoi contattarci o gestire le informazioni disponibili tramite la pagina del tuo profilo.</p>
+    <h4>7. Conservazione dei Dati</h4>
+    <p>Conserveremo le tue informazioni personali solo per il tempo necessario agli scopi indicati in questa Privacy Policy, a meno che un periodo di conservazione più lungo non sia richiesto o consentito dalla legge.</p>
+    <h4>8. Modifiche a questa Policy</h4>
+    <p>Potremmo aggiornare questa Privacy Policy di tanto in tanto. Ti informeremo di eventuali modifiche significative pubblicando la nuova policy sul sito con una data di aggiornamento rivista.</p>
+    <h4>9. Contatti</h4>
+    <p>Se hai domande su questa Privacy Policy, contattaci attraverso i canali forniti sul sito.</p>
+    <p><em>Questo è un testo placeholder generato da AI. Sostituiscilo con la tua Privacy Policy completa, specifica e conforme alle normative vigenti (es. GDPR).</em></p>
+`;
+
+function openLegalModal(type) {
+    if (!legalInfoModal || !legalInfoModalTitle || !legalInfoModalContent) {
+        console.error("Elementi della modale legale non trovati.");
+        return;
+    }
+
+    if (type === 'terms') {
+        legalInfoModalTitle.textContent = 'Termini di Servizio';
+        legalInfoModalContent.innerHTML = termsOfServiceText;
+    } else if (type === 'privacy') {
+        legalInfoModalTitle.textContent = 'Privacy Policy';
+        legalInfoModalContent.innerHTML = privacyPolicyText;
+    }
+    legalInfoModal.style.display = 'flex';
+    document.body.classList.add('modal-open'); 
+}
+
+function closeLegalModal() {
+    if (!legalInfoModal) return;
+    legalInfoModal.style.display = 'none';
+    document.body.classList.remove('modal-open');
 }
 
 // --- GESTIONE REGISTRAZIONE ---
@@ -290,6 +386,8 @@ if (loginFormModal) {
     });
 }
 
+
+
 // --- AGGANCIO EVENT LISTENER PRINCIPALE E LOGICA authAction ---
 document.addEventListener('DOMContentLoaded', () => {
     if (registerForm) {
@@ -306,6 +404,35 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmPasswordInput.addEventListener('input', () => clearFieldError(confirmPasswordErrorDiv));
     if (nicknameInput && nicknameErrorDiv)
         nicknameInput.addEventListener('input', () => clearFieldError(nicknameErrorDiv));
+
+    // ----- INIZIO CODICE MODALE LEGALE DA SPOSTARE QUI -----
+    if (openTermsModalLink) {
+        openTermsModalLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openLegalModal('terms');
+        });
+    }
+
+    if (openPrivacyModalLink) {
+        openPrivacyModalLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openLegalModal('privacy');
+        });
+    }
+
+    if (closeLegalInfoModalBtn) {
+        closeLegalInfoModalBtn.addEventListener('click', closeLegalModal);
+    }
+
+    if (legalInfoModal) {
+        legalInfoModal.addEventListener('click', (event) => {
+            if (event.target === legalInfoModal) { 
+                closeLegalModal();
+            }
+        });
+    }
+    // ----- FINE CODICE MODALE LEGALE -----
+
 
     // Logica per authAction
     const urlParams = new URLSearchParams(window.location.search);

@@ -562,6 +562,53 @@ section#profile {
     gap: 10px;
 }
 
+.external-links-list {
+    li {
+        // La li è già display: flex, justify-content: space-between, align-items: center
+        // Questo è buono. Assicuriamoci che l'icona e il testo del link stiano bene insieme.
+        gap: 10px; // Aggiunge un po' di spazio tra icona+testo e i bottoni di azione
+
+        // Contenitore per icona e testo del link
+        // Dobbiamo creare questo se l'icona e il .link-display sono fratelli diretti
+        // Se l'icona è DENTRO .link-display, allora .link-display ha bisogno di display:flex
+        // Basandomi sulla modifica JS, l'icona è un fratello di .link-display all'interno del <li>.
+        // Quindi il flex sul <li> dovrebbe allinearli orizzontalmente.
+
+        // Stile per l'icona effettiva (classe base aggiunta via JS)
+        .external-link-icon-base-style {
+            font-size: 1.4em; // Dimensione dell'icona
+            margin-right: 8px; // Spazio tra icona e il testo del link
+            line-height: 1; // Per un buon allineamento verticale
+            flex-shrink: 0; // Impedisce all'icona di restringersi
+        }
+
+        .link-display {
+            flex-grow: 1; // Permette al testo del link di occupare lo spazio rimanente
+            display: flex; // Per allineare il titolo e l'hostname (se visibile)
+            align-items: center;
+            flex-wrap: nowrap; // Evita che titolo e hostname vadano a capo se non c'è spazio
+            overflow: hidden; // Nasconde l'overflow del testo
+
+            a {
+                // Stili esistenti vanno bene, potremmo aggiungere:
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis; // Se il titolo del link è troppo lungo
+                margin-right: 5px;
+            }
+            .link-url {
+                 white-space: nowrap;
+                 overflow: hidden;
+                 text-overflow: ellipsis;
+            }
+        }
+
+        .link-actions {
+            flex-shrink: 0; // Impedisce ai bottoni di restringersi
+        }
+    }
+}
+
 // Stili obsoleti o ridondanti da #profileUpdateForm (commentati o rimossi)
 // #profileUpdateForm div { /* ... */ }
 // #profileUpdateForm label { /* ... */ }

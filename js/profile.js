@@ -269,39 +269,124 @@ async function openBadgeDetailsModal(badgeId) {
     badgeDetailModal.style.display = 'block';
 }
 
+/**
+ * Restituisce l'HTML dell'icona e il colore basati sull'URL del link.
+ * @param {string} url - L'URL del link esterno.
+ * @returns {object} Un oggetto con { iconHtml: string, color: string }
+ */
+function getIconDetailsForExternalLink(url) {
+    let iconHtml = '<span class="material-symbols-rounded external-link-icon">link</span>'; // Icona Material di default
+    let iconColor = '#757575'; // Grigio di default (colore definito 'a mano')
+
+    if (!url) return { iconHtml, color: iconColor };
+
+    try {
+        const hostname = new URL(url).hostname.toLowerCase();
+
+        if (hostname.includes('github.com')) {
+            iconHtml = '<i class="fab fa-github external-link-icon"></i>'; // Font Awesome
+            iconColor = '#333333'; // Nero GitHub
+        } else if (hostname.includes('linkedin.com')) {
+            iconHtml = '<i class="fab fa-linkedin external-link-icon"></i>'; // Font Awesome
+            iconColor = '#0077B5'; // Blu LinkedIn
+        } else if (hostname.includes('x.com') || hostname.includes('twitter.com')) {
+            iconHtml = '<i class="fab fa-twitter external-link-icon"></i>'; // Font Awesome (o fa-x-twitter se aggiornato)
+            iconColor = '#1DA1F2'; // Blu Twitter
+        } else if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
+            iconHtml = '<i class="fab fa-youtube external-link-icon"></i>'; // Font Awesome
+            iconColor = '#FF0000'; // Rosso YouTube
+        } else if (hostname.includes('facebook.com')) {
+            iconHtml = '<i class="fab fa-facebook external-link-icon"></i>'; // Font Awesome
+            iconColor = '#1877F2'; // Blu Facebook
+        } else if (hostname.includes('instagram.com')) {
+            iconHtml = '<i class="fab fa-instagram external-link-icon"></i>'; // Font Awesome
+            iconColor = '#E4405F'; // Rosa Instagram
+        } else if (hostname.includes('t.me') || hostname.includes('telegram.org')) {
+            iconHtml = '<i class="fab fa-telegram external-link-icon"></i>'; // Font Awesome
+            iconColor = '#2CA5E0'; // Blu Telegram
+        } else if (hostname.includes('medium.com')) {
+            iconHtml = '<i class="fab fa-medium external-link-icon"></i>'; // Font Awesome
+            iconColor = '#000000'; // Nero Medium
+        } else if (hostname.includes('stackoverflow.com')) {
+            iconHtml = '<i class="fab fa-stack-overflow external-link-icon"></i>'; // Font Awesome
+            iconColor = '#F58025'; // Arancione StackOverflow
+        } else if (hostname.includes('reddit.com')) {
+            iconHtml = '<i class="fab fa-reddit-alien external-link-icon"></i>'; // Font Awesome
+            iconColor = '#FF4500'; // Rosso-Arancio Reddit
+        }
+        // Aggiungi altri 'else if' per altri domini/servizi se necessario
+        // Se nessun brand specifico viene riconosciuto, usa l'icona 'link' di Material Symbols
+        // e il colore di default già impostati.
+    } catch (e) {
+        console.warn(`[AthenaDev] URL non valido per getIconDetailsForExternalLink: ${url}`, e);
+        // Restituisce comunque l'icona e il colore di default
+    }
+    return { iconHtml, color: iconColor };
+}
+
 // =================================================================================
 // --- FUNZIONI DI RENDERING E GESTIONE UI (PROFILO) ---
 // =================================================================================
 function renderExternalLinks(linksArray, isOwnProfile) {
     if (!externalLinksListUL || !noExternalLinksMessage) return;
     externalLinksListUL.innerHTML = '';
+
+    // La sezione link è visibile solo se è il profilo dell'utente loggato
+    // e l'elemento della sezione esiste.
     if (!isOwnProfile || !externalLinksSection) {
         if (externalLinksSection) externalLinksSection.style.display = 'none';
         return;
     }
     externalLinksSection.style.display = 'block';
+
     if (!linksArray || linksArray.length === 0) {
-        if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'list-item';
+        if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'list-item'; // Usa list-item per coerenza con <ul>
         return;
     }
+
     if (noExternalLinksMessage) noExternalLinksMessage.style.display = 'none';
+
     linksArray.forEach((link, index) => {
         const li = document.createElement('li');
+
+        // --- INIZIO MODIFICHE PER ICONA ---
+        const iconDetails = getIconDetailsForExternalLink(link.url);
+        const iconElement = document.createElement('span'); // Usiamo span per contenere l'HTML dell'icona
+        iconElement.innerHTML = iconDetails.iconHtml;
+        // Applica il colore direttamente all'icona (o al suo primo figlio se è un <i> dentro lo <span>)
+        const actualIconTag = iconElement.firstChild;
+        if (actualIconTag) {
+            actualIconTag.style.color = iconDetails.color;
+            // Aggiungiamo una classe generica per lo stile comune (es. margini)
+            // La classe specifica (fab fa-github o material-symbols-rounded) è già nell'innerHTML.
+            actualIconTag.classList.add('external-link-icon-base-style');
+        }
+        li.appendChild(iconElement); // Aggiungi l'icona al li
+        // --- FINE MODIFICHE PER ICONA ---
+
         const linkDisplayDiv = document.createElement('div');
-        linkDisplayDiv.className = 'link-display';
+        linkDisplayDiv.className = 'link-display'; // Questo div ora conterrà solo il testo
+
         const anchor = document.createElement('a');
         anchor.href = link.url;
         anchor.textContent = link.title || 'Link senza titolo';
         anchor.target = '_blank';
         anchor.rel = 'noopener noreferrer';
         linkDisplayDiv.appendChild(anchor);
+
+        // Opzionale: mostrare l'URL completo potrebbe essere ridondante con le icone,
+        // ma lo manteniamo per ora. Potresti volerlo rimuovere o nascondere.
         const urlSpan = document.createElement('span');
         urlSpan.className = 'link-url';
-        urlSpan.textContent = ` (${link.url})`;
+        urlSpan.textContent = ` (${new URL(link.url).hostname})`; // Mostra solo l'hostname per pulizia
         linkDisplayDiv.appendChild(urlSpan);
+
         li.appendChild(linkDisplayDiv);
+
+        // Le azioni rimangono uguali, ma assicurati che siano allineate correttamente con flexbox
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'link-actions';
+
         const editBtn = document.createElement('button');
         editBtn.className = 'game-button edit-link-btn';
         editBtn.textContent = 'Modifica';
@@ -309,6 +394,7 @@ function renderExternalLinks(linksArray, isOwnProfile) {
         editBtn.dataset.index = index;
         editBtn.addEventListener('click', () => openExternalLinkFormForEdit(index));
         actionsDiv.appendChild(editBtn);
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'game-button delete-link-btn';
         deleteBtn.textContent = 'Elimina';
@@ -316,6 +402,7 @@ function renderExternalLinks(linksArray, isOwnProfile) {
         deleteBtn.dataset.index = index;
         deleteBtn.addEventListener('click', () => handleDeleteExternalLink(index));
         actionsDiv.appendChild(deleteBtn);
+
         li.appendChild(actionsDiv);
         externalLinksListUL.appendChild(li);
     });

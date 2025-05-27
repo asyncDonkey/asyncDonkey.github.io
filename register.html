@@ -458,16 +458,16 @@
                     </div>
 
                     <div style="font-size: 0.85em; margin-top: 25px; text-align: center">
-                        <p>
-                            Registrandoti, accetti i nostri
-                            <a href="#terms" id="termsLink">Termini di Servizio</a> (placeholder) e la nostra
-                            <a href="#privacy" id="privacyLink">Privacy Policy</a> (placeholder).
-                        </p>
-                        <p>
-                            Hai già un account?
-                            <a href="#" id="loginRedirectLink">Accedi qui</a>.
-                        </p>
-                    </div>
+    <p>
+        Registrandoti, dichiari di aver letto e accettato i nostri
+        <a href="#" id="openTermsModalLink" class="underline-link">Termini di Servizio</a> e la nostra
+        <a href="#" id="openPrivacyModalLink" class="underline-link">Privacy Policy</a>.
+    </p>
+    <p>
+        Hai già un account?
+        <a href="#" id="loginRedirectLink" class="underline-link">Accedi qui</a>.
+    </p>
+</div>
                 </form>
 
                 <div id="registrationSuccessMessage" style="display: none; text-align: center; margin-top: 20px">
@@ -480,6 +480,8 @@
                     <p><a href="index.html" class="game-button">Torna alla Homepage</a></p>
                 </div>
             </section>
+
+            
         </main>
 
         <footer>
@@ -510,6 +512,16 @@
                 </form>
             </div>
         </div>
+
+        <div id="legalInfoModal" class="modal" style="display: none;">
+    <div class="modal-content large">
+        <button class="close-modal-btn" id="closeLegalInfoModalBtn" aria-label="Chiudi modale">&times;</button>
+        <h3 id="legalInfoModalTitle" style="margin-top:0;">Titolo Legale</h3>
+        <div id="legalInfoModalContent" class="modal-scrollable-content">
+            <p>Caricamento...</p>
+        </div>
+    </div>
+</div>
 
         <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 

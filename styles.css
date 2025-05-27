@@ -3326,6 +3326,46 @@ section#profile h3 {
   gap: 10px;
 }
 
+.external-links-list li {
+  gap: 10px;
+}
+.external-links-list li .external-link-icon-base-style {
+  font-size: 1.4em;
+  margin-right: 8px;
+  line-height: 1;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+.external-links-list li .link-display {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  overflow: hidden;
+}
+.external-links-list li .link-display a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 5px;
+}
+.external-links-list li .link-display .link-url {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.external-links-list li .link-actions {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+
 #profileMessage {
   text-align: center;
   font-weight: bold;
@@ -4145,6 +4185,129 @@ img.comment-avatar-img {
   border-radius: 2px;
   -webkit-transition: width 0.4s ease-out;
   transition: width 0.4s ease-out;
+}
+
+#legalInfoModal .modal-content.large {
+  max-width: 800px;
+  width: 90%;
+  max-height: 85vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+#legalInfoModal .modal-content h3#legalInfoModalTitle {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333333;
+  font-size: 1.6em;
+  margin-top: 0;
+}
+#legalInfoModal .modal-scrollable-content {
+  overflow-y: auto;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  padding-right: 15px;
+  padding-left: 5px;
+  line-height: 1.7;
+  color: #424242;
+}
+#legalInfoModal .modal-scrollable-content h2 {
+  font-size: 1.4em;
+  color: #212121;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+#legalInfoModal .modal-scrollable-content h2:first-child {
+  margin-top: 0;
+}
+#legalInfoModal .modal-scrollable-content h4 {
+  font-size: 1.1em;
+  color: #333333;
+  margin-top: 15px;
+  margin-bottom: 8px;
+}
+#legalInfoModal .modal-scrollable-content p {
+  margin-bottom: 12px;
+}
+#legalInfoModal .modal-scrollable-content ul {
+  list-style-type: disc;
+  margin-left: 20px;
+  margin-bottom: 12px;
+  padding-left: 0;
+}
+#legalInfoModal .modal-scrollable-content ul li {
+  margin-bottom: 5px;
+}
+#legalInfoModal .modal-scrollable-content strong {
+  color: #000000;
+}
+
+.underline-link {
+  text-decoration: underline;
+  color: #007bff;
+  cursor: pointer;
+}
+.underline-link:hover {
+  color: #0056b3;
+}
+
+@-webkit-keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(-30px);
+            transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+  }
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(-30px);
+            transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+  }
+}
+#legalInfoModal .modal-content #closeLegalInfoModalBtn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 1.75rem;
+  font-weight: bold;
+  line-height: 1;
+  color: #aaaaaa;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  z-index: 10;
+}
+#legalInfoModal .modal-content #closeLegalInfoModalBtn:hover, #legalInfoModal .modal-content #closeLegalInfoModalBtn:focus {
+  color: #000000;
+  text-decoration: none;
+  outline: none;
+}
+#legalInfoModal .modal-content #closeLegalInfoModalBtn:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+#legalInfoModal .modal-content h3#legalInfoModalTitle {
+  padding-right: 40px;
 }
 
 /* ===== Donkey Runner Game Page Specific Styles ===== */
