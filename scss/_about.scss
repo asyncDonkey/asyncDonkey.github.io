@@ -235,3 +235,98 @@
     line-height: 1.6;
     font-size: 0.95em;
 }
+
+/* --- Stili Carosello per la Sezione Pattern (Mobile) --- */
+
+@media (max-width: 768px) {
+    #complex-patterns .patterns-container {
+        display: flex;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding: 0 0 15px 1px; // Aggiunto padding per l'estetica
+
+        // Nasconde la barra di scorrimento
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
+    #complex-patterns .pattern-card {
+        // Imposta una larghezza fissa per le card nel carosello
+        flex: 0 0 290px; // Un po' più larghe per accomodare il testo
+        margin-right: 15px;
+    }
+}
+
+/* --- Stili per la Griglia di Navigazione Interna (about.html) --- */
+
+.internal-nav-grid {
+    background-color: var(--surface-bg-secondary);
+    padding: 15px 0;
+    margin-bottom: 30px; // Spazio prima della sezione "The .Dev"
+    border-bottom: 1px solid var(--border-color-primary);
+    
+    .nav-grid-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px; // Spazio tra i pulsanti
+        flex-wrap: wrap; // Permette di andare a capo su schermi piccoli se necessario
+    }
+
+    .nav-grid-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 15px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-color-secondary);
+        background-color: var(--surface-bg-primary);
+        border: 1px solid var(--border-color-secondary);
+        transition: all 0.2s ease-in-out;
+        min-width: 100px; // Larghezza minima per ogni item
+        text-align: center;
+
+        &:hover {
+            background-color: var(--surface-bg-hover);
+            color: var(--link-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .material-symbols-rounded {
+            font-size: 2em; // Dimensione icona
+            margin-bottom: 5px;
+        }
+
+        .nav-grid-text {
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+    }
+}
+
+// Responsive adjustments (opzionale, la griglia con flex-wrap dovrebbe già adattarsi)
+@media (max-width: 500px) {
+    .internal-nav-grid .nav-grid-list {
+        gap: 10px; // Riduci il gap su schermi molto piccoli
+    }
+    .internal-nav-grid .nav-grid-item {
+        padding: 8px 10px;
+        min-width: 80px;
+         .material-symbols-rounded {
+            font-size: 1.8em; 
+        }
+        .nav-grid-text {
+            font-size: 0.8em;
+        }
+    }
+}

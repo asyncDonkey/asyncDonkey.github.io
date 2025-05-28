@@ -7639,6 +7639,113 @@ main section {
   font-size: 0.95em;
 }
 
+/* --- Stili Carosello per la Sezione Pattern (Mobile) --- */
+@media (max-width: 768px) {
+  #complex-patterns .patterns-container {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: start;
+        -ms-flex-pack: start;
+            justify-content: flex-start;
+    overflow-x: auto;
+    -ms-scroll-snap-type: x mandatory;
+        scroll-snap-type: x mandatory;
+    padding: 0 0 15px 1px;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  #complex-patterns .patterns-container::-webkit-scrollbar {
+    display: none;
+  }
+  #complex-patterns .pattern-card {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 290px;
+            flex: 0 0 290px;
+    margin-right: 15px;
+  }
+}
+/* --- Stili per la Griglia di Navigazione Interna (about.html) --- */
+.internal-nav-grid {
+  background-color: var(--surface-bg-secondary);
+  padding: 15px 0;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--border-color-primary);
+}
+.internal-nav-grid .nav-grid-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 15px;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+.internal-nav-grid .nav-grid-item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding: 10px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-color-secondary);
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-secondary);
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  min-width: 100px;
+  text-align: center;
+}
+.internal-nav-grid .nav-grid-item:hover {
+  background-color: var(--surface-bg-hover);
+  color: var(--link-hover-color);
+  -webkit-transform: translateY(-2px);
+          transform: translateY(-2px);
+  -webkit-box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.internal-nav-grid .nav-grid-item .material-symbols-rounded {
+  font-size: 2em;
+  margin-bottom: 5px;
+}
+.internal-nav-grid .nav-grid-item .nav-grid-text {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+@media (max-width: 500px) {
+  .internal-nav-grid .nav-grid-list {
+    gap: 10px;
+  }
+  .internal-nav-grid .nav-grid-item {
+    padding: 8px 10px;
+    min-width: 80px;
+  }
+  .internal-nav-grid .nav-grid-item .material-symbols-rounded {
+    font-size: 1.8em;
+  }
+  .internal-nav-grid .nav-grid-item .nav-grid-text {
+    font-size: 0.8em;
+  }
+}
 #test-zone-section h2 {
   font-family: "Space Grotesk", sans-serif;
   font-weight: 600;
