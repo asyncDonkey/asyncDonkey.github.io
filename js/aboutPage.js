@@ -1,5 +1,6 @@
 // Contenuto completo e aggiornato per js/aboutPage.js
 import { showToast } from './toastNotifications.js';
+import { setupDraggableCarousel } from './utils/carouselUtils.js'; // NUOVA IMPORTAZIONE
 
 const competenzeTecniche = [
         {
@@ -269,41 +270,7 @@ function openPatternModal(patternId) {
     window.addEventListener('click', closeOutside);
 }
 
-/**
- * FUNZIONE OTTIMIZZATA: Aggiunge la logica 'grab-and-drag' a qualsiasi contenitore.
- * @param {HTMLElement} container - L'elemento contenitore del carosello.
- */
-function setupDraggableCarousel(container) {
-    if (!container) return;
-    let isDown = false;
-    let startX;
-    let scrollLeft;
 
-    container.addEventListener('mousedown', (e) => {
-        isDown = true;
-        container.classList.add('active-carousel');
-        startX = e.pageX - container.offsetLeft;
-        scrollLeft = container.scrollLeft;
-    });
-
-    container.addEventListener('mouseleave', () => {
-        isDown = false;
-        container.classList.remove('active-carousel');
-    });
-
-    container.addEventListener('mouseup', () => {
-        isDown = false;
-        container.classList.remove('active-carousel');
-    });
-
-    container.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - container.offsetLeft;
-        const walk = (x - startX) * 2; 
-        container.scrollLeft = scrollLeft - walk;
-    });
-}
 
 
 // Event Listener principale che avvia le funzioni della pagina

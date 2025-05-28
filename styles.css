@@ -7408,6 +7408,45 @@ main section {
   /* color: var(--link-color); /* Opzionale: cambia colore quando votato */
 }
 
+@media (max-width: 768px) {
+  #issuesDisplayArea {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    overflow-x: auto;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 20px;
+    margin-left: -10px;
+    margin-right: -10px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -ms-scroll-snap-type: x proximity;
+        scroll-snap-type: x proximity;
+  }
+  #issuesDisplayArea::-webkit-scrollbar {
+    display: none;
+  }
+  #issuesDisplayArea.active-carousel {
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+  }
+  #issuesDisplayArea .issue-card {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 88%;
+            flex: 0 0 88%;
+    max-width: 340px;
+    margin-right: 12px;
+    scroll-snap-align: start;
+    -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+    margin-bottom: 0;
+  }
+  #issuesDisplayArea .issue-card:last-child {
+    margin-right: 0;
+  }
+}
+
 /* Contenuto aggiornato per scss/_about.scss */
 .dev-text-content p {
   margin-bottom: 1em;

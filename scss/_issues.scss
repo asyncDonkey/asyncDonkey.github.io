@@ -161,3 +161,58 @@
         'opsz' 20; /* Piena quando votato */
     /* color: var(--link-color); /* Opzionale: cambia colore quando votato */
 }
+
+#issuesDisplayArea {
+    // Qui puoi mantenere gli stili che hai attualmente per la visualizzazione desktop
+    // Esempio: se è un semplice flusso di blocchi:
+    // display: block; 
+    // Oppure se usi grid per desktop:
+    // display: grid;
+    // grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    // gap: 15px;
+
+    // Media Query specifica per il comportamento del carosello mobile
+    @media (max-width: 768px) {
+        display: flex;              // 1. Abilita il layout Flexbox per gli item in riga
+        overflow-x: auto;           // 2. Permette lo scroll orizzontale
+        padding-left: 10px;         // Aggiunge un po' di spazio a sinistra della prima card
+        padding-right: 10px;        // Aggiunge un po' di spazio a destra dell'ultima card (se serve per lo snap)
+        padding-bottom: 20px;       // Spazio per eventuale ombra/effetto e per non tagliare le card
+        margin-left: -10px;         // Compensa il padding-left per allineare con i bordi della pagina se necessario
+        margin-right: -10px;        // Compensa il padding-right
+        
+        // Nascondi la scrollbar standard mantenendo la funzionalità
+        scrollbar-width: none;      // Per Firefox
+        -ms-overflow-style: none;   // Per IE 10+
+        &::-webkit-scrollbar {
+            display: none;          // Per Chrome, Safari, Opera, Edge
+        }
+
+        // Comportamento dello "snap" durante lo scroll (opzionale ma consigliato per UX)
+        // scroll-snap-type: x mandatory; // Forza lo snap a un item
+        scroll-snap-type: x proximity; // Snap più permissivo, scatta se vicino
+
+        // Stili per il feedback visivo durante il drag (opzionale)
+        &.active-carousel {
+            cursor: grabbing;
+            // potresti aggiungere altri effetti se desideri, es:
+            // .issue-card { transform: scale(0.98); } 
+        }
+
+        .issue-card {
+            flex: 0 0 88%;          // Ogni card occupa l'88% della larghezza del contenitore del carosello
+                                    // Questo permette di vedere un pezzetto della card successiva, invitando allo swipe
+            max-width: 340px;       // Un limite massimo ragionevole per la larghezza della card su mobile
+            margin-right: 12px;     // Spazio tra le card nel carosello
+            scroll-snap-align: start; // Allinea l'inizio della card con l'inizio del contenitore snap
+            transform: translateZ(0); // Piccolo trucco per migliorare le performance di rendering su alcuni browser
+            
+            // Rimuovi il margine inferiore se presente, dato che il padding-bottom del contenitore gestisce lo spazio
+            margin-bottom: 0; 
+
+            &:last-child {
+                margin-right: 0;    // Nessun margine per l'ultima card (o uguale al padding-right del contenitore per allineamento)
+            }
+        }
+    }
+}
