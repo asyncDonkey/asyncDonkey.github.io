@@ -1,9 +1,6 @@
-// js/aboutPage.js
+// Contenuto completo e aggiornato per js/aboutPage.js
 
-document.addEventListener('DOMContentLoaded', () => {
-    // --- DATA ---
-    // La nostra nuova "Single Source of Truth" per le competenze
-    const competenzeTecniche = [
+const competenzeTecniche = [
         {
             id: 'javascript',
             nome: 'JavaScript (ES6+)',
@@ -78,76 +75,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    // --- LOGICA DI RENDERIZZAZIONE ---
-    const skillsGrid = document.querySelector('#skills .skills-grid');
-    const skillDetailModal = document.getElementById('skillDetailModal');
-    const skillModalContent = document.getElementById('skillModalContent');
-    const closeModalBtn = document.querySelector('#skillDetailModal .close-modal-btn');
+function populateSkills() {
+    const skillsGrid = document.querySelector("#skills .skills-grid");
+    if (!skillsGrid) return;
 
-    if (!skillsGrid || !skillDetailModal || !skillModalContent || !closeModalBtn) {
-        console.error('Elementi per la sezione competenze (griglia o modale) non trovati. Script interrotto.');
-        return;
-    }
+    skillsGrid.innerHTML = ""; // Pulisce il messaggio di caricamento
 
-    /**
-     * Mostra la modale con i dettagli della competenza selezionata.
-     * @param {object} skill L'oggetto della competenza da visualizzare.
-     */
-    function showSkillModal(skill) {
-        skillModalContent.innerHTML = `
-            <div class="skill-modal-header">
-                <i class="${skill.iconClass}" style="color: ${skill.coloreIcona};"></i>
-                <h2>${skill.nome}</h2>
-            </div>
-            <div class="skill-modal-body">
-                <h3>Descrizione</h3>
-                <p>${skill.descrizioneDettagliata}</p>
-                <h3>Esempio Pratico nel Progetto</h3>
-                <p>${skill.esempioPratico}</p>
-            </div>
+    competenzeTecniche.forEach((skill) => {
+        const listItem = document.createElement("li");
+        listItem.className = "skill-card";
+        listItem.setAttribute("data-skill-id", skill.id);
+
+        listItem.innerHTML = `
+            <i class="skill-icon ${skill.iconClass}" style="color: ${skill.coloreIcona};" aria-hidden="true"></i>
+            <span>${skill.nome}</span>
         `;
-        skillDetailModal.style.display = 'block';
-    }
-
-    /**
-     * Popola la griglia delle competenze in `about.html`.
-     */
-    function renderSkills() {
-        // Svuota la griglia da eventuali elementi statici
-        skillsGrid.innerHTML = '';
-
-        competenzeTecniche.forEach(skill => {
-            const card = document.createElement('li');
-            card.className = 'skill-card';
-            
-            const icon = document.createElement('i');
-            icon.className = `${skill.iconClass} skill-icon`;
-            icon.style.color = skill.coloreIcona;
-
-            const name = document.createElement('span');
-            name.textContent = skill.nome;
-
-            card.appendChild(icon);
-            card.appendChild(name);
-
-            // Aggiungi l'evento di click per aprire la modale
-            card.addEventListener('click', () => showSkillModal(skill));
-
-            skillsGrid.appendChild(card);
-        });
-    }
-
-    // --- EVENT LISTENERS per la modale ---
-    closeModalBtn.addEventListener('click', () => {
-        skillDetailModal.style.display = 'none';
+        skillsGrid.appendChild(listItem);
     });
+}
 
-    window.addEventListener('click', (event) => {
-        if (event.target == skillDetailModal) {
-            skillDetailModal.style.display = 'none';
+function openSkillModal(skillId) {
+    const skill = competenzeTecniche.find(s => s.id === skillId);
+    if (!skill) return;
+
+    const modal = document.getElementById("skillDetailModal");
+    const modalContent = document.getElementById("skillModalContent");
+    const closeModalBtn = modal.querySelector(".close-modal-btn");
+
+    modalContent.innerHTML = `
+        <div class="skill-modal-header">
+            <i class="${skill.iconClass}" style="color: ${skill.coloreIcona};" aria-hidden="true"></i>
+            <h2>${skill.nome}</h2>
+        </div>
+        <div class="skill-modal-body">
+            <h3>Descrizione Dettagliata</h3>
+            <p>${skill.descrizioneDettagliata}</p>
+            <h3>Esempio Pratico nel Progetto</h3>
+            <p>${skill.esempioPratico}</p>
+        </div>
+    `;
+
+    modal.style.display = "block";
+
+    const closeModal = () => {
+        modal.style.display = "none";
+        closeModalBtn.removeEventListener('click', closeModal);
+        window.removeEventListener('click', closeOutside);
+    };
+
+    const closeOutside = (event) => {
+        if (event.target == modal) {
+            closeModal();
         }
+    };
+
+    closeModalBtn.addEventListener('click', closeModal);
+    window.addEventListener('click', closeOutside);
+}
+
+/**
+ * NUOVA FUNZIONE: Aggiunge la logica per il trascinamento orizzontale del carosello.
+ * @param {HTMLElement} container - L'elemento contenitore del carosello.
+ */
+function setupSkillsCarousel(container) {
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    container.addEventListener('mousedown', (e) => {
+        isDown = true;
+        container.classList.add('active-carousel');
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
     });
 
-    // Avvia la renderizzazione
-    renderSkills();
+    container.addEventListener('mouseleave', () => {
+        isDown = false;
+        container.classList.remove('active-carousel');
+    });
+
+    container.addEventListener('mouseup', () => {
+        isDown = false;
+        container.classList.remove('active-carousel');
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const walk = (x - startX) * 2; // Moltiplicatore per rendere il drag più veloce
+        container.scrollLeft = scrollLeft - walk;
+    });
+}
+
+
+// Event Listener principale che avvia le funzioni della pagina
+document.addEventListener("DOMContentLoaded", () => {
+    populateSkills();
+
+    const skillsGrid = document.querySelector("#skills .skills-grid");
+    if (skillsGrid) {
+        skillsGrid.addEventListener("click", (event) => {
+            const card = event.target.closest(".skill-card");
+            if (card) {
+                const skillId = card.getAttribute("data-skill-id");
+                openSkillModal(skillId);
+            }
+        });
+
+        // NUOVA LOGICA: Attiva il carosello solo su mobile
+        if (window.innerWidth <= 768) {
+            setupSkillsCarousel(skillsGrid);
+        }
+    }
 });
