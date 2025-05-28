@@ -330,3 +330,48 @@
         }
     }
 }
+
+/* --- Stili per la Sezione Contatti Migliorata --- */
+#contact ul li {
+    display: flex;       // Allinea gli elementi (label, email, pulsante) sulla stessa riga
+    align-items: center; // Allinea verticalmente al centro
+    flex-wrap: wrap;     // Permette di andare a capo se non c'è spazio
+    gap: 8px;            // Spazio tra gli elementi (es. email e pulsante copia)
+    margin-bottom: 0.5em; // Mantiene un po' di spazio sotto ogni item della lista
+}
+
+.contact-email-link {
+    text-decoration: none; // Rimuoviamo la sottolineatura standard del link
+    // Il colore e l'animazione sono gestiti dallo span interno
+}
+
+// La classe .contact-email-animated è già in _animations.scss per l'animazione,
+// ma possiamo aggiungere stili specifici qui se necessario (es. display).
+// .contact-email-animated {} 
+
+.copy-email-button {
+    background: transparent;
+    border: 1px solid transparent; // Bordo invisibile per mantenere dimensioni
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    padding: 4px; 
+    border-radius: var(--border-radius-sm, 4px);
+    display: inline-flex; // Per allineare l'icona
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+
+    .material-symbols-rounded {
+        font-size: 1.1rem; // Dimensione icona leggermente più piccola
+    }
+
+    &:hover {
+        color: var(--link-hover-color);
+        background-color: var(--surface-bg-hover);
+        border-color: var(--border-color-secondary);
+    }
+
+    &:active {
+        transform: translateY(1px);
+    }
+}

@@ -619,6 +619,33 @@ a:hover {
           animation: nickname-glow-teal-effect 2.5s infinite alternate ease-in-out;
 }
 
+/* ===== Animazione Neon per Email Contatto ===== */
+@-webkit-keyframes contact-email-neon-glow {
+  0%, 100% {
+    color: var(--link-color);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.2), 0 0 6px var(--link-color), 0 0 10px var(--link-color);
+  }
+  50% {
+    color: var(--link-hover-color); /* O un teal più brillante se definito */
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 10px var(--link-hover-color), 0 0 18px var(--link-hover-color), 0 0 25px var(--link-hover-color);
+  }
+}
+@keyframes contact-email-neon-glow {
+  0%, 100% {
+    color: var(--link-color);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.2), 0 0 6px var(--link-color), 0 0 10px var(--link-color);
+  }
+  50% {
+    color: var(--link-hover-color); /* O un teal più brillante se definito */
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 10px var(--link-hover-color), 0 0 18px var(--link-hover-color), 0 0 25px var(--link-hover-color);
+  }
+}
+.contact-email-animated {
+  -webkit-animation: contact-email-neon-glow 2.5s infinite ease-in-out;
+          animation: contact-email-neon-glow 2.5s infinite ease-in-out;
+  font-weight: 600; /* Diamo un po' di spessore all'email */
+}
+
 /* ===== Header Styles ===== */
 header {
   background-color: var(--surface-bg-primary);
@@ -7746,6 +7773,56 @@ main section {
     font-size: 0.8em;
   }
 }
+/* --- Stili per la Sezione Contatti Migliorata --- */
+#contact ul li {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0.5em;
+}
+
+.contact-email-link {
+  text-decoration: none;
+}
+
+.copy-email-button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--border-radius-sm, 4px);
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+.copy-email-button .material-symbols-rounded {
+  font-size: 1.1rem;
+}
+.copy-email-button:hover {
+  color: var(--link-hover-color);
+  background-color: var(--surface-bg-hover);
+  border-color: var(--border-color-secondary);
+}
+.copy-email-button:active {
+  -webkit-transform: translateY(1px);
+          transform: translateY(1px);
+}
+
 #test-zone-section h2 {
   font-family: "Space Grotesk", sans-serif;
   font-weight: 600;

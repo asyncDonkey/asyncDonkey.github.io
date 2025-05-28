@@ -377,3 +377,28 @@
 .nickname-glow-teal {
     animation: nickname-glow-teal-effect 2.5s infinite alternate ease-in-out;
 }
+
+/* ===== Animazione Neon per Email Contatto ===== */
+@keyframes contact-email-neon-glow {
+    0%, 100% {
+        color: var(--link-color);
+        text-shadow: 
+            0 0 4px rgba(255, 255, 255, 0.2),
+            0 0 6px var(--link-color),
+            0 0 10px var(--link-color);
+    }
+    50% {
+        color: var(--link-hover-color); /* O un teal più brillante se definito */
+        text-shadow: 
+            0 0 6px rgba(255, 255, 255, 0.4),
+            0 0 10px var(--link-hover-color),
+            0 0 18px var(--link-hover-color),
+            0 0 25px var(--link-hover-color);
+    }
+}
+
+.contact-email-animated {
+    animation: contact-email-neon-glow 2.5s infinite ease-in-out;
+    font-weight: 600; /* Diamo un po' di spessore all'email */
+}
+

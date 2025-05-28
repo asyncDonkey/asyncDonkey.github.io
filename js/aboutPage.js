@@ -1,4 +1,5 @@
 // Contenuto completo e aggiornato per js/aboutPage.js
+import { showToast } from './toastNotifications.js';
 
 const competenzeTecniche = [
         {
@@ -339,9 +340,37 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Se siamo su mobile, attiva i caroselli
+    // *** NUOVA LOGICA: Pulsante Copia Email ***
+    const copyEmailBtn = document.getElementById('copyEmailBtn');
+    const emailAddressElement = document.getElementById('contactEmailAddress');
+
+    if (copyEmailBtn && emailAddressElement) {
+        copyEmailBtn.addEventListener('click', () => {
+            const email = emailAddressElement.textContent;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(email)
+                    .then(() => {
+                        showToast('Indirizzo email copiato!', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Errore nel copiare l\'email: ', err);
+                        showToast('Errore nel copiare l\'email.', 'error');
+                        // Fallback per browser che non supportano clipboard API o per http
+                        // Potresti selezionare il testo e usare document.execCommand('copy')
+                        // ma è deprecato e meno sicuro. Per ora, logghiamo l'errore.
+                    });
+            } else {
+                // Fallback per browser molto vecchi o contesti non sicuri (non https)
+                console.warn('API Clipboard non disponibile.');
+                showToast('Impossibile copiare l\'email automaticamente.', 'warning');
+            }
+        });
+    }
+    // *** FINE NUOVA LOGICA ***
+
+
     if (window.innerWidth <= 768) {
-        setupDraggableCarousel(skillsGrid);
-        setupDraggableCarousel(patternsContainer); 
+        if (skillsGrid) setupDraggableCarousel(skillsGrid);
+        if (patternsContainer) setupDraggableCarousel(patternsContainer); 
     }
 });
