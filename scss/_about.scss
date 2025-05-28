@@ -76,3 +76,101 @@
     text-align: center;
     color: var(--text-color-secondary);
 }
+
+/* Nuovo contenitore per la flip card (CON MODIFICHE PER IL FLOAT A SINISTRA) */
+.flip-card-container {
+    perspective: 1000px; 
+    width: 250px; 
+    height: 250px; 
+    margin: 0 auto 20px auto; /* Centra la card su mobile e le dà spazio sotto */
+}
+
+@media (min-width: 768px) { /* Per schermi più grandi */
+    .flip-card-container {
+        float: left; /* <<< MODIFICA QUI: Manda la card a SINISTRA */
+        margin: 5px 20px 10px 0; /* <<< MODIFICA QUI: Margine a destra e sotto */
+        /* Era: margin: 10px 0 10px 20px; */
+    }
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 15px;
+}
+
+.flip-card-container:hover .flip-card-inner {
+    transform: rotateY(180deg); 
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.flip-card-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+}
+
+.flip-card-back {
+    background-color: #2a2a2a;
+    color: #E0E0E0;
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.flip-card-back h3 {
+    margin: 0 0 15px 0;
+    color: #00C9A7; /* Teal */
+}
+
+.flip-card-back p {
+    margin: 4px 0;
+    font-size: 0.9em;
+}
+
+/* Il testo che segue il float */
+#about .dev-section-content .dev-text-content {
+    /* Questa proprietà assicura che il contenitore del testo
+       non inizi finché non c'è spazio libero accanto all'elemento flottante.
+       Se il float non ha `overflow: hidden` sul suo parent,
+       a volte questo può aiutare, ma `overflow: hidden` sul parent
+       del float (cioè .dev-section-content) è spesso la soluzione più robusta.
+       Tuttavia, l'abbiamo già applicato a .dev-text-content.
+       Rimuoviamo la vecchia regola `display: flex` da .dev-section-content
+       e lasciamo che il float faccia il suo lavoro.
+    */
+}
+
+/* Modifica a .dev-section-content per permettere al float di funzionare correttamente */
+.dev-section-content {
+    /* Rimuovi display: flex e gap se li avevi qui specificamente
+       per .dev-image-container e .dev-text-content come colonne.
+       Il float si occuperà del posizionamento.
+    */
+    padding: 1px; /* Trucco per contenere i float figli se .clearfix non è usato */
+                  /* oppure usa un clearfix classico */
+}
+
+/* Opzionale: un clearfix per .dev-section-content se necessario */
+.dev-section-content::after {
+    content: "";
+    clear: both;
+    display: table;
+}

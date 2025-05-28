@@ -19,43 +19,7 @@
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
         <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
-        <style>
-            /* Stili per l'immagine nella sezione "The .Dev" */
-            .dev-section-content {
-                display: flex;
-                flex-wrap: wrap; /* Per responsività */
-                gap: 20px;
-            }
-
-            .dev-text-content {
-                flex: 2; /* Più spazio per il testo */
-                min-width: 300px; /* Larghezza minima per il testo */
-            }
-
-            .dev-image-container {
-                flex: 1; /* Meno spazio per l'immagine */
-                min-width: 200px; /* Larghezza minima per l'immagine */
-                text-align: center; /* Centra l'immagine se più piccola del contenitore */
-            }
-
-            .dev-image-container img {
-                max-width: 100%;
-                height: auto;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-
-            /* Media query per stackare immagine e testo su schermi piccoli */
-            @media (max-width: 768px) {
-                .dev-section-content {
-                    flex-direction: column;
-                }
-                .dev-image-container {
-                    order: -1; /* Sposta l'immagine sopra il testo su mobile se preferito */
-                    margin-bottom: 20px;
-                }
-            }
-        </style>
+        
     </head>
 
     <body>
@@ -217,7 +181,20 @@
 
             <section id="about">
                 <h2>The .Dev</h2>
-                <div class="dev-section-content">
+               <div class="dev-section-content">
+    <div class="flip-card-container">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <img src="images/dev.jpg" alt="Immagine dello sviluppatore" />
+            </div>
+            <div class="flip-card-back">
+                <h3>Umberto T.</h3>
+                <p>Location: Italy 🇮🇹</p>
+                <p>Focus: Full-Stack</p>
+                <p>Status: Coding...</p>
+            </div>
+        </div>
+    </div>
                     <div class="dev-text-content">
                         <p>
                             Ciao, sono Umberto. L'obiettivo primario di questo spazio è unire il problem-solving
@@ -273,9 +250,7 @@
                             >.
                         </p>
                     </div>
-                    <div class="dev-image-container">
-                        <img src="images/dev.jpg" alt="Immagine dello sviluppatore o logo del progetto" />
-                    </div>
+                    
                 </div>
             </section>
 
