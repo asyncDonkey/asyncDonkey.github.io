@@ -7343,19 +7343,82 @@ main section {
   /* color: var(--link-color); /* Opzionale: cambia colore quando votato */
 }
 
+/* Contenuto aggiornato per scss/_about.scss */
 .dev-text-content p {
-  margin-bottom: 1em; /* Aggiunge spazio sotto ogni paragrafo */
+  margin-bottom: 1em;
 }
 
 .dev-text-content ul {
-  list-style-position: inside; /* Porta i pallini dentro il blocco della lista */
-  padding-left: 0; /* Rimuovi il padding di default se 'inside' non basta */
-  margin-left: 1.5em; /* Aggiungi un margine per indentare un po' la lista */
-  margin-bottom: 1em; /* Spazio sotto la lista */
+  list-style-position: inside;
+  padding-left: 0;
+  margin-left: 1.5em;
+  margin-bottom: 1em;
 }
 
 .dev-text-content ul li {
-  margin-bottom: 0.5em; /* Spazio tra gli elementi della lista */
+  margin-bottom: 0.5em;
+}
+
+/* Stile per le nuove card con icona e testo */
+.skill-card {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  gap: 10px;
+}
+.skill-card .skill-icon {
+  font-size: 2.5em;
+}
+.skill-card span {
+  font-weight: 600;
+}
+
+/* Stili per la Modale Dettaglio Competenze */
+#skillDetailModal .modal-content.large {
+  max-width: 700px; /* Modale più larga per contenuti dettagliati */
+}
+
+.skill-modal-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 15px;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #444;
+}
+.skill-modal-header i {
+  font-size: 2.8em;
+}
+.skill-modal-header h2 {
+  margin: 0;
+  font-size: 1.8em;
+  color: #525151;
+}
+
+.skill-modal-body h3 {
+  color: #525151;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  border-left: 3px solid #00C9A7;
+  padding-left: 10px;
+}
+
+.skill-modal-body p {
+  color: #B0C4DE; /* <<<< MODIFICA ESEGUITA QUI: Da #BDBDBD al nuovo blu */
+  line-height: 1.7;
+  margin-bottom: 1em;
+  font-size: 1em;
+}
+
+#skills .loader-dots {
+  /* (Stili per il loader se non già presenti globalmente) */
+  text-align: center;
+  color: var(--text-color-secondary);
 }
 
 #test-zone-section h2 {

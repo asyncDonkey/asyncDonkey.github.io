@@ -1,14 +1,78 @@
+/* Contenuto aggiornato per scss/_about.scss */
+
 .dev-text-content p {
-    margin-bottom: 1em; /* Aggiunge spazio sotto ogni paragrafo */
+    margin-bottom: 1em; 
 }
 
 .dev-text-content ul {
-    list-style-position: inside; /* Porta i pallini dentro il blocco della lista */
-    padding-left: 0; /* Rimuovi il padding di default se 'inside' non basta */
-    margin-left: 1.5em; /* Aggiungi un margine per indentare un po' la lista */
-    margin-bottom: 1em; /* Spazio sotto la lista */
+    list-style-position: inside;
+    padding-left: 0; 
+    margin-left: 1.5em; 
+    margin-bottom: 1em; 
 }
 
 .dev-text-content ul li {
-    margin-bottom: 0.5em; /* Spazio tra gli elementi della lista */
+    margin-bottom: 0.5em;
+}
+
+/* Stile per le nuove card con icona e testo */
+.skill-card {
+    flex-direction: column;
+    gap: 10px; // Spazio tra icona e testo
+
+    .skill-icon {
+        font-size: 2.5em; // Icone più grandi
+        // il colore viene applicato via JS inline
+    }
+
+    span {
+        font-weight: 600;
+    }
+}
+
+
+/* Stili per la Modale Dettaglio Competenze */
+#skillDetailModal .modal-content.large {
+    max-width: 700px; /* Modale più larga per contenuti dettagliati */
+}
+
+.skill-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444; // Colore a mano per il bordo
+
+    i {
+        font-size: 2.8em;
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 1.8em;
+        color: #525151; // Colore a mano per il testo
+    }
+}
+
+.skill-modal-body h3 {
+    color: #525151; // Colore a mano
+    margin-top: 20px;
+    margin-bottom: 8px;
+    border-left: 3px solid #00C9A7; // Teal per evidenziare
+    padding-left: 10px;
+}
+
+.skill-modal-body p {
+    color: #B0C4DE; /* <<<< MODIFICA ESEGUITA QUI: Da #BDBDBD al nuovo blu */
+    line-height: 1.7;
+    margin-bottom: 1em;
+    font-size: 1em;
+}
+
+// Stile per il loader, se lo usi
+#skills .loader-dots {
+    /* (Stili per il loader se non già presenti globalmente) */
+    text-align: center;
+    color: var(--text-color-secondary);
 }

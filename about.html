@@ -6,8 +6,10 @@
         <title>The .Dev - asyncDonkey | Progetti e Tecnologie</title>
         <link rel="stylesheet" href="styles.css" />
         <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
         <link
             href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&display=swap"
             rel="stylesheet"
@@ -278,83 +280,15 @@
             </section>
 
             <section id="skills">
-                <h2>Competenze Tecniche</h2>
-                <p>
-                    Tecnologie e competenze chiave impiegate e in fase di sviluppo per il progetto asyncDonkey (clicca
-                    su una card per dettagli):
-                </p>
-                <ul class="skills-grid">
-                    <li
-                        class="skill-card"
-                        data-skill-name="HTML5"
-                        data-description="Costruzione di pagine web strutturate e semantiche, utilizzando tag moderni e best practice per l'accessibilità (accessibility) e SEO."
-                    >
-                        HTML5
-                    </li>
-                    <li
-                        class="skill-card"
-                        data-skill-name="CSS3"
-                        data-description="Styling di pagine web per un look moderno e responsive. Esperienza con Flexbox, Grid, CSS Variables e metodologie come BEM per creare interfacce utente (UI) accattivanti."
-                    >
-                        CSS3
-                    </li>
-                    <li
-                        class="skill-card"
-                        data-skill-name="JavaScript (ES6+)"
-                        data-description="Aggiunta di interattività e logica dinamica. Focus su manipolazione del DOM, gestione eventi, programmazione asincrona (Promises, async/await)."
-                    >
-                        JavaScript (ES6+)
-                    </li>
-                    <li
-                        class="skill-card"
-                        data-skill-name="Linguaggio C"
-                        data-description="Solide basi di programmazione procedurale, gestione della memoria e algoritmi, utili per comprendere il funzionamento a basso livello dei sistemi."
-                    >
-                        Linguaggio C
-                    </li>
-                    <li
-                        class="skill-card"
-                        data-skill-name="Firebase Platform"
-                        data-description="Utilizzo di Firebase per backend-as-a-service (BaaS): Firestore Database (NoSQL), Authentication, Hosting e Security Rules."
-                    >
-                        Firebase Platform
-                    </li>
-                    <li
-                        class="skill-card"
-                        data-skill-name="Backend Development (Concetti)"
-                        data-description="Comprensione dei principi server-side, design di API RESTful. Interesse per Python (Django/Flask) o Node.js (Express)."
-                    >
-                        [Python / Node.js]
-                    </li>
-                    <li
-                        class="skill-card"
-                        data-skill-name="Frontend Frameworks (Studio Futuro)"
-                        data-description="Studio pianificato di React, Vue.js o Svelte per Single Page Applications (SPA) complesse e performanti."
-                    >
-                        [React / Vue / Svelte]
-                    </li>
-                    <li
-                        class="skill-card"
-                        data-skill-name="Databases (Studio Futuro)"
-                        data-description="Interesse per database relazionali (SQL) come PostgreSQL e approfondimento NoSQL (MongoDB, Firestore)."
-                    >
-                        [SQL / NoSQL DBs]
-                    </li>
-                    <li
-                        class="skill-card"
-                        data-skill-name="Problem Solving & Project Management"
-                        data-description="Capacità di problem-solving analitico, gestione di progetti, attenzione ai dettagli e pensiero strutturato, trasferibili allo sviluppo software."
-                    >
-                        PS & PM
-                    </li>
-                </ul>
-                <div id="skillDetails" class="skill-details-container">
-                    <p>
-                        Selezionare una delle competenze elencate precedentemente per visualizzare una descrizione
-                        dettagliata.
-                    </p>
-                </div>
-            </section>
+    <h2>Competenze Tecniche</h2>
+    <p>
+        Tecnologie e competenze chiave impiegate e in fase di sviluppo per il progetto asyncDonkey (clicca
+        su una card per dettagli):
+    </p>
+    <ul class="skills-grid">
+        <div class="loader-dots"><span></span><span></span><span></span></div> Caricamento competenze...
+    </ul>
+    </section>
 
             <section id="guestbook">
                 <h2>Guestbook Generale</h2>
@@ -420,6 +354,13 @@
 
         <button id="scrollToTopBtn" title="Torna in cima">↑</button>
 
+        <div id="skillDetailModal" class="modal" style="display: none;">
+    <div class="modal-content large"> <span class="close-modal-btn">&times;</span>
+        <div id="skillModalContent">
+            </div>
+    </div>
+</div>
+
         <div id="loginModal" class="modal">
             <div class="modal-content">
                 <span class="closeLoginBtn">&times;</span>
@@ -455,6 +396,8 @@
         <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
         <script src="js/main.js" type="module"></script>
+        <script src="js/aboutPage.js" type="module"></script>
         <script src="js/comments.js" type="module"></script>
+        
     </body>
 </html>

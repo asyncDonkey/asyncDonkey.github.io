@@ -1167,24 +1167,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function setupInteractiveSkills() {
-        const skillBadges = document.querySelectorAll('#skills ul li[data-skill-name]');
-        const skillDetailsContainer = document.getElementById('skillDetails');
-        if (!skillDetailsContainer || skillBadges.length === 0) return;
-        let currentlyActiveSkillBadge = null;
-        skillBadges.forEach((badge) => {
-            badge.addEventListener('click', function () {
-                if (currentlyActiveSkillBadge) {
-                    currentlyActiveSkillBadge.classList.remove('active-skill');
-                }
-                this.classList.add('active-skill');
-                currentlyActiveSkillBadge = this;
-                const skillName = this.dataset.skillName || 'Skill';
-                const skillDescription = this.dataset.description || 'Nessun dettaglio disponibile.';
-                skillDetailsContainer.innerHTML = `<h3>${escapeHTML(skillName)}</h3><p>${escapeHTML(skillDescription)}</p>`;
-            });
-        });
-    }
+   
 
     function setupModalControls() {
         if (showLoginBtn && loginModal) {
@@ -1204,7 +1187,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Chiamate alle funzioni di setup del DOM
     setupSmoothScrolling();
     setupScrollToTopButton();
-    setupInteractiveSkills();
+    
     setupModalControls();
     setupAvatarClickListener();
     // Caricamento contenuti specifici della homepage
