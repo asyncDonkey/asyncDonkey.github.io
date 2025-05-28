@@ -266,6 +266,96 @@
     </ul>
     </section>
 
+    <section id="complex-patterns">
+    <h2>Pattern e Logiche Complesse</h2>
+    <p class="section-description">
+        Oltre alle singole tecnologie, il progetto implementa diversi pattern architetturali per garantire robustezza, manutenibilità e performance. Ecco alcuni esempi significativi implementati nel codebase:
+    </p>
+    <div class="patterns-container">
+
+        <div class="pattern-card">
+    <div class="pattern-header">
+        <span class="material-symbols-rounded">hourglass_top</span>
+        <h3>Gestione Asincrona (async/await)</h3>
+    </div>
+    <div class="pattern-body">
+        <p>
+            Questo pattern è il cuore di un'applicazione web moderna e reattiva. Invece di eseguire un'operazione lunga (come chiedere i dati al database) e costringere l'utente ad aspettare, il codice la avvia e 'promette' di completarla in un secondo momento, senza bloccare il resto dell'interfaccia.
+            <br><br>
+            <strong>L'analogia è semplice:</strong> è come ordinare un caffè. Invece di restare fermo al bancone, ti viene dato un dischetto che vibrerà quando l'ordine è pronto, lasciandoti libero di sederti. Allo stesso modo, il sito rimane sempre fluido e navigabile mentre attende i dati.
+            <br><br>
+            L'uso di <code>async/await</code> è la sintassi che rende questo flusso di lavoro elegante e leggibile, ed è fondamentale per caricare elementi come i punteggi della classifica o i commenti degli articoli senza mai 'congelare' l'esperienza dell'utente.
+        </p>
+    </div>
+</div>
+
+        <div class="pattern-card">
+    <div class="pattern-header">
+        <span class="material-symbols-rounded">sync</span>
+        <h3>Realtime Listeners (onSnapshot)</h3>
+    </div>
+    <div class="pattern-body">
+        <p>
+            Questo pattern trasforma l'applicazione da una pagina statica a un'esperienza viva e collaborativa. Utilizzando la funzione <code>onSnapshot</code> di Firestore, il client non si limita a 'chiedere' i dati una volta, ma 'sottoscrive' un abbonamento alle modifiche future.
+            <br><br>
+            <strong>L'analogia:</strong> è come essere in una chat di gruppo. Non hai bisogno di aggiornare manualmente per vedere i nuovi messaggi; questi appaiono istantaneamente per tutti i partecipanti. Allo stesso modo, quando un utente lascia un commento su un articolo, questo compare sulla pagina di chiunque la stia visualizzando in quel momento.
+            <br><br>
+            Questa reattività è fondamentale per le notifiche, le sezioni di commenti e per qualsiasi funzionalità che richieda una sincronizzazione live, rendendo l'interazione più fluida e coinvolgente.
+        </p>
+    </div>
+</div>
+
+        <div class="pattern-card">
+    <div class="pattern-header">
+        <span class="material-symbols-rounded">view_module</span>
+        <h3>Modularizzazione del Codice JS</h3>
+    </div>
+    <div class="pattern-body">
+        <p>
+            Questo approccio è fondamentale per la salute e la longevità di un codebase. Invece di un unico, monolitico file JavaScript, il codice è stato scomposto in moduli indipendenti (<code>ES6 Modules</code>), ognuno con una responsabilità chiara e definita.
+            <br><br>
+            <strong>L'analogia:</strong> è come costruire con i mattoncini LEGO®. Invece di partire da un blocco gigante, si utilizzano mattoncini standard e specializzati (i moduli) che possono essere combinati e riutilizzati. Il file <code>main.js</code> agisce come il 'manuale di istruzioni', importando e orchestrando i diversi moduli, come <code>auth.js</code> per la gestione degli utenti o <code>comments.js</code> per i commenti.
+            <br><br>
+            Questo non solo rende il codice più pulito e leggibile, ma ne semplifica drasticamente la manutenzione: se c'è un problema con i commenti, sappiamo di dover guardare solo nel 'cassetto' giusto, senza rischiare di rompere altre parti del sito.
+        </p>
+    </div>
+</div>
+
+        <div class="pattern-card">
+    <div class="pattern-header">
+        <span class="material-symbols-rounded">cached</span>
+        <h3>Cache Busting per Risorse Critiche</h3>
+    </div>
+    <div class="pattern-body">
+        <p>
+            Questo pattern risolve un problema comune e frustrante: la visualizzazione di risorse non aggiornate a causa della 'memoria' (cache) del browser. Per garantire che l'utente veda sempre la versione più recente di un file critico, come il proprio avatar, si 'invalida' la versione precedente.
+            <br><br>
+            <strong>L'analogia:</strong> è come un prodotto al supermercato. Se la scatola cambia leggermente, potresti non notarlo, ma se viene aggiunta un'etichetta con scritto 'Nuova Formula!', sai per certo di dover prendere quella. Aggiungere un parametro all'indirizzo di un'immagine (es. <code>avatar.jpg?v=12345</code>) agisce come quell'etichetta, forzando il browser a ignorare la vecchia versione e scaricare quella nuova.
+            <br><br>
+            Nel progetto, questo è visibile in <code>js/profile.js</code>: quando un utente carica un nuovo avatar, all'URL dell'immagine viene aggiunto un timestamp, garantendo che la modifica sia visibile a tutti istantaneamente.
+        </p>
+    </div>
+</div>
+
+        <div class="pattern-card">
+    <div class="pattern-header">
+        <span class="material-symbols-rounded">schema</span>
+        <h3>Sincronizzazione Dati Denormalizzati</h3>
+    </div>
+    <div class="pattern-body">
+        <p>
+            Questo è un pattern avanzato di architettura per database <code>NoSQL</code> come <code>Firestore</code>, che bilancia performance e coerenza. Per rendere il sito più veloce, alcune informazioni (come il nickname di un utente) vengono duplicate e salvate direttamente dove servono (es. all'interno di un commento), un processo chiamato 'denormalizzazione'.
+            <br><br>
+            <strong>L'analogia:</strong> è come avere il numero di un amico sia nella rubrica del telefono (la fonte di verità) sia scritto su vari post-it. Se il numero cambia, devi aggiornare tutti i post-it. Per evitare questo lavoro manuale, una <strong><code>Cloud Function</code></strong> agisce da 'assistente magico': non appena aggiorni la rubrica, l'assistente trova e corregge automaticamente ogni post-it.
+            <br><br>
+            Allo stesso modo, la funzione <code>userPublicProfileSync.js</code> nel backend 'ascolta' le modifiche al profilo di un utente e le propaga istantaneamente in tutti i documenti correlati, garantendo coerenza in tutto il sito senza sacrificare la velocità di caricamento.
+        </p>
+    </div>
+</div>
+
+    </div>
+</section>
+
             <section id="guestbook">
                 <h2>Guestbook Generale</h2>
                 <p>Lascia un commento o un saluto!</p>

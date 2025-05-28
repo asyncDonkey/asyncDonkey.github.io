@@ -7574,6 +7574,71 @@ main section {
   display: table;
 }
 
+/* --- Stili per la Sezione Pattern Complessi --- */
+#complex-patterns {
+  padding-top: 2rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--border-color-secondary);
+}
+#complex-patterns .section-description {
+  max-width: 800px;
+  text-align: center;
+  margin: 0 auto 2rem auto;
+  color: var(--text-color-secondary);
+  font-size: 1.05em;
+  line-height: 1.7;
+}
+
+.patterns-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.pattern-card {
+  background-color: var(--surface-bg-secondary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: 8px;
+  padding: 20px 25px;
+  -webkit-transition: -webkit-transform 0.2s ease-in-out, -webkit-box-shadow 0.2s ease-in-out;
+  transition: -webkit-transform 0.2s ease-in-out, -webkit-box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, -webkit-transform 0.2s ease-in-out, -webkit-box-shadow 0.2s ease-in-out;
+}
+.pattern-card:hover {
+  -webkit-transform: translateY(-4px);
+          transform: translateY(-4px);
+  -webkit-box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.pattern-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.pattern-header .material-symbols-rounded {
+  font-size: 2em;
+  color: var(--link-color);
+}
+.pattern-header h3 {
+  margin: 0;
+  font-size: 1.25em;
+  color: var(--heading-color);
+}
+
+.pattern-body p {
+  margin: 0;
+  color: var(--text-color-secondary);
+  line-height: 1.6;
+  font-size: 0.95em;
+}
+
 #test-zone-section h2 {
   font-family: "Space Grotesk", sans-serif;
   font-weight: 600;
