@@ -44,6 +44,8 @@ const BADGE_ID_CONTENT_EXPLORER = 'content-explorer'; // Per commenti su 3 artic
 const BADGE_ID_ARTICLE_PATRON = 'article-patron'; // NUOVO: Per 5 like ad articoli diversi
 const BADGE_ID_EARLY_ADOPTER = 'early-adopter'; // NUOVO
 
+const BADGE_ID_APPRECIATED_AUTHOR = 'appreciated-author';
+
 /**
  * Helper per recuperare i dettagli di un badge da Firestore.
  * Potremmo aggiungere un livello di cache qui in futuro se necessario.
@@ -773,5 +775,72 @@ exports.awardEarlyAdopterBadge = onDocumentCreated('userProfiles/{userId}', asyn
         }
     } else {
         logger.info(`[CF:${functionName}] Utente ${userId} non idoneo per il badge '${badgeIdToAward}'.`);
+    }
+});
+// --- NUOVA FUNZIONE PER BADGE "AUTORE APPREZZATO" ---
+exports.awardAppreciatedAuthorBadge = onDocumentUpdated('articles/{articleId}', async (event) => {
+    const functionName = 'awardAppreciatedAuthorBadge';
+    if (!event.data || !event.data.before || !event.data.after) {
+        logger.info(`[CF:${functionName}] Evento non valido o dati mancanti.`);
+        return;
+    }
+
+    const articleId = event.params.articleId;
+    const articleAfter = event.data.after.data();
+    // const articleBefore = event.data.before.data(); // Non strettamente necessario per questa logica
+
+    const authorId = articleAfter.authorId;
+    const likeCount = articleAfter.likeCount || 0;
+    const likeThreshold = 5;
+    const badgeIdToAward = BADGE_ID_APPRECIATED_AUTHOR;
+
+    if (!authorId) {
+        logger.warn(`[CF:${functionName}] Articolo ${articleId} non ha un authorId.`);
+        return;
+    }
+
+    if (likeCount < likeThreshold) {
+        // logger.info(`[CF:${functionName}] Articolo ${articleId} ha ${likeCount} likes, soglia non raggiunta.`);
+        return;
+    }
+
+    const userProfileRef = db.collection('userProfiles').doc(authorId);
+
+    try {
+        let badgeActuallyAwarded = false;
+        await db.runTransaction(async (transaction) => {
+            const userProfileSnap = await transaction.get(userProfileRef);
+            if (!userProfileSnap.exists) {
+                logger.warn(`[CF:${functionName}] Profilo utente ${authorId} non trovato per articolo ${articleId}.`);
+                return;
+            }
+
+            const userProfile = userProfileSnap.data();
+            const earnedBadges = userProfile.earnedBadges || [];
+
+            if (earnedBadges.includes(badgeIdToAward)) {
+                // logger.info(`[CF:${functionName}] Utente <span class="math-inline">\{authorId\} ha già il badge '</span>{badgeIdToAward}'.`);
+                return;
+            }
+
+            // L'utente non ha il badge e la soglia like è raggiunta
+            logger.info(`[CF:<span class="math-inline">{functionName}] Assegnazione badge '</span>{badgeIdToAward}' a utente ${authorId} per articolo ${articleId}.`);
+            transaction.update(userProfileRef, {
+                earnedBadges: FieldValue.arrayUnion(badgeIdToAward),
+                updatedAt: FieldValue.serverTimestamp(),
+            });
+            badgeActuallyAwarded = true;
+        });
+
+        if (badgeActuallyAwarded) {
+            await sendNewBadgeNotification(authorId, badgeIdToAward);
+            logger.info(`[CF:<span class="math-inline">{functionName}] Notifica inviata per badge '</span>{badgeIdToAward}' a utente ${authorId}.`);
+        }
+
+    } catch (error) {
+        logger.error(
+            `[CF:<span class="math-inline">{functionName}] Errore durante la transazione per badge '</span>{badgeIdToAward}' a utente ${authorId} (articolo ${articleId}):`,
+            error
+        );
     }
 });

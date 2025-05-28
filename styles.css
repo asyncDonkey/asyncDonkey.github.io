@@ -560,6 +560,65 @@ a:hover {
   font-family: "Source Code Pro", monospace;
 }
 
+@-webkit-keyframes icon-pulse-teal-effect {
+  0%, 100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+    opacity: 0.85;
+    color: #00C9A7;
+  }
+  50% {
+    -webkit-transform: scale(1.15);
+            transform: scale(1.15);
+    opacity: 1;
+    color: #00fcd1;
+    text-shadow: 0 0 8px rgba(0, 201, 167, 0.5);
+  }
+}
+
+@keyframes icon-pulse-teal-effect {
+  0%, 100% {
+    -webkit-transform: scale(1);
+            transform: scale(1);
+    opacity: 0.85;
+    color: #00C9A7;
+  }
+  50% {
+    -webkit-transform: scale(1.15);
+            transform: scale(1.15);
+    opacity: 1;
+    color: #00fcd1;
+    text-shadow: 0 0 8px rgba(0, 201, 167, 0.5);
+  }
+}
+.icon-pulse-teal {
+  -webkit-animation: icon-pulse-teal-effect 2s infinite ease-in-out;
+          animation: icon-pulse-teal-effect 2s infinite ease-in-out;
+  display: inline-block;
+}
+
+@-webkit-keyframes nickname-glow-teal-effect {
+  0%, 100% {
+    text-shadow: 0 0 3px rgba(0, 201, 167, 0.2), 0 0 5px rgba(0, 201, 167, 0.1);
+  }
+  50% {
+    text-shadow: 0 0 5px rgba(0, 201, 167, 0.8), 0 0 10px rgba(0, 201, 167, 0.6), 0 0 15px rgba(0, 201, 167, 0.4);
+  }
+}
+
+@keyframes nickname-glow-teal-effect {
+  0%, 100% {
+    text-shadow: 0 0 3px rgba(0, 201, 167, 0.2), 0 0 5px rgba(0, 201, 167, 0.1);
+  }
+  50% {
+    text-shadow: 0 0 5px rgba(0, 201, 167, 0.8), 0 0 10px rgba(0, 201, 167, 0.6), 0 0 15px rgba(0, 201, 167, 0.4);
+  }
+}
+.nickname-glow-teal {
+  -webkit-animation: nickname-glow-teal-effect 2.5s infinite alternate ease-in-out;
+          animation: nickname-glow-teal-effect 2.5s infinite alternate ease-in-out;
+}
+
 /* ===== Header Styles ===== */
 header {
   background-color: var(--surface-bg-primary);

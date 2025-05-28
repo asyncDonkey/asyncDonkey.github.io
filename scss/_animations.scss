@@ -337,3 +337,43 @@
     // Potresti voler aggiungere un font più "digitale" o squadrato se lo usi
     font-family: 'Source Code Pro', monospace;
 }
+// --- NUOVE ANIMAZIONI PER BADGE "AUTORE APPREZZATO" (Teal) ---
+
+// 1. Animazione per l'icona del badge "Autore Apprezzato"
+@keyframes icon-pulse-teal-effect {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.85;
+        color: #00C9A7; // Colore base Teal
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+        color: lighten(#00C9A7, 10%); // Leggermente più chiaro al picco
+        text-shadow: 0 0 8px rgba(0, 201, 167, 0.5); // Leggero alone coordinato
+    }
+}
+
+.icon-pulse-teal {
+    animation: icon-pulse-teal-effect 2s infinite ease-in-out;
+    display: inline-block; // Necessario per transform
+}
+
+// 2. Animazione per il nickname quando "Autore Apprezzato" è il badge attivo
+@keyframes nickname-glow-teal-effect {
+    0%, 100% {
+        text-shadow: 
+            0 0 3px rgba(0, 201, 167, 0.2),
+            0 0 5px rgba(0, 201, 167, 0.1);
+    }
+    50% {
+        text-shadow: 
+            0 0 5px rgba(0, 201, 167, 0.8),
+            0 0 10px rgba(0, 201, 167, 0.6),
+            0 0 15px rgba(0, 201, 167, 0.4);
+    }
+}
+
+.nickname-glow-teal {
+    animation: nickname-glow-teal-effect 2.5s infinite alternate ease-in-out;
+}
