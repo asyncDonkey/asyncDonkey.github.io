@@ -1005,45 +1005,22 @@
                 </div>
             </section>
 
-            <section
-                id="bugReportSection"
-                style="margin-top: 30px; max-width: 700px; width: 100%; margin-left: auto; margin-right: auto"
-            >
-                <h2 style="text-align: center">Segnala un Bug / Suggerisci Miglioramento</h2>
-                <div id="donkeyRunnerGameIssueTracker">
-                    <form id="bugReportForm" class="comment-form-container">
-                        <h4>Segnala Bug per Donkey Runner</h4>
-                        <div id="bugReportUserEmailSection" style="display: none">
-                            <label for="userEmailBug">La tua Email (opzionale, per ricontattarti):</label>
-                            <input type="email" id="userEmailBug" name="userEmailBug" />
-                        </div>
-                        <div>
-                            <label for="bugDescription">Descrizione del Bug:*</label>
-                            <textarea id="bugDescription" name="bugDescription" rows="4" required></textarea>
-                        </div>
-                        <button type="submit" id="submitBugReportBtn" class="game-button">
-                            Invia Segnalazione Bug
-                        </button>
-                        <div id="bugReportMessage" style="margin-top: 10px"></div>
-                    </form>
-
-                    <form id="featureRequestForm" class="comment-form-container" style="margin-top: 20px">
-                        <h4>Suggerisci Miglioramento per Donkey Runner</h4>
-                        <div>
-                            <label for="featureTitle">Titolo Idea (opzionale):</label>
-                            <input type="text" id="featureTitle" name="featureTitle" />
-                        </div>
-                        <div>
-                            <label for="featureDescription">Descrivi la tua idea:*</label>
-                            <textarea id="featureDescription" name="featureDescription" rows="4" required></textarea>
-                        </div>
-                        <button type="submit" id="submitFeatureRequestBtn" class="game-button">
-                            Invia Suggerimento
-                        </button>
-                        <div id="featureRequestMessage" style="margin-top: 10px"></div>
-                    </form>
-                </div>
-            </section>
+            <section id="contribution-cta-section" style="margin-top: 30px; max-width: 700px; width: 100%; margin-left: auto; margin-right: auto; text-align: center; padding: 20px; background-color: var(--surface-bg-secondary); border-radius: 8px;">
+    <h2 style="text-align: center;">Feedback & Idee</h2>
+    <p style="margin-bottom: 20px; color: var(--text-color-secondary);">
+        Hai trovato un'anomalia nel codice o hai un'idea per migliorare il gioco? La tua opinione è preziosa! Visita la pagina dei contributi per segnalare bug, proporre nuove funzionalità e votare quelle della community.
+    </p>
+    <div class="contribution-links" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px;">
+        <a href="contribute.html#report-bug-section" class="game-button" style="text-decoration: none;">
+            <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 5px;">bug_report</span>
+            Segnala Bug
+        </a>
+        <a href="contribute.html#feature-request-section" class="game-button" style="text-decoration: none;">
+            <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 5px;">lightbulb</span>
+            Proponi un'Idea
+        </a>
+    </div>
+</section>
         </main>
 
         <footer>

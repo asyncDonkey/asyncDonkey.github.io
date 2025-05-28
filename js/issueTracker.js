@@ -223,11 +223,14 @@ async function loadIssues() {
 
     try {
         const issuesCollectionRef = collection(db, 'userIssues');
-        let q = query(issuesCollectionRef, orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE));
+        // MODIFICA 1: Aggiornato l'ordinamento di default
+        let q = query(issuesCollectionRef, orderBy('upvotes', 'desc'), orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE));
 
         const filterType = filterIssueTypeSelect ? filterIssueTypeSelect.value : 'all';
         const filterStatus = filterIssueStatusSelect ? filterIssueStatusSelect.value : 'all';
-        const conditions = [];
+        const conditions = []; // Questo array conterrà i 'where' clauses
+        let queryClauses = []; // Questo array conterrà tutti i clause, inclusi i 'where' e 'orderBy'
+
         if (filterType !== 'all') {
             conditions.push(where('type', '==', filterType));
         }
@@ -235,9 +238,14 @@ async function loadIssues() {
             conditions.push(where('status', '==', filterStatus));
         }
 
+        // Costruisci la query finale
         if (conditions.length > 0) {
-            q = query(issuesCollectionRef, ...conditions, orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE));
+            queryClauses = [...conditions, orderBy('upvotes', 'desc'), orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE)];
+        } else {
+            queryClauses = [orderBy('upvotes', 'desc'), orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE)];
         }
+        q = query(issuesCollectionRef, ...queryClauses);
+
 
         const querySnapshot = await getDocs(q);
         issuesDisplayArea.innerHTML = '';
@@ -269,10 +277,10 @@ async function loadIssues() {
                 issue.type === 'gameIssue'
                     ? `Problema Gioco (${escapeHTML(issue.gameId || 'Non specificato')})`
                     : issue.type === 'generalFeature'
-                      ? 'Funzionalità Generale Sito'
-                      : issue.type === 'newGameRequest'
-                        ? 'Suggerimento Nuovo Gioco'
-                        : 'Sconosciuto';
+                        ? 'Funzionalità Generale Sito'
+                        : issue.type === 'newGameRequest'
+                            ? 'Suggerimento Nuovo Gioco'
+                            : 'Sconosciuto';
             const statusBadge = `<span class="issue-status-badge ${getStatusBadgeClass(issue.status)}">${escapeHTML(issue.status)}</span>`;
 
             let submittedByText = `Inviato da: ${escapeHTML(issue.submittedBy.userName || 'Anonimo')}`;
@@ -308,7 +316,6 @@ async function loadIssues() {
             upvoteButton.title = userHasVoted ? 'Hai già votato' : 'Vota questa segnalazione';
             if (userHasVoted) upvoteButton.classList.add('voted');
 
-            // Pulisci listener e classi precedenti
             if (upvoteInteractionWrapper.guestHandlerAttached) {
                 upvoteInteractionWrapper.removeEventListener('click', upvoteInteractionWrapper.guestHandlerAttached);
                 delete upvoteInteractionWrapper.guestHandlerAttached;
