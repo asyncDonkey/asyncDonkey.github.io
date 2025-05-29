@@ -77,6 +77,163 @@ function getStatusBadgeClass(status) {
     }
 }
 
+function createIssueCardElement(issueData, issueId, localCurrentUser) {
+    const issueCard = document.createElement('div');
+    issueCard.className = 'issue-card';
+    issueCard.setAttribute('data-issue-id', issueId);
+
+    const titleEl = document.createElement('h5');
+    titleEl.textContent = escapeHTML(issueData.title);
+
+    const descriptionEl = document.createElement('p');
+    descriptionEl.className = 'issue-description';
+    descriptionEl.textContent =
+        escapeHTML(issueData.description.substring(0, 200)) + (issueData.description.length > 200 ? '...' : '');
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'issue-meta';
+    
+    const typeText =
+        issueData.type === 'gameIssue'
+            ? `Problema Gioco (${escapeHTML(issueData.gameId || 'Non specificato')})`
+            : issueData.type === 'generalFeature'
+                ? 'Funzionalità Generale Sito'
+                : issueData.type === 'newGameRequest'
+                    ? 'Suggerimento Nuovo Gioco'
+                    : 'Sconosciuto';
+    
+    // CORREZIONE QUI: Assicurarsi che statusBadge sia un template literal corretto
+    const statusBadge = `<span class="issue-status-badge ${getStatusBadgeClass(issueData.status)}">${escapeHTML(issueData.status)}</span>`;
+
+    let submittedByText = `Inviato da: ${escapeHTML(issueData.submittedBy.userName || 'Anonimo')}`;
+    if (issueData.submittedBy.userNationalityCode && issueData.submittedBy.userNationalityCode !== 'OTHER') {
+        submittedByText += ` <span class="fi fi-${issueData.submittedBy.userNationalityCode.toLowerCase()}"></span>`;
+    }
+    submittedByText += ` il ${formatIssueTimestamp(issueData.timestamp)}`;
+
+    // CORREZIONE QUI: Usare correttamente le variabili nel template literal
+    metaEl.innerHTML = `
+        <p><strong>Tipo:</strong> ${typeText} | <strong>Stato:</strong> ${statusBadge}</p>
+        <p><small>${submittedByText}</small></p>
+    `;
+
+    const actionsEl = document.createElement('div');
+    actionsEl.className = 'issue-actions';
+
+    const upvoteInteractionWrapper = document.createElement('div');
+    upvoteInteractionWrapper.style.display = 'inline-block';
+    upvoteInteractionWrapper.classList.add('upvote-interaction-wrapper');
+
+    const upvoteButton = document.createElement('button');
+    upvoteButton.className = 'upvote-issue-btn game-button';
+
+    let userHasVoted = false;
+    if (localCurrentUser && issueData.upvotedBy && issueData.upvotedBy.includes(localCurrentUser.uid)) {
+        userHasVoted = true;
+    }
+
+    const upvoteIconFill = userHasVoted ? 1 : 0;
+    const upvoteIconName = 'how_to_vote';
+
+    // CORREZIONE QUI: Assicurarsi che upvoteIconFill e upvoteIconName siano interpolati correttamente
+    upvoteButton.innerHTML = `<span class="material-symbols-rounded" style="font-variation-settings: 'FILL' ${upvoteIconFill};">${upvoteIconName}</span> <span class="upvote-count">${issueData.upvotes || 0}</span>`;
+    upvoteButton.title = userHasVoted ? 'Hai già votato' : 'Vota questa segnalazione';
+    if (userHasVoted) upvoteButton.classList.add('voted');
+
+    if (upvoteInteractionWrapper.guestHandlerAttached) {
+        upvoteInteractionWrapper.removeEventListener('click', upvoteInteractionWrapper.guestHandlerAttached);
+        delete upvoteInteractionWrapper.guestHandlerAttached;
+    }
+    upvoteInteractionWrapper.classList.remove('guest-interactive');
+    upvoteInteractionWrapper.style.cursor = 'default';
+
+    const oldButtonHandler = upvoteButton.handlerAttached;
+    if (oldButtonHandler) {
+        upvoteButton.removeEventListener('click', oldButtonHandler);
+        delete upvoteButton.handlerAttached;
+    }
+    
+    if (localCurrentUser) {
+        upvoteButton.disabled = false;
+        upvoteInteractionWrapper.style.cursor = 'pointer';
+        const upvoteHandler = () => handleIssueUpvote(issueId);
+        upvoteButton.addEventListener('click', upvoteHandler);
+        upvoteButton.handlerAttached = upvoteHandler;
+    } else {
+        upvoteButton.disabled = true;
+        upvoteInteractionWrapper.style.cursor = 'pointer';
+        upvoteInteractionWrapper.title = 'Accedi per votare';
+        upvoteInteractionWrapper.classList.add('guest-interactive');
+
+        const guestUpvoteHandler = (e) => {
+            e.stopPropagation();
+            showToast('Devi essere loggato per votare segnalazioni o suggerimenti.', 'info', 3000);
+            const showLoginBtnGlobal = document.getElementById('showLoginBtn');
+            if (showLoginBtnGlobal) {
+                showLoginBtnGlobal.click();
+            }
+        };
+        upvoteInteractionWrapper.addEventListener('click', guestUpvoteHandler);
+        upvoteInteractionWrapper.guestHandlerAttached = guestUpvoteHandler;
+    }
+
+    upvoteInteractionWrapper.appendChild(upvoteButton);
+    actionsEl.appendChild(upvoteInteractionWrapper);
+
+    issueCard.appendChild(titleEl);
+    issueCard.appendChild(descriptionEl);
+    issueCard.appendChild(metaEl);
+    issueCard.appendChild(actionsEl);
+    
+    return issueCard;
+}
+
+async function loadAndDisplayTopVotedIssue() {
+    const topIssueSection = document.getElementById('top-voted-issue-section');
+    const topIssueContainer = document.getElementById('topVotedIssueContainer');
+
+    if (!topIssueSection || !topIssueContainer) return;
+
+    try {
+        const issuesCollectionRef = collection(db, 'userIssues');
+        // Query per la top issue attiva (non completata o rifiutata) con almeno 1 voto
+        const q = query(
+            issuesCollectionRef,
+            where('status', 'not-in', ['completed', 'declined']),
+            orderBy('upvotes', 'desc'),
+            orderBy('timestamp', 'desc'), // Criterio secondario per coerenza
+            limit(1)
+        );
+
+        const querySnapshot = await getDocs(q);
+        topIssueContainer.innerHTML = ''; // Pulisci il contenitore
+
+        if (!querySnapshot.empty) {
+            const topIssueDoc = querySnapshot.docs[0];
+            const topIssueData = topIssueDoc.data();
+
+            if (topIssueData.upvotes > 0) { // Mostra solo se ha almeno un voto
+                const topIssueCardElement = createIssueCardElement(topIssueData, topIssueDoc.id, currentUser);
+                topIssueCardElement.classList.add('top-issue-highlight'); // Aggiungi classe per styling specifico
+
+                topIssueContainer.appendChild(topIssueCardElement);
+                topIssueSection.style.display = 'block'; // Rendi visibile la sezione
+            } else {
+                topIssueSection.style.display = 'none'; // Nascondi se la top issue non ha voti
+            }
+        } else {
+            topIssueSection.style.display = 'none'; // Nascondi se non ci sono issue idonee
+        }
+    } catch (error) {
+        console.error("Errore nel caricare la top issue:", error);
+        topIssueSection.style.display = 'none';
+         if (error.code === 'failed-precondition' && topIssueContainer) {
+            topIssueContainer.innerHTML = '<p><small>Indice Firestore per top issue mancante.</small></p>';
+            topIssueSection.style.display = 'block'; 
+        }
+    }
+}
+
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
     if (issueSubmissionForm && issueAuthRequiredMessageDiv) {
@@ -90,6 +247,7 @@ onAuthStateChanged(auth, (user) => {
     }
     if (issuesDisplayArea) {
         loadIssues();
+        loadAndDisplayTopVotedIssue();
     }
 });
 
@@ -235,110 +393,9 @@ async function loadIssues() {
             querySnapshot.forEach((docSnapshot) => {
                 const issue = docSnapshot.data();
                 const issueId = docSnapshot.id;
-                const issueCard = document.createElement('div');
-                issueCard.className = 'issue-card';
-                issueCard.setAttribute('data-issue-id', issueId);
-
-                const titleEl = document.createElement('h5');
-                titleEl.textContent = escapeHTML(issue.title);
-
-                const descriptionEl = document.createElement('p');
-                descriptionEl.className = 'issue-description';
-                descriptionEl.textContent =
-                    escapeHTML(issue.description.substring(0, 200)) + (issue.description.length > 200 ? '...' : '');
-
-                const metaEl = document.createElement('div');
-                metaEl.className = 'issue-meta';
-                const typeText =
-                    issue.type === 'gameIssue'
-                        ? `Problema Gioco (${escapeHTML(issue.gameId || 'Non specificato')})`
-                        : issue.type === 'generalFeature'
-                            ? 'Funzionalità Generale Sito'
-                            : issue.type === 'newGameRequest'
-                                ? 'Suggerimento Nuovo Gioco'
-                                : 'Sconosciuto';
-                const statusBadge = `<span class="issue-status-badge ${getStatusBadgeClass(issue.status)}">${escapeHTML(issue.status)}</span>`;
-
-                let submittedByText = `Inviato da: ${escapeHTML(issue.submittedBy.userName || 'Anonimo')}`;
-                if (issue.submittedBy.userNationalityCode && issue.submittedBy.userNationalityCode !== 'OTHER') {
-                    submittedByText += ` <span class="fi fi-${issue.submittedBy.userNationalityCode.toLowerCase()}"></span>`;
-                }
-                submittedByText += ` il ${formatIssueTimestamp(issue.timestamp)}`;
-
-                metaEl.innerHTML = `
-                    <p><strong>Tipo:</strong> ${typeText} | <strong>Stato:</strong> ${statusBadge}</p>
-                    <p><small>${submittedByText}</small></p>
-                `;
-
-                const actionsEl = document.createElement('div');
-                actionsEl.className = 'issue-actions';
-
-                const upvoteInteractionWrapper = document.createElement('div');
-                upvoteInteractionWrapper.style.display = 'inline-block';
-                upvoteInteractionWrapper.classList.add('upvote-interaction-wrapper');
-
-                const upvoteButton = document.createElement('button');
-                upvoteButton.className = 'upvote-issue-btn game-button';
-
-                let userHasVoted = false;
-                if (currentUser && issue.upvotedBy && issue.upvotedBy.includes(currentUser.uid)) {
-                    userHasVoted = true;
-                }
-
-                const upvoteIconFill = userHasVoted ? 1 : 0;
-                const upvoteIconName = 'how_to_vote';
-
-                upvoteButton.innerHTML = `<span class="material-symbols-rounded" style="font-variation-settings: 'FILL' ${upvoteIconFill};">${upvoteIconName}</span> <span class="upvote-count">${issue.upvotes || 0}</span>`;
-                upvoteButton.title = userHasVoted ? 'Hai già votato' : 'Vota questa segnalazione';
-                if (userHasVoted) upvoteButton.classList.add('voted');
-
-                if (upvoteInteractionWrapper.guestHandlerAttached) {
-                    upvoteInteractionWrapper.removeEventListener('click', upvoteInteractionWrapper.guestHandlerAttached);
-                    delete upvoteInteractionWrapper.guestHandlerAttached;
-                }
-                upvoteInteractionWrapper.classList.remove('guest-interactive');
-                upvoteInteractionWrapper.style.cursor = 'default';
-
-                const oldButtonHandler = upvoteButton.handlerAttached;
-                if (oldButtonHandler) {
-                    upvoteButton.removeEventListener('click', oldButtonHandler);
-                    delete upvoteButton.handlerAttached;
-                }
-
-                if (currentUser) {
-                    upvoteButton.disabled = false;
-                    upvoteInteractionWrapper.style.cursor = 'pointer';
-
-                    const upvoteHandler = () => handleIssueUpvote(issueId);
-                    upvoteButton.addEventListener('click', upvoteHandler);
-                    upvoteButton.handlerAttached = upvoteHandler;
-                } else {
-                    upvoteButton.disabled = true;
-                    upvoteInteractionWrapper.style.cursor = 'pointer';
-                    upvoteInteractionWrapper.title = 'Accedi per votare';
-                    upvoteInteractionWrapper.classList.add('guest-interactive');
-
-                    const guestUpvoteHandler = (e) => {
-                        e.stopPropagation();
-                        showToast('Devi essere loggato per votare segnalazioni o suggerimenti.', 'info', 3000);
-                        const showLoginBtnGlobal = document.getElementById('showLoginBtn');
-                        if (showLoginBtnGlobal) {
-                            showLoginBtnGlobal.click();
-                        }
-                    };
-                    upvoteInteractionWrapper.addEventListener('click', guestUpvoteHandler);
-                    upvoteInteractionWrapper.guestHandlerAttached = guestUpvoteHandler;
-                }
-
-                upvoteInteractionWrapper.appendChild(upvoteButton);
-                actionsEl.appendChild(upvoteInteractionWrapper);
-
-                issueCard.appendChild(titleEl);
-                issueCard.appendChild(descriptionEl);
-                issueCard.appendChild(metaEl);
-                issueCard.appendChild(actionsEl);
-                issuesDisplayArea.appendChild(issueCard);
-            });
+                const issueCardElement = createIssueCardElement(issue, issueId, currentUser);
+    issuesDisplayArea.appendChild(issueCardElement);
+});
         }
         
         // <<< CHIAMATA A updateCarouselState AGGIUNTA QUI >>>

@@ -7447,6 +7447,29 @@ main section {
   }
 }
 
+#top-voted-issue-section {
+  background-color: var(--surface-bg-highlight, var(--surface-bg-secondary));
+  padding: 20px;
+  border-radius: var(--border-radius-large, 8px);
+  margin-bottom: 30px;
+  border: 1px solid var(--accent-color, var(--link-color));
+}
+#top-voted-issue-section h3 {
+  color: var(--accent-color-text, var(--heading-color));
+  margin-top: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+#top-voted-issue-section h3 .material-symbols-rounded {
+  margin-right: 8px;
+  color: var(--warning-color, #ffc107);
+  font-size: 1.5em;
+}
+
 /* Contenuto aggiornato per scss/_about.scss */
 .dev-text-content p {
   margin-bottom: 1em;

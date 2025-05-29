@@ -216,3 +216,33 @@
         }
     }
 }
+// Stili per la sezione della Top Issue
+#top-voted-issue-section {
+    background-color: var(--surface-bg-highlight, var(--surface-bg-secondary)); // Usa una variabile dedicata o un fallback
+    padding: 20px;
+    border-radius: var(--border-radius-large, 8px);
+    margin-bottom: 30px; // Spazio prima della lista normale
+    border: 1px solid var(--accent-color, var(--link-color)); // Bordo accentuato
+
+    h3 {
+        color: var(--accent-color-text, var(--heading-color));
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        .material-symbols-rounded {
+            margin-right: 8px;
+            color: var(--warning-color, #ffc107); // Colore icona stella
+            font-size: 1.5em; // Icona più grande
+        }
+    }
+}
+
+// Stili specifici per la card della top issue, se necessario
+// (la classe .top-issue-highlight viene aggiunta alla card stessa)
+.issue-card.top-issue-highlight {
+    // Esempio: nessun box-shadow aggiuntivo se la sezione ha già un bordo,
+    // o potresti volerla rendere ancora più evidente.
+    // box-shadow: 0 4px 12px rgba(var(--accent-color-rgb, 0,0,0), 0.15);
+    // Per ora, lasciamo che erediti gli stili di .issue-card,
+    // l'enfasi è data dalla sezione contenitore.
+}
