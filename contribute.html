@@ -201,6 +201,24 @@
 
         <main>
 
+            <nav id="contribute-page-nav" class="page-section-nav">
+        <a href="#contributeArticles" class="nav-item">
+            <span class="material-symbols-rounded">ink_pen</span>
+            <span>Scrivi Articolo</span>
+        </a>
+        <a href="#aboutMarkdown" class="nav-item">
+            <span class="material-symbols-rounded">markdown</span>
+            <span>Guida Markdown</span>
+        </a>
+        <a href="#contributeIssues" class="nav-item">
+            <span class="material-symbols-rounded">emoji_objects</span>
+            <span>Segnalazioni & Idee</span>
+        </a>
+        <a href="#issueSubmissionForm" class="nav-item"> <span class="material-symbols-rounded">add_comment</span>
+            <span>Invia Segnalazione</span>
+        </a>
+    </nav>
+
             <section id="top-voted-issue-section" class="contribution-section" style="display: none;"> <h3><span class="material-symbols-rounded" style="vertical-align: text-bottom;">star</span> La Più Richiesta dalla Community</h3>
     <div id="topVotedIssueContainer">
         </div>
@@ -209,6 +227,8 @@
                 <h2>Contribuisci al Progetto</h2>
                 <p>La tua partecipazione è preziosa! Scopri come puoi contribuire con articoli, idee e segnalazioni.</p>
             </section>
+
+            
         
 
             <section id="contributeArticles" class="contribution-section">
@@ -283,54 +303,32 @@
             </section>
 
             <section id="contributeIssues" class="contribution-section">
-                <h3>
-                    <span
-                        class="material-symbols-rounded"
-                        style="vertical-align: text-bottom; margin-right: 8px; font-size: 1.3em"
-                        >emoji_objects</span
-                    >Segnalazioni e Suggerimenti
-                </h3>
-                <p>Il tuo feedback è fondamentale per migliorare asyncDonkey.io e i giochi presenti!</p>
-                <h4>Tipi di Contributi:</h4>
-                <ul>
-                    <li>
-                        <strong>Segnalazione Bug:</strong> Se hai riscontrato un errore o un comportamento anomalo in un
-                        gioco o nel sito, <a href="donkeyRunner.html#bugReportSection">segnalacelo qui</a> o apri una
-                        issue su
-                        <a
-                            href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=bug_report.yml"
-                            target="_blank"
-                            rel="noopener"
-                            >GitHub</a
-                        >.
-                    </li>
-                    <li>
-                        <strong>Proposta di Nuova Funzionalità (Generale):</strong> Hai un'idea per una nuova sezione
-                        del sito o un miglioramento generale della piattaforma?
-                    </li>
-                    <li>
-                        <strong>Proposta di Nuovo Gioco:</strong> Ti piacerebbe vedere un nuovo tipo di gioco su
-                        asyncDonkey.io?
-                    </li>
-                    <li>
-                        <strong>Miglioramenti a Giochi Esistenti:</strong> Idee per rendere i giochi attuali ancora più
-                        divertenti o funzionali.
-                    </li>
-                </ul>
-                <p>
-                    A breve implementeremo una sezione dedicata qui sulla pagina "Contribuisci" dove potrai inviare
-                    queste proposte e votare quelle degli altri utenti. Per ora, puoi usare il form di
-                    <a href="donkeyRunner.html#featureRequestSection">suggerimento funzionalità nel gioco CodeDash!</a>
-                    per idee generali o relative ai giochi, oppure, per questioni più tecniche o dettagliate, apri una
-                    "Feature Request" direttamente su
-                    <a
-                        href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=feature_request.yml"
-                        target="_blank"
-                        rel="noopener"
-                        >GitHub Issues</a
-                    >.
-                </p>
-                <div id="issueTrackerSection" style="margin-top: 20px">
+    <h3>
+        <span
+            class="material-symbols-rounded"
+            style="vertical-align: text-bottom; margin-right: 8px; font-size: 1.3em"
+            >emoji_objects</span
+        >Segnalazioni e Suggerimenti
+    </h3>
+    <p>Il tuo feedback è fondamentale per migliorare asyncDonkey.io e i giochi presenti! Utilizza i moduli sottostanti per inviare le tue proposte, segnalare bug e votare le idee della community.</p>
+    <h4>Cosa puoi segnalare o suggerire:</h4>
+    <ul>
+        <li>
+            <strong>Proposta di Nuova Funzionalità Generale:</strong> Idee per nuove sezioni del sito o miglioramenti generali della piattaforma.
+        </li>
+        <li>
+            <strong>Suggerimento Nuovo Gioco:</strong> Proposte per nuovi giochi da integrare su asyncDonkey.io.
+        </li>
+        <li>
+            <strong>Segnalazione Bug o Problema:</strong> Errori o comportamenti anomali riscontrati in un gioco specifico o nel sito in generale.
+        </li>
+        <li>
+            <strong>Miglioramenti a Giochi Esistenti:</strong> Idee per rendere i giochi attuali ancora più divertenti o funzionali.
+        </li>
+    </ul>
+    <p>Tutte le segnalazioni e i suggerimenti validi sono benvenuti e ci aiutano a crescere!</p>
+    
+    <div id="issueTrackerSection" style="margin-top: 20px;">
                     <h4>Invia una Nuova Segnalazione o Suggerimento</h4>
                     <div
                         id="issueAuthRequiredMessage"

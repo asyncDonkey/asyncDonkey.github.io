@@ -11,15 +11,18 @@
 }
 
 #articleDisplayTitle {
-    /* h1 del titolo articolo */
     font-size: 2.2em;
-    color: var(--heading-color);
+    color: #333333; /* Placeholder per var(--heading-color) - SOSTITUISCI CON IL TUO VALORE EFFETTIVO */
     margin-top: 0;
-    margin-bottom: 8px; /* Leggermente ridotto da 10px */
-    line-height: 1.25; /* Leggermente ridotta per compattare verticalmente */
-    white-space: normal !important; /* Assicura che il testo possa andare a capo */
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    margin-bottom: 8px; 
+    line-height: 1.25; 
+    
+    white-space: normal !important; 
+    overflow-wrap: break-word;  
+    word-wrap: break-word; // Fallback per overflow-wrap
+
+    // AGGIUNTA: Per forzare l'interruzione di parole molto lunghe se necessario
+    word-break: break-all; 
 }
 
 #articleDisplayMeta {
@@ -395,3 +398,117 @@
 // Fallback per i bottoni social (se dovessero diventare visibili o se vuoi stilare quelli nella modale nativa, anche se è difficile)
 // Per ora li lasciamo con uno stile base, dato che sono gestiti dalla UI nativa.
 // Se la tua modale nativa mostra link testuali, potremmo aggiungere qui stili per a.social-*
+// File: il tuo SCSS per view-article.html (es. _article-viewer.scss)
+
+#articleDisplayContent {
+    // Stili esistenti che hai fornito:
+    font-size: 1.05em; 
+    line-height: 1.7;
+    color: #444444; // Placeholder per var(--text-color-secondary) - SOSTITUISCI CON IL TUO VALORE
+
+    // AGGIUNTA: Gestione del ritorno a capo per parole lunghe e URL
+    overflow-wrap: break-word;
+    word-wrap: break-word;     // Fallback per browser più vecchi
+    // word-break: break-all;  // Da usare con cautela, solo se break-word non basta
+
+    // Stili per h1-h3, p, a, ul, ol, blockquote (come li hai, ma verifica che non ci siano larghezze fisse o white-space: nowrap)
+    h1, h2, h3, h4, h5, h6 { // Aggiunti h4-h6 per completezza
+        color: #333333; // Placeholder per var(--heading-color) - SOSTITUISCI
+        margin-top: 1.8em;
+        margin-bottom: 0.8em;
+        // border-bottom: 1px solid #dddddd; // Placeholder per var(--border-color-secondary) - SOSTITUISCI
+        // padding-bottom: 0.3em; // Nota: la bordatura solo sui titoli principali è più comune
+    }
+    h1 { font-size: 1.8em; border-bottom: 1px solid #dddddd; padding-bottom: 0.3em;} // Bordo solo per H1
+    h2 { font-size: 1.5em; border-bottom: 1px solid #dddddd; padding-bottom: 0.3em;} // Bordo solo per H2
+    h3 { font-size: 1.3em; } // H3 e successivi senza bordo di default
+    h4 { font-size: 1.2em; }
+    h5 { font-size: 1.1em; }
+    h6 { font-size: 1.0em; }
+
+
+    p { margin-bottom: 1.2em; }
+    a { color: #007bff; text-decoration: underline; } // Placeholder per var(--link-color) - SOSTITUISCI
+    a:hover { color: #0056b3; } // Placeholder per var(--link-hover-color) - SOSTITUISCI
+    ul, ol { margin-left: 20px; margin-bottom: 1.2em; }
+    li { margin-bottom: 0.5em; }
+    blockquote {
+        border-left: 3px solid #007bff; // Placeholder per var(--link-color) - SOSTITUISCI
+        padding-left: 15px;
+        margin: 0 0 1.2em 0; // Rimosso margin-left per allineamento, il padding-left crea l'indentazione
+        font-style: italic;
+        color: #6c757d; // Placeholder per var(--text-color-muted) - SOSTITUISCI
+    }
+
+    pre {
+        background-color: #f8f9fa; // Placeholder per var(--surface-bg-secondary) - SOSTITUISCI
+        border: 1px solid #dee2e6;   // Placeholder per var(--border-color-secondary) - SOSTITUISCI
+        padding: 15px;
+        border-radius: 6px;          // Ok, o usa var(--border-radius-standard)
+        overflow-x: auto;            // QUESTO È CORRETTO E GIÀ PRESENTE
+        font-family: 'Source Code Pro', monospace;
+        font-size: 0.95em;
+        margin: 1.5em 0; 
+    }
+
+    pre code { // Assicurati che questi stili non contrastino con il syntax highlighter
+        padding: 0;
+        background-color: transparent;
+        border-radius: 0;
+        font-size: inherit; 
+        border: none; // Rimuovi bordi se presenti
+        white-space: inherit; // Eredita white-space da pre (che è pre)
+    }
+    
+    // Codice inline (non dentro <pre>)
+    code:not(pre > code) { // Applica solo a <code> non figlio diretto di <pre>
+        background-color: #e9ecef; // Placeholder per var(--surface-bg-secondary) o un grigio chiaro - SOSTITUISCI
+        padding: 0.2em 0.4em;
+        border-radius: 3px;          // Ok, o usa var(--border-radius-small)
+        font-family: 'Source Code Pro', monospace;
+        font-size: 0.9em;            // Leggermente più piccolo del testo normale
+        color: #c7254e;              // Placeholder per un colore che lo distingua - SOSTITUISCI
+    }
+
+
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 6px;         // Ok, o usa var(--border-radius-standard)
+        margin: 1.5em auto;         // Centra le immagini
+        display: block;
+    }
+
+    // AGGIUNTA: Gestione base per le tabelle Markdown
+    // Per far funzionare questo, dovrai wrappare le tabelle generate da Markdown
+    // con un <div class="table-wrapper">...</div>. Questo potrebbe richiedere JS.
+    // Se marked.js non lo fa, una soluzione più semplice ma meno elegante è:
+    // table { display: block; width: 100%; overflow-x: auto; /* ...altri stili tabella... */ }
+    
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 1.5em 0;
+      border: 1px solid #dee2e6; // Placeholder - SOSTITUISCI
+      border-radius: 6px;       // Placeholder - SOSTITUISCI
+    }
+
+    table {
+        width: 100%; 
+        border-collapse: collapse;
+        // font-size: 0.9em; // Puoi decommentare se vuoi le tabelle leggermente più piccole
+        
+        th, td {
+            border: 1px solid #dee2e6; // Placeholder per var(--border-color-secondary) - SOSTITUISCI
+            padding: 0.6em 0.8em;     // Aumentato leggermente il padding per leggibilità
+            text-align: left;
+        }
+
+        thead th {
+            background-color: #f8f9fa; // Placeholder per var(--surface-bg-secondary) - SOSTITUISCI
+            font-weight: 600;
+        }
+        tbody tr:nth-child(odd) td { // Strisce per le righe (opzionale)
+            // background-color: #fdfdfd; // Placeholder per un colore di sfondo molto chiaro - SOSTITUISCI
+        }
+    }
+}

@@ -2360,15 +2360,15 @@ section#contact li {
 }
 
 #articleDisplayTitle {
-  /* h1 del titolo articolo */
   font-size: 2.2em;
-  color: var(--heading-color);
+  color: #333333; /* Placeholder per var(--heading-color) - SOSTITUISCI CON IL TUO VALORE EFFETTIVO */
   margin-top: 0;
-  margin-bottom: 8px; /* Leggermente ridotto da 10px */
-  line-height: 1.25; /* Leggermente ridotta per compattare verticalmente */
-  white-space: normal !important; /* Assicura che il testo possa andare a capo */
-  word-wrap: break-word;
+  margin-bottom: 8px;
+  line-height: 1.25;
+  white-space: normal !important;
   overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-all;
 }
 
 #articleDisplayMeta {
@@ -2730,6 +2730,116 @@ section#contact li {
   color: var(--link-color);
 }
 
+#articleDisplayContent {
+  font-size: 1.05em;
+  line-height: 1.7;
+  color: #444444;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+#articleDisplayContent h1, #articleDisplayContent h2, #articleDisplayContent h3, #articleDisplayContent h4, #articleDisplayContent h5, #articleDisplayContent h6 {
+  color: #333333;
+  margin-top: 1.8em;
+  margin-bottom: 0.8em;
+}
+#articleDisplayContent h1 {
+  font-size: 1.8em;
+  border-bottom: 1px solid #dddddd;
+  padding-bottom: 0.3em;
+}
+#articleDisplayContent h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid #dddddd;
+  padding-bottom: 0.3em;
+}
+#articleDisplayContent h3 {
+  font-size: 1.3em;
+}
+#articleDisplayContent h4 {
+  font-size: 1.2em;
+}
+#articleDisplayContent h5 {
+  font-size: 1.1em;
+}
+#articleDisplayContent h6 {
+  font-size: 1em;
+}
+#articleDisplayContent p {
+  margin-bottom: 1.2em;
+}
+#articleDisplayContent a {
+  color: #007bff;
+  text-decoration: underline;
+}
+#articleDisplayContent a:hover {
+  color: #0056b3;
+}
+#articleDisplayContent ul, #articleDisplayContent ol {
+  margin-left: 20px;
+  margin-bottom: 1.2em;
+}
+#articleDisplayContent li {
+  margin-bottom: 0.5em;
+}
+#articleDisplayContent blockquote {
+  border-left: 3px solid #007bff;
+  padding-left: 15px;
+  margin: 0 0 1.2em 0;
+  font-style: italic;
+  color: #6c757d;
+}
+#articleDisplayContent pre {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 15px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.95em;
+  margin: 1.5em 0;
+}
+#articleDisplayContent pre code {
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+  font-size: inherit;
+  border: none;
+  white-space: inherit;
+}
+#articleDisplayContent code:not(pre > code) {
+  background-color: #e9ecef;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.9em;
+  color: #c7254e;
+}
+#articleDisplayContent img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1.5em auto;
+  display: block;
+}
+#articleDisplayContent .table-wrapper {
+  overflow-x: auto;
+  margin: 1.5em 0;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+#articleDisplayContent table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#articleDisplayContent table th, #articleDisplayContent table td {
+  border: 1px solid #dee2e6;
+  padding: 0.6em 0.8em;
+  text-align: left;
+}
+#articleDisplayContent table thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
 /* ===== Skills Section Styles (Pagina About) ===== */
 section#skills ul.skills-grid {
   list-style-type: none;
@@ -7468,6 +7578,92 @@ main section {
   margin-right: 8px;
   color: var(--warning-color, #ffc107);
   font-size: 1.5em;
+}
+
+.page-section-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: var(--surface-bg-secondary);
+  border-radius: var(--border-radius-large, 8px);
+  -webkit-box-shadow: var(--shadow-elevation-low);
+          box-shadow: var(--shadow-elevation-low);
+}
+.page-section-nav .nav-item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding: 15px 10px;
+  background-color: var(--surface-bg-primary);
+  color: var(--text-color-primary);
+  text-decoration: none;
+  border-radius: var(--border-radius-small, 4px);
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid var(--border-color-light);
+  text-align: center;
+}
+.page-section-nav .nav-item .material-symbols-rounded {
+  font-size: 2em;
+  margin-bottom: 8px;
+  color: var(--link-color);
+  -webkit-transition: color 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
+}
+.page-section-nav .nav-item span:not(.material-symbols-rounded) {
+  font-size: 0.9em;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.page-section-nav .nav-item:hover, .page-section-nav .nav-item:focus {
+  background-color: var(--surface-bg-hover);
+  color: var(--link-hover-color);
+  text-decoration: none;
+  -webkit-transform: translateY(-2px);
+          transform: translateY(-2px);
+  -webkit-box-shadow: var(--shadow-elevation-medium);
+          box-shadow: var(--shadow-elevation-medium);
+  outline: none;
+}
+.page-section-nav .nav-item:hover .material-symbols-rounded, .page-section-nav .nav-item:focus .material-symbols-rounded {
+  color: var(--link-hover-color);
+}
+.page-section-nav .nav-item:active {
+  -webkit-transform: translateY(0);
+          transform: translateY(0);
+  -webkit-box-shadow: var(--shadow-elevation-low);
+          box-shadow: var(--shadow-elevation-low);
+}
+@media (max-width: 768px) {
+  .page-section-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 25px;
+  }
+  .page-section-nav .nav-item {
+    padding: 12px 8px;
+  }
+  .page-section-nav .nav-item .material-symbols-rounded {
+    font-size: 2.2em;
+    margin-bottom: 0;
+  }
+  .page-section-nav .nav-item span:not(.material-symbols-rounded) {
+    display: none;
+  }
 }
 
 /* Contenuto aggiornato per scss/_about.scss */

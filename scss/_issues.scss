@@ -246,3 +246,93 @@
     // Per ora, lasciamo che erediti gli stili di .issue-card,
     // l'enfasi è data dalla sezione contenitore.
 }
+
+// Stili per la navigazione interna alla pagina (es. contribute.html, about.html)
+.page-section-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 15px; 
+    margin-bottom: 30px; 
+    padding: 15px; 
+    background-color: var(--surface-bg-secondary);
+    border-radius: var(--border-radius-large, 8px);
+    box-shadow: var(--shadow-elevation-low);
+
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 10px; 
+        background-color: var(--surface-bg-primary);
+        color: var(--text-color-primary);
+        text-decoration: none;
+        border-radius: var(--border-radius-small, 4px); 
+        transition: all 0.2s ease-in-out;
+        border: 1px solid var(--border-color-light); 
+        text-align: center;
+
+        .material-symbols-rounded {
+            font-size: 2em; 
+            margin-bottom: 8px; 
+            color: var(--link-color);
+            transition: color 0.2s ease-in-out;
+        }
+
+        span:not(.material-symbols-rounded) {
+            font-size: 0.9em; 
+            font-weight: 500;
+            line-height: 1.3; 
+        }
+
+        &:hover,
+        &:focus {
+            background-color: var(--surface-bg-hover);
+            color: var(--link-hover-color);
+            text-decoration: none;
+            transform: translateY(-2px); 
+            box-shadow: var(--shadow-elevation-medium);
+            outline: none;
+
+            .material-symbols-rounded {
+                color: var(--link-hover-color);
+            }
+        }
+        
+        &:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-elevation-low);
+        }
+    }
+
+    // Modifiche per mobile: layout a GRIGLIA e SOLO ICONE
+    @media (max-width: 768px) {
+        display: grid; // Manteniamo la griglia
+        // Definiamo una dimensione minima per gli item che contengono solo l'icona
+        // Questo permetterà a più item di stare su una riga prima di andare a capo.
+        // Es. per 4-5 icone per riga su schermi piccoli.
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); 
+        gap: 10px; // Gap ridotto
+        padding: 10px;
+        margin-bottom: 25px;
+        // Non sono più necessari gli stili per lo slider (overflow-x, etc.)
+
+        .nav-item {
+            padding: 12px 8px; // Adatta il padding per la sola icona
+
+            .material-symbols-rounded {
+                font-size: 2.2em;  // Icone leggermente più grandi dato che sono l'unico elemento
+                margin-bottom: 0;  // Nessun margine inferiore, dato che non c'è testo
+            }
+
+            span:not(.material-symbols-rounded) { // Testo del link
+                display: none;     // << NASCONDI IL TESTO SU MOBILE >>
+            }
+        }
+    }
+    // La media query @media (max-width: 480px) potrebbe non essere più necessaria
+    // poiché il layout a griglia con auto-fit e minmax si adatterà bene.
+    // Potremmo eliminarla o, se vuoi un controllo ancora più fine per schermi piccolissimi,
+    // potremmo modificare qui il minmax o il numero di colonne fisse.
+    // Per ora, la configurazione sopra (max-width: 768px) dovrebbe essere sufficiente.
+}
