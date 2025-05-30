@@ -246,22 +246,6 @@
     }
 }
 
-#articleShareSection {
-    margin-top: 30px;
-    margin-bottom: 30px;
-    padding: 20px;
-    background-color: var(--surface-bg-secondary);
-    border-radius: 8px;
-    border: 1px solid var(--border-color-secondary);
-
-    h4 {
-        margin-top: 0;
-        margin-bottom: 15px;
-        color: var(--heading-color);
-        font-size: 1.1em;
-        font-weight: 600;
-    }
-}
 
 // Stili per la sezione condivisione articolo
 #articleShareSection {
@@ -281,23 +265,7 @@
     }
 }
 
-// Contenitore principale dei bottoni visibili e di quelli nel fallback (se usati)
-#articleShareSection {
-    margin-top: 30px;
-    margin-bottom: 30px;
-    padding: 20px 25px;
-    background-color: var(--surface-bg-secondary);
-    border-radius: 8px;
-    border: 1px solid var(--border-color-secondary);
 
-    h4 {
-        margin-top: 0;
-        margin-bottom: 20px;
-        color: var(--heading-color);
-        font-size: 1.15em;
-        font-weight: 600;
-    }
-}
 
 .share-buttons-container {
     display: flex;
