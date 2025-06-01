@@ -673,22 +673,25 @@
 
         <main>
             <div id="gameInstructions" class="game-instructions-container">
-    <p class="tutorial-prompt">
-        Nuovo su asyncDonkey Runner? 
-        <a href="#gameInfoAccordion" id="scrollToTutorialLink">Dai un'occhiata alla guida rapida!</a>
-    </p>
-    <button id="creditsIconBtn" title="Crediti e Licenza">
-        <span class="material-symbols-rounded">info</span>
-    </button>
-</div>
+                <p class="tutorial-prompt">
+                    Nuovo su asyncDonkey Runner?
+                    <a href="#gameInfoAccordion" id="scrollToTutorialLink">Dai un'occhiata alla guida rapida!</a>
+                </p>
+                <button id="creditsIconBtn" title="Crediti e Licenza">
+                    <span class="material-symbols-rounded">info</span>
+                </button>
+            </div>
 
             <div id="gameContainer">
                 <button id="fullscreenButton" class="game-button" title="Toggle Fullscreen">FULLSCREEN</button>
-                <div id="orientationPrompt" class="orientation-prompt" style="display: none;">
-    <span class="material-symbols-rounded prompt-icon">screen_rotation</span>
-    <p>Per un'esperienza di gioco ottimale, ruota il dispositivo in orizzontale e considera la modalità fullscreen!</p>
-    <button id="dismissOrientationPrompt" class="button-sm">Capito!</button>
-</div>
+                <div id="orientationPrompt" class="orientation-prompt" style="display: none">
+                    <span class="material-symbols-rounded prompt-icon">screen_rotation</span>
+                    <p>
+                        Per un'esperienza di gioco ottimale, ruota il dispositivo in orizzontale e considera la modalità
+                        fullscreen!
+                    </p>
+                    <button id="dismissOrientationPrompt" class="button-sm">Capito!</button>
+                </div>
                 <canvas id="gameCanvas"></canvas>
 
                 <div id="scoreInputContainerDonkey" style="display: none">
@@ -704,8 +707,8 @@
                     <div class="score-buttons">
                         <button id="saveScoreBtnDonkey" class="game-button">Salva</button>
                         <button id="restartGameBtnDonkey" class="game-button" title="Rigioca">
-    <span class="material-symbols-rounded">replay</span>
-</button>
+                            <span class="material-symbols-rounded">replay</span>
+                        </button>
                     </div>
                 </div>
 
@@ -732,248 +735,334 @@
             </div>
 
             <div id="gameInfoAccordion" class="info-accordion-container">
-    <div class="accordion-item">
-        <button class="accordion-header">
-            Tutorial di Gioco
-            <span class="material-symbols-rounded accordion-icon">expand_more</span>
-        </button>
-        <div class="accordion-panel">
-            <div class="tutorial-content">
-                <div class="tutorial-intro">
-    <p class="terminal-text danger-text">DANGER!!! SYSTEM INTEGRITY COMPROMISED!</p>
-    <p class="terminal-text">> Initializing asyncDonkey Defense Subroutines...</p>
-    <p class="terminal-text">> DonkeyDebugger Protocol: <span class="status-ok">ACTIVE</span></p>
-    <p class="terminal-text">> Target Entity: <span class="glitch-name">gl17chz!l!a</span></p>
-    <p class="terminal-text lore-text">
-        Il sistema è sotto attacco da una caotica entità digitale nota come <span class="glitch-name">gl17chz!l!a</span>!
-        Solo il coraggioso asinello del programma DonkeyDebugger, guidato da te, può sperare di debellare questa minaccia e ripristinare l'ordine.
-        Padroneggia i comandi e preparati alla sfida!
-    </p>
-</div>
-    <h4>Comandi Principali:</h4>
-    <ul class="tutorial-list">
-        <li>
-            <div class="key-combo">
-                <span class="key-icon material-symbols-rounded">space_bar</span> <span>/</span> 
-                
+                <div class="accordion-item">
+                    <button class="accordion-header">
+                        Tutorial di Gioco
+                        <span class="material-symbols-rounded accordion-icon">expand_more</span>
+                    </button>
+                    <div class="accordion-panel">
+                        <div class="tutorial-content">
+                            <div class="tutorial-intro">
+                                <p class="terminal-text danger-text">DANGER!!! SYSTEM INTEGRITY COMPROMISED!</p>
+                                <p class="terminal-text">> Initializing asyncDonkey Defense Subroutines...</p>
+                                <p class="terminal-text">
+                                    > DonkeyDebugger Protocol: <span class="status-ok">ACTIVE</span>
+                                </p>
+                                <p class="terminal-text">
+                                    > Target Entity: <span class="glitch-name">gl17chz!l!a</span>
+                                </p>
+                                <p class="terminal-text lore-text">
+                                    Il sistema è sotto attacco da una caotica entità digitale nota come
+                                    <span class="glitch-name">gl17chz!l!a</span>! Solo il coraggioso asinello del
+                                    programma DonkeyDebugger, guidato da te, può sperare di debellare questa minaccia e
+                                    ripristinare l'ordine. Padroneggia i comandi e preparati alla sfida!
+                                </p>
+                            </div>
+                            <h4>Comandi Principali:</h4>
+                            <ul class="tutorial-list">
+                                <li>
+                                    <div class="key-combo">
+                                        <span class="key-icon material-symbols-rounded">space_bar</span> <span>/</span>
+                                    </div>
+                                    <div class="action-desc"><strong>Salta:</strong> Evita ostacoli e nemici.</div>
+                                </li>
+                                <li>
+                                    <div class="key-combo">
+                                        <span class="key-icon">CTRL</span> <span>/</span>
+                                        <span class="key-icon">X</span>
+                                    </div>
+                                    <div class="action-desc">
+                                        <strong>Spara:</strong> Elimina i nemici e alcuni ostacoli (se hai il power-up
+                                        giusto!).
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <h4>Avvio e Riavvio Partita:</h4>
+                            <ul class="tutorial-list">
+                                <li>
+                                    <div class="key-combo">
+                                        <span class="key-icon">ENTER</span>
+                                    </div>
+                                    <div class="action-desc">
+                                        <strong>Inizia/Ricomincia:</strong> Avvia una nuova partita dalla schermata
+                                        iniziale o dal menu di Game Over (dopo aver salvato il punteggio, se desideri).
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="key-combo">
+                                        <span class="key-icon material-symbols-rounded">replay</span>
+                                    </div>
+                                    <div class="action-desc">
+                                        <strong>Pulsanti su Schermo:</strong> Su mobile o al Game Over, puoi usare i
+                                        pulsanti dedicati per iniziare o rigiocare subito (senza salvare il punteggio
+                                        attuale se riavvii dal Game Over senza salvare).
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <h4>Punteggio e Classifica:</h4>
+                            <p>
+                                Il tuo punteggio aumenta eliminando nemici e sopravvivendo. Se salvi il tuo risultato,
+                                comparirà nella classifica generale! Scala le vette e diventa una leggenda di CodeDash!
+                            </p>
+
+                            <p>
+                                <em
+                                    >Ulteriori dettagli su nemici specifici, power-up e sul temibile Glitchzilla li
+                                    troverai nelle altre schede!</em
+                                >
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header">
+                        Glitchpedia (Nemici)
+                        <span class="material-symbols-rounded accordion-icon">expand_more</span>
+                    </button>
+                    <div class="accordion-panel">
+                        <div class="glitchpedia-entry">
+                            <img src="images/gifs/enemyOne.gif" alt="Enemy One" class="enemy-gif" />
+                            <div class="enemy-info">
+                                <h5>Pixel Prowler</h5>
+                                <p>
+                                    Un'entità base del glitch. Si muove inesorabile. Contatto diretto fatale.
+                                    Eliminabile con un singolo colpo.
+                                </p>
+                                <p><strong>Punti Vita:</strong> 1 | <strong>Punti Uccisione:</strong> 20</p>
+                            </div>
+                        </div>
+
+                        <div class="glitchpedia-entry">
+                            <img src="images/gifs/enemyTwo.gif" alt="Enemy Two" class="enemy-gif" />
+                            <div class="enemy-info">
+                                <h5>Rush Blocker</h5>
+                                <p>
+                                    Più aggressivo del Prowler, avanza rapidamente verso il giocatore. Contatto diretto
+                                    fatale. Un colpo è sufficiente per decompilerlo.
+                                </p>
+                                <p><strong>Punti Vita:</strong> 1 | <strong>Punti Uccisione:</strong> 35</p>
+                            </div>
+                        </div>
+
+                        <div class="glitchpedia-entry">
+                            <img src="images/gifs/enemyThree.gif" alt="Enemy Three" class="enemy-gif" />
+                            <div class="enemy-info">
+                                <h5>Corrupted Core</h5>
+                                <p>
+                                    Primo incontro con una corruzione più resistente. Richiede più colpi per essere
+                                    neutralizzato. La sua corazza si degrada visibilmente.
+                                </p>
+                                <p><strong>Punti Vita:</strong> 3 | <strong>Punti Uccisione:</strong> 50</p>
+                            </div>
+                        </div>
+
+                        <div class="glitchpedia-entry">
+                            <img src="images/gifs/enemyFour.gif" alt="Enemy Four" class="enemy-gif" />
+                            <div class="enemy-info">
+                                <h5>Bit Repeater</h5>
+                                <p>
+                                    Questa anomalia stazionaria lancia proiettili di codice corrotto. Fragile, ma
+                                    pericoloso dalla distanza.
+                                </p>
+                                <p><strong>Punti Vita:</strong> 1 | <strong>Punti Uccisione:</strong> 40</p>
+                            </div>
+                        </div>
+
+                        <div class="glitchpedia-entry">
+                            <img src="images/gifs/enemyFive.gif" alt="Enemy Five" class="enemy-gif" />
+                            <div class="enemy-info">
+                                <h5>Data Packet</h5>
+                                <p>
+                                    Un frammento di dati fluttuante. Innocuo al contatto, anzi, "raccoglilo" per
+                                    ottenere un Power-Up casuale! Se colpito da un proiettile, si dissolve senza
+                                    rilasciare bonus.
+                                </p>
+                                <p><strong>Punti Vita:</strong> 1 (speciale) | <strong>Punti Raccolta:</strong> 100</p>
+                            </div>
+                        </div>
+
+                        <div class="glitchpedia-entry">
+                            <img src="images/gifs/enemySixDmg2.gif" alt="Enemy Six" class="enemy-gif" />
+                            <div class="enemy-info">
+                                <h5>Firewall Sentry</h5>
+                                <p>
+                                    Una robusta unità difensiva che combina resistenza e potenza di fuoco. Lancia
+                                    proiettili più potenti e richiede numerosi colpi per essere smantellata.
+                                </p>
+                                <p><strong>Punti Vita:</strong> 4 | <strong>Punti Uccisione:</strong> 60</p>
+                            </div>
+                        </div>
+
+                        <div class="glitchpedia-entry">
+                            <img src="images/gifs/enemySeven.gif" alt="Enemy Seven" class="enemy-gif" />
+                            <div class="enemy-info">
+                                <h5>Stubborn Glitch</h5>
+                                <p>
+                                    Una variante più tenace del Prowler. Non lasciarti ingannare dalla sua apparente
+                                    semplicità, richiede due colpi per essere debellato.
+                                </p>
+                                <p><strong>Punti Vita:</strong> 2 | <strong>Punti Uccisione:</strong> 30</p>
+                            </div>
+                        </div>
+
+                        <div class="glitchpedia-entry">
+                            <img
+                                src="images/gifs/dangerousFlyingEnemy.gif"
+                                alt="Dangerous Flying Enemy"
+                                class="enemy-gif"
+                            />
+                            <div class="enemy-info">
+                                <h5>Volatile Fragment</h5>
+                                <p>
+                                    Un frammento di codice instabile e ostile. A differenza del Data Packet, il contatto
+                                    è dannoso! Abbattendolo c'è una possibilità (35%) che rilasci un Power-Up.
+                                </p>
+                                <p><strong>Punti Vita:</strong> 1 | <strong>Punti Uccisione:</strong> 150</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header">
+                        Armamentario (Power-up)
+                        <span class="material-symbols-rounded accordion-icon">expand_more</span>
+                    </button>
+                    <div class="accordion-panel">
+                        <div class="powerup-entry">
+                            <img src="images/gifs/tripleShotPowerUp.gif" alt="Multi-Thread" class="powerup-gif" />
+                            <div class="powerup-info">
+                                <h5>Multi-Thread</h5>
+                                <p>
+                                    Incrementa la potenza di fuoco sparando tre proiettili contemporaneamente. Ideale
+                                    per sfoltire rapidamente le minacce multiple.
+                                </p>
+                                <p><strong>Durata:</strong> 10 secondi</p>
+                            </div>
+                        </div>
+
+                        <div class="powerup-entry">
+                            <img src="images/gifs/shieldPowerUp.gif" alt="Active Shield" class="powerup-gif" />
+                            <div class="powerup-info">
+                                <h5>Active Shield</h5>
+                                <p>
+                                    Genera uno scudo protettivo che assorbe un singolo colpo da nemici o proiettili. Si
+                                    disattiva dopo l'impatto.
+                                </p>
+                                <p><strong>Durata:</strong> 15 secondi o al primo colpo subito</p>
+                            </div>
+                        </div>
+
+                        <div class="powerup-entry">
+                            <img src="images/gifs/powerUpFirewall.gif" alt="Solid Firewall" class="powerup-gif" />
+                            <div class="powerup-info">
+                                <h5>Solid Firewall</h5>
+                                <p>
+                                    Una barriera energetica temporanea che ti rende immune agli ostacoli "Code Block",
+                                    distruggendoli al contatto e facendoti guadagnare punti extra.
+                                </p>
+                                <p><strong>Durata:</strong> 12 secondi</p>
+                            </div>
+                        </div>
+
+                        <div class="powerup-entry">
+                            <img src="images/gifs/powerUpDebugMode.gif" alt="Debug Payload" class="powerup-gif" />
+                            <div class="powerup-info">
+                                <h5>Debug Payload</h5>
+                                <p>
+                                    Potenzia i tuoi proiettili
+                                    <img
+                                        src="images/gif/debugBullet.gif"
+                                        alt="Debug Bullet"
+                                        class="inline-bullet-gif"
+                                    />, che infliggono il doppio del danno (2 HP) ai nemici. Perfetto contro le unità
+                                    più corazzate.
+                                </p>
+                                <p><strong>Durata:</strong> 12 secondi</p>
+                            </div>
+                        </div>
+
+                        <div class="powerup-entry">
+                            <img src="images/gifs/powerUpBlockBreaker.gif" alt="Decompiler" class="powerup-gif" />
+                            <div class="powerup-info">
+                                <h5>Decompiler</h5>
+                                <p>
+                                    Permette ai tuoi proiettili standard di distruggere gli ostacoli "Code Block",
+                                    normalmente infrangibili con lo sparo base.
+                                </p>
+                                <p><strong>Durata:</strong> 10 secondi</p>
+                            </div>
+                        </div>
+
+                        <div class="powerup-entry">
+                            <img src="images/gifs/bombPowerUp.gif" alt="System Cleanup" class="powerup-gif" />
+                            <div class="powerup-info">
+                                <h5>System Cleanup</h5>
+                                <p>
+                                    Un impulso devastante che elimina istantaneamente tutti i nemici e gli ostacoli
+                                    visibili sullo schermo. Danneggia anche Glitchzilla, se presente.
+                                </p>
+                                <p><strong>Effetto:</strong> Istantaneo</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header">
+                        Il Boss: Glitchzilla
+                        <span class="material-symbols-rounded accordion-icon">expand_more</span>
+                    </button>
+                    <div class="accordion-panel">
+                        <div class="glitchpedia-entry boss-entry">
+                            <img
+                                src="images/gifs/glitchzillaDmg1.gif"
+                                alt="Glitchzilla - Fase Danneggiata 1"
+                                class="enemy-gif boss-gif"
+                            />
+                            <div class="enemy-info">
+                                <h5>ENTITÀ ANOMALA: <span class="glitch-name">gl17chz!l!a</span> (Boss)</h5>
+                                <p>
+                                    <strong>Rilevamento:</strong> Corruzione massiva di sorgente, classificata come
+                                    anomalia di Livello Omega. Sembra essere l'epicentro del "glitching" che affligge il
+                                    sistema. La sua struttura dati è... complessa e altamente instabile. La sua
+                                    interfaccia grafica è un abominio di pixel corrotti e codice sorgente impazzito.
+                                </p>
+                                <p>
+                                    <strong>Comportamento Operativo:</strong>
+                                    <span class="glitch-name">gl17chz!l!a</span> manifesta routine di attacco multiple e
+                                    pattern di fuoco erratico. La sua logica interna sembra progettata per massimizzare
+                                    l'entropia del sistema (e la tua frustrazione). Mostra una notevole resilienza ai
+                                    tentativi di "debugging" standard.
+                                </p>
+                                <p>
+                                    <strong>Analisi Tattica:</strong> Non ci sono scorciatoie per questa decompilazione,
+                                    caro DonkeyDebugger. Ogni istanza di <span class="glitch-name">gl17chz!l!a</span> è
+                                    un puzzle procedurale. Studia i suoi pattern di attacco, analizza le sequenze dei
+                                    suoi "errori" e preparati a "debuggare" il bug più grosso che tu abbia mai
+                                    affrontato. Dopotutto, è solo un programma... giusto? Buona fortuna, ne avrai
+                                    bisogno!
+                                </p>
+                                <p>
+                                    <strong>Ricompense per la Decompilazione:</strong> La gloria eterna, certo! Ma non
+                                    solo! Se riuscirai a "debuggare" <span class="glitch-name">gl17chz!l!a</span> fino
+                                    alla sua completa eradicazione, otterrai: un'esclusiva animazione per il tuo
+                                    nickname, un badge distintivo visibile sulla leaderboard globale e un ulteriore
+                                    badge trionfale sul tuo profilo personale! Esatto, la VERA gloria eterna (e
+                                    digitale)!
+                                </p>
+                                <p>
+                                    <strong>Punti Vita:</strong> MOLTI | <strong>Punti Eliminazione:</strong> TANTI (e
+                                    la gloria eterna)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="action-desc">
-                <strong>Salta:</strong> Evita ostacoli e nemici.
-            </div>
-        </li>
-        <li>
-            <div class="key-combo">
-                <span class="key-icon">CTRL</span> <span>/</span> 
-                <span class="key-icon">X</span>
-            </div>
-            <div class="action-desc">
-                <strong>Spara:</strong> Elimina i nemici e alcuni ostacoli (se hai il power-up giusto!).
-            </div>
-        </li>
-    </ul>
-
-    <h4>Avvio e Riavvio Partita:</h4>
-    <ul class="tutorial-list">
-        <li>
-            <div class="key-combo">
-                <span class="key-icon">ENTER</span>
-            </div>
-            <div class="action-desc">
-                <strong>Inizia/Ricomincia:</strong> Avvia una nuova partita dalla schermata iniziale o dal menu di Game Over (dopo aver salvato il punteggio, se desideri).
-            </div>
-        </li>
-        <li>
-            <div class="key-combo">
-                <span class="key-icon material-symbols-rounded">replay</span>
-            </div>
-            <div class="action-desc">
-                <strong>Pulsanti su Schermo:</strong> Su mobile o al Game Over, puoi usare i pulsanti dedicati per iniziare o rigiocare subito (senza salvare il punteggio attuale se riavvii dal Game Over senza salvare).
-            </div>
-        </li>
-    </ul>
-    
-    <h4>Punteggio e Classifica:</h4>
-    <p>Il tuo punteggio aumenta eliminando nemici e sopravvivendo. Se salvi il tuo risultato, comparirà nella classifica generale! Scala le vette e diventa una leggenda di CodeDash!</p>
-
-    <p><em>Ulteriori dettagli su nemici specifici, power-up e sul temibile Glitchzilla li troverai nelle altre schede!</em></p>
-</div>
-        </div>
-    </div>
-
-    <div class="accordion-item">
-        <button class="accordion-header">
-            Glitchpedia (Nemici)
-            <span class="material-symbols-rounded accordion-icon">expand_more</span>
-        </button>
-        <div class="accordion-panel">
-    <div class="glitchpedia-entry">
-        <img src="images/gifs/enemyOne.gif" alt="Enemy One" class="enemy-gif">
-        <div class="enemy-info">
-            <h5>Pixel Prowler</h5>
-            <p>Un'entità base del glitch. Si muove inesorabile. Contatto diretto fatale. Eliminabile con un singolo colpo.</p>
-            <p><strong>Punti Vita:</strong> 1 | <strong>Punti Uccisione:</strong> 20</p>
-        </div>
-    </div>
-
-    <div class="glitchpedia-entry">
-        <img src="images/gifs/enemyTwo.gif" alt="Enemy Two" class="enemy-gif">
-        <div class="enemy-info">
-            <h5>Rush Blocker</h5>
-            <p>Più aggressivo del Prowler, avanza rapidamente verso il giocatore. Contatto diretto fatale. Un colpo è sufficiente per decompilerlo.</p>
-            <p><strong>Punti Vita:</strong> 1 | <strong>Punti Uccisione:</strong> 35</p>
-        </div>
-    </div>
-
-    <div class="glitchpedia-entry">
-        <img src="images/gifs/enemyThree.gif" alt="Enemy Three" class="enemy-gif">
-        <div class="enemy-info">
-            <h5>Corrupted Core</h5>
-            <p>Primo incontro con una corruzione più resistente. Richiede più colpi per essere neutralizzato. La sua corazza si degrada visibilmente.</p>
-            <p><strong>Punti Vita:</strong> 3 | <strong>Punti Uccisione:</strong> 50</p>
-        </div>
-    </div>
-
-    <div class="glitchpedia-entry">
-        <img src="images/gifs/enemyFour.gif" alt="Enemy Four" class="enemy-gif">
-        <div class="enemy-info">
-            <h5>Bit Repeater</h5>
-            <p>Questa anomalia stazionaria lancia proiettili di codice corrotto. Fragile, ma pericoloso dalla distanza.</p>
-            <p><strong>Punti Vita:</strong> 1 | <strong>Punti Uccisione:</strong> 40</p>
-        </div>
-    </div>
-
-    <div class="glitchpedia-entry">
-        <img src="images/gifs/enemyFive.gif" alt="Enemy Five" class="enemy-gif">
-        <div class="enemy-info">
-            <h5>Data Packet</h5>
-            <p>Un frammento di dati fluttuante. Innocuo al contatto, anzi, "raccoglilo" per ottenere un Power-Up casuale! Se colpito da un proiettile, si dissolve senza rilasciare bonus.</p>
-            <p><strong>Punti Vita:</strong> 1 (speciale) | <strong>Punti Raccolta:</strong> 100</p>
-        </div>
-    </div>
-
-    <div class="glitchpedia-entry">
-        <img src="images/gifs/enemySixDmg2.gif" alt="Enemy Six" class="enemy-gif">
-        <div class="enemy-info">
-            <h5>Firewall Sentry</h5>
-            <p>Una robusta unità difensiva che combina resistenza e potenza di fuoco. Lancia proiettili più potenti e richiede numerosi colpi per essere smantellata.</p>
-            <p><strong>Punti Vita:</strong> 4 | <strong>Punti Uccisione:</strong> 60</p>
-        </div>
-    </div>
-
-    <div class="glitchpedia-entry">
-        <img src="images/gifs/enemySeven.gif" alt="Enemy Seven" class="enemy-gif">
-        <div class="enemy-info">
-            <h5>Stubborn Glitch</h5>
-            <p>Una variante più tenace del Prowler. Non lasciarti ingannare dalla sua apparente semplicità, richiede due colpi per essere debellato.</p>
-            <p><strong>Punti Vita:</strong> 2 | <strong>Punti Uccisione:</strong> 30</p>
-        </div>
-    </div>
-
-    <div class="glitchpedia-entry">
-        <img src="images/gifs/dangerousFlyingEnemy.gif" alt="Dangerous Flying Enemy" class="enemy-gif">
-        <div class="enemy-info">
-            <h5>Volatile Fragment</h5>
-            <p>Un frammento di codice instabile e ostile. A differenza del Data Packet, il contatto è dannoso! Abbattendolo c'è una possibilità (35%) che rilasci un Power-Up.</p>
-            <p><strong>Punti Vita:</strong> 1 | <strong>Punti Uccisione:</strong> 150</p>
-        </div>
-    </div>
-</div>
-    </div>
-
-    <div class="accordion-item">
-        <button class="accordion-header">
-            Armamentario (Power-up)
-            <span class="material-symbols-rounded accordion-icon">expand_more</span>
-        </button>
-        <div class="accordion-panel">
-    <div class="powerup-entry">
-        <img src="images/gifs/tripleShotPowerUp.gif" alt="Multi-Thread" class="powerup-gif">
-        <div class="powerup-info">
-            <h5>Multi-Thread</h5>
-            <p>Incrementa la potenza di fuoco sparando tre proiettili contemporaneamente. Ideale per sfoltire rapidamente le minacce multiple.</p>
-            <p><strong>Durata:</strong> 10 secondi</p>
-        </div>
-    </div>
-
-    <div class="powerup-entry">
-        <img src="images/gifs/shieldPowerUp.gif" alt="Active Shield" class="powerup-gif">
-        <div class="powerup-info">
-            <h5>Active Shield</h5>
-            <p>Genera uno scudo protettivo che assorbe un singolo colpo da nemici o proiettili. Si disattiva dopo l'impatto.</p>
-            <p><strong>Durata:</strong> 15 secondi o al primo colpo subito</p>
-        </div>
-    </div>
-
-    <div class="powerup-entry">
-        <img src="images/gifs/powerUpFirewall.gif" alt="Solid Firewall" class="powerup-gif">
-        <div class="powerup-info">
-            <h5>Solid Firewall</h5>
-            <p>Una barriera energetica temporanea che ti rende immune agli ostacoli "Code Block", distruggendoli al contatto e facendoti guadagnare punti extra.</p>
-            <p><strong>Durata:</strong> 12 secondi</p>
-        </div>
-    </div>
-
-    <div class="powerup-entry">
-        <img src="images/gifs/powerUpDebugMode.gif" alt="Debug Payload" class="powerup-gif">
-        <div class="powerup-info">
-            <h5>Debug Payload</h5>
-            <p>Potenzia i tuoi proiettili <img src="images/gif/debugBullet.gif" alt="Debug Bullet" class="inline-bullet-gif">, che infliggono il doppio del danno (2 HP) ai nemici. Perfetto contro le unità più corazzate.</p>
-            <p><strong>Durata:</strong> 12 secondi</p>
-        </div>
-    </div>
-
-    <div class="powerup-entry">
-        <img src="images/gifs/powerUpBlockBreaker.gif" alt="Decompiler" class="powerup-gif">
-        <div class="powerup-info">
-            <h5>Decompiler</h5>
-            <p>Permette ai tuoi proiettili standard di distruggere gli ostacoli "Code Block", normalmente infrangibili con lo sparo base.</p>
-            <p><strong>Durata:</strong> 10 secondi</p>
-        </div>
-    </div>
-
-    <div class="powerup-entry">
-        <img src="images/gifs/bombPowerUp.gif" alt="System Cleanup" class="powerup-gif">
-        <div class="powerup-info">
-            <h5>System Cleanup</h5>
-            <p>Un impulso devastante che elimina istantaneamente tutti i nemici e gli ostacoli visibili sullo schermo. Danneggia anche Glitchzilla, se presente.</p>
-            <p><strong>Effetto:</strong> Istantaneo</p>
-        </div>
-    </div>
-</div>
-    </div>
-
-    <div class="accordion-item">
-        <button class="accordion-header">
-            Il Boss: Glitchzilla
-            <span class="material-symbols-rounded accordion-icon">expand_more</span>
-        </button>
-        <div class="accordion-panel">
-    <div class="glitchpedia-entry boss-entry">
-        <img src="images/gifs/glitchzillaDmg1.gif" alt="Glitchzilla - Fase Danneggiata 1" class="enemy-gif boss-gif">
-        <div class="enemy-info">
-            <h5>ENTITÀ ANOMALA: <span class="glitch-name">gl17chz!l!a</span> (Boss)</h5>
-            <p>
-                <strong>Rilevamento:</strong> Corruzione massiva di sorgente, classificata come anomalia di Livello Omega. Sembra essere l'epicentro del "glitching" che affligge il sistema.
-                La sua struttura dati è... complessa e altamente instabile. La sua interfaccia grafica è un abominio di pixel corrotti e codice sorgente impazzito.
-            </p>
-            <p>
-                <strong>Comportamento Operativo:</strong> <span class="glitch-name">gl17chz!l!a</span> manifesta routine di attacco multiple e pattern di fuoco erratico. La sua logica interna sembra progettata per massimizzare l'entropia del sistema (e la tua frustrazione).
-                Mostra una notevole resilienza ai tentativi di "debugging" standard.
-            </p>
-            <p>
-                <strong>Analisi Tattica:</strong> Non ci sono scorciatoie per questa decompilazione, caro DonkeyDebugger. Ogni istanza di <span class="glitch-name">gl17chz!l!a</span> è un puzzle procedurale. Studia i suoi pattern di attacco, analizza le sequenze dei suoi "errori" e preparati a "debuggare" il bug più grosso che tu abbia mai affrontato. Dopotutto, è solo un programma... giusto? Buona fortuna, ne avrai bisogno!
-            </p>
-            <p>
-                <strong>Ricompense per la Decompilazione:</strong> La gloria eterna, certo! Ma non solo!
-                Se riuscirai a "debuggare" <span class="glitch-name">gl17chz!l!a</span> fino alla sua completa eradicazione, otterrai:
-                un'esclusiva animazione per il tuo nickname, un badge distintivo visibile sulla leaderboard globale e un ulteriore badge trionfale sul tuo profilo personale! Esatto, la VERA gloria eterna (e digitale)!
-            </p>
-            <p><strong>Punti Vita:</strong> MOLTI | <strong>Punti Eliminazione:</strong> TANTI (e la gloria eterna)</p>
-        </div>
-    </div>
-</div>
-    </div>
-</div>
 
             <section
                 id="guestbook"
@@ -1005,22 +1094,44 @@
                 </div>
             </section>
 
-            <section id="contribution-cta-section" style="margin-top: 30px; max-width: 700px; width: 100%; margin-left: auto; margin-right: auto; text-align: center; padding: 20px; background-color: var(--surface-bg-secondary); border-radius: 8px;">
-    <h2 style="text-align: center;">Feedback & Idee</h2>
-    <p style="margin-bottom: 20px; color: var(--text-color-secondary);">
-        Hai trovato un'anomalia nel codice o hai un'idea per migliorare il gioco? La tua opinione è preziosa! Visita la pagina dei contributi per segnalare bug, proporre nuove funzionalità e votare quelle della community.
-    </p>
-    <div class="contribution-links" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px;">
-        <a href="contribute.html#report-bug-section" class="game-button" style="text-decoration: none;">
-            <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 5px;">bug_report</span>
-            Segnala Bug
-        </a>
-        <a href="contribute.html#feature-request-section" class="game-button" style="text-decoration: none;">
-            <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 5px;">lightbulb</span>
-            Proponi un'Idea
-        </a>
-    </div>
-</section>
+            <section
+                id="contribution-cta-section"
+                style="
+                    margin-top: 30px;
+                    max-width: 700px;
+                    width: 100%;
+                    margin-left: auto;
+                    margin-right: auto;
+                    text-align: center;
+                    padding: 20px;
+                    background-color: var(--surface-bg-secondary);
+                    border-radius: 8px;
+                "
+            >
+                <h2 style="text-align: center">Feedback & Idee</h2>
+                <p style="margin-bottom: 20px; color: var(--text-color-secondary)">
+                    Hai trovato un'anomalia nel codice o hai un'idea per migliorare il gioco? La tua opinione è
+                    preziosa! Visita la pagina dei contributi per segnalare bug, proporre nuove funzionalità e votare
+                    quelle della community.
+                </p>
+                <div
+                    class="contribution-links"
+                    style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px"
+                >
+                    <a href="contribute.html#report-bug-section" class="game-button" style="text-decoration: none">
+                        <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 5px"
+                            >bug_report</span
+                        >
+                        Segnala Bug
+                    </a>
+                    <a href="contribute.html#feature-request-section" class="game-button" style="text-decoration: none">
+                        <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 5px"
+                            >lightbulb</span
+                        >
+                        Proponi un'Idea
+                    </a>
+                </div>
+            </section>
         </main>
 
         <footer>
@@ -1070,26 +1181,30 @@
             </div>
         </div>
 
-        <div id="creditsModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span class="close-modal-btn" id="closeCreditsModalBtn">&times;</span>
-        <div id="creditsModalContent">
-    <img src="images/donkey_walk_animation.gif" alt="Walking Donkey GIF" class="credits-gif">
-    
-    <div class="credits-section">
-        <h3>Crediti</h3>
-        <p class="credits-text">
-            Gioco ideato, sviluppato e disegnato da <br>
-            <strong>Umberto Trombetta</strong>
-            <br>
-            (<a href="https://github.com/asyncDonkey" target="_blank" rel="noopener noreferrer">asyncDonkey</a> su GitHub)
-        </p>
-    </div>
+        <div id="creditsModal" class="modal" style="display: none">
+            <div class="modal-content">
+                <span class="close-modal-btn" id="closeCreditsModalBtn">&times;</span>
+                <div id="creditsModalContent">
+                    <img src="images/donkey_walk_animation.gif" alt="Walking Donkey GIF" class="credits-gif" />
 
-    <div class="license-section">
-        <h3>Licenza</h3>
-        <div id="licenseTextContainer">
-    <pre>Copyright (c) 2025 Umberto Trombetta
+                    <div class="credits-section">
+                        <h3>Crediti</h3>
+                        <p class="credits-text">
+                            Gioco ideato, sviluppato e disegnato da <br />
+                            <strong>Umberto Trombetta</strong>
+                            <br />
+                            (<a href="https://github.com/asyncDonkey" target="_blank" rel="noopener noreferrer"
+                                >asyncDonkey</a
+                            >
+                            su GitHub)
+                        </p>
+                    </div>
+
+                    <div class="license-section">
+                        <h3>Licenza</h3>
+                        <div id="licenseTextContainer">
+                            <pre>
+Copyright (c) 2025 Umberto Trombetta
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1107,12 +1222,13 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.</pre>
-</div>
-    </div>
-</div>
-    </div>
-</div>
+SOFTWARE.</pre
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 

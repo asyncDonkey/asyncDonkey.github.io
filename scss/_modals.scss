@@ -359,59 +359,58 @@
     // --- FINE SEZIONE CORRETTA ---
 }
 
-
 #avatarConfirmationModal .progress-bar-container {
-    background-color: #f0f0f0; 
+    background-color: #f0f0f0;
     border-radius: 4px;
-    padding: 2px;  // 2px sopra e 2px sotto la barra interna
-    height: 24px;  // Altezza totale per contenere una barra da 20px + 4px di padding verticale
-    box-sizing: border-box; 
+    padding: 2px; // 2px sopra e 2px sotto la barra interna
+    height: 24px; // Altezza totale per contenere una barra da 20px + 4px di padding verticale
+    box-sizing: border-box;
     // display: flex; /* Rimosso temporaneamente */
     // align-items: center; /* Rimosso temporaneamente */
 }
 
 // Barra di riempimento effettiva (invariata rispetto al tuo ultimo aggiornamento)
 #avatarConfirmationModal #avatarUploadProgressBar.progress-bar-fill {
-    display: block; 
-    height: 20px;   
-    background-color: #00e0b0; 
+    display: block;
+    height: 20px;
+    background-color: #00e0b0;
     width: 0%;
-    border-radius: 2px; 
+    border-radius: 2px;
     transition: width 0.4s ease-out;
 }
 
 // Stili specifici per la modale delle informazioni legali
 #legalInfoModal {
     .modal-content {
-        &.large { 
-            max-width: 800px; 
+        &.large {
+            max-width: 800px;
             width: 90%;
-            max-height: 85vh; 
-            display: flex;    
-            flex-direction: column; 
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
         }
 
         h3#legalInfoModalTitle {
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid #e0e0e0; 
-            color: #333333; 
+            border-bottom: 1px solid #e0e0e0;
+            color: #333333;
             font-size: 1.6em;
             margin-top: 0; // Assicura che non ci sia margine sopra il titolo
         }
     }
 
     .modal-scrollable-content {
-        overflow-y: auto;   
-        flex-grow: 1;       
-        padding-right: 15px; 
+        overflow-y: auto;
+        flex-grow: 1;
+        padding-right: 15px;
         padding-left: 5px; // Un po' di padding anche a sinistra per il testo
         line-height: 1.7;
-        color: #424242; 
+        color: #424242;
 
         h2 {
             font-size: 1.4em;
-            color: #212121; 
+            color: #212121;
             margin-top: 20px;
             margin-bottom: 10px;
             &:first-child {
@@ -437,19 +436,19 @@
             }
         }
         strong {
-            color: #000000; 
+            color: #000000;
         }
     }
 }
 
 // Stile per i link che aprono la modale, se vuoi che sembrino più link
 .underline-link {
-  text-decoration: underline;
-  color: #007bff; // Blu link (colore definito 'a mano')
-  cursor: pointer;
-  &:hover {
-    color: #0056b3; // Blu link più scuro (colore definito 'a mano')
-  }
+    text-decoration: underline;
+    color: #007bff; // Blu link (colore definito 'a mano')
+    cursor: pointer;
+    &:hover {
+        color: #0056b3; // Blu link più scuro (colore definito 'a mano')
+    }
 }
 
 @keyframes modal-fade-in {
@@ -464,21 +463,22 @@
 }
 // Stile specifico per il bottone di chiusura della modale legale
 #legalInfoModal {
-    .modal-content { // Il contenitore parente che ha position: relative
-        // Assicurati che .modal-content abbia position: relative; 
+    .modal-content {
+        // Il contenitore parente che ha position: relative
+        // Assicurati che .modal-content abbia position: relative;
         // (dovrebbe già averlo dal tuo codice base)
-        
+
         #closeLegalInfoModalBtn {
             position: absolute;
-            top: 15px;    // Distanza dal bordo superiore del .modal-content
-            right: 20px;   // Distanza dal bordo destro del .modal-content
+            top: 15px; // Distanza dal bordo superiore del .modal-content
+            right: 20px; // Distanza dal bordo destro del .modal-content
             font-size: 1.75rem; // Equivalente a circa 28px se il font base è 16px
             font-weight: bold;
-            line-height: 1;   // Per un miglior allineamento verticale del carattere '×'
-            color: #aaaaaa;   // Grigio chiaro (colore definito 'a mano')
+            line-height: 1; // Per un miglior allineamento verticale del carattere '×'
+            color: #aaaaaa; // Grigio chiaro (colore definito 'a mano')
             background: none; // Nessuno sfondo
-            border: none;     // Nessun bordo
-            padding: 0;       // Nessun padding interno
+            border: none; // Nessun bordo
+            padding: 0; // Nessun padding interno
             cursor: pointer;
             text-decoration: none; // Rimuove eventuale sottolineatura se fosse un <a>
             z-index: 10; // Assicura che sia sopra altri elementi nella modale
@@ -490,7 +490,8 @@
                 outline: none; // Rimuove l'outline di focus di default del browser
             }
 
-            &:focus-visible { // Stile per il focus per l'accessibilità (tastiera)
+            &:focus-visible {
+                // Stile per il focus per l'accessibilità (tastiera)
                 outline: 2px solid #007bff; // Blu standard per il focus (colore definito 'a mano')
                 outline-offset: 2px;
             }

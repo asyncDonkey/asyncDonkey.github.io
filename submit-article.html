@@ -258,16 +258,26 @@
 
                 <form id="articleSubmissionForm" style="display: none">
                     <div>
+                        <div class="custom-markdown-editor-container"></div>
                         <label for="articleTitle">Titolo Articolo:<span class="required-indicator">*</span></label>
                         <input type="text" id="articleTitle" name="articleTitle" required maxlength="150" />
                     </div>
-                    <div>
-                        <label for="articleContent"
-                            >Contenuto (Markdown):<span class="required-indicator">*</span></label
-                        >
-                        <textarea id="articleContent" name="articleContent" rows="15" required></textarea>
-                    </div>
-                    <div>
+                    <div> 
+        <label for="articleContent">Contenuto (Markdown):<span class="required-indicator">*</span></label>
+
+        
+        <div class="custom-markdown-editor-container">
+            <h3 class="custom-markdown-editor-title">
+    <span class="material-symbols-rounded">markdown</span> Editor Markdown
+</h3> 
+            
+            
+            <div class="custom-editor-frame">
+                <textarea id="articleContent" name="articleContent" rows="15" required></textarea>
+                
+            </div>
+        </div>
+    </div>
                         <label for="articleSnippet">Snippet / Riassunto Breve (max 300 caratteri):</label>
                         <textarea id="articleSnippet" name="articleSnippet" rows="3" maxlength="300"></textarea>
                     </div>

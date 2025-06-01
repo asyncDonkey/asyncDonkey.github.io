@@ -341,15 +341,16 @@
 
 // 1. Animazione per l'icona del badge "Autore Apprezzato"
 @keyframes icon-pulse-teal-effect {
-    0%, 100% {
+    0%,
+    100% {
         transform: scale(1);
         opacity: 0.85;
-        color: #00C9A7; // Colore base Teal
+        color: #00c9a7; // Colore base Teal
     }
     50% {
         transform: scale(1.15);
         opacity: 1;
-        color: lighten(#00C9A7, 10%); // Leggermente più chiaro al picco
+        color: lighten(#00c9a7, 10%); // Leggermente più chiaro al picco
         text-shadow: 0 0 8px rgba(0, 201, 167, 0.5); // Leggero alone coordinato
     }
 }
@@ -361,13 +362,14 @@
 
 // 2. Animazione per il nickname quando "Autore Apprezzato" è il badge attivo
 @keyframes nickname-glow-teal-effect {
-    0%, 100% {
-        text-shadow: 
+    0%,
+    100% {
+        text-shadow:
             0 0 3px rgba(0, 201, 167, 0.2),
             0 0 5px rgba(0, 201, 167, 0.1);
     }
     50% {
-        text-shadow: 
+        text-shadow:
             0 0 5px rgba(0, 201, 167, 0.8),
             0 0 10px rgba(0, 201, 167, 0.6),
             0 0 15px rgba(0, 201, 167, 0.4);
@@ -380,16 +382,17 @@
 
 /* ===== Animazione Neon per Email Contatto ===== */
 @keyframes contact-email-neon-glow {
-    0%, 100% {
+    0%,
+    100% {
         color: var(--link-color);
-        text-shadow: 
+        text-shadow:
             0 0 4px rgba(255, 255, 255, 0.2),
             0 0 6px var(--link-color),
             0 0 10px var(--link-color);
     }
     50% {
         color: var(--link-hover-color); /* O un teal più brillante se definito */
-        text-shadow: 
+        text-shadow:
             0 0 6px rgba(255, 255, 255, 0.4),
             0 0 10px var(--link-hover-color),
             0 0 18px var(--link-hover-color),
@@ -401,4 +404,3 @@
     animation: contact-email-neon-glow 2.5s infinite ease-in-out;
     font-weight: 600; /* Diamo un po' di spessore all'email */
 }
-

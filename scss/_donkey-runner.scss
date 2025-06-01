@@ -781,7 +781,7 @@ body.game-fullscreen-active main {
 // Stile per la modale (rimane valido)
 #creditsModal .modal-content {
     h3 {
-        color: #0eaf9b; 
+        color: #0eaf9b;
         margin-top: 0;
         border-bottom: 1px solid #34495e;
         padding-bottom: 10px;
@@ -798,34 +798,35 @@ body.game-fullscreen-active main {
         image-rendering: pixelated; // Mantiene lo stile pixel-art se presente
     }
 
-    .credits-section, .license-section {
+    .credits-section,
+    .license-section {
         text-align: center;
         margin-bottom: 20px;
     }
 
     .credits-text {
-    font-size: 1.1em;
-    line-height: 1.5;
-    // --- FIX ---
-    color: #34495e; // << CAMBIATO da #ecf0f1 a un grigio-blu scuro
-
-    strong {
+        font-size: 1.1em;
+        line-height: 1.5;
         // --- FIX ---
-        color: #000000; // << CAMBIATO da #ffffff a nero per massimo risalto
-        font-weight: 600;
-    }
+        color: #34495e; // << CAMBIATO da #ecf0f1 a un grigio-blu scuro
 
-    a {
-        color: #008f8a; // << Leggermente scurito per un miglior contrasto su sfondo chiaro
-        text-decoration: none;
-        font-weight: bold;
+        strong {
+            // --- FIX ---
+            color: #000000; // << CAMBIATO da #ffffff a nero per massimo risalto
+            font-weight: 600;
+        }
 
-        &:hover {
-            text-decoration: underline;
+        a {
+            color: #008f8a; // << Leggermente scurito per un miglior contrasto su sfondo chiaro
+            text-decoration: none;
+            font-weight: bold;
+
+            &:hover {
+                text-decoration: underline;
+            }
         }
     }
-}
-    
+
     // Stile per il contenitore della licenza
     #licenseTextContainer {
         font-size: 0.9em;
@@ -848,7 +849,7 @@ body.game-fullscreen-active main {
     border: 1px solid #0b8a8f; // Teal scuro per il bordo contenitore
     border-radius: 6px;
     background-color: #2c3034; // Uno sfondo scuro per il contenitore
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .donkey-runner-page .accordion-item {
@@ -898,7 +899,9 @@ body.game-fullscreen-active main {
     background-color: #1c1e22; // Sfondo leggermente diverso per il pannello
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease-out, padding 0.3s ease-out; // Transizione fluida
+    transition:
+        max-height 0.3s ease-out,
+        padding 0.3s ease-out; // Transizione fluida
 
     p {
         color: #bdc3c7; // Grigio chiaro per il testo interno
@@ -959,8 +962,13 @@ body.game-fullscreen-active main {
     }
 
     @keyframes blink-danger {
-        0%, 100% { color: #ff0000; }
-        50% { color: #8B0000; } // Rosso più scuro per il lampeggio
+        0%,
+        100% {
+            color: #ff0000;
+        }
+        50% {
+            color: #8b0000;
+        } // Rosso più scuro per il lampeggio
     }
 
     .status-ok {
@@ -973,14 +981,24 @@ body.game-fullscreen-active main {
         font-weight: bold;
         animation: text-glitch 0.1s infinite alternate;
     }
-    
+
     // Semplice animazione per il nome del glitch (opzionale, può essere più complessa)
     @keyframes text-glitch {
-        0% { transform: translate(0,0); }
-        25% { transform: translate(-1px, 1px); }
-        50% { transform: translate(1px, -1px); }
-        75% { transform: translate(1px, 1px); }
-        100% { transform: translate(-1px, -1px); }
+        0% {
+            transform: translate(0, 0);
+        }
+        25% {
+            transform: translate(-1px, 1px);
+        }
+        50% {
+            transform: translate(1px, -1px);
+        }
+        75% {
+            transform: translate(1px, 1px);
+        }
+        100% {
+            transform: translate(-1px, -1px);
+        }
     }
 
     .lore-text {
@@ -1000,7 +1018,8 @@ body.game-fullscreen-active main {
         font-size: 1.1em; // Leggermente più grande
     }
 
-    .tutorial-list { // Nuova classe per le liste del tutorial
+    .tutorial-list {
+        // Nuova classe per le liste del tutorial
         list-style: none;
         padding-left: 0;
         margin-bottom: 20px; // Aumentato margine inferiore lista
@@ -1019,8 +1038,9 @@ body.game-fullscreen-active main {
         align-items: center;
         margin-right: 12px; // Spazio tra key-combo e descrizione
         flex-shrink: 0; // Non far restringere questo blocco
-        
-        span:not(.key-icon) { // Stile per lo slash "/" o altri testi non-icona
+
+        span:not(.key-icon) {
+            // Stile per lo slash "/" o altri testi non-icona
             margin: 0 4px;
             color: #868e96; // Grigio per lo slash
         }
@@ -1037,37 +1057,38 @@ body.game-fullscreen-active main {
         color: #ecf0f1;
         font-family: 'Source Code Pro', monospace;
         font-size: 0.9em; // Font per testo tasti
-        min-width: 22px; 
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        min-width: 22px;
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 
         &.material-symbols-rounded {
-            font-size: 20px; 
-            padding: 5px; 
+            font-size: 20px;
+            padding: 5px;
         }
     }
-    
+
     .action-desc {
         color: #bdc3c7; // Colore base per la descrizione
         flex-grow: 1; // Permette alla descrizione di usare lo spazio rimanente
 
-        strong { // "Salta:", "Spara:", etc.
-            color: #ffffff; 
+        strong {
+            // "Salta:", "Spara:", etc.
+            color: #ffffff;
             font-weight: 600; // Già impostato, ma per chiarezza
             margin-right: 5px; // Spazio dopo i due punti (se presenti nel testo)
         }
     }
 
-    p { 
+    p {
         color: #bdc3c7;
         line-height: 1.6;
         margin: 10px 0 15px 0;
         font-size: 0.95em; // Applicato anche ai paragrafi generali
     }
 
-    em { 
+    em {
         color: #adb5bd;
     }
-.glitchpedia-entry {
+    .glitchpedia-entry {
         display: flex;
         align-items: flex-start; // Allinea l'immagine e il testo in alto
         margin-bottom: 25px; // Spazio tra le voci
@@ -1114,7 +1135,7 @@ body.game-fullscreen-active main {
             }
         }
     }
-.powerup-entry {
+    .powerup-entry {
         display: flex;
         align-items: flex-start;
         margin-bottom: 25px;
@@ -1159,7 +1180,7 @@ body.game-fullscreen-active main {
                     color: #ffffff;
                 }
             }
-            
+
             .inline-bullet-gif {
                 width: 24px; // Più piccolo per adattarsi al testo
                 height: auto;
@@ -1169,7 +1190,7 @@ body.game-fullscreen-active main {
             }
         }
     }
-.boss-entry {
+    .boss-entry {
         border-top: 2px solid #ff0000; // Un bordo rosso per segnalare il boss
         padding-top: 20px; // Più spazio sopra
 
@@ -1183,8 +1204,8 @@ body.game-fullscreen-active main {
             color: #ff0000; // Nome del boss in rosso
             font-size: 1.3em; // Nome più grande
         }
-        
-        .enemy-info .glitch-name { 
+
+        .enemy-info .glitch-name {
             // Riprendiamo l'animazione glitch per il nome del boss anche qui
             color: #ff00ff;
             font-weight: bold;
@@ -1255,7 +1276,7 @@ body.game-fullscreen-active main {
     color: #a1ef8c; // Verde lime brillante
     border: 3px solid #446176; // Blu-grigio acciaio, PIÙ SPESSO
     padding: 12px 18px; // Padding per dare dimensione
-    font-size: 1.2em;   // Dimensione font per leggibilità
+    font-size: 1.2em; // Dimensione font per leggibilità
     text-transform: uppercase;
     border-radius: 5px; // Leggermente arrotondato
     box-shadow: 3px 3px 0px #1a1423; // Ombra più scura e netta (derivata dal viola di sfondo)
@@ -1282,7 +1303,7 @@ body.game-fullscreen-active main {
 
 // Specifiche per i bottoni JMP/SHT se necessario (ad es. dimensioni diverse)
 .donkey-runner-page .control-button {
-    flex-grow: 0; 
+    flex-grow: 0;
     flex-basis: 45%; // Come prima per mantenere il layout a due
     margin: 0 5px;
     min-height: 60px; // Assicura un'altezza minima per la cliccabilità
@@ -1298,7 +1319,6 @@ body.game-fullscreen-active main {
     }
 }
 
-
 // Stili specifici per #mobileStartButton (posizionamento e dimensione)
 .donkey-runner-page #mobileStartButton {
     // display: none; // Gestito da JS (mantenuto da prima)
@@ -1309,7 +1329,7 @@ body.game-fullscreen-active main {
     // z-index: 100; // Mantenuto da prima
 
     padding: 15px 30px; // Padding specifico per il pulsante START
-    font-size: 1.6em;  // Font più grande per START
+    font-size: 1.6em; // Font più grande per START
     // Nota: le regole di posizionamento sono commentate qui perché dovrebbero già esistere
     // nel tuo file. Se non ci sono, decommentale o assicurati che siano definite.
 }
@@ -1327,10 +1347,10 @@ body.game-fullscreen-active main {
     #restartGameBtnDonkey {
         font-family: 'Source Code Pro', monospace; // NUOVO FONT
         background-color: #2c2137; // Viola scuro profondo
-        color: #a1ef8c;           // Verde lime brillante
+        color: #a1ef8c; // Verde lime brillante
         border: 2px solid #446176; // Blu-grigio acciaio (leggermente meno spesso dei control-button per differenziare)
-        padding: 10px 18px;      // Padding leggermente diverso per adattarsi al contesto del form
-        font-size: 0.95em;       // Dimensione font per leggibilità nel form
+        padding: 10px 18px; // Padding leggermente diverso per adattarsi al contesto del form
+        font-size: 0.95em; // Dimensione font per leggibilità nel form
         text-transform: uppercase;
         border-radius: 5px;
         box-shadow: 2px 2px 0px #1a1423; // Ombra più scura e netta
@@ -1340,22 +1360,22 @@ body.game-fullscreen-active main {
         cursor: pointer;
         letter-spacing: 0.5px;
         min-width: 90px; // Larghezza minima per accomodare testo e icona
-        height: 42px;    // Altezza fissa per allineamento
+        height: 42px; // Altezza fissa per allineamento
         display: inline-flex; // Per centrare l'icona o il testo
         align-items: center;
         justify-content: center;
         margin: 0; // Rimuoviamo il margin individuale, gestito dal gap del parent
 
         &:hover {
-            background-color: #3b2d4a; 
-            color: #c4f0c2; 
+            background-color: #3b2d4a;
+            color: #c4f0c2;
             box-shadow: 3px 3px 0px #3fac95;
             transform: translate(-1px, -1px);
         }
 
         &:active {
-            background-color: #3fac95; 
-            color: #2c2137; 
+            background-color: #3fac95;
+            color: #2c2137;
             box-shadow: 1px 1px 0px #1a1423;
             transform: translate(1px, 1px); // Leggermente meno "schiacciato" dei control-button
         }
@@ -1370,7 +1390,7 @@ body.game-fullscreen-active main {
     // Se vuoi differenziare #saveScoreBtnDonkey (es. colore primario diverso)
     // #saveScoreBtnDonkey {
     //     // Esempio:
-    //     // background-color: #3fac95; 
+    //     // background-color: #3fac95;
     //     // color: #1a1423;
     //     // border-color: #2c2137;
     //

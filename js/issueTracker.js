@@ -1,8 +1,20 @@
 // js/issueTracker.js
 import { db, auth } from './main.js';
 import {
-    collection, addDoc, query, where, orderBy, limit, getDocs,
-    serverTimestamp, doc, updateDoc, getDoc, increment, arrayUnion, arrayRemove
+    collection,
+    addDoc,
+    query,
+    where,
+    orderBy,
+    limit,
+    getDocs,
+    serverTimestamp,
+    doc,
+    updateDoc,
+    getDoc,
+    increment,
+    arrayUnion,
+    arrayRemove,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
@@ -58,22 +70,35 @@ function formatIssueTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp?.toDate) return 'Data non disponibile';
     try {
         return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
         });
-    } catch (e) { return 'Formato data errato'; }
+    } catch (e) {
+        return 'Formato data errato';
+    }
 }
 
 function getStatusBadgeClass(status) {
     switch (status) {
-        case 'new': return 'status-new';
-        case 'underConsideration': return 'status-under-consideration';
-        case 'accepted': return 'status-accepted';
-        case 'planned': return 'status-planned';
-        case 'inProgress': return 'status-in-progress';
-        case 'completed': return 'status-completed';
-        case 'declined': return 'status-declined';
-        default: return 'status-unknown';
+        case 'new':
+            return 'status-new';
+        case 'underConsideration':
+            return 'status-under-consideration';
+        case 'accepted':
+            return 'status-accepted';
+        case 'planned':
+            return 'status-planned';
+        case 'inProgress':
+            return 'status-in-progress';
+        case 'completed':
+            return 'status-completed';
+        case 'declined':
+            return 'status-declined';
+        default:
+            return 'status-unknown';
     }
 }
 
@@ -92,16 +117,16 @@ function createIssueCardElement(issueData, issueId, localCurrentUser) {
 
     const metaEl = document.createElement('div');
     metaEl.className = 'issue-meta';
-    
+
     const typeText =
         issueData.type === 'gameIssue'
             ? `Problema Gioco (${escapeHTML(issueData.gameId || 'Non specificato')})`
             : issueData.type === 'generalFeature'
-                ? 'Funzionalità Generale Sito'
-                : issueData.type === 'newGameRequest'
-                    ? 'Suggerimento Nuovo Gioco'
-                    : 'Sconosciuto';
-    
+              ? 'Funzionalità Generale Sito'
+              : issueData.type === 'newGameRequest'
+                ? 'Suggerimento Nuovo Gioco'
+                : 'Sconosciuto';
+
     // CORREZIONE QUI: Assicurarsi che statusBadge sia un template literal corretto
     const statusBadge = `<span class="issue-status-badge ${getStatusBadgeClass(issueData.status)}">${escapeHTML(issueData.status)}</span>`;
 
@@ -152,7 +177,7 @@ function createIssueCardElement(issueData, issueId, localCurrentUser) {
         upvoteButton.removeEventListener('click', oldButtonHandler);
         delete upvoteButton.handlerAttached;
     }
-    
+
     if (localCurrentUser) {
         upvoteButton.disabled = false;
         upvoteInteractionWrapper.style.cursor = 'pointer';
@@ -184,7 +209,7 @@ function createIssueCardElement(issueData, issueId, localCurrentUser) {
     issueCard.appendChild(descriptionEl);
     issueCard.appendChild(metaEl);
     issueCard.appendChild(actionsEl);
-    
+
     return issueCard;
 }
 
@@ -212,7 +237,8 @@ async function loadAndDisplayTopVotedIssue() {
             const topIssueDoc = querySnapshot.docs[0];
             const topIssueData = topIssueDoc.data();
 
-            if (topIssueData.upvotes > 0) { // Mostra solo se ha almeno un voto
+            if (topIssueData.upvotes > 0) {
+                // Mostra solo se ha almeno un voto
                 const topIssueCardElement = createIssueCardElement(topIssueData, topIssueDoc.id, currentUser);
                 topIssueCardElement.classList.add('top-issue-highlight'); // Aggiungi classe per styling specifico
 
@@ -225,11 +251,11 @@ async function loadAndDisplayTopVotedIssue() {
             topIssueSection.style.display = 'none'; // Nascondi se non ci sono issue idonee
         }
     } catch (error) {
-        console.error("Errore nel caricare la top issue:", error);
+        console.error('Errore nel caricare la top issue:', error);
         topIssueSection.style.display = 'none';
-         if (error.code === 'failed-precondition' && topIssueContainer) {
+        if (error.code === 'failed-precondition' && topIssueContainer) {
             topIssueContainer.innerHTML = '<p><small>Indice Firestore per top issue mancante.</small></p>';
-            topIssueSection.style.display = 'block'; 
+            topIssueSection.style.display = 'block';
         }
     }
 }
@@ -338,7 +364,7 @@ if (issueSubmissionForm) {
                 issueSubmissionMessageDiv.style.color = 'green';
             }
             issueSubmissionForm.reset();
-            if(gameSelectionContainer) gameSelectionContainer.style.display = 'none';
+            if (gameSelectionContainer) gameSelectionContainer.style.display = 'none';
             loadIssues();
         } catch (error) {
             console.error('Errore invio issue:', error);
@@ -366,9 +392,9 @@ async function loadIssues() {
         const issuesCollectionRef = collection(db, 'userIssues');
         const filterType = filterIssueTypeSelect ? filterIssueTypeSelect.value : 'all';
         const filterStatus = filterIssueStatusSelect ? filterIssueStatusSelect.value : 'all';
-        
-        const conditions = []; 
-        let queryClauses = []; 
+
+        const conditions = [];
+        let queryClauses = [];
 
         if (filterType !== 'all') {
             conditions.push(where('type', '==', filterType));
@@ -378,29 +404,34 @@ async function loadIssues() {
         }
 
         if (conditions.length > 0) {
-            queryClauses = [...conditions, orderBy('upvotes', 'desc'), orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE)];
+            queryClauses = [
+                ...conditions,
+                orderBy('upvotes', 'desc'),
+                orderBy('timestamp', 'desc'),
+                limit(ISSUES_PER_PAGE),
+            ];
         } else {
             queryClauses = [orderBy('upvotes', 'desc'), orderBy('timestamp', 'desc'), limit(ISSUES_PER_PAGE)];
         }
-        
+
         const q = query(issuesCollectionRef, ...queryClauses);
         const querySnapshot = await getDocs(q);
-        issuesDisplayArea.innerHTML = ''; 
+        issuesDisplayArea.innerHTML = '';
 
         if (querySnapshot.empty) {
-            issuesDisplayArea.innerHTML = '<p>Nessuna segnalazione o suggerimento trovato per i filtri selezionati.</p>';
+            issuesDisplayArea.innerHTML =
+                '<p>Nessuna segnalazione o suggerimento trovato per i filtri selezionati.</p>';
         } else {
             querySnapshot.forEach((docSnapshot) => {
                 const issue = docSnapshot.data();
                 const issueId = docSnapshot.id;
                 const issueCardElement = createIssueCardElement(issue, issueId, currentUser);
-    issuesDisplayArea.appendChild(issueCardElement);
-});
+                issuesDisplayArea.appendChild(issueCardElement);
+            });
         }
-        
-        // <<< CHIAMATA A updateCarouselState AGGIUNTA QUI >>>
-        updateCarouselState(); 
 
+        // <<< CHIAMATA A updateCarouselState AGGIUNTA QUI >>>
+        updateCarouselState();
     } catch (error) {
         console.error('Errore caricamento issues:', error);
         if (issuesDisplayArea) {
@@ -469,7 +500,7 @@ async function handleIssueUpvote(issueId) {
                 iconSpanElement.textContent = upvoteIconName;
                 iconSpanElement.style.fontVariationSettings = `'FILL' ${upvoteIconFill}`;
             }
-            
+
             if (userNowHasVoted) {
                 upvoteButton.classList.add('voted');
                 upvoteButton.title = 'Hai già votato';
@@ -496,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
             updateCarouselState();
-        }, 250); 
+        }, 250);
     });
 });
 

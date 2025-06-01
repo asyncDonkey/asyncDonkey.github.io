@@ -520,7 +520,8 @@
 
 #articlesSection {
     // Nascondiamo il link "Vedi tutti" se non ci sono articoli nel contenitore
-    &:has(:not(p)) .view-all-articles-container { // se ha qualcosa che non sia il paragrafo di loading
+    &:has(:not(p)) .view-all-articles-container {
+        // se ha qualcosa che non sia il paragrafo di loading
         display: block;
     }
 }
@@ -532,7 +533,7 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch; // Scrolling fluido per iOS
-    
+
     // Nasconde la scrollbar per un look più pulito
     &::-webkit-scrollbar {
         display: none;
@@ -557,7 +558,9 @@
     border-radius: 25px;
     text-decoration: none;
     font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition:
+        background-color 0.3s ease,
+        transform 0.2s ease;
     border: none;
     cursor: pointer;
 
@@ -567,7 +570,6 @@
         text-decoration: none;
     }
 }
-
 
 // Stile per le card all'interno del container
 .article-card {
@@ -590,14 +592,14 @@
     // Per la card normale, il padding è nel wrapper del testo
     &:not(.is-featured) {
         .article-card-text-content {
-             padding: 20px;
+            padding: 20px;
         }
     }
     // Per la featured, il padding è azzerato perché lo gestiamo diversamente
     &.is-featured {
-         .article-card-text-content {
-             padding: 0 20px 20px 20px;
-         }
+        .article-card-text-content {
+            padding: 0 20px 20px 20px;
+        }
     }
 }
 
@@ -632,7 +634,7 @@
             // Stile per la card in evidenza QUANDO è in griglia
             &.is-featured {
                 grid-column: 1 / -1;
-                display: flex; 
+                display: flex;
                 flex-direction: row;
                 align-items: center;
                 padding: 0; // Rimuoviamo padding dalla card genitore

@@ -143,7 +143,7 @@ const privacyPolicyText = `
 
 function openLegalModal(type) {
     if (!legalInfoModal || !legalInfoModalTitle || !legalInfoModalContent) {
-        console.error("Elementi della modale legale non trovati.");
+        console.error('Elementi della modale legale non trovati.');
         return;
     }
 
@@ -155,7 +155,7 @@ function openLegalModal(type) {
         legalInfoModalContent.innerHTML = privacyPolicyText;
     }
     legalInfoModal.style.display = 'flex';
-    document.body.classList.add('modal-open'); 
+    document.body.classList.add('modal-open');
 }
 
 function closeLegalModal() {
@@ -386,8 +386,6 @@ if (loginFormModal) {
     });
 }
 
-
-
 // --- AGGANCIO EVENT LISTENER PRINCIPALE E LOGICA authAction ---
 document.addEventListener('DOMContentLoaded', () => {
     if (registerForm) {
@@ -426,13 +424,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (legalInfoModal) {
         legalInfoModal.addEventListener('click', (event) => {
-            if (event.target === legalInfoModal) { 
+            if (event.target === legalInfoModal) {
                 closeLegalModal();
             }
         });
     }
     // ----- FINE CODICE MODALE LEGALE -----
-
 
     // Logica per authAction
     const urlParams = new URLSearchParams(window.location.search);

@@ -1167,8 +1167,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-   
-
     function setupModalControls() {
         if (showLoginBtn && loginModal) {
             showLoginBtn.addEventListener('click', (e) => {
@@ -1187,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Chiamate alle funzioni di setup del DOM
     setupSmoothScrolling();
     setupScrollToTopButton();
-    
+
     setupModalControls();
     setupAvatarClickListener();
     // Caricamento contenuti specifici della homepage

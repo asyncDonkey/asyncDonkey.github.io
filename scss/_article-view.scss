@@ -1,7 +1,9 @@
 /* ===== Pagina Visualizzazione Articolo Singolo (view-article.html) ===== */
 #articleDisplaySection {
-    /* Eredita da main section, qui eventuali override */
     padding: 25px 30px; /* Consistenza con altre sezioni */
+    max-width: 960px; // NUOVO: Aumenta la larghezza massima per desktop
+    margin-left: auto; // NUOVO: Centra la sezione
+    margin-right: auto; // NUOVO: Centra la sezione
 }
 #articleDisplayHeader {
     border-bottom: 1px solid var(--border-color-secondary);
@@ -14,15 +16,15 @@
     font-size: 2.2em;
     color: #333333; /* Placeholder per var(--heading-color) - SOSTITUISCI CON IL TUO VALORE EFFETTIVO */
     margin-top: 0;
-    margin-bottom: 8px; 
-    line-height: 1.25; 
-    
-    white-space: normal !important; 
-    overflow-wrap: break-word;  
+    margin-bottom: 8px;
+    line-height: 1.25;
+
+    white-space: normal !important;
+    overflow-wrap: break-word;
     word-wrap: break-word; // Fallback per overflow-wrap
 
     // AGGIUNTA: Per forzare l'interruzione di parole molto lunghe se necessario
-    word-break: break-all; 
+    word-break: break-all;
 }
 
 #articleDisplayMeta {
@@ -50,9 +52,11 @@
     display: inline-block;
 }
 #articleDisplayContent {
-    font-size: 1.05em;
+    font-size: 1em; // Modificato da 1.05em
     line-height: 1.7;
     color: var(--text-color-secondary);
+    overflow-wrap: break-word; // Manteniamo queste proprietà importanti
+    word-wrap: break-word;
 }
 #articleDisplayContent h1,
 #articleDisplayContent h2,
@@ -246,7 +250,6 @@
     }
 }
 
-
 // Stili per la sezione condivisione articolo
 #articleShareSection {
     margin-top: 30px;
@@ -264,8 +267,6 @@
         font-weight: 600;
     }
 }
-
-
 
 .share-buttons-container {
     display: flex;
@@ -370,36 +371,70 @@
 
 #articleDisplayContent {
     // Stili esistenti che hai fornito:
-    font-size: 1.05em; 
+    font-size: 1.05em;
     line-height: 1.7;
     color: #444444; // Placeholder per var(--text-color-secondary) - SOSTITUISCI CON IL TUO VALORE
 
     // AGGIUNTA: Gestione del ritorno a capo per parole lunghe e URL
     overflow-wrap: break-word;
-    word-wrap: break-word;     // Fallback per browser più vecchi
+    word-wrap: break-word; // Fallback per browser più vecchi
     // word-break: break-all;  // Da usare con cautela, solo se break-word non basta
 
     // Stili per h1-h3, p, a, ul, ol, blockquote (come li hai, ma verifica che non ci siano larghezze fisse o white-space: nowrap)
-    h1, h2, h3, h4, h5, h6 { // Aggiunti h4-h6 per completezza
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        // Aggiunti h4-h6 per completezza
         color: #333333; // Placeholder per var(--heading-color) - SOSTITUISCI
         margin-top: 1.8em;
         margin-bottom: 0.8em;
         // border-bottom: 1px solid #dddddd; // Placeholder per var(--border-color-secondary) - SOSTITUISCI
         // padding-bottom: 0.3em; // Nota: la bordatura solo sui titoli principali è più comune
     }
-    h1 { font-size: 1.8em; border-bottom: 1px solid #dddddd; padding-bottom: 0.3em;} // Bordo solo per H1
-    h2 { font-size: 1.5em; border-bottom: 1px solid #dddddd; padding-bottom: 0.3em;} // Bordo solo per H2
-    h3 { font-size: 1.3em; } // H3 e successivi senza bordo di default
-    h4 { font-size: 1.2em; }
-    h5 { font-size: 1.1em; }
-    h6 { font-size: 1.0em; }
+    h1 {
+        font-size: 1.8em;
+        border-bottom: 1px solid #dddddd;
+        padding-bottom: 0.3em;
+    } // Bordo solo per H1
+    h2 {
+        font-size: 1.5em;
+        border-bottom: 1px solid #dddddd;
+        padding-bottom: 0.3em;
+    } // Bordo solo per H2
+    h3 {
+        font-size: 1.3em;
+    } // H3 e successivi senza bordo di default
+    h4 {
+        font-size: 1.2em;
+    }
+    h5 {
+        font-size: 1.1em;
+    }
+    h6 {
+        font-size: 1em;
+    }
 
-
-    p { margin-bottom: 1.2em; }
-    a { color: #007bff; text-decoration: underline; } // Placeholder per var(--link-color) - SOSTITUISCI
-    a:hover { color: #0056b3; } // Placeholder per var(--link-hover-color) - SOSTITUISCI
-    ul, ol { margin-left: 20px; margin-bottom: 1.2em; }
-    li { margin-bottom: 0.5em; }
+    p {
+        margin-bottom: 1.2em;
+    }
+    a {
+        color: #007bff;
+        text-decoration: underline;
+    } // Placeholder per var(--link-color) - SOSTITUISCI
+    a:hover {
+        color: #0056b3;
+    } // Placeholder per var(--link-hover-color) - SOSTITUISCI
+    ul,
+    ol {
+        margin-left: 20px;
+        margin-bottom: 1.2em;
+    }
+    li {
+        margin-bottom: 0.5em;
+    }
     blockquote {
         border-left: 3px solid #007bff; // Placeholder per var(--link-color) - SOSTITUISCI
         padding-left: 15px;
@@ -410,40 +445,41 @@
 
     pre {
         background-color: #f8f9fa; // Placeholder per var(--surface-bg-secondary) - SOSTITUISCI
-        border: 1px solid #dee2e6;   // Placeholder per var(--border-color-secondary) - SOSTITUISCI
+        border: 1px solid #dee2e6; // Placeholder per var(--border-color-secondary) - SOSTITUISCI
         padding: 15px;
-        border-radius: 6px;          // Ok, o usa var(--border-radius-standard)
-        overflow-x: auto;            // QUESTO È CORRETTO E GIÀ PRESENTE
+        border-radius: 6px; // Ok, o usa var(--border-radius-standard)
+        overflow-x: auto; // QUESTO È CORRETTO E GIÀ PRESENTE
         font-family: 'Source Code Pro', monospace;
         font-size: 0.95em;
-        margin: 1.5em 0; 
+        margin: 1.5em 0;
     }
 
-    pre code { // Assicurati che questi stili non contrastino con il syntax highlighter
+    pre code {
+        // Assicurati che questi stili non contrastino con il syntax highlighter
         padding: 0;
         background-color: transparent;
         border-radius: 0;
-        font-size: inherit; 
+        font-size: inherit;
         border: none; // Rimuovi bordi se presenti
         white-space: inherit; // Eredita white-space da pre (che è pre)
     }
-    
+
     // Codice inline (non dentro <pre>)
-    code:not(pre > code) { // Applica solo a <code> non figlio diretto di <pre>
+    code:not(pre > code) {
+        // Applica solo a <code> non figlio diretto di <pre>
         background-color: #e9ecef; // Placeholder per var(--surface-bg-secondary) o un grigio chiaro - SOSTITUISCI
         padding: 0.2em 0.4em;
-        border-radius: 3px;          // Ok, o usa var(--border-radius-small)
+        border-radius: 3px; // Ok, o usa var(--border-radius-small)
         font-family: 'Source Code Pro', monospace;
-        font-size: 0.9em;            // Leggermente più piccolo del testo normale
-        color: #c7254e;              // Placeholder per un colore che lo distingua - SOSTITUISCI
+        font-size: 0.9em; // Leggermente più piccolo del testo normale
+        color: #c7254e; // Placeholder per un colore che lo distingua - SOSTITUISCI
     }
-
 
     img {
         max-width: 100%;
         height: auto;
-        border-radius: 6px;         // Ok, o usa var(--border-radius-standard)
-        margin: 1.5em auto;         // Centra le immagini
+        border-radius: 6px; // Ok, o usa var(--border-radius-standard)
+        margin: 1.5em auto; // Centra le immagini
         display: block;
     }
 
@@ -452,22 +488,23 @@
     // con un <div class="table-wrapper">...</div>. Questo potrebbe richiedere JS.
     // Se marked.js non lo fa, una soluzione più semplice ma meno elegante è:
     // table { display: block; width: 100%; overflow-x: auto; /* ...altri stili tabella... */ }
-    
+
     .table-wrapper {
-      overflow-x: auto;
-      margin: 1.5em 0;
-      border: 1px solid #dee2e6; // Placeholder - SOSTITUISCI
-      border-radius: 6px;       // Placeholder - SOSTITUISCI
+        overflow-x: auto;
+        margin: 1.5em 0;
+        border: 1px solid #dee2e6; // Placeholder - SOSTITUISCI
+        border-radius: 6px; // Placeholder - SOSTITUISCI
     }
 
     table {
-        width: 100%; 
+        width: 100%;
         border-collapse: collapse;
         // font-size: 0.9em; // Puoi decommentare se vuoi le tabelle leggermente più piccole
-        
-        th, td {
+
+        th,
+        td {
             border: 1px solid #dee2e6; // Placeholder per var(--border-color-secondary) - SOSTITUISCI
-            padding: 0.6em 0.8em;     // Aumentato leggermente il padding per leggibilità
+            padding: 0.6em 0.8em; // Aumentato leggermente il padding per leggibilità
             text-align: left;
         }
 
@@ -475,7 +512,8 @@
             background-color: #f8f9fa; // Placeholder per var(--surface-bg-secondary) - SOSTITUISCI
             font-weight: 600;
         }
-        tbody tr:nth-child(odd) td { // Strisce per le righe (opzionale)
+        tbody tr:nth-child(odd) td {
+            // Strisce per le righe (opzionale)
             // background-color: #fdfdfd; // Placeholder per un colore di sfondo molto chiaro - SOSTITUISCI
         }
     }

@@ -18,11 +18,12 @@ export function setupDraggableCarousel(container) {
         startX = e.pageX - container.offsetLeft;
         scrollLeft = container.scrollLeft;
         // Impedire la selezione del testo durante il trascinamento
-        container.style.userSelect = 'none'; 
+        container.style.userSelect = 'none';
     });
 
     container.addEventListener('mouseleave', () => {
-        if (isDown) { // Solo se il mouse era premuto
+        if (isDown) {
+            // Solo se il mouse era premuto
             isDown = false;
             container.classList.remove('active-carousel');
             container.style.userSelect = 'auto'; // Ripristina la selezione del testo
@@ -30,7 +31,8 @@ export function setupDraggableCarousel(container) {
     });
 
     container.addEventListener('mouseup', () => {
-        if (isDown) { // Solo se il mouse era premuto
+        if (isDown) {
+            // Solo se il mouse era premuto
             isDown = false;
             container.classList.remove('active-carousel');
             container.style.userSelect = 'auto'; // Ripristina la selezione del testo
@@ -53,27 +55,34 @@ export function setupDraggableCarousel(container) {
     container.addEventListener('mouseup', () => {
         container.style.cursor = 'grab';
     });
-     // Supporto base per eventi touch (semplificato)
-    container.addEventListener('touchstart', (e) => {
-        if (e.target.closest('button, a')) return;
-        isDown = true;
-        startX = e.touches[0].pageX - container.offsetLeft;
-        scrollLeft = container.scrollLeft;
-        container.style.userSelect = 'none';
-    }, { passive: true }); // Passive true per performance scroll
+    // Supporto base per eventi touch (semplificato)
+    container.addEventListener(
+        'touchstart',
+        (e) => {
+            if (e.target.closest('button, a')) return;
+            isDown = true;
+            startX = e.touches[0].pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+            container.style.userSelect = 'none';
+        },
+        { passive: true }
+    ); // Passive true per performance scroll
 
     container.addEventListener('touchend', () => {
         isDown = false;
         container.style.userSelect = 'auto';
     });
 
-    container.addEventListener('touchmove', (e) => {
-        if (!isDown) return;
-        // Non chiamare e.preventDefault() qui a meno che non sia strettamente necessario
-        // e dopo aver testato, perché può interferire con lo scroll nativo
-        const x = e.touches[0].pageX - container.offsetLeft;
-        const walk = (x - startX) * 2;
-        container.scrollLeft = scrollLeft - walk;
-    }, { passive: false }); // Passive false se si usa preventDefault
-
+    container.addEventListener(
+        'touchmove',
+        (e) => {
+            if (!isDown) return;
+            // Non chiamare e.preventDefault() qui a meno che non sia strettamente necessario
+            // e dopo aver testato, perché può interferire con lo scroll nativo
+            const x = e.touches[0].pageX - container.offsetLeft;
+            const walk = (x - startX) * 2;
+            container.scrollLeft = scrollLeft - walk;
+        },
+        { passive: false }
+    ); // Passive false se si usa preventDefault
 }

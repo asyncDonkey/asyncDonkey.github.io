@@ -42,7 +42,6 @@ const scrollToTutorialLink = document.getElementById('scrollToTutorialLink');
 const orientationPromptEl = document.getElementById('orientationPrompt');
 const dismissOrientationPromptBtn = document.getElementById('dismissOrientationPrompt');
 
-
 function formatScoreTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp || typeof firebaseTimestamp.toDate !== 'function') {
         return 'N/A';
@@ -65,25 +64,27 @@ let orientationPromptDismissedSession = false;
 
 function checkAndDisplayOrientationPrompt() {
     if (!orientationPromptEl || !isTouchDevice || orientationPromptDismissedSession) {
-        if(orientationPromptEl && orientationPromptEl.style.display !== 'none') { // Evita di settare display se già none
-             orientationPromptEl.style.display = 'none';
+        if (orientationPromptEl && orientationPromptEl.style.display !== 'none') {
+            // Evita di settare display se già none
+            orientationPromptEl.style.display = 'none';
         }
         return;
     }
 
-    const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
     // isFullscreenActive è una variabile globale che dovresti già avere,
     // assicurati che sia aggiornata correttamente da handleFullscreenChange
     // Se non è globale, passala come argomento o recuperala qui:
     const isGameFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
 
-
     if (isPortrait && !isGameFullscreen) {
-        if (orientationPromptEl.style.display !== 'flex') { // Evita di settare display se già flex
+        if (orientationPromptEl.style.display !== 'flex') {
+            // Evita di settare display se già flex
             orientationPromptEl.style.display = 'flex';
         }
     } else {
-        if (orientationPromptEl.style.display !== 'none') { // Evita di settare display se già none
+        if (orientationPromptEl.style.display !== 'none') {
+            // Evita di settare display se già none
             orientationPromptEl.style.display = 'none';
         }
     }
@@ -562,7 +563,7 @@ let resourcesInitialized = false;
 let gameLoopRequestId = null;
 
 let bossFightImminent = false;
-let bossWarningTimer = 2.0; 
+let bossWarningTimer = 2.0;
 let postBossCooldownActive = false;
 let postBossCooldownTimer = 2.0;
 
@@ -1070,7 +1071,7 @@ class Projectile {
                 this.sprite,
                 frame.sx,
                 frame.sy,
-                this.animation.frameWidth,  // Corrected
+                this.animation.frameWidth, // Corrected
                 this.animation.frameHeight, // Corrected
                 this.x,
                 this.y,
@@ -1594,18 +1595,20 @@ class Glitchzilla extends BaseEnemy {
         if (this.health <= 0) {
             console.log('Glitchzilla SCONFITTO! Assegno punteggio: ' + this.scoreValue);
             AudioManager.playSound('glitchzillaDefeatedSuccessfully'); // Make sure 'audio/glitchzilla_victory.mp3' is loaded
-            
+
             score += this.scoreValue;
             activeMiniboss = null; // Boss is no longer active
 
             // Initiate post-boss cooldown state
             postBossCooldownActive = true;
-            postBossCooldownTimer = 2.0;    // Start the 2-second cooldown timer
+            postBossCooldownTimer = 2.0; // Start the 2-second cooldown timer
 
-            bossFightImminent = false;      // CRITICAL: Prevent immediate re-trigger of boss warning
-                                            // hasGlitchzillaSpawnedThisGame remains true, preventing a new boss sequence for this game.
-            
-            console.log(`Glitchzilla defeated. postBossCooldownActive: ${postBossCooldownActive}, bossFightImminent: ${bossFightImminent}`);
+            bossFightImminent = false; // CRITICAL: Prevent immediate re-trigger of boss warning
+            // hasGlitchzillaSpawnedThisGame remains true, preventing a new boss sequence for this game.
+
+            console.log(
+                `Glitchzilla defeated. postBossCooldownActive: ${postBossCooldownActive}, bossFightImminent: ${bossFightImminent}`
+            );
         }
     }
     update(dt) {
@@ -2370,7 +2373,7 @@ function resetGame() {
     dangerousFlyingEnemies = [];
     enemyProjectiles = [];
     powerUpItems = [];
-    
+
     activeMiniboss = null; // Ensure boss is cleared
 
     // Reset all boss-related state flags
@@ -2409,7 +2412,14 @@ function resetGame() {
 
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
     if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none';
-    console.log('Gioco resettato. Flags boss: imminent=', bossFightImminent, 'spawnedThisGame=', hasGlitchzillaSpawnedThisGame, 'cooldownActive=', postBossCooldownActive);
+    console.log(
+        'Gioco resettato. Flags boss: imminent=',
+        bossFightImminent,
+        'spawnedThisGame=',
+        hasGlitchzillaSpawnedThisGame,
+        'cooldownActive=',
+        postBossCooldownActive
+    );
 }
 
 function drawTerminalBackgroundEffects() {
@@ -2513,7 +2523,7 @@ function updatePlaying(dt) {
     if (postBossCooldownActive) {
         postBossCooldownTimer -= dt;
         if (postBossCooldownTimer <= 0) {
-            postBossCooldownActive = false; 
+            postBossCooldownActive = false;
             // Cooldown finished. bossFightImminent is already false.
             // hasGlitchzillaSpawnedThisGame is true, so boss sequence won't re-trigger.
             // Normal spawning will resume in the spawning logic block.
@@ -2524,14 +2534,14 @@ function updatePlaying(dt) {
     // 2. Try to Initiate Boss Spawn Sequence (only if no boss stuff is happening)
     if (
         score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD && // Score condition
-        !activeMiniboss &&                            // No boss currently active
-        !hasGlitchzillaSpawnedThisGame &&             // Boss hasn't been encountered this game yet
-        !bossFightImminent &&                         // Boss sequence isn't already starting
-        !postBossCooldownActive                       // Not in post-boss cooldown
+        !activeMiniboss && // No boss currently active
+        !hasGlitchzillaSpawnedThisGame && // Boss hasn't been encountered this game yet
+        !bossFightImminent && // Boss sequence isn't already starting
+        !postBossCooldownActive // Not in post-boss cooldown
     ) {
         console.log('Soglia punteggio per Glitchzilla raggiunta. Avvio sequenza di spawn (2s warning).');
-        bossFightImminent = true;       // Start the pre-boss warning phase
-        bossWarningTimer = 2.0;         // Set the 2-second timer
+        bossFightImminent = true; // Start the pre-boss warning phase
+        bossWarningTimer = 2.0; // Set the 2-second timer
     }
 
     // 3. Handle Boss Warning/Spawn Countdown
@@ -2573,12 +2583,13 @@ function updatePlaying(dt) {
         spawnDangerousFlyingEnemyIfNeeded(dt);
         spawnPowerUpAmbientIfNeeded(dt);
     }
-    
+
     // --- Final Updates for the Frame ---
     checkCollisions(); // Handles collisions and can trigger processGameOver
-    if (currentGameState === GAME_STATE.PLAYING) { // Only increment score if still playing
-      score += dt * 10;
-      gameSpeed += dt * 0.3;
+    if (currentGameState === GAME_STATE.PLAYING) {
+        // Only increment score if still playing
+        score += dt * 10;
+        gameSpeed += dt * 0.3;
     }
 }
 
@@ -2809,7 +2820,6 @@ if (restartGameBtnDonkey) {
     });
 }
 
-
 // NUOVO Event Listener per il pulsante Start/Restart mobile
 if (mobileStartButton) {
     mobileStartButton.addEventListener('click', (e) => {
@@ -2852,8 +2862,8 @@ window.addEventListener('click', (event) => {
 
 // --- Logica per le Schede Informative Espandibili (Accordion) ---
 if (accordionHeaders.length > 0) {
-    accordionHeaders.forEach(header => {
-        header.addEventListener('click', function() {
+    accordionHeaders.forEach((header) => {
+        header.addEventListener('click', function () {
             const currentlyActiveHeader = document.querySelector('.accordion-header.active');
             if (currentlyActiveHeader && currentlyActiveHeader !== this) {
                 currentlyActiveHeader.classList.remove('active');
@@ -2869,14 +2879,14 @@ if (accordionHeaders.length > 0) {
                 panel.classList.remove('open');
             } else {
                 panel.classList.add('open');
-                panel.style.maxHeight = panel.scrollHeight + "px";
+                panel.style.maxHeight = panel.scrollHeight + 'px';
             }
         });
     });
 }
 
 if (scrollToTutorialLink && accordionHeaders.length > 0) {
-    scrollToTutorialLink.addEventListener('click', function(event) {
+    scrollToTutorialLink.addEventListener('click', function (event) {
         event.preventDefault(); // Previene il comportamento di default del link anchor
 
         const accordionContainer = document.getElementById('gameInfoAccordion');
@@ -2901,7 +2911,7 @@ if (scrollToTutorialLink && accordionHeaders.length > 0) {
             // Apri la scheda tutorial
             firstHeader.classList.add('active');
             firstPanel.classList.add('open');
-            firstPanel.style.maxHeight = firstPanel.scrollHeight + "px";
+            firstPanel.style.maxHeight = firstPanel.scrollHeight + 'px';
         }
     });
 }
@@ -2910,15 +2920,16 @@ if (scrollToTutorialLink && accordionHeaders.length > 0) {
 if (dismissOrientationPromptBtn && orientationPromptEl) {
     dismissOrientationPromptBtn.addEventListener('click', () => {
         orientationPromptEl.style.display = 'none';
-        orientationPromptDismissedSession = true; 
+        orientationPromptDismissedSession = true;
         console.log('Prompt orientamento chiuso dall utente per questa sessione.');
     });
 }
 
 // Listener per il cambio di orientamento per il prompt
-if (window.matchMedia("(orientation: portrait)").addEventListener) {
-    window.matchMedia("(orientation: portrait)").addEventListener('change', checkAndDisplayOrientationPrompt);
-} else if (window.addEventListener) { // Fallback
+if (window.matchMedia('(orientation: portrait)').addEventListener) {
+    window.matchMedia('(orientation: portrait)').addEventListener('change', checkAndDisplayOrientationPrompt);
+} else if (window.addEventListener) {
+    // Fallback
     window.addEventListener('orientationchange', checkAndDisplayOrientationPrompt);
 }
 

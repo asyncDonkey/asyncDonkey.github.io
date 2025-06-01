@@ -70,7 +70,7 @@ export function createArticleCard(articleData, articleId, authorPublicProfile, i
         coverImgLink.appendChild(coverImg);
         card.appendChild(coverImgLink);
     }
-    
+
     // Contenuto testuale della card
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'article-card-text-content';
@@ -111,7 +111,10 @@ export function createArticleCard(articleData, articleId, authorPublicProfile, i
     avatarImg.className = 'author-avatar-homepage';
     avatarImg.src = authorAvatarSrc;
     avatarImg.alt = `Avatar di ${authorDisplayName}`;
-    avatarImg.onerror = () => { avatarImg.src = DEFAULT_AUTHOR_AVATAR_PATH; avatarImg.onerror = null; };
+    avatarImg.onerror = () => {
+        avatarImg.src = DEFAULT_AUTHOR_AVATAR_PATH;
+        avatarImg.onerror = null;
+    };
     authorInfoSpan.appendChild(avatarImg);
 
     const authorNameContainer = document.createElement('span');
@@ -139,7 +142,7 @@ export function createArticleCard(articleData, articleId, authorPublicProfile, i
     dateEl.className = 'article-date';
     dateEl.textContent = formatArticleDate(articleData.publishedAt || articleData.createdAt);
     metaEl.appendChild(dateEl);
-    
+
     contentWrapper.appendChild(metaEl);
 
     const snippetEl = document.createElement('p');
@@ -166,9 +169,9 @@ export function createArticleCard(articleData, articleId, authorPublicProfile, i
     readMoreLinkEl.href = `view-article.html?id=${articleId}`;
     readMoreLinkEl.textContent = 'Leggi di più →';
     contentWrapper.appendChild(readMoreLinkEl);
-    
+
     card.appendChild(contentWrapper);
-    
+
     return card;
 }
 /**
@@ -200,14 +203,14 @@ export async function displayArticlesSection() {
             return;
         }
 
-        const articles = articleSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const authorIds = [...new Set(articles.map(a => a.authorId).filter(Boolean))];
+        const articles = articleSnapshots.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const authorIds = [...new Set(articles.map((a) => a.authorId).filter(Boolean))];
 
         let profiles = {};
         if (authorIds.length > 0) {
             const profilesQuery = query(collection(db, 'userPublicProfiles'), where(documentId(), 'in', authorIds));
             const profileSnapshots = await getDocs(profilesQuery);
-            profileSnapshots.forEach(doc => {
+            profileSnapshots.forEach((doc) => {
                 profiles[doc.id] = doc.data();
             });
         }
@@ -221,10 +224,10 @@ export async function displayArticlesSection() {
         });
 
         articlesSection.style.display = 'block'; // Mostra la sezione
-
     } catch (error) {
         console.error('Errore durante il caricamento degli articoli:', error);
-        articlesContainer.innerHTML = '<p style="text-align:center; color: var(--error-color);">Impossibile caricare gli articoli.</p>';
+        articlesContainer.innerHTML =
+            '<p style="text-align:center; color: var(--error-color);">Impossibile caricare gli articoli.</p>';
         articlesSection.style.display = 'block';
     }
 }
@@ -277,7 +280,7 @@ export async function displayGlitchzillaBanner() {
             bannerElement.style.display = 'none';
         }
     } catch (error) {
-        console.error("Errore nel recuperare i dati per il banner di Glitchzilla:", error);
+        console.error('Errore nel recuperare i dati per il banner di Glitchzilla:', error);
         bannerElement.style.display = 'none';
     }
 }

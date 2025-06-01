@@ -265,7 +265,7 @@ async function handleRejectArticleClick(e) {
 function createTesterCardHTML(testerProfile, stats) {
     const successRate = stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : 0;
     const failureRate = stats.total > 0 ? ((stats.failure / stats.total) * 100).toFixed(1) : 0;
-    const lastSubmission = stats.lastSubmissionDate 
+    const lastSubmission = stats.lastSubmissionDate
         ? stats.lastSubmissionDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })
         : 'N/A';
 
@@ -307,7 +307,6 @@ function createTaskSummaryHTML(taskInfo, stats) {
     `;
 }
 
-
 /**
  * Carica e aggrega i dati dai profili dei tester e i loro risultati di test.
  */
@@ -318,10 +317,9 @@ async function loadTesterMonitoringData() {
         // 1. Recupera le definizioni dei task per avere i titoli a disposizione
         const tasksDefSnapshot = await getDocs(collection(db, 'testTasksDefinition'));
         const tasksDefinitions = new Map();
-        tasksDefSnapshot.forEach(doc => {
+        tasksDefSnapshot.forEach((doc) => {
             tasksDefinitions.set(doc.id, doc.data());
         });
-
 
         // 2. Recupera tutti gli utenti che sono tester
         const testersQuery = query(collection(db, 'userProfiles'), where('isTestUser', '==', true));
@@ -337,7 +335,7 @@ async function loadTesterMonitoringData() {
         let testerPromises = []; // Array per contenere le promise di elaborazione di ogni tester
 
         // 3. Itera su ogni tester per recuperare e aggregare i suoi risultati
-        testersSnapshot.forEach(testerDoc => {
+        testersSnapshot.forEach((testerDoc) => {
             const testerProfile = testerDoc.data();
             const testerId = testerDoc.id;
 
@@ -349,16 +347,16 @@ async function loadTesterMonitoringData() {
                     total: resultsSnapshot.size,
                     success: 0,
                     failure: 0,
-                    lastSubmissionDate: null
+                    lastSubmissionDate: null,
                 };
 
-                resultsSnapshot.forEach(resultDoc => {
+                resultsSnapshot.forEach((resultDoc) => {
                     const resultData = resultDoc.data();
-                    
+
                     // Aggiorna statistiche del singolo tester
                     if (resultData.outcome === 'success') stats.success++;
                     if (resultData.outcome === 'failure') stats.failure++;
-                    
+
                     const timestamp = resultData.timestamp?.toDate();
                     if (timestamp && (!stats.lastSubmissionDate || timestamp > stats.lastSubmissionDate)) {
                         stats.lastSubmissionDate = timestamp;
@@ -377,7 +375,7 @@ async function loadTesterMonitoringData() {
 
                 return { profile: testerProfile, stats: stats };
             })();
-            
+
             testerPromises.push(promise);
         });
 
@@ -389,7 +387,7 @@ async function loadTesterMonitoringData() {
         let testersHTML = '';
         allTestersData
             .sort((a, b) => b.stats.total - a.stats.total) // Ordina per numero di task completati
-            .forEach(data => {
+            .forEach((data) => {
                 testersHTML += createTesterCardHTML(data.profile, data.stats);
             });
         testerMonitoringListContainer.innerHTML = testersHTML || '<p>Nessun risultato sottomesso dai tester.</p>';
@@ -399,17 +397,18 @@ async function loadTesterMonitoringData() {
         taskAggregates.forEach((stats, taskId) => {
             const taskInfo = {
                 id: taskId,
-                title: tasksDefinitions.get(taskId)?.title || `Task ${taskId}`
+                title: tasksDefinitions.get(taskId)?.title || `Task ${taskId}`,
             };
             tasksSummaryHTML += createTaskSummaryHTML(taskInfo, stats);
         });
-        testTasksSummaryContainer.innerHTML = tasksSummaryHTML || '<p>Ancora nessun feedback ricevuto per i task di test.</p>';
-
-
+        testTasksSummaryContainer.innerHTML =
+            tasksSummaryHTML || '<p>Ancora nessun feedback ricevuto per i task di test.</p>';
     } catch (error) {
-        console.error("Errore nel caricare i dati di monitoraggio dei tester:", error);
-        testerMonitoringListContainer.innerHTML = '<p style="color: var(--error-color);">Errore nel caricamento dei dati dei tester.</p>';
-        testTasksSummaryContainer.innerHTML = '<p style="color: var(--error-color);">Errore nel caricamento del riepilogo dei task.</p>';
+        console.error('Errore nel caricare i dati di monitoraggio dei tester:', error);
+        testerMonitoringListContainer.innerHTML =
+            '<p style="color: var(--error-color);">Errore nel caricamento dei dati dei tester.</p>';
+        testTasksSummaryContainer.innerHTML =
+            '<p style="color: var(--error-color);">Errore nel caricamento del riepilogo dei task.</p>';
         showToast('Errore nel caricamento dei dati di monitoraggio.', 'error');
     }
 }

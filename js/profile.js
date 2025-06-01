@@ -470,22 +470,25 @@ async function updateProfilePageUI(data, isOwnProfile, uidLoaded) {
     }
 
     // Aggiunto per mostrare la data di registrazione
-const registrationDateSpan = document.getElementById('registrationDate');
-if (registrationDateSpan) {
-    // La data di creazione è un dato privato di Auth, la mostriamo solo al proprietario del profilo.
-    if (isOwnProfile && loggedInUser && loggedInUser.metadata.creationTime) {
-        registrationDateSpan.textContent = new Date(loggedInUser.metadata.creationTime).toLocaleDateString('it-IT', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        });
-        // Assicuriamoci che il paragrafo contenitore sia visibile
-        if(registrationDateSpan.parentElement) registrationDateSpan.parentElement.style.display = 'block';
-    } else {
-        // Se non siamo sul nostro profilo o il dato non è disponibile, nascondiamo l'intera riga.
-        if(registrationDateSpan.parentElement) registrationDateSpan.parentElement.style.display = 'none';
+    const registrationDateSpan = document.getElementById('registrationDate');
+    if (registrationDateSpan) {
+        // La data di creazione è un dato privato di Auth, la mostriamo solo al proprietario del profilo.
+        if (isOwnProfile && loggedInUser && loggedInUser.metadata.creationTime) {
+            registrationDateSpan.textContent = new Date(loggedInUser.metadata.creationTime).toLocaleDateString(
+                'it-IT',
+                {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                }
+            );
+            // Assicuriamoci che il paragrafo contenitore sia visibile
+            if (registrationDateSpan.parentElement) registrationDateSpan.parentElement.style.display = 'block';
+        } else {
+            // Se non siamo sul nostro profilo o il dato non è disponibile, nascondiamo l'intera riga.
+            if (registrationDateSpan.parentElement) registrationDateSpan.parentElement.style.display = 'none';
+        }
     }
-}
 
     if (profileAvatarImg) {
         let avatarSrcToSet;
@@ -1458,27 +1461,27 @@ async function handleConfirmAvatarUpload() {
         return showToast('Nessun file selezionato o utente non loggato.', 'warning');
     }
     if (modalConfirmUploadBtn) modalConfirmUploadBtn.disabled = true;
-if (modalCancelUploadBtn) modalCancelUploadBtn.disabled = true;
+    if (modalCancelUploadBtn) modalCancelUploadBtn.disabled = true;
 
-if (avatarUploadProgressContainer) {
-    avatarUploadProgressContainer.style.display = 'block'; // Make container visible
-}
-if (avatarUploadProgressBar) {
-    avatarUploadProgressBar.style.width = '0%'; // Set initial width
-}
-if (avatarUploadProgressText) {
-    avatarUploadProgressText.textContent = '0%'; // Set initial text
-}
+    if (avatarUploadProgressContainer) {
+        avatarUploadProgressContainer.style.display = 'block'; // Make container visible
+    }
+    if (avatarUploadProgressBar) {
+        avatarUploadProgressBar.style.width = '0%'; // Set initial width
+    }
+    if (avatarUploadProgressText) {
+        avatarUploadProgressText.textContent = '0%'; // Set initial text
+    }
 
-// === NUOVA RIGA PER FORZARE IL REFLOW ===
-if (avatarUploadProgressBar) {
-    void avatarUploadProgressBar.offsetWidth; // Leggere una proprietà come offsetWidth forza il reflow
-}
-// === FINE NUOVA RIGA ===
+    // === NUOVA RIGA PER FORZARE IL REFLOW ===
+    if (avatarUploadProgressBar) {
+        void avatarUploadProgressBar.offsetWidth; // Leggere una proprietà come offsetWidth forza il reflow
+    }
+    // === FINE NUOVA RIGA ===
 
-if (modalAvatarStatus) modalAvatarStatus.textContent = 'Caricamento in corso...';
+    if (modalAvatarStatus) modalAvatarStatus.textContent = 'Caricamento in corso...';
 
-const fileExtension = selectedAvatarFile.name.split('.').pop().toLowerCase();
+    const fileExtension = selectedAvatarFile.name.split('.').pop().toLowerCase();
     const filePath = `user-avatars/${loggedInUser.uid}/original_${Date.now()}.${fileExtension}`;
     const fileStorageRef = storageRef(storage, filePath);
     const uploadTask = uploadBytesResumable(fileStorageRef, selectedAvatarFile);

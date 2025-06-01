@@ -50,7 +50,7 @@
         border: 1px solid var(--border-color-primary);
         background-color: var(--surface-bg-secondary);
         border-radius: var(--border-radius-md);
-        
+
         p b {
             color: var(--primary-color);
         }
@@ -94,7 +94,7 @@
             color: var(--primary-color);
         }
     }
-    
+
     .test-task-area {
         font-size: 0.9em;
         font-family: 'Source Code Pro', monospace;
@@ -124,7 +124,7 @@
             color: var(--text-color-secondary);
         }
     }
-    
+
     .feedback-form-container {
         border-top: 1px dashed var(--border-color-light);
         padding-top: 1.5rem;
@@ -134,17 +134,17 @@
             margin-top: 0;
             color: var(--primary-color-dark, var(--text-color-primary));
         }
-        
+
         textarea {
             width: 100%;
             min-height: 60px;
             resize: none;
-            overflow-y: hidden; 
+            overflow-y: hidden;
             line-height: 1.6;
             // Eredita gli stili globali da _base.scss o _utilities.scss
         }
     }
-    
+
     .task-actions {
         padding-top: 1rem;
     }

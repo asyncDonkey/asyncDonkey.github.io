@@ -6,7 +6,7 @@ import {
     where,
     orderBy,
     getDocs,
-    documentId
+    documentId,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 /**
@@ -32,13 +32,14 @@ async function loadAllArticles() {
 
         // 2. Gestisci il caso in cui non ci sono articoli
         if (articleSnapshots.empty) {
-            articlesContainer.innerHTML = '<p style="text-align:center; color:var(--text-color-muted);">Nessun articolo trovato al momento. Torna a trovarci presto!</p>';
+            articlesContainer.innerHTML =
+                '<p style="text-align:center; color:var(--text-color-muted);">Nessun articolo trovato al momento. Torna a trovarci presto!</p>';
             return;
         }
 
         // 3. Estrai i dati e gli ID degli autori
-        const articles = articleSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const authorIds = [...new Set(articles.map(a => a.authorId).filter(Boolean))];
+        const articles = articleSnapshots.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const authorIds = [...new Set(articles.map((a) => a.authorId).filter(Boolean))];
 
         // 4. Recupera i profili pubblici degli autori in modo efficiente
         let profiles = {};
@@ -48,25 +49,26 @@ async function loadAllArticles() {
             // Per ora, presumendo un numero ragionevole di autori, una singola query è sufficiente.
             const profilesQuery = query(collection(db, 'userPublicProfiles'), where(documentId(), 'in', authorIds));
             const profileSnapshots = await getDocs(profilesQuery);
-            profileSnapshots.forEach(doc => {
+            profileSnapshots.forEach((doc) => {
                 profiles[doc.id] = doc.data();
             });
         }
 
         // 5. Popola il contenitore con le card degli articoli
         articlesContainer.innerHTML = ''; // Pulisce il messaggio "Caricamento..."
-        articles.forEach(article => {
+        articles.forEach((article) => {
             const authorProfile = profiles[article.authorId] || null;
             // 'isFeatured' è sempre false in questa pagina
             const cardElement = createArticleCard(article, article.id, authorProfile, false);
             articlesContainer.appendChild(cardElement);
         });
-
     } catch (error) {
         console.error('Errore durante il caricamento di tutti gli articoli:', error);
-        articlesContainer.innerHTML = '<p style="text-align:center; color: var(--error-color);">Si è verificato un errore nel caricare gli articoli. Riprova più tardi.</p>';
+        articlesContainer.innerHTML =
+            '<p style="text-align:center; color: var(--error-color);">Si è verificato un errore nel caricare gli articoli. Riprova più tardi.</p>';
         if (error.code === 'failed-precondition') {
-             articlesContainer.innerHTML += '<p style="text-align:center; font-size: 0.9em; color: var(--text-color-muted);">(Dettaglio tecnico: Indice Firestore mancante o non corretto per questa query).</p>';
+            articlesContainer.innerHTML +=
+                '<p style="text-align:center; font-size: 0.9em; color: var(--text-color-muted);">(Dettaglio tecnico: Indice Firestore mancante o non corretto per questa query).</p>';
         }
     }
 }

@@ -227,13 +227,14 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
             // Questo è più sicuro che fidarsi di un nickname inviato dal client.
             const userProfileSnap = await userProfileRef.get();
             if (!userProfileSnap.exists) {
-                logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato. Impossibile aggiornare il banner con un nickname corretto.`);
+                logger.warn(
+                    `[CF:${functionName}] Profilo utente ${userId} non trovato. Impossibile aggiornare il banner con un nickname corretto.`
+                );
                 // Potremmo decidere di non fare nulla o usare un fallback. Per ora usiamo il fallback.
             }
             const userProfileData = userProfileSnap.data() || {};
             const userNickname = userProfileData.nickname || 'Un Eroe Anonimo'; // Usa il nickname dal profilo, o il fallback.
             // --- FINE MODIFICA CHIAVE ---
-
 
             // Logica per assegnare il badge (ora usa userProfileSnap già recuperato)
             await db.runTransaction(async (transaction) => {
@@ -272,12 +273,13 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
                 lastWinnerId: userId,
                 defeatedAt: FieldValue.serverTimestamp(),
             };
-            
+
             await glitchzillaStatsRef.set(bannerUpdateData);
             logger.info(`[CF:${functionName}] Banner di Glitchzilla aggiornato con il vincitore: ${userNickname}.`);
-
         } catch (error) {
-            logger.error(`[CF:${functionName}] Errore nella transazione o nell'aggiornamento del banner:`, error, { userId });
+            logger.error(`[CF:${functionName}] Errore nella transazione o nell'aggiornamento del banner:`, error, {
+                userId,
+            });
         }
     }
 });
@@ -824,7 +826,9 @@ exports.awardAppreciatedAuthorBadge = onDocumentUpdated('articles/{articleId}', 
             }
 
             // L'utente non ha il badge e la soglia like è raggiunta
-            logger.info(`[CF:<span class="math-inline">{functionName}] Assegnazione badge '</span>{badgeIdToAward}' a utente ${authorId} per articolo ${articleId}.`);
+            logger.info(
+                `[CF:<span class="math-inline">{functionName}] Assegnazione badge '</span>{badgeIdToAward}' a utente ${authorId} per articolo ${articleId}.`
+            );
             transaction.update(userProfileRef, {
                 earnedBadges: FieldValue.arrayUnion(badgeIdToAward),
                 updatedAt: FieldValue.serverTimestamp(),
@@ -834,9 +838,10 @@ exports.awardAppreciatedAuthorBadge = onDocumentUpdated('articles/{articleId}', 
 
         if (badgeActuallyAwarded) {
             await sendNewBadgeNotification(authorId, badgeIdToAward);
-            logger.info(`[CF:<span class="math-inline">{functionName}] Notifica inviata per badge '</span>{badgeIdToAward}' a utente ${authorId}.`);
+            logger.info(
+                `[CF:<span class="math-inline">{functionName}] Notifica inviata per badge '</span>{badgeIdToAward}' a utente ${authorId}.`
+            );
         }
-
     } catch (error) {
         logger.error(
             `[CF:<span class="math-inline">{functionName}] Errore durante la transazione per badge '</span>{badgeIdToAward}' a utente ${authorId} (articolo ${articleId}):`,

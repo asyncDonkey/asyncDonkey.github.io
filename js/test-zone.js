@@ -126,10 +126,9 @@ async function saveTestResult(taskId, outcome, comment) {
         });
 
         showToast('Feedback inviato con successo!', 'success');
-        
+
         // NUOVO: Ricarica solo i task per aggiornare la UI in modo consistente
         await loadTestTasks();
-
     } catch (error) {
         console.error('Errore nel salvare il risultato del test:', error);
         showToast('Errore durante il salvataggio del feedback. Riprova.', 'error');
@@ -139,7 +138,6 @@ async function saveTestResult(taskId, outcome, comment) {
         }
     }
 }
-
 
 /**
  * // MODIFICATO: Gestisce i click anche per il nuovo pulsante "Modifica Esito".
@@ -186,7 +184,7 @@ function setupTaskFeedbackListeners() {
                     currentOutcomeForTask[taskId] = 'failure';
                 }
             }
-             // Cerca di inferire l'esito dalla UI se non è stato cliccato un nuovo pulsante
+            // Cerca di inferire l'esito dalla UI se non è stato cliccato un nuovo pulsante
             if (!currentOutcomeForTask[taskId]) {
                 const submittedMessage = document.querySelector(`#feedback-submitted-message-${taskId} p strong`);
                 if (submittedMessage) {
@@ -198,7 +196,6 @@ function setupTaskFeedbackListeners() {
                     }
                 }
             }
-
 
             const outcome = currentOutcomeForTask[taskId];
             const comment = commentTextarea ? commentTextarea.value.trim() : '';
@@ -213,15 +210,14 @@ function setupTaskFeedbackListeners() {
         // Gestione pulsante "Annulla"
         else if (button.classList.contains('cancel-feedback-button')) {
             // Semplicemente ricarichiamo per tornare allo stato salvato, è la via più semplice e robusta
-             await loadTestTasks();
+            await loadTestTasks();
         }
-    if (event.target.tagName.toLowerCase() === 'textarea') {
-        event.target.style.height = 'auto';
-        event.target.style.height = `${event.target.scrollHeight}px`;
-    }
-});
+        if (event.target.tagName.toLowerCase() === 'textarea') {
+            event.target.style.height = 'auto';
+            event.target.style.height = `${event.target.scrollHeight}px`;
+        }
+    });
 }
-
 
 /**
  * // MODIFICATO: Carica sia i task sia i risultati esistenti del tester.
@@ -235,7 +231,7 @@ async function loadTestTasks() {
         const testResultsCollectionRef = collection(db, 'userProfiles', currentUserForTestZone.uid, 'testResults');
         const resultsSnapshot = await getDocs(testResultsCollectionRef);
         const userResultsMap = new Map();
-        resultsSnapshot.forEach(doc => {
+        resultsSnapshot.forEach((doc) => {
             userResultsMap.set(doc.id, doc.data());
         });
 
@@ -263,10 +259,9 @@ async function loadTestTasks() {
             tasksHTML += createTaskCardHTML(taskData, taskId, existingResult);
         });
         testTasksListContainer.innerHTML = tasksHTML;
-        
+
         // Listener viene settato una volta dopo il rendering completo
         // La gestione è stata spostata in initializeTestZone per evitare duplicazioni
-
     } catch (error) {
         console.error('Errore nel caricare i task di test da Firestore:', error);
         testTasksListContainer.innerHTML =
@@ -274,7 +269,6 @@ async function loadTestTasks() {
         showToast('Errore nel caricamento dei task di test.', 'error');
     }
 }
-
 
 /**
  * Inizializza la pagina verificando lo stato di autenticazione e i permessi dell'utente.
@@ -285,7 +279,7 @@ function initializeTestZone() {
     if (testZoneContent) testZoneContent.style.display = 'none';
 
     // NUOVO: Inizializza il listener una sola volta qui.
-    setupTaskFeedbackListeners(); 
+    setupTaskFeedbackListeners();
 
     onAuthStateChanged(auth, async (user) => {
         currentUserForTestZone = user;
@@ -298,13 +292,13 @@ function initializeTestZone() {
                     if (loader) loader.style.display = 'none';
                     if (accessDeniedMessage) accessDeniedMessage.style.display = 'none';
                     if (testZoneContent) testZoneContent.style.display = 'block';
-                     // --- NUOVA LOGICA PER IL TOAST DELLE LINEE GUIDA ---
+                    // --- NUOVA LOGICA PER IL TOAST DELLE LINEE GUIDA ---
                     if (guidelinesToast && dismissGuidelinesToastBtn) {
                         // Mostra il toast solo se non è già stato chiuso in questa sessione
                         if (sessionStorage.getItem('engineRoomToastDismissed') !== 'true') {
                             guidelinesToast.style.display = 'flex';
                         }
-                        
+
                         // Aggiungi il listener per chiudere il toast
                         dismissGuidelinesToastBtn.addEventListener('click', () => {
                             guidelinesToast.style.display = 'none';
@@ -320,7 +314,8 @@ function initializeTestZone() {
                 }
             } catch (error) {
                 console.error('Errore nel recuperare il profilo utente:', error);
-                if (loader) loader.innerHTML = "<p style='color: var(--error-color);'>Errore nel verificare i permessi.</p>";
+                if (loader)
+                    loader.innerHTML = "<p style='color: var(--error-color);'>Errore nel verificare i permessi.</p>";
                 if (testZoneContent) testZoneContent.style.display = 'none';
                 if (accessDeniedMessage) accessDeniedMessage.style.display = 'block';
                 showToast('Errore verifica permessi.', 'error');
