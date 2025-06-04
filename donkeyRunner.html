@@ -19,31 +19,39 @@
         <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
         <style>
             body.donkey-runner-page {
-                background-color: var(--game-bg-color, #333);
-                color: var(--game-text-color, #fff);
-                font-family: 'Source Code Pro', 'Courier New', Courier, monospace;
-                display: flex;
-                flex-direction: column;
-                min-height: 100vh;
-                margin: 0;
-                overflow-x: hidden;
-                overflow-y: auto;
-            }
+    background-color: var(--surface-bg-primary-light, #ffffff); /* MODIFICATO */
+    color: var(--text-color-primary-light, #212529);       /* MODIFICATO */
+    font-family: 'Source Code Pro', 'Courier New', Courier, monospace; /* Mantenuto per il testo generico della pagina, se vuoi */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
 
-            .donkey-runner-page header,
-            .donkey-runner-page footer {
-                background-color: var(--game-header-footer-bg, #222);
-                padding: 10px 20px;
-                text-align: center;
-                flex-shrink: 0;
-            }
-            .donkey-runner-page header a {
-                color: var(--link-color);
-            }
-            .donkey-runner-page footer p {
-                margin: 5px 0;
-                font-size: 0.9em;
-            }
+.donkey-runner-page header,
+.donkey-runner-page footer {
+    background-color: var(--surface-bg-secondary-light, #f8f9fa); /* MODIFICATO per un leggero contrasto */
+    padding: 10px 20px;
+    text-align: center;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border-color-light, #dee2e6); /* Aggiunto per separazione header */
+}
+.donkey-runner-page footer {
+    border-top: 1px solid var(--border-color-light, #dee2e6); /* Aggiunto per separazione footer */
+    border-bottom: none; /* Rimuovi se c'era prima */
+}
+
+.donkey-runner-page header a,
+.donkey-runner-page footer a { /* Assicurati che i link siano leggibili */
+    color: var(--link-color-light, #007bff); /* MODIFICATO */
+}
+.donkey-runner-page footer p {
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: var(--text-color-secondary-light, #6c757d); /* MODIFICATO per testo secondario */
+}
 
             .donkey-runner-page main {
                 flex-grow: 1;

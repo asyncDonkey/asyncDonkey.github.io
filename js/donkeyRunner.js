@@ -309,8 +309,8 @@ canvas.height = 450;
 
 const groundHeight = 70;
 
-const PLAYER_JUMP_VELOCITY_INITIAL = -570; // px/s (valore da testare/affinare)
-const GRAVITY_ACCELERATION = 576;       // px/s^2 (valore da testare/affinare)
+const PLAYER_JUMP_VELOCITY_INITIAL = -850; // px/s (valore da testare/affinare)
+const GRAVITY_ACCELERATION = 2000;       // px/s^2 (valore da testare/affinare)
 
 let gameSpeed = 220;
 const lineWidth = 2;
