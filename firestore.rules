@@ -1,5 +1,5 @@
 rules_version = '2';
-//IssueSTABLE
+//testTasks1stTry
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -7,6 +7,12 @@ service cloud.firestore {
       return request.auth != null &&
              exists(/databases/$(database)/documents/userProfiles/$(userId)) &&
              get(/databases/$(database)/documents/userProfiles/$(userId)).data.isAdmin == true;
+    }
+    
+    function isTestUser(userId) {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/userProfiles/$(userId)) &&
+             get(/databases/$(database)/documents/userProfiles/$(userId)).data.isTestUser == true;
     }
 
     function isValidExternalLinkObject(link) {
@@ -18,12 +24,14 @@ service cloud.firestore {
     }
 
     match /userProfiles/{userId} {
-      allow read: if true;
+      allow read: if request.auth != null &&
+                     (request.auth.uid == userId || isAdmin(request.auth.uid));
       allow create: if request.auth != null && request.auth.uid == userId &&
                         request.resource.data.email == request.auth.token.email &&
                         request.resource.data.nickname is string &&
                           request.resource.data.nickname.size() >= 3 && request.resource.data.nickname.size() <= 25 &&
                         (request.resource.data.get('isAdmin', false) == false) &&
+                        (request.resource.data.get('isTestUser', false) == false) &&
                         request.resource.data.statusMessage is string &&
                         request.resource.data.externalLinks is list && request.resource.data.externalLinks.size() == 0 &&
                         request.resource.data.earnedBadges is list && request.resource.data.earnedBadges.size() == 0 &&
@@ -38,50 +46,119 @@ service cloud.firestore {
                         
                         && request.resource.data.keys().hasOnly([
                           'email', 'nickname', 'createdAt', 'nationalityCode', 'isAdmin',
-                          'statusMessage', 'externalLinks', 'earnedBadges', 'bio', 'hasPublishedArticles', 'hasDefeatedGlitchzilla'
+                          'statusMessage', 'externalLinks', 'earnedBadges', 'bio', 'hasPublishedArticles', 'hasDefeatedGlitchzilla', 'isTestUser'
                         ])
                         ;
-      allow update: if request.auth != null && request.auth.uid == userId &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasAny(['statusMessage', 'externalLinks', 'bio', 'updatedAt']) &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['statusMessage', 'externalLinks', 'bio', 'updatedAt']) &&
-                        (request.resource.data.statusMessage == resource.data.statusMessage || 
-                          (request.resource.data.statusMessage is string && request.resource.data.statusMessage.size() <= 150)) &&
-                        (request.resource.data.externalLinks == resource.data.externalLinks ||
-                          (request.resource.data.externalLinks is list &&
-                           request.resource.data.externalLinks.size() <= 5 &&
-                           true // Temporaneamente semplificato
-                          )
-                        ) 
-                        && request.resource.data.hasPublishedArticles == resource.data.hasPublishedArticles
-                        &&
-                        (request.resource.data.bio == resource.data.bio ||
-                          (request.resource.data.bio is string && request.resource.data.bio.size() <= 300)
-                        ) &&
-                        request.resource.data.updatedAt == request.time &&
-                        request.resource.data.email == resource.data.email &&
-                        request.resource.data.nickname == resource.data.nickname &&
-                        request.resource.data.createdAt == resource.data.createdAt &&
-                        request.resource.data.isAdmin == resource.data.isAdmin &&
-                        request.resource.data.nationalityCode == resource.data.nationalityCode &&
-                        request.resource.data.earnedBadges == resource.data.earnedBadges;
-      allow delete: if false;
-    // REGOLE PER LE NOTIFICHE UTENTE (INSERITE QUI, DENTRO userProfiles/{userId})
+      allow update: if request.auth != null && request.auth.uid == userId && (
+            // Scenario 1: Aggiornamento campi standard del profilo (bio, status, links)
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasAny(['statusMessage', 'externalLinks', 'bio', 'updatedAt']) &&
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['statusMessage', 'externalLinks', 'bio', 'updatedAt']) &&
+              (request.resource.data.statusMessage == resource.data.statusMessage || 
+                (request.resource.data.statusMessage is string && request.resource.data.statusMessage.size() <= 150)) &&
+              (request.resource.data.externalLinks == resource.data.externalLinks ||
+                (request.resource.data.externalLinks is list &&
+                 request.resource.data.externalLinks.size() <= 5 
+                 // Non validiamo il contenuto di externalLinks qui, affidandoci al client e futura CF
+                )
+              ) &&
+              (request.resource.data.bio == resource.data.bio ||
+                (request.resource.data.bio is string && request.resource.data.bio.size() <= 300)
+              ) &&
+              
+              // Campi che non devono cambiare in questo scenario
+              
+          
+          
+          request.resource.data.email == resource.data.email &&
+          request.resource.data.nickname == resource.data.nickname &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.isAdmin == resource.data.isAdmin &&
+          request.resource.data.nationalityCode == resource.data.nationalityCode &&
+          request.resource.data.earnedBadges == resource.data.earnedBadges &&
+          request.resource.data.hasPublishedArticles == resource.data.hasPublishedArticles && 
+          request.resource.data.hasDefeatedGlitchzilla == resource.data.hasDefeatedGlitchzilla &&
+          request.resource.data.get('avatarUrls', null) == resource.data.get('avatarUrls', null) && 
+          request.resource.data.get('lastNicknameRequestTimestamp', null) == resource.data.get('lastNicknameRequestTimestamp', null) &&
+          
+              request.resource.data.updatedAt == request.time // updatedAt deve sempre cambiare
+            ) ||
+            // Scenario 2: Aggiornamento SOLO dello stile del nickname
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasAll(['activeNicknameAnimation', 'updatedAt']) && // Devono cambiare solo questi due
+              request.resource.data.diff(resource.data).affectedKeys().size() == 2 && // Esattamente due chiavi modificate
+              (
+                (request.resource.data.activeNicknameAnimation is string && request.resource.data.activeNicknameAnimation.size() > 0 && request.resource.data.activeNicknameAnimation.size() <= 50) ||
+                request.resource.data.activeNicknameAnimation == null
+              ) &&
+              // Tutti gli altri campi devono rimanere invariati
+              request.resource.data.statusMessage == resource.data.statusMessage &&
+              request.resource.data.externalLinks == resource.data.externalLinks &&
+              request.resource.data.bio == resource.data.bio &&
+              request.resource.data.email == resource.data.email &&
+              request.resource.data.nickname == resource.data.nickname &&
+              request.resource.data.createdAt == resource.data.createdAt &&
+              request.resource.data.isAdmin == resource.data.isAdmin &&
+              request.resource.data.nationalityCode == resource.data.nationalityCode &&
+              request.resource.data.earnedBadges == resource.data.earnedBadges &&
+              request.resource.data.hasPublishedArticles == resource.data.hasPublishedArticles &&
+              request.resource.data.hasDefeatedGlitchzilla == resource.data.hasDefeatedGlitchzilla &&
+              request.resource.data.get('avatarUrls', null) == resource.data.get('avatarUrls', null) &&
+              request.resource.data.get('lastNicknameRequestTimestamp', null) == resource.data.get('lastNicknameRequestTimestamp', null) &&
+              request.resource.data.updatedAt == request.time // updatedAt deve sempre cambiare
+            )
+        );
+
+      allow delete: if false; // Come da tue regole
+      
+      // REGOLE PER LE NOTIFICHE UTENTE (come le avevi)
       match /notifications/{notificationId} {
-        // Un utente autenticato può leggere le proprie notifiche (sia un singolo documento che una lista)
         allow read: if request.auth != null && request.auth.uid == userId;
-
-        // Solo il proprietario della notifica può aggiornarla (es. per marcarla come letta)
-        // Questa regola è specifica: permette solo di cambiare 'read' da false a true.
         allow update: if request.auth != null && request.auth.uid == userId &&
-                        request.resource.data.read == true && resource.data.read == false &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'updatedAt']) && 
-                        request.resource.data.keys().hasAll(['type', 'title', 'message', 'timestamp', 'read', 'icon']) && // Assicura che i campi obbligatori non vengano rimossi
-                        request.resource.data.updatedAt == request.time; // Forza l'aggiornamento di un timestamp se cambi 'updatedAt'
-
-        // Nessuno (dal client) può creare o cancellare notifiche. Queste sono gestite dal backend (Cloud Functions).
+                          request.resource.data.read == true && resource.data.read == false &&
+                          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'updatedAt']) && 
+                          request.resource.data.keys().hasAll(['type', 'title', 'message', 'timestamp', 'read', 'icon']) &&
+                          request.resource.data.updatedAt == request.time;
         allow create, delete: if false;
       }
+    
+    match /testResults/{testResultId} {
+      allow read: if request.auth.uid == userId || isAdmin(request.auth.uid);
+
+      // Permetti la creazione se l'utente è un tester e i dati sono corretti.
+      allow create: if request.auth.uid == userId && isTestUser(userId) &&
+                       request.resource.data.taskId is string &&
+                       request.resource.data.outcome is string && (request.resource.data.outcome == 'success' || request.resource.data.outcome == 'failure') &&
+                       request.resource.data.comment is string && request.resource.data.comment.size() <= 2000 &&
+                       request.resource.data.testerId == request.auth.uid &&
+                       request.resource.data.timestamp == request.time;
+
+      // MODIFICATO: Permetti l'aggiornamento alle stesse condizioni della creazione,
+      // ma assicurandoti che i campi chiave non vengano modificati.
+      allow update: if request.auth.uid == userId && isTestUser(userId) &&
+                       request.resource.data.taskId == resource.data.taskId && // Il taskId non può essere cambiato
+                       request.resource.data.testerId == resource.data.testerId && // Il testerId non può essere cambiato
+                       request.resource.data.outcome is string && (request.resource.data.outcome == 'success' || request.resource.data.outcome == 'failure') &&
+                       request.resource.data.comment is string && request.resource.data.comment.size() <= 2000 &&
+                       request.resource.data.timestamp == request.time;
+                       
+      // L'eliminazione rimane non permessa per mantenere lo storico.
+      allow delete: if false;
     }
+    // ===================================================
+
+  }
+    
+    match /badgeDefinitions/{badgeId} {
+      allow read: if true;
+      allow write: if false; // Le definizioni possono essere modificate solo dalla console Firebase
+    }
+    
+        // --- NUOVA Collezione userPublicProfiles ---
+    match /userPublicProfiles/{userId} {
+  allow read: if true; // Permetti a chiunque di leggere
+  allow create, update, delete: if false;
+}
 
     match /leaderboardScores/{scoreId} {
       allow read: if true;
@@ -365,6 +442,12 @@ service cloud.firestore {
       allow delete: if request.auth != null && get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.isAdmin == true;
     }
     
+    // Permette a chiunque di leggere le statistiche pubbliche della piattaforma
+match /platformInfo/{docId} {
+  allow read: if true;
+  allow write: if false; // Scrittura gestita solo dalle Cloud Functions
+}
+    
      match /userIssues/{issueId} {
       allow read: if true;
       allow create: if request.auth != null // 1. Utente deve essere loggato
@@ -433,5 +516,25 @@ service cloud.firestore {
         );
       allow delete: if isAdmin(request.auth.uid);
     }
-	}
+    match /nicknameChangeRequests/{request} {
+      // Admin possono leggere tutte le richieste.
+      // Gli utenti possono leggere le proprie richieste (per query con where o get diretto).
+      allow read: if request.auth != null && 
+                    (isAdmin(request.auth.uid) || // Admin possono leggere tutto
+                     request.auth.uid == resource.data.userId || // Utente legge il suo doc specifico
+                     request.auth.uid == request.resource.data.userId); // Utente fa una query per i suoi doc
+
+      // Create/Update/Delete sono gestite solo da Cloud Functions (backend)
+      allow create, update, delete: if false; 
+    }
+	// NUOVE REGOLE PER LE DEFINIZIONI DEI TASK DI TEST (POSIZIONE CORRETTA)
+    match /testTasksDefinition/{taskId} {
+      allow read: if request.auth != null && 
+                     (isTestUser(request.auth.uid) || isAdmin(request.auth.uid));
+      allow create, update, delete: if request.auth != null && isAdmin(request.auth.uid);
+    }
+  
+  
+    }
+  
 }
