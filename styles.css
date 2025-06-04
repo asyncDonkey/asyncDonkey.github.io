@@ -2300,10 +2300,6 @@ section#contact li {
   display: block;
 }
 
-.article-card:not(.is-featured) .article-card-cover-image {
-  display: none;
-}
-
 @media (min-width: 768px) {
   #articlesContainer {
     display: grid;
