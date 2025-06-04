@@ -2705,6 +2705,7 @@ section#contact li {
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 20px;
+  border-radius: 10px;
   /* La nitidezza dei pixel dipenderà dalla risoluzione nativa del video */
   /* e da come il browser lo scala. */
 }
@@ -5324,21 +5325,20 @@ body.donkey-runner-page {
 
 .donkey-runner-page header,
 .donkey-runner-page footer {
-  background-color: var(--surface-bg-secondary); /* MODIFICATO: usa la variabile generica */
+  background-color: var(--surface-bg-secondary);
   padding: 10px 20px;
-  text-align: center;
+  /* text-align: center; */ /* RIMUOVERE QUESTA RIGA */
   -ms-flex-negative: 0;
       flex-shrink: 0;
-  /* I bordi possono rimanere o essere resi dipendenti dal tema se necessario */
-  border-bottom: 1px solid var(--border-color); /* Assicurati che --border-color sia theme-aware o usa --border-color-light/dark */
+  border-bottom: 1px solid var(--border-color);
 }
 
 .donkey-runner-page footer {
-  border-top: 1px solid var(--border-color); /* Come sopra */
+  border-top: 1px solid var(--border-color);
   border-bottom: none;
+  text-align: center; /* MANTENERE text-align: center; se specificamente voluto per il footer */
 }
 
-.donkey-runner-page header a,
 .donkey-runner-page footer a {
   color: var(--link-color); /* MODIFICATO: usa la variabile generica */
 }

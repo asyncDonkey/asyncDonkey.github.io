@@ -324,20 +324,21 @@ body.donkey-runner-page {
 }
 
 .donkey-runner-page header,
-.donkey-runner-page footer {
-    background-color: var(--surface-bg-secondary); /* MODIFICATO: usa la variabile generica */
-    padding: 10px 20px;
-    text-align: center;
-    flex-shrink: 0;
-    /* I bordi possono rimanere o essere resi dipendenti dal tema se necessario */
-    border-bottom: 1px solid var(--border-color); /* Assicurati che --border-color sia theme-aware o usa --border-color-light/dark */
-}
-.donkey-runner-page footer {
-    border-top: 1px solid var(--border-color); /* Come sopra */
-    border-bottom: none;
-}
+            .donkey-runner-page footer {
+                background-color: var(--surface-bg-secondary);
+                padding: 10px 20px;
+                /* text-align: center; */ /* RIMUOVERE QUESTA RIGA */
+                flex-shrink: 0;
+                border-bottom: 1px solid var(--border-color); 
+            }
+            .donkey-runner-page footer {
+                border-top: 1px solid var(--border-color); 
+                border-bottom: none;
+                 text-align: center; /* MANTENERE text-align: center; se specificamente voluto per il footer */
+            }
 
-.donkey-runner-page header a,
+
+
 .donkey-runner-page footer a {
     color: var(--link-color); /* MODIFICATO: usa la variabile generica */
 }
