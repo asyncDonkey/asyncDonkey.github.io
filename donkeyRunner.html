@@ -19,9 +19,9 @@
         <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
         <style>
             body.donkey-runner-page {
-    background-color: var(--surface-bg-primary-light, #ffffff); /* MODIFICATO */
-    color: var(--text-color-primary-light, #212529);       /* MODIFICATO */
-    font-family: 'Source Code Pro', 'Courier New', Courier, monospace; /* Mantenuto per il testo generico della pagina, se vuoi */
+    background-color: var(--surface-bg-primary); /* MODIFICATO: usa la variabile generica */
+    color: var(--text-color-primary);       /* MODIFICATO: usa la variabile generica */
+    font-family: 'Source Code Pro', 'Courier New', Courier, monospace;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -32,25 +32,26 @@
 
 .donkey-runner-page header,
 .donkey-runner-page footer {
-    background-color: var(--surface-bg-secondary-light, #f8f9fa); /* MODIFICATO per un leggero contrasto */
+    background-color: var(--surface-bg-secondary); /* MODIFICATO: usa la variabile generica */
     padding: 10px 20px;
     text-align: center;
     flex-shrink: 0;
-    border-bottom: 1px solid var(--border-color-light, #dee2e6); /* Aggiunto per separazione header */
+    /* I bordi possono rimanere o essere resi dipendenti dal tema se necessario */
+    border-bottom: 1px solid var(--border-color); /* Assicurati che --border-color sia theme-aware o usa --border-color-light/dark */
 }
 .donkey-runner-page footer {
-    border-top: 1px solid var(--border-color-light, #dee2e6); /* Aggiunto per separazione footer */
-    border-bottom: none; /* Rimuovi se c'era prima */
+    border-top: 1px solid var(--border-color); /* Come sopra */
+    border-bottom: none;
 }
 
 .donkey-runner-page header a,
-.donkey-runner-page footer a { /* Assicurati che i link siano leggibili */
-    color: var(--link-color-light, #007bff); /* MODIFICATO */
+.donkey-runner-page footer a {
+    color: var(--link-color); /* MODIFICATO: usa la variabile generica */
 }
 .donkey-runner-page footer p {
-    margin: 5px 0;
-    font-size: 0.9em;
-    color: var(--text-color-secondary-light, #6c757d); /* MODIFICATO per testo secondario */
+    /* Il colore del testo del footer potrebbe necessitare di una variabile generica
+       come --text-color-secondary se già definita in modo theme-aware in _variables.scss */
+    color: var(--text-color-secondary); /* MODIFICATO: usa la variabile generica */
 }
 
             .donkey-runner-page main {
@@ -538,9 +539,9 @@
     <body class="donkey-runner-page">
         <header>
             <div class="header-top-row">
-                <a href="index.html" style="text-decoration: none">
-                    <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
-                </a>
+                <a href="index.html"> 
+            <h1 title="Vai alla Homepage di asynced.org">asynced.org</h1> 
+        </a>
                 <nav class="desktop-nav">
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px">
                         <li>
