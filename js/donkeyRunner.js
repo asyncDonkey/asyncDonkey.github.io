@@ -308,7 +308,10 @@ canvas.width = 800;
 canvas.height = 450;
 
 const groundHeight = 70;
-const gravity = 0.16;
+
+const PLAYER_JUMP_VELOCITY_INITIAL = -570; // px/s (valore da testare/affinare)
+const GRAVITY_ACCELERATION = 576;       // px/s^2 (valore da testare/affinare)
+
 let gameSpeed = 220;
 const lineWidth = 2;
 const GLOBAL_SPRITE_SCALE_FACTOR = 1.5;
@@ -713,7 +716,7 @@ class Player {
         this.y = y;
         this.displayWidth = dw;
         this.displayHeight = dh;
-        this.velocityY = 0;
+        this.velocityY = 0; // Ora in pixel/secondo
         this.onGround = true;
         const pXRatio = 20 / 120;
         const pYRatio = 10 / 120;
@@ -802,13 +805,16 @@ class Player {
         ctx.fillStyle = 'orange';
         ctx.fillRect(this.x, this.y, this.displayWidth, this.displayHeight);
     }
-    applyGravity() {
-        this.velocityY += gravity;
-        this.y += this.velocityY;
-    }
+    
 
     update(dt) {
-        this.applyGravity();
+        // Applica l'accelerazione di gravità alla velocità verticale
+        this.velocityY += GRAVITY_ACCELERATION * dt;
+
+        // Aggiorna la posizione verticale basata sulla velocità verticale
+        this.y += this.velocityY * dt;
+
+        // Controllo collisione con il suolo
         if (this.y + this.displayHeight >= canvas.height - groundHeight) {
             this.y = canvas.height - groundHeight - this.displayHeight;
             this.velocityY = 0;
@@ -816,7 +822,10 @@ class Player {
         } else {
             this.onGround = false;
         }
-        if (this.walkAnimation && this.onGround) this.walkAnimation.update(dt);
+
+        if (this.walkAnimation && this.onGround) {
+            this.walkAnimation.update(dt);
+        }
 
         if (this.activePowerUp) {
             this.powerUpTimer -= dt;
@@ -828,7 +837,7 @@ class Player {
 
     jump() {
         if (this.onGround) {
-            this.velocityY = -9.5;
+            this.velocityY = PLAYER_JUMP_VELOCITY_INITIAL; // Usa la nuova costante
             this.onGround = false;
             AudioManager.playSound('jump');
         }
