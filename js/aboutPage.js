@@ -19,7 +19,7 @@ const competenzeTecniche = [
         iconClass: 'fab fa-html5',
         coloreIcona: '#E34F26',
         descrizioneDettagliata:
-            "Utilizzato per creare la struttura portante di tutte le pagine web del progetto, con un focus rigoroso sulla semantica (es. <main>, <section>, <nav>) per massimizzare l'accessibilità (a11y) e la SEO.",
+            "Utilizzato per creare la struttura portante di tutte le pagine web del progetto, con un focus rigoroso sulla semantica per massimizzare l'accessibilità (a11y) e la SEO.",
         esempioPratico:
             "L'intera impalcatura di pagine come `index.html`, `about.html` e `profile.html` è costruita seguendo le best practice di HTML5.",
     },
