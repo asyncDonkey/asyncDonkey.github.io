@@ -310,7 +310,7 @@ canvas.height = 450;
 const groundHeight = 70;
 
 const PLAYER_JUMP_VELOCITY_INITIAL = -850; // px/s (valore da testare/affinare)
-const GRAVITY_ACCELERATION = 2000;       // px/s^2 (valore da testare/affinare)
+const GRAVITY_ACCELERATION = 2000; // px/s^2 (valore da testare/affinare)
 
 let gameSpeed = 220;
 const lineWidth = 2;
@@ -805,7 +805,6 @@ class Player {
         ctx.fillStyle = 'orange';
         ctx.fillRect(this.x, this.y, this.displayWidth, this.displayHeight);
     }
-    
 
     update(dt) {
         // Applica l'accelerazione di gravità alla velocità verticale

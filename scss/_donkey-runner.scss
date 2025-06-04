@@ -300,8 +300,9 @@ body.game-fullscreen-active main {
 }
 body.donkey-runner-page {
     background-color: var(--surface-bg-primary-light, #ffffff); /* MODIFICATO */
-    color: var(--text-color-primary-light, #212529);       /* MODIFICATO */
-    font-family: 'Source Code Pro', 'Courier New', Courier, monospace; /* Mantenuto per il testo generico della pagina, se vuoi */
+    color: var(--text-color-primary-light, #212529); /* MODIFICATO */
+    font-family:
+        'Source Code Pro', 'Courier New', Courier, monospace; /* Mantenuto per il testo generico della pagina, se vuoi */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -312,7 +313,7 @@ body.donkey-runner-page {
 
 body.donkey-runner-page {
     background-color: var(--surface-bg-primary); /* MODIFICATO: usa la variabile generica */
-    color: var(--text-color-primary);       /* MODIFICATO: usa la variabile generica */
+    color: var(--text-color-primary); /* MODIFICATO: usa la variabile generica */
     font-family: 'Source Code Pro', 'Courier New', Courier, monospace;
     display: flex;
     flex-direction: column;
@@ -1428,7 +1429,6 @@ body.game-fullscreen-active main {
     font-size: 0.9rem;
     padding: 10px 18px;
     text-transform: none; /* O mantieni uppercase se preferisci */
-    
 }
 
 /* Pulsanti "Segnala Bug" e "Proponi un'Idea" nella sezione CTA */

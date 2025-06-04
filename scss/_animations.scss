@@ -415,16 +415,16 @@
         /* Il fascio di luce inizia a entrare */
         color: inherit;
         text-shadow:
-            0 0 5px rgba(255, 255, 255, 0.5), /* Alone bianco generale leggero */
-            -50px 0 20px rgba(255, 255, 220, 0.8); /* Luce giallina intensa che arriva da sinistra (molto fuori) */
+            0 0 5px rgba(255, 255, 255, 0.5),
+            /* Alone bianco generale leggero */ -50px 0 20px rgba(255, 255, 220, 0.8); /* Luce giallina intensa che arriva da sinistra (molto fuori) */
     }
     50% {
         /* Il fascio di luce è al centro del testo */
         color: #fff; /* Testo molto brillante nel punto luce */
         text-shadow:
             0 0 7px rgba(255, 255, 255, 0.8),
-            0 0 15px rgba(255, 255, 220, 0.9), /* Luce giallina intensa e diffusa */
-            0 0 25px rgba(255, 255, 200, 0.7);
+            0 0 15px rgba(255, 255, 220, 0.9),
+            /* Luce giallina intensa e diffusa */ 0 0 25px rgba(255, 255, 200, 0.7);
     }
     70% {
         /* Il fascio di luce inizia a uscire */
@@ -447,29 +447,40 @@
 }
 
 @keyframes nickname-crackling-energy-effect {
-    0%, 100% {
+    0%,
+    100% {
         color: #00ffff; /* Ciano base */
-        text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+        text-shadow:
+            0 0 5px #00ffff,
+            0 0 10px #00ffff;
         transform: translateX(0) translateY(0);
     }
     10% {
         color: #ff00ff; /* Flash Magenta */
-        text-shadow: 0 0 6px #ff00ff, 0 0 12px #ff00ff;
+        text-shadow:
+            0 0 6px #ff00ff,
+            0 0 12px #ff00ff;
         transform: translateX(-1px) translateY(0.5px);
     }
     20% {
         color: #00ffff;
-        text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+        text-shadow:
+            0 0 5px #00ffff,
+            0 0 10px #00ffff;
         transform: translateX(0.5px) translateY(-0.5px);
     }
     30% {
         color: #39ff14; /* Flash Verde */
-        text-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14;
+        text-shadow:
+            0 0 5px #39ff14,
+            0 0 10px #39ff14;
         transform: translateX(0) translateY(1px);
     }
     40% {
         color: #00ffff;
-        text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+        text-shadow:
+            0 0 5px #00ffff,
+            0 0 10px #00ffff;
         transform: translateX(0) translateY(0);
     }
     /* Puoi aggiungere altri piccoli "crepitii" o lasciare una pausa più lunga */
@@ -479,12 +490,16 @@
     60% {
         opacity: 1;
         color: #ffdd00; /* Flash Giallo/Oro */
-        text-shadow: 0 0 6px #ffdd00, 0 0 12px #ffdd00;
+        text-shadow:
+            0 0 6px #ffdd00,
+            0 0 12px #ffdd00;
         transform: translateX(-0.5px) translateY(0);
     }
     70% {
-         color: #00ffff;
-        text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+        color: #00ffff;
+        text-shadow:
+            0 0 5px #00ffff,
+            0 0 10px #00ffff;
         transform: translateX(0) translateY(0);
     }
 }
@@ -496,63 +511,71 @@
 }
 
 @keyframes nickname-cosmic-breath-effect {
-    0%, 100% {
+    0%,
+    100% {
         color: #9b59b6; /* Viola Ametista */
-        text-shadow: 0 0 8px rgba(155, 89, 182, 0.5), 0 0 15px rgba(155, 89, 182, 0.3);
+        text-shadow:
+            0 0 8px rgba(155, 89, 182, 0.5),
+            0 0 15px rgba(155, 89, 182, 0.3);
         opacity: 0.85;
     }
     33% {
         color: #3498db; /* Blu Peter River */
-        text-shadow: 0 0 10px rgba(52, 152, 219, 0.6), 0 0 20px rgba(52, 152, 219, 0.4);
+        text-shadow:
+            0 0 10px rgba(52, 152, 219, 0.6),
+            0 0 20px rgba(52, 152, 219, 0.4);
         opacity: 1;
     }
     66% {
         color: #e74c3c; /* Rosso Alizarin (un rosso-arancio scuro per contrasto cosmico) */
-        text-shadow: 0 0 9px rgba(231, 76, 60, 0.55), 0 0 18px rgba(231, 76, 60, 0.35);
+        text-shadow:
+            0 0 9px rgba(231, 76, 60, 0.55),
+            0 0 18px rgba(231, 76, 60, 0.35);
         opacity: 0.9;
     }
 }
 
 .nickname-cosmic-breath {
     display: inline-block;
-    animation: nickname-cosmic-breath-effect 6s infinite alternate ease-in-out; 
+    animation: nickname-cosmic-breath-effect 6s infinite alternate ease-in-out;
     /* Durata più lunga per un effetto calmo, 'alternate' per un ciclo avanti-indietro */
 }
 
 @keyframes nickname-arcade-flash-effect {
-    0%, 100% {
-        color: #FF3B30; /* Rosso Arcade */
-        text-shadow: 
-            1px 1px 0px #A61B13, /* Ombra interna più scura */
-            0 0 3px #FF3B30,
+    0%,
+    100% {
+        color: #ff3b30; /* Rosso Arcade */
+        text-shadow:
+            1px 1px 0px #a61b13,
+            /* Ombra interna più scura */ 0 0 3px #ff3b30,
             0 0 5px rgba(255, 59, 48, 0.5);
     }
     20% {
-        color: #00A1FF; /* Blu Elettrico Arcade */
-        text-shadow: 
-            1px 1px 0px #0061A6,
-            0 0 3px #00A1FF,
+        color: #00a1ff; /* Blu Elettrico Arcade */
+        text-shadow:
+            1px 1px 0px #0061a6,
+            0 0 3px #00a1ff,
             0 0 5px rgba(0, 161, 255, 0.5);
     }
     40% {
-        color: #34C759; /* Verde Brillante Arcade */
-        text-shadow: 
-            1px 1px 0px #1A8235,
-            0 0 3px #34C759,
+        color: #34c759; /* Verde Brillante Arcade */
+        text-shadow:
+            1px 1px 0px #1a8235,
+            0 0 3px #34c759,
             0 0 5px rgba(52, 199, 89, 0.5);
     }
     60% {
-        color: #FFCC00; /* Giallo Intenso Arcade */
-        text-shadow: 
-            1px 1px 0px #A68200,
-            0 0 3px #FFCC00,
+        color: #ffcc00; /* Giallo Intenso Arcade */
+        text-shadow:
+            1px 1px 0px #a68200,
+            0 0 3px #ffcc00,
             0 0 5px rgba(255, 204, 0, 0.5);
     }
     80% {
-        color: #AF52DE; /* Viola Arcade */
-        text-shadow: 
-            1px 1px 0px #6D2C8C,
-            0 0 3px #AF52DE,
+        color: #af52de; /* Viola Arcade */
+        text-shadow:
+            1px 1px 0px #6d2c8c,
+            0 0 3px #af52de,
             0 0 5px rgba(175, 82, 222, 0.5);
     }
 }
@@ -560,25 +583,27 @@
 .nickname-arcade-flash {
     display: inline-block;
     animation: nickname-arcade-flash-effect 1.2s infinite steps(1, end); /* steps() per transizioni nette */
-    font-family: 'Press Start 2P', 'Source Code Pro', monospace; /* Suggerimento font, 'Press Start 2P' è molto arcade */
-                                                                /* Assicurati di importarlo se lo usi */
+    font-family:
+        'Press Start 2P', 'Source Code Pro', monospace; /* Suggerimento font, 'Press Start 2P' è molto arcade */
+    /* Assicurati di importarlo se lo usi */
     font-weight: bold; /* I font arcade spesso sono bold */
 }
 
 @keyframes nickname-social-blue-pulse-effect {
-    0%, 100% {
-        color: #1877F2; /* Blu Facebook Standard */
-        text-shadow: 
+    0%,
+    100% {
+        color: #1877f2; /* Blu Facebook Standard */
+        text-shadow:
             0 0 4px rgba(24, 119, 242, 0.3),
             0 0 8px rgba(24, 119, 242, 0.2);
         opacity: 0.9;
         transform: scale(1);
     }
     50% {
-        color: #4295FF; /* Un blu più chiaro e brillante */
-        text-shadow: 
-            0 0 6px rgba(66, 149, 255, 0.7), /* Alone più pronunciato */
-            0 0 12px rgba(66, 149, 255, 0.5),
+        color: #4295ff; /* Un blu più chiaro e brillante */
+        text-shadow:
+            0 0 6px rgba(66, 149, 255, 0.7),
+            /* Alone più pronunciato */ 0 0 12px rgba(66, 149, 255, 0.5),
             0 0 18px rgba(24, 119, 242, 0.3); /* Alone del colore base più diffuso */
         opacity: 1;
         transform: scale(1.03); /* Leggero ingrandimento per l'effetto "pulse" */
@@ -592,7 +617,8 @@
 }
 
 @keyframes nickname-sweep-sparkle-effect {
-    0%, 100% {
+    0%,
+    100% {
         color: inherit; /* Colore di base del testo */
         text-shadow: none; /* Nessuna ombra o effetto */
     }
@@ -600,33 +626,34 @@
     20% {
         color: inherit;
         /* Ombra offset che simula la luce in avvicinamento */
-        text-shadow: -25px 0px 15px rgba(255, 255, 230, 0.5), /* Alone più ampio e soffuso */
-                     -35px 0px 8px rgba(255, 255, 255, 0.7);   /* Nucleo più brillante della luce */
+        text-shadow:
+            -25px 0px 15px rgba(255, 255, 230, 0.5),
+            /* Alone più ampio e soffuso */ -35px 0px 8px rgba(255, 255, 255, 0.7); /* Nucleo più brillante della luce */
     }
     /* Fase 2: Il fascio di luce è centrato, massima luminosità e scintille */
     50% {
         color: #fff; /* Testo al massimo della brillantezza */
         text-shadow: 
             /* Scintille: piccole, definite, bianche, posizionate leggermente attorno alle lettere */
-            1px 1px 0px rgba(255, 255, 255, 1),   /* Scintilla 1 */
-            -1px -1px 1px rgba(255, 255, 255, 0.9), /* Scintilla 2 */
-            1px -2px 0px rgba(255, 255, 240, 0.95),/* Scintilla 3 (leggermente giallina) */
-            
-            /* Bagliore principale del fascio di luce sul testo */
-            0 0 7px rgba(255, 255, 255, 0.95), /* Bagliore interno bianco intenso */
-            0 0 15px rgba(255, 255, 230, 0.8), /* Bagliore medio bianco-giallastro */
-            0 0 25px rgba(255, 255, 200, 0.6); /* Alone esterno più ampio e soffuso */
+            1px 1px 0px rgba(255, 255, 255, 1),
+            /* Scintilla 1 */ -1px -1px 1px rgba(255, 255, 255, 0.9),
+            /* Scintilla 2 */ 1px -2px 0px rgba(255, 255, 240, 0.95),
+            /* Scintilla 3 (leggermente giallina) */ /* Bagliore principale del fascio di luce sul testo */ 0 0 7px
+                rgba(255, 255, 255, 0.95),
+            /* Bagliore interno bianco intenso */ 0 0 15px rgba(255, 255, 230, 0.8),
+            /* Bagliore medio bianco-giallastro */ 0 0 25px rgba(255, 255, 200, 0.6); /* Alone esterno più ampio e soffuso */
     }
     /* Fase 3: Il fascio di luce si allontana verso destra */
     80% {
         color: inherit;
-        text-shadow: 25px 0px 15px rgba(255, 255, 230, 0.5),
-                     35px 0px 8px rgba(255, 255, 255, 0.7);
+        text-shadow:
+            25px 0px 15px rgba(255, 255, 230, 0.5),
+            35px 0px 8px rgba(255, 255, 255, 0.7);
     }
 }
 
 .nickname-sweep-sparkle {
     display: inline-block; /* Utile per la resa di text-shadow complessi */
-    animation: nickname-sweep-sparkle-effect 3.5s infinite ease-in-out; 
+    animation: nickname-sweep-sparkle-effect 3.5s infinite ease-in-out;
     /* Durata leggermente aumentata per dare più respiro all'effetto */
 }

@@ -49,7 +49,7 @@
             "package.json",
             "README.md"
         ],
-        
+
         "rewrites": [
             {
                 "source": "/profile",
@@ -110,11 +110,9 @@
                         "value": "public, max-age=0, must-revalidate"
                     }
                 ]
-                
             }
         ],
         "cleanUrls": true,
         "trailingSlash": false
-        
     }
 }
