@@ -653,3 +653,15 @@
         }
     }
 }
+
+.intro-visual-asset { // Questa classe ora si applicherà al tag <video>
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+    // image-rendering: pixelated; /* NOTA: image-rendering ha un effetto limitato o nullo sui tag <video> */
+                                /* La nitidezza dei pixel dipenderà dalla risoluzione nativa del video */
+                                /* e da come il browser lo scala. */
+}
