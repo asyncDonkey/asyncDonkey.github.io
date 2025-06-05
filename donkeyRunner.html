@@ -711,22 +711,28 @@
                 <canvas id="gameCanvas"></canvas>
 
                 <div id="scoreInputContainerDonkey" style="display: none">
-                    <div class="score-display-area">
-                        <h3>Game Over!</h3>
-                        <p>Punteggio: <span id="finalScoreDisplayDonkey">0</span></p>
-                    </div>
-                    <div id="playerNameInputArea" class="player-input-area">
-                        <label for="playerInitialsDonkey" id="playerInitialsLabel">Iniziali (1-5):</label>
-                        <input type="text" id="playerInitialsDonkey" name="playerInitialsDonkey" maxlength="5" />
-                        <span id="loggedInUserNameDisplay" style="display: none"></span>
-                    </div>
-                    <div class="score-buttons">
-                        <button id="saveScoreBtnDonkey" class="game-button">Salva</button>
-                        <button id="restartGameBtnDonkey" class="game-button" title="Rigioca">
-                            <span class="material-symbols-rounded">replay</span>
-                        </button>
-                    </div>
+                <div class="score-display-area">
+                    <h3>Game Over!</h3>
+                    <p>Punteggio: <span id="finalScoreDisplayDonkey">0</span></p>
                 </div>
+                <div id="playerNameInputArea" class="player-input-area">
+                    <label for="playerInitialsDonkey" id="playerInitialsLabel">Iniziali (1-5):</label>
+                    <input type="text" id="playerInitialsDonkey" name="playerInitialsDonkey" maxlength="5" />
+                    <span id="loggedInUserNameDisplay" style="display: none"></span>
+                </div>
+                <div class="score-buttons">
+                    <button id="saveScoreBtnDonkey" class="game-button">Salva</button>
+                    
+                    <button id="shareScoreBtnDonkey" class="game-button" title="Condividi Punteggio">
+                        <span class="material-symbols-rounded" aria-hidden="true">share</span>
+                        <span class="visually-hidden">Condividi Punteggio</span> 
+                        </button>
+                    
+                    <button id="restartGameBtnDonkey" class="game-button" title="Rigioca">
+                        <span class="material-symbols-rounded">replay</span>
+                    </button>
+                </div>
+            </div>
 
                 <button id="mobileStartButton" class="game-button">START GAME</button>
 

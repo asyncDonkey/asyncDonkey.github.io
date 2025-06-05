@@ -59,6 +59,13 @@ function formatScoreTimestamp(firebaseTimestamp) {
     }
 }
 
+function getUrlParameter(name) {
+    name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
+    const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    const results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
+
 // --- Logica per il Prompt di Orientamento Mobile ---
 let orientationPromptDismissedSession = false;
 
@@ -90,6 +97,114 @@ function checkAndDisplayOrientationPrompt() {
     }
 }
 // --- Fine Logica Prompt Orientamento ---
+
+async function handleShareScore() {
+    console.log("handleShareScore attivato!"); // Per debugging iniziale
+
+    // 1. Ottenere il punteggio finale
+    //    La variabile 'finalScore' dovrebbe essere già disponibile globalmente
+    //    e impostata in processGameOver().
+    if (typeof finalScore === 'undefined' || finalScore < 0) { // Potremmo voler permettere 0 se è un punteggio valido
+        showToast("Nessun punteggio valido da condividere.", "warning");
+        console.warn("handleShareScore: finalScore non definito o non valido:", finalScore);
+        return;
+    }
+
+    // 2. Ottenere il nome dello sfidante
+    let challengerName = "Un Asinello Pixelato"; // Nome di fallback
+    const currentUser = auth.currentUser;
+
+    if (currentUser) {
+        try {
+            // Usiamo la stessa logica di recupero nickname di handleSaveDonkeyScore per coerenza
+            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
+            const docSnap = await getDoc(userProfileRef);
+            if (docSnap.exists() && docSnap.data().nickname) {
+                challengerName = docSnap.data().nickname;
+            } else {
+                challengerName = currentUser.displayName || currentUser.email.split('@')[0] || "Giocatore Misterioso";
+            }
+        } catch (error) {
+            console.warn("Errore nel recuperare il nome del profilo per la condivisione:", error);
+            // Fallback se il recupero del profilo fallisce
+            challengerName = currentUser.displayName || currentUser.email.split('@')[0] || "Giocatore Connesso";
+        }
+    } else {
+        const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
+        if (playerInitialsDonkeyInput && playerInitialsDonkeyInput.value.trim() !== "") {
+            challengerName = playerInitialsDonkeyInput.value.trim().toUpperCase();
+        }
+        // Se è ospite e non ha inserito iniziali, userà "Un Asinello Pixelato"
+    }
+    console.log("Sfidante:", challengerName, "Punteggio:", finalScore);
+
+    // 3. Costruire il messaggio e l'URL della sfida
+    const siteBaseUrl = window.location.origin; // Es. "https://asynced.org"
+    const gamePath = "/donkeyRunner.html"; 
+
+    const challengeUrl = `<span class="math-inline">{siteBaseUrl}</span>{gamePath}?challengeScore=<span class="math-inline">{finalScore}&challengerName=</span>{encodeURIComponent(challengerName)}&utm_source=donkey_runner_share&utm_medium=social_share`;
+
+    const shareTitle = "SYSTEM_ALERT: codeDash Challenge!";
+    // Testo più completo per clipboard/fallback
+    const fullShareText = `WARNING! ${challengerName} (Score: ${finalScore}) ti sfida su codeDash! Accetta il protocollo: ${challengeUrl} 👾`;
+    // Testo più breve per navigator.share (alcune app potrebbero troncarlo)
+    const shortShareText = `// --- INCOMING_CHALLENGE_TRANSMISSION --- //
+SYSTEM_ID: asyncDonkey_Runner_Core
+SOURCE_AGENT: ${challengerName}
+PRIORITY: URGENT 🚨
+SUBJECT: High Score Anomaly Detected!
+
+L'agente ${challengerName} ha registrato un punteggio di ${finalScore} e ha avviato il Protocollo di Sfida Competitiva!
+Sei chiamato/a a superare questo benchmark. Il sistema conta su di te!
+
+Esegui routine di risposta: ${challengeUrl}
+// --- END_OF_TRANSMISSION --- //`;
+
+    console.log("URL Sfida:", challengeUrl);
+    console.log("Testo completo:", fullShareText);
+
+    // 4. Implementare navigator.share con fallback
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: shareTitle,
+                text: shortShareText, // Testo breve per la condivisione nativa
+                url: challengeUrl, 
+            });
+            showToast("Sfida condivisa con successo!", "success");
+            console.log("Condivisione nativa riuscita.");
+        } catch (error) {
+            console.error("Errore durante navigator.share:", error);
+            // Non mostrare errore se l'utente annulla esplicitamente il foglio di condivisione
+            if (error.name !== 'AbortError') { 
+                showToast("Condivisione annullata o fallita.", "info");
+            }
+            // In caso di errore (diverso da AbortError), potremmo comunque tentare il fallback
+            // o semplicemente informare l'utente. Per ora, non facciamo fallback automatico qui.
+        }
+    } else {
+        // Fallback per browser che non supportano navigator.share
+        console.log("navigator.share non supportato, uso fallback.");
+        fallbackShare(fullShareText, challengeUrl); // Passiamo il testo completo e l'URL separato
+    }
+}
+
+function fallbackShare(textToShare, urlToShare) { // Accetta URL separato
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToShare) // Copiamo il testo completo che include già l'URL
+            .then(() => {
+                showToast("Testo della sfida copiato negli appunti!", "info");
+            })
+            .catch(err => {
+                console.error('Fallback: Impossibile copiare negli appunti:', err);
+                // Se il clipboard fallisce, mostriamo un alert con il testo da copiare manualmente
+                alert("Copia questo testo per condividere la tua sfida:\n\n" + textToShare);
+            });
+    } else {
+        // Fallback molto basilare se neanche clipboard.writeText è supportato
+        alert("Copia questo testo per condividere la tua sfida:\n\n" + textToShare);
+    }
+}
 
 async function loadDonkeyLeaderboard() {
     const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
@@ -326,6 +441,7 @@ const scoreInputContainerDonkey = document.getElementById('scoreInputContainerDo
 const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
 const restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey');
 const mobileStartButton = document.getElementById('mobileStartButton'); // NUOVO RIFERIMENTO
+const shareScoreBtnDonkey = document.getElementById('shareScoreBtnDonkey'); // NUOVO
 
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
 const isIPhone = /iPhone/i.test(navigator.userAgent);
@@ -2165,9 +2281,9 @@ function processGameOver() {
     }
 
     if (isTouchDevice && mobileStartButton) {
-        mobileStartButton.textContent = 'RIGIOCA';
-        mobileStartButton.style.display = 'block';
-    }
+    mobileStartButton.innerHTML = '<span class="material-symbols-rounded">replay</span><span class="visually-hidden">Rigioca</span>'; // Verifica che sia .innerHTML
+    mobileStartButton.style.display = 'block';
+}
 }
 
 function checkCollisions() {
@@ -2497,42 +2613,74 @@ function drawMenuScreen() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawTerminalBackgroundEffects();
     drawGround();
-    drawGlitchText(
-        'asyncDonkey Runner',
+
+    // >>> INIZIO MODIFICHE PER SFIDA <<<
+    const incomingChallengeScore = getUrlParameter('challengeScore');
+    const incomingChallengerName = getUrlParameter('challengerName');
+    const numericalChallengeScore = parseInt(incomingChallengeScore, 10);
+
+    drawGlitchText( // Titolo gioco rimane
+        'codeDash!',
         canvas.width / 2,
-        canvas.height / 2 - 60,
+        canvas.height / 2 - 100, // Spostato un po' più in alto per fare spazio al testo della sfida
         48,
-        PALETTE.BRIGHT_GREEN_TEAL,
-        PALETTE.MEDIUM_TEAL,
-        PALETTE.DARK_TEAL_BLUE,
-        5,
-        3
+        PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE, 5, 3
     );
 
-    if (isTouchDevice && mobileStartButton) {
-        mobileStartButton.textContent = 'START GAME';
-        mobileStartButton.style.display = 'block'; // Mostra il pulsante start su mobile
-    } else {
+    if (incomingChallengerName && !isNaN(numericalChallengeScore) && numericalChallengeScore > 0) {
+        // Messaggio di sfida ricevuto!
         drawGlitchText(
-            'Premi INVIO per Iniziare',
+            `SYSTEM_ALERT: Sfida da ${incomingChallengerName}!`,
             canvas.width / 2,
-            canvas.height / 2 + 20,
-            28,
-            PALETTE.BRIGHT_TEAL,
-            PALETTE.MEDIUM_PURPLE,
-            PALETTE.DARK_TEAL_BLUE,
-            3,
-            2
+            canvas.height / 2 - 20, // Posizione primo testo sfida
+            28, // Dimensione font
+            PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 3, 2
         );
-    }
+        drawGlitchText(
+            `TARGET SCORE: ${numericalChallengeScore}. Routine di superamento richiesta!`,
+            canvas.width / 2,
+            canvas.height / 2 + 20, // Posizione secondo testo sfida
+            22, // Dimensione font
+            PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 2, 1
+        );
 
+        if (isTouchDevice && mobileStartButton) {
+            mobileStartButton.textContent = '_RUN'; // Testo specifico per il pulsante mobile
+            mobileStartButton.style.display = 'block';
+        } else {
+            drawGlitchText(
+                'Premi INVIO per ESEGUIRE!',
+                canvas.width / 2,
+                canvas.height / 2 + 70, // Posizione prompt azione
+                26,
+                PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE, 3, 1
+            );
+        }
+    } else {
+        // Messaggio di avvio standard (se non ci sono parametri di sfida validi)
+        if (isTouchDevice && mobileStartButton) {
+    mobileStartButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span><span class="visually-hidden">Start Game</span>'; // Verifica che sia .innerHTML
+    mobileStartButton.style.display = 'block';
+} else {
+            drawGlitchText(
+                'Premi INVIO per Iniziare',
+                canvas.width / 2,
+                canvas.height / 2 + 20,
+                28,
+                PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 3, 2
+            );
+        }
+    }
+    // >>> FINE MODIFICHE PER SFIDA <<<
+
+    // Il testo dei controlli può rimanere più in basso
     ctx.fillStyle = PALETTE.MEDIUM_TEAL;
     ctx.font = '16px "Source Code Pro", monospace';
     ctx.textAlign = 'center';
     ctx.fillText(
         'Controlli: SPAZIO/FRECCIA SU per Saltare, CTRL/X per Sparare',
         canvas.width / 2,
-        canvas.height - groundHeight - 180
+        canvas.height - groundHeight - 30 // Adattato leggermente y-pos se necessario
     );
 }
 
@@ -2848,6 +2996,9 @@ if (restartGameBtnDonkey) {
         resetGame();
         AudioManager.playMusic(false);
     });
+}
+if (shareScoreBtnDonkey) {
+    shareScoreBtnDonkey.addEventListener('click', handleShareScore);
 }
 
 // NUOVO Event Listener per il pulsante Start/Restart mobile
