@@ -1500,14 +1500,36 @@ body.game-fullscreen-active main {
         }
 
         #mobileControls { 
-            display: block !important; 
-            position: fixed !important; // Fisso rispetto al viewport
-            bottom: 10px; // O come preferisci
+            display: block !important; // Assicurati che siano visibili se il gioco è in PLAYING
+            position: fixed !important; 
+            bottom: 15px; // Leggermente più in alto per evitare la barra home dell'iPhone
             left: 50%;
             transform: translateX(-50%);
             width: 90%; 
-            max-width: 400px; 
+            max-width: 380px; // Leggermente più stretto per landscape
             z-index: 200; 
+        }
+
+        #mobileControlsInternal {
+            display: flex; // Assicuriamoci sia flex
+            justify-content: space-between !important; /* MODIFICA CHIAVE: spinge i figli ai lati */
+            align-items: center; // Mantiene l'allineamento verticale
+            width: 100%;       // Occupa tutta la larghezza del suo genitore #mobileControls
+            padding: 0 10px;   /* Aggiunge un po' di respiro ai lati di #mobileControlsInternal, 
+                                  così i pulsanti non sono attaccati ai bordi di #mobileControls. 
+                                  Puoi aggiustare questo valore (es. 5px o 15px) */
+            box-sizing: border-box;
+        }
+
+        #mobileControlsInternal .control-button {
+            flex-grow: 0;         // Non devono crescere per riempire spazio extra
+            flex-shrink: 1;       // Possono restringersi se necessario
+            flex-basis: auto;     // La larghezza sarà basata sul contenuto e padding del pulsante
+            margin: 0;            // Rimuoviamo i margini laterali individuali, 
+                                  // ci pensa space-between a distribuirli.
+            // Potresti voler rivedere il padding qui se necessario,
+            // ad esempio: padding: 10px 20px; (o quello che ritieni migliore)
+            // min-width: auto; // O imposta una nuova min-width se i pulsanti diventano troppo piccoli
         }
 
         #mobileStartButton { 

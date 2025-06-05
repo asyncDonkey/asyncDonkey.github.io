@@ -6780,13 +6780,40 @@ body.game-fullscreen-active main {
   body.donkey-runner-page:not(.game-fullscreen-active) #mobileControls {
     display: block !important;
     position: fixed !important;
-    bottom: 10px;
+    bottom: 15px;
     left: 50%;
     -webkit-transform: translateX(-50%);
             transform: translateX(-50%);
     width: 90%;
-    max-width: 400px;
+    max-width: 380px;
     z-index: 200;
+  }
+  body.donkey-runner-page:not(.game-fullscreen-active) #mobileControlsInternal {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify !important;
+        -ms-flex-pack: justify !important;
+            justify-content: space-between !important; /* MODIFICA CHIAVE: spinge i figli ai lati */
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    width: 100%;
+    padding: 0 10px; /* Aggiunge un po' di respiro ai lati di #mobileControlsInternal, 
+   così i pulsanti non sono attaccati ai bordi di #mobileControls. 
+   Puoi aggiustare questo valore (es. 5px o 15px) */
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+  }
+  body.donkey-runner-page:not(.game-fullscreen-active) #mobileControlsInternal .control-button {
+    -webkit-box-flex: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    -ms-flex-negative: 1;
+        flex-shrink: 1;
+    -ms-flex-preferred-size: auto;
+        flex-basis: auto;
+    margin: 0;
   }
   body.donkey-runner-page:not(.game-fullscreen-active) #mobileStartButton {
     position: fixed !important;
