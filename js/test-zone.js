@@ -13,6 +13,12 @@ import {
     setDoc, // MODIFICATO: Usiamo setDoc invece di addDoc per creare/aggiornare documenti con ID specifici
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { showToast } from './toastNotifications.js';
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked@5.0.1/lib/marked.esm.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+
+const functions = getFunctions();
+const updateTestStepStatusCallable = httpsCallable(functions, 'updateTestStepStatus'); // QUESTA È LA TUA NUOVA CLOUD FUNCTION
+
 
 // --- RIFERIMENTI DOM ---
 const loader = document.getElementById('test-zone-loader');
@@ -26,18 +32,40 @@ const dismissGuidelinesToastBtn = document.getElementById('dismiss-guidelines-to
 let currentUserForTestZone = null;
 
 /**
- * // MODIFICATO: La funzione ora accetta i risultati esistenti per renderizzare la card in modo condizionale.
  * @param {object} taskData I dati del task.
  * @param {string} taskId L'ID del task.
  * @param {object|null} existingResult Il risultato del test già sottomesso dall'utente per questo task.
  * @returns {string} La stringa HTML per la task card.
  */
 function createTaskCardHTML(taskData, taskId, existingResult) {
-    const stepsHTML = taskData.stepsToReproduce
-        ? `<div class="test-task-details-section"><strong>Passaggi:</strong><div class="formatted-text">${escapeHTML(taskData.stepsToReproduce).replace(/\n/g, '<br>')}</div></div>`
-        : '';
+    let stepsHTML = '';
+    // MODIFICA: Utilizza il nuovo campo 'steps' che è un array di oggetti
+    if (taskData.steps && Array.isArray(taskData.steps) && taskData.steps.length > 0) {
+        let stepsListHtml = '';
+        const completedSteps = existingResult ? (existingResult.completedSteps || []) : [];
+        const isCompletedOrFailed = existingResult && (existingResult.outcome === 'success' || existingResult.outcome === 'failure');
+
+        taskData.steps.forEach(step => {
+            const isChecked = completedSteps.includes(step.id) ? 'checked' : '';
+            // Disabilita la checkbox se il task è già stato completato o ha fallito
+            const isDisabled = isCompletedOrFailed ? 'disabled' : '';
+            stepsListHtml += `
+                <div class="test-step-item">
+                    <input type="checkbox" id="step-${taskId}-${step.id}" data-task-id="${taskId}" data-step-id="${step.id}" class="test-step-checkbox" ${isChecked} ${isDisabled}>
+                    <label for="step-${taskId}-${step.id}">${marked.parse(step.description)}</label>
+                </div>
+            `;
+        });
+        stepsHTML = `<div class="test-task-details-section"><strong>Passaggi:</strong><div class="formatted-text steps-list">${stepsListHtml}</div></div>`;
+    } else {
+        // Fallback per vecchi dati o dati malformati
+        stepsHTML = taskData.stepsToReproduce // Controlla il vecchio nome del campo come fallback
+            ? `<div class="test-task-details-section"><strong>Passaggi:</strong><div class="formatted-text">${marked.parse(taskData.stepsToReproduce)}</div></div>`
+            : '';
+    }
+
     const expectedHTML = taskData.expectedBehavior
-        ? `<div class="test-task-details-section"><strong>Risultato Atteso:</strong><div class="formatted-text">${escapeHTML(taskData.expectedBehavior).replace(/\n/g, '<br>')}</div></div>`
+        ? `<div class="test-task-details-section"><strong>Risultato Atteso:</strong><div class="formatted-text">${marked.parse(taskData.expectedBehavior)}</div></div>`
         : '';
     const areaHTML = taskData.area
         ? `<p class="test-task-area"><strong>Area:</strong> ${escapeHTML(taskData.area)}</p>`
@@ -96,6 +124,39 @@ function createTaskCardHTML(taskData, taskId, existingResult) {
 }
 
 /**
+ * Gestisce il click su una checkbox di uno step di test.
+ * @param {Event} event L'evento di click.
+ */
+async function handleTestStepCheckboxClick(event) {
+    const checkbox = event.target;
+    if (!checkbox.classList.contains('test-step-checkbox')) return;
+
+    const taskId = checkbox.dataset.taskId;
+    const stepId = checkbox.dataset.stepId;
+    const isCompleted = checkbox.checked;
+
+    if (!currentUserForTestZone) {
+        showToast("Devi essere loggato per marcare gli step.", 'info');
+        checkbox.checked = !isCompleted; // Ripristina lo stato
+        return;
+    }
+
+    try {
+        const response = await updateTestStepStatusCallable({ taskId, stepId, isCompleted });
+        if (response.data.success) {
+            // showToast('Stato step aggiornato!', 'success'); // Meno toast, per non essere troppo intrusivo
+        } else {
+            showToast('Errore: ' + response.data.message, 'error');
+            checkbox.checked = !isCompleted; // Ripristina lo stato
+        }
+    } catch (error) {
+        console.error('Errore chiamata Cloud Function per aggiornare step:', error);
+        showToast('Errore durante l_aggiornamento dello step. Riprova.', 'error');
+        checkbox.checked = !isCompleted; // Ripristina lo stato
+    }
+}
+
+/**
  * // MODIFICATO: Salva o aggiorna il risultato del test in Firestore usando setDoc.
  * @param {string} taskId L'ID del task.
  * @param {string} outcome L'esito ('success' o 'failure').
@@ -145,11 +206,21 @@ async function saveTestResult(taskId, outcome, comment) {
 function setupTaskFeedbackListeners() {
     if (!testTasksListContainer) return;
 
+    // DICHIARA LA VARIABILE QUI
     let currentOutcomeForTask = {};
 
-    testTasksListContainer.addEventListener('click', async (event) => {
+    // Rimuovi eventuali listener duplicati prima di aggiungerli (molto importante per loadTestTasks)
+    testTasksListContainer.removeEventListener('click', handleTestStepCheckboxClick);
+    testTasksListContainer.removeEventListener('click', handleTaskActionClicks); // Nuova funzione per i bottoni esistenti
+
+    testTasksListContainer.addEventListener('click', handleTestStepCheckboxClick);
+    testTasksListContainer.addEventListener('click', handleTaskActionClicks)
+
+    // Aggiungi una funzione separata per gestire i click sui bottoni di submit/edit/cancel
+    // Questo aiuta a mantenere la logica più organizzata.
+    function handleTaskActionClicks(event) {
         const target = event.target;
-        const button = target.closest('button');
+        const button = target.closest('button'); // Trova il bottone più vicino
 
         if (!button) return;
 
@@ -162,16 +233,19 @@ function setupTaskFeedbackListeners() {
 
         // Gestione pulsanti "Successo" / "Fallimento"
         if (button.classList.contains('outcome-button')) {
+            // Puoi anche aggiornare l'outcome solo quando l'utente invia il feedback
+            // Per ora, lo usiamo per mostrare il form
             currentOutcomeForTask[taskId] = button.dataset.outcome;
             if (feedbackFormContainer) {
                 feedbackFormContainer.style.display = 'block';
                 if (commentTextarea) commentTextarea.focus();
             }
         }
-        // NUOVO: Gestione pulsante "Modifica Esito"
+        // Gestione pulsante "Modifica Esito"
         else if (button.classList.contains('edit-feedback-button')) {
             if (taskActionsContainer) taskActionsContainer.style.display = 'none';
             if (feedbackFormContainer) feedbackFormContainer.style.display = 'block';
+            // Potresti voler ricaricare qui il commento esistente nel textarea se non lo è già
         }
         // Gestione pulsante "Invia Feedback" / "Aggiorna Feedback"
         else if (button.classList.contains('submit-feedback-button')) {
@@ -204,19 +278,19 @@ function setupTaskFeedbackListeners() {
                 showToast("Errore critico: impossibile determinare l'esito. Selezionalo di nuovo.", 'error');
                 return;
             }
-            await saveTestResult(taskId, outcome, comment);
+            saveTestResult(taskId, outcome, comment);
             delete currentOutcomeForTask[taskId];
         }
         // Gestione pulsante "Annulla"
         else if (button.classList.contains('cancel-feedback-button')) {
             // Semplicemente ricarichiamo per tornare allo stato salvato, è la via più semplice e robusta
-            await loadTestTasks();
+            loadTestTasks();
         }
         if (event.target.tagName.toLowerCase() === 'textarea') {
             event.target.style.height = 'auto';
             event.target.style.height = `${event.target.scrollHeight}px`;
         }
-    });
+    }
 }
 
 /**

@@ -849,3 +849,105 @@ exports.awardAppreciatedAuthorBadge = onDocumentUpdated('articles/{articleId}', 
         );
     }
 });
+
+// ==================================================================
+// --- NUOVA FUNZIONE PER GESTIRE LE SPUNTE DEI TEST STEPS ---
+// ==================================================================
+
+exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request) => {
+    const functionName = 'updateTestStepStatus';
+    // 1. Autenticazione: Assicurati che l'utente sia loggato
+    if (!request.auth || !request.auth.uid) {
+        logger.warn(`[CF:${functionName}] Chiamata non autenticata.`);
+        throw new HttpsError('unauthenticated', 'Devi essere autenticato per eseguire questa operazione.');
+    }
+    const userId = request.auth.uid;
+
+    // 2. Validazione Input: Verifica che i parametri essenziali siano presenti e validi
+    const { taskId, stepId, isCompleted } = request.data;
+    if (!taskId || !stepId || typeof isCompleted !== 'boolean') {
+        logger.warn(`[CF:${functionName}] Parametri mancanti o non validi: taskId=${taskId}, stepId=${stepId}, isCompleted=${isCompleted}`);
+        throw new HttpsError('invalid-argument', 'Parametri necessari mancanti o non validi (taskId, stepId, isCompleted).');
+    }
+
+    const userProfileRef = db.collection('userProfiles').doc(userId);
+    const testResultDocRef = userProfileRef.collection('testResults').doc(taskId);
+
+    try {
+        // Usa una transazione per assicurare l'integrità dei dati
+        await db.runTransaction(async (transaction) => {
+            // Log di debug per db e transaction (lasciali, sono utili)
+            logger.debug(`[CF:${functionName}] Inside transaction - typeof db: ${typeof db}, db.constructor.name: ${db.constructor.name}`);
+            logger.debug(`[CF:${functionName}] Inside transaction - typeof transaction: ${typeof transaction}, transaction.constructor.name: ${transaction.constructor.name}`);
+
+            const docSnap = await transaction.get(testResultDocRef);
+
+            // Log di debug per docSnap (lascialo, è fondamentale)
+            logger.debug(`[CF:${functionName}] Debug docSnap - Type: ${typeof docSnap}, Value: ${JSON.stringify(docSnap)}`);
+            
+            // --- MODIFICA CRUCIALE QUI ---
+            // Tentativo di accedere ai dati del documento, assumendo che docSnap sia
+            // un DocumentSnapshot valido, o che docSnap.data() si comporti come previsto
+            // in questo caso di bug (restituendo undefined o un errore gestibile).
+            let currentCompletedSteps = [];
+            let currentOutcome = null;
+            let documentExists = false; // NUOVO: Flag per tracciare se il documento esiste
+
+            // Controlla se docSnap è un oggetto valido e ha un metodo .data()
+            // Se docSnap è una DocumentReference, .data() potrebbe non esistere,
+            // il che causerà un nuovo errore. Se non esiste, significa che la transazione
+            // sta restituendo un oggetto completamente sbagliato.
+            if (docSnap && typeof docSnap.data === 'function') {
+                const data = docSnap.data(); // Tenta di accedere ai dati
+                if (data !== undefined && data !== null) { // Se i dati sono presenti, il documento esiste
+                    documentExists = true;
+                    currentCompletedSteps = data.completedSteps || [];
+                    currentOutcome = data.outcome || null;
+                }
+            } else {
+                // Se docSnap non è un oggetto o non ha .data(), è un problema grave
+                logger.error(`[CF:${functionName}] Unexpected object type from transaction.get: ${typeof docSnap}. Full object: ${JSON.stringify(docSnap)}`);
+                throw new HttpsError('internal', 'Errore critico: il database non ha restituito lo snapshot atteso.');
+            }
+            // --- FINE MODIFICA CRUCIALE ---
+
+            let updatedSteps;
+            if (isCompleted) {
+                updatedSteps = [...new Set([...currentCompletedSteps, stepId])];
+            } else {
+                updatedSteps = currentCompletedSteps.filter(id => id !== stepId);
+            }
+
+            const updatePayload = {
+                completedSteps: updatedSteps,
+                lastUpdated: FieldValue.serverTimestamp(),
+            };
+
+            // Adatta il controllo dell'esistenza al nuovo flag
+            if (!documentExists) { // Se il documento non esiste, crealo
+                if (!currentOutcome) {
+                    updatePayload.status = 'in_progress';
+                }
+                updatePayload.taskId = taskId;
+                updatePayload.testerId = userId;
+                updatePayload.createdAt = FieldValue.serverTimestamp();
+                transaction.set(testResultDocRef, updatePayload);
+            } else { // Se il documento esiste, aggiornalo
+                if (currentOutcome !== 'success' && currentOutcome !== 'failure') {
+                    updatePayload.status = 'in_progress';
+                }
+                transaction.update(testResultDocRef, updatePayload);
+            }
+        });
+
+        logger.info(`[CF:${functionName}] Stato step '${stepId}' per task '${taskId}' di utente '${userId}' aggiornato a 'isCompleted: ${isCompleted}'.`);
+        return { success: true, message: 'Stato dello step aggiornato con successo!' };
+
+    } catch (error) {
+        logger.error(`[CF:${functionName}] Errore durante l'aggiornamento dello step '${stepId}' per task '${taskId}' di utente '${userId}':`, error);
+        if (error instanceof HttpsError) {
+            throw error;
+        }
+        throw new HttpsError('internal', 'Si è verificato un errore interno durante l_aggiornamento dello step. Riprova.');
+    }
+});
