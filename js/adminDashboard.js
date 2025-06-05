@@ -1,4 +1,3 @@
-// js/adminDashboard.js
 import { db, auth, showConfirmationModal } from './main.js';
 import {
     collection,
@@ -14,6 +13,13 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
+
+// --- NUOVO IMPORT PER CHIAMARE LE CLOUD FUNCTIONS ---
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+
+// Inizializza Firebase Functions
+const functions = getFunctions();
+// --- FINE NUOVO IMPORT ---
 
 const adminAuthMessageDiv = document.getElementById('adminAuthMessage');
 const adminDashboardContentDiv = document.getElementById('adminDashboardContent');
@@ -55,6 +61,12 @@ const rejectionReasonTextarea = document.getElementById('rejectionReasonTextarea
 const cancelRejectReasonBtn = document.getElementById('cancelRejectReasonBtn');
 // submitRejectReasonBtn sarà gestito dall'event listener del form
 
+const nicknameRequestsListDiv = document.getElementById('nicknameRequestsList');
+
+// --- NUOVI RIFERIMENTI DOM PER MONITORAGGIO TESTER ---
+const testerMonitoringListContainer = document.getElementById('tester-monitoring-list-container');
+const testTasksSummaryContainer = document.getElementById('test-tasks-summary-container');
+
 let currentArticleIdToReject = null; // Variabile per tenere traccia dell'ID durante il processo di rifiuto
 
 function initializeOrUpdateEditMarkdownEditor(content = '') {
@@ -90,14 +102,12 @@ function initializeOrUpdateEditMarkdownEditor(content = '') {
                         enabled: false, // Disabilitato per la modale di modifica admin
                     },
                 });
-                // console.log('EasyMDE per modifica articolo inizializzato.');
             } catch (e) {
                 console.error('Errore inizializzazione EasyMDE per modifica:', e);
                 editArticleContentTextarea.value = content;
             }
         } else {
             easyMDEEditInstance.value(content);
-            // console.log('EasyMDE per modifica articolo: contenuto aggiornato.');
         }
     } else {
         console.error('Textarea per EasyMDE (editArticleContent) non trovato nella modale.');
@@ -109,7 +119,6 @@ function destroyEditMarkdownEditor() {
         try {
             easyMDEEditInstance.toTextArea();
             easyMDEEditInstance = null;
-            // console.log('EasyMDE per modifica rimosso.');
         } catch (e) {
             console.error('Errore rimozione EasyMDE per modifica:', e);
         }
@@ -121,7 +130,6 @@ function destroyEditMarkdownEditor() {
 
 async function loadPendingArticles() {
     if (!pendingArticlesListDiv) {
-        // console.warn('Elemento pendingArticlesListDiv non trovato.');
         return;
     }
     pendingArticlesListDiv.innerHTML = '<p>Caricamento articoli in attesa di revisione...</p>';
@@ -147,16 +155,16 @@ async function loadPendingArticles() {
                       .toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })
                 : 'N/A';
             itemDiv.innerHTML = `
-                <span class="article-info">
-                    <strong>${article.title || 'Titolo mancante'}</strong><br>
-                    <small>Autore: ${article.authorName || article.authorId} | Inviato: ${creationDate}</small>
-                </span>
-                <span class="actions">
-                    <button class="game-button view-edit-btn" data-id="${articleId}">Visualizza/Modifica</button>
-                    <button class="game-button approve-btn" data-id="${articleId}" style="background-color: var(--game-border-color); color: white;">Approva</button>
-                    <button class="game-button reject-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Respingi</button>
-                </span>
-            `;
+        <span class="article-info">
+          <strong>${article.title || 'Titolo mancante'}</strong><br>
+          <small>Autore: ${article.authorName || article.authorId} | Inviato: ${creationDate}</small>
+        </span>
+        <span class="actions">
+          <button class="game-button view-edit-btn" data-id="${articleId}">Visualizza/Modifica</button>
+          <button class="game-button approve-btn" data-id="${articleId}" style="background-color: var(--game-border-color); color: white;">Approva</button>
+          <button class="game-button reject-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Respingi</button>
+        </span>
+      `;
             pendingArticlesListDiv.appendChild(itemDiv);
         });
         addEventListenersToAdminArticleButtons();
@@ -176,8 +184,8 @@ function addEventListenersToAdminArticleButtons() {
         button.addEventListener('click', handleApproveArticleClick);
     });
     document.querySelectorAll('#pendingArticlesList .reject-btn').forEach((button) => {
-        button.removeEventListener('click', handleRejectArticleClick); // Modificato qui
-        button.addEventListener('click', handleRejectArticleClick); // Modificato qui
+        button.removeEventListener('click', handleRejectArticleClick);
+        button.addEventListener('click', handleRejectArticleClick);
     });
 }
 
@@ -191,7 +199,6 @@ async function handleApproveArticleClick(e) {
     await approveArticle(articleId);
 }
 
-// MODIFICATA: handleRejectArticleClick ora apre la modale
 async function handleRejectArticleClick(e) {
     const articleId = e.target.dataset.id;
     if (!articleId) {
@@ -199,7 +206,7 @@ async function handleRejectArticleClick(e) {
         return;
     }
 
-    let articleTitleForDisplay = `ID: ${articleId.substring(0, 6)}...`; // Fallback title
+    let articleTitleForDisplay = `ID: ${articleId.substring(0, 6)}...`;
     try {
         const articleRef = doc(db, 'articles', articleId);
         const docSnap = await getDoc(articleRef);
@@ -210,7 +217,6 @@ async function handleRejectArticleClick(e) {
         console.warn(`Impossibile recuperare il titolo per l'articolo ${articleId}:`, err);
     }
 
-    // Mostra la modale di conferma PRIMA di procedere
     const userConfirmedInitialRejection = await showConfirmationModal(
         'Conferma Iniziale Rifiuto',
         `Sei sicuro di voler avviare il processo di rifiuto per l'articolo ${articleTitleForDisplay}? Potrai inserire un motivo nel passo successivo.`
@@ -218,20 +224,19 @@ async function handleRejectArticleClick(e) {
 
     if (!userConfirmedInitialRejection) {
         showToast("Processo di rifiuto annullato dall'utente.", 'info');
-        return; // L'utente ha cliccato "No" o chiuso la modale di conferma
+        return;
     }
 
-    // L'utente ha confermato, procedi con l'apertura della modale per il motivo
-    currentArticleIdToReject = articleId; // Salva l'ID per usarlo nel submit del form del motivo
+    currentArticleIdToReject = articleId;
 
     if (rejectingArticleIdInput) {
-        rejectingArticleIdInput.value = articleId; // Popola l'input nascosto nel form del motivo
+        rejectingArticleIdInput.value = articleId;
     }
     if (rejectionReasonTextarea) {
-        rejectionReasonTextarea.value = ''; // Pulisci il textarea da usi precedenti
+        rejectionReasonTextarea.value = '';
     }
 
-    const modalReasonTitleEl = document.getElementById('rejectReasonModalTitle'); // ID dal tuo HTML
+    const modalReasonTitleEl = document.getElementById('rejectReasonModalTitle');
     if (modalReasonTitleEl) {
         modalReasonTitleEl.textContent = `Motivo Rifiuto per: ${articleTitleForDisplay}`;
     }
@@ -239,22 +244,346 @@ async function handleRejectArticleClick(e) {
     if (rejectReasonModal) {
         rejectReasonModal.style.display = 'block';
         if (rejectionReasonTextarea) {
-            rejectionReasonTextarea.focus(); // Metti il focus sul textarea
+            rejectionReasonTextarea.focus();
         }
     } else {
-        // Fallback nel caso estremamente raro la modale del motivo non sia trovata
-        // (dovrebbe essere sempre presente se l'HTML è corretto)
         showToast('Errore critico: la modale per inserire il motivo del rifiuto non è stata trovata.', 'error');
         console.error('La modale #rejectReasonModal non è stata trovata nel DOM!');
-        // Potresti voler fare un prompt qui come ULTIMISSIMA spiaggia, ma è meglio evitare.
-        // const reasonFallback = prompt(`Inserisci motivo per rifiutare ${articleTitleForDisplay}:`);
-        // if (reasonFallback !== null) { // Se l'utente non preme annulla sul prompt
-        //     await processArticleRejection(articleId, reasonFallback);
-        // }
     }
 }
 
-// NUOVA FUNZIONE: processArticleRejection
+// =================================================================================
+// ============== NUOVE FUNZIONI PER IL MONITORAGGIO DEI TESTER ====================
+// =================================================================================
+
+/**
+ * Crea l'HTML per la card di un singolo tester con le sue statistiche.
+ * @param {object} testerProfile - I dati del profilo del tester (es. { nickname, email }).
+ * @param {object} stats - Le statistiche aggregate (es. { total, success, failure, lastSubmissionDate }).
+ * @returns {string} La stringa HTML per la card del tester.
+ */
+function createTesterCardHTML(testerProfile, stats) {
+    const successRate = stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : 0;
+    const failureRate = stats.total > 0 ? ((stats.failure / stats.total) * 100).toFixed(1) : 0;
+    const lastSubmission = stats.lastSubmissionDate
+        ? stats.lastSubmissionDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })
+        : 'N/A';
+
+    return `
+        <div class="article-list-item tester-card">
+            <span class="article-info">
+                <strong>${testerProfile.nickname || 'Nickname non disponibile'}</strong><br>
+                <small>Email: ${testerProfile.email || 'N/A'} | Ultimo feedback: ${lastSubmission}</small>
+            </span>
+            <span class="actions tester-stats" style="text-align: right;">
+                <span title="Task Completati">Completati: <strong>${stats.total}</strong></span>
+                <span title="Successi" style="color: var(--success-color);">Successi: <strong>${stats.success} (${successRate}%)</strong></span>
+                <span title="Fallimenti" style="color: var(--error-color);">Fallimenti: <strong>${stats.failure} (${failureRate}%)</strong></span>
+            </span>
+        </div>
+    `;
+}
+
+/**
+ * Crea l'HTML per la riga di riepilogo di un singolo task.
+ * @param {object} taskInfo - I dati del task (es. { id, title }).
+ * @param {object} stats - Le statistiche aggregate per quel task (es. { total, success, failure }).
+ * @returns {string} La stringa HTML per la riga del task.
+ */
+function createTaskSummaryHTML(taskInfo, stats) {
+    const successRate = stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : 0;
+
+    return `
+        <div class="article-list-item task-summary-item">
+            <span class="article-info">
+                <strong>${taskInfo.title || 'Titolo non disponibile'}</strong><br>
+                <small>Task ID: ${taskInfo.id}</small>
+            </span>
+            <span class="actions task-stats" style="text-align: right;">
+                 <span>Feedback Totali: <strong>${stats.total}</strong></span>
+                 <span style="color: var(--success-color);">% Successo: <strong>${successRate}%</strong></span>
+            </span>
+        </div>
+    `;
+}
+
+/**
+ * Carica e aggrega i dati dai profili dei tester e i loro risultati di test.
+ */
+async function loadTesterMonitoringData() {
+    if (!testerMonitoringListContainer || !testTasksSummaryContainer) return;
+
+    try {
+        // 1. Recupera le definizioni dei task per avere i titoli a disposizione
+        const tasksDefSnapshot = await getDocs(collection(db, 'testTasksDefinition'));
+        const tasksDefinitions = new Map();
+        tasksDefSnapshot.forEach((doc) => {
+            tasksDefinitions.set(doc.id, doc.data());
+        });
+
+        // 2. Recupera tutti gli utenti che sono tester
+        const testersQuery = query(collection(db, 'userProfiles'), where('isTestUser', '==', true));
+        const testersSnapshot = await getDocs(testersQuery);
+
+        if (testersSnapshot.empty) {
+            testerMonitoringListContainer.innerHTML = '<p>Nessun utente tester trovato.</p>';
+            testTasksSummaryContainer.innerHTML = '<p>Nessun dato da visualizzare.</p>';
+            return;
+        }
+
+        const taskAggregates = new Map(); // Per aggregare i risultati per task
+        let testerPromises = []; // Array per contenere le promise di elaborazione di ogni tester
+
+        // 3. Itera su ogni tester per recuperare e aggregare i suoi risultati
+        testersSnapshot.forEach((testerDoc) => {
+            const testerProfile = testerDoc.data();
+            const testerId = testerDoc.id;
+
+            const promise = (async () => {
+                const resultsCollectionRef = collection(db, 'userProfiles', testerId, 'testResults');
+                const resultsSnapshot = await getDocs(resultsCollectionRef);
+
+                const stats = {
+                    total: resultsSnapshot.size,
+                    success: 0,
+                    failure: 0,
+                    lastSubmissionDate: null,
+                };
+
+                resultsSnapshot.forEach((resultDoc) => {
+                    const resultData = resultDoc.data();
+
+                    // Aggiorna statistiche del singolo tester
+                    if (resultData.outcome === 'success') stats.success++;
+                    if (resultData.outcome === 'failure') stats.failure++;
+
+                    const timestamp = resultData.timestamp?.toDate();
+                    if (timestamp && (!stats.lastSubmissionDate || timestamp > stats.lastSubmissionDate)) {
+                        stats.lastSubmissionDate = timestamp;
+                    }
+
+                    // Aggiorna statistiche globali per task
+                    const taskId = resultData.taskId;
+                    if (!taskAggregates.has(taskId)) {
+                        taskAggregates.set(taskId, { total: 0, success: 0, failure: 0 });
+                    }
+                    const currentTaskStats = taskAggregates.get(taskId);
+                    currentTaskStats.total++;
+                    if (resultData.outcome === 'success') currentTaskStats.success++;
+                    if (resultData.outcome === 'failure') currentTaskStats.failure++;
+                });
+
+                return { profile: testerProfile, stats: stats };
+            })();
+
+            testerPromises.push(promise);
+        });
+
+        // 4. Attendi che tutti i dati dei tester siano stati processati
+        const allTestersData = await Promise.all(testerPromises);
+
+        // 5. Renderizza l'HTML
+        // Panoramica per Tester
+        let testersHTML = '';
+        allTestersData
+            .sort((a, b) => b.stats.total - a.stats.total) // Ordina per numero di task completati
+            .forEach((data) => {
+                testersHTML += createTesterCardHTML(data.profile, data.stats);
+            });
+        testerMonitoringListContainer.innerHTML = testersHTML || '<p>Nessun risultato sottomesso dai tester.</p>';
+
+        // Panoramica per Task
+        let tasksSummaryHTML = '';
+        taskAggregates.forEach((stats, taskId) => {
+            const taskInfo = {
+                id: taskId,
+                title: tasksDefinitions.get(taskId)?.title || `Task ${taskId}`,
+            };
+            tasksSummaryHTML += createTaskSummaryHTML(taskInfo, stats);
+        });
+        testTasksSummaryContainer.innerHTML =
+            tasksSummaryHTML || '<p>Ancora nessun feedback ricevuto per i task di test.</p>';
+    } catch (error) {
+        console.error('Errore nel caricare i dati di monitoraggio dei tester:', error);
+        testerMonitoringListContainer.innerHTML =
+            '<p style="color: var(--error-color);">Errore nel caricamento dei dati dei tester.</p>';
+        testTasksSummaryContainer.innerHTML =
+            '<p style="color: var(--error-color);">Errore nel caricamento del riepilogo dei task.</p>';
+        showToast('Errore nel caricamento dei dati di monitoraggio.', 'error');
+    }
+}
+
+async function loadNicknameChangeRequests() {
+    if (!nicknameRequestsListDiv) {
+        console.warn('Elemento nicknameRequestsListDiv non trovato.');
+        return;
+    }
+    nicknameRequestsListDiv.innerHTML = '<p>Caricamento richieste cambio nickname...</p>';
+    try {
+        const requestsRef = collection(db, 'nicknameChangeRequests');
+        const q = query(requestsRef, where('status', '==', 'pending'), orderBy('requestedAt', 'asc'));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            nicknameRequestsListDiv.innerHTML = '<p>Nessuna richiesta di cambio nickname in sospeso.</p>';
+            return;
+        }
+
+        nicknameRequestsListDiv.innerHTML = '';
+        querySnapshot.forEach((docSnapshot) => {
+            const request = docSnapshot.data();
+            const requestId = docSnapshot.id;
+            const itemDiv = document.createElement('div');
+            itemDiv.classList.add('admin-list-item', 'nickname-request-item');
+
+            const requestedDate = request.requestedAt?.toDate
+                ? request.requestedAt.toDate().toLocaleDateString('it-IT', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                  })
+                : 'Data non disponibile';
+            const userIdentifier = request.userEmail || request.userId;
+
+            itemDiv.innerHTML = `
+        <span class="article-info" style="flex-basis: 65%;"> Utente: <strong>${userIdentifier}</strong> (ID: ${request.userId})<br>
+          <small>
+            Nickname Attuale: <em>${request.currentNickname || 'Non specificato'}</em><br>
+            Nuovo Nickname Richiesto: <strong>${request.requestedNickname}</strong><br>
+            Data Richiesta: ${requestedDate}
+          </small>
+        </span>
+        <span class="actions" style="flex-basis: 35%; text-align:right;">
+          <button class="game-button approve-nickname-btn" data-id="${requestId}" data-userid="${request.userId}" data-newnickname="${request.requestedNickname}" style="background-color: var(--game-border-color); color: white; margin-bottom: 5px;">Approva</button>
+          <button class="game-button reject-nickname-btn" data-id="${requestId}" data-userid="${request.userId}" data-currentnickname="${request.currentNickname}" data-requestednickname="${request.requestedNickname}" data-useremail="${userIdentifier}" style="background-color: #dc3545; color: white;">Rifiuta</button>
+        </span>
+      `;
+            nicknameRequestsListDiv.appendChild(itemDiv);
+        });
+
+        addEventListenersToNicknameRequestButtons();
+    } catch (error) {
+        console.error('Errore caricamento richieste cambio nickname:', error);
+        nicknameRequestsListDiv.innerHTML = '<p>Errore nel caricamento delle richieste. Controlla la console.</p>';
+        if (error.code === 'failed-precondition' && error.message.includes('index')) {
+            nicknameRequestsListDiv.innerHTML +=
+                '<p style="color:red;"><b>Nota:</b> Sembra mancare un indice Firestore per questa query. Controlla la console per il link per crearlo.</p>';
+        }
+    }
+}
+
+function addEventListenersToNicknameRequestButtons() {
+    document.querySelectorAll('#nicknameRequestsList .approve-nickname-btn').forEach((button) => {
+        button.removeEventListener('click', handleApproveNicknameClick);
+        button.addEventListener('click', handleApproveNicknameClick);
+    });
+    document.querySelectorAll('#nicknameRequestsList .reject-nickname-btn').forEach((button) => {
+        button.removeEventListener('click', handleRejectNicknameClick);
+        button.addEventListener('click', handleRejectNicknameClick);
+    });
+}
+
+async function handleApproveNicknameClick(e) {
+    const button = e.currentTarget;
+    const requestId = button.dataset.id;
+    const userId = button.dataset.userid;
+    const newNickname = button.dataset.newnickname;
+
+    if (!requestId || !userId || !newNickname) {
+        showToast('Dati mancanti per approvare la richiesta.', 'error');
+        return;
+    }
+
+    const confirmed = await showConfirmationModal(
+        'Conferma Approvazione Nickname',
+        `Sei sicuro di voler APPROVARE il nickname "${newNickname}" per l'utente (ID: ${userId})?`
+    );
+
+    if (!confirmed) {
+        showToast('Approvazione annullata.', 'info');
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Approvazione...';
+
+    try {
+        const approveNicknameFunction = httpsCallable(functions, 'approveNicknameChange');
+        const result = await approveNicknameFunction({ requestId, userId, newNickname });
+
+        if (result.data.success) {
+            // --- MODIFICA INIZIO ---
+            // Messaggio di feedback dettagliato per l'admin
+            const successMessage = `Richiesta approvata: L'utente (ID: ${userId}) ora ha il nickname "${newNickname}".`;
+            showToast(successMessage, 'success');
+            // --- MODIFICA FINE ---
+            loadNicknameChangeRequests();
+        } else {
+            throw new Error(result.data.message || "Errore sconosciuto durante l'approvazione.");
+        }
+    } catch (error) {
+        console.error('Errore durante la chiamata a approveNicknameChange:', error);
+        const errorMessage = error.message || 'Si è verificato un errore. Riprova più tardi.';
+        showToast(`Errore approvazione: ${errorMessage}`, 'error');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Approva';
+    }
+}
+
+async function handleRejectNicknameClick(e) {
+    const button = e.currentTarget;
+    const requestId = button.dataset.id;
+    const userId = button.dataset.userid;
+    const requestedNickname = button.dataset.requestednickname;
+
+    if (!requestId || !userId) {
+        showToast('Dati mancanti per rifiutare la richiesta.', 'error');
+        return;
+    }
+
+    const reason = prompt(
+        `Inserisci un motivo per RIFIUTARE la richiesta per "${requestedNickname}" (utente ID: ${userId}). Lascia vuoto se nessun motivo specifico.`
+    );
+
+    if (reason === null) {
+        showToast('Rifiuto annullato.', 'info');
+        return;
+    }
+
+    const finalReason = reason.trim();
+    button.disabled = true;
+    button.textContent = 'Rifiuto...';
+
+    try {
+        const rejectNicknameFunction = httpsCallable(functions, 'rejectNicknameChange');
+        const result = await rejectNicknameFunction({ requestId, userId, reason: finalReason });
+
+        if (result.data.success) {
+            // --- MODIFICA INIZIO ---
+            // Messaggio di feedback dettagliato per l'admin
+            let toastMessage = `Richiesta per "${requestedNickname}" (utente ID: ${userId}) è stata rifiutata.`;
+            if (finalReason) {
+                toastMessage += ` Motivo: "${finalReason}"`;
+            }
+            showToast(toastMessage, 'success');
+            // --- MODIFICA FINE ---
+            loadNicknameChangeRequests();
+        } else {
+            throw new Error(result.data.message || 'Errore sconosciuto durante il rifiuto.');
+        }
+    } catch (error) {
+        console.error('Errore durante la chiamata a rejectNicknameChange:', error);
+        const errorMessage = error.message || 'Si è verificato un errore. Riprova più tardi.';
+        showToast(`Errore rifiuto: ${errorMessage}`, 'error');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Rifiuta';
+    }
+}
+
 async function processArticleRejection(articleId, reason) {
     if (!articleId) {
         showToast('ID articolo mancante per il rifiuto.', 'error');
@@ -272,7 +601,7 @@ async function processArticleRejection(articleId, reason) {
         if (reason !== null && reason.trim() !== '') {
             updateData.rejectionReason = reason.trim();
         } else {
-            updateData.rejectionReason = null; // o FieldValue.delete() per rimuoverlo completamente
+            updateData.rejectionReason = null;
         }
 
         await updateDoc(articleRef, updateData);
@@ -282,7 +611,7 @@ async function processArticleRejection(articleId, reason) {
             'success'
         );
         if (rejectReasonModal) rejectReasonModal.style.display = 'none';
-        currentArticleIdToReject = null; // Resetta l'ID
+        currentArticleIdToReject = null;
 
         loadPendingArticles();
         loadRejectedArticlesForAdmin();
@@ -359,9 +688,6 @@ async function approveArticle(articleId) {
     }
 }
 
-// La funzione rejectArticle è stata modificata per diventare handleRejectArticleClick
-// e processArticleRejection per gestire la nuova modale.
-
 function formatAdminTimestamp(firebaseTimestamp) {
     if (firebaseTimestamp && typeof firebaseTimestamp.toDate === 'function') {
         return firebaseTimestamp.toDate().toLocaleDateString('it-IT', {
@@ -396,7 +722,6 @@ function populateSelectWithOptions(selectElement, optionsArray, defaultOptionTex
 
 async function loadUserIssuesForAdmin() {
     if (!adminUserIssuesListDiv) {
-        // console.warn('Elemento adminUserIssuesListDiv non trovato.');
         return;
     }
     adminUserIssuesListDiv.innerHTML = '<p>Caricamento segnalazioni e suggerimenti...</p>';
@@ -435,21 +760,21 @@ async function loadUserIssuesForAdmin() {
             else if (issue.type === 'gameIssue') readableType = 'Problema Gioco';
 
             itemDiv.innerHTML = `
-                <span class="article-info" style="flex-basis: 70%;">
-                    <strong>${issue.title || '<em>Senza titolo</em>'}</strong> <small>[Tipo: ${readableType}${gameIdText}]</small><br>
-                    <small>Autore: ${issue.submittedBy.userName || 'N/D'} | Inviato: ${submittedDate} | Upvotes: ${issue.upvotes || 0}</small><br>
-                    <small style="display:block; margin-top:5px; max-height: 60px; overflow-y:auto; background: var(--surface-bg-secondary); padding:5px; border-radius:3px;">Desc: <em>${issue.description.substring(0, 150)}${issue.description.length > 150 ? '...' : ''}</em></small>
-                </span>
-                <span class="actions" style="flex-basis: 30%; text-align:right;">
-                    <label for="statusSelect-${issueId}" style="font-size:0.8em; display:block; margin-bottom:3px;">Cambia Stato:</label>
-                    <select id="statusSelect-${issueId}" data-id="${issueId}" class="admin-issue-status-select" style="padding: 5px; font-size:0.9em; margin-bottom:5px;">
-                        ${ISSUE_STATUSES.map((s_val) => {
-                            let s_text = s_val.replace(/([A-Z])/g, ' $1').trim();
-                            s_text = s_text.charAt(0).toUpperCase() + s_text.slice(1);
-                            return `<option value="${s_val}" ${issue.status === s_val ? 'selected' : ''}>${s_text}</option>`;
-                        }).join('')}
-                    </select>
-                </span>`;
+        <span class="article-info" style="flex-basis: 70%;">
+          <strong>${issue.title || '<em>Senza titolo</em>'}</strong> <small>[Tipo: ${readableType}${gameIdText}]</small><br>
+          <small>Autore: ${issue.submittedBy.userName || 'N/D'} | Inviato: ${submittedDate} | Upvotes: ${issue.upvotes || 0}</small><br>
+          <small style="display:block; margin-top:5px; max-height: 60px; overflow-y:auto; background: var(--surface-bg-secondary); padding:5px; border-radius:3px;">Desc: <em>${issue.description.substring(0, 150)}${issue.description.length > 150 ? '...' : ''}</em></small>
+        </span>
+        <span class="actions" style="flex-basis: 30%; text-align:right;">
+          <label for="statusSelect-${issueId}" style="font-size:0.8em; display:block; margin-bottom:3px;">Cambia Stato:</label>
+          <select id="statusSelect-${issueId}" data-id="${issueId}" class="admin-issue-status-select" style="padding: 5px; font-size:0.9em; margin-bottom:5px;">
+            ${ISSUE_STATUSES.map((s_val) => {
+                let s_text = s_val.replace(/([A-Z])/g, ' $1').trim();
+                s_text = s_text.charAt(0).toUpperCase() + s_text.slice(1);
+                return `<option value="${s_val}" ${issue.status === s_val ? 'selected' : ''}>${s_text}</option>`;
+            }).join('')}
+          </select>
+        </span>`;
             adminUserIssuesListDiv.appendChild(itemDiv);
         });
         document.querySelectorAll('.admin-issue-status-select').forEach((select) => {
@@ -505,7 +830,6 @@ const adminApplyPublishedFiltersBtn = document.getElementById('adminApplyPublish
 
 async function loadPublishedArticlesForAdmin() {
     if (!adminPublishedArticlesListDiv) {
-        // console.warn('Elemento adminPublishedArticlesListDiv non trovato.');
         return;
     }
     adminPublishedArticlesListDiv.innerHTML = '<p>Caricamento articoli pubblicati...</p>';
@@ -542,16 +866,16 @@ async function loadPublishedArticlesForAdmin() {
             const updatedDate = formatAdminTimestamp(article.updatedAt);
 
             itemDiv.innerHTML = `
-                <span class="article-info" style="flex-basis: 60%;">
-                    <strong>${article.title || '<em>Senza titolo</em>'}</strong><br>
-                    <small>Autore: ${article.authorName || article.authorId} | Pubblicato: ${publishedDate} | Ult. Mod.: ${updatedDate}</small>
-                </span>
-                <span class="actions" style="flex-basis: 40%; text-align:right;">
-                    <a href="view-article.html?id=${articleId}" target="_blank" class="game-button" style="text-decoration:none; margin-right:5px;">Anteprima</a>
-                    <button class="game-button edit-published-btn" data-id="${articleId}" style="margin-right:5px;">Modifica</button>
-                    <button class="game-button unpublish-btn" data-id="${articleId}" style="background-color: #ffc107; color: #333; margin-right:5px;">Rimuovi Pubbl.</button>
-                    <button class="game-button delete-published-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina</button>
-                </span>`;
+        <span class="article-info" style="flex-basis: 60%;">
+          <strong>${article.title || '<em>Senza titolo</em>'}</strong><br>
+          <small>Autore: ${article.authorName || article.authorId} | Pubblicato: ${publishedDate} | Ult. Mod.: ${updatedDate}</small>
+        </span>
+        <span class="actions" style="flex-basis: 40%; text-align:right;">
+          <a href="view-article.html?id=${articleId}" target="_blank" class="game-button" style="text-decoration:none; margin-right:5px;">Anteprima</a>
+          <button class="game-button edit-published-btn" data-id="${articleId}" style="margin-right:5px;">Modifica</button>
+          <button class="game-button unpublish-btn" data-id="${articleId}" style="background-color: #ffc107; color: #333; margin-right:5px;">Rimuovi Pubbl.</button>
+          <button class="game-button delete-published-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina</button>
+        </span>`;
             adminPublishedArticlesListDiv.appendChild(itemDiv);
         });
         addEventListenersToPublishedArticleButtons();
@@ -631,7 +955,6 @@ function initializeGuidelineToggles() {
 
 async function loadDraftArticlesForAdmin() {
     if (!draftArticlesListDiv) {
-        // console.warn('Elemento draftArticlesListDiv non trovato.');
         return;
     }
     draftArticlesListDiv.innerHTML = '<p>Caricamento bozze articoli...</p>';
@@ -654,14 +977,14 @@ async function loadDraftArticlesForAdmin() {
             const authorInfo = article.authorName || article.authorId;
 
             itemDiv.innerHTML = `
-                <span class="article-info">
-                    <strong>${article.title || '<em>Bozza Senza Titolo</em>'}</strong><br>
-                    <small>Autore: ${authorInfo} | Ultima Modifica: ${updatedDate}</small>
-                </span>
-                <span class="actions">
-                    <button class="game-button view-edit-btn" data-id="${articleId}" style="margin-right:5px;">Visualizza/Modifica</button>
-                    <button class="game-button delete-draft-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina Bozza</button>
-                </span>`;
+        <span class="article-info">
+          <strong>${article.title || '<em>Bozza Senza Titolo</em>'}</strong><br>
+          <small>Autore: ${authorInfo} | Ultima Modifica: ${updatedDate}</small>
+        </span>
+        <span class="actions">
+          <button class="game-button view-edit-btn" data-id="${articleId}" style="margin-right:5px;">Visualizza/Modifica</button>
+          <button class="game-button delete-draft-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina Bozza</button>
+        </span>`;
             draftArticlesListDiv.appendChild(itemDiv);
         });
         addEventListenersToDraftArticleButtons();
@@ -673,7 +996,6 @@ async function loadDraftArticlesForAdmin() {
 
 async function loadRejectedArticlesForAdmin() {
     if (!rejectedArticlesListDiv) {
-        // console.warn('Elemento rejectedArticlesListDiv non trovato.');
         return;
     }
     rejectedArticlesListDiv.innerHTML = '<p>Caricamento articoli respinti...</p>';
@@ -699,15 +1021,15 @@ async function loadRejectedArticlesForAdmin() {
                 : '';
 
             itemDiv.innerHTML = `
-                <span class="article-info">
-                    <strong>${article.title || '<em>Articolo Senza Titolo</em>'}</strong><br>
-                    <small>Autore: ${authorInfo} | Respinto il: ${rejectedDate}</small>
-                    ${rejectionReasonText}
-                </span>
-                <span class="actions">
-                    <button class="game-button view-edit-btn" data-id="${articleId}" style="margin-right:5px;">Visualizza/Modifica</button>
-                    <button class="game-button delete-rejected-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina Definitivamente</button>
-                </span>`;
+        <span class="article-info">
+          <strong>${article.title || '<em>Articolo Senza Titolo</em>'}</strong><br>
+          <small>Autore: ${authorInfo} | Respinto il: ${rejectedDate}</small>
+          ${rejectionReasonText}
+        </span>
+        <span class="actions">
+          <button class="game-button view-edit-btn" data-id="${articleId}" style="margin-right:5px;">Visualizza/Modifica</button>
+          <button class="game-button delete-rejected-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina Definitivamente</button>
+        </span>`;
             rejectedArticlesListDiv.appendChild(itemDiv);
         });
         addEventListenersToRejectedArticleButtons();
@@ -790,6 +1112,8 @@ async function checkAdminPermissions() {
                 initializeGuidelineToggles();
                 loadDraftArticlesForAdmin();
                 loadRejectedArticlesForAdmin();
+                loadNicknameChangeRequests();
+                loadTesterMonitoringData();
             } else {
                 if (adminAuthMessageDiv)
                     adminAuthMessageDiv.innerHTML = '<p>Accesso negato. <a href="index.html">Home</a></p>';
@@ -899,21 +1223,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeRejectReasonModalBtn) {
         closeRejectReasonModalBtn.addEventListener('click', () => {
             if (rejectReasonModal) rejectReasonModal.style.display = 'none';
-            currentArticleIdToReject = null; // Resetta l'ID
+            currentArticleIdToReject = null;
         });
     }
 
     if (cancelRejectReasonBtn) {
         cancelRejectReasonBtn.addEventListener('click', () => {
             if (rejectReasonModal) rejectReasonModal.style.display = 'none';
-            currentArticleIdToReject = null; // Resetta l'ID
+            currentArticleIdToReject = null;
         });
     }
 
     if (rejectReasonForm) {
         rejectReasonForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const reason = rejectionReasonTextarea ? rejectionReasonTextarea.value.trim() : ''; // trim() per sicurezza
+            const reason = rejectionReasonTextarea ? rejectionReasonTextarea.value.trim() : '';
             const articleIdFromInput = rejectingArticleIdInput
                 ? rejectingArticleIdInput.value
                 : currentArticleIdToReject;
@@ -922,7 +1246,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Errore: ID articolo non trovato per confermare il rifiuto.', 'error');
                 return;
             }
-            // La conferma iniziale è già avvenuta, qui si conferma con il motivo
             await processArticleRejection(articleIdFromInput, reason);
         });
     }
@@ -930,16 +1253,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (rejectReasonModal) {
         rejectReasonModal.addEventListener('click', (event) => {
             if (event.target === rejectReasonModal) {
-                // Cliccato sullo sfondo della modale
                 rejectReasonModal.style.display = 'none';
-                currentArticleIdToReject = null; // Resetta l'ID
+                currentArticleIdToReject = null;
             }
         });
     }
-    // --- Fine Event Listener Nuova Modale ---
 });
 
 onAuthStateChanged(auth, (user) => {
-    // console.log('adminDashboard.js - Auth state changed. User:', user ? user.uid : 'null');
     checkAdminPermissions();
 });

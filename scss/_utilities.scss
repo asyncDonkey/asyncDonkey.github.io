@@ -1,0 +1,61 @@
+/* ===== Utilities (Scroll-to-top, Theme Toggle Button) ===== */
+#scrollToTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    border: none;
+    background-color: var(--button-bg-primary);
+    color: var(--button-text-primary);
+    cursor: pointer;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 45px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition:
+        background-color 0.3s,
+        opacity 0.3s,
+        visibility 0.3s;
+}
+#scrollToTopBtn:hover {
+    background-color: var(--button-hover-bg-primary);
+}
+#scrollToTopBtn.show {
+    display: block;
+}
+
+#themeToggleBtn {
+    /* Unico stile per il bottone tema, usato nell'header */
+    background: none;
+    border: 1px solid var(--border-color-primary);
+    color: var(--text-color-secondary);
+    padding: 6px 10px; /* Era 8px 12px, reso più piccolo come negli altri bottoni header */
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1.1em; /* Era 1.2em */
+    line-height: 1;
+    transition: all 0.3s; /* Era background-color 0.3s, color 0.3s, border-color 0.3s */
+    /* margin-left: 15px; Rimosso, il gap è gestito da .header-controls */
+}
+#themeToggleBtn:hover {
+    background-color: var(--surface-bg-secondary);
+    border-color: var(--link-color);
+    color: var(--link-color);
+}
+
+// Stile per l'icona "Autore" accanto al nickname
+.nickname-author-icon {
+    font-size: 1em; // Adatta la dimensione se necessario per allinearla bene al testo del nickname
+    vertical-align: text-bottom; // Prova anche 'middle' o 'baseline' per il miglior allineamento
+    margin-left: 4px; // Spazio tra il nickname e l'icona
+    color: var(--link-color); // Un colore distintivo, ma non troppo invadente. Puoi cambiarlo.
+    // Potresti voler aggiungere un leggero effetto hover se l'icona fosse cliccabile in futuro
+    // transition: color 0.2s ease-in-out;
+    // &:hover {
+    //   color: var(--link-hover-color);
+    // }
+}

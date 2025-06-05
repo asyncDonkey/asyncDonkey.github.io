@@ -1,5 +1,5 @@
 // js/donkeyRunner.js
-import { Animation } from './animation.js';
+import { SpriteAnimation } from './animation.js';
 import {
     PowerUpItem,
     POWERUP_TYPE,
@@ -19,6 +19,7 @@ import {
     addDoc,
     doc,
     getDoc,
+    documentId,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { showToast } from './toastNotifications.js';
 
@@ -33,6 +34,13 @@ const PALETTE = {
 
 const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
 const MAX_LEADERBOARD_ENTRIES_MINI = 5;
+const creditsIconBtn = document.getElementById('creditsIconBtn');
+const creditsModal = document.getElementById('creditsModal');
+const closeCreditsModalBtn = document.getElementById('closeCreditsModalBtn');
+const accordionHeaders = document.querySelectorAll('.accordion-header');
+const scrollToTutorialLink = document.getElementById('scrollToTutorialLink');
+const orientationPromptEl = document.getElementById('orientationPrompt');
+const dismissOrientationPromptBtn = document.getElementById('dismissOrientationPrompt');
 
 function formatScoreTimestamp(firebaseTimestamp) {
     if (!firebaseTimestamp || typeof firebaseTimestamp.toDate !== 'function') {
@@ -51,119 +59,245 @@ function formatScoreTimestamp(firebaseTimestamp) {
     }
 }
 
+// --- Logica per il Prompt di Orientamento Mobile ---
+let orientationPromptDismissedSession = false;
+
+function checkAndDisplayOrientationPrompt() {
+    if (!orientationPromptEl || !isTouchDevice || orientationPromptDismissedSession) {
+        if (orientationPromptEl && orientationPromptEl.style.display !== 'none') {
+            // Evita di settare display se già none
+            orientationPromptEl.style.display = 'none';
+        }
+        return;
+    }
+
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    // isFullscreenActive è una variabile globale che dovresti già avere,
+    // assicurati che sia aggiornata correttamente da handleFullscreenChange
+    // Se non è globale, passala come argomento o recuperala qui:
+    const isGameFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+
+    if (isPortrait && !isGameFullscreen) {
+        if (orientationPromptEl.style.display !== 'flex') {
+            // Evita di settare display se già flex
+            orientationPromptEl.style.display = 'flex';
+        }
+    } else {
+        if (orientationPromptEl.style.display !== 'none') {
+            // Evita di settare display se già none
+            orientationPromptEl.style.display = 'none';
+        }
+    }
+}
+// --- Fine Logica Prompt Orientamento ---
+
 async function loadDonkeyLeaderboard() {
+    const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
     if (!miniLeaderboardListEl) {
-        console.warn('Elemento miniLeaderboardList non trovato.');
+        console.warn('[donkeyRunner.js] Elemento miniLeaderboardList non trovato.');
         return;
     }
     if (!db) {
-        console.error('Istanza DB non disponibile per caricare la leaderboard di DonkeyRunner.');
+        console.error('[donkeyRunner.js] Istanza DB non disponibile per caricare la leaderboard di DonkeyRunner.');
         miniLeaderboardListEl.innerHTML = '<li>Errore connessione DB.</li>';
         return;
     }
     const leaderboardScoresCollection = collection(db, 'leaderboardScores');
-    miniLeaderboardListEl.innerHTML = '<li>Caricamento punteggi...</li>';
+    miniLeaderboardListEl.innerHTML =
+        '<li><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</li>';
+
     try {
         const q = query(
             leaderboardScoresCollection,
             where('gameId', '==', 'donkeyRunner'),
             orderBy('score', 'desc'),
-            limit(MAX_LEADERBOARD_ENTRIES_MINI)
+            limit(5) // MAX_LEADERBOARD_ENTRIES_MINI (era 5)
         );
         const querySnapshot = await getDocs(q);
         const fetchedLeaderboard = [];
         querySnapshot.forEach((doc) => {
             fetchedLeaderboard.push({ id: doc.id, ...doc.data() });
         });
-        displayDonkeyLeaderboard(fetchedLeaderboard);
+
+        const userIds = [...new Set(fetchedLeaderboard.map((entry) => entry.userId).filter((id) => id))];
+        const profilesMap = new Map();
+
+        if (userIds.length > 0) {
+            const MAX_IDS_PER_IN_QUERY = 30;
+            const profilePromises = [];
+            for (let i = 0; i < userIds.length; i += MAX_IDS_PER_IN_QUERY) {
+                const batchUserIds = userIds.slice(i, i + MAX_IDS_PER_IN_QUERY);
+                if (batchUserIds.length > 0) {
+                    const profilesQuery = query(
+                        collection(db, 'userPublicProfiles'),
+                        where(documentId(), 'in', batchUserIds)
+                    );
+                    profilePromises.push(getDocs(profilesQuery));
+                }
+            }
+            try {
+                const profileSnapshotsArray = await Promise.all(profilePromises);
+                profileSnapshotsArray.forEach((profileSnaps) => {
+                    profileSnaps.forEach((snap) => {
+                        if (snap.exists()) {
+                            profilesMap.set(snap.id, snap.data());
+                        }
+                    });
+                });
+            } catch (profileError) {
+                console.error(
+                    '[donkeyRunner.js] Errore caricamento profili pubblici per mini leaderboard:',
+                    profileError
+                );
+            }
+        }
+
+        displayDonkeyLeaderboard(fetchedLeaderboard, profilesMap);
     } catch (error) {
-        console.error('Errore caricamento DonkeyRunner leaderboard: ', error);
+        console.error('[donkeyRunner.js] Errore caricamento DonkeyRunner leaderboard: ', error);
         if (error.code === 'failed-precondition') {
             miniLeaderboardListEl.innerHTML =
                 '<li>Indice Firestore mancante. Controlla la console per il link per crearlo.</li>';
-            console.error(
-                "Potrebbe essere necessario un indice composito in Firestore. L'errore originale è:",
-                error.message
-            );
         } else {
             if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Errore caricamento punteggi.</li>';
         }
     }
 }
 
-function displayDonkeyLeaderboard(leaderboardData) {
-    if (!miniLeaderboardListEl) {
-        console.warn('Elemento miniLeaderboardList non trovato.');
-        return;
-    }
+function displayDonkeyLeaderboard(leaderboardData, profilesMap) {
+    const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
+    if (!miniLeaderboardListEl) return;
+
     miniLeaderboardListEl.innerHTML = '';
     if (!leaderboardData || leaderboardData.length === 0) {
         miniLeaderboardListEl.innerHTML = '<li>Nessun punteggio registrato.</li>';
         return;
     }
+
     leaderboardData.forEach((entry, index) => {
         const li = document.createElement('li');
+
         const rankSpan = document.createElement('span');
         rankSpan.className = 'player-rank';
         rankSpan.textContent = `${index + 1}.`;
         li.appendChild(rankSpan);
+
         const avatarImg = document.createElement('img');
-        avatarImg.className = 'player-avatar';
-        const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-${entry.id}`;
-        let altTextForBlockie = entry.userName || entry.initials || 'Anon';
-        avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 });
-        avatarImg.alt = `${altTextForBlockie}'s Avatar`;
-        avatarImg.style.backgroundColor = 'transparent';
+        avatarImg.className = 'player-avatar'; // Assicurati che sia stilizzata (es. 30x30px)
+
+        const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-dr-${entry.id}`;
+        // Priorità ai dati del profilo pubblico, poi a quelli del punteggio, infine fallback generici
+        let userDisplayName = 'Giocatore Anonimo'; // Fallback finale per nome
+        let altTextForAvatar = 'Avatar Giocatore';
+        let avatarSrcToUse = generateBlockieAvatar(seedForBlockie, 30, { size: 8 }); // Default blockie
+        let userNationalityCode = null; // Inizializza a null
+
+        // Prova prima con i dati del punteggio (per ospiti o se il profilo non viene trovato)
+        if (entry.userName) userDisplayName = entry.userName;
+        if (entry.initials && !entry.userName) userDisplayName = entry.initials; // Se userName non c'è ma initials sì
+        altTextForAvatar = userDisplayName;
+        if (entry.nationalityCode) userNationalityCode = entry.nationalityCode;
+
+        const userProfile = entry.userId ? profilesMap.get(entry.userId) : null;
+
+        if (userProfile) {
+            userDisplayName = userProfile.displayName || userDisplayName; // Sovrascrive con displayName da userPublicProfiles se esiste
+            altTextForAvatar = userDisplayName; // Aggiorna alt text con il nome più accurato
+            userNationalityCode = userProfile.nationalityCode || userNationalityCode; // Sovrascrive/imposta da userPublicProfiles
+
+            let chosenAvatarUrl = null;
+            if (userProfile.avatarUrls) {
+                // Assicurati che avatarUrls esista
+                if (userProfile.avatarUrls.small) {
+                    chosenAvatarUrl = userProfile.avatarUrls.small;
+                } else if (userProfile.avatarUrls.profile) {
+                    // Fallback a dimensione profile
+                    chosenAvatarUrl = userProfile.avatarUrls.profile;
+                } else if (userProfile.avatarUrls.thumbnail) {
+                    // Altro possibile fallback
+                    chosenAvatarUrl = userProfile.avatarUrls.thumbnail;
+                }
+            }
+            // Supporto per vecchio campo avatarUrl singolo, se avatarUrls non produce nulla
+            if (!chosenAvatarUrl && userProfile.avatarUrl) {
+                chosenAvatarUrl = userProfile.avatarUrl;
+            }
+
+            if (chosenAvatarUrl) {
+                avatarSrcToUse = chosenAvatarUrl;
+                // Usa profileUpdatedAt (canonica) per cache-busting
+                if (userProfile.profileUpdatedAt && userProfile.profileUpdatedAt.seconds) {
+                    avatarSrcToUse += `?ts=${userProfile.profileUpdatedAt.seconds}`;
+                } else if (userProfile.profileUpdatedAt && typeof userProfile.profileUpdatedAt === 'number') {
+                    // Se è un timestamp numerico
+                    avatarSrcToUse += `?ts=${userProfile.profileUpdatedAt}`;
+                }
+            }
+            // Se chosenAvatarUrl è null, avatarSrcToUse rimane il blockie generato in precedenza
+        }
+
+        avatarImg.src = avatarSrcToUse;
+        avatarImg.alt = `${altTextForAvatar}'s Avatar`;
+        avatarImg.style.backgroundColor = 'transparent'; // O gestisci via CSS
         avatarImg.onerror = () => {
-            avatarImg.style.backgroundColor = '#ddd';
-            avatarImg.alt = 'Error loading avatar';
-            avatarImg.src =
-                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23ddd'/%3E%3Ctext x='5' y='7.5' font-size='5' text-anchor='middle' fill='%23777'%3E?%3C/text%3E%3C/svg%3E";
+            avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 });
+            avatarImg.alt = `${altTextForAvatar}'s Fallback Avatar`;
+            avatarImg.style.backgroundColor = '#ddd'; // Sfondo per fallback
+            avatarImg.onerror = null;
         };
         li.appendChild(avatarImg);
+
         const playerInfoDiv = document.createElement('div');
         playerInfoDiv.className = 'player-info';
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'player-name'; // Mantieni la classe per lo stile
 
-        // Aggiungi la bandierina prima del nome/link
-        if (entry.nationalityCode && entry.nationalityCode !== 'OTHER' && entry.nationalityCode.length === 2) {
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'player-name';
+
+        if (
+            userNationalityCode &&
+            userNationalityCode !== 'OTHER' &&
+            typeof userNationalityCode === 'string' &&
+            userNationalityCode.length === 2
+        ) {
             const flagIconSpan = document.createElement('span');
-            flagIconSpan.classList.add('fi', `fi-${entry.nationalityCode.toLowerCase()}`);
-            // Applica eventuali stili per la bandierina se necessario qui o via CSS
-            flagIconSpan.style.marginRight = '8px'; // Esempio
+            flagIconSpan.classList.add('fi', `fi-${userNationalityCode.toLowerCase()}`);
+            flagIconSpan.title = userNationalityCode;
+            flagIconSpan.style.marginRight = '8px';
             flagIconSpan.style.verticalAlign = 'middle';
             nameSpan.appendChild(flagIconSpan);
         }
 
-        let displayName = entry.userName || entry.initials || 'Giocatore Anonimo';
-
         if (entry.userId) {
-            // Utente Registrato
             const profileLink = document.createElement('a');
             profileLink.href = `profile.html?userId=${entry.userId}`;
-            profileLink.textContent = displayName;
-            // Potresti aggiungere una classe CSS specifica per i link ai profili se vuoi stili diversi
-            // profileLink.classList.add('profile-link-leaderboard');
+            profileLink.textContent = userDisplayName;
             nameSpan.appendChild(profileLink);
         } else {
-            // Utente Ospite
-            if (!entry.initials)
-                displayName += ' (Ospite)'; // Se non ci sono initials, rendi più esplicito che è ospite
-            else if (entry.initials) displayName = entry.initials + ' (Ospite)'; // Se ci sono initials, usa quelle + (Ospite)
-            nameSpan.appendChild(document.createTextNode(displayName));
+            // Gestione nome ospite
+            let guestDisplayName = userDisplayName; // Che a questo punto è entry.initials o 'Giocatore Anonimo'
+            if (entry.initials && !guestDisplayName.toLowerCase().includes('(ospite)')) {
+                guestDisplayName = entry.initials + ' (Ospite)';
+            } else if (guestDisplayName === 'Giocatore Anonimo' && (!entry.initials || entry.initials.trim() === '')) {
+                // Se è "Giocatore Anonimo" e non ci sono initial esplicite, aggiungi (Ospite)
+                guestDisplayName += ' (Ospite)';
+            }
+            nameSpan.appendChild(document.createTextNode(guestDisplayName));
         }
 
         const dateSpan = document.createElement('span');
         dateSpan.className = 'player-date';
+        // La funzione formatScoreTimestamp è già definita nel tuo donkeyRunner.js
         dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
+
         playerInfoDiv.appendChild(nameSpan);
         playerInfoDiv.appendChild(dateSpan);
         li.appendChild(playerInfoDiv);
+
         const scoreSpan = document.createElement('span');
         scoreSpan.className = 'player-score';
-        scoreSpan.textContent = entry.score !== undefined ? entry.score : '-';
+        scoreSpan.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
         li.appendChild(scoreSpan);
+
         miniLeaderboardListEl.appendChild(li);
     });
 }
@@ -174,7 +308,10 @@ canvas.width = 800;
 canvas.height = 450;
 
 const groundHeight = 70;
-const gravity = 0.18;
+
+const PLAYER_JUMP_VELOCITY_INITIAL = -850; // px/s (valore da testare/affinare)
+const GRAVITY_ACCELERATION = 2000; // px/s^2 (valore da testare/affinare)
+
 let gameSpeed = 220;
 const lineWidth = 2;
 const GLOBAL_SPRITE_SCALE_FACTOR = 1.5;
@@ -326,9 +463,9 @@ const GLITCHZILLA_ACTUAL_FRAME_HEIGHT = 96;
 const GLITCHZILLA_NUM_FRAMES = 4;
 const GLITCHZILLA_TARGET_WIDTH = GLITCHZILLA_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
 const GLITCHZILLA_TARGET_HEIGHT = GLITCHZILLA_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
-const GLITCHZILLA_HEALTH = 30;
+const GLITCHZILLA_HEALTH = 40;
 const GLITCHZILLA_SCORE_VALUE = 500;
-const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 2500;
+const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 2000;
 
 const GLITCHZILLA_PROJECTILE_SPRITE_SRC = 'images/glitchzillaProjectile.png';
 const GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_WIDTH = 24;
@@ -428,6 +565,11 @@ let allImagesLoaded = false;
 let resourcesInitialized = false;
 let gameLoopRequestId = null;
 
+let bossFightImminent = false;
+let bossWarningTimer = 2.0;
+let postBossCooldownActive = false;
+let postBossCooldownTimer = 2.0;
+
 let obstacles = [];
 let obstacleSpawnTimer = 0;
 let nextObstacleSpawnTime = 0;
@@ -520,6 +662,7 @@ async function loadAllAssets() {
         console.error('DB non pronto, impossibile caricare la leaderboard per DonkeyRunner.');
         if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Classifica non disponibile (DB error).</li>';
     }
+    checkAndDisplayOrientationPrompt();
 
     if (gameLoopRequestId === null && currentGameState === GAME_STATE.MENU) {
         console.log('Avvio game loop da loadAllAssets.');
@@ -573,7 +716,7 @@ class Player {
         this.y = y;
         this.displayWidth = dw;
         this.displayHeight = dh;
-        this.velocityY = 0;
+        this.velocityY = 0; // Ora in pixel/secondo
         this.onGround = true;
         const pXRatio = 20 / 120;
         const pYRatio = 10 / 120;
@@ -586,7 +729,7 @@ class Player {
         this.sprite = images['player'];
         this.walkAnimation = null;
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0) {
-            this.walkAnimation = new Animation(
+            this.walkAnimation = new SpriteAnimation(
                 this.sprite,
                 PLAYER_ACTUAL_FRAME_WIDTH,
                 PLAYER_ACTUAL_FRAME_HEIGHT,
@@ -662,13 +805,15 @@ class Player {
         ctx.fillStyle = 'orange';
         ctx.fillRect(this.x, this.y, this.displayWidth, this.displayHeight);
     }
-    applyGravity() {
-        this.velocityY += gravity;
-        this.y += this.velocityY;
-    }
 
     update(dt) {
-        this.applyGravity();
+        // Applica l'accelerazione di gravità alla velocità verticale
+        this.velocityY += GRAVITY_ACCELERATION * dt;
+
+        // Aggiorna la posizione verticale basata sulla velocità verticale
+        this.y += this.velocityY * dt;
+
+        // Controllo collisione con il suolo
         if (this.y + this.displayHeight >= canvas.height - groundHeight) {
             this.y = canvas.height - groundHeight - this.displayHeight;
             this.velocityY = 0;
@@ -676,7 +821,10 @@ class Player {
         } else {
             this.onGround = false;
         }
-        if (this.walkAnimation && this.onGround) this.walkAnimation.update(dt);
+
+        if (this.walkAnimation && this.onGround) {
+            this.walkAnimation.update(dt);
+        }
 
         if (this.activePowerUp) {
             this.powerUpTimer -= dt;
@@ -688,7 +836,7 @@ class Player {
 
     jump() {
         if (this.onGround) {
-            this.velocityY = -9.5;
+            this.velocityY = PLAYER_JUMP_VELOCITY_INITIAL; // Usa la nuova costante
             this.onGround = false;
             AudioManager.playSound('jump');
         }
@@ -836,7 +984,7 @@ class Obstacle {
         this.health = OBSTACLE_HEALTH;
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0) {
             if (OBSTACLE_NUM_FRAMES > 1) {
-                this.animation = new Animation(
+                this.animation = new SpriteAnimation(
                     this.sprite,
                     OBSTACLE_ACTUAL_FRAME_WIDTH,
                     OBSTACLE_ACTUAL_FRAME_HEIGHT,
@@ -906,10 +1054,11 @@ class Projectile {
         this.damage = this.isUpgraded ? 2 : 1;
         this.sprite = this.isUpgraded ? images['playerUpgradedProjectile'] : images['playerProjectile'];
         this.animation = null;
+
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
-            this.animation = new Animation(
+            this.animation = new SpriteAnimation(
                 this.sprite,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH, // These constants are correct for initialization
                 PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
                 PLAYER_PROJECTILE_NUM_FRAMES,
                 PLAYER_PROJECTILE_ANIMATION_SPEED
@@ -924,17 +1073,20 @@ class Projectile {
         const spriteUsable = this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0;
         if (this.animation && spriteUsable) {
             const frame = this.animation.getFrame();
+            // --- FIX START ---
+            // Using frame dimensions from the animation object, not hardcoded constants
             ctx.drawImage(
                 this.sprite,
                 frame.sx,
                 frame.sy,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                this.animation.frameWidth, // Corrected
+                this.animation.frameHeight, // Corrected
                 this.x,
                 this.y,
                 this.width,
                 this.height
             );
+            // --- FIX END ---
         } else if (spriteUsable) {
             ctx.drawImage(
                 this.sprite,
@@ -992,7 +1144,7 @@ class BaseEnemy {
     loadAnimation(spriteNameKeyToLoad, frameW, frameH, numFramesAnim, animationKey) {
         const spriteInstance = images[spriteNameKeyToLoad];
         if (spriteInstance && spriteInstance.complete && spriteInstance.naturalWidth > 0 && numFramesAnim > 0) {
-            this.animations[animationKey] = new Animation(spriteInstance, frameW, frameH, numFramesAnim);
+            this.animations[animationKey] = new SpriteAnimation(spriteInstance, frameW, frameH, numFramesAnim);
             if (animationKey === 'base' && !this.animation) {
                 this.animation = this.animations.base;
                 this.sprite = spriteInstance;
@@ -1163,7 +1315,7 @@ class EnemyProjectile {
         this.sprite = images[spriteNameKey];
         this.animation = null;
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && numFrames > 1) {
-            this.animation = new Animation(this.sprite, frameW, frameH, numFrames, 0.1);
+            this.animation = new SpriteAnimation(this.sprite, frameW, frameH, numFrames, 0.1);
         }
     }
     update(dt) {
@@ -1443,16 +1595,28 @@ class Glitchzilla extends BaseEnemy {
         if (this.animation && this.animation.reset) this.animation.reset();
     }
     takeDamage(dmg = 1) {
-        super.takeDamage(dmg);
+        super.takeDamage(dmg); // This handles this.health -= dmg;
         console.log(`Glitchzilla took ${dmg} damage, HP: ${this.health}`);
         this.updateCurrentAnimation();
         AudioManager.playSound('glitchzillaHit');
+
         if (this.health <= 0) {
             console.log('Glitchzilla SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            AudioManager.playSound('glitchzillaDefeat');
+            AudioManager.playSound('glitchzillaDefeatedSuccessfully'); // Make sure 'audio/glitchzilla_victory.mp3' is loaded
+
             score += this.scoreValue;
-            activeMiniboss = null;
-            hasGlitchzillaSpawnedThisGame = true;
+            activeMiniboss = null; // Boss is no longer active
+
+            // Initiate post-boss cooldown state
+            postBossCooldownActive = true;
+            postBossCooldownTimer = 2.0; // Start the 2-second cooldown timer
+
+            bossFightImminent = false; // CRITICAL: Prevent immediate re-trigger of boss warning
+            // hasGlitchzillaSpawnedThisGame remains true, preventing a new boss sequence for this game.
+
+            console.log(
+                `Glitchzilla defeated. postBossCooldownActive: ${postBossCooldownActive}, bossFightImminent: ${bossFightImminent}`
+            );
         }
     }
     update(dt) {
@@ -2001,6 +2165,7 @@ function checkCollisions() {
         height: asyncDonkey.colliderHeight,
     };
 
+    // --- COLLISIONE CON OSTACOLI ---
     for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
         if (
@@ -2022,13 +2187,40 @@ function checkCollisions() {
                 continue;
             }
             gameOverTrigger = true;
+            AudioManager.playSound('playerHit');
+            processGameOver();
             return;
         }
     }
 
-    const allEnemyArrays = [
+    // --- NUOVA LOGICA: COLLISIONE CON NEMICI VOLANTI (POWER-UP CARRIER) ---
+    for (let i = flyingEnemies.length - 1; i >= 0; i--) {
+        const enemy = flyingEnemies[i];
+        if (
+            playerRect.x < enemy.x + enemy.width &&
+            playerRect.x + playerRect.width > enemy.x &&
+            playerRect.y < enemy.y + enemy.height &&
+            playerRect.y + playerRect.height > enemy.y
+        ) {
+            // È un power-up carrier, non una minaccia.
+            flyingEnemies.splice(i, 1);
+            score += enemy.scoreValue; // Assegna punti per la raccolta
+            AudioManager.playSound('powerUpCollect'); // Suono gratificante
+
+            // Garantisce il drop di un power-up
+            const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
+            const randomType = Object.values(POWERUP_TYPE)[randomTypeIndex];
+            powerUpItems.push(
+                new PowerUpItem(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, randomType, images)
+            );
+            // Non c'è gameOverTrigger qui, la collisione è benefica.
+        }
+    }
+
+    // --- LOGICA ESISTENTE: COLLISIONE CON TUTTI GLI ALTRI NEMICI DANNOSI ---
+    const allDamagingEnemyArrays = [
         enemies,
-        flyingEnemies,
+        // flyingEnemies è stato rimosso da questo array e gestito sopra
         fastEnemies,
         armoredEnemies,
         shootingEnemies,
@@ -2036,9 +2228,9 @@ function checkCollisions() {
         toughBasicEnemies,
         dangerousFlyingEnemies,
     ];
-    if (activeMiniboss) allEnemyArrays.push([activeMiniboss]);
+    if (activeMiniboss) allDamagingEnemyArrays.push([activeMiniboss]);
 
-    for (const enemyArray of allEnemyArrays) {
+    for (const enemyArray of allDamagingEnemyArrays) {
         for (let i = enemyArray.length - 1; i >= 0; i--) {
             const enemy = enemyArray[i];
             if (!enemy) continue;
@@ -2056,15 +2248,22 @@ function checkCollisions() {
                     continue;
                 }
                 gameOverTrigger = true;
+                AudioManager.playSound('playerHit');
+                processGameOver();
                 return;
             }
         }
     }
 
+    // --- GESTIONE PROIETTILI GIOCATORE ---
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const proj = projectiles[i];
+        if (!proj) continue; // Sanity check
         let projectileRemoved = false;
-        for (const enemyArray of allEnemyArrays) {
+
+        // Controlla collisione con nemici dannosi + flyingEnemies (possono essere sparati)
+        const allShootableEnemyArrays = [...allDamagingEnemyArrays, flyingEnemies];
+        for (const enemyArray of allShootableEnemyArrays) {
             if (projectileRemoved) break;
             for (let j = enemyArray.length - 1; j >= 0; j--) {
                 const enemy = enemyArray[j];
@@ -2079,11 +2278,18 @@ function checkCollisions() {
                     AudioManager.playSound('enemyHit');
                     projectiles.splice(i, 1);
                     projectileRemoved = true;
+
                     if (enemy.health <= 0) {
+                        // Nemico sconfitto
                         enemyArray.splice(j, 1);
                         score += enemy.scoreValue;
                         AudioManager.playSound('enemyExplode');
-                        if (enemy.isDangerousFlyer && Math.random() < POWER_UP_DROP_CHANCE_FROM_FLYING_ENEMY) {
+
+                        // Logica per il drop chance dai nemici volanti PERICOLOSI
+                        if (
+                            (enemy instanceof DangerousFlyingEnemy || enemy.isDangerousFlyer) && // Controllo più robusto
+                            Math.random() < POWER_UP_DROP_CHANCE_FROM_FLYING_ENEMY
+                        ) {
                             const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
                             const randomType = Object.values(POWERUP_TYPE)[randomTypeIndex];
                             powerUpItems.push(
@@ -2100,6 +2306,7 @@ function checkCollisions() {
                 }
             }
         }
+
         if (asyncDonkey && asyncDonkey.isBlockBreakerActive && !projectileRemoved) {
             for (let k = obstacles.length - 1; k >= 0; k--) {
                 const obs = obstacles[k];
@@ -2121,6 +2328,7 @@ function checkCollisions() {
         }
     }
 
+    // --- GESTIONE PROIETTILI NEMICI ---
     for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
         const eProj = enemyProjectiles[i];
         if (
@@ -2136,10 +2344,13 @@ function checkCollisions() {
                 continue;
             }
             gameOverTrigger = true;
+            AudioManager.playSound('playerHit');
+            processGameOver();
             return;
         }
     }
 
+    // --- GESTIONE RACCOLTA POWER-UP (già presente, solo per completezza) ---
     for (let i = powerUpItems.length - 1; i >= 0; i--) {
         const item = powerUpItems[i];
         if (
@@ -2153,10 +2364,7 @@ function checkCollisions() {
         }
     }
 
-    if (gameOverTrigger) {
-        AudioManager.playSound('playerHit');
-        processGameOver();
-    }
+    // Il check finale di gameOverTrigger è stato spostato direttamente dove avviene l'evento
 }
 
 function resetGame() {
@@ -2173,13 +2381,22 @@ function resetGame() {
     dangerousFlyingEnemies = [];
     enemyProjectiles = [];
     powerUpItems = [];
-    activeMiniboss = null;
-    hasGlitchzillaSpawnedThisGame = false;
+
+    activeMiniboss = null; // Ensure boss is cleared
+
+    // Reset all boss-related state flags
+    bossFightImminent = false;
+    hasGlitchzillaSpawnedThisGame = false; // Allows one Glitchzilla encounter per new game
+    postBossCooldownActive = false;
+    bossWarningTimer = 2.0; // Reset timers too
+    postBossCooldownTimer = 2.0;
+
     score = 0;
     finalScore = 0;
     gameOverTrigger = false;
     canShoot = true;
     shootTimer = 0;
+
     obstacleSpawnTimer = 0;
     nextObstacleSpawnTime = calculateNextObstacleSpawnTime();
     enemyBaseSpawnTimer = 0;
@@ -2200,9 +2417,17 @@ function resetGame() {
     nextDangerousFlyingEnemySpawnTime = calculateNextGenericEnemySpawnTime(7, 10);
     powerUpSpawnTimer = 0;
     nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
+
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-    if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none'; // Nascondi il pulsante start/rigioca mobile
-    console.log('Gioco resettato.');
+    if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none';
+    console.log(
+        'Gioco resettato. Flags boss: imminent=',
+        bossFightImminent,
+        'spawnedThisGame=',
+        hasGlitchzillaSpawnedThisGame,
+        'cooldownActive=',
+        postBossCooldownActive
+    );
 }
 
 function drawTerminalBackgroundEffects() {
@@ -2299,26 +2524,81 @@ function drawMenuScreen() {
 
 function updatePlaying(dt) {
     if (!asyncDonkey) return;
+
+    // --- State Management Order is Important ---
+
+    // 1. Handle Post-Boss Cooldown State
+    if (postBossCooldownActive) {
+        postBossCooldownTimer -= dt;
+        if (postBossCooldownTimer <= 0) {
+            postBossCooldownActive = false;
+            // Cooldown finished. bossFightImminent is already false.
+            // hasGlitchzillaSpawnedThisGame is true, so boss sequence won't re-trigger.
+            // Normal spawning will resume in the spawning logic block.
+            console.log('Post-boss cooldown terminato. Ripresa del gioco normale.');
+        }
+    }
+
+    // 2. Try to Initiate Boss Spawn Sequence (only if no boss stuff is happening)
+    if (
+        score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD && // Score condition
+        !activeMiniboss && // No boss currently active
+        !hasGlitchzillaSpawnedThisGame && // Boss hasn't been encountered this game yet
+        !bossFightImminent && // Boss sequence isn't already starting
+        !postBossCooldownActive // Not in post-boss cooldown
+    ) {
+        console.log('Soglia punteggio per Glitchzilla raggiunta. Avvio sequenza di spawn (2s warning).');
+        bossFightImminent = true; // Start the pre-boss warning phase
+        bossWarningTimer = 2.0; // Set the 2-second timer
+    }
+
+    // 3. Handle Boss Warning/Spawn Countdown
+    // This runs if imminent, no boss active, and not in post-boss cooldown
+    if (bossFightImminent && !activeMiniboss && !postBossCooldownActive) {
+        bossWarningTimer -= dt;
+        if (bossWarningTimer <= 0) {
+            console.log('Warning timer scaduto. Spawn di Glitchzilla!');
+            const bossY = canvas.height - groundHeight - GLITCHZILLA_TARGET_HEIGHT;
+            activeMiniboss = new Glitchzilla(canvas.width, bossY);
+            hasGlitchzillaSpawnedThisGame = true; // Mark that a boss has now been spawned in this game session
+            // bossFightImminent remains true while boss is active (to stop other spawns)
+            // It will be set to false in Glitchzilla's takeDamage upon defeat.
+        }
+    }
+
+    // --- Core Game Object Updates ---
     asyncDonkey.update(dt);
     updateShootCooldown(dt);
     updateProjectiles(dt);
     updateObstacles(dt);
-    updateAllEnemyTypes(dt);
+    updateAllEnemyTypes(dt); // This will update activeMiniboss if it exists
     updatePowerUpItems(dt);
-    spawnObstacleIfNeeded(dt);
-    spawnEnemyBaseIfNeeded(dt);
-    spawnFlyingEnemyIfNeeded(dt);
-    spawnFastEnemyIfNeeded(dt);
-    spawnArmoredEnemyIfNeeded(dt);
-    spawnShootingEnemyIfNeeded(dt);
-    spawnArmoredShootingEnemyIfNeeded(dt);
-    spawnToughBasicEnemyIfNeeded(dt);
-    spawnDangerousFlyingEnemyIfNeeded(dt);
-    spawnGlitchzillaIfNeeded();
-    spawnPowerUpAmbientIfNeeded(dt);
-    checkCollisions();
-    score += dt * 10;
-    gameSpeed += dt * 0.3;
+
+    // --- Regular Entity Spawning Logic ---
+    // Spawn if:
+    // 1. No boss is currently active AND
+    // 2. No boss fight is currently in its "imminent" warning phase AND
+    // 3. Not in the post-boss cooldown period.
+    if (!activeMiniboss && !bossFightImminent && !postBossCooldownActive) {
+        spawnObstacleIfNeeded(dt);
+        spawnEnemyBaseIfNeeded(dt);
+        spawnFlyingEnemyIfNeeded(dt);
+        spawnFastEnemyIfNeeded(dt);
+        spawnArmoredEnemyIfNeeded(dt);
+        spawnShootingEnemyIfNeeded(dt);
+        spawnArmoredShootingEnemyIfNeeded(dt);
+        spawnToughBasicEnemyIfNeeded(dt);
+        spawnDangerousFlyingEnemyIfNeeded(dt);
+        spawnPowerUpAmbientIfNeeded(dt);
+    }
+
+    // --- Final Updates for the Frame ---
+    checkCollisions(); // Handles collisions and can trigger processGameOver
+    if (currentGameState === GAME_STATE.PLAYING) {
+        // Only increment score if still playing
+        score += dt * 10;
+        gameSpeed += dt * 0.3;
+    }
 }
 
 function drawPlayingScreen() {
@@ -2483,6 +2763,7 @@ function handleFullscreenChange() {
         }
         if (fullscreenButton) fullscreenButton.textContent = 'FULLSCREEN';
     }
+    checkAndDisplayOrientationPrompt();
 }
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -2546,6 +2827,7 @@ if (restartGameBtnDonkey) {
         AudioManager.playMusic(false);
     });
 }
+
 // NUOVO Event Listener per il pulsante Start/Restart mobile
 if (mobileStartButton) {
     mobileStartButton.addEventListener('click', (e) => {
@@ -2563,6 +2845,100 @@ if (mobileStartButton) {
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none'; // Assicura che il form del punteggio sia nascosto
         }
     });
+}
+
+// --- Event Listeners per la Modale Crediti ---
+
+if (creditsIconBtn && creditsModal) {
+    creditsIconBtn.addEventListener('click', () => {
+        creditsModal.style.display = 'block';
+    });
+}
+
+if (closeCreditsModalBtn && creditsModal) {
+    closeCreditsModalBtn.addEventListener('click', () => {
+        creditsModal.style.display = 'none';
+    });
+}
+
+// Chiudi la modale se si clicca fuori dal contenuto
+window.addEventListener('click', (event) => {
+    if (event.target == creditsModal) {
+        creditsModal.style.display = 'none';
+    }
+});
+
+// --- Logica per le Schede Informative Espandibili (Accordion) ---
+if (accordionHeaders.length > 0) {
+    accordionHeaders.forEach((header) => {
+        header.addEventListener('click', function () {
+            const currentlyActiveHeader = document.querySelector('.accordion-header.active');
+            if (currentlyActiveHeader && currentlyActiveHeader !== this) {
+                currentlyActiveHeader.classList.remove('active');
+                const activePanel = currentlyActiveHeader.nextElementSibling;
+                activePanel.style.maxHeight = null;
+                activePanel.classList.remove('open');
+            }
+
+            this.classList.toggle('active');
+            const panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+                panel.classList.remove('open');
+            } else {
+                panel.classList.add('open');
+                panel.style.maxHeight = panel.scrollHeight + 'px';
+            }
+        });
+    });
+}
+
+if (scrollToTutorialLink && accordionHeaders.length > 0) {
+    scrollToTutorialLink.addEventListener('click', function (event) {
+        event.preventDefault(); // Previene il comportamento di default del link anchor
+
+        const accordionContainer = document.getElementById('gameInfoAccordion');
+        if (accordionContainer) {
+            accordionContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Apri la prima scheda (Tutorial) se non è già aperta
+        const firstHeader = accordionHeaders[0];
+        const firstPanel = firstHeader.nextElementSibling;
+
+        if (!firstHeader.classList.contains('active')) {
+            // Chiudi eventuali altre schede aperte
+            const currentlyActiveHeader = document.querySelector('.accordion-header.active');
+            if (currentlyActiveHeader) {
+                currentlyActiveHeader.classList.remove('active');
+                const activePanel = currentlyActiveHeader.nextElementSibling;
+                activePanel.style.maxHeight = null;
+                activePanel.classList.remove('open');
+            }
+
+            // Apri la scheda tutorial
+            firstHeader.classList.add('active');
+            firstPanel.classList.add('open');
+            firstPanel.style.maxHeight = firstPanel.scrollHeight + 'px';
+        }
+    });
+}
+
+// Event listener per il pulsante "Capito!" del prompt di orientamento
+if (dismissOrientationPromptBtn && orientationPromptEl) {
+    dismissOrientationPromptBtn.addEventListener('click', () => {
+        orientationPromptEl.style.display = 'none';
+        orientationPromptDismissedSession = true;
+        console.log('Prompt orientamento chiuso dall utente per questa sessione.');
+    });
+}
+
+// Listener per il cambio di orientamento per il prompt
+if (window.matchMedia('(orientation: portrait)').addEventListener) {
+    window.matchMedia('(orientation: portrait)').addEventListener('change', checkAndDisplayOrientationPrompt);
+} else if (window.addEventListener) {
+    // Fallback
+    window.addEventListener('orientationchange', checkAndDisplayOrientationPrompt);
 }
 
 window.addEventListener('keydown', (e) => {

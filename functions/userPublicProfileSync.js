@@ -1,4 +1,4 @@
-// functions/userPublicProfileSync.js
+// File: functions/userPublicProfileSync.js
 
 const { logger } = require('firebase-functions');
 const admin = require('firebase-admin');
@@ -15,12 +15,14 @@ function preparePublicProfileData(userProfileData) {
     const publicData = {
         nickname: userProfileData.nickname || null,
         bio: userProfileData.bio || null,
-        statusMessage: userProfileData.statusMessage || null, // <-- AGGIUNTO QUI
+        statusMessage: userProfileData.statusMessage || null,
         nationalityCode: userProfileData.nationalityCode || null,
         hasPublishedArticles: userProfileData.hasPublishedArticles || false,
         hasDefeatedGlitchzilla: userProfileData.hasDefeatedGlitchzilla || false,
+        earnedBadges: userProfileData.earnedBadges || [],
         kodComplimentsReceived: userProfileData.kodComplimentsReceived || 0,
         kodRank: userProfileData.kodRank || null,
+        activeNicknameAnimation: userProfileData.activeNicknameAnimation || null, // NUOVO
         profilePublicUpdatedAt: FieldValue.serverTimestamp(),
     };
 
@@ -55,13 +57,10 @@ async function handleCreateUserPublicProfile(event) {
     const publicProfileData = preparePublicProfileData(newUserProfileData);
 
     try {
-        await db.collection("userPublicProfiles").doc(userId).set(publicProfileData);
+        await db.collection('userPublicProfiles').doc(userId).set(publicProfileData);
         logger.info(`[CF:handleCreateUserPublicProfile] Public profile for ${userId} created successfully.`);
     } catch (error) {
-        logger.error(
-            `[CF:handleCreateUserPublicProfile] Error creating public profile for ${userId}:`,
-            error
-        );
+        logger.error(`[CF:handleCreateUserPublicProfile] Error creating public profile for ${userId}:`, error);
     }
     return null;
 }
@@ -72,46 +71,64 @@ async function handleCreateUserPublicProfile(event) {
  */
 async function handleUpdateUserPublicProfile(event) {
     const userId = event.params.userId;
+    logger.info(`[CF:handleUpdateUserPublicProfile] Triggered for userId: ${userId}`);
+
+    if (!event.data || !event.data.before || !event.data.after) {
+        logger.warn(
+            `[CF:handleUpdateUserPublicProfile] Event data, before, or after snapshot is missing for userId: ${userId}. Exiting.`
+        );
+        return null;
+    }
+
     const newData = event.data.after.data();
     const oldData = event.data.before.data();
 
     if (!newData || !oldData) {
-        logger.info(`[CF:handleUpdateUserPublicProfile] Snapshot data (before or after) for ${userId} is missing. Exiting.`);
+        logger.warn(
+            `[CF:handleUpdateUserPublicProfile] Snapshot data (newData or oldData) for ${userId} is missing after access. Exiting.`
+        );
         return null;
     }
 
     const relevantFields = [
-        "nickname", "bio", "statusMessage", // <-- AGGIUNTO QUI
-        "avatarUrls", "nationalityCode",
-        "hasPublishedArticles", "hasDefeatedGlitchzilla",
-        "kodComplimentsReceived", "kodRank",
+        'nickname',
+        'bio',
+        'statusMessage',
+        'avatarUrls',
+        'nationalityCode',
+        'hasPublishedArticles',
+        'hasDefeatedGlitchzilla',
+        'kodComplimentsReceived',
+        'kodRank',
+        'earnedBadges',
+        'activeNicknameAnimation', // NUOVO
     ];
 
     let changed = false;
     for (const field of relevantFields) {
         if (JSON.stringify(newData[field]) !== JSON.stringify(oldData[field])) {
             changed = true;
-            logger.info(`[CF:handleUpdateUserPublicProfile] Field '${field}' changed for user ${userId}.`);
+            logger.info(
+                `[CF:handleUpdateUserPublicProfile] Field '${field}' changed for user ${userId}. Triggering update.`
+            );
             break;
         }
     }
 
     if (!changed) {
-        logger.info(`[CF:handleUpdateUserPublicProfile] No relevant public fields changed for ${userId}. No update to public profile.`);
+        logger.info(
+            `[CF:handleUpdateUserPublicProfile] No relevant public fields changed for ${userId}. No update to public profile.`
+        );
         return null;
     }
 
-    logger.info(`[CF:handleUpdateUserPublicProfile] Updating public profile for user: ${userId}`);
     const publicProfileDataToUpdate = preparePublicProfileData(newData);
 
     try {
-        await db.collection("userPublicProfiles").doc(userId).set(publicProfileDataToUpdate, { merge: true });
+        await db.collection('userPublicProfiles').doc(userId).set(publicProfileDataToUpdate, { merge: true });
         logger.info(`[CF:handleUpdateUserPublicProfile] Public profile for ${userId} updated successfully.`);
     } catch (error) {
-        logger.error(
-            `[CF:handleUpdateUserPublicProfile] Error updating public profile for ${userId}:`,
-            error
-        );
+        logger.error(`[CF:handleUpdateUserPublicProfile] Error updating public profile for ${userId}:`, error);
     }
     return null;
 }
@@ -125,13 +142,10 @@ async function handleDeleteUserPublicProfile(event) {
     logger.info(`[CF:handleDeleteUserPublicProfile] Deleting public profile for user: ${userId}`);
 
     try {
-        await db.collection("userPublicProfiles").doc(userId).delete();
+        await db.collection('userPublicProfiles').doc(userId).delete();
         logger.info(`[CF:handleDeleteUserPublicProfile] Public profile for ${userId} deleted successfully.`);
     } catch (error) {
-        logger.error(
-            `[CF:handleDeleteUserPublicProfile] Error deleting public profile for ${userId}:`,
-            error
-        );
+        logger.error(`[CF:handleDeleteUserPublicProfile] Error deleting public profile for ${userId}:`, error);
     }
     return null;
 }

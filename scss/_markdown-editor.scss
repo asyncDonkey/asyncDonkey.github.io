@@ -1,0 +1,87 @@
+// File: scss/_markdown-editor.scss
+// Stili per personalizzare l'editor Markdown (EasyMDE) in submit-article.html
+
+.custom-markdown-editor-container {
+    margin-top: 0.5rem; // Spazio tra la label "Contenuto (Markdown):" e il nostro titolo
+    margin-bottom: 1rem; // Spazio sotto l'intera area dell'editor personalizzato
+}
+
+.custom-markdown-editor-title {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: var(--heading-color); // Lasciamo che il colore del titolo segua il tema generale
+    margin-bottom: 0.75rem;
+    display: flex; // Utilizziamo flexbox per allineare icona e testo
+    align-items: center; // Allinea verticalmente l'icona e il testo
+    gap: 0.4em; // Spazio tra l'icona e il testo "Editor Markdown"
+}
+
+.custom-editor-frame {
+    background-color: #000000; // Nero per la cornice
+    padding: 8px;
+    border-radius: 6px; // Basato su var(--border-radius-md)
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); // Ombra leggermente più scura dato lo sfondo nero
+
+    .EasyMDEContainer {
+        border: none !important;
+        border-radius: 0; // Resetta il border-radius di EasyMDE
+
+        .editor-toolbar {
+            background-color: #000000; // Nero per la Toolbar
+            border-top-left-radius: 3px; // Basato su var(--border-radius-sm)
+            border-top-right-radius: 3px;
+            padding: 6px 8px;
+
+            button,
+            a.fa {
+                color: #e0e0e0; // Grigio chiaro per icone
+                border: 1px solid transparent;
+                padding: 4px 6px;
+                border-radius: 3px; // Basato su var(--border-radius-sm)
+                transition:
+                    background-color 0.2s ease,
+                    color 0.2s ease;
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.15);
+                    color: #ffffff; // Bianco su hover
+                }
+            }
+
+            button.active,
+            a.fa.active {
+                background-color: rgba(255, 255, 255, 0.25);
+                color: #ffffff; // Bianco per stato attivo
+            }
+
+            i.separator {
+                border-color: rgba(255, 255, 255, 0.25); // Separatore bianco traslucido
+                border-right-width: 1px;
+                border-left-width: 0;
+                margin: 0 4px;
+            }
+        }
+
+        .CodeMirror-wrap,
+        .CodeMirror {
+            background-color: #ffffff; // Sfondo BIANCO per l'area di scrittura
+            color: #333333; // Testo scuro standard per l'editor (puoi usare var(--text-color-primary) se preferisci)
+            // Angoli non arrotondati qui, perché la status bar sotto sarà nera e si fonderà
+        }
+
+        .cm-s-easymde {
+            // Tema di default di CodeMirror per EasyMDE
+            border: none !important;
+        }
+
+        .editor-statusbar {
+            background-color: #000000; // Nero per la Status Bar
+            color: #b0b0b0; // Testo grigio chiaro per la status bar
+            font-size: 0.85em;
+            padding: 5px 10px;
+            border-bottom-left-radius: 3px; // Basato su var(--border-radius-sm)
+            border-bottom-right-radius: 3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15); // Separatore sottile bianco traslucido sopra la status bar
+        }
+    }
+}

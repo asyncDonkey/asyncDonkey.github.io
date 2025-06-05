@@ -3,9 +3,16 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Il Mio Profilo - asyncDonkey.io</title>
+        <title>Profilo Utente - asyncDonkey.io</title>
         <link rel="stylesheet" href="styles.css" />
         <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+            integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -17,37 +24,38 @@
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
         <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
+
+        <link rel="icon" type="image/png" href="/images/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+        <link rel="shortcut icon" href="/images/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
+        <link rel="manifest" href="/images/site.webmanifest" />
     </head>
     <body>
         <header>
-            <div class="header-content">
-                <a href="index.html" style="text-decoration: none">
-                    <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
+            <div class="header-top-row">
+                <a href="index.html">
+                    <h1 title="Vai alla Homepage di asynced.org">asynced.org</h1>
                 </a>
-
                 <nav class="desktop-nav">
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px">
                         <li>
-                            <a href="index.html" class="auth-button nav-link-icon-only" title="Home">
-                                <span class="material-symbols-rounded">home</span>
-                                <span class="visually-hidden">Home</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                href="donkeyRunner.html"
-                                class="auth-button nav-link-icon-text"
-                                title="Gioca a codeDash!"
+                            <a href="index.html" class="auth-button nav-link-icon-only" title="Home"
+                                ><span class="material-symbols-rounded">home</span
+                                ><span class="visually-hidden">Home</span></a
                             >
-                                <span class="material-symbols-rounded">stadia_controller</span>
-                                <span class="nav-text">codeDash!</span>
-                            </a>
                         </li>
                         <li>
-                            <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica">
-                                <span class="material-symbols-rounded">leaderboard</span>
-                                <span class="nav-text">Leaderboard</span>
-                            </a>
+                            <a href="donkeyRunner.html" class="auth-button nav-link-icon-text" title="Gioca a codeDash!"
+                                ><span class="material-symbols-rounded">stadia_controller</span
+                                ><span class="nav-text">codeDash!</span></a
+                            >
+                        </li>
+                        <li>
+                            <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica"
+                                ><span class="material-symbols-rounded">leaderboard</span
+                                ><span class="nav-text">Leaderboard</span></a
+                            >
                         </li>
                         <li class="nav-dropdown-container">
                             <button
@@ -56,67 +64,103 @@
                                 aria-expanded="false"
                                 aria-controls="communityDropdownMenu"
                             >
-                                <span class="material-symbols-rounded">groups</span>
-                                <span class="nav-text">Community</span>
-                                <span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
+                                <span class="material-symbols-rounded">groups</span
+                                ><span class="nav-text">Community</span
+                                ><span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
                             </button>
                             <ul class="dropdown-menu" id="communityDropdownMenu">
                                 <li>
-                                    <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item">
-                                        <span class="material-symbols-rounded">edit_note</span>
-                                        <span class="nav-text">Contribuisci</span>
-                                    </a>
+                                    <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item"
+                                        ><span class="material-symbols-rounded">edit_note</span
+                                        ><span class="nav-text">Contribuisci</span></a
+                                    >
                                 </li>
                                 <li id="navWriteArticleDropdown" style="display: none">
-                                    <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item">
-                                        <span class="material-symbols-rounded">article</span>
-                                        <span class="nav-text">Scrivi Articolo</span>
-                                    </a>
+                                    <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item"
+                                        ><span class="material-symbols-rounded">article</span
+                                        ><span class="nav-text">Scrivi Articolo</span></a
+                                    >
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </nav>
+                <button
+                    class="navbar-toggler"
+                    id="navbarToggler"
+                    aria-label="Toggle Navigazione"
+                    aria-expanded="false"
+                    aria-controls="mobileNavMenu"
+                >
+                    <span class="material-symbols-rounded">menu</span>
+                </button>
+            </div>
 
-                <div class="header-controls" style="display: flex; align-items: center; gap: 10px">
-                    <div id="authContainer">
-                        <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login">
-                            <span class="material-symbols-rounded">login</span>
-                            <span class="visually-hidden">Login</span>
+            <div class="header-controls">
+                <div id="authContainer">
+                    <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login"
+                        ><span class="material-symbols-rounded">login</span
+                        ><span class="visually-hidden">Login</span></a
+                    >
+                    <a href="register.html" id="showSignupBtn" class="auth-button nav-link-icon-only" title="Registrati"
+                        ><span class="material-symbols-rounded">person_add</span
+                        ><span class="visually-hidden">Registrati</span></a
+                    >
+                </div>
+                <div id="userProfileContainer" style="display: none; align-items: center; gap: 8px">
+                    <div
+                        id="notificationBellContainer"
+                        style="position: relative; display: none; margin-right: 15px; align-self: center"
+                    >
+                        <a href="#" id="notificationBellLink" title="Notifiche">
+                            <i
+                                class="material-symbols-rounded"
+                                id="notificationIcon"
+                                style="font-size: 28px; color: var(--text-color-navbar); vertical-align: middle"
+                                >notifications</i
+                            >
                         </a>
-                        <a
-                            href="register.html"
-                            id="showSignupBtn"
-                            class="auth-button nav-link-icon-only"
-                            title="Registrati"
-                        >
-                            <span class="material-symbols-rounded">person_add</span>
-                            <span class="visually-hidden">Registrati</span>
-                        </a>
+                        <span id="notificationCounter" class="notification-badge" style="display: none">0</span>
+                        <div id="notification-panel" class="notification-panel" style="display: none">
+                            <div class="notification-panel-header">
+                                <h2 style="margin: 0; font-size: 1.1em; font-weight: 600">Notifiche</h2>
+                                <button
+                                    id="mark-all-as-read-btn"
+                                    class="button-link-sm"
+                                    title="Segna tutte come lette"
+                                    style="display: none"
+                                >
+                                    Segna tutte come lette
+                                </button>
+                            </div>
+                            <ul id="notification-list" class="notification-list">
+                                <li
+                                    id="no-notifications-placeholder"
+                                    class="notification-item-empty"
+                                    style="display: none"
+                                >
+                                    <p style="margin: 0">Nessuna nuova notifica.</p>
+                                </li>
+                            </ul>
+                            <div class="notification-panel-footer">
+                                <a href="/all-notifications.html" id="view-all-notifications-link" style="display: none"
+                                    >Vedi tutte le notifiche</a
+                                >
+                            </div>
+                        </div>
                     </div>
-                    <div id="userProfileContainer" style="display: none; align-items: center">
-                        <img
-                            id="headerUserAvatar"
-                            src=""
-                            alt="User Avatar"
-                            style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; display: none"
-                        />
-                        <span id="userDisplayName" style="margin-right: 8px; display: none"></span>
-                        <a
-                            href="profile.html"
-                            id="profileNavIconLink"
-                            class="auth-button nav-link-icon-only"
-                            title="Profilo"
-                            style="text-decoration: none"
-                        >
-                            <span class="material-symbols-rounded">account_circle</span>
-                            <span class="visually-hidden">Profilo</span>
-                        </a>
-                        <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
-                            <span class="material-symbols-rounded">logout</span>
-                            <span class="visually-hidden">Logout</span>
-                        </button>
-                    </div>
+                    <img id="headerUserAvatar" alt="User Avatar" />
+                    <span id="userDisplayName"></span>
+                    <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
+                        <span class="material-symbols-rounded">logout</span><span class="visually-hidden">Logout</span>
+                    </button>
+                </div>
+
+                <div class="header-action-buttons">
+                    <a href="index.html" class="auth-button nav-link-icon-only" title="Torna alla Home">
+                        <span class="material-symbols-rounded">home</span>
+                        <span class="visually-hidden">Home</span>
+                    </a>
                     <button
                         id="themeToggleBtn"
                         aria-label="Toggle Tema Chiaro/Scuro"
@@ -125,173 +169,186 @@
                     >
                         <span class="material-symbols-rounded">light_mode</span>
                     </button>
-                    <button
-                        class="navbar-toggler"
-                        id="navbarToggler"
-                        aria-label="Toggle Navigazione"
-                        aria-expanded="false"
-                        aria-controls="mobileNavMenu"
-                    >
-                        <span class="material-symbols-rounded">menu</span>
-                    </button>
                 </div>
             </div>
+
             <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true"></nav>
         </header>
 
         <main>
             <section id="profile">
-                <h2>Dettagli Profilo</h2>
-                <div id="profileContent" style="display: none">
-                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px">
-                        <img
-                            id="profileAvatar"
-                            src=""
-                            alt="User Avatar"
-                            width="80"
-                            height="80"
-                            style="
-                                border-radius: 4px;
-                                image-rendering: pixelated;
-                                background-color: #eee;
-                                border: 1px solid var(--border-color-secondary);
-                            "
-                        />
-                        <div
-                            id="avatarUploadSection"
-                            style="
-                                margin-top: 20px;
-                                padding-top: 20px;
-                                border-top: 1px dashed var(--border-color-secondary);
-                                display: none;
-                            "
-                        >
-                            <h3 style="margin-bottom: 10px">Cambia il Tuo Avatar</h3>
-                            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px">
-                                <div
-                                    style="
-                                        width: 160px;
-                                        height: 160px;
-                                        border: 2px dashed var(--border-color-secondary);
-                                        border-radius: 50%;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        overflow: hidden;
-                                        margin-bottom: 10px;
-                                        background-color: var(--surface-bg-secondary);
-                                    "
-                                >
-                                    <img
-                                        id="avatarPreview"
-                                        src="#"
-                                        alt="Anteprima nuovo avatar"
-                                        style="
-                                            max-width: 100%;
-                                            max-height: 100%;
-                                            display: none;
-                                            border-radius: 50%;
-                                            object-fit: cover;
-                                        "
-                                    />
-                                    <span
-                                        id="avatarPreviewPlaceholder"
-                                        class="material-symbols-rounded"
-                                        style="font-size: 4em; color: var(--text-color-muted)"
-                                        >add_a_photo</span
-                                    >
-                                </div>
+                <h2 id="profileSectionTitle">Caricamento Profilo...</h2>
+                <div id="guestProfileViewMessage" class="info-section" style="display: none; margin-bottom: 20px">
+                    <p>
+                        Stai visualizzando un profilo pubblico come ospite.
+                        <a href="#" id="guestProfileLoginLink" class="underline-link">Accedi</a> o
+                        <a href="register.html" class="underline-link">registrati</a> per un'esperienza completa e per
+                        interagire con la community!
+                    </p>
+                </div>
+                <div id="profileLoadingMessage">
+                    <p>Caricamento profilo...</p>
+                </div>
+                <div id="profileLoginMessage" style="display: none">
+                    <p>Devi essere loggato per visualizzare il tuo profilo.</p>
+                    <p><a href="index.html">Torna alla Homepage per Accedere</a></p>
+                    <p>Non hai un account? <a href="register.html">Registrati qui</a>.</p>
+                </div>
 
+                <div
+                    id="badgesSection"
+                    style="
+                        display: none;
+                        margin-bottom: 30px;
+                        padding-bottom: 20px;
+                        border-bottom: 1px dashed var(--border-color-secondary);
+                    "
+                >
+                    <div class="section-header-interactive">
+                        <h3>Riconoscimenti Ottenuti</h3>
+                        <button id="badgesInfoBtn" class="icon-button" title="Come ottenere i riconoscimenti?">
+                            <span class="material-symbols-rounded">help_outline</span>
+                        </button>
+                    </div>
+                    <div
+                        id="badgesDisplayContainer"
+                        style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px"
+                    >
+                        <p id="noBadgesMessage" style="color: var(--text-color-muted); display: none">
+                            Nessun riconoscimento ancora ottenuto.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="profileContent" style="display: none">
+                    <div
+                        class="profile-main-details-container"
+                        style="display: flex; align-items: flex-start; flex-wrap: wrap; gap: 20px; margin-bottom: 30px"
+                    >
+                        <div class="profile-avatar-column">
+                            <img
+                                id="profileAvatar"
+                                src=""
+                                alt="User Avatar"
+                                width="120"
+                                height="120"
+                                style="
+                                    border-radius: 8px;
+                                    image-rendering: pixelated;
+                                    background-color: #eee;
+                                    border: 2px solid var(--border-color-secondary);
+                                    object-fit: cover;
+                                "
+                            />
+                            <div id="avatarUploadSection" style="margin-top: 15px; text-align: center; display: none">
+                                <button type="button" id="selectAvatarFileBtn" class="game-button small">
+                                    Cambia Avatar
+                                </button>
                                 <input
                                     type="file"
                                     id="avatarUploadInput"
                                     accept="image/png, image/jpeg, image/webp"
                                     style="display: none"
                                 />
-
-                                <button type="button" id="selectAvatarFileBtn" class="game-button">
-                                    Scegli Immagine
-                                </button>
-
-                                <div
-                                    id="avatarUploadProgressContainer"
-                                    style="
-                                        width: 80%;
-                                        max-width: 300px;
-                                        background-color: var(--surface-bg-secondary);
-                                        border-radius: 4px;
-                                        display: none;
-                                        margin-top: 5px;
-                                    "
-                                >
-                                    <div
-                                        id="avatarUploadProgressBar"
-                                        style="
-                                            width: 0%;
-                                            height: 10px;
-                                            background-color: var(--link-color);
-                                            border-radius: 4px;
-                                            text-align: center;
-                                            line-height: 10px;
-                                            font-size: 0.7em;
-                                            color: white;
-                                        "
-                                    >
-                                        <span id="avatarUploadProgressText">0%</span>
-                                    </div>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    id="confirmAvatarUploadBtn"
-                                    class="game-button"
-                                    style="display: none; background-color: var(--bs-success); margin-top: 5px"
-                                >
-                                    Conferma e Carica Avatar
-                                </button>
-
-                                <div
-                                    id="avatarUploadStatus"
-                                    style="font-size: 0.9em; margin-top: 10px; text-align: center"
-                                ></div>
-                                <p style="font-size: 0.8em; color: var(--text-color-muted); text-align: center">
-                                    Max 5MB. Formati: JPG, PNG, WebP.
-                                </p>
                             </div>
                         </div>
+
                         <div id="profileDetailsDisplay" style="flex-grow: 1">
-                            <p style="margin-bottom: 8px; font-size: 1.05em">
+                            <h3>Dettagli Utente</h3>
+                            <p style="margin-bottom: 8px; font-size: 1.05em" id="profileEmailRow">
                                 <strong>Email:</strong> <span id="profileEmail">Caricamento...</span>
                             </p>
-                            <p style="margin-bottom: 8px; font-size: 1.05em">
-                                <strong>Nickname:</strong> <span id="currentNickname">Caricamento...</span>
-                            </p>
+                            <div
+                                id="nicknameDisplayContainer"
+                                class="nickname-container"
+                                style="margin-bottom: 8px; font-size: 1.05em; align-items: center; display: flex"
+                            >
+                                <strong>Nickname:</strong>
+                                <span id="currentNickname" style="margin-left: 5px">Caricamento...</span>
+                                <button
+                                    type="button"
+                                    id="requestNicknameChangeBtn"
+                                    class="icon-button"
+                                    title="Richiedi cambio nickname"
+                                    style="margin-left: 8px"
+                                >
+                                    <span class="material-symbols-rounded">edit_square</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    id="customizeNicknameBtn"
+                                    class="icon-button"
+                                    title="Personalizza stile nickname"
+                                    style="margin-left: 8px"
+                                >
+                                    <span class="material-symbols-rounded">palette</span>
+                                </button>
+                                <a
+                                    href="test-zone.html"
+                                    id="testZoneLink"
+                                    class="icon-button"
+                                    title="Accedi all'Area Tester"
+                                    style="margin-left: 8px; display: none"
+                                >
+                                    <span class="material-symbols-rounded">science</span>
+                                </a>
+                            </div>
                             <p style="margin-bottom: 8px; font-size: 1.05em">
                                 <strong>Nazionalità:</strong> <span id="profileNationality">Caricamento...</span>
                             </p>
+                            <p style="margin-bottom: 8px; font-size: 1.05em">
+                                <strong>Membro dal:</strong> <span id="registrationDate"></span>
+                            </p>
                         </div>
                     </div>
 
-                    <div id="statusMessageSection" style="display: none">
-                        <h3 style="margin-bottom: 10px">Stato d'Animo:</h3>
-                        <div id="statusMessageDisplay">Caricamento stato...</div>
-                        <form id="updateStatusForm" style="margin-top: 10px">
-                            <input
-                                type="text"
-                                id="statusMessageInput"
-                                name="statusMessageInput"
-                                placeholder="Come ti senti oggi?"
-                                maxlength="150"
-                            />
-                            <button type="submit" id="updateStatusBtn" class="game-button" style="padding: 10px 15px">
-                                Aggiorna
-                            </button>
+                    <div id="bioSection" class="profile-input-box" style="display: none">
+                        <h3>Mini-Bio</h3>
+                        <div id="bioDisplay">
+                            <p style="color: var(--text-color-muted)">Nessuna bio impostata.</p>
+                        </div>
+                        <form id="updateBioForm" style="display: none; margin-top: 10px">
+                            <div>
+                                <label for="bioInput">Modifica la tua bio (max 300 caratteri):</label>
+                                <textarea
+                                    id="bioInput"
+                                    name="bioInput"
+                                    class="input-field"
+                                    rows="4"
+                                    maxlength="300"
+                                ></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <div id="bioUpdateMessage" class="update-message"></div>
+                                <p id="bioCharCount"><span id="bioCurrentChars">0</span>/300</p>
+                                <button type="submit" id="updateBioBtn" class="game-button">Salva Bio</button>
+                            </div>
                         </form>
-                        <div id="statusUpdateMessage"></div>
                     </div>
 
-                    <div id="externalLinksSection" style="display: none">
-                        <h3 style="margin-bottom: 10px">Link Esterni (Max 5):</h3>
+                    <div id="statusMessageSection" class="profile-input-box" style="display: none">
+                        <h3>Stato d'Animo</h3>
+                        <div id="statusMessageDisplay">Caricamento stato...</div>
+                        <form id="updateStatusForm" style="margin-top: 10px">
+                            <div class="input-action-container">
+                                <input
+                                    type="text"
+                                    id="statusMessageInput"
+                                    name="statusMessageInput"
+                                    class="input-field"
+                                    placeholder="Come ti senti oggi?"
+                                    maxlength="150"
+                                />
+                                <button type="submit" id="updateStatusBtn" class="game-button">Aggiorna</button>
+                            </div>
+                            <div class="form-actions">
+                                <div id="statusUpdateMessage" class="update-message"></div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="externalLinksSection" class="profile-input-box" style="display: none">
+                        <h3>Link Esterni (Max 5)</h3>
                         <ul id="externalLinksList" class="external-links-list">
                             <li
                                 id="noExternalLinksMessage"
@@ -300,12 +357,10 @@
                                 <p style="color: var(--text-color-muted)">Nessun link esterno aggiunto.</p>
                             </li>
                         </ul>
-
                         <div id="manageExternalLinksUI" style="margin-top: 15px">
                             <button type="button" id="toggleAddLinkFormBtn" class="game-button">
                                 Aggiungi Nuovo Link
                             </button>
-
                             <div id="externalLinkFormContainer" style="display: none; margin-top: 15px">
                                 <h4 id="externalLinkFormTitle">Aggiungi Nuovo Link</h4>
                                 <form id="externalLinkForm">
@@ -354,183 +409,67 @@
                             </div>
                         </div>
                     </div>
-                    <div
-                        id="bioSection"
-                        style="
-                            margin-top: 20px;
-                            padding-top: 20px;
-                            border-top: 1px dashed var(--border-color-secondary);
-                            display: none;
-                        "
-                    >
-                        <h3 style="margin-bottom: 10px">Mini-Bio:</h3>
-                        <div
-                            id="bioDisplay"
-                            style="
-                                white-space: pre-wrap;
-                                word-wrap: break-word;
-                                padding: 10px;
-                                background-color: var(--surface-bg-secondary);
-                                border-radius: 4px;
-                                min-height: 3em;
-                                margin-bottom: 10px;
-                            "
-                        >
-                            <p style="color: var(--text-color-muted)">Nessuna bio impostata.</p>
-                        </div>
-                        <form id="updateBioForm" style="display: none">
-                            <div>
-                                <label for="bioInput">Modifica la tua bio (max 300 caratteri):</label>
-                                <textarea
-                                    id="bioInput"
-                                    name="bioInput"
-                                    rows="4"
-                                    maxlength="300"
-                                    style="width: 100%; margin-top: 5px"
-                                ></textarea>
-                                <p
-                                    id="bioCharCount"
-                                    style="
-                                        font-size: 0.8em;
-                                        text-align: right;
-                                        margin-top: 2px;
-                                        color: var(--text-color-muted);
-                                    "
-                                >
-                                    <span id="bioCurrentChars">0</span>/300
-                                </p>
-                            </div>
-                            <button
-                                type="submit"
-                                id="updateBioBtn"
-                                class="game-button"
-                                style="padding: 10px 15px; margin-top: 5px"
-                            >
-                                Salva Bio
-                            </button>
-                        </form>
-                        <div id="bioUpdateMessage" style="font-size: 0.9em; margin-top: 5px"></div>
-                    </div>
-                    <div
-                        id="emailVerificationBanner"
-                        class="info-section"
-                        style="display: none; margin-top: 20px; border-left-color: orange"
-                    >
-                        <p>
-                            La tua email non è ancora stata verificata. Controlla la tua casella di posta (e la cartella
-                            spam) per il link di verifica.
-                        </p>
-                        <p>
-                            Non hai ricevuto l'email?
-                            <button
-                                id="resendVerificationEmailBtn"
-                                class="game-button"
-                                style="padding: 6px 10px; font-size: 0.9em"
-                            >
-                                Invia di nuovo email di verifica
-                            </button>
-                        </p>
-                        <div id="resendEmailMessage" style="font-size: 0.9em; margin-top: 8px"></div>
-                    </div>
                 </div>
-                <div id="profileLoadingMessage">
-                    <p>Caricamento profilo...</p>
-                </div>
-                <div id="profileLoginMessage" style="display: none">
-                    <p>Devi essere loggato per visualizzare il tuo profilo.</p>
-                    <p><a href="index.html">Torna alla Homepage per Accedere</a></p>
-                    <p>Non hai un account? <a href="register.html">Registrati qui</a>.</p>
-                </div>
-            </section>
-            <div
-                id="badgesSection"
-                style="
-                    margin-top: 20px;
-                    padding-top: 20px;
-                    border-top: 1px dashed var(--border-color-secondary);
-                    display: none;
-                "
-            >
-                <h3 style="margin-bottom: 10px">Riconoscimenti Ottenuti:</h3>
-                <div id="badgesDisplayContainer" style="display: flex; flex-wrap: wrap; gap: 15px">
-                    <p id="noBadgesMessage" style="color: var(--text-color-muted); display: none">
-                        Nessun riconoscimento ancora ottenuto.
+                <div
+                    id="emailVerificationBanner"
+                    class="info-section"
+                    style="display: none; margin-top: 20px; border-left-color: orange"
+                >
+                    <p>
+                        La tua email non è ancora stata verificata. Controlla la tua casella di posta (e la cartella
+                        spam) per il link di verifica.
                     </p>
+                    <p>
+                        Non hai ricevuto l'email?
+                        <button
+                            id="resendVerificationEmailBtn"
+                            class="game-button"
+                            style="padding: 6px 10px; font-size: 0.9em"
+                        >
+                            Invia di nuovo email di verifica
+                        </button>
+                    </p>
+                    <div id="resendEmailMessage" style="font-size: 0.9em; margin-top: 8px"></div>
                 </div>
-            </div>
-            <section id="myArticlesSection" style="margin-top: 40px; display: none">
-                <h2>I Miei Articoli</h2>
-                <div class="my-articles-subsection">
-                    <h3
-                        style="
-                            color: var(--heading-color);
-                            border-bottom: 1px solid var(--border-color-secondary);
-                            padding-bottom: 8px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        Bozze
-                    </h3>
-                    <div id="myDraftArticlesListContainer">
-                        <p id="myDraftsLoadingMessage">Caricamento bozze...</p>
-                        <div id="myDraftArticlesList" class="my-articles-grid-container"></div>
-                    </div>
-                </div>
-                <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3
-                        style="
-                            color: var(--heading-color);
-                            border-bottom: 1px solid var(--border-color-secondary);
-                            padding-bottom: 8px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        In Revisione
-                    </h3>
-                    <div id="myPendingArticlesListContainer">
-                        <p id="myPendingLoadingMessage">Caricamento articoli in revisione...</p>
-                        <div id="myPendingArticlesList" class="my-articles-grid-container"></div>
-                    </div>
-                </div>
-                <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3
-                        style="
-                            color: var(--heading-color);
-                            border-bottom: 1px solid var(--border-color-secondary);
-                            padding-bottom: 8px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        Pubblicati
-                    </h3>
-                    <div id="myPublishedArticlesListContainer">
-                        <p id="myPublishedLoadingMessage">Caricamento articoli pubblicati...</p>
-                        <div id="myPublishedArticlesList" class="my-articles-grid-container"></div>
-                    </div>
-                </div>
-                <div class="my-articles-subsection" style="margin-top: 30px">
-                    <h3
-                        style="
-                            color: var(--heading-color);
-                            border-bottom: 1px solid var(--border-color-secondary);
-                            padding-bottom: 8px;
-                            margin-bottom: 15px;
-                        "
-                    >
-                        Respinti
-                    </h3>
-                    <div id="myRejectedArticlesListContainer">
-                        <p id="myRejectedLoadingMessage">Caricamento articoli respinti...</p>
-                        <div id="myRejectedArticlesList" class="my-articles-grid-container"></div>
-                    </div>
-                </div>
-            </section>
 
+                <section id="myArticlesSection" style="margin-top: 40px; display: none">
+                    <h3>I Miei Articoli</h3>
+                    <div class="my-articles-subsection">
+                        <h4 class="my-articles-subsection-title">Bozze</h4>
+                        <div id="myDraftArticlesListContainer">
+                            <p id="myDraftsLoadingMessage">Caricamento bozze...</p>
+                            <div id="myDraftArticlesList" class="my-articles-grid-container"></div>
+                        </div>
+                    </div>
+                    <div class="my-articles-subsection" style="margin-top: 30px">
+                        <h4 class="my-articles-subsection-title">In Revisione</h4>
+                        <div id="myPendingArticlesListContainer">
+                            <p id="myPendingLoadingMessage">Caricamento articoli in revisione...</p>
+                            <div id="myPendingArticlesList" class="my-articles-grid-container"></div>
+                        </div>
+                    </div>
+                    <div class="my-articles-subsection" style="margin-top: 30px">
+                        <h4 class="my-articles-subsection-title">Pubblicati</h4>
+                        <div id="myPublishedArticlesListContainer">
+                            <p id="myPublishedLoadingMessage">Caricamento articoli pubblicati...</p>
+                            <div id="myPublishedArticlesList" class="my-articles-grid-container"></div>
+                        </div>
+                    </div>
+                    <div class="my-articles-subsection" style="margin-top: 30px">
+                        <h4 class="my-articles-subsection-title">Respinti</h4>
+                        <div id="myRejectedArticlesListContainer">
+                            <p id="myRejectedLoadingMessage">Caricamento articoli respinti...</p>
+                            <div id="myRejectedArticlesList" class="my-articles-grid-container"></div>
+                        </div>
+                    </div>
+                </section>
+            </section>
             <div style="text-align: center; margin-top: 30px">
                 <a href="index.html" style="color: var(--link-color); text-decoration: underline"
                     >&larr; Torna alla Homepage</a
                 >
             </div>
+
             <div id="badgeDetailModal" class="modal" style="display: none">
                 <div class="modal-content badge-detail-modal-content" style="max-width: 450px">
                     <span class="close-modal-btn" id="closeBadgeDetailModalBtn">&times;</span>
@@ -548,6 +487,7 @@
                     ></p>
                 </div>
             </div>
+
             <div id="confirmationModal" class="modal" style="display: none">
                 <div class="modal-content" style="max-width: 400px">
                     <h3 id="confirmationModalTitle">Conferma Azione</h3>
@@ -561,6 +501,155 @@
                         >
                             No
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="avatarConfirmationModal" class="modal" style="display: none">
+                <div class="modal-content" style="max-width: 450px; text-align: center">
+                    <h3 style="margin-top: 0; margin-bottom: 20px">Conferma Nuovo Avatar</h3>
+                    <div
+                        style="
+                            width: 180px;
+                            height: 180px;
+                            border: 2px dashed var(--border-color-secondary);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            overflow: hidden;
+                            margin: 0 auto 20px auto;
+                            background-color: var(--surface-bg-secondary);
+                        "
+                    >
+                        <img
+                            id="modalAvatarPreview"
+                            src="#"
+                            alt="Anteprima nuovo avatar"
+                            style="width: 100%; height: 100%; object-fit: cover"
+                        />
+                    </div>
+                    <p id="modalAvatarStatus" style="font-size: 0.9em; margin-bottom: 25px"></p>
+                    <div
+                        id="avatarUploadProgressContainer"
+                        style="display: none; margin-bottom: 15px; width: 80%; margin-left: auto; margin-right: auto"
+                    >
+                        <div class="progress-bar-container">
+                            <div id="avatarUploadProgressBar" class="progress-bar-fill"></div>
+                        </div>
+                        <p
+                            id="avatarUploadProgressText"
+                            style="font-size: 0.85em; margin-top: 5px; color: var(--text-color-muted)"
+                        ></p>
+                    </div>
+                    <div style="display: flex; gap: 15px; justify-content: center">
+                        <button type="button" id="modalConfirmUploadBtn" class="button-modal-confirm">
+                            <span class="material-symbols-rounded">check_circle</span>
+                            Conferma
+                        </button>
+                        <button type="button" id="modalCancelUploadBtn" class="button-modal-cancel">
+                            <span class="material-symbols-rounded">cancel</span>
+                            Annulla
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="requestNicknameChangeModal" class="modal" style="display: none">
+                <div class="modal-content" style="max-width: 500px">
+                    <span class="close-modal-btn" id="closeNicknameChangeModalBtn">&times;</span>
+                    <h3 id="nicknameChangeModalTitle">Richiedi Cambio Nickname</h3>
+                    <div id="nicknameChangeInitialView">
+                        <p>
+                            Stai per richiedere un cambio di nickname. Gli amministratori esamineranno la tua richiesta.
+                        </p>
+                        <p>Ricorda che puoi richiedere un cambio nickname solo una volta ogni 90 giorni.</p>
+                        <div class="input-field-container">
+                            <label for="newNicknameInput">Nuovo Nickname Desiderato:</label>
+                            <input
+                                type="text"
+                                id="newNicknameInput"
+                                class="input-field"
+                                placeholder="Min 3, Max 20 caratteri"
+                                maxlength="20"
+                                minlength="3"
+                            />
+                            <small id="newNicknameHint" class="input-hint"
+                                >Il nickname può contenere lettere, numeri, trattini e underscore.</small
+                            >
+                        </div>
+                        <div
+                            id="nicknameChangeError"
+                            class="error-message"
+                            style="margin-top: 10px; margin-bottom: 15px"
+                        ></div>
+                        <div class="form-actions" style="margin-top: 20px">
+                            <button type="button" id="submitNicknameChangeRequestBtn" class="game-button">
+                                Invia Richiesta
+                            </button>
+                            <button
+                                type="button"
+                                id="cancelNicknameChangeRequestBtn"
+                                class="game-button secondary-button"
+                            >
+                                Annulla
+                            </button>
+                        </div>
+                    </div>
+                    <div id="nicknameChangeRequestSentView" style="display: none">
+                        <h4>Richiesta Inviata!</h4>
+                        <p>
+                            La tua richiesta di cambio nickname è stata inviata con successo. Riceverai una notifica
+                            quando verrà processata dagli amministratori.
+                        </p>
+                        <p>Puoi chiudere questa finestra.</p>
+                    </div>
+                    <div id="nicknameChangeCooldownView" style="display: none">
+                        <h4>Richiesta Recente</h4>
+                        <p>
+                            Hai già richiesto un cambio nickname di recente. Potrai effettuare una nuova richiesta tra:
+                        </p>
+                        <div id="nicknameCooldownTimer" class="cooldown-timer">
+                            -- giorni, -- ore, -- minuti, -- secondi
+                        </div>
+                        <p>Se pensi ci sia un errore, contatta il supporto.</p>
+                    </div>
+                    <div id="nicknameChangeProcessedView" style="display: none">
+                        <h4>Richiesta Processata</h4>
+                        <p>
+                            La tua precedente richiesta di cambio nickname è stata processata. Se il nickname è stato
+                            approvato, dovresti già vederlo aggiornato. In caso di rifiuto, la motivazione sarà indicata
+                            nella notifica relativa.
+                        </p>
+                        <p>
+                            Potrai fare una nuova richiesta dopo che saranno trascorsi 90 giorni dalla data dell'ultima
+                            richiesta approvata o rifiutata, o immediatamente se la tua ultima richiesta è stata
+                            annullata prima dell'elaborazione.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="nicknameAnimationModal" class="modal" style="display: none">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Personalizza Stile Nickname</h3>
+                        <span class="close-modal-btn" id="closeNicknameAnimationModalBtn" title="Chiudi">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            Seleziona uno stile sbloccato tramite i tuoi riconoscimenti. L'animazione scelta sarà
+                            visibile principalmente sulla tua pagina profilo.
+                        </p>
+                        <ul id="nicknameAnimationList" class="animation-selection-list"></ul>
+                        <div
+                            id="noNicknameAnimationsMessage"
+                            style="display: none; margin-top: 15px; text-align: center"
+                        >
+                            <p style="color: var(--text-color-muted)">
+                                Non hai ancora sbloccato personalizzazioni per il nickname.<br />Ottieni altri badge per
+                                sbloccarle!
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -581,7 +670,9 @@
         <script>
             document.getElementById('currentYear').textContent = new Date().getFullYear();
         </script>
-        <script src="js/main.js" type="module"></script>
+
         <script src="js/profile.js" type="module"></script>
+        <script src="js/main.js" type="module" defer></script>
+        <script src="js/notificationHandler.js" type="module" defer></script>
     </body>
 </html>

@@ -1,0 +1,383 @@
+/* Contenuto aggiornato per scss/_about.scss */
+
+.dev-text-content p {
+    margin-bottom: 1em;
+}
+
+.dev-text-content ul {
+    list-style-position: inside;
+    padding-left: 0;
+    margin-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.dev-text-content ul li {
+    margin-bottom: 0.5em;
+}
+
+/* Stile per le nuove card con icona e testo */
+.skill-card {
+    flex-direction: column;
+    gap: 10px; // Spazio tra icona e testo
+
+    .skill-icon {
+        font-size: 2.5em; // Icone più grandi
+        // il colore viene applicato via JS inline
+    }
+
+    span {
+        font-weight: 600;
+    }
+}
+
+/* Stili per la Modale Dettaglio Competenze */
+#skillDetailModal .modal-content.large {
+    max-width: 700px; /* Modale più larga per contenuti dettagliati */
+}
+
+.skill-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444; // Colore a mano per il bordo
+
+    i {
+        font-size: 2.8em;
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 1.8em;
+        color: #525151; // Colore a mano per il testo
+    }
+}
+
+.skill-modal-body h3 {
+    color: #525151; // Colore a mano
+    margin-top: 20px;
+    margin-bottom: 8px;
+    border-left: 3px solid #00c9a7; // Teal per evidenziare
+    padding-left: 10px;
+}
+
+.skill-modal-body p {
+    color: #b0c4de; /* <<<< MODIFICA ESEGUITA QUI: Da #BDBDBD al nuovo blu */
+    line-height: 1.7;
+    margin-bottom: 1em;
+    font-size: 1em;
+}
+
+// Stile per il loader, se lo usi
+#skills .loader-dots {
+    /* (Stili per il loader se non già presenti globalmente) */
+    text-align: center;
+    color: var(--text-color-secondary);
+}
+
+/* Nuovo contenitore per la flip card (CON MODIFICHE PER IL FLOAT A SINISTRA) */
+.flip-card-container {
+    perspective: 1000px;
+    width: 250px;
+    height: 250px;
+    margin: 0 auto 20px auto; /* Centra la card su mobile e le dà spazio sotto */
+}
+
+@media (min-width: 768px) {
+    /* Per schermi più grandi */
+    .flip-card-container {
+        float: left; /* <<< MODIFICA QUI: Manda la card a SINISTRA */
+        margin: 5px 20px 10px 0; /* <<< MODIFICA QUI: Margine a destra e sotto */
+        /* Era: margin: 10px 0 10px 20px; */
+    }
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+}
+
+.flip-card-container:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.flip-card-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.flip-card-back {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.flip-card-back h3 {
+    margin: 0 0 15px 0;
+    color: #00c9a7; /* Teal */
+}
+
+.flip-card-back p {
+    margin: 4px 0;
+    font-size: 0.9em;
+}
+
+/* Il testo che segue il float */
+#about .dev-section-content .dev-text-content {
+    /* Questa proprietà assicura che il contenitore del testo
+       non inizi finché non c'è spazio libero accanto all'elemento flottante.
+       Se il float non ha `overflow: hidden` sul suo parent,
+       a volte questo può aiutare, ma `overflow: hidden` sul parent
+       del float (cioè .dev-section-content) è spesso la soluzione più robusta.
+       Tuttavia, l'abbiamo già applicato a .dev-text-content.
+       Rimuoviamo la vecchia regola `display: flex` da .dev-section-content
+       e lasciamo che il float faccia il suo lavoro.
+    */
+}
+
+/* Modifica a .dev-section-content per permettere al float di funzionare correttamente */
+.dev-section-content {
+    /* Rimuovi display: flex e gap se li avevi qui specificamente
+       per .dev-image-container e .dev-text-content come colonne.
+       Il float si occuperà del posizionamento.
+    */
+    padding: 1px; /* Trucco per contenere i float figli se .clearfix non è usato */
+    /* oppure usa un clearfix classico */
+}
+
+/* Opzionale: un clearfix per .dev-section-content se necessario */
+.dev-section-content::after {
+    content: '';
+    clear: both;
+    display: table;
+}
+
+/* --- Stili per la Sezione Pattern Complessi --- */
+
+#complex-patterns {
+    padding-top: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color-secondary);
+
+    .section-description {
+        max-width: 800px;
+        text-align: center;
+        margin: 0 auto 2rem auto;
+        color: var(--text-color-secondary);
+        font-size: 1.05em;
+        line-height: 1.7;
+    }
+}
+
+.patterns-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.pattern-card {
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 20px 25px;
+    transition:
+        transform 0.2s ease-in-out,
+        box-shadow 0.2s ease-in-out;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.pattern-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .material-symbols-rounded {
+        font-size: 2em;
+        color: var(--link-color);
+    }
+
+    h3 {
+        margin: 0;
+        font-size: 1.25em;
+        color: var(--heading-color);
+    }
+}
+
+.pattern-body p {
+    margin: 0;
+    color: var(--text-color-secondary);
+    line-height: 1.6;
+    font-size: 0.95em;
+}
+
+/* --- Stili Carosello per la Sezione Pattern (Mobile) --- */
+
+@media (max-width: 768px) {
+    #complex-patterns .patterns-container {
+        display: flex;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding: 0 0 15px 1px; // Aggiunto padding per l'estetica
+
+        // Nasconde la barra di scorrimento
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
+    #complex-patterns .pattern-card {
+        // Imposta una larghezza fissa per le card nel carosello
+        flex: 0 0 290px; // Un po' più larghe per accomodare il testo
+        margin-right: 15px;
+    }
+}
+
+/* --- Stili per la Griglia di Navigazione Interna (about.html) --- */
+
+.internal-nav-grid {
+    background-color: var(--surface-bg-secondary);
+    padding: 15px 0;
+    margin-bottom: 30px; // Spazio prima della sezione "The .Dev"
+    border-bottom: 1px solid var(--border-color-primary);
+
+    .nav-grid-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px; // Spazio tra i pulsanti
+        flex-wrap: wrap; // Permette di andare a capo su schermi piccoli se necessario
+    }
+
+    .nav-grid-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 15px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-color-secondary);
+        background-color: var(--surface-bg-primary);
+        border: 1px solid var(--border-color-secondary);
+        transition: all 0.2s ease-in-out;
+        min-width: 100px; // Larghezza minima per ogni item
+        text-align: center;
+
+        &:hover {
+            background-color: var(--surface-bg-hover);
+            color: var(--link-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .material-symbols-rounded {
+            font-size: 2em; // Dimensione icona
+            margin-bottom: 5px;
+        }
+
+        .nav-grid-text {
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+    }
+}
+
+// Responsive adjustments (opzionale, la griglia con flex-wrap dovrebbe già adattarsi)
+@media (max-width: 500px) {
+    .internal-nav-grid .nav-grid-list {
+        gap: 10px; // Riduci il gap su schermi molto piccoli
+    }
+    .internal-nav-grid .nav-grid-item {
+        padding: 8px 10px;
+        min-width: 80px;
+        .material-symbols-rounded {
+            font-size: 1.8em;
+        }
+        .nav-grid-text {
+            font-size: 0.8em;
+        }
+    }
+}
+
+/* --- Stili per la Sezione Contatti Migliorata --- */
+#contact ul li {
+    display: flex; // Allinea gli elementi (label, email, pulsante) sulla stessa riga
+    align-items: center; // Allinea verticalmente al centro
+    flex-wrap: wrap; // Permette di andare a capo se non c'è spazio
+    gap: 8px; // Spazio tra gli elementi (es. email e pulsante copia)
+    margin-bottom: 0.5em; // Mantiene un po' di spazio sotto ogni item della lista
+}
+
+.contact-email-link {
+    text-decoration: none; // Rimuoviamo la sottolineatura standard del link
+    // Il colore e l'animazione sono gestiti dallo span interno
+}
+
+// La classe .contact-email-animated è già in _animations.scss per l'animazione,
+// ma possiamo aggiungere stili specifici qui se necessario (es. display).
+// .contact-email-animated {}
+
+.copy-email-button {
+    background: transparent;
+    border: 1px solid transparent; // Bordo invisibile per mantenere dimensioni
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--border-radius-sm, 4px);
+    display: inline-flex; // Per allineare l'icona
+    align-items: center;
+    justify-content: center;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+
+    .material-symbols-rounded {
+        font-size: 1.1rem; // Dimensione icona leggermente più piccola
+    }
+
+    &:hover {
+        color: var(--link-hover-color);
+        background-color: var(--surface-bg-hover);
+        border-color: var(--border-color-secondary);
+    }
+
+    &:active {
+        transform: translateY(1px);
+    }
+}

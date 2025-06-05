@@ -17,6 +17,12 @@
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
         <link href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.1/css/flag-icons.min.css" rel="stylesheet" />
+
+        <link rel="icon" type="image/png" href="/images/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+        <link rel="shortcut icon" href="/images/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
+        <link rel="manifest" href="/images/site.webmanifest" />
         <style>
             /* Stili specifici per contribute.html se necessari */
             .contribution-section {
@@ -57,34 +63,29 @@
     </head>
     <body>
         <header>
-            <div class="header-content">
-                <a href="index.html" style="text-decoration: none">
-                    <h1 style="font-size: 1.8em; margin: 0">asyncDonkey.io</h1>
+            <div class="header-top-row">
+                <a href="index.html">
+                    <h1 title="Vai alla Homepage di asynced.org">asynced.org</h1>
                 </a>
-
                 <nav class="desktop-nav">
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 15px">
                         <li>
-                            <a href="index.html" class="auth-button nav-link-icon-only" title="Home">
-                                <span class="material-symbols-rounded">home</span>
-                                <span class="visually-hidden">Home</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                href="donkeyRunner.html"
-                                class="auth-button nav-link-icon-text"
-                                title="Gioca a codeDash!"
+                            <a href="index.html" class="auth-button nav-link-icon-only" title="Home"
+                                ><span class="material-symbols-rounded">home</span
+                                ><span class="visually-hidden">Home</span></a
                             >
-                                <span class="material-symbols-rounded">stadia_controller</span>
-                                <span class="nav-text">codeDash!</span>
-                            </a>
                         </li>
                         <li>
-                            <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica">
-                                <span class="material-symbols-rounded">leaderboard</span>
-                                <span class="nav-text">Leaderboard</span>
-                            </a>
+                            <a href="donkeyRunner.html" class="auth-button nav-link-icon-text" title="Gioca a codeDash!"
+                                ><span class="material-symbols-rounded">stadia_controller</span
+                                ><span class="nav-text">codeDash!</span></a
+                            >
+                        </li>
+                        <li>
+                            <a href="leaderboard.html" class="auth-button nav-link-icon-text" title="Vedi Classifica"
+                                ><span class="material-symbols-rounded">leaderboard</span
+                                ><span class="nav-text">Leaderboard</span></a
+                            >
                         </li>
                         <li class="nav-dropdown-container">
                             <button
@@ -93,67 +94,103 @@
                                 aria-expanded="false"
                                 aria-controls="communityDropdownMenu"
                             >
-                                <span class="material-symbols-rounded">groups</span>
-                                <span class="nav-text">Community</span>
-                                <span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
+                                <span class="material-symbols-rounded">groups</span
+                                ><span class="nav-text">Community</span
+                                ><span class="material-symbols-rounded dropdown-arrow">arrow_drop_down</span>
                             </button>
                             <ul class="dropdown-menu" id="communityDropdownMenu">
                                 <li>
-                                    <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item">
-                                        <span class="material-symbols-rounded">edit_note</span>
-                                        <span class="nav-text">Contribuisci</span>
-                                    </a>
+                                    <a href="contribute.html" class="auth-button nav-link-icon-text dropdown-item"
+                                        ><span class="material-symbols-rounded">edit_note</span
+                                        ><span class="nav-text">Contribuisci</span></a
+                                    >
                                 </li>
                                 <li id="navWriteArticleDropdown" style="display: none">
-                                    <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item">
-                                        <span class="material-symbols-rounded">article</span>
-                                        <span class="nav-text">Scrivi Articolo</span>
-                                    </a>
+                                    <a href="submit-article.html" class="auth-button nav-link-icon-text dropdown-item"
+                                        ><span class="material-symbols-rounded">article</span
+                                        ><span class="nav-text">Scrivi Articolo</span></a
+                                    >
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </nav>
+                <button
+                    class="navbar-toggler"
+                    id="navbarToggler"
+                    aria-label="Toggle Navigazione"
+                    aria-expanded="false"
+                    aria-controls="mobileNavMenu"
+                >
+                    <span class="material-symbols-rounded">menu</span>
+                </button>
+            </div>
 
-                <div class="header-controls" style="display: flex; align-items: center; gap: 10px">
-                    <div id="authContainer">
-                        <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login">
-                            <span class="material-symbols-rounded">login</span>
-                            <span class="visually-hidden">Login</span>
+            <div class="header-controls">
+                <div id="authContainer">
+                    <a href="#" id="showLoginBtn" class="auth-button nav-link-icon-only" title="Login"
+                        ><span class="material-symbols-rounded">login</span
+                        ><span class="visually-hidden">Login</span></a
+                    >
+                    <a href="register.html" id="showSignupBtn" class="auth-button nav-link-icon-only" title="Registrati"
+                        ><span class="material-symbols-rounded">person_add</span
+                        ><span class="visually-hidden">Registrati</span></a
+                    >
+                </div>
+                <div id="userProfileContainer" style="display: none; align-items: center; gap: 8px">
+                    <div
+                        id="notificationBellContainer"
+                        style="position: relative; display: none; margin-right: 15px; align-self: center"
+                    >
+                        <a href="#" id="notificationBellLink" title="Notifiche">
+                            <i
+                                class="material-symbols-rounded"
+                                id="notificationIcon"
+                                style="font-size: 28px; color: var(--text-color-navbar); vertical-align: middle"
+                                >notifications</i
+                            >
+                            <span id="notificationCounter" class="notification-badge" style="display: none">0</span>
                         </a>
-                        <a
-                            href="register.html"
-                            id="showSignupBtn"
-                            class="auth-button nav-link-icon-only"
-                            title="Registrati"
-                        >
-                            <span class="material-symbols-rounded">person_add</span>
-                            <span class="visually-hidden">Registrati</span>
-                        </a>
+                        <div id="notification-panel" class="notification-panel" style="display: none">
+                            <div class="notification-panel-header">
+                                <h2 style="margin: 0; font-size: 1.1em; font-weight: 600">Notifiche</h2>
+                                <button
+                                    id="mark-all-as-read-btn"
+                                    class="button-link-sm"
+                                    title="Segna tutte come lette"
+                                    style="display: none"
+                                >
+                                    Segna tutte come lette
+                                </button>
+                            </div>
+                            <ul id="notification-list" class="notification-list">
+                                <li
+                                    id="no-notifications-placeholder"
+                                    class="notification-item-empty"
+                                    style="display: none"
+                                >
+                                    <p style="margin: 0">Nessuna nuova notifica.</p>
+                                </li>
+                            </ul>
+                            <div class="notification-panel-footer">
+                                <a href="/all-notifications.html" id="view-all-notifications-link" style="display: none"
+                                    >Vedi tutte le notifiche</a
+                                >
+                            </div>
+                        </div>
                     </div>
-                    <div id="userProfileContainer" style="display: none; align-items: center">
-                        <img
-                            id="headerUserAvatar"
-                            src=""
-                            alt="User Avatar"
-                            style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; display: none"
-                        />
-                        <span id="userDisplayName" style="margin-right: 8px; display: none"></span>
-                        <a
-                            href="profile.html"
-                            id="profileNavIconLink"
-                            class="auth-button nav-link-icon-only"
-                            title="Profilo"
-                            style="text-decoration: none"
-                        >
-                            <span class="material-symbols-rounded">account_circle</span>
-                            <span class="visually-hidden">Profilo</span>
-                        </a>
-                        <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
-                            <span class="material-symbols-rounded">logout</span>
-                            <span class="visually-hidden">Logout</span>
-                        </button>
-                    </div>
+                    <img id="headerUserAvatar" alt="User Avatar" />
+                    <span id="userDisplayName"></span>
+                    <button id="logoutButton" class="auth-button nav-link-icon-only" title="Logout">
+                        <span class="material-symbols-rounded">logout</span><span class="visually-hidden">Logout</span>
+                    </button>
+                </div>
+
+                <div class="header-action-buttons">
+                    <a href="index.html" class="auth-button nav-link-icon-only" title="Torna alla Home">
+                        <span class="material-symbols-rounded">home</span>
+                        <span class="visually-hidden">Home</span>
+                    </a>
                     <button
                         id="themeToggleBtn"
                         aria-label="Toggle Tema Chiaro/Scuro"
@@ -162,28 +199,52 @@
                     >
                         <span class="material-symbols-rounded">light_mode</span>
                     </button>
-                    <button
-                        class="navbar-toggler"
-                        id="navbarToggler"
-                        aria-label="Toggle Navigazione"
-                        aria-expanded="false"
-                        aria-controls="mobileNavMenu"
-                    >
-                        <span class="material-symbols-rounded">menu</span>
-                    </button>
                 </div>
             </div>
+
             <nav class="mobile-nav-menu" id="mobileNavMenu" aria-hidden="true"></nav>
         </header>
 
         <main>
+            <nav id="contribute-page-nav" class="page-section-nav">
+                <a href="#contributeArticles" class="nav-item">
+                    <span class="material-symbols-rounded">ink_pen</span>
+                    <span>Scrivi Articolo</span>
+                </a>
+                <a href="#aboutMarkdown" class="nav-item">
+                    <span class="material-symbols-rounded">markdown</span>
+                    <span>Guida Markdown</span>
+                </a>
+                <a href="#contributeIssues" class="nav-item">
+                    <span class="material-symbols-rounded">emoji_objects</span>
+                    <span>Segnalazioni & Idee</span>
+                </a>
+                <a href="#issueSubmissionForm" class="nav-item">
+                    <span class="material-symbols-rounded">add_comment</span>
+                    <span>Invia Segnalazione</span>
+                </a>
+            </nav>
+
+            <section id="top-voted-issue-section" class="contribution-section" style="display: none">
+                <h3>
+                    <span class="material-symbols-rounded" style="vertical-align: text-bottom">star</span> La Più
+                    Richiesta dalla Community
+                </h3>
+                <div id="topVotedIssueContainer"></div>
+            </section>
             <section id="pageHeader" style="text-align: center; margin-bottom: 30px">
                 <h2>Contribuisci al Progetto</h2>
                 <p>La tua partecipazione è preziosa! Scopri come puoi contribuire con articoli, idee e segnalazioni.</p>
             </section>
 
             <section id="contributeArticles" class="contribution-section">
-                <h3>✍️ Scrivere un Articolo</h3>
+                <h3>
+                    <span
+                        class="material-symbols-rounded"
+                        style="vertical-align: text-bottom; margin-right: 8px; font-size: 1.3em"
+                        >ink_pen</span
+                    >Scrivere un Articolo
+                </h3>
                 <p>
                     Hai conoscenze da condividere o un progetto interessante di cui parlare? Puoi proporre un articolo
                     per la pubblicazione sul sito!
@@ -214,7 +275,13 @@
             </section>
 
             <section id="aboutMarkdown" class="contribution-section">
-                <h3>📄 Cos'è il Markdown?</h3>
+                <h3>
+                    <span
+                        class="material-symbols-rounded"
+                        style="vertical-align: text-bottom; margin-right: 8px; font-size: 1.3em"
+                        >markdown</span
+                    >Cos'è il Markdown?
+                </h3>
                 <p>
                     Il Markdown è un linguaggio di markup leggero con una sintassi di formattazione del testo semplice.
                     È stato creato nel 2004 da John Gruber con Aaron Swartz. La sua filosofia principale è quella di
@@ -229,68 +296,104 @@
                 <a
                     href="view-article.html?id=markdown-guide-placeholder"
                     class="btn-action"
-                    style="background-color: var(--surface-bg-secondary); color: var(--text-color-secondary)"
-                    >Guida Completa al Markdown (Prossimamente)</a
+                    style="
+                        background-color: var(--surface-bg-secondary);
+                        color: var(--text-color-secondary);
+                        display: inline-flex;
+                        align-items: center;
+                    "
                 >
+                    <span class="material-symbols-rounded" style="margin-right: 8px">live_help</span>Guida Completa al
+                    Markdown (Prossimamente)
+                </a>
             </section>
 
             <section id="contributeIssues" class="contribution-section">
-                <h3>💡 Segnalazioni e Suggerimenti</h3>
-                <p>Il tuo feedback è fondamentale per migliorare asyncDonkey.io e i giochi presenti!</p>
-                <h4>Tipi di Contributi:</h4>
+                <h3>
+                    <span
+                        class="material-symbols-rounded"
+                        style="vertical-align: text-bottom; margin-right: 8px; font-size: 1.3em"
+                        >emoji_objects</span
+                    >Segnalazioni e Suggerimenti
+                </h3>
+                <p>
+                    Il tuo feedback è fondamentale per migliorare asyncDonkey.io e i giochi presenti! Utilizza i moduli
+                    sottostanti per inviare le tue proposte, segnalare bug e votare le idee della community.
+                </p>
+                <h4>Cosa puoi segnalare o suggerire:</h4>
                 <ul>
                     <li>
-                        <strong>Segnalazione Bug:</strong> Se hai riscontrato un errore o un comportamento anomalo in un
-                        gioco o nel sito, <a href="donkeyRunner.html#bugReportSection">segnalacelo qui</a> o apri una
-                        issue su
-                        <a
-                            href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=bug_report.yml"
-                            target="_blank"
-                            rel="noopener"
-                            >GitHub</a
-                        >.
+                        <strong>Proposta di Nuova Funzionalità Generale:</strong> Idee per nuove sezioni del sito o
+                        miglioramenti generali della piattaforma.
                     </li>
                     <li>
-                        <strong>Proposta di Nuova Funzionalità (Generale):</strong> Hai un'idea per una nuova sezione
-                        del sito o un miglioramento generale della piattaforma?
+                        <strong>Suggerimento Nuovo Gioco:</strong> Proposte per nuovi giochi da integrare su
+                        asyncDonkey.io.
                     </li>
                     <li>
-                        <strong>Proposta di Nuovo Gioco:</strong> Ti piacerebbe vedere un nuovo tipo di gioco su
-                        asyncDonkey.io?
+                        <strong>Segnalazione Bug o Problema:</strong> Errori o comportamenti anomali riscontrati in un
+                        gioco specifico o nel sito in generale.
                     </li>
                     <li>
                         <strong>Miglioramenti a Giochi Esistenti:</strong> Idee per rendere i giochi attuali ancora più
                         divertenti o funzionali.
                     </li>
                 </ul>
-                <p>
-                    A breve implementeremo una sezione dedicata qui sulla pagina "Contribuisci" dove potrai inviare
-                    queste proposte e votare quelle degli altri utenti. Per ora, puoi usare il form di
-                    <a href="donkeyRunner.html#featureRequestSection">suggerimento funzionalità nel gioco CodeDash!</a>
-                    per idee generali o relative ai giochi, oppure, per questioni più tecniche o dettagliate, apri una
-                    "Feature Request" direttamente su
-                    <a
-                        href="https://github.com/asyncDonkey/asyncDonkey.github.io/issues/new?template=feature_request.yml"
-                        target="_blank"
-                        rel="noopener"
-                        >GitHub Issues</a
-                    >.
-                </p>
+                <p>Tutte le segnalazioni e i suggerimenti validi sono benvenuti e ci aiutano a crescere!</p>
+
                 <div id="issueTrackerSection" style="margin-top: 20px">
                     <h4>Invia una Nuova Segnalazione o Suggerimento</h4>
                     <div
                         id="issueAuthRequiredMessage"
+                        class="auth-required-prompt"
                         style="
-                            display: none;
-                            padding: 10px;
+                            display: none; /* Gestito da js/issueTracker.js */
+                            text-align: center;
+                            padding: 20px 25px;
                             background-color: var(--surface-bg-secondary);
-                            border-radius: 4px;
-                            margin-bottom: 15px;
+                            border-radius: var(--border-radius-standard, 8px); /* Aggiunto fallback per border-radius */
+                            margin-bottom: 25px;
+                            border: 1px solid var(--border-color-secondary);
                         "
                     >
-                        <p>
-                            Devi essere <a href="#" id="loginLinkFromContributePage">loggato</a> per inviare una
-                            segnalazione o un suggerimento.
+                        <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 1.4em; color: var(--heading-color)">
+                            Accesso Richiesto
+                        </h3>
+                        <p style="margin-bottom: 20px; font-size: 1.05em; color: var(--text-color-secondary)">
+                            Devi essere autenticato per poter inviare una nuova segnalazione, un suggerimento o votare
+                            quelli esistenti.
+                        </p>
+                        <div
+                            class="auth-prompt-actions"
+                            style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap"
+                        >
+                            <a
+                                href="register.html?authAction=login&redirectUrl=/contribute.html"
+                                class="game-button primary-action"
+                                style="text-decoration: none"
+                            >
+                                <span
+                                    class="material-symbols-rounded"
+                                    style="margin-right: 6px; vertical-align: text-bottom; font-size: 1.2em"
+                                    >login</span
+                                >Accedi
+                            </a>
+                            <a
+                                href="register.html?authAction=signup&redirectUrl=/contribute.html"
+                                class="game-button alt secondary-action"
+                                style="text-decoration: none"
+                            >
+                                <span
+                                    class="material-symbols-rounded"
+                                    style="margin-right: 6px; vertical-align: text-bottom; font-size: 1.2em"
+                                    >person_add</span
+                                >Registrati
+                            </a>
+                        </div>
+                        <p style="margin-top: 25px; font-size: 0.9em">
+                            <a href="index.html" style="color: var(--link-color); text-decoration: underline"
+                                >&larr; Oppure torna alla Homepage</a
+                            >
                         </p>
                     </div>
                     <form id="issueSubmissionForm" style="display: none">
@@ -430,7 +533,7 @@
 
         <script src="js/main.js" type="module"></script>
         <script src="js/issueTracker.js" type="module"></script>
-        {/* NUOVA RIGA */}
+        <script src="js/notificationHandler.js" type="module" defer></script>
         <script>
             document.getElementById('currentYear').textContent = new Date().getFullYear();
         </script>

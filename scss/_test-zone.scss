@@ -1,0 +1,151 @@
+// File: scss/_test-zone.scss
+// Stili dedicati per la engineRoom / testZone
+// VERSIONE FINALE: Estetica "Modern Engineering" con supporto per i temi (CSS Variables)
+
+#test-zone-section {
+    h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        // L'icona è già nell'HTML, quindi non serve qui
+    }
+
+    // Linee guida per i tester
+    .tester-guidelines {
+        background: var(--surface-bg-secondary);
+        border-left: 4px solid var(--primary-color);
+        padding: 1.5rem;
+        margin: 2rem 0;
+        border-radius: var(--border-radius-md);
+
+        h3 {
+            color: var(--text-color-primary);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            font-family: 'Space Grotesk', sans-serif;
+            &::before {
+                content: 'info'; // Icona informativa
+                font-family: 'Material Symbols Rounded';
+                font-size: 1.2em;
+                margin-right: 10px;
+                color: var(--primary-color);
+            }
+        }
+        h4 {
+            color: var(--primary-color-dark); // O un altro colore secondario
+            margin-top: 1.5em;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 1px;
+        }
+        p {
+            color: var(--text-color-secondary);
+            line-height: 1.7;
+        }
+    }
+
+    // Toast persistente
+    .persistent-toast {
+        border: 1px solid var(--border-color-primary);
+        background-color: var(--surface-bg-secondary);
+        border-radius: var(--border-radius-md);
+
+        p b {
+            color: var(--primary-color);
+        }
+    }
+}
+
+#test-tasks-list-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-top: 2rem;
+}
+
+.test-task-card {
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    transition: all 0.2s ease-in-out;
+    box-shadow: var(--shadow-sm);
+
+    &:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    h3 {
+        color: var(--primary-color-dark, var(--text-color-primary));
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.4em;
+        margin-top: 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color-secondary);
+        display: flex;
+        align-items: center;
+        &::before {
+            content: 'biotech'; // Icona tecnica
+            font-family: 'Material Symbols Rounded';
+            margin-right: 12px;
+            font-size: 1.3em;
+            color: var(--primary-color);
+        }
+    }
+
+    .test-task-area {
+        font-size: 0.9em;
+        font-family: 'Source Code Pro', monospace;
+        color: var(--text-color-muted);
+        margin: 1rem 0;
+    }
+
+    .test-task-details-section {
+        margin: 1rem 0;
+        padding: 1rem;
+        background-color: var(--surface-bg-secondary);
+        border: 1px dashed var(--border-color-secondary);
+        border-radius: var(--border-radius-sm);
+
+        strong {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--text-color-secondary);
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 1px;
+        }
+        .formatted-text {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 1em;
+            line-height: 1.6;
+            color: var(--text-color-secondary);
+        }
+    }
+
+    .feedback-form-container {
+        border-top: 1px dashed var(--border-color-light);
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+
+        h4 {
+            margin-top: 0;
+            color: var(--primary-color-dark, var(--text-color-primary));
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 60px;
+            resize: none;
+            overflow-y: hidden;
+            line-height: 1.6;
+            // Eredita gli stili globali da _base.scss o _utilities.scss
+        }
+    }
+
+    .task-actions {
+        padding-top: 1rem;
+    }
+}

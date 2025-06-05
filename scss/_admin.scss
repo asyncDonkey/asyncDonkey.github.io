@@ -1,0 +1,187 @@
+/* Stili per la lista issue nell'admin dashboard */
+#adminUserIssuesList .article-info small em {
+    /* Enfasi per la descrizione */
+    color: var(--text-color-muted);
+}
+#adminUserIssuesList .admin-issue-status-select {
+    /* Stili specifici per il select dello stato se necessario */
+    border: 1px solid var(--border-color-primary);
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-primary);
+}
+
+/* Stili per Admin Dashboard - Linee Guida Moderazione */
+.admin-section#moderationGuidelinesSection {
+    background-color: var(--surface-bg-secondary);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color-secondary);
+}
+
+.admin-section#moderationGuidelinesSection h2 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color-primary);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.guidelines-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.guideline-item h4 {
+    margin-bottom: 8px;
+}
+
+.guideline-toggle-btn {
+    background-color: transparent;
+    border: none;
+    color: var(--link-color);
+    padding: 8px 0; /* Rimosso padding laterale per allineamento con testo */
+    text-align: left;
+    font-size: 1.1em; /* Leggermente più grande per i titoli delle sezioni */
+    font-weight: bold; /* Simile a un h4 */
+    cursor: pointer;
+    width: 100%;
+    display: flex; /* Per l'icona ::after */
+    justify-content: space-between; /* Spinge l'icona a destra */
+    align-items: center;
+}
+
+.guideline-toggle-btn:hover,
+.guideline-toggle-btn:focus {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+.guideline-toggle-btn::after {
+    content: '▼'; /* Freccia verso il basso di default */
+    font-size: 0.8em;
+    margin-left: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.guideline-toggle-btn[aria-expanded='true']::after {
+    transform: rotate(-180deg); /* Freccia verso l'alto quando espanso */
+}
+
+.guideline-content {
+    padding-left: 15px; /* Indentazione per il contenuto */
+    border-left: 2px solid var(--border-color-primary);
+    margin-top: 5px;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.guideline-content ul,
+.guideline-content ol {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 20px; /* Spazio per i bullet points */
+}
+
+.guideline-content li {
+    margin-bottom: 6px;
+}
+
+// Stile base per gli item nelle liste admin (se non già definito)
+.admin-list-item {
+    border-bottom: 1px solid var(--border-color-secondary);
+    padding: 15px 10px; // Aumentato un po' il padding verticale
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    background-color: var(--surface-bg-primary); // Sfondo leggermente diverso per distinguerli
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    .article-info {
+        // Riusiamo il nome della classe interna per info, ma potrebbe essere rinominata
+        flex-basis: 60%; // Adatta a seconda del contenuto
+        line-height: 1.5;
+
+        strong {
+            color: var(--heading-color);
+        }
+        small {
+            display: block;
+            color: var(--text-color-muted);
+            margin-top: 4px;
+            font-size: 0.85em;
+        }
+    }
+
+    .actions {
+        flex-basis: 40%; // Adatta
+        text-align: right;
+
+        .game-button {
+            // Stile specifico per i bottoni game-button dentro le actions admin
+            padding: 6px 12px;
+            font-size: 0.9em;
+            margin-left: 8px;
+            margin-bottom: 5px; // Per quando vanno a capo
+        }
+    }
+}
+
+// Stili specifici per gli item delle richieste di nickname
+.nickname-request-item {
+    // Qui puoi aggiungere sovrascritture o stili unici se .admin-list-item non basta
+    // Esempio:
+    // border-left: 3px solid var(--accent-color);
+
+    .article-info {
+        // Se vuoi adattare lo spazio per nickname-request-item
+        flex-basis: 65%;
+    }
+    .actions {
+        flex-basis: 35%;
+    }
+}
+
+// Responsive per .admin-list-item (se non già gestito globalmente per admin)
+@media (max-width: 768px) {
+    .admin-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .article-info,
+        .actions {
+            flex-basis: 100%;
+            width: 100%;
+        }
+
+        .actions {
+            text-align: left;
+            margin-top: 15px;
+
+            .game-button {
+                margin-left: 0;
+                margin-right: 8px;
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
+    }
+}
+
+// Stili per la sezione generale delle richieste nickname
+#nicknameRequestsSection {
+    h2 {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color-primary);
+    }
+    #nicknameRequestsList {
+        p {
+            // Stile per i messaggi "Caricamento..." o "Nessuna richiesta..."
+            color: var(--text-color-muted);
+            font-style: italic;
+        }
+    }
+}

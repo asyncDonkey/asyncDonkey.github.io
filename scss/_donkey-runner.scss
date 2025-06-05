@@ -1,0 +1,1443 @@
+/* ===== Donkey Runner Game Page Specific Styles ===== */
+/* body.donkey-runner-page è già definito con le variabili --game-* */
+.donkey-runner-page header .header-content h1 {
+    font-size: 1.8em;
+} /* Già presente, ok */
+.donkey-runner-page main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 5%;
+    width: 100%;
+    box-sizing: border-box;
+}
+.donkey-runner-page #gameContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--game-border-color, #00b9be);
+    border-radius: 8px;
+    padding: 10px;
+    background-color: var(--game-container-bg, #1c1c1c);
+    box-shadow: 0 0 15px rgba(0, 185, 190, 0.5);
+    max-width: 800px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+.donkey-runner-page canvas#gameCanvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    width: 100%;
+    height: auto;
+    max-height: calc(100vh - 220px);
+    border: 3px solid var(--game-border-color);
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(var(--game-border-color-rgb), 0.5);
+}
+.donkey-runner-page #mobileControls {
+    display: none; /* Gestito da JS */
+    width: 100%;
+    padding: 10px 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    position: absolute; /* Chiave per il posizionamento */
+    bottom: 10px; /* Distanza dal fondo */
+    left: 0;
+    z-index: 10; /* Sopra il canvas */
+}
+
+body.game-fullscreen-active.game-fullscreen-landscape #mobileControls {
+    position: fixed; /* Fondamentale per il posizionamento viewport */
+    bottom: 10px; /* O 5px se preferito, ma essere consistenti */
+    left: 50%;
+    transform: translateX(-50%); /* Per centrare */
+    width: 90%; /* Larghezza relativa al viewport */
+    max-width: 400px; /* Limite per non essere troppo larghi */
+    padding: 5px 0; /* Padding solo verticale se i pulsanti gestiscono il loro spazio laterale */
+    box-sizing: border-box;
+    z-index: 200; /* Z-index alto, come nella regola fullscreen generica */
+}
+
+.donkey-runner-page #mobileControlsInternal {
+    display: flex;
+    justify-content: space-around; /* o space-between se preferisci i pulsanti ai lati */
+    align-items: center;
+    width: 100%; /* Fai in modo che usi tutta la larghezza di #mobileControls */
+    /* max-width: 400px; /* Potresti rimuovere questo se #mobileControls ha già un max-width */
+    margin: 0 auto;
+}
+.donkey-runner-page .control-button {
+    /* Pulsanti JMP e SHT */
+    background-color: var(--game-button-bg, #4caf50);
+    color: var(--game-button-text, white);
+    border: 2px solid var(--game-button-border, #388e3c);
+    padding: 15px 10px; /* Leggermente meno padding orizzontale per guadagnare spazio */
+    font-size: 1.2em; /* Leggermente più piccolo se necessario */
+    border-radius: 8px;
+    box-shadow: 3px 3px 0px var(--game-button-shadow, #2e7d32);
+
+    flex-grow: 1; /* Permetti ai pulsanti di crescere per riempire lo spazio */
+    flex-shrink: 1; /* Permetti ai pulsanti di restringersi se necessario */
+    flex-basis: 0; /* Distribuisci lo spazio equamente partendo da 0 */
+    /* In alternativa a flex-basis: 0, potresti usare una % più piccola tipo 40% */
+    /* flex-basis: 40%; */
+
+    margin: 0 5px; /* Mantieni un piccolo margine */
+    text-align: center; /* Assicura che il testo sia centrato nel pulsante */
+    min-width: 80px; /* Aggiungi una larghezza minima per evitare che diventino troppo piccoli */
+}
+.donkey-runner-page .control-button:active {
+    background-color: var(--game-button-active-bg);
+    transform: scale(0.95);
+}
+.donkey-runner-page #fullscreenButton {
+    background-color: var(--surface-bg-secondary);
+    color: var(--text-color-secondary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    font-family: 'Source Code Pro', monospace;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+    /* display: none; */ /* COMMENTA O RIMUOVI QUESTO se vuoi che sia visibile di default e gestito solo da JS per nasconderlo */
+    /* OPPURE, se vuoi che sia nascosto di default e il JS lo mostri solo su touch: */
+    display: none; /* MANTIENI QUESTO e assicurati che il JS lo imposti a 'block' quando isTouchDevice è true */
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+}
+.donkey-runner-page #fullscreenButton:hover {
+    background-color: var(--link-hover-color);
+    color: var(--button-text-primary);
+}
+.donkey-runner-page #miniLeaderboardContainer {
+    color: var(--text-color-secondary);
+    background-color: var(--surface-bg-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 400px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.donkey-runner-page #miniLeaderboardContainer h3 {
+    color: var(--heading-color);
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color-primary);
+    padding-bottom: 5px;
+}
+.donkey-runner-page #miniLeaderboardList {
+    list-style-type: none;
+    padding: 0;
+    font-family: 'Source Code Pro', monospace;
+}
+.donkey-runner-page #miniLeaderboardList li {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color-secondary);
+    font-size: 0.9em;
+}
+.donkey-runner-page #miniLeaderboardList li:last-child {
+    border-bottom: none;
+}
+.donkey-runner-page #miniLeaderboardList .player-rank {
+    margin-right: 10px;
+    font-weight: bold;
+    min-width: 20px;
+}
+.donkey-runner-page #miniLeaderboardList .player-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    margin-right: 10px;
+    background-color: #eee;
+    image-rendering: pixelated;
+}
+.donkey-runner-page #miniLeaderboardList .player-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.donkey-runner-page #miniLeaderboardList .player-name {
+    font-weight: bold;
+    color: var(--text-color-primary);
+    display: flex;
+    align-items: center;
+}
+.donkey-runner-page #miniLeaderboardList .player-name .fi {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+.donkey-runner-page #miniLeaderboardList .player-date {
+    font-size: 0.8em;
+    color: var(--text-color-muted);
+}
+.donkey-runner-page #miniLeaderboardList .player-score {
+    font-weight: bold;
+    color: var(--link-color);
+    font-size: 1.1em;
+}
+
+/* ===== Componenti Generici (Bottoni, ecc.) ===== */
+.game-button {
+    /* Stile base per bottoni "gioco" usati anche nei form */
+    background-color: var(--button-bg-primary);
+    color: var(--button-text-primary);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease-in-out,
+        transform 0.1s ease-in-out;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 10px;
+}
+.game-button:hover {
+    background-color: var(--button-hover-bg-primary);
+    transform: translateY(-1px);
+}
+.game-button:active {
+    transform: translateY(0px);
+}
+
+/* Stili quando il gioco è in fullscreen (generale) */
+body.game-fullscreen-active #gameContainer {
+    /* Il gameContainer è l'elemento che va in fullscreen */
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0;
+    margin: 0;
+    /* Rimuove eventuali stili che potrebbero limitarlo */
+}
+/* Stili specifici per fullscreen E landscape */
+body.game-fullscreen-active.game-fullscreen-landscape #gameCanvas {
+    width: 100vw; /* Occupa tutta la larghezza del viewport */
+    height: 100vh; /* Occupa tutta l'altezza del viewport */
+    object-fit: contain; /* Mantiene l'aspect ratio del contenuto del canvas (800x450),
+                           lo scala per coprire l'area e ritaglia l'eccesso. */
+    border: none !important; /* Rimuovi i bordi in fullscreen */
+    border-radius: 0 !important; /* Rimuovi angoli arrotondati */
+    box-shadow: none !important; /* Rimuovi ombra */
+    max-height: none !important; /* Sovrascrivi il max-height precedente */
+}
+
+body.game-fullscreen-active.game-fullscreen-landscape #mobileControlsInternal {
+    display: flex; /* Già presente implicitamente, ma esplicito per chiarezza */
+    justify-content: space-between; /* Spinge JMP a sinistra e SHT a destra */
+    align-items: center; /* Allinea verticalmente i pulsanti */
+    width: 100%; /* Usa tutta la larghezza di #mobileControls */
+    max-width: 100%; /* Redondante se width è 100%, ma non fa male */
+    box-sizing: border-box;
+}
+
+body.game-fullscreen-active.game-fullscreen-landscape .control-button {
+    padding: 10px; /* Padding più piccolo per landscape */
+    font-size: 1em; /* Font più piccolo per landscape */
+
+    /* Stili per colore/bordo (possono essere ereditati o specificati qui) */
+    background-color: rgba(0, 50, 80, 0.7);
+    border: 2px solid rgba(90, 185, 168, 0.8);
+    color: var(--game-button-text, white);
+    font-family: 'Press Start 2P', 'Courier New', Courier, monospace; /* Eredita o specifica */
+    text-transform: uppercase;
+    border-radius: 8px; /* O 5px come la regola generale */
+    box-shadow: 3px 3px 0px var(--game-button-shadow, #2e7d32); /* Eredita o specifica */
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+
+    /* Proprietà Flex cruciali dalla soluzione del dev plan */
+    flex-grow: 0; /* Non deve crescere oltre la sua base */
+    flex-shrink: 1; /* Può restringersi se non c'è abbastanza spazio */
+    flex-basis: auto; /* La dimensione è basata sul contenuto (JMP/SHT) e padding */
+    min-width: 60px; /* Larghezza minima per assicurare che sia cliccabile e visibile */
+
+    margin: 0 5px; /* Mantiene un piccolo margine tra i pulsanti se ce ne fosse bisogno,
+                         ma con space-between e solo due elementi, questo influenzerà solo
+                         lo spazio ai bordi esterni se #mobileControlsInternal avesse padding. */
+    text-align: center; /* Utile se il testo del pulsante fosse su più righe */
+}
+
+/* Nascondi header e footer quando il gioco è in fullscreen */
+body.game-fullscreen-active header,
+body.game-fullscreen-active footer,
+body.game-fullscreen-active #miniLeaderboardContainer,
+body.game-fullscreen-active #guestbook,
+body.game-fullscreen-active #bugReportSection,
+body.game-fullscreen-active #featureRequestSection,
+body.game-fullscreen-active main > div[style*="text-align: center"] /* Nasconde le istruzioni e link "vedi classifica completa" */ {
+    display: none !important;
+}
+
+/* Assicura che il canvas e il suo contenitore non abbiano padding/margin che interferiscono */
+body.game-fullscreen-active main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    display: flex; /* Per centrare #gameContainer se non lo è già */
+    align-items: center;
+    justify-content: center;
+}
+body.donkey-runner-page {
+    background-color: var(--surface-bg-primary-light, #ffffff); /* MODIFICATO */
+    color: var(--text-color-primary-light, #212529); /* MODIFICATO */
+    font-family:
+        'Source Code Pro', 'Courier New', Courier, monospace; /* Mantenuto per il testo generico della pagina, se vuoi */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+body.donkey-runner-page {
+    background-color: var(--surface-bg-primary); /* MODIFICATO: usa la variabile generica */
+    color: var(--text-color-primary); /* MODIFICATO: usa la variabile generica */
+    font-family: 'Source Code Pro', 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.donkey-runner-page header,
+            .donkey-runner-page footer {
+                background-color: var(--surface-bg-secondary);
+                padding: 10px 20px;
+                /* text-align: center; */ /* RIMUOVERE QUESTA RIGA */
+                flex-shrink: 0;
+                border-bottom: 1px solid var(--border-color); 
+            }
+            .donkey-runner-page footer {
+                border-top: 1px solid var(--border-color); 
+                border-bottom: none;
+                 text-align: center; /* MANTENERE text-align: center; se specificamente voluto per il footer */
+            }
+
+
+
+.donkey-runner-page footer a {
+    color: var(--link-color); /* MODIFICATO: usa la variabile generica */
+}
+.donkey-runner-page footer p {
+    /* Il colore del testo del footer potrebbe necessitare di una variabile generica
+       come --text-color-secondary se già definita in modo theme-aware in _variables.scss */
+    color: var(--text-color-secondary); /* MODIFICATO: usa la variabile generica */
+}
+
+.donkey-runner-page main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.donkey-runner-page #gameContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--game-border-color, #00b9be);
+    border-radius: 8px;
+    padding: 10px;
+    background-color: var(--game-container-bg, #1c1c1c);
+    box-shadow: 0 0 15px rgba(0, 185, 190, 0.5);
+    max-width: 800px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative; /* Necessario per posizionare i figli absolute */
+}
+
+.donkey-runner-page canvas#gameCanvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    width: 100%;
+    height: auto;
+    max-height: calc(100vh - 220px);
+    border: 3px solid var(--game-border-color, #00b9be);
+    border-radius: 5px;
+    background-color: #000;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 576px) {
+    /* Donkey Runner Responsive */
+    .donkey-runner-page .control-button {
+        padding: 12px 15px;
+        font-size: 1.2em;
+    }
+    .donkey-runner-page #fullscreenButton {
+        font-size: 0.8em;
+        padding: 6px 8px;
+    }
+    .donkey-runner-page canvas#gameCanvas {
+        display: block;
+        image-rendering: pixelated; /* ...altri image-rendering... */
+        width: 100%; /* FA SI CHE IL CANVAS OCCUPI LA LARGHEZZA DEL CONTENITORE */
+        height: auto; /* MANTIENE LE PROPORZIONI BASATE SULLA LARGHEZZA */
+        max-height: calc(100vh - 220px); /* Limite per non sovrapporsi ai controlli/header/footer */
+        border: 3px solid var(--game-border-color, #00b9be);
+        /* ... */
+    }
+}
+
+.donkey-runner-page #fullscreenButton {
+    /* Stili per il pulsante fullscreen sono principalmente in styles.css */
+    /* Qui assicuriamo solo che sia posizionato correttamente rispetto a gameContainer */
+    position: absolute;
+    top: 10px; /* Aggiustabile */
+    right: 10px; /* Aggiustabile */
+    z-index: 20; /* Deve essere sopra il canvas ma sotto il form del punteggio se si sovrappongono */
+    display: none; /* Gestito da JS per isTouchDevice */
+}
+
+.donkey-runner-page .game-controls-panel {
+    /* Sezione non più usata per JMP/SHT, ma per il pulsante start */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 0;
+    /* border-top: 1px solid var(--game-border-color-light, #555); */ /* Opzionale */
+}
+
+.donkey-runner-page .game-button,
+.donkey-runner-page .control-button {
+    font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+    background-color: var(--button-bg-primary);
+    color: var(--button-text-primary);
+    border: 2px solid var(--button-border-color);
+    padding: 10px 15px;
+    font-size: 1em;
+    cursor: pointer;
+    text-transform: uppercase;
+    border-radius: 5px;
+    box-shadow: 2px 2px 0px var(--button-shadow-color);
+    transition:
+        transform 0.1s,
+        box-shadow 0.1s;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.donkey-runner-page .game-button:hover,
+.donkey-runner-page .control-button:hover {
+    background-color: var(--button-hover-bg-primary);
+}
+.donkey-runner-page .game-button:active,
+.donkey-runner-page .control-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+}
+
+.donkey-runner-page #mobileControls {
+    display: none; /* Gestito da JS */
+    width: 100%; /* Occupa tutta la larghezza del suo parent (#gameContainer) */
+    padding: 10px 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    z-index: 10;
+}
+.donkey-runner-page #mobileControlsInternal {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 90%; /* Larghezza relativa a #mobileControls */
+    max-width: 400px; /* Limite massimo */
+    margin: 0 auto; /* Centra #mobileControlsInternal dentro #mobileControls */
+}
+
+.donkey-runner-page .control-button {
+    /* Pulsanti JMP e SHT */
+    background-color: var(--game-button-bg, #4caf50);
+    color: var(--game-button-text, white);
+    border: 2px solid var(--game-button-border, #388e3c);
+    padding: 15px 20px;
+    font-size: 1.3em;
+    border-radius: 8px;
+    box-shadow: 3px 3px 0px var(--game-button-shadow, #2e7d32);
+    flex-grow: 0;
+    flex-basis: 45%;
+    margin: 0 5px;
+}
+
+.donkey-runner-page #mobileStartButton {
+    display: none; /* Gestito da JS, appare al centro */
+    position: absolute; /* Rispetto a #gameContainer */
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centra il pulsante stesso */
+    z-index: 100;
+    padding: 15px 30px;
+    font-size: 1.5em;
+    /* Aggiungi qui stili per renderlo più "arcade" se vuoi */
+}
+
+.donkey-runner-page #scoreInputContainerDonkey {
+    display: none; /* Gestito da JS */
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.85);
+    border-radius: 8px;
+    position: absolute; /* Rispetto a #gameContainer */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 150;
+    border: 2px solid var(--game-border-color);
+    box-shadow: 0 0 20px rgba(0, 185, 190, 0.7);
+    width: auto;
+    min-width: 280px;
+    max-width: 90%;
+}
+.donkey-runner-page #scoreInputContainerDonkey label,
+.donkey-runner-page #scoreInputContainerDonkey p {
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    color: var(--game-text-color, #fff);
+}
+.donkey-runner-page #playerInitialsDonkey,
+.donkey-runner-page #loggedInUserNameDisplay {
+    font-family: 'Press Start 2P', monospace;
+    padding: 8px;
+    font-size: 1.2em;
+    text-align: center;
+    border: 2px solid var(--game-border-color-light);
+    background-color: #333;
+    color: #fff;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+.donkey-runner-page #playerInitialsDonkey {
+    width: 120px;
+    text-transform: uppercase;
+}
+.donkey-runner-page #loggedInUserNameDisplay {
+    background-color: transparent;
+    border: none;
+    font-weight: bold;
+    padding: 10px 0;
+}
+.donkey-runner-page #scoreInputContainerDonkey .score-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.donkey-runner-page #miniLeaderboardContainer {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-secondary);
+    border-radius: 6px;
+}
+.donkey-runner-page #miniLeaderboardContainer h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: var(--heading-color);
+    text-align: center;
+}
+.donkey-runner-page #miniLeaderboardList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9em;
+}
+.donkey-runner-page #miniLeaderboardList li {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border-color-light);
+}
+.donkey-runner-page #miniLeaderboardList li:last-child {
+    border-bottom: none;
+}
+.donkey-runner-page .player-rank {
+    min-width: 25px;
+    font-weight: bold;
+    color: var(--text-color-secondary);
+}
+.donkey-runner-page .player-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+    margin-right: 8px;
+    image-rendering: pixelated;
+    background-color: #eee;
+}
+.donkey-runner-page .player-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.donkey-runner-page .player-name {
+    font-weight: 500;
+    color: var(--text-color-primary);
+    display: flex;
+    align-items: center;
+}
+.donkey-runner-page .player-date {
+    font-size: 0.8em;
+    color: var(--text-color-muted);
+}
+.donkey-runner-page .player-score {
+    font-weight: bold;
+    color: var(--accent-color-secondary);
+    font-size: 1.1em;
+}
+/* Stili Fullscreen (ereditati da styles.css, ma assicuriamoci che il contesto sia corretto) */
+body.game-fullscreen-active #gameContainer {
+    width: 100vw !important; /* Modificato per usare vw/vh per il contenitore */
+    height: 100vh !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0;
+    margin: 0;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex; /* Assicura che gameContainer sia flex per centrare canvas */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+body.game-fullscreen-active #mobileControls {
+    /* Rimosso .game-fullscreen-landscape per applicarlo sempre in fullscreen */
+    position: fixed; /* Fisso rispetto al viewport */
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%); /* Centra orizzontalmente */
+    width: 90%; /* Larghezza massima del contenitore dei controlli */
+    max-width: 400px; /* Non troppo largo su schermi grandi */
+    padding: 5px 0;
+    box-sizing: border-box;
+    z-index: 200; /* Sopra il canvas e il form punteggio */
+}
+/* Non serve più .game-fullscreen-landscape #mobileControlsInternal se #mobileControls è fixed e centrato */
+
+body.game-fullscreen-active .control-button {
+    /* Rimosso .game-fullscreen-landscape */
+    padding: 12px 18px;
+    font-size: 1.1em;
+    background-color: rgba(0, 50, 80, 0.7); /* Leggermente più trasparenti */
+    border-color: rgba(90, 185, 168, 0.8);
+}
+body.game-fullscreen-active .control-button:active {
+    /* Rimosso .game-fullscreen-landscape */
+    background-color: rgba(0, 70, 100, 0.9);
+}
+
+body.game-fullscreen-active header,
+            body.game-fullscreen-active footer,
+            body.game-fullscreen-active #miniLeaderboardContainer,
+            body.game-fullscreen-active #guestbook,
+            body.game-fullscreen-active #bugReportSection,
+            body.game-fullscreen-active #featureRequestSection, /* Non dovrebbe esserci in questa pagina */
+            body.game-fullscreen-active main > div#gameInstructions {
+    display: none !important;
+}
+
+body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
+    display: flex !important;
+    position: fixed !important;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    max-width: 90%;
+    z-index: 250 !important; /* Più alto di #mobileControls */
+}
+
+body.game-fullscreen-active #mobileStartButton[style*='display: block'] {
+    display: block !important;
+    position: fixed !important;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 220 !important; /* Sopra mobileControls ma sotto scoreInput */
+}
+
+/* Per il main in fullscreen, assicurati che prenda tutto lo spazio */
+body.game-fullscreen-active main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Nasconde eventuali scrollbar del body */
+}
+
+@media (max-width: 768px) {
+    .donkey-runner-page canvas#gameCanvas {
+        max-height: calc(100vh - 180px);
+    }
+}
+@media (max-width: 480px) {
+    .donkey-runner-page canvas#gameCanvas {
+        max-height: calc(100vh - 160px);
+    }
+}
+@media (max-width: 480px) {
+    .donkey-runner-page .control-button {
+        padding: 10px 12px;
+        font-size: 1.1em;
+    }
+}
+@media (max-width: 576px) {
+    .donkey-runner-page #miniLeaderboardContainer {
+        max-width: 100%;
+        padding: 10px;
+    }
+    .donkey-runner-page #miniLeaderboardList li {
+        font-size: 0.85em;
+    }
+    .donkey-runner-page .player-avatar {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* Stili per la modale dei crediti e l'icona */
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(14, 239, 185, 0.8);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 3px rgba(14, 239, 185, 0.3);
+        transform: scale(1);
+    }
+}
+
+.donkey-runner-page .game-instructions-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+    flex-wrap: wrap; // Per andare a capo su schermi piccoli
+}
+
+.donkey-runner-page .instructions-text p {
+    margin: 0.2em 0; // Riduci il margine verticale tra i paragrafi delle istruzioni
+    color: #bdc3c7; // Un grigio chiaro per le istruzioni
+    font-size: 0.9em;
+}
+
+.donkey-runner-page #creditsIconBtn {
+    background-color: transparent;
+    color: #0eaf9b; // Colore icona Teal luminoso
+    border: 2px solid #0b8a8f;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0; // Impedisce al pulsante di rimpicciolirsi
+    animation: pulse-glow 3s infinite ease-in-out;
+    transition: all 0.2s ease-in-out;
+
+    .material-symbols-rounded {
+        font-size: 24px;
+    }
+
+    &:hover {
+        background-color: #0eaf9b;
+        color: #1c1c1c; // Colore testo scuro su hover
+        border-color: #30e1b9;
+        transform: scale(1.1);
+        animation-play-state: paused;
+    }
+}
+
+// Stile per la modale (rimane valido)
+#creditsModal .modal-content {
+    h3 {
+        color: #0eaf9b;
+        margin-top: 0;
+        border-bottom: 1px solid #34495e;
+        padding-bottom: 10px;
+    }
+
+    p {
+        line-height: 1.6;
+    }
+    .credits-gif {
+        display: block;
+        margin: 5px auto 15px auto;
+        width: 72px; // Dimensione adatta per una piccola animazione
+        height: auto;
+        image-rendering: pixelated; // Mantiene lo stile pixel-art se presente
+    }
+
+    .credits-section,
+    .license-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .credits-text {
+        font-size: 1.1em;
+        line-height: 1.5;
+        // --- FIX ---
+        color: #34495e; // << CAMBIATO da #ecf0f1 a un grigio-blu scuro
+
+        strong {
+            // --- FIX ---
+            color: #000000; // << CAMBIATO da #ffffff a nero per massimo risalto
+            font-weight: 600;
+        }
+
+        a {
+            color: #008f8a; // << Leggermente scurito per un miglior contrasto su sfondo chiaro
+            text-decoration: none;
+            font-weight: bold;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    // Stile per il contenitore della licenza
+    #licenseTextContainer {
+        font-size: 0.9em;
+        color: #bdc3c7; // Grigio più chiaro per il testo legale
+        text-align: left;
+        max-height: 150px; // Altezza massima con scroll se il testo è lungo
+        overflow-y: auto;
+        border: 1px solid #34495e;
+        padding: 10px;
+        border-radius: 4px;
+        background-color: #1c1c1c; // Sfondo leggermente diverso
+    }
+}
+
+/* Stili per le Schede Informative Espandibili (Accordion) */
+.donkey-runner-page .info-accordion-container {
+    width: 100%;
+    max-width: 700px; // Stessa larghezza del guestbook per coerenza
+    margin: 30px auto;
+    border: 1px solid #0b8a8f; // Teal scuro per il bordo contenitore
+    border-radius: 6px;
+    background-color: #2c3034; // Uno sfondo scuro per il contenitore
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.donkey-runner-page .accordion-item {
+    border-bottom: 1px solid #0b8a8f; // Separatore tra item
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.donkey-runner-page .accordion-header {
+    background-color: #343a40; // Grigio scuro per l'header
+    color: #ecf0f1; // Testo chiaro
+    cursor: pointer;
+    padding: 15px 20px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    font-size: 1.1em;
+    font-family: 'Source Code Pro', monospace;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &:hover {
+        background-color: #495057; // Leggermente più chiaro in hover
+    }
+
+    &.active {
+        background-color: #0eaf9b; // Teal luminoso quando attivo
+        color: #1c1c1c; // Testo scuro quando attivo
+    }
+
+    .accordion-icon {
+        transition: transform 0.3s ease;
+    }
+
+    &.active .accordion-icon {
+        transform: rotate(180deg);
+    }
+}
+
+.donkey-runner-page .accordion-panel {
+    padding: 0 20px; // Padding solo laterale, il verticale lo dà il contenuto
+    background-color: #1c1e22; // Sfondo leggermente diverso per il pannello
+    max-height: 0;
+    overflow: hidden;
+    transition:
+        max-height 0.3s ease-out,
+        padding 0.3s ease-out; // Transizione fluida
+
+    p {
+        color: #bdc3c7; // Grigio chiaro per il testo interno
+        line-height: 1.6;
+        margin: 15px 0; // Aggiunge spazio verticale quando il pannello è aperto
+    }
+
+    &.open {
+        // max-height impostato da JS per adattarsi al contenuto
+        // Il padding verticale viene ripristinato qui per la transizione
+        padding-top: 15px;
+        padding-bottom: 15px;
+        border-top: 1px solid #0b8a8f; // Separatore visivo quando aperto
+    }
+}
+
+.donkey-runner-page .tutorial-prompt {
+    color: #bdc3c7; // Grigio chiaro
+    font-size: 1em;
+    margin: 0.5em 0;
+
+    a {
+        color: #30e1b9; // Teal brillante
+        text-decoration: underline;
+        font-weight: bold;
+        cursor: pointer;
+
+        &:hover {
+            color: #89ffeb; // Più brillante in hover
+        }
+    }
+}
+
+.donkey-runner-page .accordion-panel .tutorial-content {
+    .tutorial-intro {
+        background-color: #000000; // Sfondo nero per l'effetto terminale
+        border: 1px solid #00ff00; // Bordo verde brillante
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        font-family: 'Source Code Pro', 'Courier New', Courier, monospace;
+        box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+    }
+
+    .terminal-text {
+        color: #00ff00; // Colore testo verde brillante
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+        font-size: 0.95em; // Leggermente più piccolo per l'effetto terminale
+        white-space: pre-wrap; // Mantiene gli spazi, utile per simulare output
+    }
+
+    .danger-text {
+        color: #ff0000; // Rosso per il pericolo
+        font-weight: bold;
+        text-transform: uppercase;
+        animation: blink-danger 1s infinite steps(1, end);
+    }
+
+    @keyframes blink-danger {
+        0%,
+        100% {
+            color: #ff0000;
+        }
+        50% {
+            color: #8b0000;
+        } // Rosso più scuro per il lampeggio
+    }
+
+    .status-ok {
+        color: #39ff14; // Verde neon per status OK
+        font-weight: bold;
+    }
+
+    .glitch-name {
+        color: #ff00ff; // Magenta per il nome del glitch
+        font-weight: bold;
+        animation: text-glitch 0.1s infinite alternate;
+    }
+
+    // Semplice animazione per il nome del glitch (opzionale, può essere più complessa)
+    @keyframes text-glitch {
+        0% {
+            transform: translate(0, 0);
+        }
+        25% {
+            transform: translate(-1px, 1px);
+        }
+        50% {
+            transform: translate(1px, -1px);
+        }
+        75% {
+            transform: translate(1px, 1px);
+        }
+        100% {
+            transform: translate(-1px, -1px);
+        }
+    }
+
+    .lore-text {
+        color: #00dd00; // Un verde leggermente meno aggressivo per la lore
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px dashed #008000; // Separatore verde scuro
+        line-height: 1.6;
+    }
+
+    h4 {
+        color: #0eaf9b; // Teal per i sottotitoli
+        margin-top: 20px; // Aumentato un po' il margine superiore per staccare
+        margin-bottom: 10px; // Aumentato un po' il margine inferiore
+        border-bottom: 1px dashed #34495e;
+        padding-bottom: 8px; // Aumentato padding sotto il bordo
+        font-size: 1.1em; // Leggermente più grande
+    }
+
+    .tutorial-list {
+        // Nuova classe per le liste del tutorial
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 20px; // Aumentato margine inferiore lista
+    }
+
+    .tutorial-list li {
+        display: flex; // Manteniamo flex per la riga principale
+        align-items: flex-start; // Allinea all'inizio per descrizioni lunghe
+        margin-bottom: 12px; // Aumentato spazio tra item
+        line-height: 1.5; // Migliora leggibilità generale
+        font-size: 0.95em; // Leggermente ridotto il font size base del testo descrittivo
+    }
+
+    .key-combo {
+        display: inline-flex; // Per allineare icone e slash
+        align-items: center;
+        margin-right: 12px; // Spazio tra key-combo e descrizione
+        flex-shrink: 0; // Non far restringere questo blocco
+
+        span:not(.key-icon) {
+            // Stile per lo slash "/" o altri testi non-icona
+            margin: 0 4px;
+            color: #868e96; // Grigio per lo slash
+        }
+    }
+
+    .key-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 8px; // Leggermente più padding
+        border: 1px solid #495057;
+        border-radius: 4px;
+        background-color: #343a40;
+        color: #ecf0f1;
+        font-family: 'Source Code Pro', monospace;
+        font-size: 0.9em; // Font per testo tasti
+        min-width: 22px;
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+
+        &.material-symbols-rounded {
+            font-size: 20px;
+            padding: 5px;
+        }
+    }
+
+    .action-desc {
+        color: #bdc3c7; // Colore base per la descrizione
+        flex-grow: 1; // Permette alla descrizione di usare lo spazio rimanente
+
+        strong {
+            // "Salta:", "Spara:", etc.
+            color: #ffffff;
+            font-weight: 600; // Già impostato, ma per chiarezza
+            margin-right: 5px; // Spazio dopo i due punti (se presenti nel testo)
+        }
+    }
+
+    p {
+        color: #bdc3c7;
+        line-height: 1.6;
+        margin: 10px 0 15px 0;
+        font-size: 0.95em; // Applicato anche ai paragrafi generali
+    }
+
+    em {
+        color: #adb5bd;
+    }
+    .glitchpedia-entry {
+        display: flex;
+        align-items: flex-start; // Allinea l'immagine e il testo in alto
+        margin-bottom: 25px; // Spazio tra le voci
+        padding-bottom: 15px; // Padding sotto ogni voce
+        border-bottom: 1px dashed #343a40; // Separatore leggero
+
+        &:last-child {
+            margin-bottom: 5px; // Riduci margine per l'ultima voce
+            padding-bottom: 5px;
+            border-bottom: none;
+        }
+
+        .enemy-gif {
+            width: 64px; // Dimensione standard per le GIF dei nemici
+            height: 64px;
+            object-fit: contain; // Assicura che l'immagine si adatti senza distorsioni
+            margin-right: 15px;
+            border: 1px solid #495057; // Piccolo bordo per le GIF
+            border-radius: 4px;
+            background-color: #2c3034; // Sfondo per le gif se trasparenti
+            flex-shrink: 0; // Non far restringere l'immagine
+            image-rendering: pixelated; // Mantiene lo stile pixel-art
+        }
+
+        .enemy-info {
+            flex-grow: 1;
+            color: #bdc3c7; // Testo grigio chiaro
+
+            h5 {
+                color: #0eaf9b; // Teal per il nome del nemico
+                margin-top: 0;
+                margin-bottom: 8px;
+                font-size: 1.2em; // Nome nemico più grande
+            }
+
+            p {
+                margin-bottom: 6px;
+                font-size: 0.9em; // Testo descrittivo leggermente più piccolo
+                line-height: 1.5;
+
+                strong {
+                    color: #ffffff; // Bianco per evidenziare
+                }
+            }
+        }
+    }
+    .powerup-entry {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #343a40;
+
+        &:last-child {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: none;
+        }
+
+        .powerup-gif {
+            width: 48px; // Leggermente più piccoli degli sprite dei nemici
+            height: 48px;
+            object-fit: contain;
+            margin-right: 15px;
+            border: 1px solid #495057;
+            border-radius: 4px;
+            background-color: #2c3034;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        .powerup-info {
+            flex-grow: 1;
+            color: #bdc3c7;
+
+            h5 {
+                color: #0eaf9b; // Teal
+                margin-top: 0;
+                margin-bottom: 8px;
+                font-size: 1.2em;
+            }
+
+            p {
+                margin-bottom: 6px;
+                font-size: 0.9em;
+                line-height: 1.5;
+
+                strong {
+                    color: #ffffff;
+                }
+            }
+
+            .inline-bullet-gif {
+                width: 24px; // Più piccolo per adattarsi al testo
+                height: auto;
+                vertical-align: middle; // Allinea bene con il testo
+                margin: 0 3px;
+                image-rendering: pixelated;
+            }
+        }
+    }
+    .boss-entry {
+        border-top: 2px solid #ff0000; // Un bordo rosso per segnalare il boss
+        padding-top: 20px; // Più spazio sopra
+
+        .boss-gif {
+            width: 96px; // GIF più grande per il boss
+            height: 96px;
+            border-color: #ff0000; // Bordo rosso anche per la gif del boss
+        }
+
+        .enemy-info h5 {
+            color: #ff0000; // Nome del boss in rosso
+            font-size: 1.3em; // Nome più grande
+        }
+
+        .enemy-info .glitch-name {
+            // Riprendiamo l'animazione glitch per il nome del boss anche qui
+            color: #ff00ff;
+            font-weight: bold;
+            animation: text-glitch 0.1s infinite alternate;
+        }
+    }
+}
+
+/* Stili per il Prompt Orientamento/Fullscreen Mobile */
+.donkey-runner-page #orientationPrompt {
+    display: none; // Controllato da JS
+    position: absolute;
+    bottom: 20px; // Posizionato in basso, sopra i controlli mobili se visibili
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px); // Larghezza quasi totale con un po' di margine
+    max-width: 350px; // Limite per non essere troppo largo
+    background-color: #2c3e50; // Sfondo scuro, simile ad altri elementi UI
+    color: #ecf0f1; // Testo chiaro
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #0eaf9b; // Bordo teal
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    z-index: 180; // Sopra il canvas, ma sotto il form del punteggio o modali principali
+    display: flex; // Per allineare icona e testo
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    .prompt-icon {
+        font-size: 36px;
+        color: #30e1b9; // Icona teal brillante
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.95em;
+        line-height: 1.4;
+    }
+
+    // Stile per il pulsante "Capito!" (riutilizziamo/adattiamo uno stile esistente se possibile)
+    #dismissOrientationPrompt {
+        background-color: #0eaf9b;
+        color: #1a1a1a;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 0.9em;
+        font-weight: 500;
+        cursor: pointer;
+        text-transform: uppercase;
+        margin-top: 5px; // Un po' di spazio sopra il pulsante
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: #30e1b9;
+        }
+    }
+}
+/* ===== Restyle Bottoni Donkey Runner (DR-STYLE-001) ===== */
+
+// Stile base per i bottoni di gioco JMP, SHT, e START mobile
+.donkey-runner-page .control-button,
+.donkey-runner-page #mobileStartButton {
+    font-family: 'Source Code Pro', monospace; // NUOVO FONT
+    background-color: #2c2137; // Viola scuro profondo
+    color: #a1ef8c; // Verde lime brillante
+    border: 3px solid #446176; // Blu-grigio acciaio, PIÙ SPESSO
+    padding: 12px 18px; // Padding per dare dimensione
+    font-size: 1.2em; // Dimensione font per leggibilità
+    text-transform: uppercase;
+    border-radius: 5px; // Leggermente arrotondato
+    box-shadow: 3px 3px 0px #1a1423; // Ombra più scura e netta (derivata dal viola di sfondo)
+    transition: all 0.1s ease-out; // Transizione per tutti gli stati
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+    letter-spacing: 1px; // Un po' di respiro tra le lettere
+
+    &:hover {
+        background-color: #3b2d4a; // Viola leggermente più chiaro
+        color: #c4f0c2; // Verde ancora più brillante
+        box-shadow: 4px 4px 0px #3fac95; // Ombra teal verdastro in hover
+        transform: translate(-1px, -1px); // Leggero sollevamento
+    }
+
+    &:active {
+        background-color: #3fac95; // Teal verdastro quando premuto
+        color: #2c2137; // Testo viola scuro (invertito)
+        box-shadow: 1px 1px 0px #1a1423; // Ombra ridotta
+        transform: translate(2px, 2px); // Effetto "premuto" più marcato
+    }
+}
+
+// Specifiche per i bottoni JMP/SHT se necessario (ad es. dimensioni diverse)
+.donkey-runner-page .control-button {
+    flex-grow: 0;
+    flex-basis: 45%; // Come prima per mantenere il layout a due
+    margin: 0 5px;
+    min-height: 60px; // Assicura un'altezza minima per la cliccabilità
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+@media (max-width: 480px) {
+    .donkey-runner-page .control-button {
+        padding: 10px 12px;
+        font-size: 1.1em; // Leggermente più piccolo su schermi ridotti
+        min-height: 50px;
+    }
+}
+
+// Stili specifici per #mobileStartButton (posizionamento e dimensione)
+.donkey-runner-page #mobileStartButton {
+    // display: none; // Gestito da JS (mantenuto da prima)
+    // position: absolute; // Mantenuto da prima
+    // top: 60%; // Mantenuto da prima
+    // left: 50%; // Mantenuto da prima
+    // transform: translate(-50%, -50%); // Mantenuto da prima
+    // z-index: 100; // Mantenuto da prima
+
+    padding: 15px 30px; // Padding specifico per il pulsante START
+    font-size: 1.6em; // Font più grande per START
+    // Nota: le regole di posizionamento sono commentate qui perché dovrebbero già esistere
+    // nel tuo file. Se non ci sono, decommentale o assicurati che siano definite.
+}
+
+/* ===== Restyle Bottoni Form Punteggio (DR-STYLE-001) ===== */
+
+.donkey-runner-page #scoreInputContainerDonkey .score-buttons {
+    // Manteniamo il flex per allineare i bottoni
+    display: flex;
+    gap: 10px;
+    margin-top: 10px; // O il valore che preferisci
+
+    // Stile unificato per i bottoni Salva e Rigioca nel form del punteggio
+    #saveScoreBtnDonkey,
+    #restartGameBtnDonkey {
+        font-family: 'Source Code Pro', monospace; // NUOVO FONT
+        background-color: #2c2137; // Viola scuro profondo
+        color: #a1ef8c; // Verde lime brillante
+        border: 2px solid #446176; // Blu-grigio acciaio (leggermente meno spesso dei control-button per differenziare)
+        padding: 10px 18px; // Padding leggermente diverso per adattarsi al contesto del form
+        font-size: 0.95em; // Dimensione font per leggibilità nel form
+        text-transform: uppercase;
+        border-radius: 5px;
+        box-shadow: 2px 2px 0px #1a1423; // Ombra più scura e netta
+        transition: all 0.1s ease-out;
+        user-select: none;
+        -webkit-user-select: none;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        min-width: 90px; // Larghezza minima per accomodare testo e icona
+        height: 42px; // Altezza fissa per allineamento
+        display: inline-flex; // Per centrare l'icona o il testo
+        align-items: center;
+        justify-content: center;
+        margin: 0; // Rimuoviamo il margin individuale, gestito dal gap del parent
+
+        &:hover {
+            background-color: #3b2d4a;
+            color: #c4f0c2;
+            box-shadow: 3px 3px 0px #3fac95;
+            transform: translate(-1px, -1px);
+        }
+
+        &:active {
+            background-color: #3fac95;
+            color: #2c2137;
+            box-shadow: 1px 1px 0px #1a1423;
+            transform: translate(1px, 1px); // Leggermente meno "schiacciato" dei control-button
+        }
+
+        // Stile specifico per l'icona dentro il pulsante Rigioca
+        .material-symbols-rounded {
+            font-size: 20px; // Dimensione icona
+            // Non serve vertical-align con flex
+        }
+    }
+
+    // Se vuoi differenziare #saveScoreBtnDonkey (es. colore primario diverso)
+    // #saveScoreBtnDonkey {
+    //     // Esempio:
+    //     // background-color: #3fac95;
+    //     // color: #1a1423;
+    //     // border-color: #2c2137;
+    //
+    //     // &:hover { ... }
+    //     // &:active { ... }
+    // }
+}
+
+/* Pulsante "Invia Commento" nel guestbook */
+.donkey-runner-page #guestbook #submitCommentBtn {
+    font-family: var(--font-family-ui, 'Space Grotesk', sans-serif);
+    /* Potresti voler aggiustare padding o font-size se il nuovo font lo richiede per allinearsi agli altri bottoni del sito */
+    /* Esempio:
+    font-size: 0.9rem;
+    padding: 10px 18px;
+    text-transform: none; /* O mantieni uppercase se preferisci */
+}
+
+/* Pulsanti "Segnala Bug" e "Proponi un'Idea" nella sezione CTA */
+.donkey-runner-page #contribution-cta-section .game-button {
+    font-family: var(--font-family-ui, 'Space Grotesk', sans-serif);
+    /* Esempio di aggiustamenti simili, se necessari:
+    font-size: 0.9rem;
+    padding: 10px 18px;
+    text-transform: none;
+    */
+}

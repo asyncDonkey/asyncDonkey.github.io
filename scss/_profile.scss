@@ -1,0 +1,808 @@
+/* ===== Sezione Profilo Utente (profile.html) ===== */
+section#profile {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+
+    // Assicura che i figli diretti della section#profile siano blocchi e abbiano spazio sotto
+    // Questo include #badgesSection, #profileContent (o il suo wrapper se ne hai uno), #myArticlesSection
+    > div,
+    > section {
+        // Si applica a #badgesSection, #profileContentContainer (ipotetico), #myArticlesSection, ecc.
+        width: 100%;
+        margin-bottom: 35px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    // Titolo principale della sezione profilo (h2#profileSectionTitle)
+    > h2#profileSectionTitle {
+        font-size: 1.8em;
+        color: var(--heading-color);
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color-primary);
+    }
+
+    // Stile base per gli H3 diretti figli di #profile o dentro i suoi contenitori principali
+    h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.4em;
+        color: var(--heading-color);
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color-secondary);
+    }
+}
+
+// Contenitore per i contenuti specifici del profilo (dettagli, bio, stato, link)
+// Assumendo che questo ID esista o che tu abbia un wrapper simile
+#profileContentContainer, // Se usi il wrapper che ti ho mostrato nell'HTML
+#profileContent {
+    // Fallback se #profileContent è ancora il contenitore diretto
+    width: 100%; // Assicura che occupi tutta la larghezza disponibile
+
+    // Assicura che i figli diretti (es. .profile-main-details-container, .profile-input-box) siano blocchi
+    > div,
+    > section {
+        // Si applica a .profile-main-details-container, .profile-input-box
+        width: 100%;
+        margin-bottom: 25px; // Spazio tra questi blocchi interni
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Contenitore dei dettagli principali (avatar, info testuali)
+.profile-main-details-container {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap; // Permette di andare a capo su schermi piccoli
+    gap: 25px;
+    // margin-bottom: 30px; // Spazio gestito dal genitore #profileContent > div
+
+    .profile-avatar-column {
+        flex-basis: 130px;
+        flex-shrink: 0;
+        text-align: center;
+
+        #profileAvatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            image-rendering: pixelated;
+            background-color: var(--surface-bg-secondary);
+            border: 2px solid var(--border-color-secondary);
+            object-fit: cover;
+            margin: 0 auto 10px auto;
+        }
+
+        #avatarUploadSection {
+            margin-top: 10px;
+            .game-button.small {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+        }
+    }
+
+    #profileDetailsDisplay {
+        flex-grow: 1;
+        min-width: 250px;
+
+        h3 {
+            // Titolo "Dettagli Utente"
+            margin-bottom: 12px;
+            font-size: 1.2em;
+            border-bottom: none;
+            padding-bottom: 0;
+            color: var(--text-color-primary);
+        }
+
+        p {
+            margin-bottom: 10px;
+            font-size: 1em;
+            strong {
+                color: var(--text-color-primary);
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+#profileNationality .fi {
+    display: inline-block;
+    width: 1.33333333em;
+    height: 1em;
+    line-height: 1em;
+    vertical-align: -0.15em;
+    background-size: contain;
+    background-position: 50%;
+    background-repeat: no-repeat;
+}
+
+/* Stili Unificati e Responsivi per Sezioni Input Profilo (Status, Bio, Link, etc.) */
+.profile-input-box {
+    // margin-bottom: 25px; // Spazio gestito da #profileContent > div o section#profile > div
+    padding: 20px;
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-secondary);
+    border-radius: 8px;
+    width: 100%; // Assicura che occupi tutta la larghezza
+    box-sizing: border-box; // Importante se usi padding e width 100%
+
+    h3 {
+        // Titoli interni ai box (Mini-Bio, Stato d'Animo, Link Esterni)
+        margin-top: 0; // Sovrascrive l'h3 generale di section#profile se necessario
+        margin-bottom: 15px;
+        font-size: 1.2em;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color-light);
+    }
+
+    #bioDisplay,
+    #statusMessageDisplay {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        padding: 12px 15px;
+        background-color: var(--surface-bg-secondary);
+        border: 1px solid var(--border-color-secondary);
+        border-radius: 6px;
+        min-height: 3em;
+        margin-bottom: 15px;
+        color: var(--text-color-secondary);
+        font-style: italic;
+
+        &:has(p) {
+            padding: 0;
+            border: none;
+            background-color: transparent;
+            min-height: auto;
+            font-style: normal;
+            p {
+                color: var(--text-color-muted);
+            }
+        }
+    }
+
+    .input-field {
+        // Si applica sia a input[type=text] che a textarea
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--input-border-color, var(--border-color-primary));
+        border-radius: 6px;
+        background-color: var(--input-bg, var(--surface-bg-primary));
+        color: var(--text-color-primary);
+        font-family: inherit;
+        font-size: 1em;
+        transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
+        resize: vertical; // Per textarea
+        margin-bottom: 10px;
+        box-sizing: border-box;
+
+        &:focus {
+            outline: none;
+            border-color: var(--link-color);
+            box-shadow: 0 0 0 3px rgba(var(--link-color-rgb), 0.25);
+        }
+
+        &::placeholder {
+            color: var(--text-color-muted);
+        }
+    }
+
+    // Layout per il form dello Stato d'Animo
+    #updateStatusForm {
+        .input-action-container {
+            // Questo div non è più strettamente necessario se impiliamo di default
+            // Se vuoi ancora il div per raggruppare input e bottone semanticamente:
+            // display: flex; // Rimosso per impilare
+            // flex-direction: column;
+            // align-items: stretch;
+            // gap: 10px;
+        }
+        // L'input field prenderà stile da .input-field
+        // #statusMessageInput { margin-bottom: 10px; // Spazio prima del bottone }
+
+        .game-button {
+            // Bottone "Aggiorna" per lo stato
+            width: 100%;
+            margin-top: 0; // Se l'input ha già margin-bottom
+        }
+        .form-actions {
+            // Contenitore per il messaggio di update
+            justify-content: center;
+            min-height: 1.5em;
+            margin-top: 10px; // Spazio sopra il messaggio
+        }
+    }
+
+    .form-actions {
+        // Stile generale per i contenitori di azioni dei form
+        margin-top: 15px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 15px;
+    }
+
+    #updateBioForm .form-actions {
+        // Specifico per la Bio
+        justify-content: space-between;
+        .game-button {
+            min-width: 120px;
+        }
+    }
+
+    #bioCharCount {
+        font-size: 0.85em;
+        color: var(--text-color-muted);
+    }
+
+    .update-message {
+        font-size: 0.9em;
+        color: var(--text-color-muted);
+        font-style: italic;
+        flex-grow: 1;
+    }
+
+    @media (max-width: 768px) {
+        // Il form dello stato è già impilato di default ora.
+
+        #updateBioForm .form-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+            gap: 12px;
+
+            .game-button {
+                width: 100%;
+            }
+            #bioCharCount {
+                text-align: center;
+            }
+        }
+    }
+}
+
+/* Stili per la Sezione Riconoscimenti (badgesSection) */
+#badgesSection {
+    // max-width, margin-left/right, padding-left/right sono ereditati da section#profile
+    // border-bottom e padding-bottom sono gestiti da section#profile > div
+    // margin-bottom è gestito da section#profile > div
+
+    h3 {
+        // Titolo "Riconoscimenti Ottenuti"
+        font-size: 1.2em;
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 15px;
+    }
+}
+
+#badgesDisplayContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-start;
+}
+
+.badge-icon-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-secondary);
+    cursor: pointer;
+    transition:
+        transform 0.2s ease-out,
+        box-shadow 0.2s ease-out;
+    min-width: 48px;
+    min-height: 48px;
+    box-sizing: border-box;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .material-symbols-rounded {
+        font-size: 2em;
+        line-height: 1;
+    }
+
+    & .author-rookie-icon-animated {
+        // Specifico per l'icona dentro .badge-icon-item
+        animation: soft-color-pulse 3s infinite ease-in-out;
+    }
+    & .verified-user-icon-pulse {
+        // Applica all'icona (.material-symbols-rounded)
+        animation: verified-user-pulse 2.5s infinite ease-in-out;
+    }
+}
+
+@keyframes soft-color-pulse {
+    0%,
+    100% {
+        color: var(--bs-teal);
+    } // Colore come da palette originale per 'author-rookie'
+    50% {
+        color: #66d9b8;
+    } // Tonalità più chiara per l'effetto pulse
+}
+
+/* Stili per la sezione "I Miei Articoli" */
+#myArticlesSection {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    margin-top: 0;
+
+    h3 {
+        // Titolo "I Miei Articoli" (prima era h2)
+        // Stili già definiti in section#profile h3, ma puoi sovrascrivere se necessario
+        font-size: 1.3em;
+        margin-bottom: 20px; // Spazio prima delle sottosezioni di articoli
+    }
+
+    .my-articles-subsection {
+        margin-bottom: 25px;
+
+        .my-articles-subsection-title {
+            // Titoli h4 per Bozze, In Revisione etc.
+            color: var(--heading-color-secondary, var(--text-color-primary));
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color-light);
+        }
+    }
+}
+
+.my-articles-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding-top: 10px;
+}
+
+.my-article-profile-card {
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+    transition:
+        transform 0.2s ease-out,
+        box-shadow 0.2s ease-out;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.my-article-card-title {
+    font-size: 1.15em;
+    color: var(--heading-color);
+    margin-top: 0;
+    margin-bottom: 8px;
+    word-break: break-word;
+}
+
+.my-article-card-meta {
+    font-size: 0.8em;
+    color: var(--text-color-muted);
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.my-article-card-status {
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin-bottom: 4px;
+    text-align: center;
+
+    // Classi specifiche per status
+    &.status-draft {
+        background-color: var(--surface-bg-primary);
+        border: 1px dashed var(--text-color-muted);
+        color: var(--text-color-muted);
+        font-style: italic;
+    }
+    &.status-pendingReview {
+        background-color: rgba(255, 160, 0, 0.1);
+        border: 1px dashed #ffa000;
+        color: #ffa000;
+        font-style: italic;
+    }
+    &.status-published {
+        background-color: rgba(56, 142, 60, 0.1);
+        border: 1px dashed #388e3c;
+        color: #388e3c;
+    }
+    &.status-rejected {
+        background-color: rgba(211, 47, 47, 0.1);
+        border: 1px dashed #d32f2f;
+        color: #d32f2f;
+    }
+    &.status-unknown {
+        background-color: var(--text-color-muted);
+        color: var(--button-text-primary);
+    }
+}
+
+.my-article-card-rejection-reason {
+    font-size: 0.85em;
+    color: var(--text-color-primary);
+    background-color: var(--bg-color);
+    padding: 8px;
+    border-left: 3px solid var(--link-color);
+    margin-top: 8px;
+    margin-bottom: 8px;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+}
+
+.my-article-card-actions {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color-primary);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.my-article-action-button {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    // Assicurati che erediti da .game-button o abbia stili base simili
+    &.delete {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        &:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+    }
+}
+
+/* Stili per Link Esterni (dentro .profile-input-box) */
+#externalLinksSection {
+    // Non servono più stili specifici di margine/padding/bordo qui
+    // perché .profile-input-box li gestisce
+    h3 {
+        /* Già stilizzato da .profile-input-box h3 */
+    }
+}
+.external-links-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+.external-links-list li {
+    background-color: var(--surface-bg-secondary);
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.external-links-list .link-display a {
+    font-weight: 500;
+    color: var(--link-color);
+    text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    }
+}
+.external-links-list .link-url {
+    font-size: 0.85em;
+    color: var(--text-color-muted);
+    margin-left: 10px;
+    word-break: break-all;
+}
+.external-links-list .link-actions button {
+    margin-left: 8px;
+    padding: 4px 8px;
+    font-size: 0.85em;
+}
+#externalLinkFormContainer {
+    background-color: var(--surface-bg-secondary);
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+    border: 1px solid var(--border-color-primary);
+    div {
+        margin-bottom: 10px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    input[type='text'],
+    input[type='url'] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--border-color-primary);
+        border-radius: 4px;
+        box-sizing: border-box; // Aggiunto per coerenza con .input-field
+    }
+}
+#externalLinkError {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+.form-actions-links {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.external-links-list {
+    li {
+        // La li è già display: flex, justify-content: space-between, align-items: center
+        // Questo è buono. Assicuriamoci che l'icona e il testo del link stiano bene insieme.
+        gap: 10px; // Aggiunge un po' di spazio tra icona+testo e i bottoni di azione
+
+        // Contenitore per icona e testo del link
+        // Dobbiamo creare questo se l'icona e il .link-display sono fratelli diretti
+        // Se l'icona è DENTRO .link-display, allora .link-display ha bisogno di display:flex
+        // Basandomi sulla modifica JS, l'icona è un fratello di .link-display all'interno del <li>.
+        // Quindi il flex sul <li> dovrebbe allinearli orizzontalmente.
+
+        // Stile per l'icona effettiva (classe base aggiunta via JS)
+        .external-link-icon-base-style {
+            font-size: 1.4em; // Dimensione dell'icona
+            margin-right: 8px; // Spazio tra icona e il testo del link
+            line-height: 1; // Per un buon allineamento verticale
+            flex-shrink: 0; // Impedisce all'icona di restringersi
+        }
+
+        .link-display {
+            flex-grow: 1; // Permette al testo del link di occupare lo spazio rimanente
+            display: flex; // Per allineare il titolo e l'hostname (se visibile)
+            align-items: center;
+            flex-wrap: nowrap; // Evita che titolo e hostname vadano a capo se non c'è spazio
+            overflow: hidden; // Nasconde l'overflow del testo
+
+            a {
+                // Stili esistenti vanno bene, potremmo aggiungere:
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis; // Se il titolo del link è troppo lungo
+                margin-right: 5px;
+            }
+            .link-url {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .link-actions {
+            flex-shrink: 0; // Impedisce ai bottoni di restringersi
+        }
+    }
+}
+
+// Stili obsoleti o ridondanti da #profileUpdateForm (commentati o rimossi)
+// #profileUpdateForm div { /* ... */ }
+// #profileUpdateForm label { /* ... */ }
+// #profileUpdateForm input[type='text'] { /* ... */ }
+// #profileUpdateForm button[type='submit'].game-button { /* ... */ }
+
+#profileMessage {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+/* Stili Modali (non modificati qui, ma assicurati che siano corretti) */
+.badge-detail-modal-content {
+    padding: 25px;
+}
+#badgeDetailModalIcon.testo-neon-arcade {
+    // Se vuoi animazioni neon specifiche per la modale, aggiungile qui
+}
+
+.button-modal-confirm,
+.button-modal-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 1em;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    color: white;
+}
+.button-modal-confirm {
+    background-color: #28a745;
+    &:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+}
+.button-modal-cancel {
+    background-color: #6c757d;
+    &:hover {
+        background-color: #5a6268;
+    }
+}
+
+// Stili per il contenitore Nickname e Icona Modifica
+.nickname-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+
+    strong {
+        margin-right: 5px;
+    }
+
+    #currentNickname {
+        // Eventuali stili specifici per il nickname se necessario
+    }
+
+    // Stile specifico per i bottoni-icona nel container nickname usando il loro ID
+    #requestNicknameChangeBtn,
+    #customizeNicknameBtn {
+        // Applicato a entrambi gli ID
+        background-color: transparent;
+        border: none;
+        padding: 4px;
+        margin-left: 8px;
+        cursor: pointer;
+        color: var(--link-color);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1; // Aggiunto per un miglior allineamento verticale dell'icona
+
+        .material-symbols-rounded {
+            font-size: 20px;
+            transition: color 0.2s ease;
+            vertical-align: middle; // Migliora allineamento icona
+        }
+
+        &:hover .material-symbols-rounded {
+            color: var(--link-hover-color);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--link-color);
+            outline-offset: 2px;
+        }
+    }
+}
+
+// Stili per la modale di cambio nickname (se servono stili più specifici oltre a _modals.scss)
+#requestNicknameChangeModal {
+    .modal-content {
+        // Eventuali sovrascritture o aggiunte specifiche per questa modale
+        // Ad esempio, se vuoi che sia leggermente più larga o più stretta di default
+    }
+
+    #newNicknameInput {
+        // Già stilizzato da .input-field, ma puoi aggiungere specificità se serve
+        margin-bottom: 5px; // Riduci un po' il margine inferiore per far posto all'hint
+    }
+
+    .input-hint {
+        font-size: 0.8em;
+        color: var(--text-color-muted);
+        display: block; // Assicura che vada a capo
+        margin-top: 2px; // Piccolo spazio sopra l'hint
+        margin-bottom: 10px; // Spazio sotto l'hint prima del messaggio di errore
+    }
+
+    .error-message {
+        min-height: 1.2em; // Per evitare salti di layout quando appare/scompare
+    }
+
+    // Potresti voler aggiungere stili per #nicknameChangeRequestSentView, #nicknameChangeCooldownView, etc.
+    // se hanno bisogno di un layout diverso da quello base.
+    #nicknameChangeRequestSentView,
+    #nicknameChangeCooldownView,
+    #nicknameChangeProcessedView {
+        text-align: center;
+        padding: 10px 0;
+        p {
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        h4 {
+            color: var(--success-color, green); // O un altro colore a seconda del tema
+            margin-bottom: 15px;
+        }
+    }
+    #nicknameChangeCooldownView h4 {
+        color: var(--warning-color, orange);
+    }
+}
+
+.cooldown-timer {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--accent-color-secondary); // O un colore che preferisci
+    text-align: center;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: var(--surface-bg-secondary);
+    border-radius: 4px;
+}
+.section-header-interactive {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px; // Spazio tra l'header e il contenitore dei badge
+
+    h3 {
+        margin-bottom: 0; // Rimuove il margine da h3 perché gestito dal genitore
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .icon-button#badgesInfoBtn {
+        background-color: transparent;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        color: var(--text-color-muted);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        .material-symbols-rounded {
+            font-size: 24px;
+            transition: color 0.2s ease;
+        }
+
+        &:hover {
+            color: var(--link-color);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--link-color);
+            outline-offset: 2px;
+        }
+    }
+}
+
+#badgesSection h3 {
+    // Rimuoviamo il margin-bottom da qui ora che è gestito da .section-header-interactive
+    // Questo previene doppi margini nel caso l'header non venga usato altrove
+    margin-bottom: 0;
+}

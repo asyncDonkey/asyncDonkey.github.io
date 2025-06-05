@@ -1,0 +1,716 @@
+/* ===== Header Styles ===== */
+header {
+    background-color: var(--surface-bg-primary);
+    padding: 10px 5%;
+    border-bottom: 1px solid var(--border-color-primary);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    transition:
+        background-color 0.3s,
+        border-color 0.3s;
+    position: relative; /* <-- AGGIUNGI QUESTO! */
+}
+header .avatar img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color-avatar);
+    display: block;
+}
+header .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-grow: 1;
+    flex-wrap: nowrap;
+    gap: 20px;
+}
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 20px;
+}
+header h1 {
+    font-size: 1.6em;
+    margin: 0;
+    color: var(--heading-color);
+    white-space: nowrap;
+}
+header .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+header nav {
+    margin-left: 0;
+}
+header nav ul {
+    list-style-type: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+header nav a {
+    color: var(--text-color-secondary);
+    font-weight: 500;
+}
+header nav a:hover {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+/* Authentication related styles in Header */
+#authSection {
+    display: flex;
+    align-items: center;
+}
+#authContainer {
+    display: flex;
+    gap: 8px;
+}
+#userProfileContainer {
+    display: flex;
+    align-items: center; /* Già presente, ma per chiarezza */
+    gap: 8px; /* Spazio tra avatar, nome, e bottoni profilo/logout */
+} /* JS gestirà la visibilità */
+#userProfileContainer span {
+    color: var(--text-color-primary);
+    font-size: 1.2rem;
+    margin-right: 0px;
+    white-space: nowrap;
+}
+#headerUserAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 8px;
+    background-color: #eee;
+    display: none; /* JS gestirà la visibilità */
+    vertical-align: middle;
+    object-fit: cover;
+    border: 1px solid var(--border-color-secondary);
+    flex-shrink: 0;
+
+    /* --- INIZIO MODIFICHE --- */
+    cursor: pointer;
+    transition:
+        transform 0.2s ease-in-out,
+        box-shadow 0.2s ease-in-out;
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 8px var(--accent-color-light);
+    }
+    /* --- FINE MODIFICHE --- */
+}
+.auth-button {
+    background-color: transparent;
+    border: 1px solid var(--text-color-muted);
+    color: var(--text-color-secondary);
+    padding: 6px 12px; /* Padding di default */
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em; /* ~14.4px se base è 16px */
+    transition: all 0.2s ease;
+    text-decoration: none;
+
+    /* Proprietà Flex per centrare il contenuto INTERNO */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle; /* Aggiunto per coerenza con altri bottoni nav */
+    box-sizing: border-box;
+    white-space: nowrap; /* Evita che testo+icona vada a capo se c'è */
+}
+.auth-button:hover {
+    border-color: var(--link-color);
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+header .auth-button.nav-link-icon-text .material-symbols-rounded {
+    margin-right: 6px; /* Spazio tra icona e testo per bottoni con testo */
+}
+
+/* === Navbar Styles === */
+header .desktop-nav {
+    display: flex;
+    align-items: center; /* Aggiunto per allineare verticalmente i link se hanno altezze diverse */
+}
+
+/* Stili base per Material Symbols nella navbar */
+.auth-button .material-symbols-rounded {
+    /*
+        La dimensione dell'icona è critica.
+        Material Symbols di default può prendere la dimensione del font del suo genitore.
+        Se .auth-button ha font-size: 0.9em, e l'icona ha font-size: 1.5em,
+        l'icona sarà 1.5 * (0.9em del font-size del *contenitore* di .auth-button).
+        Assicuriamoci che l'icona sia abbastanza grande da essere visibile e centrabile.
+    */
+    font-size: 1rem; /* Prova una dimensione FISSA IN PIXEL per l'icona */
+    /* Se .auth-button.nav-link-icon-only è 38x38px, un'icona da 22-24px dovrebbe centrarsi bene */
+    line-height: 1; /* Molto importante per il centraggio verticale dei font icona */
+    margin: 0; /* Nessun margine sull'icona stessa */
+    padding: 0; /* Nessun padding sull'icona stessa */
+    /* vertical-align: middle; -- non necessario se il genitore è flex e usa align-items */
+    /* display: block; -- non necessario se il genitore è flex e usa align-items/justify-content */
+}
+
+.auth-button.nav-link-icon-only {
+    padding: 0; /* Sovrascrivi il padding per un controllo preciso */
+    width: 2rem; /* Adatta questa dimensione! Deve essere sufficiente per l'icona + un po' di respiro */
+    height: 2rem; /* Uguale a width per un cerchio/quadrato */
+    border-radius: 50%; /* Per renderlo circolare */
+    /* justify-content: center; e align-items: center; sono ereditati da .auth-button */
+}
+
+header .nav-link-icon-text .material-symbols-rounded {
+    margin-right: 6px; /* Spazio tra icona e testo */
+}
+
+/* Nasconde il testo per i link solo-icona, ma lo span .visually-hidden rimane per screen reader */
+header .nav-link-icon-only .nav-text,
+header .nav-link-icon-only .nav-text-desktop {
+    display: none;
+}
+header .nav-link-icon-only .material-symbols-rounded {
+    margin-right: 0; /* Nessun margine se solo icona */
+}
+
+/* Dropdown Desktop "Community" */
+.nav-dropdown-container {
+    position: relative;
+}
+
+.dropdown-toggle .dropdown-arrow {
+    font-size: 1.5em; /* Adatta se l'icona arrow_drop_down sembra troppo piccola/grande */
+    vertical-align: middle;
+    transition: transform 0.2s ease-in-out;
+}
+
+.dropdown-toggle[aria-expanded='true'] .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* Potrebbe essere necessario assicurarsi che l'icona stessa non abbia margini che la spingono */
+.auth-button .material-symbols-rounded {
+    font-size: 1.5em; /* Icona sarà 1.5 * (font-size di .auth-button = 0.9em) */
+    /* Se font-size base è 16px -> 0.9*16 = 14.4px. Icona = 1.5 * 14.4px = 21.6px */
+    line-height: 1; /* Evita spazio extra verticale */
+    margin: 0; /* Assicura che non ci siano margini sull'icona stessa */
+    /* vertical-align: middle; non più strettamente necessario con flex, ma può rimanere per sicurezza */
+}
+
+.auth-button.nav-link-icon-only .visually-hidden {
+    display: none !important; /* Forza la non visualizzazione se .visually-hidden standard non basta */
+}
+
+.article-like-btn {
+    padding-top: 0.5em; /* Per centrare verticalmente l'icona */
+    padding-bottom: 0.1em; /* Per centrare verticalmente l'icona */
+    padding-left: 0.5em; /* Per centrare verticalmente l'icona */
+    padding-right: 0.5em; /* Per centrare verticalmente l'icona */
+}
+
+.dropdown-menu {
+    display: none; /* Gestito da JS */
+    position: absolute;
+    top: calc(100% + 5px); /* Posizionamento sotto il bottone toggle */
+    left: 0;
+    z-index: 1000;
+
+    /* Rendi il contenitore UL completamente trasparente e senza stili propri evidenti */
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0; /* Il padding sarà sugli item individuali */
+    margin: 0;
+    list-style: none;
+    min-width: auto; /* Lascia che la larghezza sia determinata dagli item */
+}
+
+.dropdown-menu li {
+    margin: 0; /* Rimuovi margini di default */
+    padding: 0; /* Rimuovi padding di default */
+    /* Puoi aggiungere un piccolo margine inferiore qui se vuoi più spazio verticale TRA le "pillole" */
+    margin-bottom: 3px; /* Esempio: piccolo spazio tra un link e l'altro */
+}
+
+.dropdown-menu li:last-child {
+    margin-bottom: 0; /* Rimuovi margine dall'ultimo item */
+}
+
+.dropdown-menu li a.dropdown-item {
+    display: flex; /* Per allineare icona e testo */
+    align-items: center;
+    padding: 10px 15px; /* Padding interno al link */
+    text-decoration: none;
+    color: var(--text-color-primary);
+    white-space: nowrap; /* Evita che il testo del link vada a capo */
+
+    /* Applica qui lo stile "pillola" */
+    background-color: var(--surface-bg-primary); /* Sfondo per ogni item */
+    border: 1px solid var(--border-color-secondary); /* Bordo per ogni item */
+    border-radius: 4px; /* Angoli arrotondati per ogni item */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.07); /* Ombra leggera per ogni item */
+
+    transition:
+        background-color 0.2s,
+        color 0.2s,
+        border-color 0.2s;
+}
+
+.dropdown-menu li a.dropdown-item:hover {
+    background-color: var(--surface-bg-secondary);
+    color: var(--link-hover-color);
+    border-color: var(--link-color); /* Opzionale: cambia colore bordo su hover */
+}
+
+.dropdown-menu li a.dropdown-item .material-symbols-rounded {
+    /* CAMBIATO QUI */
+    margin-right: 10px;
+}
+
+/* Pulsante Hamburger e Menu Mobile */
+.navbar-toggler {
+    display: none; /* Nascosto su desktop */
+    background: none;
+    border: none;
+    color: var(--text-color-primary);
+    font-size: 2em;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1; /* Per centrare meglio l'icona hamburger */
+}
+.navbar-toggler:hover,
+.navbar-toggler:focus {
+    background-color: var(--surface-bg-secondary);
+}
+.navbar-toggler .material-symbols-rounded {
+    /* CAMBIATO QUI */
+    font-size: 1em; /* L'icona erediterà la dimensione dal font-size del bottone */
+    vertical-align: middle;
+}
+
+.mobile-nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.mobile-nav-menu ul li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--text-color-primary);
+    border-bottom: 1px solid var(--border-color-secondary);
+}
+.mobile-nav-menu ul li a:hover {
+    background-color: var(--surface-bg-secondary);
+    color: var(--link-hover-color);
+}
+.mobile-nav-menu ul li a .material-symbols-rounded {
+    /* CAMBIATO QUI */
+    margin-right: 12px;
+    font-size: 1.4em;
+    vertical-align: middle;
+}
+.mobile-nav-menu ul li:last-child a {
+    border-bottom: none;
+}
+
+/* Stile per nascondere elementi solo visivamente per screen reader */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- Mobile Navigation Menu --- */
+
+/* Stile base per il contenitore del menu mobile (#mobileNavMenu) */
+.mobile-nav-menu {
+    /* Questo è l'ID #mobileNavMenu nel tuo HTML */
+    display: none; /* Nascosto di default */
+    position: absolute;
+    top: 100%; /* Si posiziona sotto l'header (grazie a position:relative sull'header) */
+    left: 0;
+    right: 0;
+    background-color: var(--surface-bg-primary, #fff); /* Usa var, fallback a bianco */
+    z-index: 1000; /* Sopra gli altri contenuti */
+    border-top: 1px solid var(--border-color-primary, #ddd);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: calc(100vh - 70px); /* Altezza massima (viewport meno un po' per l'header) */
+    overflow-y: auto; /* Scroll se il contenuto è troppo lungo */
+}
+
+/* Quando il menu mobile è attivo (classe .active aggiunta da JS) */
+.mobile-nav-menu.active {
+    display: block; /* Rende visibile il menu */
+}
+
+/* Stile per la lista UL generata da JS dentro #mobileNavMenu */
+.mobile-nav-menu .mobile-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Stile per ogni elemento LI e LINK A dentro la lista mobile */
+.mobile-nav-menu .mobile-menu-list li a,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle {
+    /* Stile anche per i toggle dei sottomenu */
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: var(--text-color-primary, #333); /* Colore testo primario */
+    border-bottom: 1px solid var(--border-color-secondary, #eee); /* Separatore */
+    gap: 12px; /* Spazio tra icona e testo */
+    transition:
+        background-color 0.2s ease-in-out,
+        color 0.2s ease-in-out;
+}
+
+.mobile-nav-menu .mobile-menu-list li a .material-symbols-rounded,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle .material-symbols-rounded {
+    font-size: 1.4em; /* Dimensione icone */
+}
+
+.mobile-nav-menu .mobile-menu-list li a:hover,
+.mobile-nav-menu .mobile-menu-list li .dropdown-toggle:hover {
+    background-color: var(--surface-bg-secondary, #f5f5f5);
+    color: var(--link-hover-color, #0056b3);
+}
+
+.mobile-nav-menu .mobile-menu-list li:last-child > a,
+.mobile-nav-menu .mobile-menu-list li:last-child > .dropdown-toggle {
+    border-bottom: none; /* Rimuovi bordo per l'ultimo elemento di primo livello */
+}
+
+/* Stile per il sottomenu del dropdown "Community" mobile */
+.mobile-nav-menu .mobile-menu-list .mobile-submenu {
+    list-style: none;
+    padding-left: 20px; /* Indentazione */
+    margin: 0;
+    background-color: var(--bg-color, #f9f9f9); /* Sfondo leggermente diverso */
+    /* display: none; è gestito da JavaScript per il toggle */
+}
+
+.mobile-nav-menu .mobile-menu-list .mobile-submenu li a {
+    padding: 12px 20px 12px 15px; /* Padding aggiustato per sottomenu */
+    border-bottom: 1px solid var(--border-color-secondary, #f0f0f0); /* Separatore più leggero */
+    font-size: 0.95em; /* Testo leggermente più piccolo per sottomenu */
+}
+
+.mobile-nav-menu .mobile-menu-list .mobile-submenu li a:last-child {
+    border-bottom: none; /* Rimuovi il bordo dall'ultimo item del sottomenu */
+}
+
+/* Assicurati che il testo del link sia visibile e non solo l'icona se c'è .nav-text */
+.mobile-nav-menu .nav-text {
+    display: inline; /* O flex-grow: 1; se vuoi che occupi lo spazio rimanente */
+}
+.mobile-nav-menu .visually-hidden {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0 0 0 8px; /* Aggiungi margine a sinistra se vuoi spazio dopo l'icona */
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    display: inline;
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px 3%;
+    }
+    header .header-content {
+        width: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        gap: 20px;
+    }
+    header .header-controls {
+        width: 100%;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+        margin-left: 0;
+    }
+    header nav {
+        margin-left: 0;
+    } /* Inutile se i controlli sono in colonna, ma non fa danno */
+    main section {
+        width: 95%;
+        padding: 20px 15px;
+    }
+    .project,
+    .team-member {
+        flex-basis: 100%;
+        min-width: unset;
+    }
+    h1,
+    header h1 {
+        font-size: 1.5em;
+    }
+    main h2 {
+        font-size: 1.4em;
+    }
+    #authSection {
+        margin-top: 10px;
+        justify-content: center;
+        width: 100%;
+    } /* Centro auth section */
+    #userProfileContainer {
+        justify-content: center;
+    } /* Centro user profile */
+}
+
+@media (max-width: 576px) {
+    header nav ul {
+        gap: 10px;
+        justify-content: center;
+    }
+    header nav a {
+        font-size: 0.95em;
+    }
+    header .header-controls {
+        gap: 12px;
+    }
+    #themeToggleBtn {
+        padding: 6px 10px;
+        font-size: 1em; /* margin-left: 0; */
+    } /* Tolto margin-left se già gestito da gap */
+
+    h1,
+    header h1 {
+        font-size: 1.4em;
+    }
+}
+/* Stile per nascondere testo di "Home" su desktop se vuoi solo icona */
+@media (min-width: 992px) {
+    header .desktop-nav a[href='index.html'].nav-link-icon-only .nav-text-desktop {
+        /* Se avevi uno span specifico per il testo desktop di home, nascondilo */
+        /* display: none; */
+    }
+    /* Se il link Home è nav-link-icon-only, il testo è già nascosto dalla regola generale sopra.
+        Non serve altro per nascondere il testo, ma potresti voler forzare la non visualizzazione
+        di .nav-text se per errore fosse presente e visibile */
+    header .desktop-nav a[href='index.html'].nav-link-icon-only .nav-text {
+        display: none;
+    }
+}
+/* Il tuo CSS esistente per i breakpoint */
+@media (max-width: 991px) {
+    // L'header diventa una colonna per impilare le due righe
+    header {
+        flex-direction: column;
+        align-items: stretch; // Le righe si estendono per tutta la larghezza
+        gap: 15px; // Spazio tra la riga superiore e quella inferiore
+    }
+
+    // Stile per la riga superiore (titolo e hamburger)
+    .header-top-row {
+        display: flex;
+        justify-content: space-between; // Titolo a sx, hamburger a dx
+        align-items: center; // <-- QUESTA RIGA È LA CHIAVE PER IL CENTRAGGIO VERTICALE
+        width: 100%;
+    }
+
+    // Nasconde la nav desktop e mostra l'hamburger
+    .header-top-row .desktop-nav {
+        display: none;
+    }
+    .header-top-row .navbar-toggler {
+        // Potresti anche scrivere solo .navbar-toggler se non ci sono altri contesti
+        display: inline-flex; // Già così dovrebbe essere per mostrare l'icona hamburger
+        // Non servono altre proprietà specifiche qui per l'allineamento verticale del bottone stesso
+        // perché è gestito dal genitore .header-top-row con align-items: center.
+        // Potresti voler regolare padding o line-height SUL BOTTONE se l'icona interna non è centrata NEL BOTTONE.
+    }
+
+    // Stile per la riga inferiore (tutti gli altri controlli)
+    .header-controls {
+        display: flex;
+        justify-content: center; // <-- MODIFICATO
+        align-items: center;
+        width: 100%;
+        gap: 10px;
+    }
+
+    // Nasconde il nome utente testuale per risparmiare spazio
+    #userProfileContainer #userDisplayName {
+        display: none;
+    }
+}
+
+/* Il tuo CSS per breakpoint più piccoli, potrebbe sovrascrivere o aggiungere dettagli */
+@media (max-width: 576px) {
+    .header-content h1 {
+        font-size: 1.5em;
+    }
+    .header-controls {
+        gap: 5px;
+    }
+    .header-controls .auth-button {
+        padding: 6px 8px;
+    }
+    .header-controls .material-symbols-rounded {
+        font-size: 1.3em;
+    }
+
+    /* Questa regola potrebbe essere già coperta o necessitare di aggiustamenti
+       rispetto a .mobile-nav-menu .mobile-menu-list li a sopra */
+    .mobile-nav-menu ul li a {
+        /* Potresti voler rendere questo più specifico: .mobile-nav-menu .mobile-menu-list li a */
+        padding: 10px 15px;
+    }
+
+    #userProfileContainer #headerUserAvatar {
+        width: 28px;
+        height: 28px;
+        margin-right: 5px;
+    }
+    #userProfileContainer .auth-button .material-symbols-rounded {
+        font-size: 1.3em;
+    }
+}
+
+// Stili specifici per il contenitore della campanella e il pannello notifiche
+#notificationBellContainer {
+    position: relative; // Necessario per il posizionamento assoluto del pannello
+    // display: none; // La visibilità è gestita da JavaScript in base allo stato di login
+    margin-right: 15px; // Come da tuo HTML
+    align-self: center; // Come da tuo HTML
+
+    #notificationBellLink {
+        text-decoration: none; // Assicurati che non ci sia sottolineatura
+        position: relative; // Per posizionare correttamente il badge
+        display: inline-block; // Per far sì che il badge si posizioni correttamente
+    }
+
+    #notificationIcon {
+        font-size: 28px; // Come da tuo HTML
+        color: var(--text-color-navbar); // Come da tuo HTML, assicurati che --text-color-navbar sia definita
+        vertical-align: middle; // Come da tuo HTML
+    }
+
+    .notification-badge {
+        // Stile per #notificationCounter
+        position: absolute;
+        top: -5px;
+        right: -8px;
+        background-color: var(--accent-color-secondary, red); // Usa una variabile o un colore di accento
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.75em;
+        font-weight: bold;
+        line-height: 1;
+        // display: none; // La visibilità è gestita da JavaScript
+    }
+}
+
+#notification-panel {
+    display: none; // Visibilità iniziale gestita da JavaScript
+    width: 360px; // Larghezza desiderata
+    max-width: 95vw; // Non superare la larghezza dello schermo meno un piccolo margine
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    color: var(--text-color-primary);
+
+    // --- Stili per i figli del pannello (header, list, footer) ---
+    .notification-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color-secondary);
+        h2 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        #mark-all-as-read-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 4px 8px;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+    #notification-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 400px;
+        overflow-y: auto;
+        .notification-item-empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-color-muted);
+            p {
+                margin: 0;
+            }
+        }
+    }
+    .notification-panel-footer {
+        padding: 12px 16px;
+        border-top: 1px solid var(--border-color-secondary);
+        text-align: center;
+        #view-all-notifications-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9em;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    // --- Posizionamento ---
+    @media (min-width: 769px) {
+        // Desktop e schermi più grandi
+        position: absolute;
+        top: calc(100% + 10px); // Sotto la campanella
+        right: 0; // Allineato a destra di #notificationBellContainer
+        left: auto;
+        transform: translateX(0); // Reset trasformazione
+    }
+
+    @media (max-width: 768px) {
+        // Mobile
+        position: fixed; // POSIZIONAMENTO FISSO RISPETTO ALLA VIEWPORT
+        top: 70px; // Distanza dall'alto della viewport (aggiusta se necessario)
+        left: 50%; // Bordo sinistro del pannello al centro della viewport
+        transform: translateX(-50%); // Centra il pannello
+        // width: 90vw;         // Opzionale: se vuoi una larghezza relativa, altrimenti usa 360px e max-width
+    }
+}

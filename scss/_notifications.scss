@@ -1,0 +1,334 @@
+/* Stile per il badge del contatore notifiche */
+.notification-badge {
+    position: absolute;
+    top: -8px; /* Aggiusta per posizionare sopra l'icona */
+    right: -8px; /* Aggiusta per posizionare a destra dell'icona */
+    background-color: var(--accent-color, red); /* Usa il tuo colore di accento o un rosso standard */
+    color: white;
+    border-radius: 50%;
+    padding: 1px 5px; /* Leggermente più piccolo */
+    font-size: 0.65rem; /* Leggermente più piccolo */
+    font-weight: bold;
+    border: 1px solid var(--background-color, white); /* Bordo per staccare dallo sfondo */
+    display: none; /* Verrà mostrato da JS se il contatore > 0 */
+    line-height: 1; /* Assicura che il testo sia centrato verticalmente */
+    min-width: 16px; /* Larghezza minima per contenere anche un solo numero */
+    text-align: center;
+}
+
+#notificationBellContainer:hover #notificationIcon {
+    color: var(--primary-color, lightblue); /* Esempio di hover */
+}
+
+/* ======================================== */
+/* Notification Panel Styles              */
+/* ======================================== */
+
+/* Container for the bell icon and the panel */
+/* Ensures proper positioning of the dropdown panel */
+#notificationBellContainer {
+    position: relative; /* Establishes a positioning context for the panel */
+    display: inline-block; /* Or 'flex' if it's part of a flex layout */
+    cursor: pointer;
+}
+
+/* The main notification panel (dropdown) */
+.notification-panel {
+    display: none; /* Initially hidden, controlled by JS */
+    position: absolute;
+    top: calc(100% + 8px); /* Position below the bell icon with a small gap */
+    right: 0;
+    width: 360px; /* Or your preferred width */
+    max-width: calc(100vw - 32px); /* Prevent overflow on small screens */
+    background-color: var(
+        --dialog-background-color,
+        var(--surface-color, #fff)
+    ); /* Fallback if --dialog-background-color is not set */
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: var(--border-radius-md, 8px);
+    box-shadow: var(--box-shadow-medium, 0 4px 12px rgba(0, 0, 0, 0.15));
+    z-index: 1050; /* Ensure it's above other content */
+    color: var(--text-color, #333);
+    font-size: 0.95em; /* Slightly smaller font for dropdown items if desired */
+}
+
+.notification-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color-soft, var(--border-color, #eee));
+}
+
+.notification-panel-header h2 {
+    margin: 0;
+    font-size: 1.1em; /* Relative to panel's font-size */
+    font-weight: 600;
+    color: var(--text-color, #333);
+}
+
+/* Styling for the "Mark all as read" button */
+/* Leverages existing .button-link-sm if appropriate, or define specifically */
+#mark-all-as-read-btn {
+    /* Assuming .button-link-sm provides base styling for color, background, border */
+    padding: 4px 8px; /* Adjust padding if needed */
+    font-size: 0.9em; /* Relative to panel's font-size */
+    /* color: var(--button-link-sm-color, var(--primary-color)); */ /* Already handled by .button-link-sm */
+}
+
+/* #mark-all-as-read-btn:hover { */
+/* color: var(--button-link-sm-hover-color, var(--accent-color)); */ /* Already handled by .button-link-sm */
+/* } */
+
+.notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 400px; /* Limit height and enable scrolling */
+    overflow-y: auto;
+}
+
+/* Custom scrollbar for notification list (Webkit browsers) */
+.notification-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+    background-color: var(--surface-color, #f5f5f5);
+    border-radius: 10px;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+    background-color: var(--border-color, #ccc);
+    border-radius: 10px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-color-secondary, #aaa);
+}
+
+/* Individual notification item */
+.notification-item {
+    display: flex;
+    align-items: flex-start; /* Align icon with the start of the text block */
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color-soft, var(--border-color, #eee));
+    position: relative; /* For absolute positioning of the link overlay */
+    cursor: default; /* Default cursor, link will provide pointer if used */
+    transition: background-color 0.2s ease-in-out;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item.unread {
+    background-color: var(
+        --primary-color-ultralight,
+        rgba(0, 123, 255, 0.05)
+    ); /* Example: very light blue for unread */
+    /* Or use a border indicator: */
+    /* border-left: 3px solid var(--primary-color); */
+}
+
+.notification-item:hover {
+    background-color: var(
+        --surface-hover-color,
+        var(--background-color, #f9f9f9)
+    ); /* Use a variable for hover on interactive surfaces */
+}
+
+.notification-item-icon {
+    margin-right: 12px;
+    margin-top: 2px; /* Fine-tune vertical alignment with text */
+    color: var(--primary-color, #007bff); /* Default icon color */
+    flex-shrink: 0;
+}
+.notification-item-icon .material-symbols-rounded {
+    font-size: 20px; /* Adjust as needed */
+    vertical-align: middle;
+}
+
+.notification-item-icon.icon-type-badge {
+    color: var(--accent-color, #ffc107);
+} /* Example for badge notifications */
+.notification-item-icon.icon-type-article-approved {
+    color: var(--success-color, #28a745);
+} /* Example */
+.notification-item-icon.icon-type-article-rejected {
+    color: var(--danger-color, #dc3545);
+} /* Example */
+
+.notification-item-content {
+    flex-grow: 1;
+    min-width: 0; /* Prevents text overflow issues in flex containers */
+}
+
+.notification-item-text {
+    margin: 0 0 4px 0;
+    font-size: 1em; /* Relative to .notification-item */
+    line-height: 1.4;
+    color: var(--text-color, #333);
+    /* Allow text to break to prevent overflow */
+    word-break: break-word;
+    white-space: normal; /* Ensure text wraps */
+}
+
+.notification-item-timestamp {
+    font-size: 0.85em; /* Relative to .notification-item */
+    color: var(--text-color-secondary, #777);
+}
+
+/* Optional: Full item link (overlay) */
+.notification-item a.notification-item-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Above other content within the item, but below panel header/footer */
+    text-indent: -9999px; /* Hide text if any, make it an invisible overlay */
+    /* For debugging, add a background: outline: 1px solid red; */
+}
+.notification-item:hover a.notification-item-link {
+    cursor: pointer;
+}
+
+/* Placeholder for when there are no notifications */
+.notification-item-empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--text-color-secondary, #777);
+    border-bottom: none; /* No border if it's the only item */
+}
+
+.notification-item-empty p {
+    margin: 0;
+    font-style: italic;
+}
+
+.notification-panel-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border-color-soft, var(--border-color, #eee));
+    text-align: center;
+}
+
+#view-all-notifications-link {
+    color: var(--primary-color, #007bff);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9em; /* Relative to panel's font-size */
+    padding: 6px 12px;
+    display: inline-block;
+    border-radius: var(--border-radius-sm, 4px);
+    transition:
+        background-color 0.2s ease-in-out,
+        color 0.2s ease-in-out;
+}
+
+#view-all-notifications-link:hover {
+    background-color: var(--primary-color-light, rgba(0, 123, 255, 0.1));
+    text-decoration: none;
+}
+
+/* Ensure the panel visibility is controlled by JS (e.g., adding a class) */
+/* Alternatively, JS can directly set style.display */
+/* .notification-panel.visible { */
+/* display: block; */
+/* } */
+
+.page-container {
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+.notifications-page-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.notifications-page-list .notification-item {
+    /* Reuse styles from panel if possible */
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+    cursor: default; /* Default cursor, link part will be pointer */
+}
+.notifications-page-list .notification-item:hover {
+    background-color: var(--hover-background-color);
+}
+.notifications-page-list .notification-item.unread {
+    background-color: var(
+        --notification-unread-bg,
+        var(--accent-color-light-transparent)
+    ); /* Or a distinct background */
+    font-weight: bold; /* Example */
+}
+.notifications-page-list .notification-item.read {
+    /* Styles for read items, e.g., less prominent */
+    opacity: 0.85;
+}
+.notifications-page-list .notification-item-icon {
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.notifications-page-list .notification-item-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.notifications-page-list .notification-item-text {
+    margin: 0 0 4px 0;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+.notifications-page-list .notification-item.unread .notification-item-text {
+    font-weight: 600; /* More emphasis for unread messages */
+}
+.notifications-page-list .notification-item.read .notification-item-text {
+    font-weight: normal;
+}
+.notifications-page-list .notification-item-timestamp {
+    font-size: 0.8em;
+    color: var(--text-color-secondary);
+}
+.notifications-page-list .notification-item-link {
+    /* Overlay link for clickable item */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Ensure it's clickable over content if styled as overlay */
+    cursor: pointer;
+}
+.notifications-page-list .notification-item {
+    /* Add relative positioning for the overlay link */
+    position: relative;
+}
+.notifications-page-list .placeholder-message {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-color-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+.section-divider {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border: 0;
+    border-top: 1px solid var(--border-color-strong);
+}
+#auth-prompt {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--background-alt-color);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+#auth-prompt p {
+    margin-bottom: 15px;
+}
+#auth-prompt .button-primary {
+    text-decoration: none;
+}
