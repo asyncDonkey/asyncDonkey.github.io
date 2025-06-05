@@ -1,38 +1,40 @@
 /* ===== Pagina Visualizzazione Articolo Singolo (view-article.html) ===== */
 #articleDisplaySection {
-    padding: 25px 30px; /* Consistenza con altre sezioni */
-    max-width: 960px; // NUOVO: Aumenta la larghezza massima per desktop
-    margin-left: auto; // NUOVO: Centra la sezione
-    margin-right: auto; // NUOVO: Centra la sezione
+    padding: 25px 30px;
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    // Se vuoi che l'intera sezione dell'articolo abbia lo sfondo Dracula:
+    // background-color: var(--dracula-background); 
 }
 #articleDisplayHeader {
-    border-bottom: 1px solid var(--border-color-secondary);
-    margin-bottom: 20px; /* Leggermente ridotto da 25px */
-    padding-top: 8px; /* Riduci un po' se era 10px o più, o prova un valore piccolo */
-    padding-bottom: 12px; /* Riduci un po' per compattare */
+    border-bottom: 1px solid var(--dracula-comment, var(--border-color-secondary)); // Usa un colore Dracula per il bordo
+    margin-bottom: 20px;
+    padding-top: 8px;
+    padding-bottom: 12px;
 }
 
 #articleDisplayTitle {
     font-size: 2.2em;
-    color: #333333; /* Placeholder per var(--heading-color) - SOSTITUISCI CON IL TUO VALORE EFFETTIVO */
+    color: var(--dracula-purple, var(--heading-color)); // Titolo principale dell'articolo, es. viola Dracula
     margin-top: 0;
     margin-bottom: 8px;
     line-height: 1.25;
-
     white-space: normal !important;
     overflow-wrap: break-word;
-    word-wrap: break-word; // Fallback per overflow-wrap
-
-    // AGGIUNTA: Per forzare l'interruzione di parole molto lunghe se necessario
+    word-wrap: break-word;
     word-break: break-all;
 }
 
 #articleDisplayMeta {
     font-size: 0.9em;
-    color: var(--text-color-muted);
-    margin-bottom: 15px; /* Leggermente ridotto da 20px */
+    color: var(--dracula-comment, var(--text-color-muted)); // Meta info con colore commento Dracula
+    margin-bottom: 15px;
+    // ... (stili esistenti per .meta-item, .article-tags-display .article-tag possono rimanere o essere adattati) ...
 }
-#articleDisplayMeta .meta-item {
+#articleDisplayMeta .article-tags-display .article-tag {
+    background-color: var(--dracula-current-line, var(--surface-bg-secondary)); // Sfondo tag
+    color: var(--dracula-foreground, var(--text-color-secondary));
     margin-right: 15px;
     display: inline-block;
     margin-bottom: 5px;
@@ -52,84 +54,156 @@
     display: inline-block;
 }
 #articleDisplayContent {
-    font-size: 1em; // Modificato da 1.05em
+    font-size: 1em; // o 1.05em se preferisci
     line-height: 1.7;
-    color: var(--text-color-secondary);
-    overflow-wrap: break-word; // Manteniamo queste proprietà importanti
-    word-wrap: break-word;
+    color: var(--dracula-foreground); // Colore testo base Dracula per il contenuto
+    background-color: var(--dracula-background); // Sfondo Dracula per l'area contenuto
+    padding: 20px; // Aggiungi padding se lo sfondo è diverso dal contenitore principale
+    border-radius: var(--border-radius-md, 6px); // Opzionale: se vuoi arrotondare l'area contenuto
+
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--dracula-green); // TITOLI VERDI DRACULA!
+        margin-top: 1.8em;
+        margin-bottom: 0.8em;
+        padding-bottom: 0.3em;
+        font-family: var(--font-family-headings, "Space Grotesk", sans-serif); // O il tuo font per i titoli
+    }
+
+    h1 { font-size: 1.8em; border-bottom: 1px solid var(--dracula-comment); }
+    h2 { font-size: 1.5em; border-bottom: 1px solid var(--dracula-comment); }
+    h3 { font-size: 1.3em; border-bottom: none; } // H3 e successivi senza bordo per default
+    h4 { font-size: 1.2em; }
+    h5 { font-size: 1.1em; }
+    h6 { font-size: 1.0em; }
+
+    p {
+        margin-bottom: 1.2em;
+        color: var(--dracula-foreground); // Assicura che i paragrafi usino il colore foreground
+    }
+
+    a {
+        color: var(--dracula-pink); // Link Rosa Dracula
+        text-decoration: none; // Preferenza comune per i temi moderni
+        &:hover {
+            color: var(--dracula-cyan); // Link Cyan Dracula su hover
+            text-decoration: underline;
+        }
+    }
+
+    strong {
+        color: var(--dracula-orange); // Arancione per il grassetto
+        font-weight: bold;
+    }
+
+    em {
+        color: var(--dracula-purple); // Viola per il corsivo
+        font-style: italic;
+    }
+
+    ul, ol {
+        margin-left: 20px; // o padding-left: 2em;
+        margin-bottom: 1.2em;
+        color: var(--dracula-foreground);
+    }
+
+    li {
+        margin-bottom: 0.5em;
+    }
+
+    blockquote {
+        border-left: 4px solid var(--dracula-purple); // Viola Dracula per il bordo
+        padding: 0.5em 1em;
+        margin: 1.5em 0; // Margine sopra/sotto, nessun indentazione extra forzata dal margine sx
+        font-style: italic;
+        color: var(--dracula-comment); // Grigio/Blu commento Dracula per il testo
+        background-color: var(--dracula-current-line); // Sfondo leggermente diverso per il blockquote
+        border-radius: var(--border-radius-sm, 3px);
+    }
+
+// La TUA REGOLA per il codice inline, adattata con variabili Dracula:
+    code:not(pre > code) {
+        background-color: var(--dracula-current-line); 
+        padding: 0.2em 0.4em;
+        border-radius: var(--border-radius-sm, 3px);
+        font-family: var(--font-family-code, 'Source Code Pro', monospace);
+        font-size: 0.9em; 
+        color: var(--dracula-pink); 
+        // word-break: break-word; // Decommenta se necessario
+    }
+
+    // Blocchi di codice <pre><code>
+    pre {
+        background-color: var(--dracula-current-line); // Sfondo per il blocco <pre>
+        border: 1px solid var(--dracula-comment);      // Bordo con colore commento
+        padding: 1em;
+        border-radius: var(--border-radius-md, 6px);
+        overflow-x: auto;
+        font-family: var(--font-family-code, 'Source Code Pro', monospace);
+        font-size: 0.95em; // Dimensione font per blocchi di codice
+        margin: 1.5em 0;
+
+        code {
+            background-color: transparent; // Lo sfondo è già sul <pre>
+            color: var(--dracula-foreground); // Colore testo principale per il codice
+            padding: 0;
+            font-size: inherit; // Eredita la dimensione da <pre>
+            border-radius: 0;
+            border: none;
+            white-space: pre-wrap; // Permette il wrap MA preserva gli spazi e a capo
+            word-break: break-all; // Per spezzare parole molto lunghe se necessario all'interno del blocco
+        }
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--border-radius-md, 6px);
+        margin: 1.5em auto;
+        display: block;
+        border: 1px solid var(--dracula-comment, var(--border-color-secondary)); // Bordo opzionale per le immagini
+    }
+    
+    hr { // Linea orizzontale
+        border: none;
+        border-top: 1px solid var(--dracula-comment);
+        margin: 2em 0;
+    }
+
+    // Stili per le Tabelle (riprendendo quelli che avevi)
+    .table-wrapper { // Se usi un wrapper per lo scroll orizzontale delle tabelle
+        overflow-x: auto;
+        margin: 1.5em 0;
+        border: 1px solid var(--dracula-comment); 
+        border-radius: var(--border-radius-md, 6px);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        color: var(--dracula-foreground); // Colore testo tabella
+
+        th,
+        td {
+            border: 1px solid var(--dracula-comment); 
+            padding: 0.6em 0.8em;
+            text-align: left;
+        }
+
+        thead th {
+            background-color: var(--dracula-current-line); 
+            font-weight: 600;
+            color: var(--dracula-green); // Intestazioni tabella in verde
+        }
+
+        tbody tr:nth-child(odd) td { // Strisce opzionali per le righe
+             // background-color: var(--dracula-background-lighter, #313440); // Un po' più chiaro dello sfondo principale
+        }
+        tbody tr:hover td { // Hover sulle righe
+            background-color: var(--dracula-current-line-brighter, #4f5266);
+        }
+    }
 }
-#articleDisplayContent h1,
-#articleDisplayContent h2,
-#articleDisplayContent h3 {
-    color: var(--heading-color);
-    margin-top: 1.8em;
-    margin-bottom: 0.8em;
-    border-bottom: 1px solid var(--border-color-secondary);
-    padding-bottom: 0.3em;
-}
-#articleDisplayContent h1 {
-    font-size: 1.8em;
-}
-#articleDisplayContent h2 {
-    font-size: 1.5em;
-}
-#articleDisplayContent h3 {
-    font-size: 1.3em;
-}
-#articleDisplayContent p {
-    margin-bottom: 1.2em;
-}
-#articleDisplayContent a {
-    color: var(--link-color);
-    text-decoration: underline;
-}
-#articleDisplayContent a:hover {
-    color: var(--link-hover-color);
-}
-#articleDisplayContent ul,
-#articleDisplayContent ol {
-    margin-left: 20px;
-    margin-bottom: 1.2em;
-}
-#articleDisplayContent li {
-    margin-bottom: 0.5em;
-}
-#articleDisplayContent blockquote {
-    border-left: 3px solid var(--link-color);
-    padding-left: 15px;
-    margin: 0 0 1.2em 0;
-    font-style: italic;
-    color: var(--text-color-muted);
-}
-#articleDisplayContent pre {
-    background-color: var(--surface-bg-secondary);
-    border: 1px solid var(--border-color-secondary);
-    padding: 15px;
-    border-radius: 6px;
-    overflow-x: auto;
-    font-family: 'Source Code Pro', monospace;
-    font-size: 0.95em;
-}
-#articleDisplayContent code {
-    background-color: var(--surface-bg-secondary);
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-    font-family: 'Source Code Pro', monospace;
-    font-size: 0.9em;
-}
-#articleDisplayContent pre code {
-    padding: 0;
-    background-color: transparent;
-    border-radius: 0;
-    font-size: inherit;
-}
-#articleDisplayContent img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 6px;
-    margin: 15px 0;
-    display: block;
-}
+
 #articleInteractions {
     max-width: 800px;
     margin: 30px auto 20px auto;
@@ -370,151 +444,153 @@
 // File: il tuo SCSS per view-article.html (es. _article-viewer.scss)
 
 #articleDisplayContent {
-    // Stili esistenti che hai fornito:
-    font-size: 1.05em;
+    font-size: 1em; // o 1.05em se preferisci
     line-height: 1.7;
-    color: #444444; // Placeholder per var(--text-color-secondary) - SOSTITUISCI CON IL TUO VALORE
+    color: var(--dracula-foreground); // Colore testo base Dracula per il contenuto
+    background-color: var(--dracula-background); // Sfondo Dracula per l'area contenuto
+    padding: 20px; // Aggiungi padding se lo sfondo è diverso dal contenitore principale
+    border-radius: var(--border-radius-md, 6px); // Opzionale: se vuoi arrotondare l'area contenuto
 
-    // AGGIUNTA: Gestione del ritorno a capo per parole lunghe e URL
-    overflow-wrap: break-word;
-    word-wrap: break-word; // Fallback per browser più vecchi
-    // word-break: break-all;  // Da usare con cautela, solo se break-word non basta
-
-    // Stili per h1-h3, p, a, ul, ol, blockquote (come li hai, ma verifica che non ci siano larghezze fisse o white-space: nowrap)
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        // Aggiunti h4-h6 per completezza
-        color: #333333; // Placeholder per var(--heading-color) - SOSTITUISCI
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--dracula-green); // TITOLI VERDI DRACULA!
         margin-top: 1.8em;
         margin-bottom: 0.8em;
-        // border-bottom: 1px solid #dddddd; // Placeholder per var(--border-color-secondary) - SOSTITUISCI
-        // padding-bottom: 0.3em; // Nota: la bordatura solo sui titoli principali è più comune
-    }
-    h1 {
-        font-size: 1.8em;
-        border-bottom: 1px solid #dddddd;
         padding-bottom: 0.3em;
-    } // Bordo solo per H1
-    h2 {
-        font-size: 1.5em;
-        border-bottom: 1px solid #dddddd;
-        padding-bottom: 0.3em;
-    } // Bordo solo per H2
-    h3 {
-        font-size: 1.3em;
-    } // H3 e successivi senza bordo di default
-    h4 {
-        font-size: 1.2em;
+        font-family: var(--font-family-headings, "Space Grotesk", sans-serif); // O il tuo font per i titoli
     }
-    h5 {
-        font-size: 1.1em;
-    }
-    h6 {
-        font-size: 1em;
-    }
+
+    h1 { font-size: 1.8em; border-bottom: 1px solid var(--dracula-comment); }
+    h2 { font-size: 1.5em; border-bottom: 1px solid var(--dracula-comment); }
+    h3 { font-size: 1.3em; border-bottom: none; } // H3 e successivi senza bordo per default
+    h4 { font-size: 1.2em; }
+    h5 { font-size: 1.1em; }
+    h6 { font-size: 1.0em; }
 
     p {
         margin-bottom: 1.2em;
+        color: var(--dracula-foreground); // Assicura che i paragrafi usino il colore foreground
     }
+
     a {
-        color: #007bff;
-        text-decoration: underline;
-    } // Placeholder per var(--link-color) - SOSTITUISCI
-    a:hover {
-        color: #0056b3;
-    } // Placeholder per var(--link-hover-color) - SOSTITUISCI
-    ul,
-    ol {
-        margin-left: 20px;
-        margin-bottom: 1.2em;
+        color: var(--dracula-pink); // Link Rosa Dracula
+        text-decoration: none; // Preferenza comune per i temi moderni
+        &:hover {
+            color: var(--dracula-cyan); // Link Cyan Dracula su hover
+            text-decoration: underline;
+        }
     }
+
+    strong {
+        color: var(--dracula-orange); // Arancione per il grassetto
+        font-weight: bold;
+    }
+
+    em {
+        color: var(--dracula-purple); // Viola per il corsivo
+        font-style: italic;
+    }
+
+    ul, ol {
+        margin-left: 20px; // o padding-left: 2em;
+        margin-bottom: 1.2em;
+        color: var(--dracula-foreground);
+    }
+
     li {
         margin-bottom: 0.5em;
     }
+
     blockquote {
-        border-left: 3px solid #007bff; // Placeholder per var(--link-color) - SOSTITUISCI
-        padding-left: 15px;
-        margin: 0 0 1.2em 0; // Rimosso margin-left per allineamento, il padding-left crea l'indentazione
+        border-left: 4px solid var(--dracula-purple); // Viola Dracula per il bordo
+        padding: 0.5em 1em;
+        margin: 1.5em 0; // Margine sopra/sotto, nessun indentazione extra forzata dal margine sx
         font-style: italic;
-        color: #6c757d; // Placeholder per var(--text-color-muted) - SOSTITUISCI
+        color: var(--dracula-comment); // Grigio/Blu commento Dracula per il testo
+        background-color: var(--dracula-current-line); // Sfondo leggermente diverso per il blockquote
+        border-radius: var(--border-radius-sm, 3px);
     }
 
-    pre {
-        background-color: #f8f9fa; // Placeholder per var(--surface-bg-secondary) - SOSTITUISCI
-        border: 1px solid #dee2e6; // Placeholder per var(--border-color-secondary) - SOSTITUISCI
-        padding: 15px;
-        border-radius: 6px; // Ok, o usa var(--border-radius-standard)
-        overflow-x: auto; // QUESTO È CORRETTO E GIÀ PRESENTE
-        font-family: 'Source Code Pro', monospace;
-        font-size: 0.95em;
-        margin: 1.5em 0;
-    }
-
-    pre code {
-        // Assicurati che questi stili non contrastino con il syntax highlighter
-        padding: 0;
-        background-color: transparent;
-        border-radius: 0;
-        font-size: inherit;
-        border: none; // Rimuovi bordi se presenti
-        white-space: inherit; // Eredita white-space da pre (che è pre)
-    }
-
-    // Codice inline (non dentro <pre>)
+    // La TUA REGOLA per il codice inline, adattata con variabili Dracula:
     code:not(pre > code) {
-        // Applica solo a <code> non figlio diretto di <pre>
-        background-color: #e9ecef; // Placeholder per var(--surface-bg-secondary) o un grigio chiaro - SOSTITUISCI
+        background-color: var(--dracula-current-line); 
         padding: 0.2em 0.4em;
-        border-radius: 3px; // Ok, o usa var(--border-radius-small)
-        font-family: 'Source Code Pro', monospace;
-        font-size: 0.9em; // Leggermente più piccolo del testo normale
-        color: #c7254e; // Placeholder per un colore che lo distingua - SOSTITUISCI
+        border-radius: var(--border-radius-sm, 3px);
+        font-family: var(--font-family-code, 'Source Code Pro', monospace);
+        font-size: 0.9em; 
+        color: var(--dracula-pink); 
+        // word-break: break-word; // Decommenta se necessario
+    }
+
+    // Blocchi di codice <pre><code>
+    pre {
+        background-color: var(--dracula-current-line); // Sfondo per il blocco <pre>
+        border: 1px solid var(--dracula-comment);      // Bordo con colore commento
+        padding: 1em;
+        border-radius: var(--border-radius-md, 6px);
+        overflow-x: auto;
+        font-family: var(--font-family-code, 'Source Code Pro', monospace);
+        font-size: 0.95em; // Dimensione font per blocchi di codice
+        margin: 1.5em 0;
+
+        code {
+            background-color: transparent; // Lo sfondo è già sul <pre>
+            color: var(--dracula-foreground); // Colore testo principale per il codice
+            padding: 0;
+            font-size: inherit; // Eredita la dimensione da <pre>
+            border-radius: 0;
+            border: none;
+            white-space: pre-wrap; // Permette il wrap MA preserva gli spazi e a capo
+            word-break: break-all; // Per spezzare parole molto lunghe se necessario all'interno del blocco
+        }
     }
 
     img {
         max-width: 100%;
         height: auto;
-        border-radius: 6px; // Ok, o usa var(--border-radius-standard)
-        margin: 1.5em auto; // Centra le immagini
+        border-radius: var(--border-radius-md, 6px);
+        margin: 1.5em auto;
         display: block;
+        border: 1px solid var(--dracula-comment, var(--border-color-secondary)); // Bordo opzionale per le immagini
+    }
+    
+    hr { // Linea orizzontale
+        border: none;
+        border-top: 1px solid var(--dracula-comment);
+        margin: 2em 0;
     }
 
-    // AGGIUNTA: Gestione base per le tabelle Markdown
-    // Per far funzionare questo, dovrai wrappare le tabelle generate da Markdown
-    // con un <div class="table-wrapper">...</div>. Questo potrebbe richiedere JS.
-    // Se marked.js non lo fa, una soluzione più semplice ma meno elegante è:
-    // table { display: block; width: 100%; overflow-x: auto; /* ...altri stili tabella... */ }
-
-    .table-wrapper {
+    // Stili per le Tabelle (riprendendo quelli che avevi)
+    .table-wrapper { // Se usi un wrapper per lo scroll orizzontale delle tabelle
         overflow-x: auto;
         margin: 1.5em 0;
-        border: 1px solid #dee2e6; // Placeholder - SOSTITUISCI
-        border-radius: 6px; // Placeholder - SOSTITUISCI
+        border: 1px solid var(--dracula-comment); 
+        border-radius: var(--border-radius-md, 6px);
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        // font-size: 0.9em; // Puoi decommentare se vuoi le tabelle leggermente più piccole
+        color: var(--dracula-foreground); // Colore testo tabella
 
         th,
         td {
-            border: 1px solid #dee2e6; // Placeholder per var(--border-color-secondary) - SOSTITUISCI
-            padding: 0.6em 0.8em; // Aumentato leggermente il padding per leggibilità
+            border: 1px solid var(--dracula-comment); 
+            padding: 0.6em 0.8em;
             text-align: left;
         }
 
         thead th {
-            background-color: #f8f9fa; // Placeholder per var(--surface-bg-secondary) - SOSTITUISCI
+            background-color: var(--dracula-current-line); 
             font-weight: 600;
+            color: var(--dracula-green); // Intestazioni tabella in verde
         }
-        tbody tr:nth-child(odd) td {
-            // Strisce per le righe (opzionale)
-            // background-color: #fdfdfd; // Placeholder per un colore di sfondo molto chiaro - SOSTITUISCI
+
+        tbody tr:nth-child(odd) td { // Strisce opzionali per le righe
+             // background-color: var(--dracula-background-lighter, #313440); // Un po' più chiaro dello sfondo principale
+        }
+        tbody tr:hover td { // Hover sulle righe
+            background-color: var(--dracula-current-line-brighter, #4f5266);
         }
     }
 }
+

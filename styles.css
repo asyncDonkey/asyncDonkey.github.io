@@ -41,6 +41,17 @@
   --bs-secondary: #6c757d;
   --bs-success: #198754;
   --bs-info: #0dcaf0;
+  --dracula-background: #282a36;
+  --dracula-current-line: #44475a;
+  --dracula-foreground: #f8f8f2;
+  --dracula-comment: #6272a4;
+  --dracula-cyan: #8be9fd;
+  --dracula-green: #50fa7b;
+  --dracula-orange: #ffb86c;
+  --dracula-pink: #ff79c9;
+  --dracula-purple: #bd93f9;
+  --dracula-red: #ff5555;
+  --dracula-yellow: #f1fa8c;
 }
 
 body.dark-mode {
@@ -2712,22 +2723,22 @@ section#contact li {
 
 /* ===== Pagina Visualizzazione Articolo Singolo (view-article.html) ===== */
 #articleDisplaySection {
-  padding: 25px 30px; /* Consistenza con altre sezioni */
+  padding: 25px 30px;
   max-width: 960px;
   margin-left: auto;
   margin-right: auto;
 }
 
 #articleDisplayHeader {
-  border-bottom: 1px solid var(--border-color-secondary);
-  margin-bottom: 20px; /* Leggermente ridotto da 25px */
-  padding-top: 8px; /* Riduci un po' se era 10px o più, o prova un valore piccolo */
-  padding-bottom: 12px; /* Riduci un po' per compattare */
+  border-bottom: 1px solid var(--dracula-comment, var(--border-color-secondary));
+  margin-bottom: 20px;
+  padding-top: 8px;
+  padding-bottom: 12px;
 }
 
 #articleDisplayTitle {
   font-size: 2.2em;
-  color: #333333; /* Placeholder per var(--heading-color) - SOSTITUISCI CON IL TUO VALORE EFFETTIVO */
+  color: var(--dracula-purple, var(--heading-color));
   margin-top: 0;
   margin-bottom: 8px;
   line-height: 1.25;
@@ -2739,11 +2750,13 @@ section#contact li {
 
 #articleDisplayMeta {
   font-size: 0.9em;
-  color: var(--text-color-muted);
-  margin-bottom: 15px; /* Leggermente ridotto da 20px */
+  color: var(--dracula-comment, var(--text-color-muted));
+  margin-bottom: 15px;
 }
 
-#articleDisplayMeta .meta-item {
+#articleDisplayMeta .article-tags-display .article-tag {
+  background-color: var(--dracula-current-line, var(--surface-bg-secondary));
+  color: var(--dracula-foreground, var(--text-color-secondary));
   margin-right: 15px;
   display: inline-block;
   margin-bottom: 5px;
@@ -2768,95 +2781,141 @@ section#contact li {
 #articleDisplayContent {
   font-size: 1em;
   line-height: 1.7;
-  color: var(--text-color-secondary);
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+  color: var(--dracula-foreground);
+  background-color: var(--dracula-background);
+  padding: 20px;
+  border-radius: var(--border-radius-md, 6px);
 }
-
-#articleDisplayContent h1,
-#articleDisplayContent h2,
-#articleDisplayContent h3 {
-  color: var(--heading-color);
+#articleDisplayContent h1, #articleDisplayContent h2, #articleDisplayContent h3, #articleDisplayContent h4, #articleDisplayContent h5, #articleDisplayContent h6 {
+  color: var(--dracula-green);
   margin-top: 1.8em;
   margin-bottom: 0.8em;
-  border-bottom: 1px solid var(--border-color-secondary);
   padding-bottom: 0.3em;
+  font-family: var(--font-family-headings, "Space Grotesk", sans-serif);
 }
-
 #articleDisplayContent h1 {
   font-size: 1.8em;
+  border-bottom: 1px solid var(--dracula-comment);
 }
-
 #articleDisplayContent h2 {
   font-size: 1.5em;
+  border-bottom: 1px solid var(--dracula-comment);
 }
-
 #articleDisplayContent h3 {
   font-size: 1.3em;
+  border-bottom: none;
 }
-
+#articleDisplayContent h4 {
+  font-size: 1.2em;
+}
+#articleDisplayContent h5 {
+  font-size: 1.1em;
+}
+#articleDisplayContent h6 {
+  font-size: 1em;
+}
 #articleDisplayContent p {
   margin-bottom: 1.2em;
+  color: var(--dracula-foreground);
 }
-
 #articleDisplayContent a {
-  color: var(--link-color);
+  color: var(--dracula-pink);
+  text-decoration: none;
+}
+#articleDisplayContent a:hover {
+  color: var(--dracula-cyan);
   text-decoration: underline;
 }
-
-#articleDisplayContent a:hover {
-  color: var(--link-hover-color);
+#articleDisplayContent strong {
+  color: var(--dracula-orange);
+  font-weight: bold;
 }
-
-#articleDisplayContent ul,
-#articleDisplayContent ol {
+#articleDisplayContent em {
+  color: var(--dracula-purple);
+  font-style: italic;
+}
+#articleDisplayContent ul, #articleDisplayContent ol {
   margin-left: 20px;
   margin-bottom: 1.2em;
+  color: var(--dracula-foreground);
 }
-
 #articleDisplayContent li {
   margin-bottom: 0.5em;
 }
-
 #articleDisplayContent blockquote {
-  border-left: 3px solid var(--link-color);
-  padding-left: 15px;
-  margin: 0 0 1.2em 0;
+  border-left: 4px solid var(--dracula-purple);
+  padding: 0.5em 1em;
+  margin: 1.5em 0;
   font-style: italic;
-  color: var(--text-color-muted);
+  color: var(--dracula-comment);
+  background-color: var(--dracula-current-line);
+  border-radius: var(--border-radius-sm, 3px);
 }
-
-#articleDisplayContent pre {
-  background-color: var(--surface-bg-secondary);
-  border: 1px solid var(--border-color-secondary);
-  padding: 15px;
-  border-radius: 6px;
-  overflow-x: auto;
-  font-family: "Source Code Pro", monospace;
-  font-size: 0.95em;
-}
-
-#articleDisplayContent code {
-  background-color: var(--surface-bg-secondary);
+#articleDisplayContent code:not(pre > code) {
+  background-color: var(--dracula-current-line);
   padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-family: "Source Code Pro", monospace;
+  border-radius: var(--border-radius-sm, 3px);
+  font-family: var(--font-family-code, "Source Code Pro", monospace);
   font-size: 0.9em;
+  color: var(--dracula-pink);
 }
-
+#articleDisplayContent pre {
+  background-color: var(--dracula-current-line);
+  border: 1px solid var(--dracula-comment);
+  padding: 1em;
+  border-radius: var(--border-radius-md, 6px);
+  overflow-x: auto;
+  font-family: var(--font-family-code, "Source Code Pro", monospace);
+  font-size: 0.95em;
+  margin: 1.5em 0;
+}
 #articleDisplayContent pre code {
-  padding: 0;
   background-color: transparent;
-  border-radius: 0;
+  color: var(--dracula-foreground);
+  padding: 0;
   font-size: inherit;
+  border-radius: 0;
+  border: none;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
-
 #articleDisplayContent img {
   max-width: 100%;
   height: auto;
-  border-radius: 6px;
-  margin: 15px 0;
+  border-radius: var(--border-radius-md, 6px);
+  margin: 1.5em auto;
   display: block;
+  border: 1px solid var(--dracula-comment, var(--border-color-secondary));
+}
+#articleDisplayContent hr {
+  border: none;
+  border-top: 1px solid var(--dracula-comment);
+  margin: 2em 0;
+}
+#articleDisplayContent .table-wrapper {
+  overflow-x: auto;
+  margin: 1.5em 0;
+  border: 1px solid var(--dracula-comment);
+  border-radius: var(--border-radius-md, 6px);
+}
+#articleDisplayContent table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--dracula-foreground);
+}
+#articleDisplayContent table th,
+#articleDisplayContent table td {
+  border: 1px solid var(--dracula-comment);
+  padding: 0.6em 0.8em;
+  text-align: left;
+}
+#articleDisplayContent table thead th {
+  background-color: var(--dracula-current-line);
+  font-weight: 600;
+  color: var(--dracula-green);
+}
+#articleDisplayContent table tbody tr:hover td {
+  background-color: var(--dracula-current-line-brighter, #4f5266);
 }
 
 #articleInteractions {
@@ -3067,34 +3126,31 @@ section#contact li {
 }
 
 #articleDisplayContent {
-  font-size: 1.05em;
+  font-size: 1em;
   line-height: 1.7;
-  color: #444444;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+  color: var(--dracula-foreground);
+  background-color: var(--dracula-background);
+  padding: 20px;
+  border-radius: var(--border-radius-md, 6px);
 }
-#articleDisplayContent h1,
-#articleDisplayContent h2,
-#articleDisplayContent h3,
-#articleDisplayContent h4,
-#articleDisplayContent h5,
-#articleDisplayContent h6 {
-  color: #333333;
+#articleDisplayContent h1, #articleDisplayContent h2, #articleDisplayContent h3, #articleDisplayContent h4, #articleDisplayContent h5, #articleDisplayContent h6 {
+  color: var(--dracula-green);
   margin-top: 1.8em;
   margin-bottom: 0.8em;
+  padding-bottom: 0.3em;
+  font-family: var(--font-family-headings, "Space Grotesk", sans-serif);
 }
 #articleDisplayContent h1 {
   font-size: 1.8em;
-  border-bottom: 1px solid #dddddd;
-  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--dracula-comment);
 }
 #articleDisplayContent h2 {
   font-size: 1.5em;
-  border-bottom: 1px solid #dddddd;
-  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--dracula-comment);
 }
 #articleDisplayContent h3 {
   font-size: 1.3em;
+  border-bottom: none;
 }
 #articleDisplayContent h4 {
   font-size: 1.2em;
@@ -3107,82 +3163,108 @@ section#contact li {
 }
 #articleDisplayContent p {
   margin-bottom: 1.2em;
+  color: var(--dracula-foreground);
 }
 #articleDisplayContent a {
-  color: #007bff;
-  text-decoration: underline;
+  color: var(--dracula-pink);
+  text-decoration: none;
 }
 #articleDisplayContent a:hover {
-  color: #0056b3;
+  color: var(--dracula-cyan);
+  text-decoration: underline;
 }
-#articleDisplayContent ul,
-#articleDisplayContent ol {
+#articleDisplayContent strong {
+  color: var(--dracula-orange);
+  font-weight: bold;
+}
+#articleDisplayContent em {
+  color: var(--dracula-purple);
+  font-style: italic;
+}
+#articleDisplayContent ul, #articleDisplayContent ol {
   margin-left: 20px;
   margin-bottom: 1.2em;
+  color: var(--dracula-foreground);
 }
 #articleDisplayContent li {
   margin-bottom: 0.5em;
 }
 #articleDisplayContent blockquote {
-  border-left: 3px solid #007bff;
-  padding-left: 15px;
-  margin: 0 0 1.2em 0;
+  border-left: 4px solid var(--dracula-purple);
+  padding: 0.5em 1em;
+  margin: 1.5em 0;
   font-style: italic;
-  color: #6c757d;
+  color: var(--dracula-comment);
+  background-color: var(--dracula-current-line);
+  border-radius: var(--border-radius-sm, 3px);
+}
+#articleDisplayContent code:not(pre > code) {
+  background-color: var(--dracula-current-line);
+  padding: 0.2em 0.4em;
+  border-radius: var(--border-radius-sm, 3px);
+  font-family: var(--font-family-code, "Source Code Pro", monospace);
+  font-size: 0.9em;
+  color: var(--dracula-pink);
 }
 #articleDisplayContent pre {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  padding: 15px;
-  border-radius: 6px;
+  background-color: var(--dracula-current-line);
+  border: 1px solid var(--dracula-comment);
+  padding: 1em;
+  border-radius: var(--border-radius-md, 6px);
   overflow-x: auto;
-  font-family: "Source Code Pro", monospace;
+  font-family: var(--font-family-code, "Source Code Pro", monospace);
   font-size: 0.95em;
   margin: 1.5em 0;
 }
 #articleDisplayContent pre code {
-  padding: 0;
   background-color: transparent;
-  border-radius: 0;
+  color: var(--dracula-foreground);
+  padding: 0;
   font-size: inherit;
+  border-radius: 0;
   border: none;
-  white-space: inherit;
-}
-#articleDisplayContent code:not(pre > code) {
-  background-color: #e9ecef;
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-family: "Source Code Pro", monospace;
-  font-size: 0.9em;
-  color: #c7254e;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 #articleDisplayContent img {
   max-width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: var(--border-radius-md, 6px);
   margin: 1.5em auto;
   display: block;
+  border: 1px solid var(--dracula-comment, var(--border-color-secondary));
+}
+#articleDisplayContent hr {
+  border: none;
+  border-top: 1px solid var(--dracula-comment);
+  margin: 2em 0;
 }
 #articleDisplayContent .table-wrapper {
   overflow-x: auto;
   margin: 1.5em 0;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
+  border: 1px solid var(--dracula-comment);
+  border-radius: var(--border-radius-md, 6px);
 }
 #articleDisplayContent table {
   width: 100%;
   border-collapse: collapse;
+  color: var(--dracula-foreground);
 }
 #articleDisplayContent table th,
 #articleDisplayContent table td {
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--dracula-comment);
   padding: 0.6em 0.8em;
   text-align: left;
 }
 #articleDisplayContent table thead th {
-  background-color: #f8f9fa;
+  background-color: var(--dracula-current-line);
   font-weight: 600;
+  color: var(--dracula-green);
 }
+#articleDisplayContent table tbody tr:hover td {
+  background-color: var(--dracula-current-line-brighter, #4f5266);
+}
+
 /* ===== Skills Section Styles (Pagina About) ===== */
 section#skills ul.skills-grid {
   list-style-type: none;
