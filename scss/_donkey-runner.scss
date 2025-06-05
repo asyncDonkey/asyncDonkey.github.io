@@ -1441,3 +1441,93 @@ body.game-fullscreen-active main {
     text-transform: none;
     */
 }
+// In scss/_donkey-runner.scss
+
+/* Stili per "Fake Fullscreen" su dispositivi touch in landscape */
+/* Questi si applicano quando il dispositivo è in landscape 
+   E la classe .game-fullscreen-active (del Fullscreen API JS) NON è presente sul body.
+   Questo copre il caso iPhone (dove il pulsante JS è nascosto) e altri touch devices
+   ruotati manualmente in landscape senza aver usato il pulsante Fullscreen API.
+*/
+@media screen and (orientation: landscape) and (hover: none) and (pointer: coarse) {
+    body.donkey-runner-page:not(.game-fullscreen-active) {
+        
+        & > header, // Selettore più specifico per header e footer diretti figli di body
+        & > footer,
+        #miniLeaderboardContainer, 
+        #guestbook, 
+        #contribution-cta-section, 
+        main > #gameInstructions, // Istruzioni dentro main
+        #gameInfoAccordion,
+        #orientationPromptEl { // Assicurati che l'ID sia corretto se diverso
+            display: none !important;
+        }
+
+        main {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100vw;
+            height: 100vh; // Usa 100dvh se vuoi considerare le dynamic viewport units per una migliore gestione delle UI del browser
+            // height: 100dvh; // alternativa per iOS >= 15.4
+            overflow: hidden;
+            background-color: #000; // Sfondo nero per l'intera area di gioco
+        }
+
+        #gameContainer {
+            width: 100% !important; // Occupa il 100% del genitore main
+            height: 100% !important;// Occupa il 100% del genitore main
+            max-width: none !important;
+            max-height: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background-color: #000; // Sfondo nero anche qui per sicurezza
+            display: flex !important; 
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        canvas#gameCanvas {
+            width: 100% !important;  // Occupa il 100% del gameContainer
+            height: 100% !important; // Occupa il 100% del gameContainer
+            max-height: none !important;
+            object-fit: contain !important; // Mantiene l'aspect ratio del canvas, centrato
+            border: none !important;
+            border-radius: 0 !important;
+        }
+
+        #mobileControls { 
+            display: block !important; 
+            position: fixed !important; // Fisso rispetto al viewport
+            bottom: 10px; // O come preferisci
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%; 
+            max-width: 400px; 
+            z-index: 200; 
+        }
+
+        #mobileStartButton { 
+            // RIMUOVERE: display: block !important; 
+            // MANTENERE il resto per il corretto posizionamento quando JS lo rende visibile:
+            position: fixed !important;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 220 !important; /* Già presente nel tuo file, manteniamolo se serve */
+            // Le altre proprietà di stile del pulsante (font, colore, etc.) 
+            // sono già definite fuori dalla media query e verranno applicate.
+        }
+
+        #scoreInputContainerDonkey[style*='display: flex'] { // Quando il form del punteggio è visibile
+            position: fixed !important; // Assicura che sia visibile sopra il gioco massimizzato
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 250 !important;
+        }
+    }
+}

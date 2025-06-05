@@ -6718,6 +6718,93 @@ body.game-fullscreen-active main {
   */
 }
 
+/* Stili per "Fake Fullscreen" su dispositivi touch in landscape */
+/* Questi si applicano quando il dispositivo è in landscape 
+   E la classe .game-fullscreen-active (del Fullscreen API JS) NON è presente sul body.
+   Questo copre il caso iPhone (dove il pulsante JS è nascosto) e altri touch devices
+   ruotati manualmente in landscape senza aver usato il pulsante Fullscreen API.
+*/
+@media screen and (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  body.donkey-runner-page:not(.game-fullscreen-active) > header, body.donkey-runner-page:not(.game-fullscreen-active) > footer,
+  body.donkey-runner-page:not(.game-fullscreen-active) #miniLeaderboardContainer,
+  body.donkey-runner-page:not(.game-fullscreen-active) #guestbook,
+  body.donkey-runner-page:not(.game-fullscreen-active) #contribution-cta-section,
+  body.donkey-runner-page:not(.game-fullscreen-active) main > #gameInstructions,
+  body.donkey-runner-page:not(.game-fullscreen-active) #gameInfoAccordion,
+  body.donkey-runner-page:not(.game-fullscreen-active) #orientationPromptEl {
+    display: none !important;
+  }
+  body.donkey-runner-page:not(.game-fullscreen-active) main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #000;
+  }
+  body.donkey-runner-page:not(.game-fullscreen-active) #gameContainer {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+    background-color: #000;
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-box-direction: normal !important;
+        -ms-flex-direction: column !important;
+            flex-direction: column !important;
+    -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+            align-items: center !important;
+    -webkit-box-pack: center !important;
+        -ms-flex-pack: center !important;
+            justify-content: center !important;
+  }
+  body.donkey-runner-page:not(.game-fullscreen-active) canvas#gameCanvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    -o-object-fit: contain !important;
+       object-fit: contain !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  body.donkey-runner-page:not(.game-fullscreen-active) #mobileControls {
+    display: block !important;
+    position: fixed !important;
+    bottom: 10px;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    z-index: 200;
+  }
+  body.donkey-runner-page:not(.game-fullscreen-active) #mobileStartButton {
+    position: fixed !important;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+    z-index: 220 !important; /* Già presente nel tuo file, manteniamolo se serve */
+  }
+  body.donkey-runner-page:not(.game-fullscreen-active) #scoreInputContainerDonkey[style*="display: flex"] {
+    position: fixed !important;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+    z-index: 250 !important;
+  }
+}
 #globalLeaderboardContainer {
   color: var(--text-color-secondary);
   background-color: var(--surface-bg-primary);

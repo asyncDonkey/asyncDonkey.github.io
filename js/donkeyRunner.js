@@ -328,6 +328,7 @@ const restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey');
 const mobileStartButton = document.getElementById('mobileStartButton'); // NUOVO RIFERIMENTO
 
 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+const isIPhone = /iPhone/i.test(navigator.userAgent);
 
 if (isTouchDevice) {
     if (mobileControlsDiv) mobileControlsDiv.style.display = 'block';
@@ -338,6 +339,19 @@ if (isTouchDevice) {
     if (mobileControlsDiv) mobileControlsDiv.style.display = 'none';
     if (mobileStartButton) mobileStartButton.style.display = 'none'; // Nascondi su non-touch
     console.log('Non è un dispositivo touch.');
+}
+
+if (fullscreenButton) {
+    if (isIPhone) {
+        fullscreenButton.style.display = 'none';
+        console.log('iPhone rilevato: pulsante fullscreen API nascosto. Si affida a CSS per landscape.');
+    } else if (isTouchDevice) {
+        fullscreenButton.style.display = 'block'; // Mostra per altri touch (iPad, Android)
+        console.log('Dispositivo touch (non iPhone) rilevato: pulsante fullscreen API visualizzato.');
+    } else {
+        fullscreenButton.style.display = 'none'; // Nascondi per non-touch (desktop)
+        console.log('Dispositivo non touch: pulsante fullscreen API nascosto.');
+    }
 }
 
 const WARNING_EXCLAMATION_COLOR = 'red';
@@ -2695,6 +2709,14 @@ function startGameLoop() {
 let isFullscreenActive = false;
 
 async function toggleFullscreen() {
+    // ++ AGGIUNTA GUARDIA PER iPHONE ++
+    // Se è un iPhone, questa funzione non dovrebbe fare nulla poiché il pulsante è nascosto.
+    // Questa è una sicurezza aggiuntiva.
+    if (isIPhone) {
+        console.log('toggleFullscreen chiamato su iPhone, ma il pulsante dovrebbe essere nascosto. Nessuna azione intrapresa.');
+        return;
+    }
+
     if (!gameContainer) return;
     const isCurrentlyFullscreen =
         document.fullscreenElement ||
@@ -2704,18 +2726,14 @@ async function toggleFullscreen() {
 
     if (!isCurrentlyFullscreen) {
         try {
-            if (gameContainer.requestFullscreen) await gameContainer.requestFullscreen();
-            else if (gameContainer.webkitRequestFullscreen) await gameContainer.webkitRequestFullscreen();
-            else if (gameContainer.msRequestFullscreen) await gameContainer.msRequestFullscreen();
-
-            if (isTouchDevice && screen.orientation && typeof screen.orientation.lock === 'function') {
-                try {
-                    await screen.orientation.lock('landscape-primary');
-                    console.log('Orientamento bloccato in landscape.');
-                } catch (err) {
-                    console.warn("Impossibile bloccare l'orientamento:", err.name, err.message);
-                }
+            if (gameContainer.requestFullscreen) { // Standard
+                await gameContainer.requestFullscreen();
+            } else if (gameContainer.webkitRequestFullscreen) { // Safari / iOS generico (ora per iPad principalmente)
+                await gameContainer.webkitRequestFullscreen();
+            } else if (gameContainer.msRequestFullscreen) { // IE Legacy
+                await gameContainer.msRequestFullscreen();
             }
+            // Il codice per screen.orientation.lock() è già stato rimosso come da passaggi precedenti.
         } catch (err) {
             console.error(`Errore attivazione fullscreen: ${err.message} (${err.name})`);
             showToast('Impossibile attivare la modalità fullscreen.', 'error');
@@ -2725,18 +2743,19 @@ async function toggleFullscreen() {
             if (document.exitFullscreen) await document.exitFullscreen();
             else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
             else if (document.msExitFullscreen) await document.msExitFullscreen();
-
-            if (screen.orientation && typeof screen.orientation.unlock === 'function') {
-                screen.orientation.unlock();
-                console.log('Orientamento sbloccato.');
-            }
+            // Il codice per screen.orientation.unlock() è già stato rimosso.
         } catch (err) {
             console.error(`Errore uscita fullscreen: ${err.message} (${err.name})`);
         }
     }
 }
 
+
 function handleFullscreenChange() {
+    // ++ NESSUNA MODIFICA NECESSARIA QUI rispetto all'ultima versione che mi hai passato ++
+    // La logica di `screen.orientation.unlock()` era già stata rimossa.
+    // Questa funzione reagisce agli eventi dell'API Fullscreen, che non verranno attivati
+    // dal pulsante su iPhone se il pulsante è nascosto.
     isFullscreenActive = !!(
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
@@ -2747,7 +2766,8 @@ function handleFullscreenChange() {
     if (isFullscreenActive) {
         document.body.classList.add('game-fullscreen-active');
         if (
-            isTouchDevice &&
+            isTouchDevice && // Rimane isTouchDevice perché questo si applica a iPad/Android che usano l'API
+            screen.orientation && 
             (screen.orientation.type.startsWith('landscape') || window.innerWidth > window.innerHeight)
         ) {
             document.body.classList.add('game-fullscreen-landscape');
@@ -2758,12 +2778,9 @@ function handleFullscreenChange() {
     } else {
         document.body.classList.remove('game-fullscreen-active');
         document.body.classList.remove('game-fullscreen-landscape');
-        if (screen.orientation && typeof screen.orientation.unlock === 'function') {
-            screen.orientation.unlock();
-        }
         if (fullscreenButton) fullscreenButton.textContent = 'FULLSCREEN';
     }
-    checkAndDisplayOrientationPrompt();
+    checkAndDisplayOrientationPrompt(); // Questo è per il tuo prompt personalizzato
 }
 
 document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -2813,8 +2830,13 @@ if (shootButton) {
     );
 }
 
-if (fullscreenButton) {
-    fullscreenButton.addEventListener('click', toggleFullscreen);
+if (fullscreenButton) { // Controlla sempre se il pulsante esiste
+    if (!isIPhone) { // Attacca il listener solo se NON è un iPhone
+        fullscreenButton.addEventListener('click', toggleFullscreen);
+        console.log('Event listener per fullscreenButton aggiunto (non è un iPhone).');
+    } else {
+        console.log('Event listener per fullscreenButton NON aggiunto (è un iPhone).');
+    }
 }
 if (saveScoreBtnDonkey) {
     saveScoreBtnDonkey.addEventListener('click', handleSaveDonkeyScore);
