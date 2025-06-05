@@ -65,75 +65,137 @@
 }
 
 .test-task-card {
-    // ... (stili esistenti per .test-task-card) ...
+    background-color: var(--surface-bg-primary);
+    border: 1px solid var(--border-color-primary);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    transition: all 0.2s ease-in-out;
+    box-shadow: var(--shadow-sm);
+
+    &:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    h3 {
+        color: var(--primary-color-dark, var(--text-color-primary));
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.4em;
+        margin-top: 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color-secondary);
+        display: flex;
+        align-items: center;
+        &::before {
+            content: 'biotech'; // Icona tecnica
+            font-family: 'Material Symbols Rounded';
+            margin-right: 12px;
+            font-size: 1.3em;
+            color: var(--primary-color);
+        }
+    }
+
+    .test-task-description {
+        color: var(--text-color-secondary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .test-task-area {
+        font-size: 0.9em;
+        font-family: 'Source Code Pro', monospace;
+        color: var(--text-color-muted);
+        margin: 1rem 0;
+    }
 
     .test-task-details-section {
-        // ... (stili esistenti) ...
+        margin: 1rem 0;
+        padding: 1rem;
+        background-color: var(--dracula-background);
+        border: 1px dashed var(--border-color-secondary);
+        border-radius: var(--border-radius-sm);
 
-        .formatted-text {
-            font-family: 'Source Code Pro', monospace; // Mantenere questo per il testo formattato
-            font-size: 1em;
-            line-height: 1.6;
-            color: var(--text-color-secondary); // Colore testo generale
-
-            // Stili per il Markdown (Dracula-like)
-            h1, h2, h3, h4, h5, h6 {
-                color: var(--dracula-purple); // Un colore vivace da Dracula per i titoli
-                font-family: 'Space Grotesk', sans-serif;
-                margin-top: 1em;
-                margin-bottom: 0.5em;
-                line-height: 1.2;
-            }
-            p {
-                color: var(--text-color-secondary); // Testo normale
-                margin-bottom: 0.8em;
-            }
-            code {
-                background-color: var(--dracula-current-line); // Colore di sfondo della riga corrente
-                color: var(--dracula-pink); // Rosa per il codice inline
-                padding: 0.2em 0.4em;
-                border-radius: 3px;
-                font-family: 'Source Code Pro', monospace;
-                white-space: nowrap; // Impedisce al codice inline di andare a capo
-            }
-            pre {
-                background-color: var(--dracula-background); // Sfondo principale di Dracula
-                color: var(--dracula-foreground); // Colore testo principale
-                padding: 1em;
-                border-radius: var(--border-radius-sm);
-                overflow-x: auto; // Per scroll orizzontale in caso di codice lungo
-                margin: 1em 0;
-                code {
-                    background-color: transparent; // Non applicare sfondo al codice dentro pre
-                    color: inherit; // Eredita il colore dal pre
-                    padding: 0;
-                    border-radius: 0;
-                    white-space: pre; // Mantiene la formattazione esatta
-                }
-            }
-            a {
-                color: var(--dracula-cyan); // Ciano per i link
-                text-decoration: underline;
-                &:hover {
-                    color: var(--dracula-green); // Verde su hover
-                }
-            }
-            ul, ol {
-                margin-left: 1.5em;
-                padding-left: 0;
-                li {
-                    color: var(--text-color-secondary);
-                    margin-bottom: 0.5em;
-                }
-            }
-            strong {
-                color: var(--text-color-primary); // Potrebbe essere un colore più forte
-            }
-            em {
-                font-style: italic;
-                color: var(--dracula-yellow); // Giallo per enfasi
-            }
+        strong {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: var(--dracula-green);
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 1px;
         }
+        .formatted-text {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1em;
+    line-height: 1.6;
+    color: var(--text-color-secondary); // Colore testo generale
+
+    // Stili per il Markdown (Dracula-like)
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--dracula-purple); // Un colore vivace da Dracula per i titoli
+        font-family: 'Space Grotesk', sans-serif;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        line-height: 1.2;
+    }
+    p {
+        color: var(--dracula-foreground); // Testo normale da Dracula
+        margin-bottom: 0.8em;
+    }
+    code {
+        background-color: var(--dracula-current-line); // Colore di sfondo della riga corrente
+        color: var(--dracula-pink); // Rosa per il codice inline
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-family: 'Source Code Pro', monospace;
+        white-space: nowrap; // Impedisce al codice inline di andare a capo
+    }
+    pre {
+        background-color: var(--dracula-background); // Sfondo principale di Dracula
+        color: var(--dracula-foreground); // Colore testo principale
+        padding: 1em;
+        border-radius: var(--border-radius-sm);
+        overflow-x: auto; // Per scroll orizzontale in caso di codice lungo
+        margin: 1em 0;
+        code {
+            background-color: transparent; // Non applicare sfondo al codice dentro pre
+            color: inherit; // Eredita il colore dal pre
+            padding: 0;
+            border-radius: 0;
+            white-space: pre; // Mantiene la formattazione esatta
+        }
+    }
+    a {
+        color: var(--dracula-cyan); // Ciano per i link
+        text-decoration: underline;
+        &:hover {
+            color: var(--dracula-green); // Verde su hover
+        }
+    }
+    ul, ol {
+        margin-left: 1.5em;
+        padding-left: 0;
+        li {
+            color: var(--dracula-foreground); // Colore item lista
+            margin-bottom: 0.5em;
+        }
+    }
+    strong {
+        color: var(--dracula-cyan); // Arancione per il grassetto
+    }
+    em {
+        font-style: italic;
+        color: var(--dracula-yellow); // Giallo per enfasi
+    }
+    blockquote {
+        border-left: 4px solid var(--dracula-purple); // Viola per blockquote
+        padding: 0.5em 1em;
+        margin: 1.5em 0;
+        font-style: italic;
+        color: var(--dracula-comment); // Colore commento per blockquote
+        background-color: var(--dracula-current-line); // Sfondo simile al codice
+        border-radius: var(--border-radius-sm);
+    }
+}
     }
 
     // Stili per le checkbox degli step
@@ -178,14 +240,22 @@
                         margin-bottom: 0;
                     }
                 }
-                // Puoi riapplicare qui gli stili per code, pre, a, strong, em come sopra se necessario
-                // ma con attenzione per non rompere il layout del singolo step.
                 code {
                     background-color: var(--dracula-current-line);
                     color: var(--dracula-pink);
                     padding: 0.1em 0.3em;
                     border-radius: 2px;
                     font-size: 0.9em;
+                }
+                strong {
+                    color: var(--dracula-orange);
+                }
+                em {
+                    color: var(--dracula-yellow);
+                }
+                a {
+                    color: var(--dracula-cyan);
+                    text-decoration: underline;
                 }
             }
         }
@@ -198,5 +268,52 @@
         opacity: 0.8;
     }
 
-    // ... (resto degli stili .test-task-card, .feedback-form-container, .task-actions) ...
+    .feedback-form-container {
+        border-top: 1px dashed var(--border-color-light);
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+
+        h4 {
+            margin-top: 0;
+            color: var(--primary-color-dark, var(--text-color-primary));
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 60px;
+            resize: none;
+            overflow-y: hidden;
+            line-height: 1.6;
+            // Eredita gli stili globali da _base.scss o _utilities.scss
+        }
+    }
+
+    .feedback-submitted-message {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.95em;
+        line-height: 1.5;
+        p {
+            margin: 0;
+        }
+        &.success {
+            background-color: var(--success-bg-light); // Assicurati di definire queste variabili se non lo hai fatto
+            border-left: 4px solid var(--success-color);
+            color: var(--success-color-dark);
+        }
+        &.failure {
+            background-color: var(--danger-bg-light); // Assicurati di definire queste variabili se non lo hai fatto
+            border-left: 4px solid var(--danger-color);
+            color: var(--danger-color-dark);
+        }
+    }
+
+    .task-actions {
+        padding-top: 1rem;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+    }
 }

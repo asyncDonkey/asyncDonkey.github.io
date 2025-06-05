@@ -8611,6 +8611,68 @@ main section {
   margin-top: 2rem;
 }
 
+.test-task-card {
+  background-color: var(--surface-bg-primary);
+  border: 1px solid var(--border-color-primary);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  -webkit-box-shadow: var(--shadow-sm);
+          box-shadow: var(--shadow-sm);
+}
+.test-task-card:hover {
+  border-color: var(--primary-color);
+  -webkit-box-shadow: var(--shadow-md);
+          box-shadow: var(--shadow-md);
+}
+.test-task-card h3 {
+  color: var(--primary-color-dark, var(--text-color-primary));
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.4em;
+  margin-top: 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color-secondary);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+.test-task-card h3::before {
+  content: "biotech";
+  font-family: "Material Symbols Rounded";
+  margin-right: 12px;
+  font-size: 1.3em;
+  color: var(--primary-color);
+}
+.test-task-card .test-task-description {
+  color: var(--text-color-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.test-task-card .test-task-area {
+  font-size: 0.9em;
+  font-family: "Source Code Pro", monospace;
+  color: var(--text-color-muted);
+  margin: 1rem 0;
+}
+.test-task-card .test-task-details-section {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--dracula-background);
+  border: 1px dashed var(--border-color-secondary);
+  border-radius: var(--border-radius-sm);
+}
+.test-task-card .test-task-details-section strong {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: var(--dracula-green);
+  text-transform: uppercase;
+  font-size: 0.8em;
+  letter-spacing: 1px;
+}
 .test-task-card .test-task-details-section .formatted-text {
   font-family: "Source Code Pro", monospace;
   font-size: 1em;
@@ -8625,7 +8687,7 @@ main section {
   line-height: 1.2;
 }
 .test-task-card .test-task-details-section .formatted-text p {
-  color: var(--text-color-secondary);
+  color: var(--dracula-foreground);
   margin-bottom: 0.8em;
 }
 .test-task-card .test-task-details-section .formatted-text code {
@@ -8663,15 +8725,24 @@ main section {
   padding-left: 0;
 }
 .test-task-card .test-task-details-section .formatted-text ul li, .test-task-card .test-task-details-section .formatted-text ol li {
-  color: var(--text-color-secondary);
+  color: var(--dracula-foreground);
   margin-bottom: 0.5em;
 }
 .test-task-card .test-task-details-section .formatted-text strong {
-  color: var(--text-color-primary);
+  color: var(--dracula-cyan);
 }
 .test-task-card .test-task-details-section .formatted-text em {
   font-style: italic;
   color: var(--dracula-yellow);
+}
+.test-task-card .test-task-details-section .formatted-text blockquote {
+  border-left: 4px solid var(--dracula-purple);
+  padding: 0.5em 1em;
+  margin: 1.5em 0;
+  font-style: italic;
+  color: var(--dracula-comment);
+  background-color: var(--dracula-current-line);
+  border-radius: var(--border-radius-sm);
 }
 .test-task-card .test-step-item {
   display: -webkit-box;
@@ -8726,10 +8797,69 @@ main section {
   border-radius: 2px;
   font-size: 0.9em;
 }
+.test-task-card .test-step-item label .formatted-text strong {
+  color: var(--dracula-orange);
+}
+.test-task-card .test-step-item label .formatted-text em {
+  color: var(--dracula-yellow);
+}
+.test-task-card .test-step-item label .formatted-text a {
+  color: var(--dracula-cyan);
+  text-decoration: underline;
+}
 .test-task-card .test-step-item input[type=checkbox]:checked + label {
   color: var(--text-color-muted);
   text-decoration: line-through;
   opacity: 0.8;
+}
+.test-task-card .feedback-form-container {
+  border-top: 1px dashed var(--border-color-light);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+.test-task-card .feedback-form-container h4 {
+  margin-top: 0;
+  color: var(--primary-color-dark, var(--text-color-primary));
+}
+.test-task-card .feedback-form-container textarea {
+  width: 100%;
+  min-height: 60px;
+  resize: none;
+  overflow-y: hidden;
+  line-height: 1.6;
+}
+.test-task-card .feedback-submitted-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+.test-task-card .feedback-submitted-message p {
+  margin: 0;
+}
+.test-task-card .feedback-submitted-message.success {
+  background-color: var(--success-bg-light);
+  border-left: 4px solid var(--success-color);
+  color: var(--success-color-dark);
+}
+.test-task-card .feedback-submitted-message.failure {
+  background-color: var(--danger-bg-light);
+  border-left: 4px solid var(--danger-color);
+  color: var(--danger-color-dark);
+}
+.test-task-card .task-actions {
+  padding-top: 1rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 10px;
 }
 
 .custom-markdown-editor-container {

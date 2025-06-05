@@ -14,6 +14,13 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { showToast } from './toastNotifications.js';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@5.0.1/lib/marked.esm.js';
+
+// NUOVO: Configurazione di marked
+marked.setOptions({
+    breaks: true, // Interpreta le singole nuove righe come <br> (interruzioni di linea HTML)
+    gfm: true     // Abilita GitHub Flavored Markdown (include tabelle, task lists, ecc.)
+});
+
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 
 const functions = getFunctions();
