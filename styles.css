@@ -2897,6 +2897,7 @@ section#contact li {
   margin: 1.5em 0;
   border: 1px solid var(--dracula-comment);
   border-radius: var(--border-radius-md, 6px);
+  -webkit-overflow-scrolling: touch;
 }
 #articleDisplayContent table {
   width: 100%;
@@ -2908,11 +2909,15 @@ section#contact li {
   border: 1px solid var(--dracula-comment);
   padding: 0.6em 0.8em;
   text-align: left;
+  white-space: nowrap;
 }
 #articleDisplayContent table thead th {
   background-color: var(--dracula-current-line);
   font-weight: 600;
   color: var(--dracula-green);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 #articleDisplayContent table tbody tr:hover td {
   background-color: var(--dracula-current-line-brighter, #4f5266);
@@ -3244,6 +3249,7 @@ section#contact li {
   margin: 1.5em 0;
   border: 1px solid var(--dracula-comment);
   border-radius: var(--border-radius-md, 6px);
+  -webkit-overflow-scrolling: touch;
 }
 #articleDisplayContent table {
   width: 100%;
@@ -3255,11 +3261,15 @@ section#contact li {
   border: 1px solid var(--dracula-comment);
   padding: 0.6em 0.8em;
   text-align: left;
+  white-space: nowrap;
 }
 #articleDisplayContent table thead th {
   background-color: var(--dracula-current-line);
   font-weight: 600;
   color: var(--dracula-green);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 #articleDisplayContent table tbody tr:hover td {
   background-color: var(--dracula-current-line-brighter, #4f5266);

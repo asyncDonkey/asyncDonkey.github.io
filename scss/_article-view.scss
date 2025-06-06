@@ -170,37 +170,40 @@
     }
 
     // Stili per le Tabelle (riprendendo quelli che avevi)
-    .table-wrapper { // Se usi un wrapper per lo scroll orizzontale delle tabelle
-        overflow-x: auto;
-        margin: 1.5em 0;
-        border: 1px solid var(--dracula-comment); 
-        border-radius: var(--border-radius-md, 6px);
+    .table-wrapper { // Questa classe è già nel tuo file, assicuriamoci che abbia queste proprietà
+      overflow-x: auto;
+      margin: 1.5em 0;
+      border: 1px solid var(--dracula-comment); 
+      border-radius: var(--border-radius-md, 6px);
+      -webkit-overflow-scrolling: touch; // Per uno scroll fluido su iOS
     }
 
     table {
-        width: 100%;
-        border-collapse: collapse;
-        color: var(--dracula-foreground); // Colore testo tabella
+      // Abbiamo rimosso 'display: block' e 'overflow-x' da qui!
+      width: 100%; // width: 100% qui va bene, perché il wrapper gestisce lo scroll
+      border-collapse: collapse;
+      color: var(--dracula-foreground);
 
-        th,
-        td {
-            border: 1px solid var(--dracula-comment); 
-            padding: 0.6em 0.8em;
-            text-align: left;
-        }
+      th,
+      td {
+        border: 1px solid var(--dracula-comment); 
+        padding: 0.6em 0.8em;
+        text-align: left;
+        white-space: nowrap; // Manteniamo questo per evitare il wrap del testo nelle celle
+      }
 
-        thead th {
-            background-color: var(--dracula-current-line); 
-            font-weight: 600;
-            color: var(--dracula-green); // Intestazioni tabella in verde
-        }
+      thead th {
+        background-color: var(--dracula-current-line); 
+        font-weight: 600;
+        color: var(--dracula-green);
+        position: sticky; // Bonus: rende l'header della tabella "appiccicoso" durante lo scroll
+        top: 0;
+        z-index: 1; // Assicura che l'header stia sopra il contenuto della tabella
+      }
 
-        tbody tr:nth-child(odd) td { // Strisce opzionali per le righe
-             // background-color: var(--dracula-background-lighter, #313440); // Un po' più chiaro dello sfondo principale
-        }
-        tbody tr:hover td { // Hover sulle righe
-            background-color: var(--dracula-current-line-brighter, #4f5266);
-        }
+      tbody tr:hover td {
+        background-color: var(--dracula-current-line-brighter, #4f5266);
+      }
     }
 }
 
@@ -560,37 +563,40 @@
     }
 
     // Stili per le Tabelle (riprendendo quelli che avevi)
-    .table-wrapper { // Se usi un wrapper per lo scroll orizzontale delle tabelle
-        overflow-x: auto;
-        margin: 1.5em 0;
-        border: 1px solid var(--dracula-comment); 
-        border-radius: var(--border-radius-md, 6px);
+    .table-wrapper { // Questa classe è già nel tuo file, assicuriamoci che abbia queste proprietà
+      overflow-x: auto;
+      margin: 1.5em 0;
+      border: 1px solid var(--dracula-comment); 
+      border-radius: var(--border-radius-md, 6px);
+      -webkit-overflow-scrolling: touch; // Per uno scroll fluido su iOS
     }
 
     table {
-        width: 100%;
-        border-collapse: collapse;
-        color: var(--dracula-foreground); // Colore testo tabella
+      // Abbiamo rimosso 'display: block' e 'overflow-x' da qui!
+      width: 100%; // width: 100% qui va bene, perché il wrapper gestisce lo scroll
+      border-collapse: collapse;
+      color: var(--dracula-foreground);
 
-        th,
-        td {
-            border: 1px solid var(--dracula-comment); 
-            padding: 0.6em 0.8em;
-            text-align: left;
-        }
+      th,
+      td {
+        border: 1px solid var(--dracula-comment); 
+        padding: 0.6em 0.8em;
+        text-align: left;
+        white-space: nowrap; // Manteniamo questo per evitare il wrap del testo nelle celle
+      }
 
-        thead th {
-            background-color: var(--dracula-current-line); 
-            font-weight: 600;
-            color: var(--dracula-green); // Intestazioni tabella in verde
-        }
+      thead th {
+        background-color: var(--dracula-current-line); 
+        font-weight: 600;
+        color: var(--dracula-green);
+        position: sticky; // Bonus: rende l'header della tabella "appiccicoso" durante lo scroll
+        top: 0;
+        z-index: 1; // Assicura che l'header stia sopra il contenuto della tabella
+      }
 
-        tbody tr:nth-child(odd) td { // Strisce opzionali per le righe
-             // background-color: var(--dracula-background-lighter, #313440); // Un po' più chiaro dello sfondo principale
-        }
-        tbody tr:hover td { // Hover sulle righe
-            background-color: var(--dracula-current-line-brighter, #4f5266);
-        }
+      tbody tr:hover td {
+        background-color: var(--dracula-current-line-brighter, #4f5266);
+      }
     }
 }
 

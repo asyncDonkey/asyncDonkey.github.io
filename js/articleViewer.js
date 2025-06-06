@@ -155,6 +155,28 @@ function setupShareButtons() {
         shareViaEmailBtn.href = `mailto:?subject=${encodedTitle}&body=Leggi questo articolo:%20${encodedUrl}`;
 }
 
+function wrapTablesForResponsiveness() {
+    const articleContent = document.getElementById('articleDisplayContent');
+    if (!articleContent) return;
+
+    const tables = articleContent.querySelectorAll('table');
+    tables.forEach(table => {
+        // Controlla se la tabella è già stata avvolta per evitare duplicazioni
+        if (table.parentNode.classList.contains('table-wrapper')) {
+            return; 
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper'; // Usiamo la classe che hai già nel tuo SCSS!
+
+        // Inserisci il wrapper nel DOM, subito prima della tabella
+        table.parentNode.insertBefore(wrapper, table);
+
+        // Sposta la tabella dentro il suo nuovo wrapper
+        wrapper.appendChild(table);
+    });
+}
+
 function updateMetaTags(articleData, articleId) {
     const defaultImageUrl = 'https://firebasestorage.googleapis.com/v0/b/asyncdonkey.firebasestorage.app/o/asynced_images%2Fsummary_large_image.png?alt=media&token=a4c20eb4-24d7-4e42-a47e-8e3672a8c482';
     const articleUrl = `https://asyncd.org/view-article.html?id=${articleId}`;
@@ -302,9 +324,11 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
             }
             if (articleDisplayContent) {
                 if (articleDataFromDb.contentMarkdown) {
-                    try {
-                        articleDisplayContent.innerHTML = marked.parse(articleDataFromDb.contentMarkdown);
-                    } catch (e) {
+    try {
+        articleDisplayContent.innerHTML = marked.parse(articleDataFromDb.contentMarkdown);
+        // La riga successiva è la nostra aggiunta!
+        wrapTablesForResponsiveness(); // <<< CHIAMIAMO LA FUNZIONE QUI!
+    } catch (e) {
                         console.error('Errore durante il parsing del Markdown:', e);
                         articleDisplayContent.textContent = articleDataFromDb.contentMarkdown; // Fallback a testo semplice
                     }
