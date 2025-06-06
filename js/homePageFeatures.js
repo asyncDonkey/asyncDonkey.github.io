@@ -51,7 +51,7 @@ export function formatArticleDate(dateInput) {
  * @returns {HTMLElement} L'elemento della card articolo.
  */
 export function createArticleCard(articleData, articleId, authorPublicProfile, isFeatured = false) {
-    const card = document.createElement('div');
+    const card = document.createElement('article');
     card.className = 'article-card';
     if (isFeatured) {
         card.classList.add('is-featured');
