@@ -200,6 +200,58 @@ function setupThemeSwitcher() {
     console.log('[Main.js setupThemeSwitcher] Theme switcher inizializzato.');
 }
 
+/**
+ * Inizializza la sezione e il pulsante per la richiesta di diventare beta tester.
+ * @param {object} user L'oggetto utente di Firebase.
+ * @param {object|null} profileData I dati del profilo utente da Firestore.
+ */
+function initializeTesterRequestButton(user, profileData) {
+    const requestSection = document.getElementById('beta-tester-request-section');
+    const requestButton = document.getElementById('request-tester-role-btn');
+
+    if (!requestSection || !requestButton) {
+        // La sezione non è in questa pagina, quindi non facciamo nulla.
+        return;
+    }
+
+    // Condizioni per mostrare il pulsante:
+    // 1. L'utente è loggato.
+    // 2. Il profilo utente è stato caricato.
+    // 3. L'utente NON è già un tester.
+    // 4. L'utente NON è un admin (gli admin sono tester impliciti).
+    if (user && profileData && !profileData.isTestUser && !profileData.isAdmin) {
+        requestSection.style.display = 'block';
+
+        // Aggiungiamo un listener che chiama la Cloud Function
+        requestButton.addEventListener('click', async () => {
+            requestButton.disabled = true;
+            requestButton.textContent = 'Invio richiesta in corso...';
+
+            try {
+                const requestTesterRole = httpsCallable(functions, 'requestTesterRole');
+                const result = await requestTesterRole();
+
+                if (result.data.success) {
+                    showToast('Richiesta inviata con successo! Un admin la esaminerà presto. 🚀', 'success', 8000);
+                    // Nascondiamo la sezione dopo l'invio per evitare richieste multiple
+                    requestSection.style.display = 'none';
+                } else {
+                    throw new Error(result.data.message || 'Si è verificato un errore sconosciuto.');
+                }
+            } catch (error) {
+                console.error("Errore durante la chiamata a requestTesterRole:", error);
+                showToast(`Errore: ${error.message}`, 'error');
+                requestButton.disabled = false;
+                requestButton.innerHTML = `<span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 8px;">rocket_launch</span>Voglio diventare un Beta Tester!`;
+            }
+        });
+
+    } else {
+        // Nascondi la sezione se le condizioni non sono soddisfatte
+        requestSection.style.display = 'none';
+    }
+}
+
 // Funzione loadHeaderUserProfileDisplay (modificata per caricare avatar personalizzato)
 async function loadHeaderUserProfileDisplay(user, profileData) {
     const userDisplayNameElement = document.getElementById('userDisplayName');
@@ -656,6 +708,7 @@ function updateUIBasedOnAuthState(user, profileData) {
     }
 
     updateAdminDashboardLink(user, profileData);
+    initializeTesterRequestButton(user, profileData);
 
     if (document.getElementById('articlesSection')) {
         initializeHomepageArticleInteractions(user);

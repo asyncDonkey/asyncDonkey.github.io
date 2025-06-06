@@ -951,3 +951,50 @@ exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request)
         throw new HttpsError('internal', 'Si è verificato un errore interno durante l_aggiornamento dello step. Riprova.');
     }
 });
+
+exports.requestTesterRole = onCall({ region: 'us-central1' }, async (request) => {
+    const functionName = 'requestTesterRole';
+
+    // 1. Verifica autenticazione
+    if (!request.auth || !request.auth.uid) {
+        logger.warn(`[CF:${functionName}] Chiamata non autenticata.`);
+        throw new HttpsError('unauthenticated', 'Devi essere autenticato per fare questa richiesta.');
+    }
+    const userId = request.auth.uid;
+    const userNickname = request.auth.token.name || 'un utente sconosciuto'; // 'name' viene dal custom claim del nickname
+
+    try {
+        // 2. Recupera tutti gli admin
+        const adminsSnapshot = await db.collection('userProfiles').where('isAdmin', '==', true).get();
+        if (adminsSnapshot.empty) {
+            logger.warn(`[CF:${functionName}] Nessun admin trovato a cui inviare la notifica.`);
+            // Non considerarlo un errore per l'utente, la richiesta è comunque "valida"
+            return { success: true, message: 'La tua richiesta è stata registrata, ma non ci sono admin da notificare.' };
+        }
+
+        const adminIds = adminsSnapshot.docs.map(doc => doc.id);
+
+        // 3. Prepara e invia le notifiche
+        const notificationPayload = {
+            type: 'tester_request',
+            title: 'Richiesta Ruolo Tester',
+            message: `L'utente "${userNickname}" (ID: ${userId}) ha richiesto di diventare un Beta Tester.`,
+            link: `/admin-dashboard.html#users-management-section`, // Link diretto alla sezione admin
+            icon: 'science',
+            relatedItemId: userId
+        };
+
+        const notificationPromises = adminIds.map(adminId => 
+            createNotification(adminId, notificationPayload)
+        );
+        
+        await Promise.all(notificationPromises);
+
+        logger.info(`[CF:${functionName}] Notifiche inviate a ${adminIds.length} admin per la richiesta da parte di ${userId}.`);
+        return { success: true, message: 'Notifiche inviate agli amministratori.' };
+
+    } catch (error) {
+        logger.error(`[CF:${functionName}] Errore durante l'invio delle notifiche per la richiesta di ruolo tester da ${userId}:`, error);
+        throw new HttpsError('internal', 'Impossibile inviare la richiesta agli admin. Riprova più tardi.');
+    }
+});

@@ -111,7 +111,7 @@ function createTaskCardHTML(taskData, taskId, existingResult) {
     return `
         <div class="test-task-card" id="task-card-${taskId}" data-task-id="${taskId}">
             <h3>${escapeHTML(taskData.title) || 'Task Senza Titolo'}</h3>
-            <p class="test-task-description">${escapeHTML(taskData.description) || 'Nessuna descrizione.'}</p>
+            <div class="test-task-description formatted-text">${marked.parse(taskData.description || 'Nessuna descrizione.')}</div>
             ${areaHTML}
             ${stepsHTML}
             ${expectedHTML}
