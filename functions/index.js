@@ -1,7 +1,7 @@
 // functions/index.js (Versione Corretta e Refattorizzata)
 
 // Firebase Functions v2 imports
-const { onDocumentUpdated, onDocumentCreated, onDocumentDeleted } = require('firebase-functions/v2/firestore');
+const { onDocumentUpdated, onDocumentCreated, onDocumentDeleted, onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { onObjectFinalized } = require('firebase-functions/v2/storage');
 const { HttpsError, onCall } = require('firebase-functions/v2/https');
 const { logger } = require('firebase-functions');
@@ -45,6 +45,9 @@ const BADGE_ID_ARTICLE_PATRON = 'article-patron'; // NUOVO: Per 5 like ad artico
 const BADGE_ID_EARLY_ADOPTER = 'early-adopter'; // NUOVO
 
 const BADGE_ID_APPRECIATED_AUTHOR = 'appreciated-author';
+const BADGE_ID_BETA_TESTER = 'beta-tester';
+const BADGE_ID_BETA_TESTER_CERTIFIED = 'beta-tester-certified';
+
 
 /**
  * Helper per recuperare i dettagli di un badge da Firestore.
@@ -850,6 +853,129 @@ exports.awardAppreciatedAuthorBadge = onDocumentUpdated('articles/{articleId}', 
     }
 });
 
+/**
+ * Assegna il badge "Beta Tester" quando un utente viene promosso.
+ * Si attiva quando il campo 'isTestUser' in un profilo utente cambia da false a true.
+ */
+exports.awardBetaTesterBadgeOnRoleChange = onDocumentUpdated('userProfiles/{userId}', async (event) => {
+    const functionName = 'awardBetaTesterBadgeOnRoleChange';
+    if (!event.data) return;
+
+    const dataBefore = event.data.before.data();
+    const dataAfter = event.data.after.data();
+    const userId = event.params.userId;
+
+    // Condizione di attivazione: isTestUser è diventato 'true'
+    if (dataBefore.isTestUser !== true && dataAfter.isTestUser === true) {
+        logger.info(`[CF:${functionName}] L'utente ${userId} è stato promosso a Beta Tester. Controllo per assegnazione badge.`);
+
+        const userProfileRef = db.collection('userProfiles').doc(userId);
+        const badgeId = BADGE_ID_BETA_TESTER;
+
+        try {
+            const userProfileSnap = await userProfileRef.get();
+            if (!userProfileSnap.exists) {
+                logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato durante il tentativo di assegnare il badge.`);
+                return;
+            }
+
+            const userProfile = userProfileSnap.data();
+            const earnedBadges = userProfile.earnedBadges || [];
+
+            if (!earnedBadges.includes(badgeId)) {
+                logger.info(`[CF:<span class="math-inline">{functionName}] Assegnazione del badge '</span>{badgeId}' all'utente ${userId}.`);
+                await userProfileRef.update({
+                    earnedBadges: FieldValue.arrayUnion(badgeId),
+                    updatedAt: FieldValue.serverTimestamp(),
+                });
+                await sendNewBadgeNotification(userId, badgeId);
+            } else {
+                logger.info(`[CF:${functionName}] L'utente <span class="math-inline">{userId} possiede già il badge '</span>{badgeId}'.`);
+            }
+        } catch (error) {
+            logger.error(`[CF:<span class="math-inline">{functionName}] Errore durante l'assegnazione del badge '</span>{badgeId}' a ${userId}:`, error);
+        }
+    }
+});
+
+/**
+ * Controlla se un utente ha completato tutti i test attivi e, in caso affermativo,
+ * assegna il badge "Beta Tester Certificato".
+ * Si attiva alla creazione o aggiornamento di un documento in 'testResults'.
+ */
+exports.checkAndAwardCertifiedTesterBadge = onDocumentWritten('userProfiles/{userId}/testResults/{taskId}', async (event) => {
+    const functionName = 'checkAndAwardCertifiedTesterBadge';
+    const userId = event.params.userId;
+
+    // L'evento di scrittura stesso è il nostro trigger, non abbiamo bisogno dei dati specifici del documento.
+    logger.info(`[CF:${functionName}] Trigger attivato per utente ${userId}. Avvio controllo completamento test.`);
+
+    const userProfileRef = db.collection('userProfiles').doc(userId);
+
+    try {
+        const userProfileSnap = await userProfileRef.get();
+        if (!userProfileSnap.exists) {
+            logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato.`);
+            return null;
+        }
+
+        const userProfile = userProfileSnap.data();
+        const earnedBadges = userProfile.earnedBadges || [];
+
+        // Se l'utente ha già il badge, non facciamo nulla.
+        if (earnedBadges.includes(BADGE_ID_BETA_TESTER_CERTIFIED)) {
+            logger.info(`[CF:${functionName}] Utente ${userId} ha già il badge certificato.`);
+            return null;
+        }
+
+        // 1. Conta tutti i task di test ATTIVI
+        const activeTasksQuery = db.collection('testTasksDefinition').where('status', '==', 'active');
+        const activeTasksSnap = await activeTasksQuery.get();
+        const totalActiveTasks = activeTasksSnap.size;
+
+        if (totalActiveTasks === 0) {
+            logger.info(`[CF:${functionName}] Nessun task di test attivo trovato. Impossibile assegnare il badge.`);
+            return null;
+        }
+
+        // 2. Conta tutti i risultati di test SOTTOMESSI da questo utente
+        const userResultsQuery = userProfileRef.collection('testResults');
+        const userResultsSnap = await userResultsQuery.get();
+        const totalUserCompletedTasks = userResultsSnap.size;
+        
+        logger.info(`[CF:${functionName}] Controllo per utente ${userId}: ${totalUserCompletedTasks} test completati su ${totalActiveTasks} totali richiesti.`);
+
+        // 3. Confronta i conteggi
+        if (totalUserCompletedTasks >= totalActiveTasks) {
+            logger.info(`[CF:${functionName}] CONGRATULAZIONI! L'utente ${userId} ha completato tutti i test! Assegnazione badge e animazione.`);
+
+            const badgeDetails = await getBadgeDetails(BADGE_ID_BETA_TESTER_CERTIFIED);
+            if (!badgeDetails) {
+                 logger.error(`[CF:${functionName}] Dettagli per il badge ${BADGE_ID_BETA_TESTER_CERTIFIED} non trovati!`);
+                 return null;
+            }
+
+            const updates = {
+                earnedBadges: FieldValue.arrayUnion(BADGE_ID_BETA_TESTER_CERTIFIED),
+                updatedAt: FieldValue.serverTimestamp(),
+            };
+
+            // Applica l'animazione del nickname se definita nel badge
+            if (badgeDetails.nicknameAnimationClass) {
+                updates.activeNicknameAnimation = badgeDetails.nicknameAnimationClass;
+            }
+            
+            await userProfileRef.update(updates);
+            await sendNewBadgeNotification(userId, BADGE_ID_BETA_TESTER_CERTIFIED);
+        }
+
+        return null;
+
+    } catch (error) {
+        logger.error(`[CF:${functionName}] Errore durante il controllo del badge per l'utente ${userId}:`, error);
+        return null;
+    }
+});
 // ==================================================================
 // --- NUOVA FUNZIONE PER GESTIRE LE SPUNTE DEI TEST STEPS ---
 // ==================================================================

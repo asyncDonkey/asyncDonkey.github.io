@@ -381,3 +381,27 @@
         transform: translateY(1px);
     }
 }
+
+.video-section {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--surface-bg-secondary);
+
+    h2 {
+        margin-bottom: 25px;
+    }
+
+    .video-player-wrapper {
+        max-width: 900px; // Imposta una larghezza massima per schermi grandi
+        margin: 0 auto;  // Centra il video
+        
+        .about-video-player {
+            width: 100%;    // Rende il video fluido e responsivo
+            height: auto;   // Mantiene le proporzioni originali del video
+            border-radius: var(--border-radius-standard);
+            border: 1px solid var(--border-color-secondary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: block; // Evita spazi extra sotto il video
+        }
+    }
+}

@@ -347,3 +347,33 @@
         // --- FINE FIX BOTTONI RESPONSIVE ---
     }
 }
+
+.test-rewards-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-secondary);
+    border-radius: var(--border-radius-standard);
+    margin-bottom: 25px;
+
+    .icon {
+        font-size: 36px;
+        color: var(--link-color);
+        margin-top: 5px;
+    }
+
+    h3 {
+        margin: 0 0 5px 0;
+        font-size: 1.1em;
+        color: var(--heading-color);
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.95em;
+        color: var(--text-color-secondary);
+        line-height: 1.5;
+    }
+}
