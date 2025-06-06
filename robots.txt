@@ -1,0 +1,19 @@
+# Permetti a tutti i crawler di visitare il sito
+User-agent: *
+Allow: /
+
+# Elenco delle pagine e cartelle da non visitare (disallow)
+Disallow: /admin-dashboard.html
+Disallow: /admin-dashboard
+Disallow: /test-zone.html
+Disallow: /test-zone
+Disallow: /submit-article.html
+Disallow: /submit-article
+Disallow: /all-notifications.html
+Disallow: /all-notifications
+Disallow: /functions/
+Disallow: /scss/
+Disallow: /documentation/
+
+# Posizione della nostra mappa del sito (che creeremo tra un attimo)
+Sitemap: https://asynced.org/sitemap.xml
