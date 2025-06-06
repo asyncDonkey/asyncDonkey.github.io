@@ -8730,7 +8730,7 @@ main section {
 
 #test-tasks-list-container {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 25px;
   margin-top: 2rem;
 }
@@ -8802,6 +8802,21 @@ main section {
   font-size: 1em;
   line-height: 1.6;
   color: var(--text-color-secondary);
+  overflow-x: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.test-task-card .test-task-details-section .formatted-text pre, .test-task-card .test-task-details-section .formatted-text code {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+.test-task-card .test-task-details-section .formatted-text table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
 }
 .test-task-card .test-task-details-section .formatted-text h1, .test-task-card .test-task-details-section .formatted-text h2, .test-task-card .test-task-details-section .formatted-text h3, .test-task-card .test-task-details-section .formatted-text h4, .test-task-card .test-task-details-section .formatted-text h5, .test-task-card .test-task-details-section .formatted-text h6 {
   color: var(--dracula-purple);
@@ -8984,6 +8999,13 @@ main section {
       -ms-flex-align: center;
           align-items: center;
   gap: 10px;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+.test-task-card .task-actions p {
+  width: 100%;
+  margin-bottom: 12px;
+  font-weight: bold;
 }
 
 .custom-markdown-editor-container {

@@ -59,7 +59,7 @@
 
 #test-tasks-list-container {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr); // <-- La riga corretta
     gap: 25px;
     margin-top: 2rem;
 }
@@ -96,6 +96,7 @@
     }
 
     .test-task-description {
+        // RIPORTA QUESTO BLOCCO AL SUO STATO ORIGINALE (SENZA IL FIX DI PRIMA)
         color: var(--text-color-secondary);
         line-height: 1.6;
         margin-bottom: 1rem;
@@ -128,6 +129,24 @@
     font-size: 1em;
     line-height: 1.6;
     color: var(--text-color-secondary); // Colore testo generale
+
+     // --- INIZIO NUOVO FIX ROBUSTO ---
+            overflow-x: auto;      // Applica lo scroll orizzontale al contenitore se un figlio sfora
+            word-wrap: break-word; // Manda a capo le parole lunghe
+            overflow-wrap: break-word;
+            pre, code {
+                white-space: pre-wrap !important; // Forza il "wrap" del testo nei blocchi di codice
+                word-break: break-all !important;   // Rompe le parole per evitare overflow
+            }
+
+            table {
+                display: block;          // Tratta la tabella come un blocco
+                width: 100%;             // Occupa il 100% del suo contenitore (che ora è scrollabile)
+                max-width: 100%;         // Non superare mai la larghezza del contenitore
+                overflow-x: auto;        // Rendi la tabella stessa scrollabile se necessario
+                border-spacing: 0;
+                border-collapse: collapse;
+            }
 
     // Stili per il Markdown (Dracula-like)
     h1, h2, h3, h4, h5, h6 {
@@ -315,5 +334,16 @@
         justify-content: flex-start;
         align-items: center;
         gap: 10px;
+        
+        // --- INIZIO FIX BOTTONI RESPONSIVE ---
+        flex-wrap: wrap; // La nostra bacchetta magica! Permette ai bottoni di andare a capo.
+
+        // Diamo uno stile al paragrafo che abbiamo appena pulito
+        p {
+            width: 100%;             // Lo facciamo estendere per tutta la larghezza, forzando i bottoni ad andare sotto.
+            margin-bottom: 12px;     // Spazio tra la domanda e i bottoni.
+            font-weight: bold;       // Manteniamo il grassetto.
+        }
+        // --- FINE FIX BOTTONI RESPONSIVE ---
     }
 }

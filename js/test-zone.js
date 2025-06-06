@@ -97,7 +97,7 @@ function createTaskCardHTML(taskData, taskId, existingResult) {
     } else {
         actionsOrStatusHTML = `
             <div class="task-actions" id="task-actions-${taskId}" style="margin-top: 15px;">
-                <p style="font-weight: bold; margin-bottom: 8px;">Questo task è stato completato con successo?</p>
+    <p>Questo task è stato completato con successo?</p>
                 <button class="game-button success-button outcome-button" data-task-id="${taskId}" data-outcome="success">
                     <span class="material-symbols-rounded">check_circle</span> Sì, Successo!
                 </button>
