@@ -155,30 +155,34 @@ function setupShareButtons() {
         shareViaEmailBtn.href = `mailto:?subject=${encodedTitle}&body=Leggi questo articolo:%20${encodedUrl}`;
 }
 
-function updateOpenGraphMetaTags(articleData) {
-    if (!articleData) return;
-    const setMetaTag = (property, content) => {
-        let element = document.querySelector(`meta[property="${property}"]`);
-        if (!element) {
-            element = document.createElement('meta');
-            element.setAttribute('property', property);
-            document.head.appendChild(element);
-        }
-        element.setAttribute('content', content || '');
-    };
-    setMetaTag('og:title', articleData.title || document.title);
-    setMetaTag(
-        'og:description',
-        articleData.snippet ||
-            (articleData.contentMarkdown
-                ? articleData.contentMarkdown.substring(0, 150) + '...'
-                : 'Un interessante articolo da asyncDonkey.io')
-    );
-    setMetaTag('og:url', window.location.href);
-    setMetaTag(
-        'og:image',
-        articleData.coverImageUrl || 'https://asyncdonkey.github.io/images/asyncDonkey-default-social-image.png'
-    );
+function updateMetaTags(articleData, articleId) {
+    const defaultImageUrl = 'https://firebasestorage.googleapis.com/v0/b/asyncdonkey.firebasestorage.app/o/asynced_images%2Fsummary_large_image.png?alt=media&token=a4c20eb4-24d7-4e42-a47e-8e3672a8c482';
+    const articleUrl = `https://asyncd.org/view-article.html?id=${articleId}`;
+    
+    // Crea uno snippet dalla descrizione breve o, in mancanza, dai primi 155 caratteri del contenuto
+    const snippet = articleData.snippet || (articleData.contentMarkdown ? articleData.contentMarkdown.substring(0, 155) + '...' : 'Leggi questo articolo su asynced.org');
+    
+    const coverImage = articleData.coverImageUrl || defaultImageUrl;
+    const authorName = articleData.authorName || 'Umberto T.';
+
+    // --- Aggiornamento Tag Standard ---
+    document.title = `${articleData.title} | asynced.org`;
+    document.querySelector('meta[name="description"]').setAttribute('content', snippet);
+
+    // --- Aggiornamento Open Graph ---
+    document.querySelector('meta[property="og:title"]').setAttribute('content', articleData.title);
+    document.querySelector('meta[property="og:description"]').setAttribute('content', snippet);
+    document.querySelector('meta[property="og:url"]').setAttribute('content', articleUrl);
+    document.querySelector('meta[property="og:image"]').setAttribute('content', coverImage);
+    document.querySelector('meta[property="article:author"]').setAttribute('content', authorName);
+    if (articleData.publishedAt) { // Usa publishedAt se esiste
+        document.querySelector('meta[property="article:published_time"]').setAttribute('content', new Date(articleData.publishedAt.seconds * 1000).toISOString());
+    }
+
+    // --- Aggiornamento Twitter Card ---
+    document.querySelector('meta[name="twitter:title"]').setAttribute('content', articleData.title);
+    document.querySelector('meta[name="twitter:description"]').setAttribute('content', snippet);
+    document.querySelector('meta[name="twitter:image"]').setAttribute('content', coverImage);
 }
 
 // --- FUNZIONE loadAndDisplayArticleFromFirestore AGGIORNATA ---
@@ -196,8 +200,7 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
         if (docSnap.exists() && docSnap.data().status === 'published') {
             const articleDataFromDb = docSnap.data();
             currentArticleData = articleDataFromDb;
-            document.title = `${articleDataFromDb.title || 'Articolo'} - asyncDonkey.io`;
-            updateOpenGraphMetaTags(articleDataFromDb);
+            updateMetaTags(articleDataFromDb, articleId); // NUOVA CHIAMATA
 
             if (articleDisplayTitle) articleDisplayTitle.textContent = articleDataFromDb.title || 'N/D';
             if (articleDisplayDate) {
