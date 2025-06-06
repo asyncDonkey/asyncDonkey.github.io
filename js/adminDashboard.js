@@ -160,10 +160,16 @@ async function loadPendingArticles() {
           <small>Autore: ${article.authorName || article.authorId} | Inviato: ${creationDate}</small>
         </span>
         <span class="actions">
-          <button class="game-button view-edit-btn" data-id="${articleId}">Visualizza/Modifica</button>
-          <button class="game-button approve-btn" data-id="${articleId}" style="background-color: var(--game-border-color); color: white;">Approva</button>
-          <button class="game-button reject-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Respingi</button>
-        </span>
+    <button class="game-button icon-button view-edit-btn" data-id="${articleId}" title="Visualizza/Modifica">
+    <span class="material-symbols-rounded">edit_document</span>
+</button>
+    <button class="game-button icon-button approve-btn" data-id="${articleId}" title="Approva">
+        <span class="material-symbols-rounded">check_circle</span>
+    </button>
+    <button class="game-button icon-button reject-btn" data-id="${articleId}" title="Respingi">
+        <span class="material-symbols-rounded">cancel</span>
+    </button>
+</span>
       `;
             pendingArticlesListDiv.appendChild(itemDiv);
         });
@@ -190,17 +196,28 @@ function addEventListenersToAdminArticleButtons() {
 }
 
 async function handleViewEditArticleClick(e) {
-    const articleId = e.target.dataset.id;
+    const button = e.target.closest('.view-edit-btn'); // Usa .closest() anche qui!
+    if (!button) return; // Se non trova il bottone, esce.
+
+    const articleId = button.dataset.id;
+    if (!articleId) {
+        console.error("ID articolo non trovato sul bottone di modifica!");
+        return;
+    }
     await openEditArticleModal(articleId);
 }
 
 async function handleApproveArticleClick(e) {
-    const articleId = e.target.dataset.id;
+    const button = e.target.closest('.approve-btn'); // <-- E QUI
+    if (!button) return;
+    const articleId = button.dataset.id;
     await approveArticle(articleId);
 }
 
 async function handleRejectArticleClick(e) {
-    const articleId = e.target.dataset.id;
+    const button = e.target.closest('.reject-btn'); // <-- E ANCHE QUI
+    if (!button) return;
+    const articleId = button.dataset.id;
     if (!articleId) {
         showToast('ID articolo non specificato per il rifiuto.', 'error');
         return;
@@ -456,9 +473,13 @@ async function loadNicknameChangeRequests() {
           </small>
         </span>
         <span class="actions" style="flex-basis: 35%; text-align:right;">
-          <button class="game-button approve-nickname-btn" data-id="${requestId}" data-userid="${request.userId}" data-newnickname="${request.requestedNickname}" style="background-color: var(--game-border-color); color: white; margin-bottom: 5px;">Approva</button>
-          <button class="game-button reject-nickname-btn" data-id="${requestId}" data-userid="${request.userId}" data-currentnickname="${request.currentNickname}" data-requestednickname="${request.requestedNickname}" data-useremail="${userIdentifier}" style="background-color: #dc3545; color: white;">Rifiuta</button>
-        </span>
+    <button class="game-button icon-button approve-nickname-btn" data-id="${requestId}" data-userid="${request.userId}" data-newnickname="${request.requestedNickname}" title="Approva Nickname">
+        <span class="material-symbols-rounded">check_circle</span>
+    </button>
+    <button class="game-button icon-button reject-nickname-btn" data-id="${requestId}" ... title="Rifiuta Nickname">
+        <span class="material-symbols-rounded">cancel</span>
+    </button>
+</span>
       `;
             nicknameRequestsListDiv.appendChild(itemDiv);
         });
@@ -871,11 +892,19 @@ async function loadPublishedArticlesForAdmin() {
           <small>Autore: ${article.authorName || article.authorId} | Pubblicato: ${publishedDate} | Ult. Mod.: ${updatedDate}</small>
         </span>
         <span class="actions" style="flex-basis: 40%; text-align:right;">
-          <a href="view-article.html?id=${articleId}" target="_blank" class="game-button" style="text-decoration:none; margin-right:5px;">Anteprima</a>
-          <button class="game-button edit-published-btn" data-id="${articleId}" style="margin-right:5px;">Modifica</button>
-          <button class="game-button unpublish-btn" data-id="${articleId}" style="background-color: #ffc107; color: #333; margin-right:5px;">Rimuovi Pubbl.</button>
-          <button class="game-button delete-published-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina</button>
-        </span>`;
+    <a href="view-article.html?id=${articleId}" target="_blank" class="game-button icon-button" title="Anteprima Articolo" style="text-decoration:none;">
+        <span class="material-symbols-rounded">visibility</span>
+    </a>
+    <button class="game-button icon-button edit-published-btn" data-id="${articleId}" title="Modifica Articolo">
+        <span class="material-symbols-rounded">edit</span>
+    </button>
+    <button class="game-button icon-button unpublish-btn" data-id="${articleId}" title="Rimuovi Pubblicazione">
+        <span class="material-symbols-rounded">unpublished</span>
+    </button>
+    <button class="game-button icon-button delete-published-btn" data-id="${articleId}" title="Elimina Definitivamente">
+        <span class="material-symbols-rounded">delete_forever</span>
+    </button>
+</span>`;
             adminPublishedArticlesListDiv.appendChild(itemDiv);
         });
         addEventListenersToPublishedArticleButtons();
@@ -902,42 +931,49 @@ function addEventListenersToPublishedArticleButtons() {
 }
 
 async function handleEditPublishedArticleClick(e) {
-    await openEditArticleModal(e.target.dataset.id);
+    const button = e.target.closest('.edit-published-btn');
+    if (!button) return;
+    const articleId = button.dataset.id;
+ await openEditArticleModal(articleId);
 }
 
 async function handleUnpublishArticleClick(e) {
-    const articleId = e.target.dataset.id;
-    const newStatus = 'draft';
-    if (!confirm(`Rimuovere dalla pubblicazione l'articolo ID: ${articleId}? (Status diventerà: '${newStatus}')`))
-        return;
-    try {
-        const articleRef = doc(db, 'articles', articleId);
-        await updateDoc(articleRef, {
-            status: newStatus,
-            publishedAt: null,
-            updatedAt: serverTimestamp(),
-        });
-        showToast(`Articolo ${articleId} rimosso dalla pubblicazione. Status: ${newStatus}.`);
-        loadPublishedArticlesForAdmin();
-        loadDraftArticlesForAdmin();
-    } catch (error) {
-        console.error('Errore rimozione pubblicazione:', error);
-        showToast('Errore durante la rimozione dalla pubblicazione.', 'error');
-    }
+    const button = e.target.closest('.unpublish-btn');
+    if (!button) return;
+ const articleId = button.dataset.id;
+ const newStatus = 'draft';
+ if (!confirm(`Rimuovere dalla pubblicazione l'articolo ID: ${articleId}? (Status diventerà: '${newStatus}')`))
+  return;
+ try {
+  const articleRef = doc(db, 'articles', articleId);
+  await updateDoc(articleRef, {
+   status: newStatus,
+   publishedAt: null,
+   updatedAt: serverTimestamp(),
+  });
+  showToast(`Articolo ${articleId} rimosso dalla pubblicazione. Status: ${newStatus}.`);
+  loadPublishedArticlesForAdmin();
+  loadDraftArticlesForAdmin();
+ } catch (error) {
+  console.error('Errore rimozione pubblicazione:', error);
+  showToast('Errore durante la rimozione dalla pubblicazione.', 'error');
+ }
 }
 
 async function handleDeletePublishedArticleClick(e) {
-    const articleId = e.target.dataset.id;
-    if (!confirm(`ELIMINARE PERMANENTEMENTE l'articolo ID: ${articleId}? Azione IRREVERSIBILE.`)) return;
-    try {
-        const articleRef = doc(db, 'articles', articleId);
-        await deleteDoc(articleRef);
-        showToast(`Articolo ID: ${articleId} eliminato con successo.`);
-        loadPublishedArticlesForAdmin();
-    } catch (error) {
-        console.error('Errore eliminazione articolo:', error);
-        showToast("Errore durante l'eliminazione dell'articolo.", 'error');
-    }
+    const button = e.target.closest('.delete-published-btn');
+    if (!button) return;
+ const articleId = button.dataset.id;
+ if (!confirm(`ELIMINARE PERMANENTEMENTE l'articolo ID: ${articleId}? Azione IRREVERSIBILE.`)) return;
+ try {
+  const articleRef = doc(db, 'articles', articleId);
+  await deleteDoc(articleRef);
+  showToast(`Articolo ID: ${articleId} eliminato con successo.`);
+  loadPublishedArticlesForAdmin();
+ } catch (error) {
+  console.error('Errore eliminazione articolo:', error);
+  showToast("Errore durante l'eliminazione dell'articolo.", 'error');
+ }
 }
 
 function initializeGuidelineToggles() {
@@ -982,9 +1018,13 @@ async function loadDraftArticlesForAdmin() {
           <small>Autore: ${authorInfo} | Ultima Modifica: ${updatedDate}</small>
         </span>
         <span class="actions">
-          <button class="game-button view-edit-btn" data-id="${articleId}" style="margin-right:5px;">Visualizza/Modifica</button>
-          <button class="game-button delete-draft-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina Bozza</button>
-        </span>`;
+    <button class="game-button icon-button view-edit-btn" data-id="${articleId}" title="Visualizza/Modifica">
+        <span class="material-symbols-rounded">edit_document</span>
+    </button>
+    <button class="game-button icon-button delete-draft-btn" data-id="${articleId}" title="Elimina Bozza">
+        <span class="material-symbols-rounded">delete_forever</span>
+    </button>
+</span>`;
             draftArticlesListDiv.appendChild(itemDiv);
         });
         addEventListenersToDraftArticleButtons();
@@ -1027,9 +1067,13 @@ async function loadRejectedArticlesForAdmin() {
           ${rejectionReasonText}
         </span>
         <span class="actions">
-          <button class="game-button view-edit-btn" data-id="${articleId}" style="margin-right:5px;">Visualizza/Modifica</button>
-          <button class="game-button delete-rejected-btn" data-id="${articleId}" style="background-color: #dc3545; color: white;">Elimina Definitivamente</button>
-        </span>`;
+    <button class="game-button icon-button view-edit-btn" data-id="${articleId}" title="Visualizza/Modifica Articolo Respinto">
+        <span class="material-symbols-rounded">edit_document</span>
+    </button>
+    <button class="game-button icon-button delete-rejected-btn" data-id="${articleId}" title="Elimina Definitivamente">
+        <span class="material-symbols-rounded">delete_forever</span>
+    </button>
+</span>`;
             rejectedArticlesListDiv.appendChild(itemDiv);
         });
         addEventListenersToRejectedArticleButtons();

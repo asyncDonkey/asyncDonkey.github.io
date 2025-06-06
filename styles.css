@@ -7421,6 +7421,37 @@ body.dark-mode #leaderboardTable tr:nth-child(even) {
   font-style: italic;
 }
 
+.admin-card {
+  background-color: var(--surface-bg-secondary);
+  border: 1px solid var(--border-color-secondary);
+  border-radius: var(--border-radius-large, 12px);
+  -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  height: 100%;
+  margin-bottom: 25px;
+}
+
+#adminDashboardContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 25px;
+}
+
+.admin-card h2 {
+  margin-top: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color-primary);
+}
+
+.icon-button {
+  padding: 8px;
+  line-height: 1;
+}
+.icon-button .material-symbols-rounded {
+  vertical-align: middle;
+}
+
 /* styles.css - Stili per Notifiche Toast */
 #toast-container {
   position: fixed;

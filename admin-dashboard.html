@@ -332,37 +332,43 @@
                     </div>
                 </div>
 
-                <div class="admin-section" id="pendingArticlesSection">
-                    <h2>Articoli in Attesa di Revisione</h2>
-                    <div id="pendingArticlesList">
-                        <p>Caricamento articoli...</p>
-                    </div>
-                </div>
-
-                <div class="admin-section" id="nicknameRequestsSection">
-                            <h2>Richieste Cambio Nickname in Sospeso</h2>
-                            <div id="nicknameRequestsList">
-                                <p>Caricamento richieste...</p>
-                            </div>
-                        </div>
-
-                <div class="admin-section" id="testerMonitoringSection">
-    <h2>
-        <span class="material-symbols-rounded" style="vertical-align: text-bottom;">bug_report</span>
-        Monitoraggio Piattaforma di Testing
-    </h2>
-    
-    <div class="admin-subsection" style="margin-bottom: 25px;">
-        <h3>Panoramica per Tester</h3>
-        <div id="tester-monitoring-list-container">
-            <p>Caricamento dati dei tester...</p>
+                <div class="admin-card">
+    <div class="admin-section" id="pendingArticlesSection">
+        <h2>Articoli in Attesa di Revisione</h2>
+        <div id="pendingArticlesList">
+            <p>Caricamento articoli...</p>
         </div>
     </div>
+</div>
 
-    <div class="admin-subsection">
-        <h3>Panoramica per Task di Test</h3>
-        <div id="test-tasks-summary-container">
-            <p>Caricamento riepilogo task...</p>
+                <div class="admin-card">
+    <div class="admin-section" id="nicknameRequestsSection">
+        <h2>Richieste Cambio Nickname in Sospeso</h2>
+        <div id="nicknameRequestsList">
+                                <p>Caricamento richieste...</p>
+                            </div>
+    </div>
+</div>
+
+                <div class="admin-card">
+    <div class="admin-section" id="testerMonitoringSection">
+        <h2>
+            <span class="material-symbols-rounded" style="vertical-align: text-bottom;">bug_report</span>
+            Monitoraggio Piattaforma di Testing
+        </h2>
+        
+        <div class="admin-subsection" style="margin-bottom: 25px;">
+            <h3>Panoramica per Tester</h3>
+            <div id="tester-monitoring-list-container">
+                <p>Caricamento dati dei tester...</p>
+            </div>
+        </div>
+
+        <div class="admin-subsection">
+            <h3>Panoramica per Task di Test</h3>
+            <div id="test-tasks-summary-container">
+                <p>Caricamento riepilogo task...</p>
+            </div>
         </div>
     </div>
 </div>
@@ -400,8 +406,9 @@
                     </div>
                 </div>
 
-                <div class="admin-section" id="userIssuesSection">
-                    <h2>Segnalazioni e Suggerimenti Utenti</h2>
+                <div class="admin-card">
+    <div class="admin-section" id="userIssuesSection">
+        <h2>Segnalazioni e Suggerimenti Utenti</h2>
                     <div id="issuesFilterControlsAdmin" style="margin-bottom: 15px">
                         <label for="adminFilterIssueType">Filtra per Tipo:</label>
                         <select id="adminFilterIssueType" style="padding: 8px; border-radius: 4px">
@@ -432,11 +439,12 @@
                     <div id="adminUserIssuesList">
                         <p>Caricamento segnalazioni utenti...</p>
                     </div>
-                </div>
+</div>
 
-                <div class="admin-section" id="publishedArticlesSection">
-                    <h2>Articoli Pubblicati</h2>
-                    <div id="publishedArticlesFilterControls" style="margin-bottom: 15px">
+                <div class="admin-card">
+    <div class="admin-section" id="publishedArticlesSection">
+        <h2>Articoli Pubblicati</h2>
+        <div id="publishedArticlesFilterControls" style="margin-bottom: 15px">
                         <input
                             type="text"
                             id="adminSearchPublishedTitle"
@@ -452,23 +460,27 @@
                         </button>
                     </div>
                     <div id="adminPublishedArticlesList">
-                        <p>Caricamento articoli pubblicati...</p>
-                    </div>
-                </div>
+            <p>Caricamento articoli pubblicati...</p>
+        </div>
+    </div>
+</div>
 
-                <div class="admin-section" id="draftArticlesSection">
-                    <h2>Bozze Articoli Utenti (Opzionale)</h2>
-                    <div id="draftArticlesList">
-                        <p>Caricamento bozze...</p>
-                    </div>
-                </div>
+                <div class="admin-card" style="grid-column: 1 / -1;"> <div class="admin-section" id="draftArticlesSection">
+        <h2>Bozze Articoli Utenti</h2>
+        <div id="draftArticlesList">
+            <p>Caricamento bozze...</p>
+        </div>
+    </div>
 
-                <div class="admin-section" id="rejectedArticlesSection">
-                    <h2>Articoli Respinti (Opzionale)</h2>
-                    <div id="rejectedArticlesList">
-                        <p>Caricamento articoli respinti...</p>
-                    </div>
-                </div>
+    <hr style="margin: 30px 0; border-color: var(--border-color-secondary);">
+
+    <div class="admin-section" id="rejectedArticlesSection">
+        <h2>Articoli Respinti</h2>
+        <div id="rejectedArticlesList">
+            <p>Caricamento articoli respinti...</p>
+        </div>
+    </div>
+</div>
             </section>
         <div class="admin-section" id="rejectReasonModal" class="modal" style="display:none;">
                 <div class="modal-content" style="max-width: 500px;">

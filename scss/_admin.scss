@@ -185,3 +185,34 @@
         }
     }
 }
+// 1. Stile per le nuove card
+.admin-card {
+    background-color: var(--surface-bg-secondary);
+    border: 1px solid var(--border-color-secondary);
+    border-radius: var(--border-radius-large, 12px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    height: 100%;
+    margin-bottom: 25px; // <-- AGGIUNGI QUESTA RIGA!
+}
+
+// 2. Applichiamo la griglia al contenitore principale
+#adminDashboardContent {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); // Magia responsiva!
+    gap: 25px; // Spazio tra le card
+}
+
+// 3. Assicuriamoci che i titoli dentro le card non abbiano margini strani
+.admin-card h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color-primary);
+}
+.icon-button {
+    padding: 8px;
+    line-height: 1;
+    .material-symbols-rounded {
+        vertical-align: middle;
+    }
+}
