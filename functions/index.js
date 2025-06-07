@@ -48,6 +48,12 @@ const BADGE_ID_APPRECIATED_AUTHOR = 'appreciated-author';
 const BADGE_ID_BETA_TESTER = 'beta-tester';
 const BADGE_ID_BETA_TESTER_CERTIFIED = 'beta-tester-certified';
 
+// In functions/index.js, aggiungi queste nuove costanti per gli ID dei badge
+const BADGE_ID_JUMPER_BRONZE = 'noob-jumper';
+const BADGE_ID_COLLECTOR_BRONZE = 'curious-collector';
+// Aggiungiamo anche gli altri che avevamo ipotizzato, così la funzione è già pronta!
+const BADGE_ID_SHOOTER_BRONZE = 'codestormer';
+const BADGE_ID_VETERAN_BRONZE = 'glitch-veteran';
 
 /**
  * Helper per recuperare i dettagli di un badge da Firestore.
@@ -1122,5 +1128,97 @@ exports.requestTesterRole = onCall({ region: 'us-central1' }, async (request) =>
     } catch (error) {
         logger.error(`[CF:${functionName}] Errore durante l'invio delle notifiche per la richiesta di ruolo tester da ${userId}:`, error);
         throw new HttpsError('internal', 'Impossibile inviare la richiesta agli admin. Riprova più tardi.');
+    }
+});
+
+exports.handleGameStatsAndAwardBadges = onDocumentCreated('leaderboardScores/{scoreId}', async (event) => {
+    const functionName = 'handleGameStatsAndAwardBadges';
+    if (!event.data) {
+        logger.info(`[CF:${functionName}] Evento non valido.`);
+        return;
+    }
+
+    const scoreData = event.data.data();
+    const userId = scoreData.userId;
+
+    // Se non c'è un userId (punteggio di un ospite) o non ci sono statistiche, interrompiamo.
+    if (!userId || !scoreData.stats) {
+        logger.info(`[CF:${functionName}] Punteggio da guest o senza statistiche. Nessuna azione per i badge.`);
+        return;
+    }
+
+    const userProfileRef = db.collection('userProfiles').doc(userId);
+    const gameStatsFromScore = scoreData.stats;
+
+    try {
+        await db.runTransaction(async (transaction) => {
+            const userProfileSnap = await transaction.get(userProfileRef);
+            if (!userProfileSnap.exists) {
+                logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato durante la transazione.`);
+                return;
+            }
+
+            const userProfile = userProfileSnap.data();
+            const earnedBadges = userProfile.earnedBadges || [];
+            const newBadgesToAward = [];
+            
+            // 1. Inizializza o aggiorna le statistiche cumulative del profilo
+            const cumulativeStats = userProfile.gameStats || {
+                totalJumps: 0,
+                totalShotsFired: 0,
+                totalPowerUpsCollected: 0,
+                totalGamesPlayed: 0,
+            };
+
+            cumulativeStats.totalJumps += (gameStatsFromScore.jumps || 0);
+            cumulativeStats.totalShotsFired += (gameStatsFromScore.shotsFired || 0);
+            cumulativeStats.totalPowerUpsCollected += (gameStatsFromScore.powerUpsCollected || 0);
+            cumulativeStats.totalGamesPlayed += 1; // Ogni punteggio salvato è una partita giocata
+
+            // 2. Controlla ogni badge basato sulle statistiche
+            // Badge Saltatore
+            if (cumulativeStats.totalJumps >= 250 && !earnedBadges.includes(BADGE_ID_JUMPER_BRONZE)) {
+                newBadgesToAward.push(BADGE_ID_JUMPER_BRONZE);
+            }
+
+            // Badge Collezionista
+            if (cumulativeStats.totalPowerUpsCollected >= 25 && !earnedBadges.includes(BADGE_ID_COLLECTOR_BRONZE)) {
+                newBadgesToAward.push(BADGE_ID_COLLECTOR_BRONZE);
+            }
+            
+            // Badge Artigliere (pronto per quando aggiungeremo il contatore shotsFired)
+            if (cumulativeStats.totalShotsFired >= 500 && !earnedBadges.includes(BADGE_ID_SHOOTER_BRONZE)) {
+                newBadgesToAward.push(BADGE_ID_SHOOTER_BRONZE);
+            }
+            
+            // Badge Veterano (pronto per quando aggiungeremo il contatore partite)
+            if (cumulativeStats.totalGamesPlayed >= 50 && !earnedBadges.includes(BADGE_ID_VETERAN_BRONZE)) {
+                newBadgesToAward.push(BADGE_ID_VETERAN_BRONZE);
+            }
+
+            // 3. Prepara l'oggetto di aggiornamento per Firestore
+            const profileUpdates = {
+                gameStats: cumulativeStats, // Salva sempre le statistiche aggiornate
+                updatedAt: FieldValue.serverTimestamp(),
+            };
+
+            if (newBadgesToAward.length > 0) {
+                profileUpdates.earnedBadges = FieldValue.arrayUnion(...newBadgesToAward);
+            }
+
+            // 4. Esegui l'aggiornamento del profilo
+            transaction.update(userProfileRef, profileUpdates);
+            
+            // 5. Prepara le notifiche da inviare dopo la transazione
+            // (La logica di invio è fuori dalla transazione per prassi migliore)
+            for (const badgeId of newBadgesToAward) {
+                await sendNewBadgeNotification(userId, badgeId);
+            }
+        });
+
+        logger.info(`[CF:${functionName}] Statistiche e badge per l'utente ${userId} processati con successo.`);
+
+    } catch (error) {
+        logger.error(`[CF:${functionName}] Errore nella transazione delle statistiche di gioco per l'utente ${userId}:`, error);
     }
 });

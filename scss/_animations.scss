@@ -692,3 +692,38 @@
         text-shadow: 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #5dade2, 0 0 25px #5dade2, 0 0 30px #5dade2, 0 0 35px #5dade2, 0 0 40px #5dade2;
     }
 }
+// Animazione per l'icona del badge System Architect
+@keyframes architect-gear-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.icon-architect-spin {
+    display: inline-block; // Necessario per la trasformazione
+    animation: architect-gear-spin 8s linear infinite;
+}
+// Animazione per il nickname del System Architect
+@keyframes architect-nickname-glitch {
+    0%, 100% {
+        text-shadow: 0 0 5px rgba(160, 174, 192, 0.4);
+        transform: skewX(0);
+        opacity: 1;
+    }
+    50% {
+        text-shadow:
+            -1px 0px 1px rgba(0, 255, 255, 0.7),
+            1px 0px 1px rgba(255, 0, 255, 0.7);
+        transform: skewX(-2deg);
+        opacity: 0.95;
+    }
+}
+
+.nickname-architect-glitch {
+    display: inline-block;
+    animation: architect-nickname-glitch 3s infinite alternate ease-in-out;
+    font-family: 'Source Code Pro', monospace; // Un tocco tech!
+}

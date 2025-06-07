@@ -766,6 +766,12 @@ let finalScore = 0;
 let gameOverTrigger = false;
 let lastTime = 0;
 
+let gameStats = {
+    jumps: 0,
+    shotsFired: 0,
+    powerUpsCollected: 0
+};
+
 async function loadAllAssets() {
     console.log('Carico assets...');
     const imagePromises = imagesToLoad.map((d) => loadImage(d.name, d.src));
@@ -969,6 +975,7 @@ class Player {
             this.velocityY = PLAYER_JUMP_VELOCITY_INITIAL; // Usa la nuova costante
             this.onGround = false;
             AudioManager.playSound('jump');
+            gameStats.jumps++;
         }
     }
 
@@ -999,6 +1006,7 @@ class Player {
             AudioManager.playSound('shoot', false, 0.8);
             canShoot = false;
             shootTimer = 0;
+            gameStats.shotsFired++;
         }
     }
 
@@ -1054,6 +1062,7 @@ class Player {
         if (type !== POWERUP_TYPE.SMART_BOMB) {
             AudioManager.playSound('powerUpCollect');
         }
+        gameStats.powerUpsCollected++;
     }
 
     deactivatePowerUp() {
@@ -2151,6 +2160,7 @@ async function handleSaveDonkeyScore() {
             hasGlitchzillaSpawnedThisGame &&
             activeMiniboss === null &&
             Math.floor(finalScore) >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD + GLITCHZILLA_SCORE_VALUE,
+            stats: gameStats
     };
 
     if (currentUser) {
@@ -2547,6 +2557,12 @@ function resetGame() {
     nextDangerousFlyingEnemySpawnTime = calculateNextGenericEnemySpawnTime(7, 10);
     powerUpSpawnTimer = 0;
     nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
+
+    gameStats = {
+        jumps: 0,
+        shotsFired: 0,
+        powerUpsCollected: 0
+    };
 
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
     if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none';
