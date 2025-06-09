@@ -32,396 +32,36 @@ const PALETTE = {
     BRIGHT_GREEN_TEAL: '#30e1b9',
 };
 
-const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
-const MAX_LEADERBOARD_ENTRIES_MINI = 5;
-const creditsIconBtn = document.getElementById('creditsIconBtn');
-const creditsModal = document.getElementById('creditsModal');
-const closeCreditsModalBtn = document.getElementById('closeCreditsModalBtn');
-const accordionHeaders = document.querySelectorAll('.accordion-header');
-const scrollToTutorialLink = document.getElementById('scrollToTutorialLink');
-const orientationPromptEl = document.getElementById('orientationPrompt');
-const dismissOrientationPromptBtn = document.getElementById('dismissOrientationPrompt');
+// Declare global DOM element variables with 'let' and no initial assignment
+// They will be assigned in setupGameEngine() once the DOM is ready.
+let miniLeaderboardListEl = null;
+let creditsIconBtn = null;
+let creditsModal = null;
+let closeCreditsModalBtn = null;
+let accordionHeaders = null;
+let scrollToTutorialLink = null;
+let orientationPromptEl = null;
+let dismissOrientationPromptBtn = null;
 
-function formatScoreTimestamp(firebaseTimestamp) {
-    if (!firebaseTimestamp || typeof firebaseTimestamp.toDate !== 'function') {
-        return 'N/A';
-    }
-    try {
-        return firebaseTimestamp.toDate().toLocaleString('it-IT', {
-            day: 'numeric',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    } catch (e) {
-        console.error('Errore formattazione timestamp:', e);
-        return 'Data errata';
-    }
-}
+let canvas = null;
+let ctx = null;
 
-function getUrlParameter(name) {
-    name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
-    const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-    const results = regex.exec(location.search);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-}
+let gameContainer = null;
+let jumpButton = null;
+let shootButton = null;
+let mobileControlsDiv = null;
+let fullscreenButton = null;
+let scoreInputContainerDonkey = null;
 
-// --- Logica per il Prompt di Orientamento Mobile ---
-let orientationPromptDismissedSession = false;
+let saveScoreBtnDonkey = null;
+let restartGameBtnDonkey = null;
+let mobileStartButton = null;
+let shareScoreBtnDonkey = null;
 
-function checkAndDisplayOrientationPrompt() {
-    if (!orientationPromptEl || !isTouchDevice || orientationPromptDismissedSession) {
-        if (orientationPromptEl && orientationPromptEl.style.display !== 'none') {
-            // Evita di settare display se già none
-            orientationPromptEl.style.display = 'none';
-        }
-        return;
-    }
+let isTouchDevice = false; // Will be set in setupGameEngine
+let isIPhone = false;     // Will be set in setupGameEngine
 
-    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-    // isFullscreenActive è una variabile globale che dovresti già avere,
-    // assicurati che sia aggiornata correttamente da handleFullscreenChange
-    // Se non è globale, passala come argomento o recuperala qui:
-    const isGameFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-
-    if (isPortrait && !isGameFullscreen) {
-        if (orientationPromptEl.style.display !== 'flex') {
-            // Evita di settare display se già flex
-            orientationPromptEl.style.display = 'flex';
-        }
-    } else {
-        if (orientationPromptEl.style.display !== 'none') {
-            // Evita di settare display se già none
-            orientationPromptEl.style.display = 'none';
-        }
-    }
-}
-// --- Fine Logica Prompt Orientamento ---
-
-async function handleShareScore() {
-    console.log("handleShareScore attivato!"); // Per debugging iniziale
-
-    // 1. Ottenere il punteggio finale
-    //    La variabile 'finalScore' dovrebbe essere già disponibile globalmente
-    //    e impostata in processGameOver().
-    if (typeof finalScore === 'undefined' || finalScore < 0) { // Potremmo voler permettere 0 se è un punteggio valido
-        showToast("Nessun punteggio valido da condividere.", "warning");
-        console.warn("handleShareScore: finalScore non definito o non valido:", finalScore);
-        return;
-    }
-
-    // 2. Ottenere il nome dello sfidante
-    let challengerName = "Un Asinello Pixelato"; // Nome di fallback
-    const currentUser = auth.currentUser;
-
-    if (currentUser) {
-        try {
-            // Usiamo la stessa logica di recupero nickname di handleSaveDonkeyScore per coerenza
-            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
-            const docSnap = await getDoc(userProfileRef);
-            if (docSnap.exists() && docSnap.data().nickname) {
-                challengerName = docSnap.data().nickname;
-            } else {
-                challengerName = currentUser.displayName || currentUser.email.split('@')[0] || "Giocatore Misterioso";
-            }
-        } catch (error) {
-            console.warn("Errore nel recuperare il nome del profilo per la condivisione:", error);
-            // Fallback se il recupero del profilo fallisce
-            challengerName = currentUser.displayName || currentUser.email.split('@')[0] || "Giocatore Connesso";
-        }
-    } else {
-        const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
-        if (playerInitialsDonkeyInput && playerInitialsDonkeyInput.value.trim() !== "") {
-            challengerName = playerInitialsDonkeyInput.value.trim().toUpperCase();
-        }
-        // Se è ospite e non ha inserito iniziali, userà "Un Asinello Pixelato"
-    }
-    console.log("Sfidante:", challengerName, "Punteggio:", finalScore);
-
-    // 3. Costruire il messaggio e l'URL della sfida
-    const siteBaseUrl = window.location.origin; // Es. "https://asynced.org"
-    const gamePath = "/donkeyRunner.html"; 
-
-    const challengeUrl = `<span class="math-inline">{siteBaseUrl}</span>{gamePath}?challengeScore=<span class="math-inline">{finalScore}&challengerName=</span>{encodeURIComponent(challengerName)}&utm_source=donkey_runner_share&utm_medium=social_share`;
-
-    const shareTitle = "SYSTEM_ALERT: codeDash Challenge!";
-    // Testo più completo per clipboard/fallback
-    const fullShareText = `WARNING! ${challengerName} (Score: ${finalScore}) ti sfida su codeDash! Accetta il protocollo: ${challengeUrl} 👾`;
-    // Testo più breve per navigator.share (alcune app potrebbero troncarlo)
-    const shortShareText = `// --- INCOMING_CHALLENGE_TRANSMISSION --- //
-SYSTEM_ID: asyncDonkey_Runner_Core
-SOURCE_AGENT: ${challengerName}
-PRIORITY: URGENT 🚨
-SUBJECT: High Score Anomaly Detected!
-
-L'agente ${challengerName} ha registrato un punteggio di ${finalScore} e ha avviato il Protocollo di Sfida Competitiva!
-Sei chiamato/a a superare questo benchmark. Il sistema conta su di te!
-
-Esegui routine di risposta: ${challengeUrl}
-// --- END_OF_TRANSMISSION --- //`;
-
-    console.log("URL Sfida:", challengeUrl);
-    console.log("Testo completo:", fullShareText);
-
-    // 4. Implementare navigator.share con fallback
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: shareTitle,
-                text: shortShareText, // Testo breve per la condivisione nativa
-                url: challengeUrl, 
-            });
-            showToast("Sfida condivisa con successo!", "success");
-            console.log("Condivisione nativa riuscita.");
-        } catch (error) {
-            console.error("Errore durante navigator.share:", error);
-            // Non mostrare errore se l'utente annulla esplicitamente il foglio di condivisione
-            if (error.name !== 'AbortError') { 
-                showToast("Condivisione annullata o fallita.", "info");
-            }
-            // In caso di errore (diverso da AbortError), potremmo comunque tentare il fallback
-            // o semplicemente informare l'utente. Per ora, non facciamo fallback automatico qui.
-        }
-    } else {
-        // Fallback per browser che non supportano navigator.share
-        console.log("navigator.share non supportato, uso fallback.");
-        fallbackShare(fullShareText, challengeUrl); // Passiamo il testo completo e l'URL separato
-    }
-}
-
-function fallbackShare(textToShare, urlToShare) { // Accetta URL separato
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(textToShare) // Copiamo il testo completo che include già l'URL
-            .then(() => {
-                showToast("Testo della sfida copiato negli appunti!", "info");
-            })
-            .catch(err => {
-                console.error('Fallback: Impossibile copiare negli appunti:', err);
-                // Se il clipboard fallisce, mostriamo un alert con il testo da copiare manualmente
-                alert("Copia questo testo per condividere la tua sfida:\n\n" + textToShare);
-            });
-    } else {
-        // Fallback molto basilare se neanche clipboard.writeText è supportato
-        alert("Copia questo testo per condividere la tua sfida:\n\n" + textToShare);
-    }
-}
-
-async function loadDonkeyLeaderboard() {
-    const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
-    if (!miniLeaderboardListEl) {
-        console.warn('[donkeyRunner.js] Elemento miniLeaderboardList non trovato.');
-        return;
-    }
-    if (!db) {
-        console.error('[donkeyRunner.js] Istanza DB non disponibile per caricare la leaderboard di DonkeyRunner.');
-        miniLeaderboardListEl.innerHTML = '<li>Errore connessione DB.</li>';
-        return;
-    }
-    const leaderboardScoresCollection = collection(db, 'leaderboardScores');
-    miniLeaderboardListEl.innerHTML =
-        '<li><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</li>';
-
-    try {
-        const q = query(
-            leaderboardScoresCollection,
-            where('gameId', '==', 'donkeyRunner'),
-            orderBy('score', 'desc'),
-            limit(5) // MAX_LEADERBOARD_ENTRIES_MINI (era 5)
-        );
-        const querySnapshot = await getDocs(q);
-        const fetchedLeaderboard = [];
-        querySnapshot.forEach((doc) => {
-            fetchedLeaderboard.push({ id: doc.id, ...doc.data() });
-        });
-
-        const userIds = [...new Set(fetchedLeaderboard.map((entry) => entry.userId).filter((id) => id))];
-        const profilesMap = new Map();
-
-        if (userIds.length > 0) {
-            const MAX_IDS_PER_IN_QUERY = 30;
-            const profilePromises = [];
-            for (let i = 0; i < userIds.length; i += MAX_IDS_PER_IN_QUERY) {
-                const batchUserIds = userIds.slice(i, i + MAX_IDS_PER_IN_QUERY);
-                if (batchUserIds.length > 0) {
-                    const profilesQuery = query(
-                        collection(db, 'userPublicProfiles'),
-                        where(documentId(), 'in', batchUserIds)
-                    );
-                    profilePromises.push(getDocs(profilesQuery));
-                }
-            }
-            try {
-                const profileSnapshotsArray = await Promise.all(profilePromises);
-                profileSnapshotsArray.forEach((profileSnaps) => {
-                    profileSnaps.forEach((snap) => {
-                        if (snap.exists()) {
-                            profilesMap.set(snap.id, snap.data());
-                        }
-                    });
-                });
-            } catch (profileError) {
-                console.error(
-                    '[donkeyRunner.js] Errore caricamento profili pubblici per mini leaderboard:',
-                    profileError
-                );
-            }
-        }
-
-        displayDonkeyLeaderboard(fetchedLeaderboard, profilesMap);
-    } catch (error) {
-        console.error('[donkeyRunner.js] Errore caricamento DonkeyRunner leaderboard: ', error);
-        if (error.code === 'failed-precondition') {
-            miniLeaderboardListEl.innerHTML =
-                '<li>Indice Firestore mancante. Controlla la console per il link per crearlo.</li>';
-        } else {
-            if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Errore caricamento punteggi.</li>';
-        }
-    }
-}
-
-function displayDonkeyLeaderboard(leaderboardData, profilesMap) {
-    const miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
-    if (!miniLeaderboardListEl) return;
-
-    miniLeaderboardListEl.innerHTML = '';
-    if (!leaderboardData || leaderboardData.length === 0) {
-        miniLeaderboardListEl.innerHTML = '<li>Nessun punteggio registrato.</li>';
-        return;
-    }
-
-    leaderboardData.forEach((entry, index) => {
-        const li = document.createElement('li');
-
-        const rankSpan = document.createElement('span');
-        rankSpan.className = 'player-rank';
-        rankSpan.textContent = `${index + 1}.`;
-        li.appendChild(rankSpan);
-
-        const avatarImg = document.createElement('img');
-        avatarImg.className = 'player-avatar'; // Assicurati che sia stilizzata (es. 30x30px)
-
-        const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-dr-${entry.id}`;
-        // Priorità ai dati del profilo pubblico, poi a quelli del punteggio, infine fallback generici
-        let userDisplayName = 'Giocatore Anonimo'; // Fallback finale per nome
-        let altTextForAvatar = 'Avatar Giocatore';
-        let avatarSrcToUse = generateBlockieAvatar(seedForBlockie, 30, { size: 8 }); // Default blockie
-        let userNationalityCode = null; // Inizializza a null
-
-        // Prova prima con i dati del punteggio (per ospiti o se il profilo non viene trovato)
-        if (entry.userName) userDisplayName = entry.userName;
-        if (entry.initials && !entry.userName) userDisplayName = entry.initials; // Se userName non c'è ma initials sì
-        altTextForAvatar = userDisplayName;
-        if (entry.nationalityCode) userNationalityCode = entry.nationalityCode;
-
-        const userProfile = entry.userId ? profilesMap.get(entry.userId) : null;
-
-        if (userProfile) {
-            userDisplayName = userProfile.displayName || userDisplayName; // Sovrascrive con displayName da userPublicProfiles se esiste
-            altTextForAvatar = userDisplayName; // Aggiorna alt text con il nome più accurato
-            userNationalityCode = userProfile.nationalityCode || userNationalityCode; // Sovrascrive/imposta da userPublicProfiles
-
-            let chosenAvatarUrl = null;
-            if (userProfile.avatarUrls) {
-                // Assicurati che avatarUrls esista
-                if (userProfile.avatarUrls.small) {
-                    chosenAvatarUrl = userProfile.avatarUrls.small;
-                } else if (userProfile.avatarUrls.profile) {
-                    // Fallback a dimensione profile
-                    chosenAvatarUrl = userProfile.avatarUrls.profile;
-                } else if (userProfile.avatarUrls.thumbnail) {
-                    // Altro possibile fallback
-                    chosenAvatarUrl = userProfile.avatarUrls.thumbnail;
-                }
-            }
-            // Supporto per vecchio campo avatarUrl singolo, se avatarUrls non produce nulla
-            if (!chosenAvatarUrl && userProfile.avatarUrl) {
-                chosenAvatarUrl = userProfile.avatarUrl;
-            }
-
-            if (chosenAvatarUrl) {
-                avatarSrcToUse = chosenAvatarUrl;
-                // Usa profileUpdatedAt (canonica) per cache-busting
-                if (userProfile.profileUpdatedAt && userProfile.profileUpdatedAt.seconds) {
-                    avatarSrcToUse += `?ts=${userProfile.profileUpdatedAt.seconds}`;
-                } else if (userProfile.profileUpdatedAt && typeof userProfile.profileUpdatedAt === 'number') {
-                    // Se è un timestamp numerico
-                    avatarSrcToUse += `?ts=${userProfile.profileUpdatedAt}`;
-                }
-            }
-            // Se chosenAvatarUrl è null, avatarSrcToUse rimane il blockie generato in precedenza
-        }
-
-        avatarImg.src = avatarSrcToUse;
-        avatarImg.alt = `${altTextForAvatar}'s Avatar`;
-        avatarImg.style.backgroundColor = 'transparent'; // O gestisci via CSS
-        avatarImg.onerror = () => {
-            avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 });
-            avatarImg.alt = `${altTextForAvatar}'s Fallback Avatar`;
-            avatarImg.style.backgroundColor = '#ddd'; // Sfondo per fallback
-            avatarImg.onerror = null;
-        };
-        li.appendChild(avatarImg);
-
-        const playerInfoDiv = document.createElement('div');
-        playerInfoDiv.className = 'player-info';
-
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'player-name';
-
-        if (
-            userNationalityCode &&
-            userNationalityCode !== 'OTHER' &&
-            typeof userNationalityCode === 'string' &&
-            userNationalityCode.length === 2
-        ) {
-            const flagIconSpan = document.createElement('span');
-            flagIconSpan.classList.add('fi', `fi-${userNationalityCode.toLowerCase()}`);
-            flagIconSpan.title = userNationalityCode;
-            flagIconSpan.style.marginRight = '8px';
-            flagIconSpan.style.verticalAlign = 'middle';
-            nameSpan.appendChild(flagIconSpan);
-        }
-
-        if (entry.userId) {
-            const profileLink = document.createElement('a');
-            profileLink.href = `profile.html?userId=${entry.userId}`;
-            profileLink.textContent = userDisplayName;
-            nameSpan.appendChild(profileLink);
-        } else {
-            // Gestione nome ospite
-            let guestDisplayName = userDisplayName; // Che a questo punto è entry.initials o 'Giocatore Anonimo'
-            if (entry.initials && !guestDisplayName.toLowerCase().includes('(ospite)')) {
-                guestDisplayName = entry.initials + ' (Ospite)';
-            } else if (guestDisplayName === 'Giocatore Anonimo' && (!entry.initials || entry.initials.trim() === '')) {
-                // Se è "Giocatore Anonimo" e non ci sono initial esplicite, aggiungi (Ospite)
-                guestDisplayName += ' (Ospite)';
-            }
-            nameSpan.appendChild(document.createTextNode(guestDisplayName));
-        }
-
-        const dateSpan = document.createElement('span');
-        dateSpan.className = 'player-date';
-        // La funzione formatScoreTimestamp è già definita nel tuo donkeyRunner.js
-        dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
-
-        playerInfoDiv.appendChild(nameSpan);
-        playerInfoDiv.appendChild(dateSpan);
-        li.appendChild(playerInfoDiv);
-
-        const scoreSpan = document.createElement('span');
-        scoreSpan.className = 'player-score';
-        scoreSpan.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
-        li.appendChild(scoreSpan);
-
-        miniLeaderboardListEl.appendChild(li);
-    });
-}
-
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = 800;
-canvas.height = 450;
-
+// Constants remain 'const'
 const groundHeight = 70;
 
 const PLAYER_JUMP_VELOCITY_INITIAL = -850; // px/s (valore da testare/affinare)
@@ -430,45 +70,6 @@ const GRAVITY_ACCELERATION = 2000; // px/s^2 (valore da testare/affinare)
 let gameSpeed = 220;
 const lineWidth = 2;
 const GLOBAL_SPRITE_SCALE_FACTOR = 1.5;
-
-const gameContainer = document.getElementById('gameContainer');
-const jumpButton = document.getElementById('jumpButton');
-const shootButton = document.getElementById('shootButton');
-const mobileControlsDiv = document.getElementById('mobileControls');
-const fullscreenButton = document.getElementById('fullscreenButton');
-const scoreInputContainerDonkey = document.getElementById('scoreInputContainerDonkey');
-
-const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
-const restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey');
-const mobileStartButton = document.getElementById('mobileStartButton'); // NUOVO RIFERIMENTO
-const shareScoreBtnDonkey = document.getElementById('shareScoreBtnDonkey'); // NUOVO
-
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
-const isIPhone = /iPhone/i.test(navigator.userAgent);
-
-if (isTouchDevice) {
-    if (mobileControlsDiv) mobileControlsDiv.style.display = 'block';
-    if (fullscreenButton) fullscreenButton.style.display = 'block';
-    // Il mobileStartButton sarà gestito in drawMenuScreen e processGameOver
-    console.log('Dispositivo touch rilevato.');
-} else {
-    if (mobileControlsDiv) mobileControlsDiv.style.display = 'none';
-    if (mobileStartButton) mobileStartButton.style.display = 'none'; // Nascondi su non-touch
-    console.log('Non è un dispositivo touch.');
-}
-
-if (fullscreenButton) {
-    if (isIPhone) {
-        fullscreenButton.style.display = 'none';
-        console.log('iPhone rilevato: pulsante fullscreen API nascosto. Si affida a CSS per landscape.');
-    } else if (isTouchDevice) {
-        fullscreenButton.style.display = 'block'; // Mostra per altri touch (iPad, Android)
-        console.log('Dispositivo touch (non iPhone) rilevato: pulsante fullscreen API visualizzato.');
-    } else {
-        fullscreenButton.style.display = 'none'; // Nascondi per non-touch (desktop)
-        console.log('Dispositivo non touch: pulsante fullscreen API nascosto.');
-    }
-}
 
 const WARNING_EXCLAMATION_COLOR = 'red';
 const WARNING_EXCLAMATION_FONT = 'bold 28px "Courier New", monospace';
@@ -531,7 +132,7 @@ const ENEMY_FOUR_IDLE_NUM_FRAMES = 4;
 const ENEMY_FOUR_TARGET_WIDTH = ENEMY_FOUR_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
 const ENEMY_FOUR_TARGET_HEIGHT = ENEMY_FOUR_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const SHOOTING_ENEMY_SHOOT_INTERVAL = 2.5;
-const SHOOTING_ENEMY_PROJECTILE_SOUND = 'audio/enemy_shoot_light.mp3'; // CORRETTO
+const SHOOTING_ENEMY_PROJECTILE_SOUND = 'audio/enemy_shoot_light.mp3';
 
 const ENEMY_FOUR_PROJECTILE_SPRITE_SRC = 'images/enemyFourProjectile.png';
 const ENEMY_FOUR_PROJECTILE_ACTUAL_FRAME_WIDTH = 16;
@@ -558,7 +159,7 @@ const ENEMY_SIX_TARGET_WIDTH = ENEMY_SIX_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCAL
 const ENEMY_SIX_TARGET_HEIGHT = ENEMY_SIX_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const ARMORED_SHOOTING_ENEMY_HEALTH = 4;
 const ARMORED_SHOOTING_ENEMY_SHOOT_INTERVAL = 3.0;
-const ARMORED_SHOOTING_ENEMY_PROJECTILE_SOUND = 'audio/enemy_shoot_heavy.mp3'; // CORRETTO
+const ARMORED_SHOOTING_ENEMY_PROJECTILE_SOUND = 'audio/enemy_shoot_heavy.mp3';
 
 const ENEMY_SIX_PROJECTILE_SPRITE_SRC = 'images/enemySixProjectile.png';
 const ENEMY_SIX_PROJECTILE_ACTUAL_FRAME_WIDTH = 20;
@@ -641,54 +242,15 @@ function setupRenderingContext(context) {
     context.msImageSmoothingEnabled = false;
     console.log('Image smoothing disabilitato.');
 }
-setupRenderingContext(ctx);
 
 const GAME_STATE = { MENU: 'MENU', PLAYING: 'PLAYING', GAME_OVER: 'GAME_OVER' };
 let currentGameState = GAME_STATE.MENU;
 let asyncDonkey = null;
-const playerInitialX = 50;
-const playerInitialY = canvas.height - groundHeight - PLAYER_TARGET_HEIGHT;
+let playerInitialX = 50; // Use let
+let playerInitialY = 0; // Will be calculated in setupGameEngine
 
 let images = {};
-const imagesToLoad = [
-    { name: 'player', src: PLAYER_SPRITESHEET_SRC },
-    { name: 'playerProjectile', src: PLAYER_PROJECTILE_SPRITE_SRC },
-    { name: 'playerUpgradedProjectile', src: PLAYER_UPGRADED_PROJECTILE_SPRITE_SRC },
-    { name: 'obstacle', src: OBSTACLE_SPRITE_SRC },
-    { name: 'enemyOne', src: ENEMY_ONE_SPRITE_SRC },
-    { name: 'enemyTwo', src: ENEMY_TWO_SPRITE_SRC },
-    { name: 'enemyThreeBase', src: ENEMY_THREE_BASE_SRC },
-    { name: 'enemyThreeDmg1', src: ENEMY_THREE_DMG1_SRC },
-    { name: 'enemyThreeDmg2', src: ENEMY_THREE_DMG2_SRC },
-    { name: 'enemyFourIdle', src: ENEMY_FOUR_IDLE_SRC },
-    { name: 'enemyFourProjectile', src: ENEMY_FOUR_PROJECTILE_SPRITE_SRC },
-    { name: 'enemyFive', src: ENEMY_FIVE_SPRITE_SRC },
-    { name: 'enemySixBase', src: ENEMY_SIX_BASE_SRC },
-    { name: 'enemySixDmg1', src: ENEMY_SIX_DMG1_SRC },
-    { name: 'enemySixDmg2', src: ENEMY_SIX_DMG2_SRC },
-    { name: 'enemySixDmg3', src: ENEMY_SIX_DMG3_SRC },
-    { name: 'enemySixProjectile', src: ENEMY_SIX_PROJECTILE_SPRITE_SRC },
-    { name: 'enemySevenBase', src: ENEMY_SEVEN_BASE_SRC },
-    { name: 'enemySevenDmg1', src: ENEMY_SEVEN_DMG1_SRC },
-    { name: 'dangerousFlyingEnemy', src: DANGEROUS_FLYING_ENEMY_SRC },
-    { name: 'glitchzillaBase', src: GLITCHZILLA_BASE_SRC },
-    { name: 'glitchzillaDmg1', src: GLITCHZILLA_DMG1_SRC },
-    { name: 'glitchzillaDmg2', src: GLITCHZILLA_DMG2_SRC },
-    { name: 'glitchzillaDmg3', src: GLITCHZILLA_DMG3_SRC },
-    { name: 'glitchzillaProjectile', src: GLITCHZILLA_PROJECTILE_SPRITE_SRC },
-];
-
-// Aggiungi gli sprite dei power-up a imagesToLoad dinamicamente
-for (const type in POWERUP_CONFIGS) {
-    if (Object.prototype.hasOwnProperty.call(POWERUP_CONFIGS, type)) {
-        const config = POWERUP_CONFIGS[type];
-        if (config.spriteKey && config.src) {
-            imagesToLoad.push({ name: config.spriteKey, src: config.src });
-        } else {
-            console.warn(`Configurazione src o spriteKey mancante per power-up tipo: ${type}`);
-        }
-    }
-}
+const imagesToLoad = []; // Initialize empty, will be populated by prepareAssetsToLoad
 
 let imagesLoadedCount = 0;
 let allImagesLoaded = false;
@@ -772,46 +334,394 @@ let gameStats = {
     powerUpsCollected: 0
 };
 
-async function loadAllAssets() {
-    console.log('Carico assets...');
-    const imagePromises = imagesToLoad.map((d) => loadImage(d.name, d.src));
-    const soundPromises = soundsToLoad.map((s) => AudioManager.loadSound(s.name, s.path));
-    const backgroundMusicPromise = AudioManager.loadBackgroundMusic(backgroundMusicPath);
+function formatScoreTimestamp(firebaseTimestamp) {
+    if (!firebaseTimestamp || typeof firebaseTimestamp.toDate !== 'function') {
+        return 'N/A';
+    }
+    try {
+        return firebaseTimestamp.toDate().toLocaleString('it-IT', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    } catch (e) {
+        console.error('Errore formattazione timestamp:', e);
+        return 'Data errata';
+    }
+}
 
-    await Promise.allSettled([...imagePromises, ...soundPromises, backgroundMusicPromise]);
+function getUrlParameter(name) {
+    name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
+    const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    const results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
 
-    console.log('Processo di caricamento assets completato.');
+// --- Logica per il Prompt di Orientamento Mobile ---
+let orientationPromptDismissedSession = false;
 
-    if (allImagesLoaded) {
-        console.log('TUTTE le immagini dichiarate sono state processate (caricate o errore gestito).');
+function checkAndDisplayOrientationPrompt() {
+    if (!orientationPromptEl || !isTouchDevice || orientationPromptDismissedSession) {
+        if (orientationPromptEl && orientationPromptEl.style.display !== 'none') {
+            orientationPromptEl.style.display = 'none';
+        }
+        return;
+    }
+
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    const isGameFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+
+    if (isPortrait && !isGameFullscreen) {
+        if (orientationPromptEl.style.display !== 'flex') {
+            orientationPromptEl.style.display = 'flex';
+        }
     } else {
-        console.warn(
-            'Attenzione: Alcune immagini potrebbero non essersi processate correttamente o il conteggio è errato.'
+        if (orientationPromptEl.style.display !== 'none') {
+            orientationPromptEl.style.display = 'none';
+        }
+    }
+}
+// --- Fine Logica Prompt Orientamento ---
+
+async function handleShareScore() {
+    console.log("handleShareScore attivato!");
+
+    if (typeof finalScore === 'undefined' || finalScore < 0) {
+        showToast("Nessun punteggio valido da condividere.", "warning");
+        console.warn("handleShareScore: finalScore non definito o non valido:", finalScore);
+        return;
+    }
+
+    let challengerName = "Un Asinello Pixelato";
+    const currentUser = auth.currentUser;
+
+    if (currentUser) {
+        try {
+            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
+            const docSnap = await getDoc(userProfileRef);
+            if (docSnap.exists() && docSnap.data().nickname) {
+                challengerName = docSnap.data().nickname;
+            } else {
+                challengerName = currentUser.displayName || currentUser.email.split('@')[0] || "Giocatore Misterioso";
+            }
+        } catch (error) {
+            console.warn("Errore nel recuperare il nome del profilo per la condivisione:", error);
+            challengerName = currentUser.displayName || currentUser.email.split('@')[0] || "Giocatore Connesso";
+        }
+    } else {
+        const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
+        if (playerInitialsDonkeyInput && playerInitialsDonkeyInput.value.trim() !== "") {
+            challengerName = playerInitialsDonkeyInput.value.trim().toUpperCase();
+        }
+    }
+    console.log("Sfidante:", challengerName, "Punteggio:", finalScore);
+
+    const siteBaseUrl = window.location.origin;
+    const gamePath = "/donkeyRunner.html";
+
+    const challengeUrl = `${siteBaseUrl}${gamePath}?challengeScore=${finalScore}&challengerName=${encodeURIComponent(challengerName)}&utm_source=donkey_runner_share&utm_medium=social_share`;
+
+    const shareTitle = "SYSTEM_ALERT: codeDash Challenge!";
+    const fullShareText = `WARNING! ${challengerName} (Score: ${finalScore}) ti sfida su codeDash! Accetta il protocollo: ${challengeUrl} 👾`;
+    const shortShareText = `// --- INCOMING_CHALLENGE_TRANSMISSION --- //
+SYSTEM_ID: asyncDonkey_Runner_Core
+SOURCE_AGENT: ${challengerName}
+PRIORITY: URGENT 🚨
+SUBJECT: High Score Anomaly Detected!
+
+L'agente ${challengerName} ha registrato un punteggio di ${finalScore} e ha avviato il Protocollo di Sfida Competitiva!
+Sei chiamato/a a superare questo benchmark. Il sistema conta su di te!
+
+Esegui routine di risposta: ${challengeUrl}
+// --- END_OF_TRANSMISSION --- //`;
+
+    console.log("URL Sfida:", challengeUrl);
+    console.log("Testo completo:", fullShareText);
+
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: shareTitle,
+                text: shortShareText,
+                url: challengeUrl,
+            });
+            showToast("Sfida condivisa con successo!", "success");
+            console.log("Condivisione nativa riuscita.");
+        } catch (error) {
+            console.error("Errore durante navigator.share:", error);
+            if (error.name !== 'AbortError') {
+                showToast("Condivisione annullata o fallita.", "info");
+            }
+        }
+    } else {
+        console.log("navigator.share non supportato, uso fallback.");
+        fallbackShare(fullShareText, challengeUrl);
+    }
+}
+
+function fallbackShare(textToShare, urlToShare) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToShare)
+            .then(() => {
+                showToast("Testo della sfida copiato negli appunti!", "info");
+            })
+            .catch(err => {
+                console.error('Fallback: Impossibile copiare negli appunti:', err);
+                alert("Copia questo testo per condividere la tua sfida:\n\n" + textToShare);
+            });
+    } else {
+        alert("Copia questo testo per condividere la tua sfida:\n\n" + textToShare);
+    }
+}
+
+async function loadDonkeyLeaderboard() {
+    if (!miniLeaderboardListEl) {
+        console.warn('[donkeyRunner.js] Elemento miniLeaderboardList non trovato.');
+        return;
+    }
+    if (!db) {
+        console.error('[donkeyRunner.js] Istanza DB non disponibile per caricare la leaderboard di DonkeyRunner.');
+        miniLeaderboardListEl.innerHTML = '<li>Errore connessione DB.</li>';
+        return;
+    }
+    const leaderboardScoresCollection = collection(db, 'leaderboardScores');
+    miniLeaderboardListEl.innerHTML =
+        '<li><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</li>';
+
+    try {
+        const q = query(
+            leaderboardScoresCollection,
+            where('gameId', '==', 'donkeyRunner'),
+            orderBy('score', 'desc'),
+            limit(5)
         );
+        const querySnapshot = await getDocs(q);
+        const fetchedLeaderboard = [];
+        querySnapshot.forEach((doc) => {
+            fetchedLeaderboard.push({ id: doc.id, ...doc.data() });
+        });
+
+        const userIds = [...new Set(fetchedLeaderboard.map((entry) => entry.userId).filter((id) => id))];
+        const profilesMap = new Map();
+
+        if (userIds.length > 0) {
+            const MAX_IDS_PER_IN_QUERY = 30;
+            const profilePromises = [];
+            for (let i = 0; i < userIds.length; i += MAX_IDS_PER_IN_QUERY) {
+                const batchUserIds = userIds.slice(i, i + MAX_IDS_PER_IN_QUERY);
+                if (batchUserIds.length > 0) {
+                    const profilesQuery = query(
+                        collection(db, 'userPublicProfiles'),
+                        where(documentId(), 'in', batchUserIds)
+                    );
+                    profilePromises.push(getDocs(profilesQuery));
+                }
+            }
+            try {
+                const profileSnapshotsArray = await Promise.all(profilePromises);
+                profileSnapshotsArray.forEach((profileSnaps) => {
+                    profileSnaps.forEach((snap) => {
+                        if (snap.exists()) {
+                            profilesMap.set(snap.id, snap.data());
+                        }
+                    });
+                });
+            } catch (profileError) {
+                console.error(
+                    '[donkeyRunner.js] Errore caricamento profili pubblici per mini leaderboard:',
+                    profileError
+                );
+            }
+        }
+
+        displayDonkeyLeaderboard(fetchedLeaderboard, profilesMap);
+    } catch (error) {
+        console.error('[donkeyRunner.js] Errore caricamento DonkeyRunner leaderboard: ', error);
+        if (error.code === 'failed-precondition') {
+            miniLeaderboardListEl.innerHTML =
+                '<li>Indice Firestore mancante. Controlla la console per il link per crearlo.</li>';
+        } else {
+            if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Errore caricamento punteggi.</li>';
+        }
+    }
+}
+
+function displayDonkeyLeaderboard(leaderboardData, profilesMap) {
+    if (!miniLeaderboardListEl) return;
+
+    miniLeaderboardListEl.innerHTML = '';
+    if (!leaderboardData || leaderboardData.length === 0) {
+        miniLeaderboardListEl.innerHTML = '<li>Nessun punteggio registrato.</li>';
+        return;
     }
 
-    resourcesInitialized = true;
+    leaderboardData.forEach((entry, index) => {
+        const li = document.createElement('li');
 
-    if (db) {
-        loadDonkeyLeaderboard();
-    } else {
-        console.error('DB non pronto, impossibile caricare la leaderboard per DonkeyRunner.');
-        if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Classifica non disponibile (DB error).</li>';
-    }
-    checkAndDisplayOrientationPrompt();
+        const rankSpan = document.createElement('span');
+        rankSpan.className = 'player-rank';
+        rankSpan.textContent = `${index + 1}.`;
+        li.appendChild(rankSpan);
 
-    if (gameLoopRequestId === null && currentGameState === GAME_STATE.MENU) {
-        console.log('Avvio game loop da loadAllAssets.');
-        startGameLoop();
-    } else {
-        console.log('Game loop non avviato da loadAllAssets:', { gameLoopRequestId, currentGameState });
+        const avatarImg = document.createElement('img');
+        avatarImg.className = 'player-avatar';
+
+        const seedForBlockie = entry.userId || entry.initials || entry.userName || `anon-dr-${entry.id}`;
+        let userDisplayName = 'Giocatore Anonimo';
+        let altTextForAvatar = 'Avatar Giocatore';
+        let avatarSrcToUse = generateBlockieAvatar(seedForBlockie, 30, { size: 8 });
+        let userNationalityCode = null;
+
+        if (entry.userName) userDisplayName = entry.userName;
+        if (entry.initials && !entry.userName) userDisplayName = entry.initials;
+        altTextForAvatar = userDisplayName;
+        if (entry.nationalityCode) userNationalityCode = entry.nationalityCode;
+
+        const userProfile = entry.userId ? profilesMap.get(entry.userId) : null;
+
+        if (userProfile) {
+            userDisplayName = userProfile.displayName || userDisplayName;
+            altTextForAvatar = userDisplayName;
+            userNationalityCode = userProfile.nationalityCode || userNationalityCode;
+
+            let chosenAvatarUrl = null;
+            if (userProfile.avatarUrls) {
+                if (userProfile.avatarUrls.small) {
+                    chosenAvatarUrl = userProfile.avatarUrls.small;
+                } else if (userProfile.avatarUrls.profile) {
+                    chosenAvatarUrl = userProfile.avatarUrls.profile;
+                } else if (userProfile.avatarUrls.thumbnail) {
+                    chosenAvatarUrl = userProfile.avatarUrls.thumbnail;
+                }
+            }
+            if (!chosenAvatarUrl && userProfile.avatarUrl) {
+                chosenAvatarUrl = userProfile.avatarUrl;
+            }
+
+            if (chosenAvatarUrl) {
+                avatarSrcToUse = chosenAvatarUrl;
+                if (userProfile.profileUpdatedAt && userProfile.profileUpdatedAt.seconds) {
+                    avatarSrcToUse += `?ts=${userProfile.profileUpdatedAt.seconds}`;
+                } else if (userProfile.profileUpdatedAt && typeof userProfile.profileUpdatedAt === 'number') {
+                    avatarSrcToUse += `?ts=${userProfile.profileUpdatedAt}`;
+                }
+            }
+        }
+
+        avatarImg.src = avatarSrcToUse;
+        avatarImg.alt = `${altTextForAvatar}'s Avatar`;
+        avatarImg.style.backgroundColor = 'transparent';
+        avatarImg.onerror = () => {
+            avatarImg.src = generateBlockieAvatar(seedForBlockie, 30, { size: 8 });
+            avatarImg.alt = `${altTextForAvatar}'s Fallback Avatar`;
+            avatarImg.style.backgroundColor = '#ddd';
+            avatarImg.onerror = null;
+        };
+        li.appendChild(avatarImg);
+
+        const playerInfoDiv = document.createElement('div');
+        playerInfoDiv.className = 'player-info';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'player-name';
+
+        if (
+            userNationalityCode &&
+            userNationalityCode !== 'OTHER' &&
+            typeof userNationalityCode === 'string' &&
+            userNationalityCode.length === 2
+        ) {
+            const flagIconSpan = document.createElement('span');
+            flagIconSpan.classList.add('fi', `fi-${userNationalityCode.toLowerCase()}`);
+            flagIconSpan.title = userNationalityCode;
+            flagIconSpan.style.marginRight = '8px';
+            flagIconSpan.style.verticalAlign = 'middle';
+            nameSpan.appendChild(flagIconSpan);
+        }
+
+        if (entry.userId) {
+            const profileLink = document.createElement('a');
+            profileLink.href = `profile.html?userId=${entry.userId}`;
+            profileLink.textContent = userDisplayName;
+            nameSpan.appendChild(profileLink);
+        } else {
+            let guestDisplayName = userDisplayName;
+            if (entry.initials && !guestDisplayName.toLowerCase().includes('(ospite)')) {
+                guestDisplayName = entry.initials + ' (Ospite)';
+            } else if (guestDisplayName === 'Giocatore Anonimo' && (!entry.initials || entry.initials.trim() === '')) {
+                guestDisplayName += ' (Ospite)';
+            }
+            nameSpan.appendChild(document.createTextNode(guestDisplayName));
+        }
+
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'player-date';
+        dateSpan.textContent = formatScoreTimestamp(entry.timestamp);
+
+        playerInfoDiv.appendChild(nameSpan);
+        playerInfoDiv.appendChild(dateSpan);
+        li.appendChild(playerInfoDiv);
+
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'player-score';
+        scoreSpan.textContent = entry.score !== undefined ? entry.score.toLocaleString() : '-';
+        li.appendChild(scoreSpan);
+
+        miniLeaderboardListEl.appendChild(li);
+    });
+}
+
+/**
+ * Helper function to prepare the list of assets to load.
+ */
+function prepareAssetsToLoad() {
+    imagesToLoad.length = 0; // Clear existing if this function is called multiple times
+
+    imagesToLoad.push(
+        { name: 'player', src: PLAYER_SPRITESHEET_SRC },
+        { name: 'playerProjectile', src: PLAYER_PROJECTILE_SPRITE_SRC },
+        { name: 'playerUpgradedProjectile', src: PLAYER_UPGRADED_PROJECTILE_SPRITE_SRC },
+        { name: 'obstacle', src: OBSTACLE_SPRITE_SRC },
+        { name: 'enemyOne', src: ENEMY_ONE_SPRITE_SRC },
+        { name: 'enemyTwo', src: ENEMY_TWO_SPRITE_SRC },
+        { name: 'enemyThreeBase', src: ENEMY_THREE_BASE_SRC },
+        { name: 'enemyThreeDmg1', src: ENEMY_THREE_DMG1_SRC },
+        { name: 'enemyThreeDmg2', src: ENEMY_THREE_DMG2_SRC },
+        { name: 'enemyFourIdle', src: ENEMY_FOUR_IDLE_SRC },
+        { name: 'enemyFourProjectile', src: ENEMY_FOUR_PROJECTILE_SPRITE_SRC },
+        { name: 'enemyFive', src: ENEMY_FIVE_SPRITE_SRC },
+        { name: 'enemySixBase', src: ENEMY_SIX_BASE_SRC },
+        { name: 'enemySixDmg1', src: ENEMY_SIX_DMG1_SRC },
+        { name: 'enemySixDmg2', src: ENEMY_SIX_DMG2_SRC },
+        { name: 'enemySixDmg3', src: ENEMY_SIX_DMG3_SRC },
+        { name: 'enemySixProjectile', src: ENEMY_SIX_PROJECTILE_SPRITE_SRC },
+        { name: 'enemySevenBase', src: ENEMY_SEVEN_BASE_SRC },
+        { name: 'enemySevenDmg1', src: ENEMY_SEVEN_DMG1_SRC },
+        { name: 'dangerousFlyingEnemy', src: DANGEROUS_FLYING_ENEMY_SRC },
+        { name: 'glitchzillaBase', src: GLITCHZILLA_BASE_SRC },
+        { name: 'glitchzillaDmg1', src: GLITCHZILLA_DMG1_SRC },
+        { name: 'glitchzillaDmg2', src: GLITCHZILLA_DMG2_SRC },
+        { name: 'glitchzillaDmg3', src: GLITCHZILLA_DMG3_SRC },
+        { name: 'glitchzillaProjectile', src: GLITCHZILLA_PROJECTILE_SPRITE_SRC },
+    );
+
+    // Add power-up sprites dynamically
+    for (const type in POWERUP_CONFIGS) {
+        if (Object.prototype.hasOwnProperty.call(POWERUP_CONFIGS, type)) {
+            const config = POWERUP_CONFIGS[type];
+            if (config.spriteKey && config.src) {
+                imagesToLoad.push({ name: config.spriteKey, src: config.src });
+            } else {
+                console.warn(`Configurazione src o spriteKey mancante per power-up tipo: ${type}`);
+            }
+        }
     }
 }
 
 function loadImage(name, src) {
     return new Promise((resolve) => {
         if (!src) {
-            // Controllo per src undefined
             console.error(`ERRORE: src mancante per l'immagine '${name}'. Impossibile caricare.`);
             imagesLoadedCount++;
             if (imagesLoadedCount === imagesToLoad.length) {
@@ -845,6 +755,142 @@ function loadImage(name, src) {
     });
 }
 
+/**
+ * Inizializza le variabili principali, ottiene i riferimenti al DOM,
+ * e attacca tutti gli event listener necessari. Va chiamata una sola volta.
+ */
+export function setupGameEngine() {
+    console.log("⚙️ setupGameEngine: Inizializzazione motore di gioco...");
+
+    // Get DOM references and assign them to the global 'let' variables
+    canvas = document.getElementById('gameCanvas');
+    if (!canvas) {
+        console.error("CRITICO: Elemento Canvas non trovato! Impossibile avviare il gioco.");
+        return;
+    }
+    ctx = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 450;
+    playerInitialY = canvas.height - groundHeight - PLAYER_TARGET_HEIGHT;
+
+    miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
+    creditsIconBtn = document.getElementById('creditsIconBtn');
+    creditsModal = document.getElementById('creditsModal');
+    closeCreditsModalBtn = document.getElementById('closeCreditsModalBtn');
+    accordionHeaders = document.querySelectorAll('.accordion-header');
+    scrollToTutorialLink = document.getElementById('scrollToTutorialLink');
+    orientationPromptEl = document.getElementById('orientationPrompt');
+    dismissOrientationPromptBtn = document.getElementById('dismissOrientationPrompt');
+
+    gameContainer = document.getElementById('gameContainer');
+    jumpButton = document.getElementById('jumpButton');
+    shootButton = document.getElementById('shootButton');
+    mobileControlsDiv = document.getElementById('mobileControls');
+    fullscreenButton = document.getElementById('fullscreenButton');
+    scoreInputContainerDonkey = document.getElementById('scoreInputContainerDonkey');
+
+    saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
+    restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey');
+    mobileStartButton = document.getElementById('mobileStartButton');
+    shareScoreBtnDonkey = document.getElementById('shareScoreBtnDonkey');
+
+    // Setup iniziale basato sul dispositivo
+    isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    isIPhone = /iPhone/i.test(navigator.userAgent);
+
+    if (isTouchDevice) {
+        if (mobileControlsDiv) mobileControlsDiv.style.display = 'block';
+        // The fullscreen button display logic might need adjustment if you want it
+        // to appear only after the game is loaded, but for now, it's fine here.
+        if (fullscreenButton) fullscreenButton.style.display = 'block';
+        console.log('Dispositivo touch rilevato.');
+    } else {
+        if (mobileControlsDiv) mobileControlsDiv.style.display = 'none';
+        if (mobileStartButton) mobileStartButton.style.display = 'none';
+        console.log('Non è un dispositivo touch.');
+    }
+
+    if (fullscreenButton) {
+        if (isIPhone) {
+            fullscreenButton.style.display = 'none';
+        } else if (isTouchDevice) {
+            fullscreenButton.style.display = 'block';
+        } else {
+            fullscreenButton.style.display = 'none';
+        }
+    }
+
+    // Prepare the asset list (fills imagesToLoad)
+    prepareAssetsToLoad();
+
+    // Setup the rendering context
+    setupRenderingContext(ctx);
+
+    // Attach all event listeners
+    attachEventListeners();
+
+    console.log("✅ setupGameEngine: Completato.");
+}
+
+/**
+ * Esegue il caricamento di tutte le immagini e suoni necessari per il gioco.
+ * Restituisce una Promise che si risolve quando tutto è caricato.
+ */
+export async function preloadGameAssets() {
+    console.log('⏳ preloadGameAssets: Avvio caricamento assets...');
+    if (resourcesInitialized) {
+        console.log("Assets già caricati.");
+        return;
+    }
+
+    const imagePromises = imagesToLoad.map((d) => loadImage(d.name, d.src));
+    const soundPromises = soundsToLoad.map((s) => AudioManager.loadSound(s.name, s.path));
+    const backgroundMusicPromise = AudioManager.loadBackgroundMusic(backgroundMusicPath);
+
+    await Promise.allSettled([...imagePromises, ...soundPromises, backgroundMusicPromise]);
+
+    console.log('✅ preloadGameAssets: Processo di caricamento assets completato.');
+    resourcesInitialized = true;
+
+    if (db) {
+        loadDonkeyLeaderboard();
+    } else {
+        console.error('DB non pronto, impossibile caricare la leaderboard per DonkeyRunner.');
+        if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Classifica non disponibile (DB error).</li>';
+    }
+    checkAndDisplayOrientationPrompt();
+}
+
+
+/**
+ * Fa partire la logica di gioco. Imposta lo stato su PLAYING,
+ * resetta le variabili di gioco e avvia la musica e il game loop.
+ */
+export function launchGame() {
+    console.log("🚀 launchGame: Avvio del gioco!");
+    if (!resourcesInitialized) {
+        console.error("Impossibile avviare il gioco, le risorse non sono state caricate. Esegui preloadGameAssets() prima.");
+        return;
+    }
+
+    if (AudioManager.audioContext && AudioManager.audioContext.state === 'suspended') {
+        AudioManager.audioContext.resume().catch(err => console.error('Errore nel riprendere AudioContext:', err));
+    }
+
+    currentGameState = GAME_STATE.PLAYING;
+    resetGame();
+    AudioManager.playMusic(false);
+
+    if (mobileStartButton) mobileStartButton.style.display = 'none';
+    if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+
+    // Avvia il game loop se non è già in esecuzione
+    if (gameLoopRequestId === null) {
+        startGameLoop();
+    }
+}
+
+
 // --- Classi di Gioco ---
 class Player {
     constructor(x, y, dw, dh) {
@@ -852,7 +898,7 @@ class Player {
         this.y = y;
         this.displayWidth = dw;
         this.displayHeight = dh;
-        this.velocityY = 0; // Ora in pixel/secondo
+        this.velocityY = 0;
         this.onGround = true;
         const pXRatio = 20 / 120;
         const pYRatio = 10 / 120;
@@ -943,13 +989,9 @@ class Player {
     }
 
     update(dt) {
-        // Applica l'accelerazione di gravità alla velocità verticale
         this.velocityY += GRAVITY_ACCELERATION * dt;
-
-        // Aggiorna la posizione verticale basata sulla velocità verticale
         this.y += this.velocityY * dt;
 
-        // Controllo collisione con il suolo
         if (this.y + this.displayHeight >= canvas.height - groundHeight) {
             this.y = canvas.height - groundHeight - this.displayHeight;
             this.velocityY = 0;
@@ -972,7 +1014,7 @@ class Player {
 
     jump() {
         if (this.onGround) {
-            this.velocityY = PLAYER_JUMP_VELOCITY_INITIAL; // Usa la nuova costante
+            this.velocityY = PLAYER_JUMP_VELOCITY_INITIAL;
             this.onGround = false;
             AudioManager.playSound('jump');
             gameStats.jumps++;
@@ -1197,7 +1239,7 @@ class Projectile {
         if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
             this.animation = new SpriteAnimation(
                 this.sprite,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH, // These constants are correct for initialization
+                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
                 PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
                 PLAYER_PROJECTILE_NUM_FRAMES,
                 PLAYER_PROJECTILE_ANIMATION_SPEED
@@ -1212,20 +1254,17 @@ class Projectile {
         const spriteUsable = this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0;
         if (this.animation && spriteUsable) {
             const frame = this.animation.getFrame();
-            // --- FIX START ---
-            // Using frame dimensions from the animation object, not hardcoded constants
             ctx.drawImage(
                 this.sprite,
                 frame.sx,
                 frame.sy,
-                this.animation.frameWidth, // Corrected
-                this.animation.frameHeight, // Corrected
+                this.animation.frameWidth,
+                this.animation.frameHeight,
                 this.x,
                 this.y,
                 this.width,
                 this.height
             );
-            // --- FIX END ---
         } else if (spriteUsable) {
             ctx.drawImage(
                 this.sprite,
@@ -1734,24 +1773,22 @@ class Glitchzilla extends BaseEnemy {
         if (this.animation && this.animation.reset) this.animation.reset();
     }
     takeDamage(dmg = 1) {
-        super.takeDamage(dmg); // This handles this.health -= dmg;
+        super.takeDamage(dmg);
         console.log(`Glitchzilla took ${dmg} damage, HP: ${this.health}`);
         this.updateCurrentAnimation();
         AudioManager.playSound('glitchzillaHit');
 
         if (this.health <= 0) {
             console.log('Glitchzilla SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            AudioManager.playSound('glitchzillaDefeatedSuccessfully'); // Make sure 'audio/glitchzilla_victory.mp3' is loaded
+            AudioManager.playSound('glitchzillaDefeatedSuccessfully');
 
             score += this.scoreValue;
-            activeMiniboss = null; // Boss is no longer active
+            activeMiniboss = null;
 
-            // Initiate post-boss cooldown state
             postBossCooldownActive = true;
-            postBossCooldownTimer = 2.0; // Start the 2-second cooldown timer
+            postBossCooldownTimer = 2.0;
 
-            bossFightImminent = false; // CRITICAL: Prevent immediate re-trigger of boss warning
-            // hasGlitchzillaSpawnedThisGame remains true, preventing a new boss sequence for this game.
+            bossFightImminent = false;
 
             console.log(
                 `Glitchzilla defeated. postBossCooldownActive: ${postBossCooldownActive}, bossFightImminent: ${bossFightImminent}`
@@ -2041,7 +2078,7 @@ function spawnPowerUpAmbientIfNeeded(dt) {
         const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
         const randomType = Object.values(POWERUP_TYPE)[randomTypeIndex];
         const yPos = 50 + Math.random() * (canvas.height - groundHeight - 150);
-        powerUpItems.push(new PowerUpItem(canvas.width, yPos, randomType, images)); // Passa 'images'
+        powerUpItems.push(new PowerUpItem(canvas.width, yPos, randomType, images));
         powerUpSpawnTimer = 0;
         nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
     }
@@ -2085,14 +2122,13 @@ function drawAllEnemyTypes() {
 }
 
 function shouldShowDonkeyScoreInput(currentScore) {
-    // console.log('Controllo shouldShowDonkeyScoreInput con score:', currentScore);
     return currentScore > 0;
 }
 
 async function handleSaveDonkeyScore() {
     const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
     const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
-    const loggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay'); // Per prendere il nome se loggato
+    const loggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay');
 
     if (!saveScoreBtnDonkey) {
         showToast('Errore: pulsante Salva non trovato.', 'error');
@@ -2105,32 +2141,26 @@ async function handleSaveDonkeyScore() {
     let userNameForDb = '';
 
     if (!currentUser) {
-        // Utente NON loggato
         if (!playerInitialsDonkeyInput) {
             showToast('Errore: campo iniziali non trovato.', 'error');
             console.error(
                 'ERRORE in handleSaveDonkeyScore (utente non loggato): playerInitialsDonkeyInput non trovato.'
             );
-            saveScoreBtnDonkey.disabled = false; // Riabilita il pulsante
+            saveScoreBtnDonkey.disabled = false;
             return;
         }
         initialsForSave = playerInitialsDonkeyInput.value.trim().toUpperCase();
         if (initialsForSave.length < 1 || initialsForSave.length > 5) {
             showToast('Inserisci da 1 a 5 caratteri per le iniziali.', 'warning');
-            saveScoreBtnDonkey.disabled = false; // Riabilita il pulsante
+            saveScoreBtnDonkey.disabled = false;
             return;
         }
         userNameForDb = initialsForSave;
     } else {
-        // Utente LOGGATO
-        // Recupera il nome visualizzato (nickname o email part)
-        // e usalo per generare le 'initials' se necessario dalle regole,
-        // e imposta userNameForDb.
         let displayNameForScore = loggedInUserNameDisplay
             ? loggedInUserNameDisplay.textContent
             : currentUser.email.split('@')[0];
 
-        // Tentativo di recupero profilo per nome più accurato e nazionalità
         try {
             const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
             const docSnap = await getDoc(userProfileRef);
@@ -2142,9 +2172,8 @@ async function handleSaveDonkeyScore() {
         }
 
         userNameForDb = displayNameForScore;
-        // Le regole richiedono 'initials'. Deriviamole da userNameForDb.
         initialsForSave = userNameForDb.substring(0, 5).toUpperCase();
-        if (initialsForSave.length === 0) initialsForSave = 'USER'; // Fallback se userName fosse vuoto
+        if (initialsForSave.length === 0) initialsForSave = 'USER';
     }
 
     saveScoreBtnDonkey.disabled = true;
@@ -2153,7 +2182,7 @@ async function handleSaveDonkeyScore() {
     let scoreData = {
         gameId: 'donkeyRunner',
         score: Math.floor(finalScore),
-        initials: initialsForSave, // Ora sempre presente
+        initials: initialsForSave,
         userName: userNameForDb,
         timestamp: serverTimestamp(),
         glitchzillaDefeated:
@@ -2165,7 +2194,6 @@ async function handleSaveDonkeyScore() {
 
     if (currentUser) {
         scoreData.userId = currentUser.uid;
-        // La nazionalità viene aggiunta se presente nel profilo (già gestito dalla logica di recupero sopra)
         try {
             const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
             const docSnap = await getDoc(userProfileRef);
@@ -2176,7 +2204,6 @@ async function handleSaveDonkeyScore() {
             console.warn('handleSaveDonkeyScore: Errore recupero nationalityCode', error);
         }
     }
-    // Per utenti non loggati, nationalityCode non viene inviato (le regole lo gestiscono con .get('nationalityCode', null))
 
     console.log('Dati punteggio pronti per il salvataggio:', scoreData);
 
@@ -2187,7 +2214,7 @@ async function handleSaveDonkeyScore() {
         if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
         loadDonkeyLeaderboard();
     } catch (error) {
-        console.error('Errore salvataggio punteggio:', error); // Qui vedrai "Missing or insufficient permissions" se il problema persiste
+        console.error('Errore salvataggio punteggio:', error);
         showToast('Errore nel salvare il punteggio. Riprova. (' + error.code + ')', 'error');
     } finally {
         if (saveScoreBtnDonkey) {
@@ -2212,7 +2239,7 @@ function processGameOver() {
     console.log('finalScore (dopo floor):', finalScore);
 
     AudioManager.stopMusic();
-    AudioManager.playSound('gameOverSound'); // Ricorda di aggiungere il file audio mancante
+    AudioManager.playSound('gameOverSound');
 
     console.log('Elementi del form punteggio cercati DENTRO processGameOver:', {
         container: !!localScoreInputContainer,
@@ -2242,16 +2269,16 @@ function processGameOver() {
                 if (currentUser) {
                     getDoc(doc(db, 'userProfiles', currentUser.uid))
                         .then((profileSnap) => {
-                            let displayName = currentUser.email.split('@')[0]; // Fallback
+                            let displayName = currentUser.email.split('@')[0];
                             if (profileSnap.exists() && profileSnap.data().nickname) {
                                 displayName = profileSnap.data().nickname;
                             }
                             localLoggedInUserNameDisplay.textContent = displayName;
-                            localLoggedInUserNameDisplay.style.display = 'inline'; // o 'block'
+                            localLoggedInUserNameDisplay.style.display = 'inline';
                             localPlayerInitialsLabel.style.display = 'none';
                             localPlayerInitialsInput.style.display = 'none';
                             localPlayerInitialsInput.required = false;
-                            localPlayerInitialsInput.value = ''; // Pulisci per sicurezza
+                            localPlayerInitialsInput.value = '';
                         })
                         .catch((err) => {
                             console.error('Errore recupero nickname per form punteggio:', err);
@@ -2263,12 +2290,11 @@ function processGameOver() {
                             localPlayerInitialsInput.value = '';
                         });
                 } else {
-                    // Utente non loggato
                     localLoggedInUserNameDisplay.style.display = 'none';
-                    localPlayerInitialsLabel.style.display = 'block'; // O 'inline'
-                    localPlayerInitialsInput.style.display = 'block'; // O 'inline-block'
+                    localPlayerInitialsLabel.style.display = 'block';
+                    localPlayerInitialsInput.style.display = 'block';
                     localPlayerInitialsInput.required = true;
-                    localPlayerInitialsInput.value = ''; // Resetta per nuovo input
+                    localPlayerInitialsInput.value = '';
                     localPlayerInitialsInput.focus();
                 }
             } else {
@@ -2282,7 +2308,6 @@ function processGameOver() {
                 console.error('localSaveScoreBtn NON TROVATO DENTRO processGameOver');
             }
         } else {
-            // shouldShow è false (punteggio 0)
             localScoreInputContainer.style.display = 'none';
             console.log('shouldShowDonkeyScoreInput è false, scoreInputContainerDonkey nascosto.');
         }
@@ -2291,7 +2316,7 @@ function processGameOver() {
     }
 
     if (isTouchDevice && mobileStartButton) {
-    mobileStartButton.innerHTML = '<span class="material-symbols-rounded">replay</span><span class="visually-hidden">Rigioca</span>'; // Verifica che sia .innerHTML
+    mobileStartButton.innerHTML = '<span class="material-symbols-rounded">replay</span><span class="visually-hidden">Rigioca</span>';
     mobileStartButton.style.display = 'block';
 }
 }
@@ -2305,7 +2330,6 @@ function checkCollisions() {
         height: asyncDonkey.colliderHeight,
     };
 
-    // --- COLLISIONE CON OSTACOLI ---
     for (let i = obstacles.length - 1; i >= 0; i--) {
         const obs = obstacles[i];
         if (
@@ -2333,7 +2357,6 @@ function checkCollisions() {
         }
     }
 
-    // --- NUOVA LOGICA: COLLISIONE CON NEMICI VOLANTI (POWER-UP CARRIER) ---
     for (let i = flyingEnemies.length - 1; i >= 0; i--) {
         const enemy = flyingEnemies[i];
         if (
@@ -2342,25 +2365,20 @@ function checkCollisions() {
             playerRect.y < enemy.y + enemy.height &&
             playerRect.y + playerRect.height > enemy.y
         ) {
-            // È un power-up carrier, non una minaccia.
             flyingEnemies.splice(i, 1);
-            score += enemy.scoreValue; // Assegna punti per la raccolta
-            AudioManager.playSound('powerUpCollect'); // Suono gratificante
+            score += enemy.scoreValue;
+            AudioManager.playSound('powerUpCollect');
 
-            // Garantisce il drop di un power-up
             const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
             const randomType = Object.values(POWERUP_TYPE)[randomTypeIndex];
             powerUpItems.push(
                 new PowerUpItem(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, randomType, images)
             );
-            // Non c'è gameOverTrigger qui, la collisione è benefica.
         }
     }
 
-    // --- LOGICA ESISTENTE: COLLISIONE CON TUTTI GLI ALTRI NEMICI DANNOSI ---
     const allDamagingEnemyArrays = [
         enemies,
-        // flyingEnemies è stato rimosso da questo array e gestito sopra
         fastEnemies,
         armoredEnemies,
         shootingEnemies,
@@ -2395,13 +2413,11 @@ function checkCollisions() {
         }
     }
 
-    // --- GESTIONE PROIETTILI GIOCATORE ---
     for (let i = projectiles.length - 1; i >= 0; i--) {
         const proj = projectiles[i];
-        if (!proj) continue; // Sanity check
+        if (!proj) continue;
         let projectileRemoved = false;
 
-        // Controlla collisione con nemici dannosi + flyingEnemies (possono essere sparati)
         const allShootableEnemyArrays = [...allDamagingEnemyArrays, flyingEnemies];
         for (const enemyArray of allShootableEnemyArrays) {
             if (projectileRemoved) break;
@@ -2420,14 +2436,12 @@ function checkCollisions() {
                     projectileRemoved = true;
 
                     if (enemy.health <= 0) {
-                        // Nemico sconfitto
                         enemyArray.splice(j, 1);
                         score += enemy.scoreValue;
                         AudioManager.playSound('enemyExplode');
 
-                        // Logica per il drop chance dai nemici volanti PERICOLOSI
                         if (
-                            (enemy instanceof DangerousFlyingEnemy || enemy.isDangerousFlyer) && // Controllo più robusto
+                            (enemy instanceof DangerousFlyingEnemy || enemy.isDangerousFlyer) &&
                             Math.random() < POWER_UP_DROP_CHANCE_FROM_FLYING_ENEMY
                         ) {
                             const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
@@ -2468,7 +2482,6 @@ function checkCollisions() {
         }
     }
 
-    // --- GESTIONE PROIETTILI NEMICI ---
     for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
         const eProj = enemyProjectiles[i];
         if (
@@ -2490,7 +2503,6 @@ function checkCollisions() {
         }
     }
 
-    // --- GESTIONE RACCOLTA POWER-UP (già presente, solo per completezza) ---
     for (let i = powerUpItems.length - 1; i >= 0; i--) {
         const item = powerUpItems[i];
         if (
@@ -2503,8 +2515,6 @@ function checkCollisions() {
             powerUpItems.splice(i, 1);
         }
     }
-
-    // Il check finale di gameOverTrigger è stato spostato direttamente dove avviene l'evento
 }
 
 function resetGame() {
@@ -2522,13 +2532,12 @@ function resetGame() {
     enemyProjectiles = [];
     powerUpItems = [];
 
-    activeMiniboss = null; // Ensure boss is cleared
+    activeMiniboss = null;
 
-    // Reset all boss-related state flags
     bossFightImminent = false;
-    hasGlitchzillaSpawnedThisGame = false; // Allows one Glitchzilla encounter per new game
+    hasGlitchzillaSpawnedThisGame = false;
     postBossCooldownActive = false;
-    bossWarningTimer = 2.0; // Reset timers too
+    bossWarningTimer = 2.0;
     postBossCooldownTimer = 2.0;
 
     score = 0;
@@ -2630,54 +2639,51 @@ function drawMenuScreen() {
     drawTerminalBackgroundEffects();
     drawGround();
 
-    // >>> INIZIO MODIFICHE PER SFIDA <<<
     const incomingChallengeScore = getUrlParameter('challengeScore');
     const incomingChallengerName = getUrlParameter('challengerName');
     const numericalChallengeScore = parseInt(incomingChallengeScore, 10);
 
-    drawGlitchText( // Titolo gioco rimane
+    drawGlitchText(
         'codeDash!',
         canvas.width / 2,
-        canvas.height / 2 - 100, // Spostato un po' più in alto per fare spazio al testo della sfida
+        canvas.height / 2 - 100,
         48,
         PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE, 5, 3
     );
 
     if (incomingChallengerName && !isNaN(numericalChallengeScore) && numericalChallengeScore > 0) {
-        // Messaggio di sfida ricevuto!
         drawGlitchText(
             `SYSTEM_ALERT: Sfida da ${incomingChallengerName}!`,
             canvas.width / 2,
-            canvas.height / 2 - 20, // Posizione primo testo sfida
-            28, // Dimensione font
+            canvas.height / 2 - 20,
+            28,
             PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 3, 2
         );
         drawGlitchText(
             `TARGET SCORE: ${numericalChallengeScore}. Routine di superamento richiesta!`,
             canvas.width / 2,
-            canvas.height / 2 + 20, // Posizione secondo testo sfida
-            22, // Dimensione font
+            canvas.height / 2 + 20,
+            22,
             PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 2, 1
         );
 
         if (isTouchDevice && mobileStartButton) {
-            mobileStartButton.textContent = '_RUN'; // Testo specifico per il pulsante mobile
+            mobileStartButton.textContent = '_RUN';
             mobileStartButton.style.display = 'block';
         } else {
             drawGlitchText(
                 'Premi INVIO per ESEGUIRE!',
                 canvas.width / 2,
-                canvas.height / 2 + 70, // Posizione prompt azione
+                canvas.height / 2 + 70,
                 26,
                 PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE, 3, 1
             );
         }
     } else {
-        // Messaggio di avvio standard (se non ci sono parametri di sfida validi)
         if (isTouchDevice && mobileStartButton) {
-    mobileStartButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span><span class="visually-hidden">Start Game</span>'; // Verifica che sia .innerHTML
-    mobileStartButton.style.display = 'block';
-} else {
+            mobileStartButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span><span class="visually-hidden">Start Game</span>';
+            mobileStartButton.style.display = 'block';
+        } else {
             drawGlitchText(
                 'Premi INVIO per Iniziare',
                 canvas.width / 2,
@@ -2687,76 +2693,56 @@ function drawMenuScreen() {
             );
         }
     }
-    // >>> FINE MODIFICHE PER SFIDA <<<
-
-    // Il testo dei controlli può rimanere più in basso
     ctx.fillStyle = PALETTE.MEDIUM_TEAL;
     ctx.font = '16px "Source Code Pro", monospace';
     ctx.textAlign = 'center';
     ctx.fillText(
         'Controlli: SPAZIO/FRECCIA SU per Saltare, CTRL/X per Sparare',
         canvas.width / 2,
-        canvas.height - groundHeight - 30 // Adattato leggermente y-pos se necessario
+        canvas.height - groundHeight - 30
     );
 }
 
 function updatePlaying(dt) {
     if (!asyncDonkey) return;
 
-    // --- State Management Order is Important ---
-
-    // 1. Handle Post-Boss Cooldown State
     if (postBossCooldownActive) {
         postBossCooldownTimer -= dt;
         if (postBossCooldownTimer <= 0) {
             postBossCooldownActive = false;
-            // Cooldown finished. bossFightImminent is already false.
-            // hasGlitchzillaSpawnedThisGame is true, so boss sequence won't re-trigger.
-            // Normal spawning will resume in the spawning logic block.
             console.log('Post-boss cooldown terminato. Ripresa del gioco normale.');
         }
     }
 
-    // 2. Try to Initiate Boss Spawn Sequence (only if no boss stuff is happening)
     if (
-        score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD && // Score condition
-        !activeMiniboss && // No boss currently active
-        !hasGlitchzillaSpawnedThisGame && // Boss hasn't been encountered this game yet
-        !bossFightImminent && // Boss sequence isn't already starting
-        !postBossCooldownActive // Not in post-boss cooldown
+        score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD &&
+        !activeMiniboss &&
+        !hasGlitchzillaSpawnedThisGame &&
+        !bossFightImminent &&
+        !postBossCooldownActive
     ) {
         console.log('Soglia punteggio per Glitchzilla raggiunta. Avvio sequenza di spawn (2s warning).');
-        bossFightImminent = true; // Start the pre-boss warning phase
-        bossWarningTimer = 2.0; // Set the 2-second timer
+        bossFightImminent = true;
+        bossWarningTimer = 2.0;
     }
 
-    // 3. Handle Boss Warning/Spawn Countdown
-    // This runs if imminent, no boss active, and not in post-boss cooldown
     if (bossFightImminent && !activeMiniboss && !postBossCooldownActive) {
         bossWarningTimer -= dt;
         if (bossWarningTimer <= 0) {
             console.log('Warning timer scaduto. Spawn di Glitchzilla!');
             const bossY = canvas.height - groundHeight - GLITCHZILLA_TARGET_HEIGHT;
             activeMiniboss = new Glitchzilla(canvas.width, bossY);
-            hasGlitchzillaSpawnedThisGame = true; // Mark that a boss has now been spawned in this game session
-            // bossFightImminent remains true while boss is active (to stop other spawns)
-            // It will be set to false in Glitchzilla's takeDamage upon defeat.
+            hasGlitchzillaSpawnedThisGame = true;
         }
     }
 
-    // --- Core Game Object Updates ---
     asyncDonkey.update(dt);
     updateShootCooldown(dt);
     updateProjectiles(dt);
     updateObstacles(dt);
-    updateAllEnemyTypes(dt); // This will update activeMiniboss if it exists
+    updateAllEnemyTypes(dt);
     updatePowerUpItems(dt);
 
-    // --- Regular Entity Spawning Logic ---
-    // Spawn if:
-    // 1. No boss is currently active AND
-    // 2. No boss fight is currently in its "imminent" warning phase AND
-    // 3. Not in the post-boss cooldown period.
     if (!activeMiniboss && !bossFightImminent && !postBossCooldownActive) {
         spawnObstacleIfNeeded(dt);
         spawnEnemyBaseIfNeeded(dt);
@@ -2770,10 +2756,8 @@ function updatePlaying(dt) {
         spawnPowerUpAmbientIfNeeded(dt);
     }
 
-    // --- Final Updates for the Frame ---
-    checkCollisions(); // Handles collisions and can trigger processGameOver
+    checkCollisions();
     if (currentGameState === GAME_STATE.PLAYING) {
-        // Only increment score if still playing
         score += dt * 10;
         gameSpeed += dt * 0.3;
     }
@@ -2793,7 +2777,7 @@ function drawPlayingScreen() {
     ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
     ctx.font = '24px "Source Code Pro", "Courier New", Courier, monospace';
     ctx.textAlign = 'left';
-    ctx.fillText('Score: ' + Math.floor(score), 20, 40); // Punteggio intero
+    ctx.fillText('Score: ' + Math.floor(score), 20, 40);
     if (asyncDonkey && asyncDonkey.activePowerUp) {
         ctx.fillStyle = PALETTE.BRIGHT_TEAL;
         ctx.font = '18px "Source Code Pro", monospace';
@@ -2835,8 +2819,6 @@ function drawGameOverScreen() {
             1
         );
     }
-    // Il form per salvare il punteggio è gestito da HTML/CSS.
-    // Il pulsante "Rigioca" mobile è gestito da processGameOver -> mobileStartButton.
 }
 
 function gameLoop(timestamp) {
@@ -2873,9 +2855,6 @@ function startGameLoop() {
 let isFullscreenActive = false;
 
 async function toggleFullscreen() {
-    // ++ AGGIUNTA GUARDIA PER iPHONE ++
-    // Se è un iPhone, questa funzione non dovrebbe fare nulla poiché il pulsante è nascosto.
-    // Questa è una sicurezza aggiuntiva.
     if (isIPhone) {
         console.log('toggleFullscreen chiamato su iPhone, ma il pulsante dovrebbe essere nascosto. Nessuna azione intrapresa.');
         return;
@@ -2890,14 +2869,13 @@ async function toggleFullscreen() {
 
     if (!isCurrentlyFullscreen) {
         try {
-            if (gameContainer.requestFullscreen) { // Standard
+            if (gameContainer.requestFullscreen) {
                 await gameContainer.requestFullscreen();
-            } else if (gameContainer.webkitRequestFullscreen) { // Safari / iOS generico (ora per iPad principalmente)
+            } else if (gameContainer.webkitRequestFullscreen) {
                 await gameContainer.webkitRequestFullscreen();
-            } else if (gameContainer.msRequestFullscreen) { // IE Legacy
+            } else if (gameContainer.msRequestFullscreen) {
                 await gameContainer.msRequestFullscreen();
             }
-            // Il codice per screen.orientation.lock() è già stato rimosso come da passaggi precedenti.
         } catch (err) {
             console.error(`Errore attivazione fullscreen: ${err.message} (${err.name})`);
             showToast('Impossibile attivare la modalità fullscreen.', 'error');
@@ -2907,7 +2885,6 @@ async function toggleFullscreen() {
             if (document.exitFullscreen) await document.exitFullscreen();
             else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
             else if (document.msExitFullscreen) await document.msExitFullscreen();
-            // Il codice per screen.orientation.unlock() è già stato rimosso.
         } catch (err) {
             console.error(`Errore uscita fullscreen: ${err.message} (${err.name})`);
         }
@@ -2916,10 +2893,6 @@ async function toggleFullscreen() {
 
 
 function handleFullscreenChange() {
-    // ++ NESSUNA MODIFICA NECESSARIA QUI rispetto all'ultima versione che mi hai passato ++
-    // La logica di `screen.orientation.unlock()` era già stata rimossa.
-    // Questa funzione reagisce agli eventi dell'API Fullscreen, che non verranno attivati
-    // dal pulsante su iPhone se il pulsante è nascosto.
     isFullscreenActive = !!(
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
@@ -2930,8 +2903,8 @@ function handleFullscreenChange() {
     if (isFullscreenActive) {
         document.body.classList.add('game-fullscreen-active');
         if (
-            isTouchDevice && // Rimane isTouchDevice perché questo si applica a iPad/Android che usano l'API
-            screen.orientation && 
+            isTouchDevice &&
+            screen.orientation &&
             (screen.orientation.type.startsWith('landscape') || window.innerWidth > window.innerHeight)
         ) {
             document.body.classList.add('game-fullscreen-landscape');
@@ -2944,232 +2917,218 @@ function handleFullscreenChange() {
         document.body.classList.remove('game-fullscreen-landscape');
         if (fullscreenButton) fullscreenButton.textContent = 'FULLSCREEN';
     }
-    checkAndDisplayOrientationPrompt(); // Questo è per il tuo prompt personalizzato
+    checkAndDisplayOrientationPrompt();
 }
 
-document.addEventListener('fullscreenchange', handleFullscreenChange);
-document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+/**
+ * Helper function to attach all event listeners.
+ */
+function attachEventListeners() {
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
-if (screen.orientation) {
-    screen.orientation.addEventListener('change', () => {
-        if (isFullscreenActive) {
-            if (screen.orientation.type.startsWith('landscape')) {
-                document.body.classList.add('game-fullscreen-landscape');
-            } else {
-                document.body.classList.remove('game-fullscreen-landscape');
-            }
-        }
-    });
-}
-
-// Event Listeners per Input
-if (jumpButton) {
-    jumpButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.jump();
-    });
-    jumpButton.addEventListener(
-        'touchstart',
-        (e) => {
-            e.preventDefault();
-            if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.jump();
-        },
-        { passive: false }
-    );
-}
-if (shootButton) {
-    shootButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.shoot();
-    });
-    shootButton.addEventListener(
-        'touchstart',
-        (e) => {
-            e.preventDefault();
-            if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.shoot();
-        },
-        { passive: false }
-    );
-}
-
-if (fullscreenButton) { // Controlla sempre se il pulsante esiste
-    if (!isIPhone) { // Attacca il listener solo se NON è un iPhone
-        fullscreenButton.addEventListener('click', toggleFullscreen);
-        console.log('Event listener per fullscreenButton aggiunto (non è un iPhone).');
-    } else {
-        console.log('Event listener per fullscreenButton NON aggiunto (è un iPhone).');
-    }
-}
-if (saveScoreBtnDonkey) {
-    saveScoreBtnDonkey.addEventListener('click', handleSaveDonkeyScore);
-}
-if (restartGameBtnDonkey) {
-    restartGameBtnDonkey.addEventListener('click', () => {
-        if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-        currentGameState = GAME_STATE.PLAYING;
-        resetGame();
-        AudioManager.playMusic(false);
-    });
-}
-if (shareScoreBtnDonkey) {
-    shareScoreBtnDonkey.addEventListener('click', handleShareScore);
-}
-
-// NUOVO Event Listener per il pulsante Start/Restart mobile
-if (mobileStartButton) {
-    mobileStartButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (AudioManager.audioContext && AudioManager.audioContext.state === 'suspended') {
-            AudioManager.audioContext
-                .resume()
-                .catch((err) => console.error('Errore nel riprendere AudioContext:', err));
-        }
-        if (currentGameState === GAME_STATE.MENU || currentGameState === GAME_STATE.GAME_OVER) {
-            AudioManager.playMusic(false);
-            currentGameState = GAME_STATE.PLAYING;
-            resetGame();
-            mobileStartButton.style.display = 'none'; // Nascondi dopo l'avvio
-            if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none'; // Assicura che il form del punteggio sia nascosto
-        }
-    });
-}
-
-// --- Event Listeners per la Modale Crediti ---
-
-if (creditsIconBtn && creditsModal) {
-    creditsIconBtn.addEventListener('click', () => {
-        creditsModal.style.display = 'block';
-    });
-}
-
-if (closeCreditsModalBtn && creditsModal) {
-    closeCreditsModalBtn.addEventListener('click', () => {
-        creditsModal.style.display = 'none';
-    });
-}
-
-// Chiudi la modale se si clicca fuori dal contenuto
-window.addEventListener('click', (event) => {
-    if (event.target == creditsModal) {
-        creditsModal.style.display = 'none';
-    }
-});
-
-// --- Logica per le Schede Informative Espandibili (Accordion) ---
-if (accordionHeaders.length > 0) {
-    accordionHeaders.forEach((header) => {
-        header.addEventListener('click', function () {
-            const currentlyActiveHeader = document.querySelector('.accordion-header.active');
-            if (currentlyActiveHeader && currentlyActiveHeader !== this) {
-                currentlyActiveHeader.classList.remove('active');
-                const activePanel = currentlyActiveHeader.nextElementSibling;
-                activePanel.style.maxHeight = null;
-                activePanel.classList.remove('open');
-            }
-
-            this.classList.toggle('active');
-            const panel = this.nextElementSibling;
-            if (panel.style.maxHeight) {
-                panel.style.maxHeight = null;
-                panel.classList.remove('open');
-            } else {
-                panel.classList.add('open');
-                panel.style.maxHeight = panel.scrollHeight + 'px';
+    if (screen.orientation) {
+        screen.orientation.addEventListener('change', () => {
+            if (isFullscreenActive) {
+                if (screen.orientation.type.startsWith('landscape')) {
+                    document.body.classList.add('game-fullscreen-landscape');
+                } else {
+                    document.body.classList.remove('game-fullscreen-landscape');
+                }
             }
         });
-    });
-}
-
-if (scrollToTutorialLink && accordionHeaders.length > 0) {
-    scrollToTutorialLink.addEventListener('click', function (event) {
-        event.preventDefault(); // Previene il comportamento di default del link anchor
-
-        const accordionContainer = document.getElementById('gameInfoAccordion');
-        if (accordionContainer) {
-            accordionContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // Apri la prima scheda (Tutorial) se non è già aperta
-        const firstHeader = accordionHeaders[0];
-        const firstPanel = firstHeader.nextElementSibling;
-
-        if (!firstHeader.classList.contains('active')) {
-            // Chiudi eventuali altre schede aperte
-            const currentlyActiveHeader = document.querySelector('.accordion-header.active');
-            if (currentlyActiveHeader) {
-                currentlyActiveHeader.classList.remove('active');
-                const activePanel = currentlyActiveHeader.nextElementSibling;
-                activePanel.style.maxHeight = null;
-                activePanel.classList.remove('open');
-            }
-
-            // Apri la scheda tutorial
-            firstHeader.classList.add('active');
-            firstPanel.classList.add('open');
-            firstPanel.style.maxHeight = firstPanel.scrollHeight + 'px';
-        }
-    });
-}
-
-// Event listener per il pulsante "Capito!" del prompt di orientamento
-if (dismissOrientationPromptBtn && orientationPromptEl) {
-    dismissOrientationPromptBtn.addEventListener('click', () => {
-        orientationPromptEl.style.display = 'none';
-        orientationPromptDismissedSession = true;
-        console.log('Prompt orientamento chiuso dall utente per questa sessione.');
-    });
-}
-
-// Listener per il cambio di orientamento per il prompt
-if (window.matchMedia('(orientation: portrait)').addEventListener) {
-    window.matchMedia('(orientation: portrait)').addEventListener('change', checkAndDisplayOrientationPrompt);
-} else if (window.addEventListener) {
-    // Fallback
-    window.addEventListener('orientationchange', checkAndDisplayOrientationPrompt);
-}
-
-window.addEventListener('keydown', (e) => {
-    if (!resourcesInitialized) return;
-    if (AudioManager.audioContext && AudioManager.audioContext.state === 'suspended') {
-        AudioManager.audioContext.resume().catch((err) => console.error('Errore nel riprendere AudioContext:', err));
     }
-    switch (currentGameState) {
-        case GAME_STATE.MENU:
-            if (e.key === 'Enter') {
-                AudioManager.playMusic(false);
-                currentGameState = GAME_STATE.PLAYING;
-                resetGame();
-                if (mobileStartButton) mobileStartButton.style.display = 'none';
-            }
-            break;
-        case GAME_STATE.PLAYING:
-            if (asyncDonkey) {
-                if (e.code === 'Space' || e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    asyncDonkey.jump();
-                }
-                if (e.code === 'ControlLeft' || e.key === 'x' || e.key === 'X' || e.key === 'ControlRight') {
-                    e.preventDefault();
-                    asyncDonkey.shoot();
-                }
-            }
-            break;
-        case GAME_STATE.GAME_OVER:
-            // Permetti il riavvio con Invio solo se il form del punteggio NON è visibile
-            if (
-                e.key === 'Enter' &&
-                (!scoreInputContainerDonkey || scoreInputContainerDonkey.style.display === 'none')
-            ) {
-                currentGameState = GAME_STATE.PLAYING;
-                resetGame();
-                AudioManager.playMusic(false);
-                if (mobileStartButton) mobileStartButton.style.display = 'none';
-            }
-            break;
-    }
-});
 
-loadAllAssets();
-console.log('Fine script donkeyRunner.js (esecuzione iniziale). In attesa caricamento assets...');
+    if (jumpButton) {
+        jumpButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.jump();
+        });
+        jumpButton.addEventListener(
+            'touchstart',
+            (e) => {
+                e.preventDefault();
+                if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.jump();
+            },
+            { passive: false }
+        );
+    }
+    if (shootButton) {
+        shootButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.shoot();
+        });
+        shootButton.addEventListener(
+            'touchstart',
+            (e) => {
+                e.preventDefault();
+                if (asyncDonkey && currentGameState === GAME_STATE.PLAYING) asyncDonkey.shoot();
+            },
+            { passive: false }
+        );
+    }
+
+    if (fullscreenButton) {
+        if (!isIPhone) {
+            fullscreenButton.addEventListener('click', toggleFullscreen);
+            console.log('Event listener per fullscreenButton aggiunto (non è un iPhone).');
+        } else {
+            console.log('Event listener per fullscreenButton NON aggiunto (è un iPhone).');
+        }
+    }
+    if (saveScoreBtnDonkey) {
+        saveScoreBtnDonkey.addEventListener('click', handleSaveDonkeyScore);
+    }
+    if (restartGameBtnDonkey) {
+        restartGameBtnDonkey.addEventListener('click', () => {
+            // This is 'restartGameBtnDonkey', it should directly restart the game state
+            // and hide the score input, similar to launchGame but without initial checks.
+            if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+            currentGameState = GAME_STATE.PLAYING;
+            resetGame();
+            AudioManager.playMusic(false);
+            if (mobileStartButton) mobileStartButton.style.display = 'none'; // Ensure mobile start button is hidden on restart
+        });
+    }
+    if (shareScoreBtnDonkey) {
+        shareScoreBtnDonkey.addEventListener('click', handleShareScore);
+    }
+
+    // Event Listener for the mobile Start/Restart button
+    if (mobileStartButton) {
+        mobileStartButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Call launchGame for both MENU and GAME_OVER states
+            if (currentGameState === GAME_STATE.MENU || currentGameState === GAME_STATE.GAME_OVER) {
+                launchGame();
+            }
+        });
+    }
+
+    // --- Event Listeners for Credits Modal ---
+    if (creditsIconBtn && creditsModal) {
+        creditsIconBtn.addEventListener('click', () => {
+            creditsModal.style.display = 'block';
+        });
+    }
+
+    if (closeCreditsModalBtn && creditsModal) {
+        closeCreditsModalBtn.addEventListener('click', () => {
+            creditsModal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target == creditsModal) {
+            creditsModal.style.display = 'none';
+        }
+    });
+
+    // --- Logic for Expandable Info Cards (Accordion) ---
+    if (accordionHeaders.length > 0) {
+        accordionHeaders.forEach((header) => {
+            header.addEventListener('click', function () {
+                const currentlyActiveHeader = document.querySelector('.accordion-header.active');
+                if (currentlyActiveHeader && currentlyActiveHeader !== this) {
+                    currentlyActiveHeader.classList.remove('active');
+                    const activePanel = currentlyActiveHeader.nextElementSibling;
+                    activePanel.style.maxHeight = null;
+                    activePanel.classList.remove('open');
+                }
+
+                this.classList.toggle('active');
+                const panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                    panel.classList.remove('open');
+                } else {
+                    panel.classList.add('open');
+                    panel.style.maxHeight = panel.scrollHeight + 'px';
+                }
+            });
+        });
+    }
+
+    if (scrollToTutorialLink && accordionHeaders.length > 0) {
+        scrollToTutorialLink.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            const accordionContainer = document.getElementById('gameInfoAccordion');
+            if (accordionContainer) {
+                accordionContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            const firstHeader = accordionHeaders[0];
+            const firstPanel = firstHeader.nextElementSibling;
+
+            if (!firstHeader.classList.contains('active')) {
+                const currentlyActiveHeader = document.querySelector('.accordion-header.active');
+                if (currentlyActiveHeader) {
+                    currentlyActiveHeader.classList.remove('active');
+                    const activePanel = currentlyActiveHeader.nextElementSibling;
+                    activePanel.style.maxHeight = null;
+                    activePanel.classList.remove('open');
+                }
+
+                firstHeader.classList.add('active');
+                firstPanel.classList.add('open');
+                firstPanel.style.maxHeight = firstPanel.scrollHeight + 'px';
+            }
+        });
+    }
+
+    if (dismissOrientationPromptBtn && orientationPromptEl) {
+        dismissOrientationPromptBtn.addEventListener('click', () => {
+            orientationPromptEl.style.display = 'none';
+            orientationPromptDismissedSession = true;
+            console.log('Prompt orientamento chiuso dall utente per questa sessione.');
+        });
+    }
+
+    if (window.matchMedia('(orientation: portrait)').addEventListener) {
+        window.matchMedia('(orientation: portrait)').addEventListener('change', checkAndDisplayOrientationPrompt);
+    } else if (window.addEventListener) {
+        window.addEventListener('orientationchange', checkAndDisplayOrientationPrompt);
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (!resourcesInitialized) return;
+        if (AudioManager.audioContext && AudioManager.audioContext.state === 'suspended') {
+            AudioManager.audioContext.resume().catch((err) => console.error('Errore nel riprendere AudioContext:', err));
+        }
+        switch (currentGameState) {
+            case GAME_STATE.MENU:
+                if (e.key === 'Enter') {
+                    launchGame(); // Call the new launchGame function
+                }
+                break;
+            case GAME_STATE.PLAYING:
+                if (asyncDonkey) {
+                    if (e.code === 'Space' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        asyncDonkey.jump();
+                    }
+                    if (e.code === 'ControlLeft' || e.key === 'x' || e.key === 'X' || e.key === 'ControlRight') {
+                        e.preventDefault();
+                        asyncDonkey.shoot();
+                    }
+                }
+                break;
+            case GAME_STATE.GAME_OVER:
+                if (
+                    e.key === 'Enter' &&
+                    (!scoreInputContainerDonkey || scoreInputContainerDonkey.style.display === 'none')
+                ) {
+                    launchGame(); // Call the new launchGame function
+                }
+                break;
+        }
+    });
+    console.log("✅ Event listeners attaccati.");
+}
+
+// Remove auto-executing calls from here. These will be triggered from index.html or loader.js
+// console.log('Fine script donkeyRunner.js (esecuzione iniziale). In attesa caricamento assets...');
+

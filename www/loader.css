@@ -1,130 +1,466 @@
-/* Stili per la schermata di caricamento e il menu principale */
+/* www/loader.css */
+
 :root {
-    --terminal-bg: #000000;
-    --terminal-text: #00FF41;
-    --terminal-glow: rgba(0, 255, 65, 0.5);
-    --menu-button-bg: #1a1423;
-    --menu-button-border: #446176;
-    --menu-button-text: #a1ef8c;
-    --menu-button-shadow: #1a1423;
-    --menu-button-hover-bg: #3b2d4a;
-    --menu-button-hover-text: #c4f0c2;
-    --menu-button-hover-shadow: #3fac95;
+    --terminal-bg: #282a36; /* Dracula background */
+    --terminal-darker-bg: #1a1b22;
+    --terminal-text: #f8f8f2; /* Dracula foreground */
+    --terminal-comment: #6272a4; /* Dracula comment */
+    --terminal-red: #ff5555; /* Dracula red */
+    --terminal-orange: #ffb86c; /* Dracula orange */
+    --terminal-yellow: #f1fa8c; /* Dracula yellow */
+    --terminal-green: #50fa7b; /* Dracula green */
+    --terminal-cyan: #8be9fd; /* Dracula cyan */
+    --terminal-purple: #bd93f9; /* Dracula purple */
+    --terminal-pink: #ff79c6; /* Dracula pink */
+    --terminal-blue: #66d9ef; /* Dracula blue */
+    --bright-green-teal: #30e1b9; /* A bright green-teal for highlights */
+    --medium-teal: #0b8a8f;
+    --bright-teal: #0eaf9b;
+    --dark-teal-blue: #32535f;
+    --medium-purple: #631b34;
+    --terminal-border: var(--terminal-green);
 }
 
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    background-color: var(--terminal-bg);
-}
-
-#terminal {
+body {
     font-family: 'Source Code Pro', monospace;
+    overflow: hidden; /* Important for app experience */
+}
+
+#terminal-container {
+    background-color: var(--terminal-bg);
     color: var(--terminal-text);
-    text-shadow: 0 0 5px var(--terminal-glow);
-    padding: 15px;
-    height: 100%;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    transition: opacity 0.5s ease-out;
 }
 
-#log-output p {
-    margin: 0 0 0.5em 0;
-    white-space: pre-wrap; /* Mantiene gli spazi e va a capo */
-    word-break: break-all;
+#terminal-log {
+    background-color: var(--terminal-darker-bg);
+    border: 2px solid var(--terminal-border);
+    width: 80%;
+    max-width: 600px;
+    height: 200px;
+    padding: 15px;
+    overflow-y: auto;
+    font-size: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 15px rgba(0,255,0,0.3);
+    white-space: pre-wrap;
+    box-sizing: border-box;
+    position: relative; /* Needed for blinking cursor effect */
 }
 
-.cursor {
-    display: inline-block;
-    background-color: var(--terminal-text);
-    width: 10px;
-    height: 1.2em;
-    animation: blink 1s steps(1) infinite;
-    margin-left: 2px;
-    box-shadow: 0 0 5px var(--terminal-glow);
-}
-
-@keyframes blink {
-    50% {
-        background-color: transparent;
-        box-shadow: none;
-    }
-}
-
-/* Stili per le barre di caricamento */
-#progress-container {
-    margin-top: 20px;
-}
-
-.progress-bar-wrapper {
-    margin-bottom: 15px;
-}
-
-.progress-label {
+#terminal-log div {
     margin-bottom: 5px;
-    font-size: 0.9em;
+}
+
+/* Blinking cursor effect */
+#terminal-log div:last-child::after {
+    content: '_';
+    animation: blink-caret 0.75s step-end infinite;
+}
+
+@keyframes blink-caret {
+    from, to { border-right-color: transparent }
+    50% { border-right-color: var(--terminal-text); }
+}
+
+.progress-bars {
+    width: 80%;
+    max-width: 600px;
+    margin-bottom: 20px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: var(--terminal-darker-bg);
+    border: 1px solid var(--terminal-border);
+    height: 25px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 0 5px rgba(0,255,0,0.5);
 }
 
 .progress-bar {
-    width: 100%;
-    height: 20px;
-    border: 1px solid var(--terminal-text);
-    padding: 2px;
-}
-
-.progress-bar-fill {
-    background-color: var(--terminal-text);
     height: 100%;
-    width: 0%; /* Animato da JS */
-    transition: width 0.2s linear;
+    width: 0%;
+    background-color: var(--bright-green-teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--terminal-bg);
+    transition: width 0.3s ease-out; /* Smoother transition */
+    box-shadow: 0 0 10px rgba(0,255,0,0.7);
 }
 
-/* Stili per il menu */
-#menu-container {
-    text-align: center;
-    margin: auto; /* Centra verticalmente e orizzontalmente */
+#main-menu {
+    background-color: var(--terminal-bg);
+    color: var(--terminal-text);
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 900; /* Below loader, above game */
+    opacity: 0; /* Starts transparent for fade-in */
+    transition: opacity 0.5s ease-in;
 }
 
-#menu-container h2 {
+#main-menu h1 {
+    font-family: 'Press Start 2P', cursive;
+    color: var(--bright-green-teal);
     font-size: 3em;
-    margin-bottom: 30px;
-    text-transform: uppercase;
-    letter-spacing: 4px;
+    margin-bottom: 50px;
+    text-shadow: 0 0 10px var(--bright-green-teal), 0 0 20px rgba(0,255,0,0.5);
+    text-align: center;
 }
 
-.menu-button {
-    font-family: 'Source Code Pro', monospace;
-    background-color: var(--menu-button-bg);
-    color: var(--menu-button-text);
-    border: 3px solid var(--menu-button-border);
-    padding: 12px 25px;
+#main-menu button {
+    background-color: var(--medium-teal);
+    color: var(--terminal-text);
+    border: 2px solid var(--bright-teal);
+    padding: 15px 30px;
+    margin: 10px;
+    font-family: 'Press Start 2P', cursive;
     font-size: 1.2em;
-    text-transform: uppercase;
-    border-radius: 5px;
-    box-shadow: 3px 3px 0px var(--menu-button-shadow);
-    transition: all 0.1s ease-out;
     cursor: pointer;
-    letter-spacing: 1px;
-    display: block;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    text-transform: uppercase;
+    min-width: 250px; /* Ensure buttons have a consistent size */
+    text-align: center;
+}
+
+#main-menu button:hover,
+#main-menu button:focus {
+    background-color: var(--bright-teal);
+    border-color: var(--bright-green-teal);
+    color: var(--terminal-bg);
+    box-shadow: 0 5px 20px rgba(0,255,0,0.6);
+    outline: none; /* Remove default focus outline */
+}
+
+/* Game Container Wrapper */
+#game-container-wrapper {
+    display: none; /* Hidden by default */
+    position: fixed; /* Use fixed for full screen */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    z-index: 800; /* Below menu and loader */
+}
+
+/* Ensure canvas takes up available space in wrapper */
+#gameCanvas {
+    display: block; /* Remove extra space below canvas */
     width: 100%;
-    max-width: 300px;
-    margin: 15px auto;
+    height: 100%;
+    max-width: 800px; /* Match game dimensions */
+    max-height: 450px; /* Match game dimensions */
+    object-fit: contain; /* Scale down while maintaining aspect ratio */
+    margin: auto; /* Center canvas within its flex container */
 }
 
-.menu-button:hover {
-    background-color: var(--menu-button-hover-bg);
-    color: var(--menu-button-hover-text);
-    box-shadow: 4px 4px 0px var(--menu-button-hover-shadow);
-    transform: translate(-1px, -1px);
+/* Adjust mobile controls and score input to be within game-container-wrapper if they are positioned absolutely */
+#mobileControls, #scoreInputContainerDonkey, #mobileStartButton, #creditsIconBtn, .modal, .orientation-prompt {
+    position: absolute; /* Keep absolute positioning within game-container-wrapper */
+    z-index: 810; /* Ensure they are above the canvas */
 }
 
-.menu-button:active {
-    background-color: var(--menu-button-hover-shadow);
-    color: var(--menu-button-bg);
-    box-shadow: 1px 1px 0px var(--menu-button-shadow);
-    transform: translate(2px, 2px);
+/* Basic mobile controls styling */
+#mobileControls {
+    bottom: 20px;
+    left: 20px;
+    display: flex; /* Assuming it starts hidden on desktop */
+}
+
+#mobileControls .control-button {
+    background-color: rgba(14, 175, 155, 0.7); /* Bright Teal with transparency */
+    color: white;
+    border: 2px solid var(--bright-green-teal);
+    padding: 15px;
+    font-size: 1.2em;
+    border-radius: 50%; /* Make them round */
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#mobileControls .control-button:hover {
+    background-color: rgba(14, 175, 155, 1);
+}
+
+/* Styles for restart/start button */
+.mobile-start-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bright-green-teal);
+    color: var(--terminal-bg);
+    border: 2px solid var(--terminal-green);
+    border-radius: 10px;
+    padding: 20px 40px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.5em;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(0,255,0,0.7);
+    display: none; /* Controlled by JS */
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.mobile-start-button:hover {
+    background-color: var(--bright-teal);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.mobile-start-button .material-symbols-rounded {
+    font-size: 2em; /* Adjust icon size */
+    margin-right: 10px;
+}
+
+.mobile-start-button .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Fullscreen button */
+.fullscreen-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(40, 42, 54, 0.7);
+    color: #f8f8f2;
+    border: 1px solid #6272a4;
+    padding: 8px 12px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+}
+
+.fullscreen-button:hover {
+    background-color: rgba(40, 42, 54, 1);
+}
+
+/* Orientation prompt */
+.orientation-prompt {
+    display: none; /* Hidden by default, shown by JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.5em;
+    z-index: 2000;
+}
+
+.orientation-prompt button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: var(--bright-teal);
+    color: var(--terminal-bg);
+    border: none;
+    cursor: pointer;
+}
+
+/* Modal styling */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 200; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+    padding-top: 60px; /* Location of the box */
+}
+
+.modal-content {
+    background-color: var(--terminal-darker-bg);
+    margin: 5% auto; /* 5% from the top and centered */
+    padding: 20px;
+    border: 1px solid var(--terminal-border);
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 700px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,255,0,0.5);
+    color: var(--terminal-text);
+}
+
+.modal-content h2, .modal-content h3 {
+    color: var(--bright-green-teal);
+    text-align: center;
+    font-family: 'Press Start 2P', cursive;
+}
+
+.close-button {
+    color: var(--terminal-comment);
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--terminal-red);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.accordion-container {
+    margin-top: 20px;
+}
+
+.accordion-item {
+    margin-bottom: 10px;
+    border: 1px solid var(--terminal-border);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.accordion-header {
+    background-color: var(--dark-teal-blue);
+    color: var(--terminal-text);
+    cursor: pointer;
+    padding: 15px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.9em;
+}
+
+.accordion-header:hover {
+    background-color: var(--medium-teal);
+}
+
+.accordion-header.active {
+    background-color: var(--bright-teal);
+    color: var(--terminal-bg);
+}
+
+.accordion-icon {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    content: 'expand_more'; /* Down arrow */
+    transition: transform 0.3s ease;
+}
+
+.accordion-header.active .accordion-icon {
+    content: 'expand_less'; /* Up arrow */
+    transform: rotate(180deg);
+}
+
+.accordion-panel {
+    padding: 0 18px;
+    background-color: var(--terminal-darker-bg);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    color: var(--terminal-text);
+}
+
+.accordion-panel.open {
+    /* max-height will be set by JS */
+    border-top: 1px solid var(--terminal-border);
+}
+
+.accordion-panel p, .accordion-panel ul {
+    margin: 10px 0;
+}
+
+.accordion-panel ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.accordion-panel strong {
+    color: var(--terminal-red);
+}
+
+.scroll-to-tutorial-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: var(--terminal-blue);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.scroll-to-tutorial-link:hover {
+    color: var(--bright-teal);
+}
+
+/* Toast notifications are handled by js/toastNotifications.js and scss/_toast.scss */
+#toast-notifications {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10000;
 }

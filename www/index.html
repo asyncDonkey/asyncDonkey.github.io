@@ -1,35 +1,266 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>codeDash! | Initializing...</title>
-    <link rel="stylesheet" href="loader.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>codeDash! Mobile</title>
+    <link rel="stylesheet" href="styles.css"> <link rel="stylesheet" href="loader.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+
+    <style>
+        /* Basic styling for main containers - can be moved to styles.css or loader.css */
+        body {
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling */
+            background-color: var(--terminal-bg, #282a36); /* Dracula background as fallback */
+            color: var(--terminal-text, #f8f8f2); /* Dracula text color as fallback */
+        }
+        #app-root {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Full viewport height */
+            width: 100vw; /* Full viewport width */
+            position: relative;
+        }
+
+        /* Terminal Container (Loader) */
+        #terminal-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--terminal-bg);
+            transition: opacity 0.5s ease-out;
+            z-index: 100; /* Ensure it's on top */
+        }
+
+        #terminal-log {
+            width: 80%;
+            max-width: 600px;
+            height: 200px;
+            background-color: var(--terminal-darker-bg);
+            border: 2px solid var(--terminal-border);
+            padding: 20px;
+            overflow-y: auto;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 14px;
+            color: var(--terminal-text);
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0,255,0,0.3);
+            white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+            box-sizing: border-box;
+        }
+
+        #terminal-log div {
+            margin-bottom: 5px;
+        }
+
+        .progress-bars {
+            width: 80%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--terminal-darker-bg);
+            border: 1px solid var(--terminal-border);
+            height: 25px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 5px rgba(0,255,0,0.5);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--bright-green-teal); /* Bright green/teal for progress */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 12px;
+            color: var(--terminal-bg); /* Dark text on bright bar */
+            transition: width 0.2s ease-out;
+            box-shadow: 0 0 10px rgba(0,255,0,0.7);
+        }
+
+        /* Main Menu */
+        #main-menu {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--terminal-bg);
+            transition: opacity 0.5s ease-in;
+            opacity: 0; /* Starts transparent for fade-in */
+            z-index: 90;
+        }
+
+        #main-menu h1 {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--bright-green-teal);
+            font-size: 3em;
+            margin-bottom: 50px;
+            text-shadow: 0 0 10px var(--bright-green-teal), 0 0 20px rgba(0,255,0,0.5);
+        }
+
+        #main-menu button {
+            background-color: var(--medium-teal);
+            color: var(--terminal-text);
+            border: 2px solid var(--bright-teal);
+            padding: 15px 30px;
+            margin: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            text-transform: uppercase;
+        }
+
+        #main-menu button:hover {
+            background-color: var(--bright-teal);
+            border-color: var(--bright-green-teal);
+            color: var(--terminal-bg);
+            box-shadow: 0 5px 20px rgba(0,255,0,0.6);
+        }
+
+        /* Game Container Wrapper */
+        #game-container-wrapper {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black; /* Or any background you want for the game area */
+            z-index: 80; /* Below menu, above body */
+        }
+    </style>
 </head>
 <body>
-    <div id="terminal">
-        <div id="log-output">
-            </div>
-        <div id="progress-container" style="display: none;">
-            <div class="progress-bar-wrapper">
-                <div class="progress-label">Reticulating Splines...</div>
-                <div class="progress-bar">
-                    <div class="progress-bar-fill"></div>
+    <div id="app-root">
+        <div id="terminal-container">
+            <pre id="terminal-log"></pre>
+            <div class="progress-bars">
+                <div class="progress-bar-container">
+                    <div id="progress-bar-1" class="progress-bar">0%</div>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="progress-bar-2" class="progress-bar">0%</div>
                 </div>
             </div>
+        </div>
+
+        <div id="main-menu">
+            <h1>codeDash!</h1>
+            <button id="start-game-btn">START GAME</button>
+            <button id="leaderboard-btn">LEADERBOARD</button>
+            <button id="glitchpedia-btn">GLITCHPEDIA</button>
+            <button id="account-btn">ACCOUNT</button>
+        </div>
+
+        <div id="game-container-wrapper">
+             <canvas id="gameCanvas"></canvas>
+             <div id="mobileControls">
+                 <button id="jumpButton" class="control-button">Jump</button>
+                 <button id="shootButton" class="control-button">Shoot</button>
+             </div>
+             <button id="fullscreenButton" class="fullscreen-button">FULLSCREEN</button>
+             <div id="scoreInputContainerDonkey" class="score-input-container">
+                 <p>GAME OVER! Final Score: <span id="finalScoreDisplayDonkey">0</span></p>
+                 <label for="playerInitialsDonkey" id="playerInitialsLabel">Enter Initials (3-5 chars):</label>
+                 <span id="loggedInUserNameDisplay" style="display: none;"></span>
+                 <input type="text" id="playerInitialsDonkey" maxlength="5" placeholder="ABC">
+                 <button id="saveScoreBtnDonkey">Save Score</button>
+                 <button id="shareScoreBtnDonkey">Share Score</button>
+                 <button id="restartGameBtnDonkey">Restart</button>
+             </div>
+             <div id="mobileStartButton" class="mobile-start-button">
+                 <span class="material-symbols-rounded">play_arrow</span>
+                 <span class="visually-hidden">Start Game</span>
+             </div>
+             <button id="creditsIconBtn" class="credits-icon-btn">?</button>
+             <div id="creditsModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button" id="closeCreditsModalBtn">&times;</span>
+                    <h2>Crediti</h2>
+                    <div class="accordion-container" id="gameInfoAccordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <h3>Come Giocare (Tutorial)</h3>
+                                <span class="accordion-icon"></span>
+                            </button>
+                            <div class="accordion-panel">
+                                <p><strong>Obiettivo:</strong> Corri, salta e spara per sopravvivere il più a lungo possibile, distruggendo nemici e ostacoli per accumulare punti.</p>
+                                <p><strong>Controlli:</strong></p>
+                                <ul>
+                                    <li><strong>Salto:</strong> Tasto SPAZIO o Freccia SU (tocco singolo sul lato sinistro dello schermo per mobile).</li>
+                                    <li><strong>Sparo:</strong> Tasto CTRL o X (tocco singolo sul lato destro dello schermo per mobile).</li>
+                                </ul>
+                                <p><strong>Nemici:</strong> Evita o distruggi i blocchi di codice, i bug e i glitch che cercano di fermarti!</p>
+                                <p><strong>Power-Up:</strong> Raccogli i power-up per ottenere vantaggi temporanei, come il "Multi-Thread" (triplo sparo), lo "Scudo Attivo" (immunità ai danni), o il "Debug Payload" (proiettili potenziati).</p>
+                                <p><strong>Glitchzilla:</strong> Attenzione al potente boss "Glitchzilla" che apparirà dopo aver raggiunto un certo punteggio! Sconfiggilo per ottenere un bonus massiccio.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <h3>About</h3>
+                                <span class="accordion-icon"></span>
+                            </button>
+                            <div class="accordion-panel">
+                                <p><strong>codeDash!</strong> è un classico endless runner reinventato con un tocco cyberpunk e temi legati alla programmazione. Progettato e sviluppato da <strong>Umberto "Async_Donkey" M.</strong>, questo gioco è un omaggio ai platform arcade a scorrimento laterale.</p>
+                                <p><strong>Tecnologie Utilizzate:</strong></p>
+                                <ul>
+                                    <li>HTML5 Canvas: Per la grafica del gioco.</li>
+                                    <li>JavaScript: Per la logica di gioco.</li>
+                                    <li>Firebase: Per l'autenticazione, il database dei punteggi e la gestione degli utenti.</li>
+                                    <li>Capacitor: Per il packaging come app nativa Android/iOS.</li>
+                                </ul>
+                                <p>Un ringraziamento speciale ai contributor e alla community di Async_Donkey!</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <h3>Crediti Art & Sound</h3>
+                                <span class="accordion-icon"></span>
+                            </button>
+                            <div class="accordion-panel">
+                                <ul>
+                                    <li>Sprite Giocatore: Creato da <strong>Umberto M.</strong></li>
+                                    <li>Sprite Nemici & Ostacoli: Resi unici da <strong>Umberto M.</strong> (basati su asset open source).</li>
+                                    <li>Effetti Sonori & Musica: Ottenuti da librerie open source (es. Kenney.nl, Freesound.org) e adattati per il gioco.</li>
+                                    <li>Font Pixel: "Press Start 2P" by CodeMan38.</li>
+                                    <li>Font Terminale: "Source Code Pro" by Adobe.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#gameInfoAccordion" id="scrollToTutorialLink" class="scroll-to-tutorial-link">Torna al Tutorial</a>
+                </div>
             </div>
-        <div id="menu-container" style="display: none;">
-             <h2>codeDash!</h2>
-             <button class="menu-button" id="start-game-btn">Start Game</button>
-             <button class="menu-button" id="leaderboard-btn">Leaderboard</button>
-             <button class="menu-button" id="glitchpedia-btn">Glitchpedia</button>
-             <button class="menu-button" id="account-btn">Account</button>
+            <div id="orientationPrompt" class="orientation-prompt">
+                <p>Per una migliore esperienza di gioco, ruota il tuo dispositivo in orizzontale e metti a schermo intero!</p>
+                <button id="dismissOrientationPrompt">Capito!</button>
+            </div>
         </div>
     </div>
+    <div id="toast-notifications" aria-live="polite" aria-atomic="true"></div>
 
-    <script src="js/loader.js" type="module"></script>
+    <script type="module" src="js/main.js"></script> <script type="module" src="js/powerUps.js"></script> <script type="module" src="js/animation.js"></script> <script type="module" src="js/audioManager.js"></script> <script type="module" src="js/toastNotifications.js"></script> <script type="module" src="js/donkeyRunner.js"></script> <script type="module" src="js/loader.js"></script> <script type="module" src="js/blockies.mjs"></script>
 </body>
 </html>
