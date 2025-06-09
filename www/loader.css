@@ -1,0 +1,130 @@
+/* Stili per la schermata di caricamento e il menu principale */
+:root {
+    --terminal-bg: #000000;
+    --terminal-text: #00FF41;
+    --terminal-glow: rgba(0, 255, 65, 0.5);
+    --menu-button-bg: #1a1423;
+    --menu-button-border: #446176;
+    --menu-button-text: #a1ef8c;
+    --menu-button-shadow: #1a1423;
+    --menu-button-hover-bg: #3b2d4a;
+    --menu-button-hover-text: #c4f0c2;
+    --menu-button-hover-shadow: #3fac95;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--terminal-bg);
+}
+
+#terminal {
+    font-family: 'Source Code Pro', monospace;
+    color: var(--terminal-text);
+    text-shadow: 0 0 5px var(--terminal-glow);
+    padding: 15px;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+#log-output p {
+    margin: 0 0 0.5em 0;
+    white-space: pre-wrap; /* Mantiene gli spazi e va a capo */
+    word-break: break-all;
+}
+
+.cursor {
+    display: inline-block;
+    background-color: var(--terminal-text);
+    width: 10px;
+    height: 1.2em;
+    animation: blink 1s steps(1) infinite;
+    margin-left: 2px;
+    box-shadow: 0 0 5px var(--terminal-glow);
+}
+
+@keyframes blink {
+    50% {
+        background-color: transparent;
+        box-shadow: none;
+    }
+}
+
+/* Stili per le barre di caricamento */
+#progress-container {
+    margin-top: 20px;
+}
+
+.progress-bar-wrapper {
+    margin-bottom: 15px;
+}
+
+.progress-label {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    border: 1px solid var(--terminal-text);
+    padding: 2px;
+}
+
+.progress-bar-fill {
+    background-color: var(--terminal-text);
+    height: 100%;
+    width: 0%; /* Animato da JS */
+    transition: width 0.2s linear;
+}
+
+/* Stili per il menu */
+#menu-container {
+    text-align: center;
+    margin: auto; /* Centra verticalmente e orizzontalmente */
+}
+
+#menu-container h2 {
+    font-size: 3em;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+}
+
+.menu-button {
+    font-family: 'Source Code Pro', monospace;
+    background-color: var(--menu-button-bg);
+    color: var(--menu-button-text);
+    border: 3px solid var(--menu-button-border);
+    padding: 12px 25px;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    border-radius: 5px;
+    box-shadow: 3px 3px 0px var(--menu-button-shadow);
+    transition: all 0.1s ease-out;
+    cursor: pointer;
+    letter-spacing: 1px;
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 15px auto;
+}
+
+.menu-button:hover {
+    background-color: var(--menu-button-hover-bg);
+    color: var(--menu-button-hover-text);
+    box-shadow: 4px 4px 0px var(--menu-button-hover-shadow);
+    transform: translate(-1px, -1px);
+}
+
+.menu-button:active {
+    background-color: var(--menu-button-hover-shadow);
+    color: var(--menu-button-bg);
+    box-shadow: 1px 1px 0px var(--menu-button-shadow);
+    transform: translate(2px, 2px);
+}

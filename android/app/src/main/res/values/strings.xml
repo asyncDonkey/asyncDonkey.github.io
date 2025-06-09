@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">codeDash!</string>
+    <string name="title_activity_main">codeDash!</string>
+    <string name="package_name">io.asynced.codedash</string>
+    <string name="custom_url_scheme">io.asynced.codedash</string>
+</resources>
