@@ -63,6 +63,8 @@ let accountIconBtn = null; // Nuovo: Riferimento all'icona account/login
 let isTouchDevice = false; // Will be set in setupGameEngine
 let isIPhone = false;     // Will be set in setupGameEngine
 
+let activeMiniboss = null;
+
 // Constants remain 'const'
 const groundHeight = 70;
 
@@ -207,6 +209,53 @@ const GLITCHZILLA_PROJECTILE_NUM_FRAMES = 4;
 const GLITCHZILLA_PROJECTILE_TARGET_WIDTH = GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
 const GLITCHZILLA_PROJECTILE_TARGET_HEIGHT = GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 
+// Aggiungi queste costanti subito dopo le costanti GLITCHZILLA_...
+
+// --- TROJAN_BYTE (Boss 2) Constants ---
+const TROJAN_BYTE_BASE_SRC = 'images/trojanByte_base.png';
+const TROJAN_BYTE_DMG1_SRC = 'images/trojanByte_dmg1.png';
+const TROJAN_BYTE_DMG2_SRC = 'images/trojanByte_dmg2.png';
+const TROJAN_BYTE_DMG3_SRC = 'images/trojanByte_dmg3.png';
+const TROJAN_BYTE_ACTUAL_FRAME_WIDTH = 80; // Larghezza sprite suggerita
+const TROJAN_BYTE_ACTUAL_FRAME_HEIGHT = 80; // Altezza sprite suggerita
+const TROJAN_BYTE_NUM_FRAMES = 4; // Assumendo 4 frame per animazione
+const TROJAN_BYTE_TARGET_WIDTH = TROJAN_BYTE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR * 1.1; // Leggermente più grande di glitchzilla
+const TROJAN_BYTE_TARGET_HEIGHT = TROJAN_BYTE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.1;
+const TROJAN_BYTE_HEALTH = 80; // HP suggeriti
+const TROJAN_BYTE_SCORE_VALUE = 1000; // Valore punteggio
+const TROJAN_BYTE_SPAWN_SCORE_THRESHOLD = 5000; // Soglia di apparizione
+const TROJAN_BYTE_PROJECTILE_SPRITE_SRC = 'images/trojanByteProjectile.png';
+const TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_WIDTH = 16;
+const TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_HEIGHT = 16;
+const TROJAN_BYTE_PROJECTILE_NUM_FRAMES = 4; // Assumendo 4 frame per animazione
+const TROJAN_BYTE_PROJECTILE_TARGET_WIDTH = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
+const TROJAN_BYTE_PROJECTILE_TARGET_HEIGHT = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
+const TROJAN_BYTE_PROJECTILE_SPEED = 300; // Velocità proiettili
+
+// --- MISSING_NUMBER (Boss 3) Constants ---
+const MISSING_NUMBER_BASE_SRC = 'images/missingNumber_base.png';
+const MISSING_NUMBER_DMG1_SRC = 'images/missingNumber_dmg1.png';
+const MISSING_NUMBER_DMG2_SRC = 'images/missingNumber_dmg2.png';
+const MISSING_NUMBER_DMG3_SRC = 'images/missingNumber_dmg3.png';
+const MISSING_NUMBER_ACTUAL_FRAME_WIDTH = 70; // Larghezza sprite suggerita
+const MISSING_NUMBER_ACTUAL_FRAME_HEIGHT = 70; // Altezza sprite suggerita
+const MISSING_NUMBER_NUM_FRAMES = 4; // Assumendo 4 frame per animazione
+const MISSING_NUMBER_TARGET_WIDTH = MISSING_NUMBER_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR * 1.1;
+const MISSING_NUMBER_TARGET_HEIGHT = MISSING_NUMBER_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.1;
+const MISSING_NUMBER_HEALTH = 120; // HP suggeriti
+const MISSING_NUMBER_SCORE_VALUE = 1500; // Valore punteggio
+const MISSING_NUMBER_SPAWN_SCORE_THRESHOLD = 10000; // Soglia di apparizione
+const MISSING_NUMBER_PROJECTILE_SPRITE_SRC = 'images/missingNumberProjectile.png';
+const MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH = 12;
+const MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT = 12;
+const MISSING_NUMBER_PROJECTILE_NUM_FRAMES = 4; // Assumendo 4 frame per animazione
+const MISSING_NUMBER_PROJECTILE_TARGET_WIDTH = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
+const MISSING_NUMBER_PROJECTILE_TARGET_HEIGHT = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
+const MISSING_NUMBER_PROJECTILE_SPEED = 400; // Velocità proiettili più piccoli
+
+// Nuove variabili di stato per tracciare la sconfitta dei boss in questa partita
+
+
 const ENEMY_PROJECTILE_SPEED = 250;
 
 const POWERUP_THEMATIC_NAMES = {
@@ -311,8 +360,12 @@ let dangerousFlyingEnemies = [];
 let dangerousFlyingEnemySpawnTimer = 0;
 let nextDangerousFlyingEnemySpawnTime = 0;
 
-let activeMiniboss = null;
-let hasGlitchzillaSpawnedThisGame = false;
+let hasGlitchzillaSpawnedThisGame = false; // Flag per tracciare se Glitchzilla è SPAWNATO in questa partita (trigger della sua comparsa)
+let isGlitchzillaDefeatedThisGame = false; // Nuovo: Flag per tracciare se Glitchzilla è STATO SCONFITTO in questa partita
+let hasTrojanByteSpawnedThisGame = false; // Flag per tracciare se Trojan_Byte è SPAWNATO
+let isTrojanByteDefeatedThisGame = false; // Nuovo: Flag per tracciare se Trojan_Byte è STATO SCONFITTO
+let hasMissingNumberSpawnedThisGame = false; // Flag per tracciare se Missing_Number è SPAWNATO
+let isMissingNumberDefeatedThisGame = false; // Nuovo: Flag per tracciare se Missing_Number è STATO SCONFITTO
 
 let powerUpItems = [];
 let powerUpSpawnTimer = 0;
@@ -708,7 +761,18 @@ function prepareAssetsToLoad() {
         { name: 'glitchzillaDmg2', src: GLITCHZILLA_DMG2_SRC },
         { name: 'glitchzillaDmg3', src: GLITCHZILLA_DMG3_SRC },
         { name: 'glitchzillaProjectile', src: GLITCHZILLA_PROJECTILE_SPRITE_SRC },
+        { name: 'trojanByteBase', src: TROJAN_BYTE_BASE_SRC },
+        { name: 'trojanByteDmg1', src: TROJAN_BYTE_DMG1_SRC },
+        { name: 'trojanByteDmg2', src: TROJAN_BYTE_DMG2_SRC },
+        { name: 'trojanByteDmg3', src: TROJAN_BYTE_DMG3_SRC },
+        { name: 'trojanByteProjectile', src: TROJAN_BYTE_PROJECTILE_SPRITE_SRC },
+        { name: 'missingNumberBase', src: MISSING_NUMBER_BASE_SRC },
+        { name: 'missingNumberDmg1', src: MISSING_NUMBER_DMG1_SRC },
+        { name: 'missingNumberDmg2', src: MISSING_NUMBER_DMG2_SRC },
+        { name: 'missingNumberDmg3', src: MISSING_NUMBER_DMG3_SRC },
+        { name: 'missingNumberProjectile', src: MISSING_NUMBER_PROJECTILE_SPRITE_SRC },
     );
+    
 
     // Add power-up sprites dynamically
     for (const type in POWERUP_CONFIGS) {
@@ -1806,10 +1870,11 @@ class Glitchzilla extends BaseEnemy {
 
         if (this.health <= 0) {
             console.log('Glitchzilla SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            AudioManager.playSound('glitchzillaDefeatedSuccessfully');
+            AudioManager.playSound('glitchzillaDefeat');
 
             score += this.scoreValue;
             activeMiniboss = null;
+            isGlitchzillaDefeatedThisGame = true; // <--- MODIFICA QUI
 
             postBossCooldownActive = true;
             postBossCooldownTimer = 2.0;
@@ -1884,6 +1949,324 @@ class Glitchzilla extends BaseEnemy {
         }
         if (this.x < canvas.width / 2) {
             this.x = canvas.width / 2;
+        }
+    }
+}
+
+// Aggiungi questa classe dopo la classe Glitchzilla
+class TrojanByte extends BaseEnemy {
+    constructor(x, y) {
+        super(
+            x,
+            y,
+            TROJAN_BYTE_TARGET_WIDTH,
+            TROJAN_BYTE_TARGET_HEIGHT,
+            'trojanByteBase',
+            TROJAN_BYTE_ACTUAL_FRAME_WIDTH,
+            TROJAN_BYTE_ACTUAL_FRAME_HEIGHT,
+            TROJAN_BYTE_NUM_FRAMES,
+            0.3, // Velocità leggermente più bassa per un boss più "statico" e minaccioso
+            TROJAN_BYTE_HEALTH,
+            '#FF00FF', // Colore fallback, come Glitchzilla per distinguere
+            TROJAN_BYTE_SCORE_VALUE
+        );
+        this.loadAnimation(
+            'trojanByteDmg1',
+            TROJAN_BYTE_ACTUAL_FRAME_WIDTH,
+            TROJAN_BYTE_ACTUAL_FRAME_HEIGHT,
+            TROJAN_BYTE_NUM_FRAMES,
+            'dmg1'
+        );
+        this.loadAnimation(
+            'trojanByteDmg2',
+            TROJAN_BYTE_ACTUAL_FRAME_WIDTH,
+            TROJAN_BYTE_ACTUAL_FRAME_HEIGHT,
+            TROJAN_BYTE_NUM_FRAMES,
+            'dmg2'
+        );
+        this.loadAnimation(
+            'trojanByteDmg3',
+            TROJAN_BYTE_ACTUAL_FRAME_WIDTH,
+            TROJAN_BYTE_ACTUAL_FRAME_HEIGHT,
+            TROJAN_BYTE_NUM_FRAMES,
+            'dmg3'
+        );
+        this.updateCurrentAnimation();
+        this.attackSequence = [
+            'warn_low_1', 'low_1', 'pause_short',
+            'warn_low_2', 'low_2', 'pause_short',
+            'warn_low_3', 'low_3', 'pause_medium', // Tre colpi in basso
+            'warn_middle', 'middle', 'pause_long_tb' // Un colpo in mezzo
+        ];
+        this.attackSequenceIndex = 0;
+        this.currentAttackPhaseDuration = 0;
+        this.shotFiredInPhase = false;
+        this.pauseShortDuration = 0.5;
+        this.pauseMediumDuration = 1.0;
+        this.pauseLongTbDuration = 2.5; // Pausa più lunga dopo il pattern principale
+        this.projectileSpriteName = 'trojanByteProjectile';
+        this.projectileFrameWidth = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_WIDTH;
+        this.projectileFrameHeight = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_HEIGHT;
+        this.projectileNumFrames = TROJAN_BYTE_PROJECTILE_NUM_FRAMES;
+        this.projectileTargetWidth = TROJAN_BYTE_PROJECTILE_TARGET_WIDTH;
+        this.projectileTargetHeight = TROJAN_BYTE_PROJECTILE_TARGET_HEIGHT;
+        console.log('TROJAN_BYTE SPAWNED! HP: ' + this.health);
+        // Aggiungi un suono di spawn per Trojan_Byte qui, una volta che hai il file audio.
+        // AudioManager.playSound('trojanByteSpawn'); 
+    }
+
+    updateCurrentAnimation() {
+        let animKey;
+        // La logica per cambiare sprite in base ai danni
+        if (this.health > TROJAN_BYTE_HEALTH * 0.75) animKey = 'base';
+        else if (this.health > TROJAN_BYTE_HEALTH * 0.5) animKey = 'dmg1';
+        else if (this.health > TROJAN_BYTE_HEALTH * 0.25) animKey = 'dmg2';
+        else animKey = 'dmg3';
+        this.animation = this.animations[animKey] || this.animations['base'];
+        if (this.animation && this.animation.reset) this.animation.reset();
+    }
+
+    takeDamage(dmg = 1) {
+        super.takeDamage(dmg);
+        console.log(`Trojan_Byte took ${dmg} damage, HP: ${this.health}`);
+        this.updateCurrentAnimation();
+        AudioManager.playSound('enemyHit'); // Potremmo usare un suono specifico per i boss
+
+        if (this.health <= 0) {
+            console.log('TROJAN_BYTE SCONFITTO! Assegno punteggio: ' + this.scoreValue);
+            // AudioManager.playSound('trojanByteDefeat'); 
+
+            score += this.scoreValue;
+            activeMiniboss = null;
+            isTrojanByteDefeatedThisGame = true; // <--- MODIFICA QUI
+
+            postBossCooldownActive = true;
+            postBossCooldownTimer = 2.0;
+            bossFightImminent = false;
+        }
+    }
+
+    update(dt) {
+        super.update(dt);
+        this.currentAttackPhaseDuration += dt;
+        const currentPhase = this.attackSequence[this.attackSequenceIndex];
+        let phaseComplete = false;
+
+        let projectileY;
+        switch (currentPhase) {
+            case 'warn_low_1':
+            case 'warn_low_2':
+            case 'warn_low_3':
+            case 'warn_middle':
+                this.isWarning = true;
+                if (this.currentAttackPhaseDuration >= WARNING_DURATION) {
+                    phaseComplete = true;
+                    this.isWarning = false;
+                }
+                break;
+            case 'low_1': // Primo colpo basso
+                if (!this.shotFiredInPhase) {
+                    projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
+                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                    AudioManager.playSound('enemyShootLight'); // O un suono specifico per Trojan
+                    this.shotFiredInPhase = true;
+                }
+                phaseComplete = true;
+                break;
+            case 'low_2': // Secondo colpo basso
+                if (!this.shotFiredInPhase) {
+                    projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
+                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                    AudioManager.playSound('enemyShootLight');
+                    this.shotFiredInPhase = true;
+                }
+                phaseComplete = true;
+                break;
+            case 'low_3': // Terzo colpo basso
+                if (!this.shotFiredInPhase) {
+                    projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
+                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                    AudioManager.playSound('enemyShootLight');
+                    this.shotFiredInPhase = true;
+                }
+                phaseComplete = true;
+                break;
+            case 'middle': // Colpo al centro
+                if (!this.shotFiredInPhase) {
+                    projectileY = this.y + this.height * 0.5 - this.projectileTargetHeight / 2;
+                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                    AudioManager.playSound('enemyShootLight');
+                    this.shotFiredInPhase = true;
+                }
+                phaseComplete = true;
+                break;
+            case 'pause_short':
+                if (this.currentAttackPhaseDuration >= this.pauseShortDuration) {
+                    phaseComplete = true;
+                }
+                break;
+            case 'pause_medium':
+                if (this.currentAttackPhaseDuration >= this.pauseMediumDuration) {
+                    phaseComplete = true;
+                }
+                break;
+            case 'pause_long_tb': // Pausa specifica per Trojan_Byte
+                if (this.currentAttackPhaseDuration >= this.pauseLongTbDuration) {
+                    phaseComplete = true;
+                }
+                break;
+        }
+
+        if (phaseComplete) {
+            this.attackSequenceIndex = (this.attackSequenceIndex + 1) % this.attackSequence.length;
+            // Se il prossimo attacco è quello "in basso" o "in alto", aggiungi altri due step per completare i 3 colpi.
+            // Il pattern è "3 in basso, pausa, 1 in mezzo, pausa, 1 in basso, 1 in alto".
+            // Rivediamo il pattern per matchare la tua descrizione: "3 colpi in basso, poi un colpo in mezzo, poi 1 colpo in basso, 1 in alto e poi ricomincia".
+            // Per semplicità e flessibilità, manterrei il pattern come una sequenza di azioni discrete.
+            // Il tuo pattern è: tre in basso, uno al centro, uno in basso, uno in alto.
+            // Ho implementato: tre in basso (separati da pause brevi), uno al centro (seguito da pausa lunga).
+            // Aggiungiamo i due colpi finali e poi facciamo ricominciare il ciclo.
+            if (this.attackSequence[this.attackSequenceIndex] === 'warn_low_1') { // Ricomincia il ciclo
+                this.attackSequence = [
+                    'warn_low_1', 'low_1', 'pause_short',
+                    'warn_low_2', 'low_2', 'pause_short',
+                    'warn_low_3', 'low_3', 'pause_medium',
+                    'warn_middle', 'middle', 'pause_short',
+                    'warn_low_single', 'low_single', 'pause_short', // Nuovo: singolo colpo in basso
+                    'warn_high_single', 'high_single', 'pause_long_tb' // Nuovo: singolo colpo in alto
+                ];
+                this.attackSequenceIndex = 0; // Reset dell'indice per ripartire
+            }
+
+
+            this.currentAttackPhaseDuration = 0;
+            this.shotFiredInPhase = false;
+            if (!this.attackSequence[this.attackSequenceIndex].startsWith('warn_')) {
+                this.isWarning = false;
+            }
+        }
+        if (this.x < canvas.width / 2) {
+            this.x = canvas.width / 2;
+        }
+    }
+}
+
+// Aggiungi questa classe dopo la classe TrojanByte
+class MissingNumber extends BaseEnemy {
+    constructor(x, y) {
+        super(
+            x,
+            y,
+            MISSING_NUMBER_TARGET_WIDTH,
+            MISSING_NUMBER_TARGET_HEIGHT,
+            'missingNumberBase',
+            MISSING_NUMBER_ACTUAL_FRAME_WIDTH,
+            MISSING_NUMBER_ACTUAL_FRAME_HEIGHT,
+            MISSING_NUMBER_NUM_FRAMES,
+            0.4, // Velocità simile a Glitchzilla
+            MISSING_NUMBER_HEALTH,
+            '#8A2BE2', // Colore fallback viola
+            MISSING_NUMBER_SCORE_VALUE
+        );
+        this.loadAnimation(
+            'missingNumberDmg1',
+            MISSING_NUMBER_ACTUAL_FRAME_WIDTH,
+            MISSING_NUMBER_ACTUAL_FRAME_HEIGHT,
+            MISSING_NUMBER_NUM_FRAMES,
+            'dmg1'
+        );
+        this.loadAnimation(
+            'missingNumberDmg2',
+            MISSING_NUMBER_ACTUAL_FRAME_WIDTH,
+            MISSING_NUMBER_ACTUAL_FRAME_HEIGHT,
+            MISSING_NUMBER_NUM_FRAMES,
+            'dmg2'
+        );
+        this.loadAnimation(
+            'missingNumberDmg3',
+            MISSING_NUMBER_ACTUAL_FRAME_WIDTH,
+            MISSING_NUMBER_ACTUAL_FRAME_HEIGHT,
+            MISSING_NUMBER_NUM_FRAMES,
+            'dmg3'
+        );
+        this.updateCurrentAnimation();
+
+        this.attackTimer = 0;
+        this.attackInterval = 1.5; // Intervallo tra attacchi casuali
+        this.projectileSpriteName = 'missingNumberProjectile';
+        this.projectileFrameWidth = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH;
+        this.projectileFrameHeight = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT;
+        this.projectileNumFrames = MISSING_NUMBER_PROJECTILE_NUM_FRAMES;
+        this.projectileTargetWidth = MISSING_NUMBER_PROJECTILE_TARGET_WIDTH;
+        this.projectileTargetHeight = MISSING_NUMBER_PROJECTILE_TARGET_HEIGHT;
+        this.projectileSpeed = MISSING_NUMBER_PROJECTILE_SPEED;
+        
+        console.log('MISSING_NUMBER SPAWNED! HP: ' + this.health);
+        // Aggiungi un suono di spawn per MissingNumber qui, una volta che hai il file audio.
+        // AudioManager.playSound('missingNumberSpawn');
+    }
+
+    updateCurrentAnimation() {
+        let animKey;
+        // La logica per cambiare sprite in base ai danni
+        if (this.health > MISSING_NUMBER_HEALTH * 0.75) animKey = 'base';
+        else if (this.health > MISSING_NUMBER_HEALTH * 0.5) animKey = 'dmg1';
+        else if (this.health > MISSING_NUMBER_HEALTH * 0.25) animKey = 'dmg2';
+        else animKey = 'dmg3';
+        this.animation = this.animations[animKey] || this.animations['base'];
+        if (this.animation && this.animation.reset) this.animation.reset();
+    }
+
+    takeDamage(dmg = 1) {
+        super.takeDamage(dmg);
+        console.log(`Missing_Number took ${dmg} damage, HP: ${this.health}`);
+        this.updateCurrentAnimation();
+        AudioManager.playSound('enemyHit'); // Potremmo usare un suono specifico per i boss
+
+        if (this.health <= 0) {
+            console.log('MISSING_NUMBER SCONFITTO! Assegno punteggio: ' + this.scoreValue);
+            // AudioManager.playSound('missingNumberDefeat'); 
+
+            score += this.scoreData;
+            activeMiniboss = null;
+            isMissingNumberDefeatedThisGame = true; // <--- MODIFICA QUI
+
+            postBossCooldownActive = true;
+            postBossCooldownTimer = 2.0;
+            bossFightImminent = false;
+        }
+    }
+
+    update(dt) {
+        super.update(dt);
+        this.attackTimer += dt;
+
+        if (this.attackTimer >= this.attackInterval) {
+            this.isWarning = true; // Avviso prima dell'attacco casuale
+            this.warningTimer = 0; // Reset warning timer for next phase
+            this.attackTimer = 0; // Reset attack timer
+
+            // Pattern di attacco casuale:
+            // 1. Spara 3-5 proiettili a posizioni verticali casuali
+            const numProjectiles = 3 + Math.floor(Math.random() * 3); // 3, 4 o 5 proiettili
+            for (let i = 0; i < numProjectiles; i++) {
+                // Genera una posizione Y casuale all'interno dell'altezza del canvas (escludendo il terreno)
+                const randomY = Math.random() * (canvas.height - groundHeight - this.projectileTargetHeight);
+                enemyProjectiles.push(
+                    new EnemyProjectile(
+                        this.x - this.projectileTargetWidth,
+                        randomY,
+                        this.projectileSpriteName,
+                        this.projectileFrameWidth,
+                        this.projectileFrameHeight,
+                        this.projectileNumFrames,
+                        this.projectileTargetWidth,
+                        this.projectileTargetHeight,
+                        this.projectileSpeed
+                    )
+                );
+            }
+            AudioManager.playSound('enemyShootLight'); // O un suono specifico per MissingNumber
         }
     }
 }
@@ -2211,11 +2594,10 @@ async function handleSaveDonkeyScore() {
         initials: initialsForSave,
         userName: userNameForDb,
         timestamp: serverTimestamp(),
-        glitchzillaDefeated:
-            hasGlitchzillaSpawnedThisGame &&
-            activeMiniboss === null &&
-            Math.floor(finalScore) >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD + GLITCHZILLA_SCORE_VALUE,
-            stats: gameStats
+        glitchzillaDefeated: isGlitchzillaDefeatedThisGame, // Ora usa il nuovo flag
+        trojanByteDefeated: isTrojanByteDefeatedThisGame, // Nuovo
+        missingNumberDefeated: isMissingNumberDefeatedThisGame, // Nuovo
+        stats: gameStats
     };
 
     if (currentUser) {
@@ -2572,7 +2954,12 @@ function resetGame() {
     activeMiniboss = null;
 
     bossFightImminent = false;
-    hasGlitchzillaSpawnedThisGame = false;
+    hasGlitchzillaSpawnedThisGame = false; // Reset del flag di trigger
+    isGlitchzillaDefeatedThisGame = false; // Reset del flag di sconfitta
+    hasTrojanByteSpawnedThisGame = false; // Reset del flag di trigger
+    isTrojanByteDefeatedThisGame = false; // Reset del flag di sconfitta
+    hasMissingNumberSpawnedThisGame = false; // Reset del flag di trigger
+    isMissingNumberDefeatedThisGame = false; // Reset del flag di sconfitta
     postBossCooldownActive = false;
     bossWarningTimer = 2.0;
     postBossCooldownTimer = 2.0;
@@ -2749,6 +3136,7 @@ function drawMenuScreen() {
 function updatePlaying(dt) {
     if (!asyncDonkey) return;
 
+    // Gestione del cooldown post-boss
     if (postBossCooldownActive) {
         postBossCooldownTimer -= dt;
         if (postBossCooldownTimer <= 0) {
@@ -2757,25 +3145,50 @@ function updatePlaying(dt) {
         }
     }
 
-    if (
-        score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD &&
-        !activeMiniboss &&
-        !hasGlitchzillaSpawnedThisGame &&
-        !bossFightImminent &&
-        !postBossCooldownActive
-    ) {
-        console.log('Soglia punteggio per Glitchzilla raggiunta. Avvio sequenza di spawn (2s warning).');
-        bossFightImminent = true;
-        bossWarningTimer = 2.0;
+    // --- Logica di Inizio Battaglia Boss (Trigger della fase di warning) ---
+    // Avvia la fase di warning di un boss solo se nessun boss è attivo, nessuna battaglia è imminente,
+    // e non c'è un cooldown post-boss attivo.
+    if (!activeMiniboss && !bossFightImminent && !postBossCooldownActive) {
+        if (!isGlitchzillaDefeatedThisGame && score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD) {
+            console.log('Soglia punteggio per Glitchzilla raggiunta. Avvio sequenza di spawn (2s warning).');
+            bossFightImminent = true;
+            bossWarningTimer = 2.0;
+            hasGlitchzillaSpawnedThisGame = true; // Marchia che la fase di questo boss è stata triggerata
+        } else if (isGlitchzillaDefeatedThisGame && !isTrojanByteDefeatedThisGame && score >= TROJAN_BYTE_SPAWN_SCORE_THRESHOLD) {
+            console.log('Soglia punteggio per Trojan_Byte raggiunta. Avvio sequenza di spawn (2s warning).');
+            bossFightImminent = true;
+            bossWarningTimer = 2.0;
+            hasTrojanByteSpawnedThisGame = true; // Marchia che la fase di questo boss è stata triggerata
+        } else if (isGlitchzillaDefeatedThisGame && isTrojanByteDefeatedThisGame && !isMissingNumberDefeatedThisGame && score >= MISSING_NUMBER_SPAWN_SCORE_THRESHOLD) {
+            console.log('Soglia punteggio per Missing_Number raggiunta. Avvio sequenza di spawn (2s warning).');
+            bossFightImminent = true;
+            bossWarningTimer = 2.0;
+            hasMissingNumberSpawnedThisGame = true; // Marchia che la fase di questo boss è stata triggerata
+        }
     }
 
+    // --- Logica di Spawn Effettivo del Boss (Crea l'oggetto boss dopo il warning) ---
+    // Questo avviene DOPO che il timer del warning è scaduto, ma solo se nessun boss è attualmente attivo.
     if (bossFightImminent && !activeMiniboss && !postBossCooldownActive) {
         bossWarningTimer -= dt;
         if (bossWarningTimer <= 0) {
-            console.log('Warning timer scaduto. Spawn di Glitchzilla!');
-            const bossY = canvas.height - groundHeight - GLITCHZILLA_TARGET_HEIGHT;
-            activeMiniboss = new Glitchzilla(canvas.width, bossY);
-            hasGlitchzillaSpawnedThisGame = true;
+            // Controlla quale boss deve spawnare in base ai flag di 'triggered' e 'defeated'
+            if (hasGlitchzillaSpawnedThisGame && !isGlitchzillaDefeatedThisGame) {
+                console.log('Warning timer scaduto. Spawn di Glitchzilla!');
+                const bossY = canvas.height - groundHeight - GLITCHZILLA_TARGET_HEIGHT;
+                activeMiniboss = new Glitchzilla(canvas.width, bossY);
+                bossFightImminent = false; // La battaglia è iniziata, non è più solo "imminente"
+            } else if (hasTrojanByteSpawnedThisGame && !isTrojanByteDefeatedThisGame) {
+                console.log('Warning timer scaduto. Spawn di Trojan_Byte!');
+                const bossY = canvas.height - groundHeight - TROJAN_BYTE_TARGET_HEIGHT;
+                activeMiniboss = new TrojanByte(canvas.width, bossY);
+                bossFightImminent = false;
+            } else if (hasMissingNumberSpawnedThisGame && !isMissingNumberDefeatedThisGame) {
+                console.log('Warning timer scaduto. Spawn di Missing_Number!');
+                const bossY = canvas.height - groundHeight - MISSING_NUMBER_TARGET_HEIGHT;
+                activeMiniboss = new MissingNumber(canvas.width, bossY);
+                bossFightImminent = false;
+            }
         }
     }
 
@@ -2786,19 +3199,65 @@ function updatePlaying(dt) {
     updateAllEnemyTypes(dt);
     updatePowerUpItems(dt);
 
+    // --- Logica di Spawn dei Nemici Normali (Messa in pausa durante boss fight/warning) ---
+    // Genera nemici normali solo se NON c'è un boss attivo, NON una battaglia imminente,
+    // e NON c'è un cooldown post-boss.
     if (!activeMiniboss && !bossFightImminent && !postBossCooldownActive) {
-        spawnObstacleIfNeeded(dt);
-        spawnEnemyBaseIfNeeded(dt);
-        spawnFlyingEnemyIfNeeded(dt);
-        spawnFastEnemyIfNeeded(dt);
-        spawnArmoredEnemyIfNeeded(dt);
-        spawnShootingEnemyIfNeeded(dt);
-        spawnArmoredShootingEnemyIfNeeded(dt);
-        spawnToughBasicEnemyIfNeeded(dt);
-        spawnDangerousFlyingEnemyIfNeeded(dt);
-        spawnPowerUpAmbientIfNeeded(dt);
+        // Determina la fase di gioco corrente in base ai boss sconfitti
+        let currentPhase = 0; // 0 = pre-Glitchzilla, 1 = post-Glitchzilla, 2 = post-TrojanByte, 3 = post-MissingNumber
+
+        if (isGlitchzillaDefeatedThisGame) {
+            currentPhase = 1;
+        }
+        if (isTrojanByteDefeatedThisGame) {
+            currentPhase = 2;
+        }
+        if (isMissingNumberDefeatedThisGame) {
+            currentPhase = 3;
+        }
+
+        switch (currentPhase) {
+            case 0: // Prima di Glitchzilla sconfitto
+                spawnObstacleIfNeeded(dt);
+                spawnEnemyBaseIfNeeded(dt); // enemyOne
+                spawnFlyingEnemyIfNeeded(dt); // enemyFive (data packets)
+                break;
+            case 1: // Dopo Glitchzilla sconfitto, prima di Trojan_Byte sconfitto
+                spawnObstacleIfNeeded(dt);
+                spawnEnemyBaseIfNeeded(dt);
+                spawnFlyingEnemyIfNeeded(dt);
+                spawnFastEnemyIfNeeded(dt); // enemyTwo
+                spawnArmoredEnemyIfNeeded(dt); // enemyThree
+                spawnToughBasicEnemyIfNeeded(dt); // enemySeven
+                break;
+            case 2: // Dopo Trojan_Byte sconfitto, prima di Missing_Number sconfitto
+                spawnObstacleIfNeeded(dt);
+                spawnEnemyBaseIfNeeded(dt);
+                spawnFlyingEnemyIfNeeded(dt);
+                spawnFastEnemyIfNeeded(dt);
+                spawnArmoredEnemyIfNeeded(dt);
+                spawnToughBasicEnemyIfNeeded(dt);
+                spawnShootingEnemyIfNeeded(dt); // enemyFour
+                spawnArmoredShootingEnemyIfNeeded(dt); // enemySix
+                spawnDangerousFlyingEnemyIfNeeded(dt); // dangerousFlyingEnemy
+                break;
+            case 3: // Dopo Missing_Number sconfitto (tutti i nemici al massimo)
+                spawnObstacleIfNeeded(dt);
+                spawnEnemyBaseIfNeeded(dt);
+                spawnFlyingEnemyIfNeeded(dt);
+                spawnFastEnemyIfNeeded(dt);
+                spawnArmoredEnemyIfNeeded(dt);
+                spawnShootingEnemyIfNeeded(dt);
+                spawnArmoredShootingEnemyIfNeeded(dt);
+                spawnToughBasicEnemyIfNeeded(dt);
+                spawnDangerousFlyingEnemyIfNeeded(dt);
+                // Qui potresti pensare ad aumentare la frequenza o la velocità dei nemici ulteriormente
+                break;
+        }
+        spawnPowerUpAmbientIfNeeded(dt); // I power-up spawnano sempre
     }
 
+    // Questi vengono eseguiti sempre, indipendentemente dalla fase di spawn dei nemici
     checkCollisions();
     if (currentGameState === GAME_STATE.PLAYING) {
         score += dt * 10;

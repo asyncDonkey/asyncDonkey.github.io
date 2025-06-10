@@ -33,7 +33,7 @@ const keywordColors = {
     "kernel": "keyword-blue",
     "donkeyDebugger": "keyword-blue",
     "sudo": "keyword-green",
-    "pinging": "keyword-yellow",
+    "pinging": "keyword-blue",
     "404 not found": "keyword-red",
     "antivirus": "keyword-blue",
     "analysis": "keyword-red",
@@ -42,10 +42,10 @@ const keywordColors = {
     "protocol": "keyword-blue",
     "system": "keyword-green",
     "filesystem": "keyword-green",
-    "network": "keyword-yellow",
+    "network": "keyword-green",
     "console": "keyword-blue",
     "status": "keyword-green",
-    "interface": "keyword-yellow",
+    "interface": "keyword-blue",
     "execution": "keyword-red"
 };
 
