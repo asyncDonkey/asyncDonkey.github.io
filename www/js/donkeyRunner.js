@@ -198,9 +198,9 @@ const GLITCHZILLA_ACTUAL_FRAME_HEIGHT = 96;
 const GLITCHZILLA_NUM_FRAMES = 4;
 const GLITCHZILLA_TARGET_WIDTH = GLITCHZILLA_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
 const GLITCHZILLA_TARGET_HEIGHT = GLITCHZILLA_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
-const GLITCHZILLA_HEALTH = 40;
+const GLITCHZILLA_HEALTH = 40; // 40
 const GLITCHZILLA_SCORE_VALUE = 500;
-const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 2000;
+const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 1000;
 
 const GLITCHZILLA_PROJECTILE_SPRITE_SRC = 'images/glitchzillaProjectile.png';
 const GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_WIDTH = 24;
@@ -221,16 +221,16 @@ const TROJAN_BYTE_ACTUAL_FRAME_HEIGHT = 80; // Altezza sprite suggerita
 const TROJAN_BYTE_NUM_FRAMES = 4; // Assumendo 4 frame per animazione
 const TROJAN_BYTE_TARGET_WIDTH = TROJAN_BYTE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR * 1.1; // Leggermente più grande di glitchzilla
 const TROJAN_BYTE_TARGET_HEIGHT = TROJAN_BYTE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.1;
-const TROJAN_BYTE_HEALTH = 80; // HP suggeriti
+const TROJAN_BYTE_HEALTH = 80; // HP suggeriti 80
 const TROJAN_BYTE_SCORE_VALUE = 1000; // Valore punteggio
-const TROJAN_BYTE_SPAWN_SCORE_THRESHOLD = 5000; // Soglia di apparizione
+const TROJAN_BYTE_SPAWN_SCORE_THRESHOLD = 3000; // Soglia di apparizione 5000
 const TROJAN_BYTE_PROJECTILE_SPRITE_SRC = 'images/trojanByteProjectile.png';
 const TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_WIDTH = 16;
 const TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_HEIGHT = 16;
 const TROJAN_BYTE_PROJECTILE_NUM_FRAMES = 4; // Assumendo 4 frame per animazione
 const TROJAN_BYTE_PROJECTILE_TARGET_WIDTH = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
 const TROJAN_BYTE_PROJECTILE_TARGET_HEIGHT = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
-const TROJAN_BYTE_PROJECTILE_SPEED = 300; // Velocità proiettili
+const TROJAN_BYTE_PROJECTILE_SPEED = 200; // Velocità proiettili
 
 // --- MISSING_NUMBER (Boss 3) Constants ---
 const MISSING_NUMBER_BASE_SRC = 'images/missingNumber_base.png';
@@ -244,14 +244,14 @@ const MISSING_NUMBER_TARGET_WIDTH = MISSING_NUMBER_ACTUAL_FRAME_WIDTH * GLOBAL_S
 const MISSING_NUMBER_TARGET_HEIGHT = MISSING_NUMBER_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.1;
 const MISSING_NUMBER_HEALTH = 120; // HP suggeriti
 const MISSING_NUMBER_SCORE_VALUE = 1500; // Valore punteggio
-const MISSING_NUMBER_SPAWN_SCORE_THRESHOLD = 10000; // Soglia di apparizione
+const MISSING_NUMBER_SPAWN_SCORE_THRESHOLD = 5000; // Soglia di apparizione
 const MISSING_NUMBER_PROJECTILE_SPRITE_SRC = 'images/missingNumberProjectile.png';
 const MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH = 12;
 const MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT = 12;
 const MISSING_NUMBER_PROJECTILE_NUM_FRAMES = 4; // Assumendo 4 frame per animazione
 const MISSING_NUMBER_PROJECTILE_TARGET_WIDTH = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
 const MISSING_NUMBER_PROJECTILE_TARGET_HEIGHT = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
-const MISSING_NUMBER_PROJECTILE_SPEED = 400; // Velocità proiettili più piccoli
+const MISSING_NUMBER_PROJECTILE_SPEED = 300; // Velocità proiettili più piccoli
 
 // Nuove variabili di stato per tracciare la sconfitta dei boss in questa partita
 
@@ -1993,10 +1993,12 @@ class TrojanByte extends BaseEnemy {
         );
         this.updateCurrentAnimation();
         this.attackSequence = [
-            'warn_low_1', 'low_1', 'pause_short',
-            'warn_low_2', 'low_2', 'pause_short',
-            'warn_low_3', 'low_3', 'pause_medium', // Tre colpi in basso
-            'warn_middle', 'middle', 'pause_long_tb' // Un colpo in mezzo
+            'warn_low_1', 'low_1', 'pause_medium',
+            'warn_low_2', 'low_2', 'pause_medium',
+            //'warn_low_3', 'low_3', 'pause_medium', // Tre colpi in basso consecutivi
+            'warn_middle', 'middle', 'pause_medium', // Un colpo in mezzo
+            'warn_low_single', 'low_single', 'pause_short', // Un altro colpo in basso
+            'warn_high_single', 'high_single', 'pause_long_tb' // Un colpo in alto, poi pausa lunga per ricominciare il pattern
         ];
         this.attackSequenceIndex = 0;
         this.currentAttackPhaseDuration = 0;
@@ -2012,7 +2014,7 @@ class TrojanByte extends BaseEnemy {
         this.projectileTargetHeight = TROJAN_BYTE_PROJECTILE_TARGET_HEIGHT;
         console.log('TROJAN_BYTE SPAWNED! HP: ' + this.health);
         // Aggiungi un suono di spawn per Trojan_Byte qui, una volta che hai il file audio.
-        // AudioManager.playSound('trojanByteSpawn'); 
+        // AudioManager.playSound('trojanByteSpawn');
     }
 
     updateCurrentAnimation() {
@@ -2034,7 +2036,7 @@ class TrojanByte extends BaseEnemy {
 
         if (this.health <= 0) {
             console.log('TROJAN_BYTE SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            // AudioManager.playSound('trojanByteDefeat'); 
+            // AudioManager.playSound('trojanByteDefeat');
 
             score += this.scoreValue;
             activeMiniboss = null;
@@ -2056,8 +2058,10 @@ class TrojanByte extends BaseEnemy {
         switch (currentPhase) {
             case 'warn_low_1':
             case 'warn_low_2':
-            case 'warn_low_3':
+            //case 'warn_low_3':
             case 'warn_middle':
+            case 'warn_low_single':
+            case 'warn_high_single':
                 this.isWarning = true;
                 if (this.currentAttackPhaseDuration >= WARNING_DURATION) {
                     phaseComplete = true;
@@ -2065,6 +2069,9 @@ class TrojanByte extends BaseEnemy {
                 }
                 break;
             case 'low_1': // Primo colpo basso
+            case 'low_2': // Secondo colpo basso
+            //case 'low_3': // Terzo colpo basso
+            case 'low_single': // Singolo colpo basso
                 if (!this.shotFiredInPhase) {
                     projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
                     enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
@@ -2073,27 +2080,18 @@ class TrojanByte extends BaseEnemy {
                 }
                 phaseComplete = true;
                 break;
-            case 'low_2': // Secondo colpo basso
-                if (!this.shotFiredInPhase) {
-                    projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
-                    AudioManager.playSound('enemyShootLight');
-                    this.shotFiredInPhase = true;
-                }
-                phaseComplete = true;
-                break;
-            case 'low_3': // Terzo colpo basso
-                if (!this.shotFiredInPhase) {
-                    projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
-                    AudioManager.playSound('enemyShootLight');
-                    this.shotFiredInPhase = true;
-                }
-                phaseComplete = true;
-                break;
             case 'middle': // Colpo al centro
                 if (!this.shotFiredInPhase) {
                     projectileY = this.y + this.height * 0.5 - this.projectileTargetHeight / 2;
+                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                    AudioManager.playSound('enemyShootLight');
+                    this.shotFiredInPhase = true;
+                }
+                phaseComplete = true;
+                break;
+            case 'high_single': // Singolo colpo alto
+                if (!this.shotFiredInPhase) {
+                    projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
                     enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
                     AudioManager.playSound('enemyShootLight');
                     this.shotFiredInPhase = true;
@@ -2119,26 +2117,6 @@ class TrojanByte extends BaseEnemy {
 
         if (phaseComplete) {
             this.attackSequenceIndex = (this.attackSequenceIndex + 1) % this.attackSequence.length;
-            // Se il prossimo attacco è quello "in basso" o "in alto", aggiungi altri due step per completare i 3 colpi.
-            // Il pattern è "3 in basso, pausa, 1 in mezzo, pausa, 1 in basso, 1 in alto".
-            // Rivediamo il pattern per matchare la tua descrizione: "3 colpi in basso, poi un colpo in mezzo, poi 1 colpo in basso, 1 in alto e poi ricomincia".
-            // Per semplicità e flessibilità, manterrei il pattern come una sequenza di azioni discrete.
-            // Il tuo pattern è: tre in basso, uno al centro, uno in basso, uno in alto.
-            // Ho implementato: tre in basso (separati da pause brevi), uno al centro (seguito da pausa lunga).
-            // Aggiungiamo i due colpi finali e poi facciamo ricominciare il ciclo.
-            if (this.attackSequence[this.attackSequenceIndex] === 'warn_low_1') { // Ricomincia il ciclo
-                this.attackSequence = [
-                    'warn_low_1', 'low_1', 'pause_short',
-                    'warn_low_2', 'low_2', 'pause_short',
-                    'warn_low_3', 'low_3', 'pause_medium',
-                    'warn_middle', 'middle', 'pause_short',
-                    'warn_low_single', 'low_single', 'pause_short', // Nuovo: singolo colpo in basso
-                    'warn_high_single', 'high_single', 'pause_long_tb' // Nuovo: singolo colpo in alto
-                ];
-                this.attackSequenceIndex = 0; // Reset dell'indice per ripartire
-            }
-
-
             this.currentAttackPhaseDuration = 0;
             this.shotFiredInPhase = false;
             if (!this.attackSequence[this.attackSequenceIndex].startsWith('warn_')) {
@@ -2150,7 +2128,6 @@ class TrojanByte extends BaseEnemy {
         }
     }
 }
-
 // Aggiungi questa classe dopo la classe TrojanByte
 class MissingNumber extends BaseEnemy {
     constructor(x, y) {
@@ -2191,8 +2168,56 @@ class MissingNumber extends BaseEnemy {
         );
         this.updateCurrentAnimation();
 
-        this.attackTimer = 0;
-        this.attackInterval = 1.5; // Intervallo tra attacchi casuali
+        // Nuovi parametri per la logica di attacco a pattern casuale
+        this.currentAttackPattern = [];
+        this.currentAttackPatternIndex = 0;
+        this.currentAttackPhaseDuration = 0;
+        this.shotFiredInPhase = false;
+
+        this.pauseShortDuration = 0.5; // Durata pause, simili a TrojanByte
+        this.pauseMediumDuration = 1.0;
+        this.pauseLongDuration = 2.5;
+
+        // Definizione dei sub-pattern di attacco
+        this.allAttackPatterns = [
+            // Pattern 1: un colpo alto, due bassi, 1 medio, pausa lunga
+            [
+                { type: 'warn', pos: 'high' }, { type: 'shot', pos: 'high' },
+                { type: 'pause', duration: this.pauseShortDuration },
+                { type: 'warn', pos: 'low' }, { type: 'shot', pos: 'low' },
+                { type: 'pause', duration: this.pauseShortDuration },
+                { type: 'warn', pos: 'low' }, { type: 'shot', pos: 'low' },
+                { type: 'pause', duration: this.pauseShortDuration },
+                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
+                { type: 'pause', duration: this.pauseLongDuration }
+            ],
+            // Pattern 2: uno alto, uno medio, pausa lunga
+            [
+                { type: 'warn', pos: 'high' }, { type: 'shot', pos: 'high' },
+                { type: 'pause', duration: this.pauseMediumDuration },
+                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
+                { type: 'pause', duration: this.pauseLongDuration }
+            ],
+            // Pattern 3: medio medio, pausa lunga
+            [
+                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
+                { type: 'pause', duration: this.pauseShortDuration },
+                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
+                { type: 'pause', duration: this.pauseLongDuration }
+            ],
+            // Pattern 4: basso medio basso, pausa lunga
+            [
+                { type: 'warn', pos: 'low' }, { type: 'shot', pos: 'low' },
+                { type: 'pause', duration: this.pauseShortDuration },
+                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
+                { type: 'pause', duration: this.pauseShortDuration },
+                { type: 'warn', pos: 'low' }, { type: 'shot', pos: 'low' },
+                { type: 'pause', duration: this.pauseLongDuration }
+            ]
+        ];
+
+        this.selectNewAttackPattern(); // Seleziona il primo pattern all'inizializzazione
+
         this.projectileSpriteName = 'missingNumberProjectile';
         this.projectileFrameWidth = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH;
         this.projectileFrameHeight = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT;
@@ -2200,15 +2225,25 @@ class MissingNumber extends BaseEnemy {
         this.projectileTargetWidth = MISSING_NUMBER_PROJECTILE_TARGET_WIDTH;
         this.projectileTargetHeight = MISSING_NUMBER_PROJECTILE_TARGET_HEIGHT;
         this.projectileSpeed = MISSING_NUMBER_PROJECTILE_SPEED;
-        
+
         console.log('MISSING_NUMBER SPAWNED! HP: ' + this.health);
         // Aggiungi un suono di spawn per MissingNumber qui, una volta che hai il file audio.
         // AudioManager.playSound('missingNumberSpawn');
     }
 
+    // Nuovo metodo per selezionare un nuovo pattern di attacco casuale
+    selectNewAttackPattern() {
+        const randomIndex = Math.floor(Math.random() * this.allAttackPatterns.length);
+        this.currentAttackPattern = this.allAttackPatterns[randomIndex];
+        this.currentAttackPatternIndex = 0;
+        this.currentAttackPhaseDuration = 0;
+        this.shotFiredInPhase = false;
+        this.isWarning = false; // Assicurati che l'avviso sia spento quando si inizia un nuovo pattern
+        console.log('MissingNumber ha selezionato un nuovo pattern di attacco:', this.currentAttackPattern);
+    }
+
     updateCurrentAnimation() {
         let animKey;
-        // La logica per cambiare sprite in base ai danni
         if (this.health > MISSING_NUMBER_HEALTH * 0.75) animKey = 'base';
         else if (this.health > MISSING_NUMBER_HEALTH * 0.5) animKey = 'dmg1';
         else if (this.health > MISSING_NUMBER_HEALTH * 0.25) animKey = 'dmg2';
@@ -2225,9 +2260,9 @@ class MissingNumber extends BaseEnemy {
 
         if (this.health <= 0) {
             console.log('MISSING_NUMBER SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            // AudioManager.playSound('missingNumberDefeat'); 
+            // AudioManager.playSound('missingNumberDefeat');
 
-            score += this.scoreData;
+            score += this.scoreValue; // Corretto da scoreData a scoreValue
             activeMiniboss = null;
             isMissingNumberDefeatedThisGame = true; // <--- MODIFICA QUI
 
@@ -2239,38 +2274,78 @@ class MissingNumber extends BaseEnemy {
 
     update(dt) {
         super.update(dt);
-        this.attackTimer += dt;
+        this.currentAttackPhaseDuration += dt;
 
-        if (this.attackTimer >= this.attackInterval) {
-            this.isWarning = true; // Avviso prima dell'attacco casuale
-            this.warningTimer = 0; // Reset warning timer for next phase
-            this.attackTimer = 0; // Reset attack timer
+        if (this.currentAttackPattern.length === 0) {
+            // Questo non dovrebbe accadere se selectNewAttackPattern() viene chiamato correttamente
+            this.selectNewAttackPattern();
+            return;
+        }
 
-            // Pattern di attacco casuale:
-            // 1. Spara 3-5 proiettili a posizioni verticali casuali
-            const numProjectiles = 3 + Math.floor(Math.random() * 3); // 3, 4 o 5 proiettili
-            for (let i = 0; i < numProjectiles; i++) {
-                // Genera una posizione Y casuale all'interno dell'altezza del canvas (escludendo il terreno)
-                const randomY = Math.random() * (canvas.height - groundHeight - this.projectileTargetHeight);
-                enemyProjectiles.push(
-                    new EnemyProjectile(
-                        this.x - this.projectileTargetWidth,
-                        randomY,
-                        this.projectileSpriteName,
-                        this.projectileFrameWidth,
-                        this.projectileFrameHeight,
-                        this.projectileNumFrames,
-                        this.projectileTargetWidth,
-                        this.projectileTargetHeight,
-                        this.projectileSpeed
-                    )
-                );
+        const currentAction = this.currentAttackPattern[this.currentAttackPatternIndex];
+        let actionComplete = false;
+
+        switch (currentAction.type) {
+            case 'warn':
+                this.isWarning = true;
+                if (this.currentAttackPhaseDuration >= WARNING_DURATION) {
+                    actionComplete = true;
+                    this.isWarning = false;
+                }
+                break;
+            case 'shot':
+                if (!this.shotFiredInPhase) {
+                    let projectileY;
+                    if (currentAction.pos === 'high') {
+                        projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
+                    } else if (currentAction.pos === 'middle') {
+                        projectileY = this.y + this.height * 0.5 - this.projectileTargetHeight / 2;
+                    } else if (currentAction.pos === 'low') {
+                        projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
+                    }
+                    enemyProjectiles.push(
+                        new EnemyProjectile(
+                            this.x - this.projectileTargetWidth,
+                            projectileY,
+                            this.projectileSpriteName,
+                            this.projectileFrameWidth,
+                            this.projectileFrameHeight,
+                            this.projectileNumFrames,
+                            this.projectileTargetWidth,
+                            this.projectileTargetHeight,
+                            this.projectileSpeed
+                        )
+                    );
+                    AudioManager.playSound('enemyShootLight'); // O un suono specifico per MissingNumber
+                    this.shotFiredInPhase = true;
+                }
+                actionComplete = true; // Il colpo è istantaneo, quindi l'azione è completa dopo il primo frame
+                break;
+            case 'pause':
+                if (this.currentAttackPhaseDuration >= currentAction.duration) {
+                    actionComplete = true;
+                }
+                break;
+        }
+
+        if (actionComplete) {
+            this.currentAttackPatternIndex++;
+            this.currentAttackPhaseDuration = 0;
+            this.shotFiredInPhase = false;
+            this.isWarning = false; // Spegni l'avviso per la prossima azione
+
+            // Se tutte le azioni del pattern corrente sono state eseguite, seleziona un nuovo pattern
+            if (this.currentAttackPatternIndex >= this.currentAttackPattern.length) {
+                this.selectNewAttackPattern();
             }
-            AudioManager.playSound('enemyShootLight'); // O un suono specifico per MissingNumber
+        }
+
+        // Assicurati che il boss non vada oltre una certa posizione a sinistra
+        if (this.x < canvas.width / 2) {
+            this.x = canvas.width / 2;
         }
     }
 }
-
 // --- Funzioni di Gioco ---
 function drawGround() {
     ctx.fillStyle = PALETTE.DARK_TEAL_BLUE;
