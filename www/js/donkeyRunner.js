@@ -253,7 +253,23 @@ const MISSING_NUMBER_PROJECTILE_TARGET_WIDTH = MISSING_NUMBER_PROJECTILE_ACTUAL_
 const MISSING_NUMBER_PROJECTILE_TARGET_HEIGHT = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const MISSING_NUMBER_PROJECTILE_SPEED = 300; // Velocità proiettili più piccoli
 
-// Nuove variabili di stato per tracciare la sconfitta dei boss in questa partita
+// --- SLAYER_SUBROUTINE (Power-Up Permanente) Constants ---
+const SLAYER_PROJECTILE_SPRITE_SRC = 'images/slay_projectile.png'; // Percorso sprite proiettile
+const SLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH = 24;
+const SLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT = 8;
+const SLAYER_PROJECTILE_NUM_FRAMES = 4;
+const SLAYER_PROJECTILE_TARGET_WIDTH = SLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
+const SLAYER_PROJECTILE_TARGET_HEIGHT = SLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
+const SLAYER_PROJECTILE_DAMAGE = 2; // Danno del proiettile slayer
+
+// --- CODE_INJECTOR (Power-Up Permanente) Constants ---
+const CODE_INJECTOR_PROJECTILE_SPRITE_SRC = 'images/inject_projectile.png'; // Percorso sprite proiettile
+const CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH = 24;
+const CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT = 8;
+const CODE_INJECTOR_PROJECTILE_NUM_FRAMES = 4;
+const CODE_INJECTOR_PROJECTILE_TARGET_WIDTH = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
+const CODE_INJECTOR_PROJECTILE_TARGET_HEIGHT = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
+const CODE_INJECTOR_PROJECTILE_DAMAGE = 3; // Danno del proiettile injector
 
 
 const ENEMY_PROJECTILE_SPEED = 250;
@@ -265,6 +281,8 @@ const POWERUP_THEMATIC_NAMES = {
     [POWERUP_TYPE.DEBUG_MODE]: 'Debug Payload',
     [POWERUP_TYPE.FIREWALL]: 'Solid Firewall',
     [POWERUP_TYPE.BLOCK_BREAKER]: 'Decompiler',
+    [POWERUP_TYPE.SLAYER_SUBROUTINE]: 'Slayer Subroutine', // Nuovo nome tematico
+    [POWERUP_TYPE.CODE_INJECTOR]: 'Code Injector', // Nuovo nome tematico
 };
 
 const soundsToLoad = [
@@ -366,6 +384,9 @@ let hasTrojanByteSpawnedThisGame = false; // Flag per tracciare se Trojan_Byte �
 let isTrojanByteDefeatedThisGame = false; // Nuovo: Flag per tracciare se Trojan_Byte è STATO SCONFITTO
 let hasMissingNumberSpawnedThisGame = false; // Flag per tracciare se Missing_Number è SPAWNATO
 let isMissingNumberDefeatedThisGame = false; // Nuovo: Flag per tracciare se Missing_Number è STATO SCONFITTO
+
+let hasSlayerSubroutineUpgrade = false;
+let hasCodeInjectorUpgrade = false;
 
 let powerUpItems = [];
 let powerUpSpawnTimer = 0;
@@ -771,6 +792,8 @@ function prepareAssetsToLoad() {
         { name: 'missingNumberDmg2', src: MISSING_NUMBER_DMG2_SRC },
         { name: 'missingNumberDmg3', src: MISSING_NUMBER_DMG3_SRC },
         { name: 'missingNumberProjectile', src: MISSING_NUMBER_PROJECTILE_SPRITE_SRC },
+        { name: 'slayerProjectile', src: SLAYER_PROJECTILE_SPRITE_SRC },
+        { name: 'codeInjectorProjectile', src: CODE_INJECTOR_PROJECTILE_SPRITE_SRC },
     );
     
 
@@ -1016,6 +1039,9 @@ class Player {
         this.isShieldActive = false;
         this.isFirewallActive = false;
         this.isBlockBreakerActive = false;
+        // NUOVI FLAG PER I POWER-UP PERMANENTI (Upgrade)
+        this.hasSlayerSubroutine = false;
+        this.hasCodeInjector = false;
     }
 
     draw() {
@@ -1094,7 +1120,8 @@ class Player {
             this.walkAnimation.update(dt);
         }
 
-        if (this.activePowerUp) {
+        // Solo i power-up temporanei hanno un timer
+        if (this.activePowerUp && ![POWERUP_TYPE.SLAYER_SUBROUTINE, POWERUP_TYPE.CODE_INJECTOR].includes(this.activePowerUp)) {
             this.powerUpTimer -= dt;
             if (this.powerUpTimer <= 0) {
                 this.deactivatePowerUp();
@@ -1114,27 +1141,26 @@ class Player {
     shoot() {
         if (canShoot) {
             const projectileYBase = this.y + this.displayHeight / 2 - PLAYER_PROJECTILE_TARGET_HEIGHT / 2;
-            const isDebugMode = this.activePowerUp === POWERUP_TYPE.DEBUG_MODE;
+            let projectileType = 'normal'; // Default
+            
+            if (this.hasSlayerSubroutine) {
+                projectileType = 'slayer';
+            } else if (this.hasCodeInjector) {
+                projectileType = 'injector';
+            } else if (this.activePowerUp === POWERUP_TYPE.DEBUG_MODE) {
+                projectileType = 'debug';
+            }
 
             if (this.activePowerUp === POWERUP_TYPE.TRIPLE_SHOT) {
-                projectiles.push(
-                    new Projectile(
-                        this.x + this.displayWidth,
-                        projectileYBase - PROJECTILE_VERTICAL_OFFSET,
-                        isDebugMode
-                    )
-                );
-                projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase, isDebugMode));
-                projectiles.push(
-                    new Projectile(
-                        this.x + this.displayWidth,
-                        projectileYBase + PROJECTILE_VERTICAL_OFFSET,
-                        isDebugMode
-                    )
-                );
+                // Se Triple Shot è attivo, spara 3 proiettili del tipo potenziato più forte disponibile
+                projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase - PROJECTILE_VERTICAL_OFFSET, projectileType));
+                projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase, projectileType));
+                projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase + PROJECTILE_VERTICAL_OFFSET, projectileType));
             } else {
-                projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase, isDebugMode));
+                // Altrimenti, spara un singolo proiettile del tipo potenziato più forte disponibile
+                projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase, projectileType));
             }
+            
             AudioManager.playSound('shoot', false, 0.8);
             canShoot = false;
             shootTimer = 0;
@@ -1143,7 +1169,42 @@ class Player {
     }
 
     activatePowerUp(type) {
-        const exclusiveTypes = [POWERUP_TYPE.DEBUG_MODE, POWERUP_TYPE.TRIPLE_SHOT, POWERUP_TYPE.BLOCK_BREAKER];
+        const exclusiveTypes = [POWERUP_TYPE.TRIPLE_SHOT, POWERUP_TYPE.SHIELD, POWERUP_TYPE.SMART_BOMB, POWERUP_TYPE.DEBUG_MODE, POWERUP_TYPE.FIREWALL, POWERUP_TYPE.BLOCK_BREAKER];
+        
+        // Gestione dei power-up permanenti (upgrade)
+        if (type === POWERUP_TYPE.SLAYER_SUBROUTINE) {
+            if (!this.hasSlayerSubroutine) {
+                this.hasSlayerSubroutine = true;
+                this.hasCodeInjector = false; // Slayer sovrascrive Code Injector
+                // Disattiva DEBUG_MODE se attivo, dato che Slayer lo rende obsoleto.
+                if (this.activePowerUp === POWERUP_TYPE.DEBUG_MODE) {
+                    this.deactivatePowerUp(); 
+                }
+                showToast("Slayer Subroutine ATTIVATO!", "success");
+                AudioManager.playSound('powerUpCollect');
+                gameStats.powerUpsCollected++;
+            }
+            return; // Non è un power-up a tempo gestito da activePowerUp/powerUpTimer
+        }
+
+        if (type === POWERUP_TYPE.CODE_INJECTOR) {
+            // Code Injector può essere attivato solo se Slayer Subroutine NON è già attivo
+            if (!this.hasSlayerSubroutine && !this.hasCodeInjector) {
+                this.hasCodeInjector = true;
+                 // Disattiva DEBUG_MODE se attivo, dato che Code Injector lo rende obsoleto.
+                if (this.activePowerUp === POWERUP_TYPE.DEBUG_MODE) {
+                    this.deactivatePowerUp(); 
+                }
+                showToast("Code Injector ATTIVATO!", "success");
+                AudioManager.playSound('powerUpCollect');
+                gameStats.powerUpsCollected++;
+            }
+            return; // Non è un power-up a tempo gestito da activePowerUp/powerUpTimer
+        }
+
+
+        // Logica per power-up temporanei (esistente)
+        // Se un power-up temporaneo di tipo esclusivo è già attivo e ne attivi un altro diverso, disattiva il precedente.
         if (
             exclusiveTypes.includes(this.activePowerUp) &&
             exclusiveTypes.includes(type) &&
@@ -1151,20 +1212,23 @@ class Player {
         ) {
             this.deactivatePowerUp();
         } else if (this.activePowerUp && this.activePowerUp !== type) {
+            // Se c'è un power-up attivo e quello nuovo è esclusivo o è scudo/firewall/blockbreaker che non è il tipo attuale, disattivalo
             if (
                 exclusiveTypes.includes(type) ||
                 (this.activePowerUp === POWERUP_TYPE.SHIELD && type !== POWERUP_TYPE.SHIELD) ||
-                (this.activePowerUp === POWERUP_TYPE.FIREWALL && type !== POWERUP_TYPE.FIREWALL)
+                (this.activePowerUp === POWERUP_TYPE.FIREWALL && type !== POWERUP_TYPE.FIREWALL) ||
+                (this.activePowerUp === POWERUP_TYPE.BLOCK_BREAKER && type !== POWERUP_TYPE.BLOCK_BREAKER)
             ) {
                 this.deactivatePowerUp();
             }
         }
 
+        // Attiva il power-up temporaneo
         this.activePowerUp = type;
         switch (type) {
             case POWERUP_TYPE.TRIPLE_SHOT:
                 this.powerUpTimer = POWERUP_DURATION.TRIPLE_SHOT;
-                this.isBlockBreakerActive = false;
+                this.isBlockBreakerActive = false; // Triple Shot e Block Breaker si escludono
                 console.log('Triple Shot ATTIVATO!');
                 break;
             case POWERUP_TYPE.SHIELD:
@@ -1174,10 +1238,10 @@ class Player {
                 break;
             case POWERUP_TYPE.SMART_BOMB:
                 this.activateSmartBomb();
-                break;
+                break; // Smart Bomb è istantanea, non ha timer
             case POWERUP_TYPE.DEBUG_MODE:
                 this.powerUpTimer = POWERUP_DURATION.DEBUG_MODE;
-                this.isBlockBreakerActive = false;
+                this.isBlockBreakerActive = false; // Debug Mode e Block Breaker si escludono
                 console.log('Debug Mode (Proiettili Potenziati) ATTIVATO!');
                 break;
             case POWERUP_TYPE.FIREWALL:
@@ -1191,12 +1255,15 @@ class Player {
                 console.log('Block Breaker ATTIVATO!');
                 break;
         }
-        if (type !== POWERUP_TYPE.SMART_BOMB) {
-            AudioManager.playSound('powerUpCollect');
+        // Riproduci suono per i power-up temporanei (Smart Bomb già gestisce il suo suono)
+        if (type !== POWERUP_TYPE.SMART_BOMB && type !== POWERUP_TYPE.SLAYER_SUBROUTINE && type !== POWERUP_TYPE.CODE_INJECTOR) {
+             AudioManager.playSound('powerUpCollect');
         }
-        gameStats.powerUpsCollected++;
+        // Incrementa contatore solo per power-up effettivamente attivati/raccolti
+        if (type !== POWERUP_TYPE.SMART_BOMB) {
+            gameStats.powerUpsCollected++;
+        }
     }
-
     deactivatePowerUp() {
         console.log(`Power-up ${this.activePowerUp} DISATTIVATO.`);
         if (this.activePowerUp === POWERUP_TYPE.SHIELD) this.isShieldActive = false;
@@ -1204,6 +1271,7 @@ class Player {
         if (this.activePowerUp === POWERUP_TYPE.BLOCK_BREAKER) this.isBlockBreakerActive = false;
         this.activePowerUp = null;
         this.powerUpTimer = 0;
+        // Non toccare i flag dei power-up permanenti qui
     }
 
     activateSmartBomb() {
@@ -1228,7 +1296,7 @@ class Player {
         });
         if (activeMiniboss) {
             activeMiniboss.takeDamage(5);
-            console.log('Smart Bomb ha danneggiato Glitchzilla!');
+            console.log('Smart Bomb ha danneggiato il boss!');
         }
         let obstaclesCleared = 0;
         for (let i = obstacles.length - 1; i >= 0; i--) {
@@ -1239,7 +1307,9 @@ class Player {
         if (enemiesCleared > 0 || obstaclesCleared > 0) AudioManager.playSound('enemyExplode', false, 0.9);
         if (enemiesCleared > 0) console.log(`${enemiesCleared} nemici distrutti dalla bomba!`);
         if (obstaclesCleared > 0) console.log(`${obstaclesCleared} ostacoli distrutti dalla bomba!`);
-        this.activePowerUp = null;
+        // Smart Bomb non è un power-up a tempo, quindi non imposto activePowerUp su null qui.
+        // È un'azione "usa e getta".
+        this.activePowerUp = null; // Rimuovo l'activePowerUp se era Smart Bomb per evitare UI persistente.
         this.powerUpTimer = 0;
     }
 }
@@ -1315,25 +1385,80 @@ class Obstacle {
 }
 
 class Projectile {
-    constructor(x, y, isUpgraded = false) {
+    // Il costruttore ora accetta un 'type' per determinare sprite e danno
+    constructor(x, y, type = 'normal') { // type può essere 'normal', 'debug', 'slayer', 'injector'
         this.x = x;
         this.y = y;
-        this.width = PLAYER_PROJECTILE_TARGET_WIDTH;
-        this.height = PLAYER_PROJECTILE_TARGET_HEIGHT;
-        this.speed = projectileSpeed;
-        this.isUpgraded = isUpgraded;
-        this.damage = this.isUpgraded ? 2 : 1;
-        this.sprite = this.isUpgraded ? images['playerUpgradedProjectile'] : images['playerProjectile'];
+        this.type = type;
         this.animation = null;
 
-        if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
-            this.animation = new SpriteAnimation(
-                this.sprite,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
-                PLAYER_PROJECTILE_NUM_FRAMES,
-                PLAYER_PROJECTILE_ANIMATION_SPEED
-            );
+        // Determina sprite, dimensioni e danno in base al tipo
+        switch (this.type) {
+            case 'slayer':
+                this.width = SLAYER_PROJECTILE_TARGET_WIDTH;
+                this.height = SLAYER_PROJECTILE_TARGET_HEIGHT;
+                this.speed = projectileSpeed; // Puoi rendere la velocità specifica se vuoi
+                this.damage = SLAYER_PROJECTILE_DAMAGE;
+                this.sprite = images['slayerProjectile'];
+                if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && SLAYER_PROJECTILE_NUM_FRAMES > 1) {
+                    this.animation = new SpriteAnimation(
+                        this.sprite,
+                        SLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                        SLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                        SLAYER_PROJECTILE_NUM_FRAMES,
+                        PLAYER_PROJECTILE_ANIMATION_SPEED
+                    );
+                }
+                break;
+            case 'injector':
+                this.width = CODE_INJECTOR_PROJECTILE_TARGET_WIDTH;
+                this.height = CODE_INJECTOR_PROJECTILE_TARGET_HEIGHT;
+                this.speed = projectileSpeed; // Puoi rendere la velocità specifica se vuoi
+                this.damage = CODE_INJECTOR_PROJECTILE_DAMAGE;
+                this.sprite = images['codeInjectorProjectile'];
+                if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && CODE_INJECTOR_PROJECTILE_NUM_FRAMES > 1) {
+                    this.animation = new SpriteAnimation(
+                        this.sprite,
+                        CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                        CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                        CODE_INJECTOR_PROJECTILE_NUM_FRAMES,
+                        PLAYER_PROJECTILE_ANIMATION_SPEED
+                    );
+                }
+                break;
+            case 'debug': // Corrisponde a isUpgraded = true nella vecchia logica
+                this.width = PLAYER_PROJECTILE_TARGET_WIDTH;
+                this.height = PLAYER_PROJECTILE_TARGET_HEIGHT;
+                this.speed = projectileSpeed;
+                this.damage = 2; // Danno potenziato
+                this.sprite = images['playerUpgradedProjectile'];
+                 if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
+                    this.animation = new SpriteAnimation(
+                        this.sprite,
+                        PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                        PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                        PLAYER_PROJECTILE_NUM_FRAMES,
+                        PLAYER_PROJECTILE_ANIMATION_SPEED
+                    );
+                }
+                break;
+            case 'normal': // Default
+            default:
+                this.width = PLAYER_PROJECTILE_TARGET_WIDTH;
+                this.height = PLAYER_PROJECTILE_TARGET_HEIGHT;
+                this.speed = projectileSpeed;
+                this.damage = 1; // Danno normale
+                this.sprite = images['playerProjectile'];
+                if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
+                    this.animation = new SpriteAnimation(
+                        this.sprite,
+                        PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
+                        PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
+                        PLAYER_PROJECTILE_NUM_FRAMES,
+                        PLAYER_PROJECTILE_ANIMATION_SPEED
+                    );
+                }
+                break;
         }
     }
     update(dt) {
@@ -1356,19 +1481,34 @@ class Projectile {
                 this.height
             );
         } else if (spriteUsable) {
+            // Fallback per sprite non animato o con un solo frame
+            let sourceFrameW = this.animation ? this.animation.frameWidth : this.sprite.naturalWidth;
+            let sourceFrameH = this.animation ? this.animation.frameHeight : this.sprite.naturalHeight;
+            if (this.type === 'normal' || this.type === 'debug') { // Per i proiettili standard che hanno un solo frame sprite
+                sourceFrameW = PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH;
+                sourceFrameH = PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT;
+            } else if (this.type === 'slayer') {
+                 sourceFrameW = SLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH;
+                 sourceFrameH = SLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT;
+            } else if (this.type === 'injector') {
+                 sourceFrameW = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH;
+                 sourceFrameH = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT;
+            }
             ctx.drawImage(
                 this.sprite,
-                0,
-                0,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
-                PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT,
-                this.x,
-                this.y,
-                this.width,
-                this.height
+                0, 0, // Assume 0,0 per il primo frame se non c'è animazione
+                sourceFrameW, sourceFrameH,
+                this.x, this.y, this.width, this.height
             );
         } else {
-            ctx.fillStyle = this.isUpgraded ? PALETTE.BRIGHT_GREEN_TEAL : PALETTE.BRIGHT_TEAL;
+            // Fallback di disegno per proiettili senza sprite valido
+            let color = '#FF0000'; // Default per proiettile rotto
+            if (this.type === 'normal') color = PALETTE.BRIGHT_TEAL;
+            if (this.type === 'debug') color = PALETTE.BRIGHT_GREEN_TEAL;
+            if (this.type === 'slayer') color = '#FF6347'; // Esempio colore per Slayer
+            if (this.type === 'injector') color = '#6A5ACD'; // Esempio colore per Injector
+
+            ctx.fillStyle = color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
     }
@@ -1874,7 +2014,13 @@ class Glitchzilla extends BaseEnemy {
 
             score += this.scoreValue;
             activeMiniboss = null;
-            isGlitchzillaDefeatedThisGame = true; // <--- MODIFICA QUI
+            isGlitchzillaDefeatedThisGame = true;
+
+            // LOGICA DI DROP PER SLAYER_SUBROUTINE (20% di probabilità)
+            if (Math.random() < 0.20) { // 20% chance
+                console.log('Glitchzilla ha droppato Slayer Subroutine!');
+                powerUpItems.push(new PowerUpItem(this.x + this.width / 2, this.y + this.height / 2, POWERUP_TYPE.SLAYER_SUBROUTINE, images));
+            }
 
             postBossCooldownActive = true;
             postBossCooldownTimer = 2.0;
@@ -2032,15 +2178,20 @@ class TrojanByte extends BaseEnemy {
         super.takeDamage(dmg);
         console.log(`Trojan_Byte took ${dmg} damage, HP: ${this.health}`);
         this.updateCurrentAnimation();
-        AudioManager.playSound('enemyHit'); // Potremmo usare un suono specifico per i boss
+        AudioManager.playSound('enemyHit');
 
         if (this.health <= 0) {
             console.log('TROJAN_BYTE SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            // AudioManager.playSound('trojanByteDefeat');
 
             score += this.scoreValue;
             activeMiniboss = null;
-            isTrojanByteDefeatedThisGame = true; // <--- MODIFICA QUI
+            isTrojanByteDefeatedThisGame = true;
+
+            // LOGICA DI DROP PER CODE_INJECTOR (20% di probabilità, SOLO SE SLAYER_SUBROUTINE NON È ATTIVO)
+            if (!hasSlayerSubroutineUpgrade && Math.random() < 0.20) { // 20% chance, conditional on Slayer not being active
+                console.log('Trojan Byte ha droppato Code Injector!');
+                powerUpItems.push(new PowerUpItem(this.x + this.width / 2, this.y + this.height / 2, POWERUP_TYPE.CODE_INJECTOR, images));
+            }
 
             postBossCooldownActive = true;
             postBossCooldownTimer = 2.0;
@@ -2559,12 +2710,33 @@ nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
 function spawnPowerUpAmbientIfNeeded(dt) {
     powerUpSpawnTimer += dt;
     if (powerUpSpawnTimer >= nextPowerUpSpawnTime) {
-        const randomTypeIndex = Math.floor(Math.random() * Object.keys(POWERUP_TYPE).length);
-        const randomType = Object.values(POWERUP_TYPE)[randomTypeIndex];
-        const yPos = 50 + Math.random() * (canvas.height - groundHeight - 150);
-        powerUpItems.push(new PowerUpItem(canvas.width, yPos, randomType, images));
-        powerUpSpawnTimer = 0;
-        nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
+        // Filtra i power-up che non dovrebbero più spawnare
+        const availablePowerUpTypes = Object.values(POWERUP_TYPE).filter(type => {
+            if (type === POWERUP_TYPE.DEBUG_MODE && (hasSlayerSubroutineUpgrade || hasCodeInjectorUpgrade)) {
+                return false; // Non spawnare DEBUG_MODE se un upgrade di sparo permanente è attivo
+            }
+            // Non spawnare i power-up permanenti tramite spawn ambientale;
+            // vengono droppati solo dai boss.
+            if (type === POWERUP_TYPE.SLAYER_SUBROUTINE || type === POWERUP_TYPE.CODE_INJECTOR) {
+                return false; 
+            }
+            return true;
+        });
+
+        if (availablePowerUpTypes.length > 0) {
+            const randomTypeIndex = Math.floor(Math.random() * availablePowerUpTypes.length);
+            const randomType = availablePowerUpTypes[randomTypeIndex];
+            const yPos = 50 + Math.random() * (canvas.height - groundHeight - 150);
+            powerUpItems.push(new PowerUpItem(canvas.width, yPos, randomType, images));
+            powerUpSpawnTimer = 0;
+            nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
+        } else {
+            console.warn("Nessun power-up ambientale disponibile da spawnare dopo aver filtrato.");
+            // Potrebbe essere necessario un meccanismo per farli spawnare più tardi o con maggiore frequenza
+            // se tutti i power-up sono stati bloccati. Per ora, semplicemente non spawniamo.
+            powerUpSpawnTimer = 0; // Reset del timer anche se non si spawna nulla per evitare spam di warning.
+            nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
+        }
     }
 }
 
@@ -3029,15 +3201,19 @@ function resetGame() {
     activeMiniboss = null;
 
     bossFightImminent = false;
-    hasGlitchzillaSpawnedThisGame = false; // Reset del flag di trigger
-    isGlitchzillaDefeatedThisGame = false; // Reset del flag di sconfitta
-    hasTrojanByteSpawnedThisGame = false; // Reset del flag di trigger
-    isTrojanByteDefeatedThisGame = false; // Reset del flag di sconfitta
-    hasMissingNumberSpawnedThisGame = false; // Reset del flag di trigger
-    isMissingNumberDefeatedThisGame = false; // Reset del flag di sconfitta
+    hasGlitchzillaSpawnedThisGame = false;
+    isGlitchzillaDefeatedThisGame = false;
+    hasTrojanByteSpawnedThisGame = false;
+    isTrojanByteDefeatedThisGame = false;
+    hasMissingNumberSpawnedThisGame = false;
+    isMissingNumberDefeatedThisGame = false;
     postBossCooldownActive = false;
     bossWarningTimer = 2.0;
     postBossCooldownTimer = 2.0;
+
+    // RESET DEI NUOVI FLAG DEI POWER-UP PERMANENTI
+    hasSlayerSubroutineUpgrade = false;
+    hasCodeInjectorUpgrade = false;
 
     score = 0;
     finalScore = 0;
@@ -3075,11 +3251,6 @@ function resetGame() {
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
     if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none';
 
-    // RIMOZIONE DELLA RIGA SEGUENTE:
-    // if (mobileControlsDiv) mobileControlsDiv.style.display = 'none';
-    // L'impostazione della visibilità dei controlli all'inizio del gioco sarà gestita esclusivamente da launchGame().
-    // Questo evita che resetGame() nasconda i pulsanti e che launchGame() non riesca a ripristinarli correttamente in tutti i casi.
-
     console.log(
         'Gioco resettato. Flags boss: imminent=',
         bossFightImminent,
@@ -3088,6 +3259,7 @@ function resetGame() {
         'cooldownActive=',
         postBossCooldownActive
     );
+    console.log('Power-up permanenti resettati: Slayer=', hasSlayerSubroutineUpgrade, 'Injector=', hasCodeInjectorUpgrade); // Aggiunto log per debug
 }
 
 function drawTerminalBackgroundEffects() {

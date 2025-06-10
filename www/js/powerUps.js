@@ -1,4 +1,3 @@
-// js/powerUps.js
 import { SpriteAnimation } from './animation.js'; // FIX: Renamed import
 
 export const POWERUP_TYPE = {
@@ -8,6 +7,9 @@ export const POWERUP_TYPE = {
     DEBUG_MODE: 'debug_mode',
     FIREWALL: 'firewall',
     BLOCK_BREAKER: 'block_breaker',
+    // NUOVI POWER-UP PERMANENTI
+    SLAYER_SUBROUTINE: 'slayer_subroutine',
+    CODE_INJECTOR: 'code_injector',
 };
 
 export const POWERUP_DURATION = {
@@ -16,6 +18,10 @@ export const POWERUP_DURATION = {
     DEBUG_MODE: 10,
     FIREWALL: 8,
     BLOCK_BREAKER: 12,
+    // I power-up permanenti non avranno una durata in senso stretto,
+    // ma mantengo queste costanti se dovessero servire per scopi secondari (es. UI)
+    SLAYER_SUBROUTINE: Infinity, // Dura per tutta la partita
+    CODE_INJECTOR: Infinity, // Dura per tutta la partita
 };
 
 const POWER_UP_SPRITE_SCALE = 1.5;
@@ -69,6 +75,23 @@ export const POWERUP_CONFIGS = {
         numFrames: 4,
         animationSpeed: 0.1,
     },
+    // NUOVE CONFIGURAZIONI PER POWER-UP PERMANENTI
+    [POWERUP_TYPE.SLAYER_SUBROUTINE]: {
+        src: 'images/powerups/slayerPowerUp.png', // ASSUNZIONE: percorso e nome file
+        spriteKey: 'powerup_slayer_subroutine',
+        frameWidth: 32,
+        frameHeight: 32,
+        numFrames: 4,
+        animationSpeed: 0.1,
+    },
+    [POWERUP_TYPE.CODE_INJECTOR]: {
+        src: 'images/powerups/codeInjectorPowerUp.png', // ASSUNZIONE: percorso e nome file
+        spriteKey: 'powerup_code_injector',
+        frameWidth: 32,
+        frameHeight: 32,
+        numFrames: 4,
+        animationSpeed: 0.1,
+    },
 };
 
 export class PowerUpItem {
@@ -82,8 +105,8 @@ export class PowerUpItem {
 
         this.x = x;
         this.y = y;
-        this.width = this.config.frameWidth * 1.5;
-        this.height = this.config.frameHeight * 1.5;
+        this.width = this.config.frameWidth * POWER_UP_SPRITE_SCALE; // Usa la costante POWER_UP_SPRITE_SCALE
+        this.height = this.config.frameHeight * POWER_UP_SPRITE_SCALE; // Usa la costante POWER_UP_SPRITE_SCALE
 
         this.sprite = images[this.config.spriteKey];
         this.animation = null;
