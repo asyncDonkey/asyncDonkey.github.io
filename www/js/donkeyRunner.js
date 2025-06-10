@@ -57,6 +57,8 @@ let saveScoreBtnDonkey = null;
 let restartGameBtnDonkey = null;
 let mobileStartButton = null;
 let shareScoreBtnDonkey = null;
+let backToMenuBtn = null; // Nuovo: Riferimento al pulsante "Torna al Menu"
+let accountIconBtn = null; // Nuovo: Riferimento all'icona account/login
 
 let isTouchDevice = false; // Will be set in setupGameEngine
 let isIPhone = false;     // Will be set in setupGameEngine
@@ -393,6 +395,8 @@ async function handleShareScore() {
         return;
     }
 
+    // TODO: [Future Task] Rivedere la logica di condivisione del punteggio per renderla più robusta o per aggiungere opzioni.
+
     let challengerName = "Un Asinello Pixelato";
     const currentUser = auth.currentUser;
 
@@ -418,7 +422,7 @@ async function handleShareScore() {
     console.log("Sfidante:", challengerName, "Punteggio:", finalScore);
 
     const siteBaseUrl = window.location.origin;
-    const gamePath = "/donkeyRunner.html";
+    const gamePath = "/donkeyRunner.html"; // Nota: questo dovrebbe puntare a www/game.html se usato esternamente
 
     const challengeUrl = `${siteBaseUrl}${gamePath}?challengeScore=${finalScore}&challengerName=${encodeURIComponent(challengerName)}&utm_source=donkey_runner_share&utm_medium=social_share`;
 
@@ -774,7 +778,7 @@ export function setupGameEngine() {
     playerInitialY = canvas.height - groundHeight - PLAYER_TARGET_HEIGHT;
 
     miniLeaderboardListEl = document.getElementById('miniLeaderboardList');
-    creditsIconBtn = document.getElementById('creditsIconBtn');
+    // Rimosso: creditsIconBtn = document.getElementById('creditsIconBtn');
     creditsModal = document.getElementById('creditsModal');
     closeCreditsModalBtn = document.getElementById('closeCreditsModalBtn');
     accordionHeaders = document.querySelectorAll('.accordion-header');
@@ -782,7 +786,7 @@ export function setupGameEngine() {
     orientationPromptEl = document.getElementById('orientationPrompt');
     dismissOrientationPromptBtn = document.getElementById('dismissOrientationPrompt');
 
-    gameContainer = document.getElementById('gameContainer'); // Note: This might not be directly in index.html, but in game-container-wrapper
+    gameContainer = document.getElementById('game-container-wrapper'); // Usa il wrapper dell'index.html
     jumpButton = document.getElementById('jumpButton');
     shootButton = document.getElementById('shootButton');
     mobileControlsDiv = document.getElementById('mobileControls');
@@ -793,6 +797,8 @@ export function setupGameEngine() {
     restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey');
     mobileStartButton = document.getElementById('mobileStartButton');
     shareScoreBtnDonkey = document.getElementById('shareScoreBtnDonkey');
+    backToMenuBtn = document.getElementById('backToMenuBtn'); // Nuovo: Ottieni il riferimento al pulsante "Torna al Menu"
+    accountIconBtn = document.getElementById('account-icon-btn'); // Nuovo: Ottieni il riferimento all'icona account
 
     // Setup iniziale basato sul dispositivo
     isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
@@ -829,6 +835,7 @@ export function setupGameEngine() {
 
     console.log("✅ setupGameEngine: Completato.");
 }
+
 
 /**
  * Esegue il caricamento di tutte le immagini e suoni necessari per il gioco.
@@ -876,6 +883,9 @@ export function launchGame() {
 
     if (mobileStartButton) mobileStartButton.style.display = 'none';
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+
+    // Nascondi il pulsante account/profilo quando il gioco è in PLAYING
+    if (accountIconBtn) accountIconBtn.style.display = 'none';
 
     // Avvia il game loop se non è già in esecuzione
     if (gameLoopRequestId === null) {
@@ -2234,6 +2244,9 @@ function processGameOver() {
     AudioManager.stopMusic();
     AudioManager.playSound('gameOverSound');
 
+    // Mostra il pulsante account/profilo al Game Over
+    if (accountIconBtn) accountIconBtn.style.display = 'flex';
+
     console.log('Elementi del form punteggio cercati DENTRO processGameOver:', {
         container: !!localScoreInputContainer,
         initialsInput: !!localPlayerInitialsInput,
@@ -2309,10 +2322,11 @@ function processGameOver() {
     }
 
     if (isTouchDevice && mobileStartButton) {
-    mobileStartButton.innerHTML = '<span class="material-symbols-rounded">replay</span><span class="visually-hidden">Rigioca</span>';
-    mobileStartButton.style.display = 'block';
+        mobileStartButton.innerHTML = '<span class="material-symbols-rounded">replay</span><span class="visually-hidden">Rigioca</span>';
+        mobileStartButton.style.display = 'block';
+    }
 }
-}
+
 
 function checkCollisions() {
     if (!asyncDonkey) return;
@@ -2781,13 +2795,14 @@ function drawPlayingScreen() {
 }
 
 function drawGameOverScreen() {
+    // TODO: [Future Task] Implementare uno schermo nero o verde terminale senza la scritta "GAME OVER"
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawGlitchText('GAME OVER', canvas.width / 2, canvas.height / 2 - 80, 60, 'red', '#FF5555', '#AA0000', 6, 3);
+    // drawGlitchText('GAME OVER', canvas.width / 2, canvas.height / 2 - 80, 60, 'red', '#FF5555', '#AA0000', 6, 3); // Rimosso temporaneamente
     drawGlitchText(
         'Punteggio Finale: ' + Math.floor(finalScore),
         canvas.width / 2,
-        canvas.height / 2,
+        canvas.height / 2, // Posizionato più centralmente
         32,
         PALETTE.BRIGHT_GREEN_TEAL,
         PALETTE.MEDIUM_TEAL,
@@ -2796,6 +2811,8 @@ function drawGameOverScreen() {
         2
     );
 
+    // Rimosso il testo "Premi INVIO per Riprovare" gestito dai nuovi pulsanti
+    /*
     if (
         !shouldShowDonkeyScoreInput(finalScore) &&
         (!isTouchDevice || !mobileStartButton || mobileStartButton.style.display === 'none')
@@ -2812,6 +2829,7 @@ function drawGameOverScreen() {
             1
         );
     }
+    */
 }
 
 function gameLoop(timestamp) {
@@ -2981,10 +2999,33 @@ function attachEventListeners() {
             resetGame();
             AudioManager.playMusic(false);
             if (mobileStartButton) mobileStartButton.style.display = 'none';
+            if (accountIconBtn) accountIconBtn.style.display = 'none'; // Nascondi anche qui
         });
     }
     if (shareScoreBtnDonkey) {
         shareScoreBtnDonkey.addEventListener('click', handleShareScore);
+    }
+
+    // Nuovo: Event Listener per il pulsante "Torna al Menu Principale"
+    if (backToMenuBtn) {
+        backToMenuBtn.addEventListener('click', () => {
+            if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+            currentGameState = GAME_STATE.MENU; // Imposta lo stato su MENU
+            resetGame(); // Resetta il gioco, ma non avviare il loop
+            AudioManager.stopMusic(); // Ferma la musica del gioco
+            // Mostra il menu principale
+            const mainMenu = document.getElementById('main-menu');
+            const gameContainerWrapper = document.getElementById('game-container-wrapper');
+            if (mainMenu) {
+                mainMenu.style.display = 'flex';
+                mainMenu.style.opacity = '1';
+                mainMenu.style.zIndex = '900';
+            }
+            if (gameContainerWrapper) {
+                gameContainerWrapper.style.display = 'none'; // Nascondi il contenitore del gioco
+            }
+            if (accountIconBtn) accountIconBtn.style.display = 'flex'; // Mostra l'icona account/login
+        });
     }
 
     // Event Listener for the mobile Start/Restart button
@@ -2998,12 +3039,8 @@ function attachEventListeners() {
     }
 
     // --- Event Listeners for Credits Modal ---
-    if (creditsIconBtn && creditsModal) {
-        creditsIconBtn.addEventListener('click', () => {
-            creditsModal.style.display = 'block';
-        });
-    }
-
+    // Rimosso: if (creditsIconBtn && creditsModal) { creditsIconBtn.addEventListener... }
+    // Rimosso creditsIconBtn dalla sezione
     if (closeCreditsModalBtn && creditsModal) {
         closeCreditsModalBtn.addEventListener('click', () => {
             creditsModal.style.display = 'none';
@@ -3107,6 +3144,8 @@ function attachEventListeners() {
                 }
                 break;
             case GAME_STATE.GAME_OVER:
+                // La gestione del tasto INVIO dopo il Game Over verrà lasciata per avviare una nuova partita,
+                // ma ora si può tornare al menu con il pulsante dedicato.
                 if (
                     e.key === 'Enter' &&
                     (!scoreInputContainerDonkey || scoreInputContainerDonkey.style.display === 'none')

@@ -26,6 +26,16 @@ body {
     overflow: hidden;
     background-color: var(--terminal-bg);
     color: var(--terminal-text);
+    margin: 0; /* Ensures no default body margin */
+}
+
+#app-root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    position: relative;
 }
 
 #terminal-container {
@@ -230,16 +240,16 @@ body {
 }
 
 
-/* Game Container Wrapper and other styles (unchanged from previous version) */
+/* Game Container Wrapper */
 #game-container-wrapper {
-    display: none;
-    position: fixed;
+    display: none; /* Hidden by default */
+    position: fixed; /* Use fixed for full screen */
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: black;
-    z-index: 800;
+    background-color: black; /* Or any background you want for the game area */
+    z-index: 800; /* Below menu, above body */
 }
 
 #gameCanvas {
@@ -252,15 +262,17 @@ body {
     margin: auto;
 }
 
-#mobileControls, #scoreInputContainerDonkey, #mobileStartButton, #creditsIconBtn, .modal, .orientation-prompt {
-    position: absolute;
-    z-index: 810;
-}
-
+/* Updated styles for Mobile Controls */
 #mobileControls {
-    bottom: 20px;
-    left: 20px;
+    position: absolute; /* Position relative to #game-container-wrapper */
+    bottom: 20px; /* Keep it at the bottom */
+    left: 0; /* Align to the left edge of its parent (#game-container-wrapper) */
+    width: 100%; /* Take full width of its parent */
     display: flex;
+    justify-content: space-between; /* Distribute buttons with space between them */
+    padding: 0 20px; /* Add horizontal padding to keep buttons from edges */
+    box-sizing: border-box; /* Include padding in width */
+    z-index: 810; /* Ensure it's above the canvas */
 }
 
 #mobileControls .control-button {
@@ -275,16 +287,235 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 10px;
+    margin-right: 0; /* Removed margin-right as space-between handles spacing */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     transition: background-color 0.2s ease;
+    flex-shrink: 0; /* Prevent shrinking on smaller screens */
 }
 
 #mobileControls .control-button:hover {
     background-color: rgba(14, 175, 155, 1);
 }
 
+/* Updated styles for Score Input Container (Game Over Screen) */
+#scoreInputContainerDonkey {
+    display: none; /* Controlled by JS */
+    flex-direction: column; /* Stack elements vertically for better layout */
+    align-items: center; /* Center horizontally */
+    gap: 10px; /* Spacing between elements */
+    padding: 25px; /* Increased padding for larger feel */
+    background-color: rgba(0, 0, 0, 0.95); /* Slightly darker background and less transparent */
+    border-radius: 12px; /* More rounded corners */
+    border: 3px solid var(--bright-green-teal); /* Thicker, themed border */
+    box-shadow: 0 0 30px rgba(48, 225, 185, 0.9); /* More prominent glow */
+
+    position: absolute; /* Position relative to #game-container-wrapper */
+    top: 50%; /* Center vertically */
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centering trick */
+    z-index: 850; /* Ensure it's above game elements and controls */
+
+    width: 95%; /* Make it wider */
+    max-width: 500px; /* Max width for larger screens */
+    box-sizing: border-box;
+    text-align: center; /* Center text within the container */
+}
+
+#scoreInputContainerDonkey p,
+#scoreInputContainerDonkey label {
+    font-family: 'Source Code Pro', monospace;
+    color: var(--terminal-text);
+    font-size: 1.2em; /* Slightly larger font */
+    margin: 0; /* Remove default margins */
+}
+
+#scoreInputContainerDonkey #finalScoreDisplayDonkey {
+    font-family: 'Press Start 2P', cursive; /* Keep pixel font for score */
+    color: var(--terminal-yellow); /* Highlight score */
+    font-size: 1.8em; /* Larger score font */
+    text-shadow: 0 0 10px var(--terminal-yellow), 0 0 20px rgba(241, 250, 140, 0.5);
+    margin-top: 5px; /* Space from "Game Over" */
+}
+
+#scoreInputContainerDonkey input[type="text"] {
+    background-color: var(--terminal-darker-bg);
+    border: 2px solid var(--terminal-green);
+    color: var(--terminal-text);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1.1em; /* Slightly larger input font */
+    padding: 10px 15px; /* Increased padding */
+    margin-top: 10px; /* More space from label */
+    border-radius: 5px;
+    text-align: center;
+    width: calc(100% - 30px); /* Full width minus padding */
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#scoreInputContainerDonkey input[type="text"]:focus {
+    border-color: var(--bright-green-teal);
+    box-shadow: 0 0 10px rgba(48, 225, 185, 0.7);
+}
+
+#scoreInputContainerDonkey .score-buttons {
+    display: flex;
+    justify-content: center; /* Center buttons horizontally */
+    gap: 15px; /* Space between buttons */
+    margin-top: 20px; /* More space above buttons */
+    width: 100%;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+/* New classes for specific game over buttons */
+.game-over-button { /* Base style for all game over buttons */
+    background-color: var(--medium-teal);
+    color: var(--terminal-text);
+    border: 2px solid var(--bright-teal);
+    padding: 12px 25px; /* Larger padding */
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1em; /* Consistent font size */
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6), 0 0 10px var(--bright-teal);
+    text-transform: uppercase;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* More space for icons */
+    flex-grow: 1;
+    min-width: 140px; /* Increased min-width */
+}
+
+.game-over-button:hover {
+    background-color: var(--bright-teal);
+    border-color: var(--bright-green-teal);
+    color: var(--terminal-bg);
+    box-shadow: 0 5px 20px rgba(0,255,0,0.8), 0 0 15px var(--bright-green-teal);
+}
+
+.game-over-button .material-symbols-rounded {
+    font-size: 1.3em; /* Larger icons */
+}
+
+/* Specific button styles */
+.game-over-save-btn {
+    background-color: var(--terminal-green);
+    border-color: var(--terminal-green);
+    color: var(--terminal-bg);
+}
+.game-over-save-btn:hover {
+    background-color: var(--bright-green-teal);
+    border-color: var(--bright-green-teal);
+}
+
+.game-over-share-btn {
+    background-color: var(--terminal-blue);
+    border-color: var(--terminal-blue);
+    color: var(--terminal-bg);
+}
+.game-over-share-btn:hover {
+    background-color: var(--terminal-cyan);
+    border-color: var(--terminal-cyan);
+}
+
+.game-over-restart-btn {
+    background-color: var(--terminal-orange);
+    border-color: var(--terminal-orange);
+    color: var(--terminal-bg);
+}
+.game-over-restart-btn:hover {
+    background-color: var(--terminal-red);
+    border-color: var(--terminal-red);
+}
+
+.game-over-main-menu-btn { /* New button style */
+    background-color: var(--terminal-purple);
+    border-color: var(--terminal-purple);
+    color: var(--terminal-bg);
+}
+.game-over-main-menu-btn:hover {
+    background-color: var(--terminal-pink);
+    border-color: var(--terminal-pink);
+}
+
+
+/* Fullscreen adjustments for score input container */
+body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
+    display: flex !important;
+    position: fixed !important;
+    top: 50%; /* Center vertically in fullscreen */
+    bottom: auto !important; /* Ensure bottom is not set */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: calc(100vw - 40px);
+    width: auto;
+    z-index: 250 !important;
+}
+
+/* Media Query for small screens in landscape */
+@media (max-width: 768px) and (orientation: landscape) {
+    #scoreInputContainerDonkey,
+    body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
+        flex-direction: column; /* Force column layout on small landscape for readability */
+        flex-wrap: nowrap; /* Prevent wrapping if forced column */
+        gap: 6px;
+        padding: 10px;
+        top: 50%; /* Keep centered */
+        bottom: auto !important;
+        max-width: calc(100vw - 20px);
+        min-width: 280px; /* Ensure it's not too small */
+    }
+    #scoreInputContainerDonkey p,
+    #scoreInputContainerDonkey label {
+        font-size: 0.9em;
+    }
+    #scoreInputContainerDonkey #finalScoreDisplayDonkey {
+        font-size: 1.4em;
+    }
+    #scoreInputContainerDonkey input[type="text"] {
+        width: 100%; /* Full width in column layout */
+        font-size: 1em;
+        padding: 8px 10px;
+    }
+    #scoreInputContainerDonkey .score-buttons {
+        gap: 8px;
+        margin-top: 10px;
+        flex-direction: column; /* Stack buttons too */
+    }
+    .game-over-button {
+        font-size: 0.85em;
+        padding: 8px 15px;
+        min-width: 100%; /* Take full width */
+    }
+}
+
+
+/* Credits Icon Button - REMOVED (will be deleted from HTML) */
+/* .credits-icon-btn { ... } */
+
+/* Fullscreen Button - Kept as is */
+.fullscreen-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(40, 42, 54, 0.7);
+    color: #f8f8f2;
+    border: 1px solid #6272a4;
+    padding: 8px 12px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+}
+
+.fullscreen-button:hover {
+    background-color: rgba(40, 42, 54, 1);
+}
+
+/* Mobile Start Button - Kept as is */
 .mobile-start-button {
     position: absolute;
     top: 50%;
@@ -304,6 +535,7 @@ body {
     justify-content: center;
     text-transform: uppercase;
     transition: background-color 0.3s, transform 0.3s;
+    z-index: 810; /* Ensure it's above the canvas but below score input */
 }
 
 .mobile-start-button:hover {
@@ -325,24 +557,6 @@ body {
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     border: 0;
-}
-
-.fullscreen-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: rgba(40, 42, 54, 0.7);
-    color: #f8f8f2;
-    border: 1px solid #6272a4;
-    padding: 8px 12px;
-    font-size: 0.8em;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    z-index: 10;
-}
-
-.fullscreen-button:hover {
-    background-color: rgba(40, 42, 54, 1);
 }
 
 .orientation-prompt {
