@@ -1,7 +1,7 @@
 // www/js/loader.js
 
 import { setupGameEngine, preloadGameAssets, launchGame } from './donkeyRunner.js';
-import { showToast } from './toastNotifications.js'; // Assicurati di importare showToast
+import { showToast } from './toastNotifications.js';
 
 const terminalContainer = document.getElementById('terminal-container');
 const terminalLog = document.getElementById('terminal-log');
@@ -12,22 +12,48 @@ const startGameBtn = document.getElementById('start-game-btn');
 const leaderboardBtn = document.getElementById('leaderboard-btn');
 const glitchpediaBtn = document.getElementById('glitchpedia-btn');
 const accountBtn = document.getElementById('account-btn');
-const gameContainerWrapper = document.getElementById('game-container-wrapper'); // Contenitore del gioco
+const gameContainerWrapper = document.getElementById('game-container-wrapper');
 
+// MESSAGGI DI CARICAMENTO - ORA SOLO TESTO, LA FORMATTAZIONE AVVERRÀ DOPO
 const loadingMessages = [
-    "BOOTING SYSTEM...",
-    "INITIALIZING SUBROUTINES...",
-    "SCANNING FOR MALICIOUS CODE...",
-    "ESTABLISHING SECURE CONNECTION...",
-    "LOADING GAME ASSETS...",
-    "PREPARING ENVIRONMENT...",
-    "SYSTEM READY. AWAITING COMMANDS..."
+    "kernel: booting asynchronous debugging system...",
+    "console: logging as donkeyDebugger...",
+    "filesystem: sudo scanning /root/sys for anomalies...",
+    "network: pinging remote glitch servers... (response: 404 not found)",
+    "antivirus: donkeyDebugger protocol v2.0 activated.",
+    "analysis: mysterious bugs and glitches detected in core system!",
+    "protocol: only donkey runner protocols can clean this system.",
+    "status: loading essential game assets for system cleanse...",
+    "interface: preparing environment for execution. hold tight...",
+    "system: donkeyDebugger is now active. system ready."
 ];
+
+// Mappatura delle parole chiave ai nomi delle classi CSS per il colore
+const keywordColors = {
+    "kernel": "keyword-blue",
+    "donkeyDebugger": "keyword-blue",
+    "sudo": "keyword-green",
+    "pinging": "keyword-yellow",
+    "404 not found": "keyword-red",
+    "antivirus": "keyword-blue",
+    "analysis": "keyword-red",
+    "bugs": "keyword-red",
+    "glitches": "keyword-red",
+    "protocol": "keyword-blue",
+    "system": "keyword-green",
+    "filesystem": "keyword-green",
+    "network": "keyword-yellow",
+    "console": "keyword-blue",
+    "status": "keyword-green",
+    "interface": "keyword-yellow",
+    "execution": "keyword-red"
+};
+
 
 let messageIndex = 0;
 let charIndex = 0;
 let currentMessageDiv = null;
-let typingInterval = 50; // ms per carattere
+let typingInterval = 15; // Reso ancora più veloce
 
 async function typeWriterEffect() {
     return new Promise(resolve => {
@@ -38,22 +64,41 @@ async function typeWriterEffect() {
 
         currentMessageDiv = document.createElement('div');
         terminalLog.appendChild(currentMessageDiv);
+        terminalLog.scrollTop = terminalLog.scrollHeight;
+
+        const currentRawMessage = loadingMessages[messageIndex];
+        charIndex = 0; // Reset charIndex for the new message
 
         const typeChar = () => {
-            if (charIndex < loadingMessages[messageIndex].length) {
-                currentMessageDiv.textContent += loadingMessages[messageIndex].charAt(charIndex);
+            if (charIndex < currentRawMessage.length) {
+                currentMessageDiv.textContent += currentRawMessage.charAt(charIndex);
                 charIndex++;
                 setTimeout(typeChar, typingInterval);
             } else {
-                currentMessageDiv.textContent += ' _'; // Add blinking cursor
+                // Quando la riga è completa, applica la formattazione con colori
+                applyKeywordColors(currentMessageDiv, currentRawMessage);
                 messageIndex++;
-                charIndex = 0;
-                setTimeout(resolve, 800); // Pause before next message or completion
+                setTimeout(resolve, 600); // Pausa prima del prossimo messaggio
             }
         };
         typeChar();
     });
 }
+
+function applyKeywordColors(element, rawText) {
+    let formattedHtml = rawText;
+    for (const keyword in keywordColors) {
+        if (rawText.includes(keyword)) {
+            // Usa una regex globale e case-insensitive per trovare tutte le occorrenze
+            // e assicurati di non wrappare HTML già esistente.
+            const regex = new RegExp(`\\b(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, 'gi');
+            formattedHtml = formattedHtml.replace(regex, `<span class="${keywordColors[keyword]}">$1</span>`);
+        }
+    }
+    element.innerHTML = formattedHtml; // Sovrascrivi con l'HTML formattato
+    element.style.textTransform = 'lowercase'; // Assicurati che rimanga minuscolo
+}
+
 
 function animateProgressBar(progressBar, targetPercentage, duration) {
     return new Promise(resolve => {
@@ -77,67 +122,65 @@ function animateProgressBar(progressBar, targetPercentage, duration) {
 }
 
 async function startLoadingSequence() {
-    // Hide everything initially
-    terminalContainer.style.display = 'block';
+    terminalContainer.style.display = 'flex';
     mainMenu.style.display = 'none';
     gameContainerWrapper.style.display = 'none';
 
-    // Set up game engine first (obtains DOM references)
-    setupGameEngine(); //
+    setupGameEngine();
 
-    // Start loading assets in the background
-    const preloadPromise = preloadGameAssets(); //
+    const preloadPromise = preloadGameAssets();
 
-    // Animate terminal messages and progress bars
     for (let i = 0; i < loadingMessages.length; i++) {
         await typeWriterEffect();
-        if (i === 0) await animateProgressBar(progressBar1, 30, 0.5);
-        if (i === 1) await animateProgressBar(progressBar2, 20, 0.5);
-        if (i === 2) await animateProgressBar(progressBar1, 60, 0.7);
-        if (i === 3) await animateProgressBar(progressBar2, 50, 0.7);
-        if (i === 4) await animateProgressBar(progressBar1, 90, 0.8);
-        if (i === 5) await animateProgressBar(progressBar2, 80, 0.8);
+        const progressIncrement = 100 / loadingMessages.length;
+        if (progressBar1 && progressBar2) {
+            if (i % 2 === 0) {
+                await animateProgressBar(progressBar1, (i + 1) * progressIncrement, 0.4);
+            } else {
+                await animateProgressBar(progressBar2, (i + 1) * progressIncrement, 0.4);
+            }
+        }
     }
 
-    // Wait for all assets to be fully loaded
-    await preloadPromise; // Wait for background asset loading to finish
+    await preloadPromise;
 
-    await animateProgressBar(progressBar1, 100, 0.3);
-    await animateProgressBar(progressBar2, 100, 0.3);
+    if (progressBar1) await animateProgressBar(progressBar1, 100, 0.3);
+    if (progressBar2) await animateProgressBar(progressBar2, 100, 0.3);
 
-    // Final message and transition
-    terminalLog.lastChild.textContent = terminalLog.lastChild.textContent.replace(' _', ''); // Remove blinking cursor
+    // Final message with blinking cursor
     const finalMessage = document.createElement('div');
-    finalMessage.textContent = "PROCESS COMPLETE. DISPLAYING MENU...";
+    finalMessage.innerHTML = "EXECUTION COMPLETE. DISPLAYING MENU: <span class=\"blinking-cursor\">_</span>";
     terminalLog.appendChild(finalMessage);
+    terminalLog.scrollTop = terminalLog.scrollHeight;
+    finalMessage.style.textTransform = 'lowercase';
+
 
     setTimeout(() => {
-        terminalContainer.style.opacity = 0; // Fade out terminal
+        terminalContainer.style.opacity = 0;
         setTimeout(() => {
             terminalContainer.style.display = 'none';
-            mainMenu.style.display = 'flex'; // Show main menu
-            mainMenu.style.opacity = 1; // Fade in menu
+            mainMenu.style.display = 'flex';
+            mainMenu.style.opacity = 1;
             console.log("Menu principale visualizzato.");
-        }, 500); // Wait for fade-out to complete
+        }, 500);
     }, 1000);
 }
 
-// Attach menu button event listeners
+// ... (Resto del codice di loader.js invariato) ...
+
 if (startGameBtn) {
     startGameBtn.addEventListener('click', () => {
         console.log("Start Game button clicked.");
         mainMenu.style.display = 'none';
-        gameContainerWrapper.style.display = 'flex'; // Show game canvas
-        launchGame(); //
+        gameContainerWrapper.style.display = 'flex';
+        launchGame();
     });
 }
 
 if (leaderboardBtn) {
     leaderboardBtn.addEventListener('click', () => {
         console.log("Leaderboard button clicked.");
-        // Implement navigation or modal display for leaderboard
         showToast("Caricamento Classifica...", "info");
-        // For now, redirect. Later, consider a modal for Capacitor.
         window.location.href = 'leaderboard.html';
     });
 }
@@ -145,25 +188,18 @@ if (leaderboardBtn) {
 if (glitchpediaBtn) {
     glitchpediaBtn.addEventListener('click', () => {
         console.log("Glitchpedia button clicked.");
-        // Implement modal or section display for Glitchpedia
         showToast("Apertura Glitchpedia...", "info");
-        // Example: show a hidden div or modal
-        // const glitchpediaModal = document.getElementById('glitchpediaModal');
-        // if (glitchpediaModal) glitchpediaModal.style.display = 'block';
+        const glitchpediaModal = document.getElementById('glitchpediaModal');
+        if (glitchpediaModal) glitchpediaModal.style.display = 'block';
     });
 }
 
 if (accountBtn) {
     accountBtn.addEventListener('click', () => {
         console.log("Account button clicked.");
-        // Implement logic to show login/profile modal
         showToast("Apertura Account...", "info");
-        // Example: show login modal from main.js if it's imported globally or exposed.
-        // For now, redirect. Later, consider a modal for Capacitor.
-        window.location.href = 'profile.html'; // Assuming profile.html handles login state
+        window.location.href = 'profile.html';
     });
 }
 
-
-// Start the loading sequence when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', startLoadingSequence);

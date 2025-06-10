@@ -246,11 +246,11 @@ function setupRenderingContext(context) {
 const GAME_STATE = { MENU: 'MENU', PLAYING: 'PLAYING', GAME_OVER: 'GAME_OVER' };
 let currentGameState = GAME_STATE.MENU;
 let asyncDonkey = null;
-let playerInitialX = 50; // Use let
-let playerInitialY = 0; // Will be calculated in setupGameEngine
+let playerInitialX = 50;
+let playerInitialY = 0;
 
 let images = {};
-const imagesToLoad = []; // Initialize empty, will be populated by prepareAssetsToLoad
+const imagesToLoad = [];
 
 let imagesLoadedCount = 0;
 let allImagesLoaded = false;
@@ -782,7 +782,7 @@ export function setupGameEngine() {
     orientationPromptEl = document.getElementById('orientationPrompt');
     dismissOrientationPromptBtn = document.getElementById('dismissOrientationPrompt');
 
-    gameContainer = document.getElementById('gameContainer');
+    gameContainer = document.getElementById('gameContainer'); // Note: This might not be directly in index.html, but in game-container-wrapper
     jumpButton = document.getElementById('jumpButton');
     shootButton = document.getElementById('shootButton');
     mobileControlsDiv = document.getElementById('mobileControls');
@@ -800,8 +800,6 @@ export function setupGameEngine() {
 
     if (isTouchDevice) {
         if (mobileControlsDiv) mobileControlsDiv.style.display = 'block';
-        // The fullscreen button display logic might need adjustment if you want it
-        // to appear only after the game is loaded, but for now, it's fine here.
         if (fullscreenButton) fullscreenButton.style.display = 'block';
         console.log('Dispositivo touch rilevato.');
     } else {
@@ -852,12 +850,7 @@ export async function preloadGameAssets() {
     console.log('✅ preloadGameAssets: Processo di caricamento assets completato.');
     resourcesInitialized = true;
 
-    if (db) {
-        loadDonkeyLeaderboard();
-    } else {
-        console.error('DB non pronto, impossibile caricare la leaderboard per DonkeyRunner.');
-        if (miniLeaderboardListEl) miniLeaderboardListEl.innerHTML = '<li>Classifica non disponibile (DB error).</li>';
-    }
+    // REMOVED: loadDonkeyLeaderboard() from here. It should be triggered when needed (e.g., in leaderboard.html or on Game Over screen display).
     checkAndDisplayOrientationPrompt();
 }
 
@@ -2983,13 +2976,11 @@ function attachEventListeners() {
     }
     if (restartGameBtnDonkey) {
         restartGameBtnDonkey.addEventListener('click', () => {
-            // This is 'restartGameBtnDonkey', it should directly restart the game state
-            // and hide the score input, similar to launchGame but without initial checks.
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
             currentGameState = GAME_STATE.PLAYING;
             resetGame();
             AudioManager.playMusic(false);
-            if (mobileStartButton) mobileStartButton.style.display = 'none'; // Ensure mobile start button is hidden on restart
+            if (mobileStartButton) mobileStartButton.style.display = 'none';
         });
     }
     if (shareScoreBtnDonkey) {
@@ -3000,7 +2991,6 @@ function attachEventListeners() {
     if (mobileStartButton) {
         mobileStartButton.addEventListener('click', (e) => {
             e.preventDefault();
-            // Call launchGame for both MENU and GAME_OVER states
             if (currentGameState === GAME_STATE.MENU || currentGameState === GAME_STATE.GAME_OVER) {
                 launchGame();
             }
@@ -3101,7 +3091,7 @@ function attachEventListeners() {
         switch (currentGameState) {
             case GAME_STATE.MENU:
                 if (e.key === 'Enter') {
-                    launchGame(); // Call the new launchGame function
+                    launchGame();
                 }
                 break;
             case GAME_STATE.PLAYING:
@@ -3121,7 +3111,7 @@ function attachEventListeners() {
                     e.key === 'Enter' &&
                     (!scoreInputContainerDonkey || scoreInputContainerDonkey.style.display === 'none')
                 ) {
-                    launchGame(); // Call the new launchGame function
+                    launchGame();
                 }
                 break;
         }
@@ -3130,5 +3120,4 @@ function attachEventListeners() {
 }
 
 // Remove auto-executing calls from here. These will be triggered from index.html or loader.js
-// console.log('Fine script donkeyRunner.js (esecuzione iniziale). In attesa caricamento assets...');
 

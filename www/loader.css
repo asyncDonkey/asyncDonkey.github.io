@@ -18,12 +18,14 @@
     --bright-teal: #0eaf9b;
     --dark-teal-blue: #32535f;
     --medium-purple: #631b34;
-    --terminal-border: var(--terminal-green);
+    --terminal-border: var(--terminal-green); /* Use green for border for old-school feel */
 }
 
 body {
     font-family: 'Source Code Pro', monospace;
-    overflow: hidden; /* Important for app experience */
+    overflow: hidden;
+    background-color: var(--terminal-bg);
+    color: var(--terminal-text);
 }
 
 #terminal-container {
@@ -50,27 +52,52 @@ body {
     height: 200px;
     padding: 15px;
     overflow-y: auto;
-    font-size: 14px;
+    font-size: 0.85em; /* Reso ancora più piccolo */
     margin-bottom: 20px;
-    box-shadow: 0 0 15px rgba(0,255,0,0.3);
+    box-shadow: 0 0 15px rgba(0,255,0,0.5), inset 0 0 8px rgba(0,255,0,0.3);
     white-space: pre-wrap;
     box-sizing: border-box;
-    position: relative; /* Needed for blinking cursor effect */
+    position: relative;
+    text-shadow: 0 0 5px rgba(0,255,0,0.6);
+    line-height: 1.4;
+    text-transform: lowercase; /* Mantiene tutto il testo minuscolo */
 }
 
 #terminal-log div {
     margin-bottom: 5px;
+    /* Rimuovi text-transform: lowercase qui se vuoi che solo i <span> siano minuscoli,
+       altrimenti lascia per default lowercase. */
 }
 
-/* Blinking cursor effect */
-#terminal-log div:last-child::after {
-    content: '_';
+/* Stili per le parole chiave colorate */
+#terminal-log .keyword-blue {
+    color: var(--terminal-blue);
+    text-shadow: 0 0 3px var(--terminal-blue);
+}
+#terminal-log .keyword-green {
+    color: var(--terminal-green);
+    text-shadow: 0 0 3px var(--terminal-green);
+}
+#terminal-log .keyword-red {
+    color: var(--terminal-red);
+    text-shadow: 0 0 3px var(--terminal-red);
+}
+#terminal-log .keyword-yellow {
+    color: var(--terminal-yellow);
+    text-shadow: 0 0 3px var(--terminal-yellow);
+}
+
+
+/* Blinking cursor for the final message */
+#terminal-log .blinking-cursor {
     animation: blink-caret 0.75s step-end infinite;
+    color: var(--terminal-green);
+    text-shadow: 0 0 5px var(--terminal-green);
 }
 
 @keyframes blink-caret {
-    from, to { border-right-color: transparent }
-    50% { border-right-color: var(--terminal-text); }
+    from, to { opacity: 0; }
+    50% { opacity: 1; }
 }
 
 .progress-bars {
@@ -83,11 +110,11 @@ body {
     width: 100%;
     background-color: var(--terminal-darker-bg);
     border: 1px solid var(--terminal-border);
-    height: 25px;
+    height: 15px;
     margin-bottom: 10px;
     overflow: hidden;
     position: relative;
-    box-shadow: inset 0 0 5px rgba(0,255,0,0.5);
+    box-shadow: inset 0 0 5px var(--terminal-green);
 }
 
 .progress-bar {
@@ -97,16 +124,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--terminal-bg);
-    transition: width 0.3s ease-out; /* Smoother transition */
-    box-shadow: 0 0 10px rgba(0,255,0,0.7);
+    transition: width 0.3s ease-out;
+    box-shadow: 0 0 10px var(--bright-green-teal);
 }
 
 #main-menu {
     background-color: var(--terminal-bg);
     color: var(--terminal-text);
-    display: none; /* Hidden by default */
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -115,8 +142,8 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 900; /* Below loader, above game */
-    opacity: 0; /* Starts transparent for fade-in */
+    z-index: 900;
+    opacity: 0;
     transition: opacity 0.5s ease-in;
 }
 
@@ -124,24 +151,27 @@ body {
     font-family: 'Press Start 2P', cursive;
     color: var(--bright-green-teal);
     font-size: 3em;
+    margin-top: 10vh; /* Spostato più in basso con vh per responsività */
     margin-bottom: 50px;
-    text-shadow: 0 0 10px var(--bright-green-teal), 0 0 20px rgba(0,255,0,0.5);
+    text-shadow: 0 0 15px var(--bright-green-teal), 0 0 30px rgba(0,255,0,0.6);
     text-align: center;
 }
 
 #main-menu button {
     background-color: var(--medium-teal);
     color: var(--terminal-text);
+    font-family: 'Source Code Pro', monospace; /* Font più da sistema per i pulsanti */
+    font-weight: bold;
+    font-size: 0.9em; /* Dimensione del testo dei pulsanti più piccola */
     border: 2px solid var(--bright-teal);
-    padding: 15px 30px;
-    margin: 10px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 1.2em;
+    padding: 10px 20px;
+    margin: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6), 0 0 10px var(--bright-teal);
     text-transform: uppercase;
-    min-width: 250px; /* Ensure buttons have a consistent size */
+    min-width: 180px;
+    max-width: 280px;
     text-align: center;
 }
 
@@ -150,53 +180,55 @@ body {
     background-color: var(--bright-teal);
     border-color: var(--bright-green-teal);
     color: var(--terminal-bg);
-    box-shadow: 0 5px 20px rgba(0,255,0,0.6);
-    outline: none; /* Remove default focus outline */
+    box-shadow: 0 5px 20px rgba(0,255,0,0.8), 0 0 15px var(--bright-green-teal);
+    outline: none;
 }
 
-/* Game Container Wrapper */
+#main-menu button:last-of-type {
+    margin-top: 25px;
+    margin-bottom: 3vh; /* Margine dal basso, usa vh per responsività */
+}
+
+/* Game Container Wrapper and other styles (unchanged from previous version) */
 #game-container-wrapper {
-    display: none; /* Hidden by default */
-    position: fixed; /* Use fixed for full screen */
+    display: none;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     background-color: black;
-    z-index: 800; /* Below menu and loader */
+    z-index: 800;
 }
 
-/* Ensure canvas takes up available space in wrapper */
 #gameCanvas {
-    display: block; /* Remove extra space below canvas */
+    display: block;
     width: 100%;
     height: 100%;
-    max-width: 800px; /* Match game dimensions */
-    max-height: 450px; /* Match game dimensions */
-    object-fit: contain; /* Scale down while maintaining aspect ratio */
-    margin: auto; /* Center canvas within its flex container */
+    max-width: 800px;
+    max-height: 450px;
+    object-fit: contain;
+    margin: auto;
 }
 
-/* Adjust mobile controls and score input to be within game-container-wrapper if they are positioned absolutely */
 #mobileControls, #scoreInputContainerDonkey, #mobileStartButton, #creditsIconBtn, .modal, .orientation-prompt {
-    position: absolute; /* Keep absolute positioning within game-container-wrapper */
-    z-index: 810; /* Ensure they are above the canvas */
+    position: absolute;
+    z-index: 810;
 }
 
-/* Basic mobile controls styling */
 #mobileControls {
     bottom: 20px;
     left: 20px;
-    display: flex; /* Assuming it starts hidden on desktop */
+    display: flex;
 }
 
 #mobileControls .control-button {
-    background-color: rgba(14, 175, 155, 0.7); /* Bright Teal with transparency */
+    background-color: rgba(14, 175, 155, 0.7);
     color: white;
     border: 2px solid var(--bright-green-teal);
     padding: 15px;
     font-size: 1.2em;
-    border-radius: 50%; /* Make them round */
+    border-radius: 50%;
     width: 70px;
     height: 70px;
     display: flex;
@@ -212,7 +244,6 @@ body {
     background-color: rgba(14, 175, 155, 1);
 }
 
-/* Styles for restart/start button */
 .mobile-start-button {
     position: absolute;
     top: 50%;
@@ -227,7 +258,7 @@ body {
     font-size: 1.5em;
     cursor: pointer;
     box-shadow: 0 0 20px rgba(0,255,0,0.7);
-    display: none; /* Controlled by JS */
+    display: none;
     align-items: center;
     justify-content: center;
     text-transform: uppercase;
@@ -240,7 +271,7 @@ body {
 }
 
 .mobile-start-button .material-symbols-rounded {
-    font-size: 2em; /* Adjust icon size */
+    font-size: 2em;
     margin-right: 10px;
 }
 
@@ -255,7 +286,6 @@ body {
     border: 0;
 }
 
-/* Fullscreen button */
 .fullscreen-button {
     position: absolute;
     top: 10px;
@@ -274,9 +304,8 @@ body {
     background-color: rgba(40, 42, 54, 1);
 }
 
-/* Orientation prompt */
 .orientation-prompt {
-    display: none; /* Hidden by default, shown by JS */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -302,26 +331,25 @@ body {
     cursor: pointer;
 }
 
-/* Modal styling */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 200; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 200;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
-    padding-top: 60px; /* Location of the box */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8);
+    padding-top: 60px;
 }
 
 .modal-content {
     background-color: var(--terminal-darker-bg);
-    margin: 5% auto; /* 5% from the top and centered */
+    margin: 5% auto;
     padding: 20px;
     border: 1px solid var(--terminal-border);
-    width: 80%; /* Could be more or less, depending on screen size */
+    width: 80%;
     max-width: 700px;
     border-radius: 8px;
     position: relative;
@@ -403,12 +431,12 @@ body {
     direction: ltr;
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
-    content: 'expand_more'; /* Down arrow */
+    content: 'expand_more';
     transition: transform 0.3s ease;
 }
 
 .accordion-header.active .accordion-icon {
-    content: 'expand_less'; /* Up arrow */
+    content: 'expand_less';
     transform: rotate(180deg);
 }
 
@@ -422,7 +450,6 @@ body {
 }
 
 .accordion-panel.open {
-    /* max-height will be set by JS */
     border-top: 1px solid var(--terminal-border);
 }
 
@@ -453,7 +480,6 @@ body {
     color: var(--bright-teal);
 }
 
-/* Toast notifications are handled by js/toastNotifications.js and scss/_toast.scss */
 #toast-notifications {
     position: fixed;
     bottom: 20px;
@@ -464,3 +490,16 @@ body {
     gap: 10px;
     z-index: 10000;
 }
+.toast {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.9em;
+}
+.toast.success { background-color: var(--terminal-green); }
+.toast.error { background-color: var(--terminal-red); }
+.toast.info { background-color: var(--terminal-blue); }
+.toast.warning { background-color: var(--terminal-orange); }
