@@ -11,7 +11,7 @@ const mainMenu = document.getElementById('main-menu');
 const startGameBtn = document.getElementById('start-game-btn');
 const leaderboardBtn = document.getElementById('leaderboard-btn');
 const glitchpediaBtn = document.getElementById('glitchpedia-btn');
-const accountBtn = document.getElementById('account-btn');
+const accountBtn = document.getElementById('account-icon-btn'); // AGGIORNATO: Riferimento alla nuova icona
 const gameContainerWrapper = document.getElementById('game-container-wrapper');
 
 // MESSAGGI DI CARICAMENTO - ORA SOLO TESTO, LA FORMATTAZIONE AVVERRÀ DOPO
@@ -90,8 +90,9 @@ function applyKeywordColors(element, rawText) {
     for (const keyword in keywordColors) {
         if (rawText.includes(keyword)) {
             // Usa una regex globale e case-insensitive per trovare tutte le occorrenze
-            // e assicurati di non wrappare HTML già esistente.
-            const regex = new RegExp(`\\b(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, 'gi');
+            // e assicurati di non sovrapporre gli span per le stesse parole
+            // $& si riferisce alla stringa trovata dalla regex
+            const regex = new RegExp(`\\b(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?!<\\/span>)\\b`, 'gi');
             formattedHtml = formattedHtml.replace(regex, `<span class="${keywordColors[keyword]}">$1</span>`);
         }
     }
@@ -166,8 +167,6 @@ async function startLoadingSequence() {
     }, 1000);
 }
 
-// ... (Resto del codice di loader.js invariato) ...
-
 if (startGameBtn) {
     startGameBtn.addEventListener('click', () => {
         console.log("Start Game button clicked.");
@@ -194,9 +193,10 @@ if (glitchpediaBtn) {
     });
 }
 
+// AGGIORNATO: Listener per la nuova icona dell'account
 if (accountBtn) {
     accountBtn.addEventListener('click', () => {
-        console.log("Account button clicked.");
+        console.log("Account icon clicked.");
         showToast("Apertura Account...", "info");
         window.location.href = 'profile.html';
     });

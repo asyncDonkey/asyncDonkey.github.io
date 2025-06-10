@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>codeDash! Mobile</title>
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="loader.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap">
@@ -118,6 +117,7 @@
             font-size: 3em;
             margin-bottom: 50px;
             text-shadow: 0 0 10px var(--bright-green-teal), 0 0 20px rgba(0,255,0,0.5);
+            text-align: center;
         }
 
         #main-menu button {
@@ -126,7 +126,7 @@
             border: 2px solid var(--bright-teal);
             padding: 15px 30px;
             margin: 10px;
-            font-family: 'Press Start 2P', cursive;
+            font-family: 'Source Code Pro', monospace;
             font-size: 1.2em;
             cursor: pointer;
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
@@ -173,7 +173,11 @@
             <button id="start-game-btn">START GAME</button>
             <button id="leaderboard-btn">LEADERBOARD</button>
             <button id="glitchpedia-btn">GLITCHPEDIA</button>
-            <button id="account-btn">ACCOUNT</button>
+            </div>
+
+        <div id="account-icon-btn" class="menu-icon-btn">
+            <span class="material-symbols-rounded">account_circle</span>
+            <span class="visually-hidden">Account</span>
         </div>
 
         <div id="game-container-wrapper">
@@ -243,7 +247,7 @@
                             </button>
                             <div class="accordion-panel">
                                 <ul>
-                                    <li>Sprite Giocatore: Creato da <strong>Umberto M.</strong></li>
+                                    <li>Sprite Giocatore: Creato da <strong>Umberto M.</strong>.</li>
                                     <li>Sprite Nemici & Ostacoli: Resi unici da <strong>Umberto M.</strong> (basati su asset open source).</li>
                                     <li>Effetti Sonori & Musica: Ottenuti da librerie open source (es. Kenney.nl, Freesound.org) e adattati per il gioco.</li>
                                     <li>Font Pixel: "Press Start 2P" by CodeMan38.</li>

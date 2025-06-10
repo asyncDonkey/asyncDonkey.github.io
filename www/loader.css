@@ -52,7 +52,7 @@ body {
     height: 200px;
     padding: 15px;
     overflow-y: auto;
-    font-size: 0.85em; /* Reso ancora più piccolo */
+    font-size: 0.85em; /* Testo più piccolo per un look da terminale */
     margin-bottom: 20px;
     box-shadow: 0 0 15px rgba(0,255,0,0.5), inset 0 0 8px rgba(0,255,0,0.3);
     white-space: pre-wrap;
@@ -65,8 +65,6 @@ body {
 
 #terminal-log div {
     margin-bottom: 5px;
-    /* Rimuovi text-transform: lowercase qui se vuoi che solo i <span> siano minuscoli,
-       altrimenti lascia per default lowercase. */
 }
 
 /* Stili per le parole chiave colorate */
@@ -160,9 +158,9 @@ body {
 #main-menu button {
     background-color: var(--medium-teal);
     color: var(--terminal-text);
-    font-family: 'Source Code Pro', monospace; /* Font più da sistema per i pulsanti */
+    font-family: 'Source Code Pro', monospace; /* FONT MODIFICATO QUI */
     font-weight: bold;
-    font-size: 0.9em; /* Dimensione del testo dei pulsanti più piccola */
+    font-size: 0.9em;
     border: 2px solid var(--bright-teal);
     padding: 10px 20px;
     margin: 8px;
@@ -184,10 +182,53 @@ body {
     outline: none;
 }
 
-#main-menu button:last-of-type {
-    margin-top: 25px;
-    margin-bottom: 3vh; /* Margine dal basso, usa vh per responsività */
+/* Regola il margine dell'ultimo pulsante nel menu principale dopo la rimozione del pulsante Account */
+#main-menu button:last-child {
+    margin-bottom: 10px; /* Reset the specific margin if it was pushing it too low */
 }
+
+/* Nuovo stile per l'icona dell'account */
+.menu-icon-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(40, 42, 54, 0.7);
+    color: var(--terminal-text);
+    border: 2px solid var(--terminal-comment);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    z-index: 950;
+}
+
+.menu-icon-btn:hover {
+    background-color: var(--medium-teal);
+    border-color: var(--bright-green-teal);
+    color: var(--bright-green-teal);
+    box-shadow: 0 2px 15px rgba(0,255,0,0.7);
+}
+
+.menu-icon-btn .material-symbols-rounded {
+    font-size: 30px;
+}
+
+.menu-icon-btn .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
 
 /* Game Container Wrapper and other styles (unchanged from previous version) */
 #game-container-wrapper {
