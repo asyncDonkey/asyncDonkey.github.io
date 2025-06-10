@@ -805,7 +805,8 @@ export function setupGameEngine() {
     isIPhone = /iPhone/i.test(navigator.userAgent);
 
     if (isTouchDevice) {
-        if (mobileControlsDiv) mobileControlsDiv.style.display = 'block';
+        // MODIFICA QUI: Cambia 'block' in 'flex'
+        if (mobileControlsDiv) mobileControlsDiv.style.display = 'flex'; 
         if (fullscreenButton) fullscreenButton.style.display = 'block';
         console.log('Dispositivo touch rilevato.');
     } else {
