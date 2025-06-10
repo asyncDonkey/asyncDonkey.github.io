@@ -35,7 +35,7 @@ const PALETTE = {
 // Declare global DOM element variables with 'let' and no initial assignment
 // They will be assigned in setupGameEngine() once the DOM is ready.
 let miniLeaderboardListEl = null;
-let creditsIconBtn = null;
+
 let creditsModal = null;
 let closeCreditsModalBtn = null;
 let accordionHeaders = null;
@@ -786,7 +786,7 @@ export function setupGameEngine() {
     orientationPromptEl = document.getElementById('orientationPrompt');
     dismissOrientationPromptBtn = document.getElementById('dismissOrientationPrompt');
 
-    gameContainer = document.getElementById('game-container-wrapper'); // Usa il wrapper dell'index.html
+    gameContainer = document.getElementById('game-container-wrapper');
     jumpButton = document.getElementById('jumpButton');
     shootButton = document.getElementById('shootButton');
     mobileControlsDiv = document.getElementById('mobileControls');
@@ -797,16 +797,15 @@ export function setupGameEngine() {
     restartGameBtnDonkey = document.getElementById('restartGameBtnDonkey');
     mobileStartButton = document.getElementById('mobileStartButton');
     shareScoreBtnDonkey = document.getElementById('shareScoreBtnDonkey');
-    backToMenuBtn = document.getElementById('backToMenuBtn'); // Nuovo: Ottieni il riferimento al pulsante "Torna al Menu"
-    accountIconBtn = document.getElementById('account-icon-btn'); // Nuovo: Ottieni il riferimento all'icona account
+    backToMenuBtn = document.getElementById('backToMenuBtn');
+    accountIconBtn = document.getElementById('account-icon-btn');
 
     // Setup iniziale basato sul dispositivo
     isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
     isIPhone = /iPhone/i.test(navigator.userAgent);
 
     if (isTouchDevice) {
-        // MODIFICA QUI: Cambia 'block' in 'flex'
-        if (mobileControlsDiv) mobileControlsDiv.style.display = 'flex'; 
+        if (mobileControlsDiv) mobileControlsDiv.style.display = 'flex'; // Già modificato a 'flex'
         if (fullscreenButton) fullscreenButton.style.display = 'block';
         console.log('Dispositivo touch rilevato.');
     } else {
@@ -825,6 +824,14 @@ export function setupGameEngine() {
         }
     }
 
+     // Imposta le icone dei pulsanti di gioco (rimuovendo il testo)
+    if (jumpButton) {
+        jumpButton.innerHTML = '<span class="material-symbols-rounded">arrow_circle_up</span><span class="visually-hidden"></span>';
+    }
+    if (shootButton) {
+        shootButton.innerHTML = '<span class="material-symbols-rounded">code</span><span class="visually-hidden"></span>';
+    }
+
     // Prepare the asset list (fills imagesToLoad)
     prepareAssetsToLoad();
 
@@ -836,6 +843,7 @@ export function setupGameEngine() {
 
     console.log("✅ setupGameEngine: Completato.");
 }
+
 
 
 /**
@@ -879,21 +887,35 @@ export function launchGame() {
     }
 
     currentGameState = GAME_STATE.PLAYING;
-    resetGame();
+    resetGame(); // resetGame() non nasconderà più mobileControlsDiv; launchGame() gestirà la visibilità.
     AudioManager.playMusic(false);
 
     if (mobileStartButton) mobileStartButton.style.display = 'none';
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
 
-    // Nascondi il pulsante account/profilo quando il gioco è in PLAYING
+    // Nascondi l'icona account/profilo quando il gioco è in PLAYING
     if (accountIconBtn) accountIconBtn.style.display = 'none';
+
+    // Assicurati che i pulsanti di gioco siano visibili solo su touch device quando il gioco è in PLAYING.
+    // Questa è l'unica riga che imposta la visibilità dei controlli all'avvio del gioco.
+    if (mobileControlsDiv) {
+        // Forza la visibilità con !important per debug
+        mobileControlsDiv.style.setProperty('display', isTouchDevice ? 'flex' : 'none', 'important');
+        console.log(`[launchGame] mobileControlsDiv display set to: ${mobileControlsDiv.style.display} (isTouchDevice: ${isTouchDevice})`);
+        setTimeout(() => {
+            if (mobileControlsDiv) {
+                const computedStyle = window.getComputedStyle(mobileControlsDiv);
+                console.log(`[launchGame - Delayed Check] Computed display for mobileControlsDiv: ${computedStyle.display}`);
+                console.log(`[launchGame - Delayed Check] Inline style for mobileControlsDiv: ${mobileControlsDiv.style.display}`);
+            }
+        }, 100);
+    }
 
     // Avvia il game loop se non è già in esecuzione
     if (gameLoopRequestId === null) {
         startGameLoop();
     }
 }
-
 
 // --- Classi di Gioco ---
 class Player {
@@ -2245,8 +2267,15 @@ function processGameOver() {
     AudioManager.stopMusic();
     AudioManager.playSound('gameOverSound');
 
-    // Mostra il pulsante account/profilo al Game Over
+    // Mostra l'icona account/profilo al Game Over
     if (accountIconBtn) accountIconBtn.style.display = 'flex';
+
+    // Nascondi i pulsanti di gioco durante la schermata di Game Over
+    if (mobileControlsDiv) {
+        mobileControlsDiv.style.display = 'none';
+        console.log(`[processGameOver] mobileControlsDiv display set to: ${mobileControlsDiv.style.display}`); // Aggiunto log per debug
+    }
+
 
     console.log('Elementi del form punteggio cercati DENTRO processGameOver:', {
         container: !!localScoreInputContainer,
@@ -2583,6 +2612,12 @@ function resetGame() {
 
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
     if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none';
+
+    // RIMOZIONE DELLA RIGA SEGUENTE:
+    // if (mobileControlsDiv) mobileControlsDiv.style.display = 'none';
+    // L'impostazione della visibilità dei controlli all'inizio del gioco sarà gestita esclusivamente da launchGame().
+    // Questo evita che resetGame() nasconda i pulsanti e che launchGame() non riesca a ripristinarli correttamente in tutti i casi.
+
     console.log(
         'Gioco resettato. Flags boss: imminent=',
         bossFightImminent,
@@ -2803,7 +2838,7 @@ function drawGameOverScreen() {
     drawGlitchText(
         'Punteggio Finale: ' + Math.floor(finalScore),
         canvas.width / 2,
-        canvas.height / 2, // Posizionato più centralmente
+        canvas.height / 2 - 20, // Spostato leggermente più in alto per lasciare spazio ai pulsanti
         32,
         PALETTE.BRIGHT_GREEN_TEAL,
         PALETTE.MEDIUM_TEAL,
@@ -2996,11 +3031,12 @@ function attachEventListeners() {
     if (restartGameBtnDonkey) {
         restartGameBtnDonkey.addEventListener('click', () => {
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-            currentGameState = GAME_STATE.PLAYING;
-            resetGame();
-            AudioManager.playMusic(false);
-            if (mobileStartButton) mobileStartButton.style.display = 'none';
-            if (accountIconBtn) accountIconBtn.style.display = 'none'; // Nascondi anche qui
+            // currentGameState = GAME_STATE.PLAYING; // launchGame() will handle this
+            // resetGame(); // launchGame() will call resetGame()
+            // AudioManager.playMusic(false); // launchGame() will handle this
+            // if (mobileStartButton) mobileBobileStartButton.style.display = 'none'; // launchGame() will handle this
+            // if (accountIconBtn) accountIconBtn.style.display = 'none'; // launchGame() will handle this
+            launchGame(); // Call launchGame to properly restart and show controls
         });
     }
     if (shareScoreBtnDonkey) {
@@ -3040,8 +3076,11 @@ function attachEventListeners() {
     }
 
     // --- Event Listeners for Credits Modal ---
-    // Rimosso: if (creditsIconBtn && creditsModal) { creditsIconBtn.addEventListener... }
-    // Rimosso creditsIconBtn dalla sezione
+    // Rimozione completa di creditsIconBtn (già fatto in index.html)
+    // Non servono più riferimenti o event listener per creditsIconBtn.
+
+    // Questi event listener restano per la modale crediti, che può essere aperta dal menu principale
+    // tramite glitchpedia-btn, non più da un'icona in gioco.
     if (closeCreditsModalBtn && creditsModal) {
         closeCreditsModalBtn.addEventListener('click', () => {
             creditsModal.style.display = 'none';
@@ -3133,6 +3172,10 @@ function attachEventListeners() {
                 }
                 break;
             case GAME_STATE.PLAYING:
+                // Nascondi il pulsante account/profilo se il gioco è in PLAYING e non è già nascosto
+                if (accountIconBtn && accountIconBtn.style.display !== 'none') {
+                    accountIconBtn.style.display = 'none';
+                }
                 if (asyncDonkey) {
                     if (e.code === 'Space' || e.key === 'ArrowUp') {
                         e.preventDefault();
@@ -3145,6 +3188,10 @@ function attachEventListeners() {
                 }
                 break;
             case GAME_STATE.GAME_OVER:
+                // Mostra il pulsante account/profilo se il gioco è in GAME_OVER e non è già visibile
+                if (accountIconBtn && accountIconBtn.style.display !== 'flex') {
+                    accountIconBtn.style.display = 'flex';
+                }
                 // La gestione del tasto INVIO dopo il Game Over verrà lasciata per avviare una nuova partita,
                 // ma ora si può tornare al menu con il pulsante dedicato.
                 if (
@@ -3160,4 +3207,3 @@ function attachEventListeners() {
 }
 
 // Remove auto-executing calls from here. These will be triggered from index.html or loader.js
-

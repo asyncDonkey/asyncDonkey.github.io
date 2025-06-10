@@ -269,36 +269,70 @@ body {
     left: 0;
     width: 100%;
     display: flex;
-    justify-content: space-between; /* Ensures buttons are at extreme ends */
-    padding: 0 20px; /* **Aggiunto/modificato: Padding per allontanare i pulsanti dai bordi** */
+    justify-content: space-between;
+    padding: 0 20px;
     box-sizing: border-box;
     z-index: 810;
 }
-
 
 #mobileControls .control-button {
     background-color: rgba(14, 175, 155, 0.7);
     color: white;
     border: 2px solid var(--bright-green-teal);
-    padding: 15px;
-    font-size: 1.2em;
-    border-radius: 50%;
+    /* Modifica: Da rotondo a quadrato (o leggermente arrotondato) */
+    border-radius: 10px; /* Non più 50% per renderlo quadrato o leggermente arrotondato */
     width: 70px;
     height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* margin-right: 0; */ /* Rimosso, non necessario con space-between */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, border-radius 0.2s ease;
     flex-shrink: 0;
-    /* Opzionale: Aggiungi flex-basis per controllare la dimensione iniziale se non bastano width/height */
-    /* flex-basis: 48%; */ /* Esempio: se vuoi che occupino quasi metà dello spazio disponibile */
 }
 
 #mobileControls .control-button:hover {
     background-color: rgba(14, 175, 155, 1);
+}
+
+/* Nuovi stili per le icone dei pulsanti di gioco */
+#mobileControls .control-button .material-symbols-rounded {
+    font-size: 3em; /* Rendi le icone più grandi per i pulsanti di gioco */
+}
+
+
+/* Nuovo stile per l'icona dell'account - Spostata in alto a destra */
+.menu-icon-btn {
+    position: fixed; /* Mantiene la posizione fissa rispetto al viewport */
+    top: 20px; /* Spostato in alto */
+    right: 20px; /* Posizionato a destra */
+    bottom: auto; /* Rimuove il posizionamento in basso conflittuale */
+    left: auto; /* Rimuove il posizionamento a sinistra conflittuale */
+    background-color: rgba(40, 42, 54, 0.7);
+    color: var(--terminal-text);
+    border: 2px solid var(--terminal-comment);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    z-index: 950;
+}
+
+.menu-icon-btn:hover {
+    background-color: var(--medium-teal);
+    border-color: var(--bright-green-teal);
+    color: var(--bright-green-teal);
+    box-shadow: 0 2px 15px rgba(0,255,0,0.7);
+}
+
+.menu-icon-btn .material-symbols-rounded {
+    font-size: 30px;
 }
 
 /* Updated styles for Score Input Container (Game Over Screen) */
