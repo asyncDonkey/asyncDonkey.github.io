@@ -152,13 +152,7 @@ if (startGameBtn) {
     });
 }
 
-if (leaderboardBtn) {
-    leaderboardBtn.addEventListener('click', () => {
-        // TODO: Questo dovrà aprire la modale, non cambiare pagina
-        showToast("Caricamento Classifica...", "info");
-        window.location.href = 'leaderboard.html'; // LOGICA DA SOSTITUIRE
-    });
-}
+
 
 if (glitchpediaBtn) {
     glitchpediaBtn.addEventListener('click', () => {

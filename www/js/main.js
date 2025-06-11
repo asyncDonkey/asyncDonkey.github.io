@@ -1,7 +1,7 @@
 // js/main.js
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 
-
+import { initLeaderboard } from './leaderboardManager.js';
 
 import { openProfileModal, initProfileControls } from './profile.js';
 
@@ -958,6 +958,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inizializzazioni principali
     initializeNewNavbar(); // Chiama setupDesktopCommunityDropdown e populateMobileMenu
     setupThemeSwitcher(); // Inizializza il theme switcher
+    initLeaderboard(); // <-- AGGIUNGI QUESTA RIGA
     
 
     // Setup dei nuovi controlli UI
