@@ -59,6 +59,8 @@ let mobileStartButton = null;
 let shareScoreBtnDonkey = null;
 let backToMenuBtn = null; // Nuovo: Riferimento al pulsante "Torna al Menu"
 let accountIconBtn = null; // Nuovo: Riferimento all'icona account/login
+let mainMenuBtn = null; // Pulsante per tornare al menu
+let accountIconContainer = null; // Riferimento al contenitore dell'icona profilo
 
 let isTouchDevice = false; // Will be set in setupGameEngine
 let isIPhone = false;     // Will be set in setupGameEngine
@@ -885,47 +887,29 @@ export function setupGameEngine() {
     mobileStartButton = document.getElementById('mobileStartButton');
     shareScoreBtnDonkey = document.getElementById('shareScoreBtnDonkey');
     backToMenuBtn = document.getElementById('backToMenuBtn');
-    accountIconBtn = document.getElementById('account-icon-btn');
+    mainMenuBtn = document.getElementById('mainMenuBtn'); // Corretto l'ID
+    accountIconContainer = document.getElementById('account-icon-container');
 
     // Setup iniziale basato sul dispositivo
-    isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     isIPhone = /iPhone/i.test(navigator.userAgent);
-
     if (isTouchDevice) {
-        if (mobileControlsDiv) mobileControlsDiv.style.display = 'flex'; // Già modificato a 'flex'
+        if (mobileControlsDiv) mobileControlsDiv.style.display = 'flex';
         if (fullscreenButton) fullscreenButton.style.display = 'block';
-        console.log('Dispositivo touch rilevato.');
     } else {
         if (mobileControlsDiv) mobileControlsDiv.style.display = 'none';
         if (mobileStartButton) mobileStartButton.style.display = 'none';
-        console.log('Non è un dispositivo touch.');
     }
-
     if (fullscreenButton) {
-        if (isIPhone) {
-            fullscreenButton.style.display = 'none';
-        } else if (isTouchDevice) {
-            fullscreenButton.style.display = 'block';
-        } else {
-            fullscreenButton.style.display = 'none';
-        }
+        if (isIPhone) fullscreenButton.style.display = 'none';
+        else if (isTouchDevice) fullscreenButton.style.display = 'block';
+        else fullscreenButton.style.display = 'none';
     }
-
-     // Imposta le icone dei pulsanti di gioco (rimuovendo il testo)
-    if (jumpButton) {
-        jumpButton.innerHTML = '<span class="material-symbols-rounded">arrow_circle_up</span><span class="visually-hidden"></span>';
-    }
-    if (shootButton) {
-        shootButton.innerHTML = '<span class="material-symbols-rounded">code</span><span class="visually-hidden"></span>';
-    }
-
-    // Prepare the asset list (fills imagesToLoad)
+    if (jumpButton) jumpButton.innerHTML = '<i class="ph-bold ph-arrow-circle-up"></i>';
+    if (shootButton) shootButton.innerHTML = '<i class="ph-bold ph-code"></i>';
+    
     prepareAssetsToLoad();
-
-    // Setup the rendering context
     setupRenderingContext(ctx);
-
-    // Attach all event listeners
     attachEventListeners();
 
     console.log("✅ setupGameEngine: Completato.");
@@ -965,7 +949,7 @@ export async function preloadGameAssets() {
 export function launchGame() {
     console.log("🚀 launchGame: Avvio del gioco!");
     if (!resourcesInitialized) {
-        console.error("Impossibile avviare il gioco, le risorse non sono state caricate. Esegui preloadGameAssets() prima.");
+        console.error("Impossibile avviare il gioco, le risorse non sono state caricate.");
         return;
     }
 
@@ -973,32 +957,22 @@ export function launchGame() {
         AudioManager.audioContext.resume().catch(err => console.error('Errore nel riprendere AudioContext:', err));
     }
 
-    currentGameState = GAME_STATE.PLAYING;
-    resetGame(); // resetGame() non nasconderà più mobileControlsDiv; launchGame() gestirà la visibilità.
+    currentGameState = 'PLAYING';
+    resetGame();
     AudioManager.playMusic(false);
 
     if (mobileStartButton) mobileStartButton.style.display = 'none';
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
 
-    // Nascondi l'icona account/profilo quando il gioco è in PLAYING
-    if (accountIconBtn) accountIconBtn.style.display = 'none';
-
-    // Assicurati che i pulsanti di gioco siano visibili solo su touch device quando il gioco è in PLAYING.
-    // Questa è l'unica riga che imposta la visibilità dei controlli all'avvio del gioco.
-    if (mobileControlsDiv) {
-        // Forza la visibilità con !important per debug
-        mobileControlsDiv.style.setProperty('display', isTouchDevice ? 'flex' : 'none', 'important');
-        console.log(`[launchGame] mobileControlsDiv display set to: ${mobileControlsDiv.style.display} (isTouchDevice: ${isTouchDevice})`);
-        setTimeout(() => {
-            if (mobileControlsDiv) {
-                const computedStyle = window.getComputedStyle(mobileControlsDiv);
-                console.log(`[launchGame - Delayed Check] Computed display for mobileControlsDiv: ${computedStyle.display}`);
-                console.log(`[launchGame - Delayed Check] Inline style for mobileControlsDiv: ${mobileControlsDiv.style.display}`);
-            }
-        }, 100);
+    // **NUOVO**: Nascondi l'icona del profilo quando il gioco inizia
+    if (accountIconContainer) {
+        accountIconContainer.style.display = 'none';
     }
 
-    // Avvia il game loop se non è già in esecuzione
+    if (mobileControlsDiv) {
+        mobileControlsDiv.style.setProperty('display', isTouchDevice ? 'flex' : 'none', 'important');
+    }
+
     if (gameLoopRequestId === null) {
         startGameLoop();
     }
@@ -2781,16 +2755,24 @@ function shouldShowDonkeyScoreInput(currentScore) {
     return currentScore > 0;
 }
 
+// In www/donkeyRunner.js
+
+/**
+ * Gestisce il salvataggio del punteggio in Firestore e aggiorna l'UI.
+ */
 async function handleSaveDonkeyScore() {
     const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
     const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
+    const shareScoreBtnDonkey = document.getElementById('shareScoreBtnDonkey');
     const loggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay');
 
-    if (!saveScoreBtnDonkey) {
-        showToast('Errore: pulsante Salva non trovato.', 'error');
-        console.error('ERRORE in handleSaveDonkeyScore: saveScoreBtnDonkey non trovato.');
+    if (!saveScoreBtnDonkey || !shareScoreBtnDonkey) {
+        showToast('Errore: pulsanti di azione non trovati.', 'error');
+        console.error('ERRORE in handleSaveDonkeyScore: saveScoreBtnDonkey o shareScoreBtnDonkey non trovati.');
         return;
     }
+
+    saveScoreBtnDonkey.disabled = true;
 
     const currentUser = auth.currentUser;
     let initialsForSave = '';
@@ -2799,9 +2781,6 @@ async function handleSaveDonkeyScore() {
     if (!currentUser) {
         if (!playerInitialsDonkeyInput) {
             showToast('Errore: campo iniziali non trovato.', 'error');
-            console.error(
-                'ERRORE in handleSaveDonkeyScore (utente non loggato): playerInitialsDonkeyInput non trovato.'
-            );
             saveScoreBtnDonkey.disabled = false;
             return;
         }
@@ -2813,26 +2792,22 @@ async function handleSaveDonkeyScore() {
         }
         userNameForDb = initialsForSave;
     } else {
-        let displayNameForScore = loggedInUserNameDisplay
-            ? loggedInUserNameDisplay.textContent
-            : currentUser.email.split('@')[0];
-
         try {
-            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
+            const userProfileRef = doc(db, 'appUsers', currentUser.uid);
             const docSnap = await getDoc(userProfileRef);
             if (docSnap.exists() && docSnap.data().nickname) {
-                displayNameForScore = docSnap.data().nickname;
+                userNameForDb = docSnap.data().nickname;
+            } else {
+                userNameForDb = currentUser.displayName || currentUser.email.split('@')[0];
             }
         } catch (profileError) {
             console.warn('handleSaveDonkeyScore: Errore recupero nickname, usando fallback.', profileError);
+            userNameForDb = currentUser.displayName || currentUser.email.split('@')[0];
         }
-
-        userNameForDb = displayNameForScore;
         initialsForSave = userNameForDb.substring(0, 5).toUpperCase();
         if (initialsForSave.length === 0) initialsForSave = 'USER';
     }
 
-    saveScoreBtnDonkey.disabled = true;
     saveScoreBtnDonkey.textContent = 'Salvataggio...';
 
     let scoreData = {
@@ -2841,100 +2816,90 @@ async function handleSaveDonkeyScore() {
         initials: initialsForSave,
         userName: userNameForDb,
         timestamp: serverTimestamp(),
-        glitchzillaDefeated: isGlitchzillaDefeatedThisGame, // Ora usa il nuovo flag
-        trojanByteDefeated: isTrojanByteDefeatedThisGame, // Nuovo
-        missingNumberDefeated: isMissingNumberDefeatedThisGame, // Nuovo
-        stats: gameStats
+        glitchzillaDefeated: isGlitchzillaDefeatedThisGame,
+        trojanByteDefeated: isTrojanByteDefeatedThisGame,
+        missingNumberDefeated: isMissingNumberDefeatedThisGame,
+        stats: gameStats,
+        userId: currentUser ? currentUser.uid : null,
     };
-
+    
     if (currentUser) {
-        scoreData.userId = currentUser.uid;
         try {
-            const userProfileRef = doc(db, 'userProfiles', currentUser.uid);
+            const userProfileRef = doc(db, "appUsers", currentUser.uid);
             const docSnap = await getDoc(userProfileRef);
             if (docSnap.exists() && docSnap.data().nationalityCode) {
                 scoreData.nationalityCode = docSnap.data().nationalityCode;
             }
         } catch (error) {
-            console.warn('handleSaveDonkeyScore: Errore recupero nationalityCode', error);
+             console.warn('handleSaveDonkeyScore: Errore recupero nationalityCode', error);
         }
     }
-
-    console.log('Dati punteggio pronti per il salvataggio:', scoreData);
 
     try {
         const leaderboardCollectionRef = collection(db, 'leaderboardScores');
         await addDoc(leaderboardCollectionRef, scoreData);
-        showToast('Punteggio salvato!', 'success');
-        if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
+        
+        showToast('Punteggio Salvato!', 'success');
+        
+        if (playerInitialsDonkeyInput) playerInitialsDonkeyInput.style.display = 'none';
+        document.getElementById('playerInitialsLabel').style.display = 'none';
+        saveScoreBtnDonkey.style.display = 'none';
+        if(loggedInUserNameDisplay) loggedInUserNameDisplay.style.display = 'none';
+
+        shareScoreBtnDonkey.style.display = 'inline-block';
+
         loadDonkeyLeaderboard();
+
     } catch (error) {
         console.error('Errore salvataggio punteggio:', error);
         showToast('Errore nel salvare il punteggio. Riprova. (' + error.code + ')', 'error');
-    } finally {
-        if (saveScoreBtnDonkey) {
-            saveScoreBtnDonkey.disabled = false;
-            saveScoreBtnDonkey.textContent = 'Salva Punteggio';
-        }
+        saveScoreBtnDonkey.disabled = false;
+        saveScoreBtnDonkey.textContent = 'Salva Punteggio';
     }
 }
 
+/**
+ * Gestisce la logica e la visualizzazione della schermata di Game Over.
+ */
 function processGameOver() {
     const localScoreInputContainer = document.getElementById('scoreInputContainerDonkey');
     const localPlayerInitialsInput = document.getElementById('playerInitialsDonkey');
-    const localSaveScoreBtn = document.getElementById('saveScoreBtnDonkey');
     const localFinalScoreDisplay = document.getElementById('finalScoreDisplayDonkey');
     const localLoggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay');
     const localPlayerInitialsLabel = document.getElementById('playerInitialsLabel');
 
-    console.log('processGameOver CHIAMATA. finalScore (prima di floor):', score);
     gameOverTrigger = false;
-    currentGameState = GAME_STATE.GAME_OVER;
+    currentGameState = 'GAME_OVER';
     finalScore = Math.floor(score);
-    console.log('finalScore (dopo floor):', finalScore);
 
     AudioManager.stopMusic();
     AudioManager.playSound('gameOverSound');
 
-    // Mostra l'icona account/profilo al Game Over
-    if (accountIconBtn) accountIconBtn.style.display = 'flex';
-
-    // Nascondi i pulsanti di gioco durante la schermata di Game Over
-    if (mobileControlsDiv) {
-        mobileControlsDiv.style.display = 'none';
-        console.log(`[processGameOver] mobileControlsDiv display set to: ${mobileControlsDiv.style.display}`); // Aggiunto log per debug
+    // **NUOVO**: Mostra l'icona del profilo al Game Over
+    if (accountIconContainer) {
+        accountIconContainer.style.display = 'flex';
     }
 
+    if (mobileControlsDiv) {
+        mobileControlsDiv.style.display = 'none';
+    }
 
-    console.log('Elementi del form punteggio cercati DENTRO processGameOver:', {
-        container: !!localScoreInputContainer,
-        initialsInput: !!localPlayerInitialsInput,
-        saveBtn: !!localSaveScoreBtn,
-        scoreDisplay: !!localFinalScoreDisplay,
-        loggedInNameDisplay: !!localLoggedInUserNameDisplay,
-        initialsLabel: !!localPlayerInitialsLabel,
-    });
-
+    // **RIMOSSA** la logica per mostrare il pulsante di replay mobile, ora è sempre visibile nel contenitore del punteggio.
+    
     if (localScoreInputContainer) {
         const shouldShow = shouldShowDonkeyScoreInput(finalScore);
-        console.log('shouldShowDonkeyScoreInput restituisce:', shouldShow);
-
         if (shouldShow) {
             if (localFinalScoreDisplay) {
                 localFinalScoreDisplay.textContent = finalScore;
-            } else {
-                console.error('Elemento finalScoreDisplayDonkey non trovato!');
             }
-
             localScoreInputContainer.style.display = 'flex';
-            console.log('scoreInputContainerDonkey.style.display impostato a flex');
-
+            
             const currentUser = auth.currentUser;
             if (localPlayerInitialsInput && localLoggedInUserNameDisplay && localPlayerInitialsLabel) {
                 if (currentUser) {
-                    getDoc(doc(db, 'userProfiles', currentUser.uid))
+                    getDoc(doc(db, 'appUsers', currentUser.uid)) // Leggiamo da appUsers
                         .then((profileSnap) => {
-                            let displayName = currentUser.email.split('@')[0];
+                            let displayName = currentUser.displayName || currentUser.email.split('@')[0];
                             if (profileSnap.exists() && profileSnap.data().nickname) {
                                 displayName = profileSnap.data().nickname;
                             }
@@ -2942,17 +2907,13 @@ function processGameOver() {
                             localLoggedInUserNameDisplay.style.display = 'inline';
                             localPlayerInitialsLabel.style.display = 'none';
                             localPlayerInitialsInput.style.display = 'none';
-                            localPlayerInitialsInput.required = false;
-                            localPlayerInitialsInput.value = '';
                         })
                         .catch((err) => {
                             console.error('Errore recupero nickname per form punteggio:', err);
-                            localLoggedInUserNameDisplay.textContent = currentUser.email.split('@')[0];
+                            localLoggedInUserNameDisplay.textContent = currentUser.displayName || currentUser.email.split('@')[0];
                             localLoggedInUserNameDisplay.style.display = 'inline';
                             localPlayerInitialsLabel.style.display = 'none';
                             localPlayerInitialsInput.style.display = 'none';
-                            localPlayerInitialsInput.required = false;
-                            localPlayerInitialsInput.value = '';
                         });
                 } else {
                     localLoggedInUserNameDisplay.style.display = 'none';
@@ -2962,27 +2923,10 @@ function processGameOver() {
                     localPlayerInitialsInput.value = '';
                     localPlayerInitialsInput.focus();
                 }
-            } else {
-                console.error('Mancano elementi UI per la gestione del nome/iniziali nel form punteggio.');
-            }
-
-            if (localSaveScoreBtn) {
-                localSaveScoreBtn.disabled = false;
-                localSaveScoreBtn.textContent = 'Salva Punteggio';
-            } else {
-                console.error('localSaveScoreBtn NON TROVATO DENTRO processGameOver');
             }
         } else {
             localScoreInputContainer.style.display = 'none';
-            console.log('shouldShowDonkeyScoreInput è false, scoreInputContainerDonkey nascosto.');
         }
-    } else {
-        console.error('ERRORE CRITICO: scoreInputContainerDonkey non trovato nel DOM!');
-    }
-
-    if (isTouchDevice && mobileStartButton) {
-        mobileStartButton.innerHTML = '<span class="material-symbols-rounded">replay</span><span class="visually-hidden">Rigioca</span>';
-        mobileStartButton.style.display = 'block';
     }
 }
 
@@ -3248,19 +3192,34 @@ function resetGame() {
         powerUpsCollected: 0
     };
 
-    if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-    if (isTouchDevice && mobileStartButton) mobileStartButton.style.display = 'none';
+    // Nascondi il contenitore dei punteggi
+    if (scoreInputContainerDonkey) {
+        scoreInputContainerDonkey.style.display = 'none';
+    }
 
-    console.log(
-        'Gioco resettato. Flags boss: imminent=',
-        bossFightImminent,
-        'spawnedThisGame=',
-        hasGlitchzillaSpawnedThisGame,
-        'cooldownActive=',
-        postBossCooldownActive
-    );
-    console.log('Power-up permanenti resettati: Slayer=', hasSlayerSubroutineUpgrade, 'Injector=', hasCodeInjectorUpgrade); // Aggiunto log per debug
+    // **BUG FIX**: Ripristina lo stato iniziale dei pulsanti
+    if (saveScoreBtnDonkey) {
+        saveScoreBtnDonkey.style.display = 'inline-block';
+        saveScoreBtnDonkey.disabled = false;
+        saveScoreBtnDonkey.textContent = 'Salva Punteggio';
+    }
+    if (shareScoreBtnDonkey) {
+        shareScoreBtnDonkey.style.display = 'none';
+    }
+
+    // Ripristina anche gli elementi per l'input dell'ospite
+    const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
+    const playerInitialsLabel = document.getElementById('playerInitialsLabel');
+    if (playerInitialsDonkeyInput) {
+        playerInitialsDonkeyInput.style.display = 'block';
+    }
+    if (playerInitialsLabel) {
+        playerInitialsLabel.style.display = 'block';
+    }
+
+    console.log('Gioco resettato.');
 }
+
 
 function drawTerminalBackgroundEffects() {
     const lines = 30;
@@ -3750,8 +3709,8 @@ function attachEventListeners() {
     }
 
     // Nuovo: Event Listener per il pulsante "Torna al Menu Principale"
-    if (backToMenuBtn) {
-        backToMenuBtn.addEventListener('click', () => {
+    if (mainMenuBtn) { // **CORRETTO** usa la variabile corretta
+        mainMenuBtn.addEventListener('click', () => {
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
             currentGameState = GAME_STATE.MENU; // Imposta lo stato su MENU
             resetGame(); // Resetta il gioco, ma non avviare il loop
@@ -3867,21 +3826,18 @@ function attachEventListeners() {
     }
 
     window.addEventListener('keydown', (e) => {
+        // Questa logica è ora più semplice
         if (!resourcesInitialized) return;
         if (AudioManager.audioContext && AudioManager.audioContext.state === 'suspended') {
-            AudioManager.audioContext.resume().catch((err) => console.error('Errore nel riprendere AudioContext:', err));
+            AudioManager.audioContext.resume().catch((err) => console.error('Error resuming AudioContext:', err));
         }
         switch (currentGameState) {
-            case GAME_STATE.MENU:
+            case 'MENU':
                 if (e.key === 'Enter') {
                     launchGame();
                 }
                 break;
-            case GAME_STATE.PLAYING:
-                // Nascondi il pulsante account/profilo se il gioco è in PLAYING e non è già nascosto
-                if (accountIconBtn && accountIconBtn.style.display !== 'none') {
-                    accountIconBtn.style.display = 'none';
-                }
+            case 'PLAYING':
                 if (asyncDonkey) {
                     if (e.code === 'Space' || e.key === 'ArrowUp') {
                         e.preventDefault();
@@ -3893,13 +3849,7 @@ function attachEventListeners() {
                     }
                 }
                 break;
-            case GAME_STATE.GAME_OVER:
-                // Mostra il pulsante account/profilo se il gioco è in GAME_OVER e non è già visibile
-                if (accountIconBtn && accountIconBtn.style.display !== 'flex') {
-                    accountIconBtn.style.display = 'flex';
-                }
-                // La gestione del tasto INVIO dopo il Game Over verrà lasciata per avviare una nuova partita,
-                // ma ora si può tornare al menu con il pulsante dedicato.
+            case 'GAME_OVER':
                 if (
                     e.key === 'Enter' &&
                     (!scoreInputContainerDonkey || scoreInputContainerDonkey.style.display === 'none')
@@ -3909,7 +3859,6 @@ function attachEventListeners() {
                 break;
         }
     });
-    console.log("✅ Event listeners attaccati.");
 }
 
 // Remove auto-executing calls from here. These will be triggered from index.html or loader.js
