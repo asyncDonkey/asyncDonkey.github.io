@@ -1,9 +1,12 @@
 /* www/loader.css */
 
 :root {
-    --terminal-bg: #282a36; /* Dracula background */
+    --terminal-bg: #0d0d0d; /* Quasi nero per un contrasto elevato */
     --terminal-darker-bg: #1a1b22;
-    --terminal-text: #f8f8f2; /* Dracula foreground */
+    --terminal-text: #e0e0e0; /* Bianco brillante ma non affaticante */
+    --terminal-highlight: #5ab9a8; /* Il tuo verde/azzurro per parole chiave */
+    --terminal-error-bright: #f14e52; /* Rosso acceso per il flash */
+    --terminal-error-dark: #9b222b;   /* Rosso scuro per il flash */
     --terminal-comment: #6272a4; /* Dracula comment */
     --terminal-red: #ff5555; /* Dracula red */
     --terminal-orange: #ffb86c; /* Dracula orange */
@@ -19,16 +22,20 @@
     --dark-teal-blue: #32535f;
     --medium-purple: #631b34;
     --terminal-border: var(--terminal-green); /* Use green for border for old-school feel */
+
+    --glow-color: rgba(90, 185, 168, 0.4); /* Colore per l'effetto di brillantezza */
 }
 
-body {
+body, html {
     font-family: 'Source Code Pro', monospace;
     overflow: hidden;
     background-color: var(--terminal-bg);
     color: var(--terminal-text);
-    margin: 0; /* Ensures no default body margin */
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
 }
-
 #app-root {
     display: flex;
     justify-content: center;
@@ -38,9 +45,8 @@ body {
     position: relative;
 }
 
+/* Il contenitore principale ora è il nostro "schermo" */
 #terminal-container {
-    background-color: var(--terminal-bg);
-    color: var(--terminal-text);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -51,56 +57,57 @@ body {
     width: 100vw;
     height: 100vh;
     z-index: 1000;
-    transition: opacity 0.5s ease-out;
+    transition: opacity 0.8s ease-out;
+    padding: 20px;
+    box-sizing: border-box;
+    /* Effetto glow per simulare un monitor CRT */
+    box-shadow: inset 0 0 25px var(--glow-color);
 }
 
+/* Il log non ha più bordi o sfondo, vive direttamente sullo schermo */
 #terminal-log {
-    background-color: var(--terminal-darker-bg);
-    border: 2px solid var(--terminal-border);
-    width: 80%;
-    max-width: 600px;
-    height: 200px;
-    padding: 15px;
-    overflow-y: auto;
-    font-size: 0.85em; /* Testo più piccolo per un look da terminale */
-    margin-bottom: 20px;
-    box-shadow: 0 0 15px rgba(0,255,0,0.5), inset 0 0 8px rgba(0,255,0,0.3);
+    width: 95%;
+    max-width: 800px; /* Un po' più largo per un look moderno */
+    height: 250px; /* Aumentiamo lo spazio per i log */
+    font-size: 0.9em;
     white-space: pre-wrap;
-    box-sizing: border-box;
-    position: relative;
-    text-shadow: 0 0 5px rgba(0,255,0,0.6);
-    line-height: 1.4;
-    text-transform: lowercase; /* Mantiene tutto il testo minuscolo */
+    text-shadow: 0 0 3px rgba(224, 224, 224, 0.3);
+    line-height: 1.5;
+    text-transform: lowercase;
+    overflow-y: auto; /* Aggiungiamo scroll se il contenuto eccede */
+    margin-bottom: 25px;
 }
 
 #terminal-log div {
     margin-bottom: 5px;
 }
-
-/* Stili per le parole chiave colorate */
-#terminal-log .keyword-blue {
-    color: var(--terminal-blue);
-    text-shadow: 0 0 3px var(--terminal-blue);
-}
-#terminal-log .keyword-green {
-    color: var(--terminal-green);
-    text-shadow: 0 0 3px var(--terminal-green);
-}
-#terminal-log .keyword-red {
-    color: var(--terminal-red);
-    text-shadow: 0 0 3px var(--terminal-red);
-}
-#terminal-log .keyword-yellow {
-    color: var(--terminal-yellow);
-    text-shadow: 0 0 3px var(--terminal-yellow);
+/* Nuove classi per le parole chiave */
+#terminal-log .keyword-highlight {
+    color: var(--terminal-highlight);
+    text-shadow: 0 0 5px var(--terminal-highlight);
 }
 
+@keyframes flash-error {
+    0%, 100% {
+        color: var(--terminal-error-bright);
+        text-shadow: 0 0 7px var(--terminal-error-bright);
+    }
+    50% {
+        color: var(--terminal-error-dark);
+        text-shadow: none;
+    }
+}
 
-/* Blinking cursor for the final message */
+#terminal-log .keyword-error {
+    animation: flash-error 1.2s step-end infinite;
+}
+
+/* Cursore lampeggiante */
 #terminal-log .blinking-cursor {
     animation: blink-caret 0.75s step-end infinite;
-    color: var(--terminal-green);
-    text-shadow: 0 0 5px var(--terminal-green);
+    background-color: var(--terminal-text);
+    box-shadow: 0 0 5px var(--terminal-text);
+    color: var(--terminal-bg); /* Il testo del cursore è lo sfondo */
 }
 
 @keyframes blink-caret {
@@ -108,34 +115,21 @@ body {
     50% { opacity: 1; }
 }
 
-.progress-bars {
-    width: 80%;
-    max-width: 600px;
-    margin-bottom: 20px;
+/* Contenitore per la nuova barra di progresso ASCII */
+#progress-container {
+    width: 95%;
+    max-width: 800px;
 }
 
-.progress-bar-container {
-    width: 100%;
-    background-color: var(--terminal-darker-bg);
-    border: 1px solid var(--terminal-border);
-    height: 15px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: inset 0 0 5px var(--terminal-green);
-}
-
-.progress-bar {
-    height: 100%;
-    width: 0%;
-    background-color: var(--bright-green-teal);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    color: var(--terminal-bg);
-    transition: width 0.3s ease-out;
-    box-shadow: 0 0 10px var(--bright-green-teal);
+/* Stile per la barra di progresso ASCII */
+#ascii-progress-bar {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1.1em;
+    color: var(--terminal-highlight);
+    text-shadow: 0 0 5px var(--terminal-highlight);
+    margin: 0;
+    padding: 0;
+    text-align: center;
 }
 
 #main-menu {
