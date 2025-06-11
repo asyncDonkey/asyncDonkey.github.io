@@ -1,5 +1,5 @@
 rules_version = '2';
-//testTasks1stTry
+//leaderboardCatch 2ndTry
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -160,26 +160,82 @@ service cloud.firestore {
   allow create, update, delete: if false;
 }
 
-    match /leaderboardScores/{scoreId} {
-      allow read: if true;
-      allow create: if request.resource.data.score is number && request.resource.data.score >= 0
-                        && request.resource.data.gameId is string
-                        && request.resource.data.timestamp == request.time
-                        && request.resource.data.initials is string && request.resource.data.initials.size() >= 1 && request.resource.data.initials.size() <= 5
-                        && request.resource.data.userName is string && request.resource.data.userName.size() >= 1 && request.resource.data.userName.size() <= 50
-                        && (request.resource.data.get('nationalityCode', null) == null || (request.resource.data.nationalityCode is string && request.resource.data.nationalityCode.size() == 2))
-                        && (request.resource.data.get('glitchzillaDefeated', null) == null || request.resource.data.glitchzillaDefeated is bool)
-                        && (
-                          (request.auth != null && request.resource.data.userId == request.auth.uid
-                            && request.resource.data.keys().toSet().difference(['score', 'timestamp', 'initials', 'userName', 'gameId', 'userId', 'nationalityCode', 'glitchzillaDefeated'].toSet()).size() == 0)
-                          ||
-                          (request.auth == null
-                            && request.resource.data.get('userId', null) == null && request.resource.data.get('nationalityCode', null) == null
-                            && request.resource.data.keys().toSet().difference(['score', 'timestamp', 'initials', 'userName', 'gameId', 'glitchzillaDefeated'].toSet()).size() == 0)
-                            );
-      allow update: if false;
+ // --- REGOLE PER LA NUOVA COLLEZIONE appUsers ---
+    match /appUsers/{userId} {
+      // Chiunque sia autenticato può leggere un profilo utente.
+      allow read: if request.auth != null;
+
+      // Un utente può creare SOLO il proprio profilo, con dati iniziali validi.
+      allow create: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.displayName is string
+        && request.resource.data.photoURL is string
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.lastLoginAt == request.time
+        && request.resource.data.gameStats.totalScore == 0
+        && request.resource.data.earnedBadges.size() == 0;
+
+      // **REGOLA DI UPDATE AGGIORNATA**
+      // Un utente può aggiornare SOLO il proprio profilo, ma ora con più opzioni.
+      allow update: if request.auth != null && request.auth.uid == userId && (
+        
+        // CASO 1: L'utente sta aggiornando solo il timestamp dell'ultimo accesso (login).
+        ( request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLoginAt'])
+          && request.resource.data.lastLoginAt == request.time )
+          
+        || // oppure
+
+        // CASO 2: La Cloud Function sta aggiornando il nickname e il suo timestamp.
+        // Anche se la Cloud Function bypassa le regole, questa regola documenta l'operazione
+        // e la renderebbe sicura anche se eseguita dal client.
+        ( request.resource.data.diff(resource.data).affectedKeys().hasAll(['nickname', 'nicknameLastUpdatedAt'])
+          && request.resource.data.nickname is string
+          && request.resource.data.nickname.size() >= 3
+          && request.resource.data.nickname.size() <= 15
+          && request.resource.data.nicknameLastUpdatedAt == request.time )
+
+      );
+
+      // Impediamo la cancellazione dei profili dal client per sicurezza.
       allow delete: if false;
     }
+
+
+
+
+match /leaderboardScores/{scoreId} {
+  allow read: if true;
+  allow create: if request.resource.data.score is number && request.resource.data.score >= 0
+      && request.resource.data.gameId is string
+      && request.resource.data.timestamp == request.time
+      && request.resource.data.initials is string && request.resource.data.initials.size() >= 1 && request.resource.data.initials.size() <= 5
+      && request.resource.data.userName is string && request.resource.data.userName.size() >= 1 && request.resource.data.userName.size() <= 50
+      && (request.resource.data.get('nationalityCode', null) == null || (request.resource.data.nationalityCode is string && request.resource.data.nationalityCode.size() == 2))
+      && (request.resource.data.get('glitchzillaDefeated', null) == null || request.resource.data.glitchzillaDefeated is bool)
+      && (request.resource.data.get('trojanByteDefeated', null) == null || request.resource.data.trojanByteDefeated is bool) // NUOVO: Trojan Byte Defeated
+      && (request.resource.data.get('missingNumberDefeated', null) == null || request.resource.data.missingNumberDefeated is bool) // NUOVO: Missing Number Defeated
+      && (request.resource.data.get('stats', null) == null ||
+          (request.resource.data.stats is map
+          && (request.resource.data.stats.get('jumps', null) == null || (request.resource.data.stats.jumps is number && request.resource.data.stats.jumps >= 0))
+          && (request.resource.data.stats.get('shotsFired', null) == null || (request.resource.data.stats.shotsFired is number && request.resource.data.stats.shotsFired >= 0))
+          && (request.resource.data.stats.get('powerUpsCollected', null) == null || (request.resource.data.stats.powerUpsCollected is number && request.resource.data.stats.powerUpsCollected >= 0))
+          // Assicurati che non ci siano altri campi imprevisti in stats
+          && request.resource.data.stats.keys().toSet().difference(['jumps', 'shotsFired', 'powerUpsCollected'].toSet()).size() == 0
+      ))
+      && (
+          (request.auth != null && request.resource.data.userId == request.auth.uid
+            // Aggiornato: Aggiungiamo i nuovi campi ai permessi per gli utenti loggati
+            && request.resource.data.keys().toSet().difference(['score', 'timestamp', 'initials', 'userName', 'gameId', 'userId', 'nationalityCode', 'glitchzillaDefeated', 'trojanByteDefeated', 'missingNumberDefeated', 'stats'].toSet()).size() == 0)
+          ||
+          (request.auth == null
+            && request.resource.data.get('userId', null) == null && request.resource.data.get('nationalityCode', null) == null
+            // Aggiornato: Aggiungiamo i nuovi campi ai permessi per gli ospiti
+            && request.resource.data.keys().toSet().difference(['score', 'timestamp', 'initials', 'userName', 'gameId', 'glitchzillaDefeated', 'trojanByteDefeated', 'missingNumberDefeated', 'stats'].toSet()).size() == 0)
+      );
+  allow update: if false;
+  allow delete: if false;
+}
 
     match /guestbookEntries/{commentId} {
       allow read: if true;

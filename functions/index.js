@@ -294,6 +294,78 @@ exports.awardGlitchzillaSlayer = onDocumentCreated('leaderboardScores/{scoreId}'
 });
 
 // --- CALLABLE FUNCTIONS ---
+
+/**
+ * FUNZIONE AGGIORNATA
+ * Permette a un utente autenticato di aggiornare il proprio nickname.
+ * Esegue validazione e implementa un cooldown di 14 giorni.
+ */
+exports.updateNickname = onCall({ region: 'us-central1' }, async (request) => {
+    const functionName = 'updateNickname';
+
+    if (!request.auth || !request.auth.uid) {
+        logger.warn(`[CF:${functionName}] Chiamata non autenticata.`);
+        throw new HttpsError('unauthenticated', 'Devi essere autenticato per modificare il nickname.');
+    }
+    const userId = request.auth.uid;
+
+    const newNickname = request.data.nickname;
+    if (typeof newNickname !== 'string' || newNickname.trim().length === 0) {
+        throw new HttpsError('invalid-argument', 'Il nickname non può essere vuoto.');
+    }
+
+    const validatedNickname = newNickname.trim();
+
+    if (validatedNickname.length < 3 || validatedNickname.length > 15) {
+        throw new HttpsError('invalid-argument', 'Il nickname deve avere tra 3 e 15 caratteri.');
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(validatedNickname)) {
+        throw new HttpsError('invalid-argument', 'Il nickname può contenere solo lettere, numeri e underscore (_).');
+    }
+
+    const userDocRef = db.collection('appUsers').doc(userId);
+
+    try {
+        const userDoc = await userDocRef.get();
+        if (!userDoc.exists) {
+             throw new HttpsError('not-found', "Documento utente non trovato.");
+        }
+        
+        const userData = userDoc.data();
+
+        // --- NUOVA LOGICA: CONTROLLO COOLDOWN ---
+        if (userData.nicknameLastUpdatedAt) {
+            const lastUpdate = userData.nicknameLastUpdatedAt.toDate(); // Converte il Timestamp in Date
+            const now = new Date();
+            const fourteenDaysInMillis = 14 * 24 * 60 * 60 * 1000;
+            const timeSinceLastUpdate = now.getTime() - lastUpdate.getTime();
+
+            if (timeSinceLastUpdate < fourteenDaysInMillis) {
+                const daysRemaining = Math.ceil((fourteenDaysInMillis - timeSinceLastUpdate) / (1000 * 60 * 60 * 24));
+                throw new HttpsError('failed-precondition', `Puoi modificare il nickname di nuovo tra ${daysRemaining} giorni.`);
+            }
+        }
+        // --- FINE NUOVA LOGICA ---
+
+        await userDocRef.update({
+            nickname: validatedNickname,
+            nicknameLastUpdatedAt: FieldValue.serverTimestamp(),
+        });
+
+        logger.info(`[CF:${functionName}] Nickname per l'utente ${userId} aggiornato a "${validatedNickname}".`);
+        return { success: true, message: 'Nickname aggiornato con successo!' };
+
+    } catch (error) {
+        logger.error(`[CF:${functionName}] Errore durante l'aggiornamento del nickname per l'utente ${userId}:`, error);
+        // Se l'errore è già un HttpsError (come il nostro errore di cooldown), rilancialo
+        if (error instanceof HttpsError) {
+            throw error;
+        }
+        throw new HttpsError('internal', 'Si è verificato un errore interno. Riprova più tardi.');
+    }
+});
+
+
 exports.grantVerificationBadge = onCall({ region: 'us-central1' }, async (request) => {
     const functionName = 'grantVerificationBadge';
     if (!request.auth || !request.auth.uid) {
