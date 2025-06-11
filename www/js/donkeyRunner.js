@@ -23,6 +23,9 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { showToast } from './toastNotifications.js';
 
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+import { functions } from './firebase-config.js'; // Assicurati di esportare 'functions' da firebase-config
+
 const PALETTE = {
     DARK_BACKGROUND: '#411d31',
     MEDIUM_PURPLE: '#631b34',
@@ -202,7 +205,7 @@ const GLITCHZILLA_TARGET_WIDTH = GLITCHZILLA_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_
 const GLITCHZILLA_TARGET_HEIGHT = GLITCHZILLA_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.2;
 const GLITCHZILLA_HEALTH = 40; // 40
 const GLITCHZILLA_SCORE_VALUE = 500;
-const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 1000;
+const GLITCHZILLA_SPAWN_SCORE_THRESHOLD = 2000;
 
 const GLITCHZILLA_PROJECTILE_SPRITE_SRC = 'images/glitchzillaProjectile.png';
 const GLITCHZILLA_PROJECTILE_ACTUAL_FRAME_WIDTH = 24;
@@ -225,7 +228,7 @@ const TROJAN_BYTE_TARGET_WIDTH = TROJAN_BYTE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_
 const TROJAN_BYTE_TARGET_HEIGHT = TROJAN_BYTE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.1;
 const TROJAN_BYTE_HEALTH = 80; // HP suggeriti 80
 const TROJAN_BYTE_SCORE_VALUE = 1000; // Valore punteggio
-const TROJAN_BYTE_SPAWN_SCORE_THRESHOLD = 3000; // Soglia di apparizione 5000
+const TROJAN_BYTE_SPAWN_SCORE_THRESHOLD = 5000; // Soglia di apparizione 5000
 const TROJAN_BYTE_PROJECTILE_SPRITE_SRC = 'images/trojanByteProjectile.png';
 const TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_WIDTH = 16;
 const TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_HEIGHT = 16;
@@ -246,7 +249,7 @@ const MISSING_NUMBER_TARGET_WIDTH = MISSING_NUMBER_ACTUAL_FRAME_WIDTH * GLOBAL_S
 const MISSING_NUMBER_TARGET_HEIGHT = MISSING_NUMBER_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR * 1.1;
 const MISSING_NUMBER_HEALTH = 120; // HP suggeriti
 const MISSING_NUMBER_SCORE_VALUE = 1500; // Valore punteggio
-const MISSING_NUMBER_SPAWN_SCORE_THRESHOLD = 5000; // Soglia di apparizione
+const MISSING_NUMBER_SPAWN_SCORE_THRESHOLD = 9500; // Soglia di apparizione 10000
 const MISSING_NUMBER_PROJECTILE_SPRITE_SRC = 'images/missingNumberProjectile.png';
 const MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH = 12;
 const MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT = 12;
@@ -2757,117 +2760,13 @@ function shouldShowDonkeyScoreInput(currentScore) {
 
 // In www/donkeyRunner.js
 
-/**
- * Gestisce il salvataggio del punteggio in Firestore e aggiorna l'UI.
- */
-async function handleSaveDonkeyScore() {
-    const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
-    const saveScoreBtnDonkey = document.getElementById('saveScoreBtnDonkey');
-    const shareScoreBtnDonkey = document.getElementById('shareScoreBtnDonkey');
-    const loggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay');
 
-    if (!saveScoreBtnDonkey || !shareScoreBtnDonkey) {
-        showToast('Errore: pulsanti di azione non trovati.', 'error');
-        console.error('ERRORE in handleSaveDonkeyScore: saveScoreBtnDonkey o shareScoreBtnDonkey non trovati.');
-        return;
-    }
-
-    saveScoreBtnDonkey.disabled = true;
-
-    const currentUser = auth.currentUser;
-    let initialsForSave = '';
-    let userNameForDb = '';
-
-    if (!currentUser) {
-        if (!playerInitialsDonkeyInput) {
-            showToast('Errore: campo iniziali non trovato.', 'error');
-            saveScoreBtnDonkey.disabled = false;
-            return;
-        }
-        initialsForSave = playerInitialsDonkeyInput.value.trim().toUpperCase();
-        if (initialsForSave.length < 1 || initialsForSave.length > 5) {
-            showToast('Inserisci da 1 a 5 caratteri per le iniziali.', 'warning');
-            saveScoreBtnDonkey.disabled = false;
-            return;
-        }
-        userNameForDb = initialsForSave;
-    } else {
-        try {
-            const userProfileRef = doc(db, 'appUsers', currentUser.uid);
-            const docSnap = await getDoc(userProfileRef);
-            if (docSnap.exists() && docSnap.data().nickname) {
-                userNameForDb = docSnap.data().nickname;
-            } else {
-                userNameForDb = currentUser.displayName || currentUser.email.split('@')[0];
-            }
-        } catch (profileError) {
-            console.warn('handleSaveDonkeyScore: Errore recupero nickname, usando fallback.', profileError);
-            userNameForDb = currentUser.displayName || currentUser.email.split('@')[0];
-        }
-        initialsForSave = userNameForDb.substring(0, 5).toUpperCase();
-        if (initialsForSave.length === 0) initialsForSave = 'USER';
-    }
-
-    saveScoreBtnDonkey.textContent = 'Salvataggio...';
-
-    let scoreData = {
-        gameId: 'donkeyRunner',
-        score: Math.floor(finalScore),
-        initials: initialsForSave,
-        userName: userNameForDb,
-        timestamp: serverTimestamp(),
-        glitchzillaDefeated: isGlitchzillaDefeatedThisGame,
-        trojanByteDefeated: isTrojanByteDefeatedThisGame,
-        missingNumberDefeated: isMissingNumberDefeatedThisGame,
-        stats: gameStats,
-        userId: currentUser ? currentUser.uid : null,
-    };
-    
-    if (currentUser) {
-        try {
-            const userProfileRef = doc(db, "appUsers", currentUser.uid);
-            const docSnap = await getDoc(userProfileRef);
-            if (docSnap.exists() && docSnap.data().nationalityCode) {
-                scoreData.nationalityCode = docSnap.data().nationalityCode;
-            }
-        } catch (error) {
-             console.warn('handleSaveDonkeyScore: Errore recupero nationalityCode', error);
-        }
-    }
-
-    try {
-        const leaderboardCollectionRef = collection(db, 'leaderboardScores');
-        await addDoc(leaderboardCollectionRef, scoreData);
-        
-        showToast('Punteggio Salvato!', 'success');
-        
-        if (playerInitialsDonkeyInput) playerInitialsDonkeyInput.style.display = 'none';
-        document.getElementById('playerInitialsLabel').style.display = 'none';
-        saveScoreBtnDonkey.style.display = 'none';
-        if(loggedInUserNameDisplay) loggedInUserNameDisplay.style.display = 'none';
-
-        shareScoreBtnDonkey.style.display = 'inline-block';
-
-        loadDonkeyLeaderboard();
-
-    } catch (error) {
-        console.error('Errore salvataggio punteggio:', error);
-        showToast('Errore nel salvare il punteggio. Riprova. (' + error.code + ')', 'error');
-        saveScoreBtnDonkey.disabled = false;
-        saveScoreBtnDonkey.textContent = 'Salva Punteggio';
-    }
-}
 
 /**
  * Gestisce la logica e la visualizzazione della schermata di Game Over.
+ * NUOVO: Chiama la Cloud Function per registrare automaticamente le statistiche.
  */
 function processGameOver() {
-    const localScoreInputContainer = document.getElementById('scoreInputContainerDonkey');
-    const localPlayerInitialsInput = document.getElementById('playerInitialsDonkey');
-    const localFinalScoreDisplay = document.getElementById('finalScoreDisplayDonkey');
-    const localLoggedInUserNameDisplay = document.getElementById('loggedInUserNameDisplay');
-    const localPlayerInitialsLabel = document.getElementById('playerInitialsLabel');
-
     gameOverTrigger = false;
     currentGameState = 'GAME_OVER';
     finalScore = Math.floor(score);
@@ -2875,58 +2774,50 @@ function processGameOver() {
     AudioManager.stopMusic();
     AudioManager.playSound('gameOverSound');
 
-    // **NUOVO**: Mostra l'icona del profilo al Game Over
     if (accountIconContainer) {
         accountIconContainer.style.display = 'flex';
     }
-
     if (mobileControlsDiv) {
         mobileControlsDiv.style.display = 'none';
     }
 
-    // **RIMOSSA** la logica per mostrare il pulsante di replay mobile, ora è sempre visibile nel contenitore del punteggio.
-    
-    if (localScoreInputContainer) {
-        const shouldShow = shouldShowDonkeyScoreInput(finalScore);
-        if (shouldShow) {
-            if (localFinalScoreDisplay) {
-                localFinalScoreDisplay.textContent = finalScore;
-            }
-            localScoreInputContainer.style.display = 'flex';
-            
-            const currentUser = auth.currentUser;
-            if (localPlayerInitialsInput && localLoggedInUserNameDisplay && localPlayerInitialsLabel) {
-                if (currentUser) {
-                    getDoc(doc(db, 'appUsers', currentUser.uid)) // Leggiamo da appUsers
-                        .then((profileSnap) => {
-                            let displayName = currentUser.displayName || currentUser.email.split('@')[0];
-                            if (profileSnap.exists() && profileSnap.data().nickname) {
-                                displayName = profileSnap.data().nickname;
-                            }
-                            localLoggedInUserNameDisplay.textContent = displayName;
-                            localLoggedInUserNameDisplay.style.display = 'inline';
-                            localPlayerInitialsLabel.style.display = 'none';
-                            localPlayerInitialsInput.style.display = 'none';
-                        })
-                        .catch((err) => {
-                            console.error('Errore recupero nickname per form punteggio:', err);
-                            localLoggedInUserNameDisplay.textContent = currentUser.displayName || currentUser.email.split('@')[0];
-                            localLoggedInUserNameDisplay.style.display = 'inline';
-                            localPlayerInitialsLabel.style.display = 'none';
-                            localPlayerInitialsInput.style.display = 'none';
-                        });
-                } else {
-                    localLoggedInUserNameDisplay.style.display = 'none';
-                    localPlayerInitialsLabel.style.display = 'block';
-                    localPlayerInitialsInput.style.display = 'block';
-                    localPlayerInitialsInput.required = true;
-                    localPlayerInitialsInput.value = '';
-                    localPlayerInitialsInput.focus();
-                }
-            }
-        } else {
-            localScoreInputContainer.style.display = 'none';
+    // --- NUOVA LOGICA DI SALVATAGGIO AUTOMATICO ---
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+        const bossesDefeatedCount = (isGlitchzillaDefeatedThisGame ? 1 : 0) + 
+                                  (isTrojanByteDefeatedThisGame ? 1 : 0) + 
+                                  (isMissingNumberDefeatedThisGame ? 1 : 0);
+        
+        const gameData = {
+            score: finalScore,
+            bossesDefeated: bossesDefeatedCount,
+            // In futuro potremmo aggiungere altre statistiche qui
+        };
+
+        showToast("Registrazione statistiche...", "info");
+        const submitGameResult = httpsCallable(functions, 'submitGameResult');
+        submitGameResult(gameData)
+            .then((result) => {
+                console.log('Cloud function response:', result.data);
+                showToast("Statistiche salvate!", "success");
+            })
+            .catch((error) => {
+                console.error("Errore chiamata a submitGameResult:", error);
+                showToast(`Errore salvataggio: ${error.message}`, "error");
+            });
+    }
+    // --- FINE NUOVA LOGICA ---
+
+    // Mostra il contenitore del punteggio
+    if (scoreInputContainerDonkey) {
+        const finalScoreDisplay = document.getElementById('finalScoreDisplayDonkey');
+        if (finalScoreDisplay) {
+            finalScoreDisplay.textContent = finalScore;
         }
+        scoreInputContainerDonkey.style.display = 'flex';
+        
+        // La logica per mostrare/nascondere l'input delle iniziali è rimossa
+        // perché ora gestiamo solo utenti loggati. La UI verrà semplificata nella Fase 3.
     }
 }
 
@@ -3198,14 +3089,10 @@ function resetGame() {
     }
 
     // **BUG FIX**: Ripristina lo stato iniziale dei pulsanti
-    if (saveScoreBtnDonkey) {
-        saveScoreBtnDonkey.style.display = 'inline-block';
-        saveScoreBtnDonkey.disabled = false;
-        saveScoreBtnDonkey.textContent = 'Salva Punteggio';
-    }
+    
     if (shareScoreBtnDonkey) {
-        shareScoreBtnDonkey.style.display = 'none';
-    }
+    shareScoreBtnDonkey.style.display = 'inline-block'; // o 'flex' a seconda dello stile del tuo container
+}
 
     // Ripristina anche gli elementi per l'input dell'ospite
     const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
@@ -3690,9 +3577,7 @@ function attachEventListeners() {
             console.log('Event listener per fullscreenButton NON aggiunto (è un iPhone).');
         }
     }
-    if (saveScoreBtnDonkey) {
-        saveScoreBtnDonkey.addEventListener('click', handleSaveDonkeyScore);
-    }
+    
     if (restartGameBtnDonkey) {
         restartGameBtnDonkey.addEventListener('click', () => {
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';

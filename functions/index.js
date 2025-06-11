@@ -24,6 +24,7 @@ if (admin.apps.length === 0) {
 }
 
 const db = admin.firestore();
+const appGameHandler = require('./appGameHandler');
 
 // --- PROJECT-SPECIFIC MODULES ---
 const userPublicProfileSync = require('./userPublicProfileSync');
@@ -1202,6 +1203,8 @@ exports.requestTesterRole = onCall({ region: 'us-central1' }, async (request) =>
         throw new HttpsError('internal', 'Impossibile inviare la richiesta agli admin. Riprova più tardi.');
     }
 });
+
+exports.submitGameResult = appGameHandler.submitGameResult;
 
 exports.handleGameStatsAndAwardBadges = onDocumentCreated('leaderboardScores/{scoreId}', async (event) => {
     const functionName = 'handleGameStatsAndAwardBadges';
