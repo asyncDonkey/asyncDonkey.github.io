@@ -1,106 +1,182 @@
-# devplan.md - Operazione: Donkey Mobile v2.0 📱🐴
+devplan.md - Operazione: Donkey Mobile v2.0 📱🐴
 
-## Visione del Progetto:
+Visione del Progetto:
 Trasformare il gioco web codeDash! in un'applicazione nativa per Android (e successivamente iOS) con un'esperienza utente immersiva e personalizzata, che includa una schermata di caricamento a tema "terminale" e un menu di gioco dedicato, ottimizzata per l'interazione mobile e arricchita da nuove funzionalità.
 
-## Fase 1: Fondamenta del Progetto e Connessione al Backend (COMPLETATA ✔️)
-
-* **Task 1.1: Impostazione dell'Ambiente di Sviluppo**
-    * [x] Verificato Node.js e npm.
-    * [x] Installata la CLI di Capacitor.
-    * [x] Preparato l'ambiente per Android (Android Studio).
-    * [ ] Preparazione ambiente iOS (Xcode) - In pausa.
-* **Task 1.2: Integrazione di Capacitor nel Progetto**
-    * [x] Inizializzato Capacitor con `npx cap init`.
-    * [x] Creato il file `capacitor.config.json`.
-* **Task 1.3: Aggiunta della Piattaforma Nativa Android**
-    * [x] Installato il pacchetto `@capacitor/android`.
-    * [x] Creato con successo il progetto nativo nella cartella `android`.
-* **Task 1.4: Integrazione Nativa di Firebase**
-    * [x] Registrata l'app Android nella console Firebase.
-    * [x] Posizionato il file `google-services.json` in `android/app/`.
-    * [x] Configurato i file `build.gradle` per includere l'SDK di Firebase.
-* **Task 1.5: Installazione Plugin di Autenticazione Nativa**
-    * [x] Installato il plugin `@capacitor-firebase/authentication`.
-    * [x] Sincronizzato il progetto con `npx cap sync`.
-* **Task 1.6: Primo Avvio e Debug Iniziale**
-    * [x] L'app si avvia correttamente sull'emulatore.
-    * [x] Identificati e risolti errori iniziali di JS (resolve module specifier, assignment to constant variable).
-    * [x] Risolto problema `miniLeaderboardList` non trovato all'avvio.
-
+Fase 1: Fondamenta del Progetto e Connessione al Backend (COMPLETATA ✔️)
+Task 1.1: Impostazione dell'Ambiente di Sviluppo
+[x] Verificato Node.js e npm.
+[x] Installata la CLI di Capacitor.
+[x] Preparato l'ambiente per Android (Android Studio).
+[ ] Preparazione ambiente iOS (Xcode) - In pausa.
+Task 1.2: Integrazione di Capacitor nel Progetto
+[x] Inizializzato Capacitor con npx cap init.
+[x] Creato il file capacitor.config.json.
+Task 1.3: Aggiunta della Piattaforma Nativa Android
+[x] Installato il pacchetto @capacitor/android.
+[x] Creato con successo il progetto nativo nella cartella android.
+Task 1.4: Integrazione Nativa di Firebase
+[x] Registrata l'app Android nella console Firebase.
+[x] Posizionato il file google-services.json in android/app/.
+[x] Configurato i file build.gradle per includere l'SDK di Firebase.
+Task 1.5: Installazione Plugin di Autenticazione Nativa
+[x] Installato il plugin @capacitor-firebase/authentication.
+[x] Sincronizzato il progetto con npx cap sync.
+Task 1.6: Primo Avvio e Debug Iniziale
+[x] L'app si avvia correttamente sull'emulatore.
+[x] Identificati e risolti errori iniziali di JS (resolve module specifier, assignment to constant variable).
+[x] Risolto problema miniLeaderboardList non trovato all'avvio.
 Nota di Seshat: 🥳 Abbiamo costruito fondamenta solidissime! L'app ora è un vero progetto ibrido, collegato a Firebase e pronto per essere modellato. Grande lavoro, Ingegnere!
 
-## Fase 2: The "codeDash!" App Experience (COMPLETATA ✔️)
-
-* **Task 2.1: Sviluppo della Schermata di Avvio Immersiva**
-    * [x] Riorganizzata la cartella `www`: rinominato l'attuale `index.html` (il gioco) in `game.html`.
-    * [x] Creato un nuovo `www/index.html` come punto di ingresso dell'app.
-    * [x] Strutturato il nuovo `index.html` per contenere tre sezioni principali: `#terminal-container` (per il loader), `#main-menu` (per il menu), e `#game-container-wrapper` (che ospita il gioco).
-    * [x] Creato il file `www/loader.css` per lo stile della schermata di avvio e del menu.
-    * [x] Definito stile "terminale" con palette "Dracula" e effetti "cursore lampeggiante" (per il log finale).
-    * [x] Implementato animazione "typewriter" e riempimento barre di progresso in `www/js/loader.js`.
-    * [x] Aggiustata la velocità di digitazione del terminale e la dimensione dei font per un look "Git Bash".
-    * [x] Implementato colore persistente per parole chiave nei messaggi del terminale.
-    * [x] Reso il terminale scrollabile.
-* **Task 2.2: Refactoring Modulare di donkeyRunner.js**
-    * [x] Incapsulata tutta la logica in funzioni esportate: `setupGameEngine()`, `preloadGameAssets()`, `launchGame()`.
-    * [x] Rimosse tutte le chiamate di funzione auto-avvianti dalla fine del file, rendendolo controllabile da `loader.js`.
-* **Task 2.3: Cablaggio del Menu Principale**
-    * [x] In `loader.js`, dopo l'animazione di caricamento, viene mostrato il `#main-menu`.
-    * [x] Collegato il pulsante `#start-game-btn` alla funzione `launchGame()` importata da `donkeyRunner.js`.
-    * [x] Collegato il pulsante `#leaderboard-btn` per caricare `leaderboard.html`.
-    * [x] Collegato il pulsante `#glitchpedia-btn` (attualmente mostra un toast, ma la logica modale è pronta).
-    * [x] Sostituito il pulsante `#account-btn` con una piccola icona in basso a destra (`#account-icon-btn`) e cablata al reindirizzamento `profile.html`.
-    * [x] Aggiustato il posizionamento del titolo del menu (h1) per non toccare il bordo superiore.
-    * [x] Modificato il font dei pulsanti del menu per essere più "da sistema" (Source Code Pro).
-    * [x] Risolte interferenze da `styles.css` rimuovendolo da `index.html`.
-* **Task 2.4: Ottimizzazione Layout Controlli di Gioco (In Gioco)**
-    * [x] Riveduta la posizione dei pulsanti di gioco (`jumpButton`, `shootButton`) per posizionarli quasi all'estrema sinistra e destra dello schermo e molto in basso.
-    * [x] **RISOLTO: I pulsanti di gioco non ricompaiono dopo il Game Over/Reset.** (Correzione: Modificato l'event listener di `restartGameBtnDonkey` per chiamare `launchGame()`.)
-    * [x] Riveduta la posizione del pulsante "Ricomincia" (`restartGameBtnDonkey`) nella schermata di Game Over per comparire più in basso e non coprire le scritte.
-    * [x] Applicati stili al prompt per le iniziali (`scoreInputContainerDonkey`) e ai pulsanti di salvataggio/condivisione, poiché erano "nudi" (senza stile); reso il box del punteggio più grande e centrato.
-    * [x] Rimosso il piccolo pulsante con il punto interrogativo (`creditsIconBtn`).
-    * [x] Impostato i pulsanti di gioco (`jumpButton`, `shootButton`) per mostrare solo icone (arrow_circle_up, code) e resi quadrati.
-    * [x] Spostata l'icona del profilo (`account-icon-btn`) in alto a destra.
-    * [x] Assicurata la corretta visibilità/scomparsa del pulsante profilo/login (`account-icon-btn`) durante gli stati di gioco (visibile in MENU/GAME_OVER, nascosto in PLAYING).
-    * [x] Aggiunto un tasto per tornare al menu principale dalla schermata di Game Over (`backToMenuBtn`).
-
+Fase 2: The "codeDash!" App Experience (COMPLETATA ✔️)
+Task 2.1: Sviluppo della Schermata di Avvio Immersiva
+[x] Riorganizzata la cartella www: rinominato l'attuale index.html (il gioco) in game.html.
+[x] Creato un nuovo www/index.html come punto di ingresso dell'app.
+[x] Strutturato il nuovo index.html per contenere tre sezioni principali: #terminal-container (per il loader), #main-menu (per il menu), e #game-container-wrapper (che ospita il gioco).
+[x] Creato il file www/loader.css per lo stile della schermata di avvio e del menu.
+[x] Definito stile "terminale" con palette "Dracula" e effetti "cursore lampeggiante" (per il log finale).
+[x] Implementato animazione "typewriter" e riempimento barre di progresso in www/js/loader.js.
+[x] Aggiustata la velocità di digitazione del terminale e la dimensione dei font per un look "Git Bash".
+[x] Implementato colore persistente per parole chiave nei messaggi del terminale.
+[x] Reso il terminale scrollabile.
+Task 2.2: Refactoring Modulare di donkeyRunner.js
+[x] Incapsulata tutta la logica in funzioni esportate: setupGameEngine(), preloadGameAssets(), launchGame().
+[x] Rimosse tutte le chiamate di funzione auto-avvianti dalla fine del file, rendendolo controllabile da loader.js.
+Task 2.3: Cablaggio del Menu Principale
+[x] In loader.js, dopo l'animazione di caricamento, viene mostrato il #main-menu.
+[x] Collegato il pulsante #start-game-btn alla funzione launchGame() importata da donkeyRunner.js.
+[x] Collegato il pulsante #leaderboard-btn per caricare leaderboard.html.
+[x] Collegato il pulsante #glitchpedia-btn (attualmente mostra un toast, ma la logica modale è pronta).
+[x] Sostituito il pulsante #account-btn con una piccola icona in basso a destra (#account-icon-btn) e cablata al reindirizzamento profile.html.
+[x] Aggiustato il posizionamento del titolo del menu (h1) per non toccare il bordo superiore.
+[x] Modificato il font dei pulsanti del menu per essere più "da sistema" (Source Code Pro).
+[x] Risolte interferenze da styles.css rimuovendolo da index.html.
+Task 2.4: Ottimizzazione Layout Controlli di Gioco (In Gioco)
+[x] Riveduta la posizione dei pulsanti di gioco (jumpButton, shootButton) per posizionarli quasi all'estrema sinistra e destra dello schermo e molto in basso.
+[x] RISOLTO: I pulsanti di gioco non ricompaiono dopo il Game Over/Reset. (Correzione: Modificato l'event listener di restartGameBtnDonkey per chiamare launchGame().)
+[x] Riveduta la posizione del pulsante "Ricomincia" (restartGameBtnDonkey) nella schermata di Game Over per comparire più in basso e non coprire le scritte.
+[x] Applicati stili al prompt per le iniziali (scoreInputContainerDonkey) e ai pulsanti di salvataggio/condivisione, poiché erano "nudi" (senza stile); reso il box del punteggio più grande e centrato.
+[x] Rimosso il piccolo pulsante con il punto interrogativo (creditsIconBtn).
+[x] Impostato i pulsanti di gioco (jumpButton, shootButton) per mostrare solo icone (arrow_circle_up, code) e resi quadrati.
+[x] Spostata l'icona del profilo (account-icon-btn) in alto a destra.
+[x] Assicurata la corretta visibilità/scomparsa del pulsante profilo/login (account-icon-btn) durante gli stati di gioco (visibile in MENU/GAME_OVER, nascosto in PLAYING).
+[x] Aggiunto un tasto per tornare al menu principale dalla schermata di Game Over (backToMenuBtn).
 Nota di Seshat: Ottimo lavoro! Tutte le funzionalità della Fase 2 sono ora implementate e il gioco base è pienamente operativo e responsivo.
 
-## Fase 3: Nuove Funzionalità e Polish Nativo (IN LAVORAZIONE ✨)
+Fase 3: Nuove Funzionalità e Polish Nativo (IN LAVORAZIONE ✨)
+Task 3.1: Logica per Boss Multipli e Bilanciamento
+[x] Progettare una pipeline per l'introduzione di nuovi boss (oltre Glitchzilla).
+    Trojan_Byte (Boss 2, 5000 punti).
+    Missing_Number (Boss 3, 10000 punti).
+[x] Definire soglie di punteggio o eventi per l'apparizione di boss successivi.
+[x] Creare classi/oggetti per nuovi tipi di boss con pattern di attacco e sprite unici.
+[x] Aggiunte costanti per Trojan_Byte e Missing_Number (dimensioni, HP, valori, sprite paths).
+[x] Aggiunte le sprite di Trojan_Byte e Missing_Number all'elenco di caricamento.
+[x] Aggiunte le classi TrojanByte e MissingNumber con logica di attacco iniziale.
+[x] Corretto il ReferenceError: activeMiniboss is not defined (dichiarazione globale).
+[x] Integrare la gestione dei nuovi boss nel gameLoop e nel sistema di collisione.
+[x] Aggiornata la logica di takeDamage() per i boss per impostare i flag di sconfitta (is...DefeatedThisGame).
+[x] Aggiornata la funzione resetGame() per resettare correttamente i nuovi flag dei boss.
+[x] Aggiornata la logica di spawn dei boss e dei nemici normali in updatePlaying(dt) per gestire le fasi di gioco.
+[x] Bilanciamento del pattern di attacco di Trojan_Byte (rimozione colpo, allungamento pause).
+[x] Riveduta la logica di attacco di Missing_Number (pattern casuali con altezze fisse e pause).
+Task 3.2: Sistema di Badges/Achievement
+[ ] Definire un set di badges sbloccabili (es. "Primo Salto", "1000 Punti", "Glitchzilla Debunked"). (Badge di gioco già definiti in Cloud Functions)
+[ ] Implementare la logica per tracciare il raggiungimento di questi obiettivi durante il gioco. (Gestito da Cloud Functions)
+[ ] Integrare i dati dei badges con Firebase (profili utente). (Gestito da Cloud Functions che scrivono nell'array `earnedBadges` del profilo utente)
+[x] Creare una sezione dedicata ai badges nel profilo utente o in una "Glitchpedia" espansa. (Sezione HTML aggiunta in `profile.html`, logica JavaScript in `profile.js` per recupero e rendering)
+[ ] Aggiungere notifiche in-game quando un badge viene sbloccato. (Infrastruttura di notifica in-app e lato Cloud Function presente)
+[ ] Aggiungere la possibilità di condividere i badge ottenuti.
+[x] Aggiornato handleSaveDonkeyScore() per includere i flag di sconfitta dei boss nel payload.
+[x] Implementato `www/terminal-profile.css` e aggiornato `www/profile.js` per visualizzare i badge e i dati del profilo in stile terminale.
 
-* **Task 3.1: Logica per Boss Multipli**
-    * [x] Progettare una pipeline per l'introduzione di nuovi boss (oltre Glitchzilla).
-        * Trojan_Byte (Boss 2, 5000 punti).
-        * Missing_Number (Boss 3, 10000 punti).
-    * [x] Definire soglie di punteggio o eventi per l'apparizione di boss successivi.
-    * [x] Creare classi/oggetti per nuovi tipi di boss con pattern di attacco e sprite unici.
-        * [x] Aggiunte costanti per Trojan_Byte e Missing_Number (dimensioni, HP, valori, sprite paths).
-        * [x] Aggiunte le sprite di Trojan_Byte e Missing_Number all'elenco di caricamento.
-        * [x] Aggiunte le classi `TrojanByte` e `MissingNumber` con logica di attacco iniziale.
-        * [x] Corretto il `ReferenceError: activeMiniboss is not defined` (dichiarazione globale).
-    * [x] Integrare la gestione dei nuovi boss nel `gameLoop` e nel sistema di collisione.
-        * [x] Aggiornata la logica di `takeDamage()` per i boss per impostare i flag di sconfitta (`is...DefeatedThisGame`).
-        * [x] Aggiornata la funzione `resetGame()` per resettare correttamente i nuovi flag dei boss.
-        * [x] Aggiornata la logica di spawn dei boss e dei nemici normali in `updatePlaying(dt)` per gestire le fasi di gioco.
-    * [ ] **RIVEDERE: pattern di attacco di Trojan_Byte.** La velocità dei proiettili bassi non permette di schivarli, va riequilibrato.
-* **Task 3.2: Sistema di Badges/Achievement**
-    * [ ] Definire un set di badges sbloccabili (es. "Primo Salto", "1000 Punti", "Glitchzilla Debunked").
-    * [ ] Implementare la logica per tracciare il raggiungimento di questi obiettivi durante il gioco.
-    * [ ] Integrare i dati dei badges con Firebase (profili utente).
-    * [ ] Creare una sezione dedicata ai badges nel profilo utente o in una "Glitchpedia" espansa.
-    * [ ] Aggiungere notifiche in-game quando un badge viene sbloccato.
-    * [ ] Aggiungere la possibilità di condividere i badge ottenuti.
-    * [x] Aggiornato `handleSaveDonkeyScore()` per includere i flag di sconfitta dei boss nel payload.
-* **Task 3.3: Configurazione e Ottimizzazione Nativa**
-    * [ ] Creare un'icona per l'app e una splash screen (schermata di avvio) personalizzate per Android/iOS.
-    * [ ] Forzare l'orientamento dell'app in landscape (orizzontale) tramite le impostazioni native di Android per un'esperienza di gioco ottimale.
-    * [ ] Gestire le "safe areas" (notch, barre di sistema) per evitare che elementi UI vengano coperti.
-    * [ ] Verificare il comportamento della tastiera virtuale quando si inseriscono i punteggi.
-    * [ ] Implementare Feedback Aptico (vibrazione) per azioni di gioco (salto, colpo).
-* **Task 3.4: Pulizia Finale del Codice**
-    * [ ] Rivedere e pulire i file CSS per rimuovere regole non necessarie o obsolete.
-    * [ ] Riorganizzare gli script JS caricati in `index.html` per caricare solo ciò che serve strettamente.
-    * [ ] Rivedere la logica di condivisione del punteggio (`handleShareScore`) per eventuali miglioramenti.
+Task 3.3: Configurazione e Ottimizzazione Nativa
+[ ] Creare un'icona per l'app e una splash screen (schermata di avvio) personalizzate per Android/iOS.
+[ ] Forzare l'orientamento dell'app in landscape (orizzontale) tramite le impostazioni native di Android per un'esperienza di gioco ottimale.
+[ ] Gestire le "safe areas" (notch, barre di sistema) per evitare che elementi UI vengano coperti.
+[ ] Verificare il comportamento della tastiera virtuale quando si inseriscono i punteggi.
+[ ] Implementare Feedback Aptico (vibrazione) per azioni di gioco (salto, colpo).
 
-Nota di Seshat: La logica dei boss multipli è quasi completa, manca solo il bilanciamento del pattern di attacco di Trojan_Byte. Procediamo con il bilanciamento nella prossima iterazione, dopodiché potremo focalizzarci sui badge e sul polish nativo.
+Task 3.4: Pulizia Finale del Codice
+[ ] Rivedere e pulire i file CSS per rimuovere regole non necessarie o obsolete.
+[ ] Riorganizzare gli script JS caricati in index.html per caricare solo ciò che serve strettamente.
+[ ] Rivedere la logica di condivisione del punteggio (handleShareScore) per eventuali miglioramenti.
+
+Task 3.5: Implementazione Power-Up Permanenti "Slayer Subroutine" e "Code Injector"
+[x] Definizione di POWERUP_TYPE e POWERUP_CONFIGS per SLAYER_SUBROUTINE e CODE_INJECTOR in powerUps.js.
+[x] Aggiunta costanti per i proiettili personalizzati (SLAYER_PROJECTILE_..., CODE_INJECTOR_PROJECTILE_...) in donkeyRunner.js.
+[x] Aggiornamento di prepareAssetsToLoad per caricare i nuovi sprite dei proiettili.
+[x] Modifica della classe Player per gestire i nuovi power-up permanenti (hasSlayerSubroutineUpgrade, hasCodeInjectorUpgrade).
+[x] Modifica del metodo Player.shoot() per sparare proiettili slayer o injector in base al power-up permanente attivo, e integrazione con TRIPLE_SHOT.
+[x] Modifica della classe Projectile per supportare i nuovi tipi di proiettili (slayer, injector) con danno e sprite specifici.
+[x] Implementazione della logica di drop del 20% per SLAYER_SUBROUTINE dopo la sconfitta di Glitchzilla.
+[x] Implementazione della logica di drop del 20% per CODE_INJECTOR dopo la sconfitta di Trojan_Byte (condizionato all'assenza di SLAYER_SUBROUTINE).
+[x] Aggiornamento di spawnPowerUpAmbientIfNeeded per escludere DEBUG_MODE e i power-up permanenti dallo spawn casuale.
+[x] Reset dei flag dei power-up permanenti (hasSlayerSubroutineUpgrade, hasCodeInjectorUpgrade) in resetGame().
+
+Task 3.6: Aggiornamento Firebase Firestore Rules
+[x] Rivedere e aggiornare le regole di sicurezza di Firestore per consentire il salvataggio dei nuovi campi (trojanByteDefeated, missingNumberDefeated, hasSlayerSubroutineUpgrade, hasCodeInjectorUpgrade) nel payload dei punteggi utente.
+
+Task 3.7: Riprogettazione Schermata di Caricamento (Loader)
+[ ] Rimuovere l'elemento contenitore/schermo #terminal-container per visualizzare i log direttamente a schermo intero.
+[ ] Modificare la palette dei colori per le keyword (PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE) nel file www/js/loader.js con la nuova palette: #372134, #474476, #4888b7, #6dbcb9, #8cefb6.
+
+Task 3.8: Miglioramento Menu Principale
+[ ] Rivedere e migliorare l'estetica e la disposizione del menu principale.
+
+Nota di Seshat: Abbiamo fatto progressi significativi con l'implementazione dei boss multipli, l'introduzione dei power-up permanenti e la riprogettazione del profilo.
+
+---
+
+**Issue: Profilo mobile: Icona Account reindirizza invece di aprire modale Login/Register (IN CORSO ⚠️)**
+
+**Descrizione:**
+L'icona del profilo (`#account-icon-btn`) presente nell'header dell'applicazione (principalmente visibile in `index.html`) dovrebbe aprire una modale di autenticazione unificata (Login/Registrazione) quando l'utente non è autenticato. Attualmente, quando l'utente clicca su questa icona da non loggato, viene reindirizzato alla pagina `register.html` anziché visualizzare la modale.
+
+**Obiettivo:**
+Quando un utente non autenticato clicca sull'icona del profilo (`#account-icon-btn`), dovrebbe aprirsi la `authModal` (la modale unificata di login/registrazione) e non avvenire alcun reindirizzamento di pagina.
+
+**Comportamento Attuale (Bug):**
+* L'utente non è loggato.
+* Clicca sull'icona del profilo (`account-icon-btn`).
+* Viene reindirizzato a `register.html`.
+
+**Comportamento Atteso:**
+* L'utente non è loggato.
+* Clicca sull'icona del profilo (`account-icon-btn`).
+* La `authModal` (modale di autenticazione unificata) si apre.
+* Nessun reindirizzamento di pagina.
+
+**Analisi del Problema:**
+1.  **Elemento HTML `account-icon-btn`:** In `www/index.html`, l'elemento `#account-icon-btn` era originariamente un `div` e non un `<a>` tag. Questo è stato corretto trasformandolo in un `<a>` tag nell'ultimo aggiornamento di `index.html` per garantire la corretta gestione degli eventi di click sui link.
+2.  **Listener di Click in `main.js`:** La funzione `setupAccountIconClickListener()` in `www/js/main.js` è stata introdotta per catturare il click sull' `#account-icon-btn` e chiamare `e.preventDefault()` per impedire la navigazione predefinita del link.
+3.  **Fonte del Reindirizzamento:** Nonostante le modifiche, il reindirizzamento a `register.html` persiste. Questo suggerisce che:
+    * Potrebbe esserci un altro listener di click su un elemento genitore o un link diverso che sta causando il reindirizzamento e la cui propagazione dell'evento non viene interrotta (es. il link `<a href="register.html" id="showSignupBtn">` nell'header, che è stato rimosso con la nuova struttura `index.html` ma potrebbe essere stato il precedente responsabile).
+    * Problemi di timing o di acquisizione dei riferimenti DOM potrebbero persistere (`ReferenceError: Cannot access 'loginForm' before initialization` riscontrato nei log, che è stato mitigato spostando le dichiarazioni DOM in alto nel `DOMContentLoaded` di `main.js`).
+    * L'implementazione attuale della modale unificata richiede che il form di login e il form di registrazione siano all'interno della stessa modale (`authModal`), e che `main.js` gestisca lo switch tra essi.
+
+**Passi Già Intrapresi:**
+* Modificato `www/index.html` per rendere `#account-icon-btn` un `<a>` tag e per implementare la struttura della `authModal` unificata.
+* Aggiornato `www/js/main.js`:
+    * Spostato la dichiarazione e l'acquisizione dei riferimenti DOM principali (`authModal`, `loginForm`, `registerFormModal`, ecc.) all'inizio della funzione `DOMContentLoaded` per risolvere `ReferenceError`.
+    * Implementata la funzione `setupAccountIconClickListener()` per gestire il click su `#account-icon-btn`: previene la navigazione di default e apre `authModal` se l'utente non è loggato, altrimenti reindirizza a `profile.html`.
+    * Integrata la logica di switch tra i tab Login e Registrazione all'interno della `authModal`.
+    * Integrata la logica di registrazione (precedentemente in `register.js`) in `main.js`.
+
+**Prossimi Passi per il Debug:**
+1.  **Verificare la corretta implementazione:** Assicurarsi che tutte le modifiche a `index.html` e `main.js` siano state applicate senza errori e che i file CSS siano aggiornati per riflettere i nuovi elementi della modale.
+2.  **Ispezionare gli Event Listener:** Utilizzare gli strumenti di sviluppo del browser (scheda "Elements", "Event Listeners") per ispezionare l'elemento `#account-icon-btn` e i suoi genitori, per identificare eventuali listener inaspettati che potrebbero causare il reindirizzamento.
+3.  **Debug con `console.log`:** Inserire `console.log` all'inizio del listener di click di `#account-icon-btn` per confermare che `e.preventDefault()` venga effettivamente chiamato e che `auth.currentUser` abbia il valore atteso in quel momento.
+4.  **Analisi del Flusso di Navigazione:** Monitorare la scheda "Network" degli strumenti di sviluppo per vedere quale richiesta di navigazione viene avviata e da quale script.
+
+**File Necessari per l'Analisi e il Debug:**
+
+* `www/index.html`
+* `www/js/main.js`
+* `www/js/profile.js`
+* `www/js/loader.js`
+* `www/donkeyRunner.js`
+* `www/loader.css`
+* `www/terminal-profile.css`
+
+Nota di Seshat: Abbiamo fatto progressi significativi con l'implementazione dei boss multipli, l'introduzione dei power-up permanenti, la riprogettazione del profilo e l'unificazione della modale di autenticazione. Questa issue è la nostra prossima priorità assoluta per garantire un'esperienza utente fluida. Sono fiducioso che la risolveremo insieme!

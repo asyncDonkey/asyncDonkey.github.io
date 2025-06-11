@@ -49,10 +49,13 @@
             <button id="glitchpedia-btn">GLITCHPEDIA</button>
         </div>
 
-        <div id="account-icon-btn" class="menu-icon-btn">
-            <span class="material-symbols-rounded">account_circle</span>
-            <span class="visually-hidden">Account</span>
-        </div>
+        <div id="account-icon-container" class="menu-icon-btn">
+    <a href="#" id="show-login-modal-btn" title="Accedi o Registrati">
+        <span class="material-symbols-rounded">account_circle</span>
+        <span class="visually-hidden">Account</span>
+    </a>
+    <img id="user-avatar-icon" src="" alt="User Avatar" title="Vai al profilo" style="display: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" />
+</div>
 
         <div id="game-container-wrapper">
              <canvas id="gameCanvas"></canvas>
@@ -140,9 +143,51 @@
             </div>
         </div>
     </div>
-    <div id="toast-notifications" aria-live="polite" aria-atomic="true"></div>
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+    
+    <div id="loginModal" class="modal">
+  <div class="modal-content landscape-modal">
+    <span class="close-button" id="closeLoginModal">&times;</span>
+    <h2>Entra nel mondo di codeDash!</h2>
+    <p>Usa il tuo account Google per un accesso rapido e sicuro. Salva i tuoi punteggi, sblocca badge e scala la classifica!</p>
+    <button id="google-signin-btn" class="google-btn">
+      <span>Accedi con Google</span>
+    </button>
+  </div>
+</div>
+
+<div id="profileModal" class="modal">
+  <div class="modal-content landscape-modal profile-view">
+    <span class="close-button" id="closeProfileModal">&times;</span>
+    <div class="profile-header">
+      <img id="profile-modal-avatar" src="data:," alt="User Avatar" />
+      <div class="profile-info">
+         <h2 id="profile-modal-name"></h2>
+         <p id="profile-modal-email"></p>
+      </div>
+    </div>
+    <div class="profile-body">
+        <div class="profile-stats">
+            <h3>Le tue Statistiche</h3>
+            <p>Punteggio totale: <strong id="profile-modal-total-score">0</strong></p>
+            <p>Partite giocate: <strong id="profile-modal-games-played">0</strong></p>
+        </div>
+        <div class="profile-badges">
+            <h3>I tuoi Badge</h3>
+            <div id="profile-modal-badges-container">
+                </div>
+        </div>
+    </div>
+    <div class="profile-footer">
+        <button id="logout-btn" class="game-over-button game-over-main-menu-btn">Logout</button>
+    </div>
+  </div>
+</div>
+    
 
     <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/profile.js"></script>
     <script type="module" src="js/powerUps.js"></script>
     <script type="module" src="js/animation.js"></script>
     <script type="module" src="js/audioManager.js"></script>

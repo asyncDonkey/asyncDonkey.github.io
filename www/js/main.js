@@ -3,6 +3,8 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 
 
 
+import { openProfileModal, initProfileControls } from './profile.js';
+
 import {
     getFirestore,
     connectFirestoreEmulator, // IMPORT PER EMULATORE FIRESTORE
@@ -25,39 +27,59 @@ import {
     signOut,
     onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { auth } from './firebase-config.js'; // Importa l'istanza auth
+import { handleGoogleSignIn } from './auth.js';
+
 
 // IMPORT PER EMULATORE STORAGE
-import { getStorage, connectStorageEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
-import {
-    getFunctions,
-    connectFunctionsEmulator,
-    httpsCallable,
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+
+
+import { httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+import { db, functions } from './firebase-config.js'; // Importa tutto da qui
 
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
 import { showToast } from './toastNotifications.js';
 
 // --- Firebase Config ---
-const firebaseConfig = {
-    apiKey: 'AIzaSyBrXQ4qwB9JhZF4kSIPyvxQYw1X4PGXpFk', // Sostituisci con la tua vera chiave se necessario (anche se per gli emulatori non è usata per auth)
-    authDomain: 'asyncdonkey.firebaseapp.com',
-    projectId: 'asyncdonkey',
-    storageBucket: 'asyncdonkey.firebasestorage.app', // Assicurati sia il bucket corretto
-    messagingSenderId: '939854468396',
-    appId: '1:939854468396:web:9646d4f51737add7704889',
-    measurementId: 'G-EQDBKQM3YE',
-};
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const storage = getStorage(app); // INIZIALIZZA STORAGE
-const functions = getFunctions(app, 'us-central1');
+
+
+
+
+
 
 let currentUserProfileUnsubscribe = null;
 let loggedInUser = null; // Mantieni aggiornato lo stato dell'utente loggato
 let notificationListener = null; // Per tenere traccia del listener delle notifiche
+
+let accountIconBtn = null;
+
+// Riferimenti ai nuovi elementi della modale di autenticazione unificata
+let authModal = null;
+let closeAuthModalBtn = null;
+let loginTabBtn = null;
+let registerTabBtn = null;
+let loginFormContainer = null;
+let registerFormContainer = null;
+let loginForm = null; // Il form di login all'interno della modale
+let registerFormModal = null; // Il form di registrazione all'interno della modale
+
+// Riferimenti ai campi e agli errori della modale di REGISTRAZIONE
+let registerEmailModal = null;
+let registerPasswordModal = null;
+let registerConfirmPasswordModal = null;
+let registerNicknameModal = null;
+let registerNationalityModal = null;
+let registerBtnModal = null;
+
+let registerEmailError = null;
+let registerPasswordError = null;
+let registerConfirmPasswordError = null;
+let registerNicknameError = null;
+let registerNationalityError = null;
+let registerGeneralError = null;
+let registrationSuccessMessageModal = null;
 
 // ----- INIZIO CODICE PER EMULATORI -----
 // Controlla se siamo in un contesto locale (es. localhost o 127.0.0.1)
@@ -93,6 +115,8 @@ let notificationListener = null; // Per tenere traccia del listener delle notifi
 //     console.log("[main.js] Connesso ai servizi Firebase di produzione.");
 // }
 // ----- FINE CODICE PER EMULATORI -----
+
+
 
 export function showConfirmationModal(title = 'Conferma Azione', message = 'Sei sicuro di voler procedere?') {
     // ... (codice invariato, come da versione precedente)
@@ -256,73 +280,6 @@ function initializeTesterRequestButton(user, profileData) {
 }
 
 // Funzione loadHeaderUserProfileDisplay (modificata per caricare avatar personalizzato)
-async function loadHeaderUserProfileDisplay(user, profileData) {
-    const userDisplayNameElement = document.getElementById('userDisplayName');
-    const headerUserAvatarElement = document.getElementById('headerUserAvatar');
-
-    if (!userDisplayNameElement || !headerUserAvatarElement) {
-        console.warn('[Main.js loadHeaderUserProfileDisplay] Elementi userDisplayName o headerUserAvatar non trovati.');
-        return;
-    }
-
-    if (!user) {
-        userDisplayNameElement.textContent = '';
-        userDisplayNameElement.style.display = 'none';
-        userDisplayNameElement.className = ''; // NUOVA MODIFICA PER STILE NICKNAME: Reset classe
-        headerUserAvatarElement.src = '';
-        headerUserAvatarElement.alt = 'User Avatar';
-        headerUserAvatarElement.style.display = 'none';
-        return;
-    }
-
-    let nicknameToShow = user.email ? user.email.split('@')[0] : 'Utente';
-    let avatarSrcToSet = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 });
-    let altText = `${nicknameToShow}'s Blockie Avatar`;
-    let activeNicknameAnimClass = null; // NUOVA MODIFICA PER STILE NICKNAME
-
-    if (profileData) {
-        if (profileData.nickname) {
-            nicknameToShow = profileData.nickname;
-        }
-        altText = `${nicknameToShow}'s Avatar`;
-        activeNicknameAnimClass = profileData.activeNicknameAnimation || null; // NUOVA MODIFICA PER STILE NICKNAME
-
-        if (profileData.avatarUrls && (profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile)) {
-            let baseUrl = profileData.avatarUrls.thumbnail || profileData.avatarUrls.profile;
-            if (profileData.profileUpdatedAt && profileData.profileUpdatedAt.seconds) {
-                avatarSrcToSet = `${baseUrl}?v=${profileData.profileUpdatedAt.seconds}`;
-            } else if (profileData.profileUpdatedAt instanceof Date) {
-                avatarSrcToSet = `${baseUrl}?v=${profileData.profileUpdatedAt.getTime()}`;
-            } else {
-                avatarSrcToSet = baseUrl;
-            }
-            altText = `${nicknameToShow}'s Custom Avatar`;
-        }
-    }
-
-    // NUOVA MODIFICA PER STILE NICKNAME: Applica classe animazione
-    userDisplayNameElement.className = ''; // Resetta classi precedenti
-    if (activeNicknameAnimClass) {
-        userDisplayNameElement.classList.add(activeNicknameAnimClass);
-    }
-    userDisplayNameElement.textContent = `Ciao, ${escapeHTML(nicknameToShow)}`;
-    userDisplayNameElement.style.display = 'inline';
-
-    headerUserAvatarElement.src = avatarSrcToSet;
-    headerUserAvatarElement.alt = altText;
-    headerUserAvatarElement.style.display = 'inline-block';
-    headerUserAvatarElement.style.backgroundColor = 'transparent';
-    headerUserAvatarElement.onerror = () => {
-        console.warn(`[Main.js Navbar] Errore caricamento avatar: ${headerUserAvatarElement.src}. Fallback.`);
-        if (user && user.uid) {
-            headerUserAvatarElement.src = generateBlockieAvatar(user.uid, 32, { size: 7, scale: 4 });
-            headerUserAvatarElement.alt = `${nicknameToShow}'s Blockie Avatar (fallback errore)`;
-        } else {
-            headerUserAvatarElement.style.display = 'none';
-        }
-        headerUserAvatarElement.onerror = null;
-    };
-}
 
 function updateHeaderAuthContainersVisibility(user) {
     // ... (codice invariato)
@@ -542,148 +499,10 @@ function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], 
     return listItem;
 }
 
-async function getUserProfile(userId) {
-    // ... (codice invariato)
-    if (!db) {
-        console.error('Firestore (db) non inizializzato (getUserProfile).');
-        return { nickname: 'Errore DB' };
-    }
-    try {
-        const userProfileDoc = await getDoc(doc(db, 'userProfiles', userId));
-        if (userProfileDoc.exists()) {
-            return userProfileDoc.data();
-        } else {
-            return { nickname: 'Utente' };
-        }
-    } catch (error) {
-        console.error(`Errore durante il recupero del profilo utente (${userId}):`, error);
-        return { nickname: 'Errore Profilo' };
-    }
-}
 
-async function updateLoginLogoutLinks(user) {
-    const mobileMenuNode = document.getElementById('mobileNavMenu');
-    const mobileMenuContainer = mobileMenuNode ? mobileMenuNode.querySelector('.mobile-menu-list') : null;
 
-    const navWriteArticleDropdownLiMobile = document.getElementById('mobile-navWriteArticleDropdown');
-    if (navWriteArticleDropdownLiMobile) {
-        navWriteArticleDropdownLiMobile.style.display = user ? 'list-item' : 'none';
-    }
-    const navWriteArticleDropdownLiDesktop = document.getElementById('navWriteArticleDropdown');
-    if (navWriteArticleDropdownLiDesktop) {
-        navWriteArticleDropdownLiDesktop.style.display = user ? 'list-item' : 'none';
-    }
 
-    if (!mobileMenuContainer) {
-        console.warn('[main.js updateLoginLogoutLinks] Contenitore menu mobile non trovato o non ancora popolato.');
-        return;
-    }
 
-    const dynamicMobileLiIds = ['mobile-profile-link-li', 'mobile-logout-link-li', 'mobile-login-link-li'];
-    dynamicMobileLiIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el && el.parentNode === mobileMenuContainer) {
-            // console.log(`[main.js updateLoginLogoutLinks] Rimuovo LI mobile: ${id}`); // DEBUG
-            el.remove();
-        }
-    });
-
-    if (user) {
-        let userProfile = await getUserProfile(user.uid);
-        let userNickname = userProfile?.nickname || (user.email ? user.email.split('@')[0] : 'Utente');
-
-        const profileHTMLMobile = `<span class="material-symbols-rounded">account_circle</span> <span class="nav-text">My Profile (${escapeHTML(userNickname)})</span>`;
-        mobileMenuContainer.appendChild(
-            createNavLinkItem('mobile-profile-link-li', 'mobile-profile-link', 'profile.html', profileHTMLMobile, [
-                'nav-item',
-            ])
-        );
-        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "My Profile" mobile.'); // DEBUG
-
-        const logoutHandler = async (e) => {
-            e.preventDefault();
-            console.log('[main.js logoutHandler mobile] Logout cliccato!'); // DEBUG
-            const mobileMenuContainerForLogout = document.getElementById('mobileNavMenu'); // Riferimento fresco
-            const isActiveBeforeLogout =
-                mobileMenuContainerForLogout && mobileMenuContainerForLogout.classList.contains('active');
-
-            if (isActiveBeforeLogout) {
-                // console.log('[main.js logoutHandler mobile] Chiusura menu mobile prima del signOut.'); // DEBUG
-                toggleMobileMenu(); // Chiude il menu e dovrebbe spostare il focus sul toggler
-            } else {
-                // console.log('[main.js logoutHandler mobile] Menu mobile non attivo, procedo con signOut.'); // DEBUG
-            }
-
-            try {
-                console.log('[main.js logoutHandler mobile] Chiamata a signOut...'); // DEBUG
-                await signOut(auth);
-                showToast('Logout effettuato con successo!', 'success');
-                console.log('[main.js logoutHandler mobile] Logout riuscito.'); // DEBUG
-            } catch (error) {
-                console.error('Errore durante il logout (mobile):', error);
-                showToast('Errore durante il logout. Riprova.', 'error');
-            }
-        };
-        const logoutHTMLMobile = `<span class="material-symbols-rounded">logout</span> <span class="nav-text">Logout</span>`;
-        mobileMenuContainer.appendChild(
-            createNavLinkItem(
-                'mobile-logout-link-li',
-                'mobile-logout-link',
-                '#',
-                logoutHTMLMobile,
-                ['nav-item'],
-                logoutHandler
-            )
-        );
-        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "Logout" mobile.'); // DEBUG
-    } else {
-        const loginHTMLMobile = `<span class="material-symbols-rounded">login</span> <span class="nav-text">Login / Register</span>`;
-        const loginMobileHandler = (e) => {
-            e.preventDefault();
-            const loginModalEl = document.getElementById('loginModal');
-            if (loginModalEl) loginModalEl.style.display = 'block';
-            const mobileMenuContainerForLogin = document.getElementById('mobileNavMenu');
-            if (mobileMenuContainerForLogin && mobileMenuContainerForLogin.classList.contains('active')) {
-                toggleMobileMenu(); // Chiudi menu mobile
-            }
-        };
-        // mobileMenuContainer.appendChild(createNavLinkItem('mobile-login-link-li', 'mobile-login-link', 'register.html', loginHTMLMobile, ['nav-item']));
-        mobileMenuContainer.appendChild(
-            createNavLinkItem(
-                'mobile-login-link-li',
-                'mobile-login-link',
-                '#',
-                loginHTMLMobile,
-                ['nav-item'],
-                loginMobileHandler
-            )
-        );
-
-        // console.log('[main.js updateLoginLogoutLinks] Aggiunto link "Login/Register" mobile.'); // DEBUG
-    }
-}
-
-async function updateAdminDashboardLink(user, profileData) {
-    const adminDashboardLinkFooter = document.getElementById('admin-dashboard-footer-link');
-    if (!adminDashboardLinkFooter) {
-        return; // Esce se il link non è in questa pagina
-    }
-
-    // L'utente deve essere loggato E avere un profilo caricato
-    if (user && profileData) {
-        console.log('[Athena] Controllo lo stato di admin dai dati del profilo Firestore:', profileData);
-
-        // La nostra nuova fonte di verità: il campo nel documento!
-        const isAdmin = profileData.isAdmin === true;
-
-        console.log(`[Athena] L'utente è admin (secondo Firestore)? ${isAdmin}`);
-
-        adminDashboardLinkFooter.style.display = isAdmin ? 'block' : 'none';
-    } else {
-        // Se non c'è utente o non ci sono dati del profilo, nascondi il link.
-        adminDashboardLinkFooter.style.display = 'none';
-    }
-}
 
 function initializeNewNavbar() {
     // ... (codice invariato)
@@ -698,57 +517,15 @@ function initializeNewNavbar() {
     console.log('[initializeNewNavbar] Nuova navbar inizializzata.');
 }
 
-function updateUIBasedOnAuthState(user, profileData) {
-    console.log('[Main.js updateUIBasedOnAuthState] Chiamata con utente:', user ? user.uid : null);
 
-    updateHeaderAuthContainersVisibility(user);
-    loadHeaderUserProfileDisplay(user, profileData);
-    updateLoginLogoutLinks(user); // Gestisce il menu mobile
 
-    const navWriteArticleDropdownDesktop = document.getElementById('navWriteArticleDropdown');
-    if (navWriteArticleDropdownDesktop) {
-        navWriteArticleDropdownDesktop.style.display = user ? 'list-item' : 'none';
-    }
-
-    updateAdminDashboardLink(user, profileData);
-    initializeTesterRequestButton(user, profileData);
-
-    if (document.getElementById('articlesSection')) {
-        initializeHomepageArticleInteractions(user);
-    }
-
-    const logoutButtonDesktop = document.getElementById('logoutButton');
-    if (logoutButtonDesktop) {
-        const desktopLogoutHandler = async (event) => {
-            event.preventDefault();
-            console.log('[main.js desktopLogoutHandler] Logout desktop cliccato!');
-            try {
-                await signOut(auth);
-                showToast('Logout effettuato con successo!', 'success');
-            } catch (error) {
-                console.error('Errore durante il logout (desktop):', error);
-                showToast('Errore durante il logout. Riprova.', 'error');
-            }
-        };
-
-        const newLogoutButton = logoutButtonDesktop.cloneNode(true);
-        logoutButtonDesktop.parentNode.replaceChild(newLogoutButton, logoutButtonDesktop);
-
-        if (user) {
-            document.getElementById('logoutButton').addEventListener('click', desktopLogoutHandler);
-        }
-    } else {
-        console.warn('[Main.js updateUIBasedOnAuthState] Pulsante logoutButton desktop non trovato.');
-    }
-
-    console.log('[Main.js updateUIBasedOnAuthState] Fine aggiornamenti UI orchestrati.');
-}
-
-export { db, auth, firebaseConfig, escapeHTML };
+export { db, auth, escapeHTML };
 
 export function getCurrentUserId() {
     return auth.currentUser ? auth.currentUser.uid : null;
 }
+
+
 
 async function loadHomeMiniLeaderboard() {
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
@@ -1181,215 +958,97 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inizializzazioni principali
     initializeNewNavbar(); // Chiama setupDesktopCommunityDropdown e populateMobileMenu
     setupThemeSwitcher(); // Inizializza il theme switcher
+    
 
-    // Variabili e funzioni locali a DOMContentLoaded (se necessarie)
-    const loginForm = document.getElementById('loginForm');
-    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
-    const loginModal = document.getElementById('loginModal');
-    const showLoginBtn = document.getElementById('showLoginBtn');
-    const closeLoginBtn = loginModal ? loginModal.querySelector('.closeLoginBtn') : null;
+    // Setup dei nuovi controlli UI
+const loginModal = document.getElementById('loginModal');
+const showLoginModalBtn = document.getElementById('show-login-modal-btn');
+const closeLoginModalBtn = document.getElementById('closeLoginModal');
+const googleSignInBtn = document.getElementById('google-signin-btn');
+const userAvatarIcon = document.getElementById('user-avatar-icon');
 
-    const openModal = (modal) => {
-        if (modal) modal.style.display = 'block';
-    };
-    const closeModal = (modal) => {
-        if (modal) modal.style.display = 'none';
-    };
+if (showLoginModalBtn) {
+    showLoginModalBtn.addEventListener('click', (e) => { // 1. Aggiungi (e) qui
+        e.preventDefault(); // 2. Aggiungi questa riga per fermare il browser
 
-    function setupSmoothScrolling() {
-        document.querySelectorAll('header nav a[href^="#"]').forEach((link) => {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                try {
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                } catch (error) {
-                    console.error('Errore smooth scrolling:', error);
-                }
-            });
-        });
-    }
-
-    function setupScrollToTopButton() {
-        if (!scrollToTopBtn) return;
-        window.addEventListener('scroll', () => {
-            scrollToTopBtn.classList.toggle('show', window.pageYOffset > 200);
-        });
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-
-    function setupModalControls() {
-        if (showLoginBtn && loginModal) {
-            showLoginBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                openModal(loginModal);
-            });
-        }
-        if (closeLoginBtn) {
-            closeLoginBtn.addEventListener('click', () => closeModal(loginModal));
-        }
-        window.addEventListener('click', (event) => {
-            if (event.target === loginModal) closeModal(loginModal);
-        });
-    }
-
-    // Chiamate alle funzioni di setup del DOM
-    setupSmoothScrolling();
-    setupScrollToTopButton();
-
-    setupModalControls();
-    setupAvatarClickListener();
-    // Caricamento contenuti specifici della homepage
-    if (document.getElementById('homeMiniLeaderboardList')) {
-        loadHomeMiniLeaderboard();
-    }
-    if (document.getElementById('articlesSection')) {
-        displayArticlesSection()
-            .then(() => {
-                /* Interazioni inizializzate dopo auth state change */
-            })
-            .catch((error) => {
-                console.error('Errore durante displayArticlesSection in DOMContentLoaded:', error);
-            });
-    }
-    if (document.getElementById('glitchzillaDefeatedBanner')) {
-        displayGlitchzillaBanner();
-    }
-
-    // Setup form di login
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = loginForm.loginEmail.value;
-            const password = loginForm.loginPassword.value;
-            const loginModalErrorDiv = document.querySelector('#loginModal .error-message');
-            if (loginModalErrorDiv) loginModalErrorDiv.style.display = 'none';
-            // E SOSTITUISCILO CON QUESTO
-try {
-    // Controlliamo se l'app sta girando su una piattaforma nativa
-    if (Capacitor.isNativePlatform()) {
-        console.log('[main.js Login] Piattaforma nativa rilevata. Uso del plugin di autenticazione Capacitor.');
-        
-        // Accediamo al plugin tramite l'oggetto globale Capacitor.Plugins
-        const { FirebaseAuthentication } = Capacitor.Plugins;
-
-        await FirebaseAuthentication.signInWithEmailAndPassword({
-            email,
-            password,
-        });
-
-    } else {
-        // Altrimenti (se siamo sul browser web), usiamo il metodo classico
-        console.log('[main.js Login] Piattaforma web rilevata. Uso del Web SDK di Firebase.');
-        await signInWithEmailAndPassword(auth, email, password);
-    }
-
-    loginForm.reset();
-    closeModal(loginModal);
-    showToast('Login effettuato con successo!', 'success');
-
-} catch (error) {
-    console.error('Errore durante il login:', error);
-    const friendlyError = traduireErroreFirebase(error.code) || error.message;
-    if (loginModalErrorDiv) {
-        loginModalErrorDiv.textContent = friendlyError;
-        loginModalErrorDiv.style.display = 'block';
-    } else {
-        showToast('Errore Login: ' + friendlyError, 'error');
-    }
-}
-        });
-    }
-
-    function setupAvatarClickListener() {
-        const headerUserAvatar = document.getElementById('headerUserAvatar');
-        if (headerUserAvatar) {
-            headerUserAvatar.addEventListener('click', () => {
-                // Controlla se l'utente è loggato prima di reindirizzare
-                if (auth.currentUser) {
-                    window.location.href = 'profile.html';
-                }
-            });
-        }
-    }
-
-    // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
-    onAuthStateChanged(auth, async (user) => {
-        console.log('[Main.js onAuthStateChanged] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
-        loggedInUser = user;
-
-        if (currentUserProfileUnsubscribe) {
-            console.log('[Main.js onAuthStateChanged] Annullamento iscrizione dal listener profilo navbar precedente.');
-            currentUserProfileUnsubscribe();
-            currentUserProfileUnsubscribe = null;
-        }
-
-        if (user) {
-            // Utente AUTENTICATO
-            const userIdForEvent = user.uid;
-            const userProfileRef = doc(db, 'userProfiles', userIdForEvent);
-            console.log(
-                `[Main.js onAuthStateChanged] Impostazione listener onSnapshot per profilo navbar UID: ${userIdForEvent}`
-            );
-
-            currentUserProfileUnsubscribe = onSnapshot(
-                userProfileRef,
-                async (docSnap) => {
-                    const userProfileData = docSnap.exists() ? docSnap.data() : null;
-                    updateUIBasedOnAuthState(user, userProfileData);
-
-                    // --- LOGICA REVISIONATA PER BADGE DI VERIFICA EMAIL ---
-                    if (user.emailVerified && userProfileData) {
-                        const earnedBadges = userProfileData.earnedBadges || [];
-                        if (!earnedBadges.includes('verified-user')) {
-                            console.log(
-                                '[Main.js] Utente verificato ma senza badge. Forzo il refresh del token e poi chiamo la Cloud Function...'
-                            );
-                            try {
-                                // **MODIFICA CHIAVE**: Forza il refresh del token per ottenere le claims aggiornate (email_verified: true)
-                                await user.getIdToken(true);
-
-                                // Ora che il token è fresco, possiamo chiamare la funzione
-                                const grantVerificationBadge = httpsCallable(functions, 'grantVerificationBadge');
-                                const result = await grantVerificationBadge();
-                                console.log('[Main.js] Chiamata a grantVerificationBadge riuscita:', result.data);
-                            } catch (error) {
-                                console.error('[Main.js] Errore durante la chiamata a grantVerificationBadge:', error);
-                            }
-                        }
-                    }
-                    // --- FINE LOGICA REVISIONATA ---
-                },
-                (error) => {
-                    console.error('[Main.js onSnapshot Navbar] Errore nel listener del profilo per navbar:', error);
-                    updateUIBasedOnAuthState(user, null);
-                }
-            );
-
-            setupNotificationBellListener(userIdForEvent);
-            loadContentSpecificFeatures(user);
-
-            console.log(`[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con userId: ${userIdForEvent}`);
-            document.dispatchEvent(
-                new CustomEvent('userAuthenticated', { detail: { user: user, userId: userIdForEvent } })
-            );
-            console.log('[Main.js onAuthStateChanged] Operazioni per utente autenticato completate.');
+        console.log("Click sull'icona di login registrato!"); // Aggiunto per debug
+        if (loginModal) {
+            loginModal.style.display = 'flex';
         } else {
-            // Utente NON AUTENTICATO (logout)
-            console.log('[Main.js onAuthStateChanged] Utente non loggato.');
-            updateUIBasedOnAuthState(null, null);
-            clearNotificationBellListener();
-            loadContentSpecificFeatures(null);
-
-            console.log('[Main.js onAuthStateChanged] Invio evento "userAuthenticated" con utente nullo (logout).');
-            document.dispatchEvent(new CustomEvent('userAuthenticated', { detail: { user: null, userId: null } }));
-            console.log('[Main.js onAuthStateChanged] Operazioni per utente non autenticato completate.');
+            console.error("La modale di login non è stata trovata nel DOM!");
         }
     });
-    console.log('[Main.js DOMContentLoaded] Tutte le inizializzazioni del DOM e Auth listener sono state impostate.');
+}
+
+if (closeLoginModalBtn) {
+    closeLoginModalBtn.addEventListener('click', () => {
+        if (loginModal) loginModal.style.display = 'none';
+    });
+}
+
+if (googleSignInBtn) {
+    googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+}
+
+if (userAvatarIcon) {
+    userAvatarIcon.addEventListener('click', () => {
+        openProfileModal(loggedInUser);
+    });
+}
+
+// Inizializza i controlli della modale del profilo (logout, etc)
+initProfileControls();
+
+// Manteniamo le altre inizializzazioni importanti!
+if (document.getElementById('homeMiniLeaderboardList')) {
+    loadHomeMiniLeaderboard();
+}
+if (document.getElementById('articlesSection')) {
+    displayArticlesSection();
+}
+if (document.getElementById('glitchzillaDefeatedBanner')) {
+    displayGlitchzillaBanner();
+}
+
+
+
+    
+
+
+    
+    // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
+    // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
+onAuthStateChanged(auth, async (user) => {
+    console.log('[Main.js] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
+    loggedInUser = user;
+
+    // Gestione della visibilità delle icone
+    const loginIcon = document.getElementById('show-login-modal-btn');
+    const avatarIcon = document.getElementById('user-avatar-icon');
+
+    if (user) {
+        // Utente LOGGATO
+        if (loginIcon) loginIcon.style.display = 'none';
+        if (avatarIcon) {
+            avatarIcon.src = user.photoURL || generateBlockieAvatar(user.uid, 32); // Fallback a blockie se non c'è foto
+            avatarIcon.style.display = 'block';
+        }
+
+        // Manteniamo le altre logiche per utenti loggati
+        // NOTA: initializeHomepageArticleInteractions va chiamato qui
+        initializeHomepageArticleInteractions(user);
+        setupNotificationBellListener(user.uid);
+        loadContentSpecificFeatures(user);
+
+    } else {
+        // Utente NON LOGGATO
+        if (loginIcon) loginIcon.style.display = 'block';
+        if (avatarIcon) avatarIcon.style.display = 'none';
+
+        // Manteniamo le altre logiche per utenti non loggati
+        initializeHomepageArticleInteractions(null);
+        clearNotificationBellListener();
+        loadContentSpecificFeatures(null);
+    }
+});
 }); // Fine dell'UNICO DOMContentLoaded

@@ -1,5 +1,13 @@
 {
   "appId": "io.asynced.codedash",
   "appName": "codeDash!",
-  "webDir": "www" 
+  "webDir": "www",
+"plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": [
+        "google.com"
+      ]
+    }
+  }
 }

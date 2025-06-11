@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo Utente - codeDash!</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="terminal-profile.css"> 
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css"/>
+</head>
+<body class="dark-mode">
+    <div id="loader-overlay" class="loader-overlay">
+        <div id="terminal-container" class="terminal-loader">
+            <pre id="terminal-log"></pre>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText"></div>
+            </div>
+            <div id="loader-cursor" class="cursor"></div>
+        </div>
+    </div>
+
+    <div id="profileAppContainer" class="terminal-app-container">
+        <header class="terminal-header">
+            <span class="terminal-prompt">></span>
+            <h1>PROFILO_UTENTE:<span id="profileSectionTitle">Caricamento...</span></h1>
+        </header>
+
+        <main id="profileMainContent" class="terminal-main-content">
+            <div id="profileLoadingMessage" class="terminal-block loading-message">
+                <span class="terminal-prompt">></span> Caricamento profilo utente...
+                <div class="loader-dots"><span></span><span></span><span></span></div>
+            </div>
+
+            <div id="profileLoginMessage" class="terminal-block error-message" style="display: none;">
+                <p><span class="terminal-prompt">!</span> ERRORE: ACCESSO NEGATO. Effettuare login per visualizzare il profilo completo.</p>
+                <p><span class="terminal-prompt">></span> Digita <a href="#" id="profilePageLoginLink">LOGIN</a> o <a href="register.html">REGISTRATI</a>.</p>
+            </div>
+
+            <div id="guestProfileViewMessage" class="terminal-block info-message" style="display: none;">
+                <p><span class="terminal-prompt">~</span> Stai visualizzando un profilo pubblico. Alcune informazioni sono riservate.</p>
+                <p><span class="terminal-prompt">></span> <a href="#" id="guestProfileLoginLink">Accedi</a> per accedere al tuo profilo o per interazioni complete.</p>
+            </div>
+
+            <div id="profileContent" class="terminal-scrollable-content" style="display: none;">
+
+                <div class="terminal-section">
+                    <h3><span class="terminal-prompt">#</span> STATO_ACCOUNT</h3>
+                    <div class="terminal-info-grid">
+                        <div class="terminal-info-item">
+                            <span class="label">NICKNAME:</span>
+                            <span id="currentNickname" class="value"></span>
+                            <button id="editNicknameBtn" class="terminal-button icon-only" title="Modifica Nickname">
+                                <span class="material-symbols-rounded">edit</span>
+                            </button>
+                            <button id="customizeNicknameBtn" class="terminal-button icon-only" title="Personalizza Stile Nickname">
+                                <span class="material-symbols-rounded">palette</span>
+                            </button>
+                        </div>
+                        <div class="terminal-info-item" id="profileEmailRow">
+                            <span class="label">EMAIL:</span>
+                            <span id="profileEmail" class="value"></span>
+                            <span id="emailVerifiedStatus" class="status-indicator"></span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">USER_ID:</span>
+                            <span id="userIdDisplay" class="value small-text"></span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">RUOLO_ADMIN:</span>
+                            <span id="isAdminDisplay" class="value"></span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">RUOLO_TESTER:</span>
+                            <span id="isTestUserDisplay" class="value"></span>
+                            <a href="test-zone.html" id="testZoneLink" class="terminal-button icon-only" title="Accedi alla Test Zone" style="display: none;">
+                                <span class="material-symbols-rounded">science</span>
+                            </a>
+                        </div>
+                         <div class="terminal-info-item">
+                            <span class="label">NAZIONALITA:</span>
+                            <span id="profileNationality" class="value"></span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">REGISTRATO_IL:</span>
+                            <span id="registrationDate" class="value"></span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">ULTIMO_LOGIN:</span>
+                            <span id="lastLoginDisplay" class="value"></span>
+                        </div>
+                    </div>
+
+                    <div id="emailVerificationNotice" class="terminal-block warning-message" style="display: none;">
+                        <p><span class="terminal-prompt">!</span> La tua email non è verificata. Verifica ora per sbloccare funzionalità e badge!</p>
+                        <button id="verifyEmailBtn" class="terminal-button primary-button">
+                            <span class="material-symbols-rounded">mail</span> Invia Email di Verifica
+                        </button>
+                        <p id="resendEmailMessage" class="info-message small-text"></p>
+                        <button id="grantVerificationBadgeBtn" class="terminal-button secondary-button" style="display: none;">
+                            <span class="material-symbols-rounded">verified</span> Richiedi Badge Utente Verificato
+                        </button>
+                    </div>
+                </div>
+
+                <div id="statusMessageSection" class="terminal-section">
+                    <h3><span class="terminal-prompt">#</span> MESSAGGIO_STATO</h3>
+                    <div id="statusMessageDisplay" class="terminal-message-display"></div>
+                    <form id="updateStatusForm" class="terminal-form" style="display: none;">
+                        <input type="text" id="statusMessageInput" placeholder="Aggiorna il tuo stato d'animo..." maxlength="150" class="terminal-input">
+                        <button type="submit" class="terminal-button primary-button">
+                            <span class="material-symbols-rounded">send</span> Aggiorna
+                        </button>
+                        <p id="statusUpdateMessage" class="error-message"></p>
+                    </form>
+                </div>
+
+                <div id="bioSection" class="terminal-section">
+                    <h3><span class="terminal-prompt">#</span> BIOGRAFIA</h3>
+                    <div id="bioDisplay" class="terminal-bio-display"></div>
+                    <form id="updateBioForm" class="terminal-form" style="display: none;">
+                        <textarea id="bioInput" placeholder="Scrivi qualcosa di te..." maxlength="300" class="terminal-textarea"></textarea>
+                        <div class="char-counter">
+                            Caratteri: <span id="bioCurrentChars">0</span>/<span id="bioCharCount">300</span>
+                        </div>
+                        <button type="submit" class="terminal-button primary-button">
+                            <span class="material-symbols-rounded">save</span> Salva Bio
+                        </button>
+                        <p id="bioUpdateMessage" class="error-message"></p>
+                    </form>
+                </div>
+
+                <section id="gameStatsSection" class="terminal-section">
+                    <h3><span class="terminal-prompt">#</span> DATI_GIOCO (DONKEY_RUNNER)</h3>
+                    <div id="gameStatsLoadingIndicator" class="loading-indicator">
+                        <div class="loader-dots"><span></span><span></span><span></span></div>
+                        Caricamento statistiche di gioco...
+                    </div>
+                    <div id="gameStatsDisplay" class="terminal-info-grid" style="display: none;">
+                        <div class="terminal-info-item">
+                            <span class="label">PARTITE_GIOCATE:</span>
+                            <span id="totalGamesPlayed" class="value">0</span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">SALTATO:</span>
+                            <span id="totalJumps" class="value">0</span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">COLPI_SPARATI:</span>
+                            <span id="totalShotsFired" class="value">0</span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">POWERUP_RACCOLTI:</span>
+                            <span id="totalPowerUpsCollected" class="value">0</span>
+                        </div>
+                         <div class="terminal-info-item">
+                            <span class="label">GLITCHZILLA_SCONFITTO:</span>
+                            <span id="glitchzillaDefeatedStatus" class="value">NO</span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">TROJAN_BYTE_SCONFITTO:</span>
+                            <span id="trojanByteDefeatedStatus" class="value">NO</span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">MISSING_NUMBER_SCONFITTO:</span>
+                            <span id="missingNumberDefeatedStatus" class="value">NO</span>
+                        </div>
+                        <div class="terminal-info-item">
+                            <span class="label">BEST_SCORE:</span>
+                            <span id="bestScoreDisplay" class="value">0</span>
+                        </div>
+                    </div>
+                     <p id="noGameStatsMessage" class="info-message" style="display: none;">Nessuna statistica di gioco disponibile. Inizia a giocare a Donkey Runner!</p>
+                </section>
+
+
+                <section id="badgesSection" class="terminal-section">
+                    <h3><span class="terminal-prompt">#</span> I_TUOI_RICONOSCIMENTI</h3>
+                    <div id="badgesLoadingIndicator" class="loading-indicator">
+                        <div class="loader-dots"><span></span><span></span><span></span></div>
+                        Caricamento badge...
+                    </div>
+                    <div id="earnedBadgesContainer" class="badges-grid" style="display: none;">
+                        </div>
+                    <p id="noBadgesMessage" class="info-message" style="display: none;">Nessun riconoscimento ancora ottenuto. Continua a giocare e interagire!</p>
+                    <button id="badgesInfoBtn" class="terminal-button primary-button mt-3">
+                        <span class="material-symbols-rounded" style="vertical-align: middle;">info</span>
+                        Come ottenere i riconoscimenti?
+                    </button>
+                </section>
+
+                <section id="avatarUploadSection" class="terminal-section">
+                    <h3><span class="terminal-prompt">#</span> GESTIONE_AVATAR</h3>
+                    <div class="terminal-avatar-area">
+                        <div class="terminal-avatar-preview">
+                            <img id="userAvatar" src="" alt="User Avatar">
+                        </div>
+                        <div class="terminal-avatar-controls">
+                            <input type="file" id="avatarUploadInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                            <button id="selectAvatarFileBtn" class="terminal-button secondary-button">
+                                <span class="material-symbols-rounded">upload_file</span> Seleziona File
+                            </button>
+                            <button id="saveAvatarBtn" class="terminal-button primary-button" style="display: none;">
+                                <span class="material-symbols-rounded">save</span> Salva Avatar
+                            </button>
+                            <button id="cancelAvatarBtn" class="terminal-button tertiary-button" style="display: none;">
+                                <span class="material-symbols-rounded">cancel</span> Annulla
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="externalLinksSection" class="terminal-section">
+                    <h3><span class="terminal-prompt">#</span> LINK_ESTERNI</h3>
+                    <ul id="externalLinksList" class="terminal-list">
+                        <li id="noExternalLinksMessage" style="display: none;">Nessun link esterno configurato.</li>
+                    </ul>
+                    <div id="manageExternalLinksUI">
+                        <button id="toggleAddLinkFormBtn" class="terminal-button secondary-button">
+                            <span class="material-symbols-rounded">add_link</span> Aggiungi Nuovo Link
+                        </button>
+
+                        <div id="externalLinkFormContainer" class="terminal-block" style="display: none;">
+                            <h4 id="externalLinkFormTitle">Aggiungi Nuovo Link</h4>
+                            <form id="externalLinkForm" class="terminal-form">
+                                <input type="hidden" id="editingLinkIndex" value="-1">
+                                <label for="externalLinkTitle" class="terminal-label">Titolo:</label>
+                                <input type="text" id="externalLinkTitle" class="terminal-input" placeholder="Il mio GitHub" required>
+                                <label for="externalLinkUrl" class="terminal-label">URL:</label>
+                                <input type="url" id="externalLinkUrl" class="terminal-input" placeholder="https://github.com/tuonome" required>
+                                <p id="externalLinkError" class="error-message"></p>
+                                <div class="terminal-form-actions">
+                                    <button type="submit" id="saveExternalLinkBtn" class="terminal-button primary-button">
+                                        <span class="material-symbols-rounded">save</span> Salva Link
+                                    </button>
+                                    <button type="button" id="cancelEditExtLinkBtn" class="terminal-button tertiary-button" style="display: none;">
+                                        <span class="material-symbols-rounded">cancel</span> Annulla
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="myArticlesSection" class="terminal-section">
+                    <h3><span class="terminal-prompt">#</span> I_MIEI_ARTICOLI</h3>
+                    <h4><span class="terminal-prompt">~</span> Bozze</h4>
+                    <div id="myDraftsLoadingMessage" class="loading-indicator"><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</div>
+                    <div id="myDraftArticlesList" class="terminal-articles-list"></div>
+                    
+                    <h4><span class="terminal-prompt">~</span> In Revisione</h4>
+                    <div id="myPendingLoadingMessage" class="loading-indicator"><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</div>
+                    <div id="myPendingArticlesList" class="terminal-articles-list"></div>
+
+                    <h4><span class="terminal-prompt">~</span> Pubblicati</h4>
+                    <div id="myPublishedLoadingMessage" class="loading-indicator"><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</div>
+                    <div id="myPublishedArticlesList" class="terminal-articles-list"></div>
+
+                    <h4><span class="terminal-prompt">~</span> Respinti</h4>
+                    <div id="myRejectedLoadingMessage" class="loading-indicator"><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</div>
+                    <div id="myRejectedArticlesList" class="terminal-articles-list"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="requestNicknameChangeModal" class="terminal-modal" style="display: none;">
+        <div class="terminal-modal-content">
+            <span class="close-btn" id="closeNicknameChangeModalBtn">&times;</span>
+            <div class="terminal-modal-header">
+                <h3><span class="terminal-prompt">#</span> RICHIESTA_CAMBIO_NICKNAME</h3>
+            </div>
+            <div class="terminal-modal-body">
+                <div id="nicknameChangeInitialView">
+                    <p><span class="terminal-prompt">?</span> Inserisci il nuovo nickname desiderato:</p>
+                    <input type="text" id="newNicknameInput" class="terminal-input" placeholder="Nuovo nickname..." maxlength="20">
+                    <p id="nicknameChangeError" class="error-message"></p>
+                    <div class="terminal-modal-actions">
+                        <button id="submitNicknameChangeRequestBtn" class="terminal-button primary-button">
+                            <span class="material-symbols-rounded">send</span> Invia Richiesta
+                        </button>
+                        <button id="cancelNicknameChangeRequestBtn" class="terminal-button tertiary-button">
+                            <span class="material-symbols-rounded">cancel</span> Annulla
+                        </button>
+                    </div>
+                </div>
+                <div id="nicknameChangeRequestSentView" style="display: none;">
+                    <p><span class="terminal-prompt">~</span> La tua richiesta di cambio nickname è stata inviata e sarà esaminata da un amministratore.</p>
+                    <p><span class="terminal-prompt">OK</span> Riceverai una notifica quando sarà elaborata.</p>
+                </div>
+                <div id="nicknameChangeCooldownView" style="display: none;">
+                    <p><span class="terminal-prompt">!</span> ATTENZIONE: Hai richiesto un cambio nickname di recente.</p>
+                    <p><span class="terminal-prompt">WAIT</span> Riprova tra: <span id="nicknameCooldownTimer"></span></p>
+                </div>
+                <div id="nicknameChangeProcessedView" style="display: none;">
+                    <p><span class="terminal-prompt">OK</span> La tua richiesta di cambio nickname è stata elaborata.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="nicknameAnimationModal" class="terminal-modal" style="display: none;">
+        <div class="terminal-modal-content">
+            <span class="close-btn" id="closeNicknameAnimationModalBtn">&times;</span>
+            <div class="terminal-modal-header">
+                <h3><span class="terminal-prompt">#</span> PERSONALIZZA_NICKNAME</h3>
+            </div>
+            <div class="terminal-modal-body">
+                <p><span class="terminal-prompt">?</span> Scegli uno stile per il tuo nickname sbloccato con i badge:</p>
+                <ul id="nicknameAnimationList" class="terminal-list">
+                    </ul>
+                <p id="noNicknameAnimationsMessage" class="info-message" style="display: none;">
+                    Nessun effetto nickname sbloccato. Sblocca badge speciali per nuove opzioni!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="badgeDetailModal" class="terminal-modal" style="display: none;">
+        <div class="terminal-modal-content">
+            <span class="close-btn" id="closeBadgeDetailModalBtn">&times;</span>
+            <div class="terminal-modal-header">
+                <h3><span class="material-symbols-rounded" id="badgeDetailModalIcon" style="vertical-align: middle;"></span> <span id="badgeDetailModalName">Nome Badge</span></h3>
+            </div>
+            <div class="terminal-modal-body">
+                <p id="badgeDetailModalDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="avatarConfirmationModal" class="terminal-modal" style="display: none;">
+        <div class="terminal-modal-content">
+            <div class="terminal-modal-header">
+                <h3><span class="terminal-prompt">#</span> CARICAMENTO_AVATAR</h3>
+            </div>
+            <div class="terminal-modal-body">
+                <p>Anteprima:</p>
+                <div class="modal-avatar-preview-container">
+                    <img id="modalAvatarPreview" src="" alt="Anteprima nuovo avatar" class="terminal-avatar-preview-img">
+                </div>
+                <p id="modalAvatarStatus" class="info-message">Confermare caricamento?</p>
+                <div id="avatarUploadProgressContainer" style="display:none; text-align: center; margin-top: 10px;">
+                    <div class="progress-bar-outline">
+                        <div class="progress-bar-fill" id="avatarUploadProgressBar"></div>
+                    </div>
+                    <span id="avatarUploadProgressText" class="progress-text">0%</span>
+                </div>
+                <div class="terminal-modal-actions">
+                    <button id="modalConfirmUploadBtn" class="terminal-button primary-button">
+                        <span class="material-symbols-rounded">check</span> Conferma
+                    </button>
+                    <button id="modalCancelUploadBtn" class="terminal-button tertiary-button">
+                        <span class="material-symbols-rounded">close</span> Annulla
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/profile.js"></script>
+    <script type="module" src="js/loader.js"></script>
+</body>
+</html>
