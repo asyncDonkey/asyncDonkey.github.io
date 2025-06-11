@@ -875,3 +875,40 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
 .profile-view .profile-footer {
     margin-top: 25px;
 }
+
+/* Stile e Animazione Arcade per le nuove Icone Phosphor */
+
+/* 1. Keyframes per l'animazione lampeggiante */
+@keyframes arcade-flash {
+  0%, 48%, 100% {
+    opacity: 1;
+    /* Usiamo una variabile di colore che già esiste per il "glow" */
+    text-shadow: 0 0 8px var(--terminal-highlight, #5ab9a8);
+  }
+  50%, 98% {
+    opacity: 0.6;
+    text-shadow: none;
+  }
+}
+
+/* 2. Applichiamo l'animazione solo sull'hover per non essere troppo invadenti */
+.game-over-button:hover i,
+.menu-icon-btn:hover i {
+  animation: arcade-flash 1.2s infinite;
+}
+
+/* 3. Aumentiamo leggermente la dimensione delle icone dentro ai pulsanti */
+.game-over-button i {
+  font-size: 1.3em; /* Puoi aggiustare questo valore */
+  vertical-align: middle;
+}
+
+/* 4. Aumentiamo la dimensione dell'icona del profilo */
+.menu-icon-btn i {
+    font-size: 32px; /* Dimensione simile alla precedente Material Icon */
+}
+
+/* 5. Aggiustiamo lo spazio tra icona e testo nei pulsanti (opzionale) */
+.game-over-button {
+    gap: 12px; /* Aumenta lo spazio se necessario */
+}

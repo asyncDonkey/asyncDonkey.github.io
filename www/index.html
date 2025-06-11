@@ -49,9 +49,9 @@
 
         <div id="account-icon-container" class="menu-icon-btn">
     <a href="#" id="show-login-modal-btn" title="Accedi o Registrati">
-        <span class="material-symbols-rounded">account_circle</span>
-        <span class="visually-hidden">Account</span>
-    </a>
+    <i class="ph-bold ph-user-circle"></i>
+    <span class="visually-hidden">Account</span>
+</a>
     <img id="user-avatar-icon" src="" alt="User Avatar" title="Vai al profilo" style="display: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" />
 </div>
 
@@ -66,10 +66,15 @@
     <p>GAME OVER! Final Score: <span id="finalScoreDisplayDonkey">0</span></p>
     
     <div class="score-buttons">
-        <button id="restartGameBtnDonkey" class="game-over-button game-over-restart-btn">Ricomincia</button>
-        <button id="mainMenuBtn" class="game-over-button game-over-main-menu-btn">Menu</button>
-        
-        <button id="shareScoreBtnDonkey" class="game-over-button game-over-share-btn">Condividi</button>
+        <button id="restartGameBtnDonkey" class="game-over-button game-over-restart-btn">
+            <i class="ph-bold ph-arrow-counter-clockwise"></i> <span>Ricomincia</span>
+        </button>
+        <button id="mainMenuBtn" class="game-over-button game-over-main-menu-btn">
+            <i class="ph-bold ph-squares-four"></i> <span>Menu</span>
+        </button>
+        <button id="shareScoreBtnDonkey" class="game-over-button game-over-share-btn">
+            <i class="ph-bold ph-share-network"></i> <span>Condividi</span>
+        </button>
     </div>
 </div>
              <div id="mobileStartButton" class="mobile-start-button">
