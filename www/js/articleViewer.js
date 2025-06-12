@@ -160,10 +160,10 @@ function wrapTablesForResponsiveness() {
     if (!articleContent) return;
 
     const tables = articleContent.querySelectorAll('table');
-    tables.forEach(table => {
+    tables.forEach((table) => {
         // Controlla se la tabella è già stata avvolta per evitare duplicazioni
         if (table.parentNode.classList.contains('table-wrapper')) {
-            return; 
+            return;
         }
 
         const wrapper = document.createElement('div');
@@ -178,12 +178,17 @@ function wrapTablesForResponsiveness() {
 }
 
 function updateMetaTags(articleData, articleId) {
-    const defaultImageUrl = 'https://firebasestorage.googleapis.com/v0/b/asyncdonkey.firebasestorage.app/o/asynced_images%2Fsummary_large_image.png?alt=media&token=a4c20eb4-24d7-4e42-a47e-8e3672a8c482';
+    const defaultImageUrl =
+        'https://firebasestorage.googleapis.com/v0/b/asyncdonkey.firebasestorage.app/o/asynced_images%2Fsummary_large_image.png?alt=media&token=a4c20eb4-24d7-4e42-a47e-8e3672a8c482';
     const articleUrl = `https://asyncd.org/view-article.html?id=${articleId}`;
-    
+
     // Crea uno snippet dalla descrizione breve o, in mancanza, dai primi 155 caratteri del contenuto
-    const snippet = articleData.snippet || (articleData.contentMarkdown ? articleData.contentMarkdown.substring(0, 155) + '...' : 'Leggi questo articolo su asynced.org');
-    
+    const snippet =
+        articleData.snippet ||
+        (articleData.contentMarkdown
+            ? articleData.contentMarkdown.substring(0, 155) + '...'
+            : 'Leggi questo articolo su asynced.org');
+
     const coverImage = articleData.coverImageUrl || defaultImageUrl;
     const authorName = articleData.authorName || 'Umberto T.';
 
@@ -197,8 +202,11 @@ function updateMetaTags(articleData, articleId) {
     document.querySelector('meta[property="og:url"]').setAttribute('content', articleUrl);
     document.querySelector('meta[property="og:image"]').setAttribute('content', coverImage);
     document.querySelector('meta[property="article:author"]').setAttribute('content', authorName);
-    if (articleData.publishedAt) { // Usa publishedAt se esiste
-        document.querySelector('meta[property="article:published_time"]').setAttribute('content', new Date(articleData.publishedAt.seconds * 1000).toISOString());
+    if (articleData.publishedAt) {
+        // Usa publishedAt se esiste
+        document
+            .querySelector('meta[property="article:published_time"]')
+            .setAttribute('content', new Date(articleData.publishedAt.seconds * 1000).toISOString());
     }
 
     // --- Aggiornamento Twitter Card ---
@@ -324,11 +332,11 @@ async function loadAndDisplayArticleFromFirestore(articleId) {
             }
             if (articleDisplayContent) {
                 if (articleDataFromDb.contentMarkdown) {
-    try {
-        articleDisplayContent.innerHTML = marked.parse(articleDataFromDb.contentMarkdown);
-        // La riga successiva è la nostra aggiunta!
-        wrapTablesForResponsiveness(); // <<< CHIAMIAMO LA FUNZIONE QUI!
-    } catch (e) {
+                    try {
+                        articleDisplayContent.innerHTML = marked.parse(articleDataFromDb.contentMarkdown);
+                        // La riga successiva è la nostra aggiunta!
+                        wrapTablesForResponsiveness(); // <<< CHIAMIAMO LA FUNZIONE QUI!
+                    } catch (e) {
                         console.error('Errore durante il parsing del Markdown:', e);
                         articleDisplayContent.textContent = articleDataFromDb.contentMarkdown; // Fallback a testo semplice
                     }

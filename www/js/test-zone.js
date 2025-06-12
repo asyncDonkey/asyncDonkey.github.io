@@ -18,14 +18,13 @@ import { marked } from 'https://cdn.jsdelivr.net/npm/marked@5.0.1/lib/marked.esm
 // NUOVO: Configurazione di marked
 marked.setOptions({
     breaks: true, // Interpreta le singole nuove righe come <br> (interruzioni di linea HTML)
-    gfm: true     // Abilita GitHub Flavored Markdown (include tabelle, task lists, ecc.)
+    gfm: true, // Abilita GitHub Flavored Markdown (include tabelle, task lists, ecc.)
 });
 
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 
 const functions = getFunctions();
 const updateTestStepStatusCallable = httpsCallable(functions, 'updateTestStepStatus'); // QUESTA È LA TUA NUOVA CLOUD FUNCTION
-
 
 // --- RIFERIMENTI DOM ---
 const loader = document.getElementById('test-zone-loader');
@@ -49,10 +48,11 @@ function createTaskCardHTML(taskData, taskId, existingResult) {
     // MODIFICA: Utilizza il nuovo campo 'steps' che è un array di oggetti
     if (taskData.steps && Array.isArray(taskData.steps) && taskData.steps.length > 0) {
         let stepsListHtml = '';
-        const completedSteps = existingResult ? (existingResult.completedSteps || []) : [];
-        const isCompletedOrFailed = existingResult && (existingResult.outcome === 'success' || existingResult.outcome === 'failure');
+        const completedSteps = existingResult ? existingResult.completedSteps || [] : [];
+        const isCompletedOrFailed =
+            existingResult && (existingResult.outcome === 'success' || existingResult.outcome === 'failure');
 
-        taskData.steps.forEach(step => {
+        taskData.steps.forEach((step) => {
             const isChecked = completedSteps.includes(step.id) ? 'checked' : '';
             // Disabilita la checkbox se il task è già stato completato o ha fallito
             const isDisabled = isCompletedOrFailed ? 'disabled' : '';
@@ -143,7 +143,7 @@ async function handleTestStepCheckboxClick(event) {
     const isCompleted = checkbox.checked;
 
     if (!currentUserForTestZone) {
-        showToast("Devi essere loggato per marcare gli step.", 'info');
+        showToast('Devi essere loggato per marcare gli step.', 'info');
         checkbox.checked = !isCompleted; // Ripristina lo stato
         return;
     }
@@ -221,7 +221,7 @@ function setupTaskFeedbackListeners() {
     testTasksListContainer.removeEventListener('click', handleTaskActionClicks); // Nuova funzione per i bottoni esistenti
 
     testTasksListContainer.addEventListener('click', handleTestStepCheckboxClick);
-    testTasksListContainer.addEventListener('click', handleTaskActionClicks)
+    testTasksListContainer.addEventListener('click', handleTaskActionClicks);
 
     // Aggiungi una funzione separata per gestire i click sui bottoni di submit/edit/cancel
     // Questo aiuta a mantenere la logica più organizzata.

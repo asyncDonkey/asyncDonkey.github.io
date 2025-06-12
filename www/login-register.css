@@ -1,0 +1,364 @@
+/* Stili per la Modale di Login/Registrazione con tema Terminale */
+
+/* Contenitore principale della modale */
+#loginModal .modal-content.login-register-view {
+    background-color: var(--terminal-darker-bg, #1a1b22);
+    border: 1px solid var(--terminal-border, #6272a4);
+    box-shadow: 0 0 20px rgba(98, 114, 164, 0.5);
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    color: var(--terminal-text, #f8f8f2);
+    font-family: 'Source Code Pro', monospace;
+    position: relative;
+    /* Rimuovi: overflow: hidden; */ /* <-- Rimuovi questa riga */
+
+    /* Aggiungi queste se non sono già ereditate correttamente da .modal-content */
+    max-height: 95vh; /* Assicurati che abbia una max-height */
+    overflow-y: auto; /* Assicurati che abbia overflow-y: auto */
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+}
+
+/* Titolo della modale */
+#loginModal h2 {
+    color: var(--terminal-cyan, #8be9fd);
+    text-align: center;
+    margin-bottom: 25px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.6em;
+    text-shadow: 0 0 8px var(--terminal-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#loginModal h2 i {
+    font-size: 1.2em; /* Dimensione dell'icona del terminale */
+}
+
+/* Toggle Accedi/Registrati */
+.auth-toggle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--terminal-comment, #6272a4);
+    padding-bottom: 10px;
+}
+
+.auth-toggle button {
+    background-color: transparent;
+    border: 1px solid var(--terminal-comment, #6272a4);
+    color: var(--terminal-comment, #6272a4);
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1em;
+    transition: all 0.2s ease;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+
+.auth-toggle button.active {
+    background-color: var(--terminal-highlight, #5ab9a8);
+    color: var(--terminal-bg, #282a36);
+    border-color: var(--terminal-highlight, #5ab9a8);
+    box-shadow: 0 0 10px rgba(90, 185, 168, 0.5);
+}
+
+.auth-toggle button:hover:not(.active) {
+    background-color: rgba(90, 185, 168, 0.1);
+    color: var(--terminal-highlight, #5ab9a8);
+}
+
+/* Stili per i form di autenticazione */
+.auth-form {
+    display: none; /* Nascosto di default */
+    animation: fadeIn 0.5s ease-out forwards;
+    padding-top: 10px;
+}
+
+.auth-form.active {
+    display: block; /* Mostrato quando attivo */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-form h3 {
+    color: var(--terminal-yellow, #f1fa8c);
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    border-bottom: 1px dotted rgba(241, 250, 140, 0.3);
+    padding-bottom: 10px;
+}
+
+.auth-form input[type='email'],
+.auth-form input[type='password'],
+.auth-form input[type='text'],
+.auth-form input[type='tel'],
+.auth-form select {
+    width: 100%; /* Con padding e bordo */
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: var(--terminal-input-bg, #282a36);
+    border: 1px solid var(--terminal-border, #6272a4);
+    color: var(--terminal-text, #f8f8f2);
+    border-radius: 5px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1em;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+    -webkit-appearance: none; /* Rimuove lo stile di default di iOS */
+    -moz-appearance: none; /* Rimuove lo stile di default di Firefox */
+    appearance: none; /* Rimuove lo stile di default */
+    box-sizing: border-box;
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+    outline: none;
+    border-color: var(--terminal-highlight, #5ab9a8);
+    box-shadow: 0 0 8px rgba(90, 185, 168, 0.4);
+}
+
+.auth-form button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--terminal-green, #50fa7b);
+    color: var(--terminal-bg, #282a36);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.1em;
+    transition:
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+    margin-top: 10px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.auth-form button:hover:not(:disabled) {
+    background-color: var(--bright-green-teal, #30e1b9);
+    box-shadow:
+        0 0 15px var(--bright-green-teal),
+        0 0 25px rgba(48, 225, 185, 0.5);
+}
+
+.auth-form button:disabled {
+    background-color: var(--terminal-comment, #6272a4);
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+/* Stili per i suggerimenti (input-hint) */
+.input-hint {
+    color: var(--terminal-comment, #6272a4);
+    font-size: 0.8em;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    text-align: left;
+    padding-left: 5px;
+}
+
+/* Privacy Consent */
+.privacy-consent {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+.privacy-consent input[type='checkbox'] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--terminal-highlight, #5ab9a8);
+    border-radius: 3px;
+    margin-right: 10px;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.privacy-consent input[type='checkbox']:checked {
+    background-color: var(--terminal-highlight, #5ab9a8);
+    border-color: var(--terminal-highlight, #5ab9a8);
+}
+
+.privacy-consent input[type='checkbox']:checked::before {
+    content: '\2713'; /* Checkmark Unicode */
+    display: block;
+    text-align: center;
+    color: var(--terminal-bg, #282a36);
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: bold;
+}
+
+.privacy-consent label {
+    color: var(--terminal-text, #f8f8f2);
+    cursor: pointer;
+}
+
+.privacy-consent label a {
+    color: var(--terminal-purple, #bd93f9);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.privacy-consent label a:hover {
+    color: var(--terminal-pink, #ff79c6);
+    text-decoration: underline;
+}
+
+/* Opt-in Section */
+.opt-in-section {
+    background-color: var(--terminal-darker-bg-light, #21222c); /* Leggermente più chiaro */
+    border: 1px dashed var(--terminal-comment, rgba(98, 114, 164, 0.5));
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.opt-in-section h4 {
+    color: var(--terminal-orange, #ffb86c);
+    font-size: 1em;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.opt-in-section input[type='checkbox'] {
+    margin-right: 10px;
+    /* Riutilizza stili checkbox della privacy */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--terminal-orange, #ffb86c);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.opt-in-section input[type='checkbox']:checked {
+    background-color: var(--terminal-orange, #ffb86c);
+    border-color: var(--terminal-orange, #ffb86c);
+}
+
+.opt-in-section input[type='checkbox']:checked::before {
+    content: '\2713';
+    display: block;
+    text-align: center;
+    color: var(--terminal-bg, #282a36);
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: bold;
+}
+
+.opt-in-section label {
+    color: var(--terminal-text, #f8f8f2);
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+#optInPhoneNumber {
+    margin-top: 10px;
+}
+
+/* Who Am I Section */
+.who-am-i-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--terminal-comment, rgba(98, 114, 164, 0.5));
+    text-align: center;
+}
+
+.who-am-i-section h4 {
+    color: var(--terminal-pink, #ff79c6);
+    font-size: 1em;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.who-am-i-section select {
+    width: calc(100% - 22px);
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23f8f8f2%22%20d%3D%22M287%2C197.915L146.2%2C57.115L5.4%2C197.915h281.6z%22%2F%3E%3C%2Fsvg%3E'); /* Freccetta giù bianca */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+}
+
+.who-am-i-section select option {
+    background-color: var(--terminal-input-bg, #282a36);
+    color: var(--terminal-text, #f8f8f2);
+}
+
+/* Link Password Dimenticata */
+.forgot-password-link {
+    color: var(--terminal-purple, #bd93f9);
+    font-size: 0.9em;
+    text-align: center;
+    display: block;
+    margin-top: 15px;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+    color: var(--terminal-pink, #ff79c6);
+    text-decoration: underline;
+}
+
+/* Stili per il pulsante di chiusura della modale (già gestito da .close-button nel CSS generale delle modali) */
+#loginModal .close-button {
+    color: var(--terminal-red, #ff5555);
+}
+
+#loginModal .close-button:hover {
+    color: var(--terminal-orange, #ffb86c);
+}
+
+/* Variabili CSS (se non sono già nel tuo styles.css principale) */
+/* Aggiungi queste variabili al tuo file styles.css principale o assicurati che siano definite altrove */
+:root {
+    --terminal-bg: #282a36; /* Dracula Background */
+    --terminal-darker-bg: #1a1b22; /* Dracula Background più scuro */
+    --terminal-darker-bg-light: #21222c; /* Leggermente più chiaro per sezioni */
+    --terminal-text: #f8f8f2; /* Dracula Foreground */
+    --terminal-comment: #6272a4; /* Dracula Comment */
+    --terminal-cyan: #8be9fd; /* Dracula Cyan */
+    --terminal-green: #50fa7b; /* Dracula Green */
+    --terminal-orange: #ffb86c; /* Dracula Orange */
+    --terminal-pink: #ff79c6; /* Dracula Pink */
+    --terminal-purple: #bd93f9; /* Dracula Purple */
+    --terminal-red: #ff5555; /* Dracula Red */
+    --terminal-yellow: #f1fa8c; /* Dracula Yellow */
+    --terminal-highlight: #5ab9a8; /* Una tonalità di teal/verde per highlight */
+    --bright-green-teal: #30e1b9; /* Ancora più brillante per hover */
+    --terminal-border: #6272a4; /* Colore bordo */
+    --terminal-input-bg: #282a36; /* Sfondo input */
+}

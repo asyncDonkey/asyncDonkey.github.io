@@ -50,7 +50,7 @@ exports.submitGameResult = onCall({ region: 'us-central1' }, async (request) => 
                 'gameStats.gamesPlayed': FieldValue.increment(1),
                 'gameStats.totalScore': FieldValue.increment(score),
                 'gameStats.bossesDefeated': FieldValue.increment(bossesDefeated),
-                'gameStats.highestScore': newHighestScore // Questo deve essere impostato direttamente
+                'gameStats.highestScore': newHighestScore, // Questo deve essere impostato direttamente
             };
 
             transaction.update(userDocRef, updates);
@@ -58,7 +58,6 @@ exports.submitGameResult = onCall({ region: 'us-central1' }, async (request) => 
 
         logger.info(`[CF:${functionName}] Statistiche aggiornate per l'utente ${userId}.`);
         return { success: true, message: 'Statistiche aggiornate con successo!' };
-
     } catch (error) {
         logger.error(`[CF:${functionName}] Errore durante l'aggiornamento delle statistiche per ${userId}:`, error);
         if (error instanceof HttpsError) {

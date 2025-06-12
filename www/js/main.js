@@ -2,15 +2,16 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 
 import { initLeaderboard } from './leaderboardManager.js';
-import { registerWithEmailPassword, signInWithEmailPassword } from './auth.js';
+// Importa solo la funzione di apertura della modale di auth da auth.js
+import { showAuthModal } from './auth.js';
 import { openProfileModal, initProfileControls } from './profile.js';
 
 import {
     getFirestore,
-    connectFirestoreEmulator, // IMPORT PER EMULATORE FIRESTORE
+    // connectFirestoreEmulator, // IMPORT PER EMULATORE FIRESTORE - Commentato se non usato
     doc,
     getDoc,
-    serverTimestamp,
+    // serverTimestamp, // Non direttamente usato qui in main.js, ma ok se serve altrove
     collection,
     query,
     where,
@@ -22,65 +23,24 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
     getAuth,
-    connectAuthEmulator, // IMPORT PER EMULATORE AUTH
-    signInWithEmailAndPassword,
+    // connectAuthEmulator, // IMPORT PER EMULATORE AUTH - Commentato se non usato
     signOut,
     onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { auth } from './firebase-config.js'; // Importa l'istanza auth
+import { auth, db, functions } from './firebase-config.js'; // Importa l'istanza auth, db e functions
 
-
-
-// IMPORT PER EMULATORE STORAGE
-
-
-import { httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
-import { db, functions } from './firebase-config.js'; // Importa tutto da qui
+// IMPORT PER EMULATORE STORAGE - Rimuovi se non usato, altrimenti importa e abilita
+// import { getStorage, connectStorageEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
 import { showToast } from './toastNotifications.js';
 
-// --- Firebase Config ---
-
-
-
-
-
-
-let currentUserProfileUnsubscribe = null;
 let loggedInUser = null; // Mantieni aggiornato lo stato dell'utente loggato
+let currentUserProfileUnsubscribe = null; // Per il listener del profilo utente
 let notificationListener = null; // Per tenere traccia del listener delle notifiche
 
-let accountIconBtn = null;
-
-// Riferimenti ai nuovi elementi della modale di autenticazione unificata
-let authModal = null;
-let closeAuthModalBtn = null;
-let loginTabBtn = null;
-let registerTabBtn = null;
-let loginFormContainer = null;
-let registerFormContainer = null;
-let loginForm = null; // Il form di login all'interno della modale
-let registerFormModal = null; // Il form di registrazione all'interno della modale
-
-// Riferimenti ai campi e agli errori della modale di REGISTRAZIONE
-let registerEmailModal = null;
-let registerPasswordModal = null;
-let registerConfirmPasswordModal = null;
-let registerNicknameModal = null;
-let registerNationalityModal = null;
-let registerBtnModal = null;
-
-let registerEmailError = null;
-let registerPasswordError = null;
-let registerConfirmPasswordError = null;
-let registerNicknameError = null;
-let registerNationalityError = null;
-let registerGeneralError = null;
-let registrationSuccessMessageModal = null;
-
-// ----- INIZIO CODICE PER EMULATORI -----
+// ----- INIZIO CODICE PER EMULATORI (MANTIENI O Rimuovi in base al tuo setup) -----
 // Controlla se siamo in un contesto locale (es. localhost o 127.0.0.1)
 // Se l'hostname è vuoto (es. apertura diretta di file:///), gli emulatori non verranno usati.
 // if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
@@ -96,12 +56,11 @@ let registrationSuccessMessageModal = null;
 //         console.log("[main.js] Connesso a Auth Emulator su http://localhost:9099");
 
 //         // Connetti a Storage Emulator (porta 9199, default)
-//         connectStorageEmulator(storage, "localhost", 9199);
-//         console.log("[main.js] Connesso a Storage Emulator su localhost:9199");
+//         // const storage = getStorage(firebaseAppInstance); // Assicurati di avere l'istanza dell'app Firebase
+//         // connectStorageEmulator(storage, "localhost", 9199);
+//         // console.log("[main.js] Connesso a Storage Emulator su localhost:9199");
 
 //         // Potresti aggiungere connectFunctionsEmulator qui se userai callable functions dal client
-//         // import { getFunctions, connectFunctionsEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
-//         // const functions = getFunctions(app);
 //         // connectFunctionsEmulator(functions, "localhost", 5001); // Porta Functions Emulator
 //         // console.log("[main.js] Connesso a Functions Emulator su localhost:5001");
 
@@ -115,53 +74,13 @@ let registrationSuccessMessageModal = null;
 // }
 // ----- FINE CODICE PER EMULATORI -----
 
-
-
+// Non ho trovato una definizione di `showConfirmationModal` nel tuo `main.js`
+// ma l'ho lasciata qui commentata in caso la volessi definire o importare.
+/*
 export function showConfirmationModal(title = 'Conferma Azione', message = 'Sei sicuro di voler procedere?') {
-    // ... (codice invariato, come da versione precedente)
-    return new Promise((resolve) => {
-        const modal = document.getElementById('confirmationModal');
-        const modalTitleEl = document.getElementById('confirmationModalTitle');
-        const modalMessageEl = document.getElementById('confirmationModalMessage');
-        const yesBtn = document.getElementById('confirmModalYesBtn');
-        const noBtn = document.getElementById('confirmModalNoBtn');
-
-        if (!modal || !modalTitleEl || !modalMessageEl || !yesBtn || !noBtn) {
-            console.error(
-                'Elementi della modale di conferma (confirmationModal, confirmationModalTitle, etc.) non trovati nel DOM.'
-            );
-            const userConfirmation = window.confirm(`${title}\n${message}`);
-            resolve(userConfirmation);
-            return;
-        }
-
-        modalTitleEl.textContent = title;
-        modalMessageEl.textContent = message;
-
-        const closeAndResolve = (value) => {
-            modal.style.display = 'none';
-            const newYesBtn = yesBtn.cloneNode(true);
-            yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
-            const newNoBtn = noBtn.cloneNode(true);
-            noBtn.parentNode.replaceChild(newNoBtn, noBtn);
-            modal.removeEventListener('click', handleModalOutsideClick);
-            resolve(value);
-        };
-
-        const handleModalOutsideClick = (event) => {
-            if (event.target === modal) {
-                closeAndResolve(false);
-            }
-        };
-
-        document.getElementById('confirmModalYesBtn').onclick = () => closeAndResolve(true);
-        document.getElementById('confirmModalNoBtn').onclick = () => closeAndResolve(false);
-        modal.addEventListener('click', handleModalOutsideClick);
-
-        modal.style.display = 'block';
-        if (yesBtn) yesBtn.focus();
-    });
+    // ... (codice invariato, se presente altrove)
 }
+*/
 
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
     // ... (codice invariato)
@@ -190,13 +109,13 @@ export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
 }
 
 function escapeHTML(str) {
-    // ... (codice invariato)
     if (str === null || str === undefined) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
+// Funzione `setupThemeSwitcher` qui se vuoi usarla
 function setupThemeSwitcher() {
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     if (!themeToggleBtn) {
@@ -204,8 +123,8 @@ function setupThemeSwitcher() {
         return;
     }
     const bodyElement = document.body;
-    const moonIconName = 'nights_stay'; //dark_mode ex
-    const sunIconName = 'sunny'; //light_mode ex
+    const moonIconName = 'nights_stay';
+    const sunIconName = 'sunny';
     const iconSpan = themeToggleBtn.querySelector('.material-symbols-rounded');
 
     function applyTheme(theme) {
@@ -236,19 +155,12 @@ function initializeTesterRequestButton(user, profileData) {
     const requestButton = document.getElementById('request-tester-role-btn');
 
     if (!requestSection || !requestButton) {
-        // La sezione non è in questa pagina, quindi non facciamo nulla.
         return;
     }
 
-    // Condizioni per mostrare il pulsante:
-    // 1. L'utente è loggato.
-    // 2. Il profilo utente è stato caricato.
-    // 3. L'utente NON è già un tester.
-    // 4. L'utente NON è un admin (gli admin sono tester impliciti).
     if (user && profileData && !profileData.isTestUser && !profileData.isAdmin) {
         requestSection.style.display = 'block';
 
-        // Aggiungiamo un listener che chiama la Cloud Function
         requestButton.addEventListener('click', async () => {
             requestButton.disabled = true;
             requestButton.textContent = 'Invio richiesta in corso...';
@@ -259,36 +171,32 @@ function initializeTesterRequestButton(user, profileData) {
 
                 if (result.data.success) {
                     showToast('Richiesta inviata con successo! Un admin la esaminerà presto. 🚀', 'success', 8000);
-                    // Nascondiamo la sezione dopo l'invio per evitare richieste multiple
                     requestSection.style.display = 'none';
                 } else {
                     throw new Error(result.data.message || 'Si è verificato un errore sconosciuto.');
                 }
             } catch (error) {
-                console.error("Errore durante la chiamata a requestTesterRole:", error);
+                console.error('Errore durante la chiamata a requestTesterRole:', error);
                 showToast(`Errore: ${error.message}`, 'error');
                 requestButton.disabled = false;
                 requestButton.innerHTML = `<span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 8px;">rocket_launch</span>Voglio diventare un Beta Tester!`;
             }
         });
-
     } else {
-        // Nascondi la sezione se le condizioni non sono soddisfatte
         requestSection.style.display = 'none';
     }
 }
 
-// Funzione loadHeaderUserProfileDisplay (modificata per caricare avatar personalizzato)
-
 function updateHeaderAuthContainersVisibility(user) {
-    // ... (codice invariato)
-    const authContainer = document.getElementById('authContainer');
-    const userProfileContainer = document.getElementById('userProfileContainer');
-    if (authContainer) authContainer.style.display = user ? 'none' : 'flex';
-    if (userProfileContainer) userProfileContainer.style.display = user ? 'flex' : 'none';
+    // Non è chiaro dove siano "authContainer" e "userProfileContainer" nel tuo index.html attuale.
+    // Se non esistono, questa funzione non farà nulla o causerà errori se non gestito.
+    // L'icona dell'account è gestita più in basso nella funzione onAuthStateChanged.
+    // const authContainer = document.getElementById('authContainer');
+    // const userProfileContainer = document.getElementById('userProfileContainer');
+    // if (authContainer) authContainer.style.display = user ? 'none' : 'flex';
+    // if (userProfileContainer) userProfileContainer.style.display = user ? 'flex' : 'none';
 }
 
-// --- NUOVA LOGICA NAVBAR ---
 function toggleMobileMenu() {
     const mobileMenuContainer = document.getElementById('mobileNavMenu');
     const mobileMenuButton = document.getElementById('navbarToggler');
@@ -308,41 +216,26 @@ function toggleMobileMenu() {
     burgerIcon.textContent = isActive ? 'close' : 'menu';
 
     if (!isActive) {
-        // Menu CHIUSO
         mobileMenuContainer.setAttribute('aria-hidden', 'true');
-        // Ritarda leggermente lo spostamento del focus per assicurarsi che il menu sia "andato"
-        // e che il focus non venga "rubato" da un elemento appena nascosto.
         setTimeout(() => {
-            // Controlla se il focus è ancora su un elemento dentro il menu mobile (che ora è nascosto)
-            // o se è sul body (il che può accadere se l'elemento con focus è stato rimosso).
             if (document.activeElement === document.body || mobileMenuContainer.contains(document.activeElement)) {
-                // Se sì, sposta il focus sul pulsante che ha aperto/chiuso il menu.
                 mobileMenuButton.focus();
             }
-            // Altrimenti, il focus potrebbe essere già stato gestito correttamente (es. da un logout)
-            // o spostato altrove dall'utente/browser, quindi non lo forziamo.
         }, 0);
     } else {
-        // Menu APERTO
         mobileMenuContainer.removeAttribute('aria-hidden');
-        // Opzionale: focus sul primo elemento del menu quando si apre
         const firstFocusableElement = mobileMenuContainer.querySelector('a, button');
         if (firstFocusableElement) {
-            // firstFocusableElement.focus(); // Commentato per ora, può essere fastidioso
+            // firstFocusableElement.focus();
         }
     }
-    // console.log(`[main.js toggleMobileMenu] Menu mobile ${isActive ? 'APERTO' : 'CHIUSO'}.`);
 }
 
 function populateMobileMenu() {
-    // ... (codice invariato)
     const navbarLinksContainer = document.querySelector('.desktop-nav > ul');
     const mobileMenuTarget = document.getElementById('mobileNavMenu');
 
-    if (!navbarLinksContainer) {
-        return;
-    }
-    if (!mobileMenuTarget) {
+    if (!navbarLinksContainer || !mobileMenuTarget) {
         return;
     }
 
@@ -448,12 +341,9 @@ function populateMobileMenu() {
 
 function loadContentSpecificFeatures(user) {
     // console.log('[Main.js] loadContentSpecificFeatures chiamata per utente:', user ? user.uid : null);
-    // TODO: Implementare logica per caricare funzionalità specifiche della pagina
-    // basate sull'utente o sul percorso della pagina corrente.
 }
 
 function setupDesktopCommunityDropdown() {
-    // ... (codice invariato)
     const dropdownToggle = document.getElementById('communityDropdownToggle');
     const dropdownMenu = document.getElementById('communityDropdownMenu');
 
@@ -483,7 +373,6 @@ function setupDesktopCommunityDropdown() {
 }
 
 function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], onClickHandler = null) {
-    // ... (codice invariato)
     const listItem = document.createElement('li');
     listItem.id = liId;
     const link = document.createElement('a');
@@ -498,13 +387,7 @@ function createNavLinkItem(liId, aId, href, innerHTML, aClasses = ['nav-item'], 
     return listItem;
 }
 
-
-
-
-
-
 function initializeNewNavbar() {
-    // ... (codice invariato)
     const mobileMenuButton = document.getElementById('navbarToggler');
     if (mobileMenuButton) {
         mobileMenuButton.addEventListener('click', toggleMobileMenu);
@@ -516,15 +399,11 @@ function initializeNewNavbar() {
     console.log('[initializeNewNavbar] Nuova navbar inizializzata.');
 }
 
-
-
 export { db, auth, escapeHTML };
 
 export function getCurrentUserId() {
     return auth.currentUser ? auth.currentUser.uid : null;
 }
-
-
 
 async function loadHomeMiniLeaderboard() {
     const leaderboardListElement = document.getElementById('homeMiniLeaderboardList');
@@ -533,26 +412,16 @@ async function loadHomeMiniLeaderboard() {
         return;
     }
     if (!db) {
-        // Assicurati che 'db' sia disponibile globalmente o importato correttamente
         console.error('[main.js] Istanza DB non disponibile per mini-leaderboard homepage.');
         leaderboardListElement.innerHTML = '<li>Errore DB.</li>';
         return;
     }
-
-    // Assicurati che 'collection', 'query', 'where', 'orderBy', 'limit', 'getDocs', 'documentId'
-    // e 'generateBlockieAvatar', 'escapeHTML' siano importati/disponibili in questo scope.
-    // Esempio:
-    // import { collection, query, where, orderBy, limit, getDocs, documentId } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-    // import { db, generateBlockieAvatar, escapeHTML } from './main.js'; // o da dove provengono
 
     leaderboardListElement.innerHTML =
         '<li><div class="loader-dots"><span></span><span></span><span></span></div> Caricamento...</li>';
 
     try {
         const scoresCollectionRef = collection(db, 'leaderboardScores');
-        // Se questa leaderboard è solo per Donkey Runner, mantieni il filtro:
-        // const q = query(scoresCollectionRef, where('gameId', '==', 'donkeyRunner'), orderBy('score', 'desc'), limit(5));
-        // Se è una leaderboard generale dei punteggi più alti da qualsiasi gioco:
         const q = query(scoresCollectionRef, orderBy('score', 'desc'), limit(5));
 
         const querySnapshot = await getDocs(q);
@@ -629,36 +498,26 @@ async function loadHomeMiniLeaderboard() {
                 } else if (userProfile.avatarUrls && userProfile.avatarUrls.profile) {
                     chosenAvatarUrl = userProfile.avatarUrls.profile;
                 } else if (userProfile.avatarUrls && userProfile.avatarUrls.thumbnail) {
-                    // Aggiunto controllo per thumbnail
                     chosenAvatarUrl = userProfile.avatarUrls.thumbnail;
                 } else if (userProfile.avatarUrl) {
-                    // Supporto per vecchio campo singolo
                     chosenAvatarUrl = userProfile.avatarUrl;
                 }
 
                 if (chosenAvatarUrl) {
                     avatarSrcToUse = chosenAvatarUrl;
-
-                    // --- INIZIO SEZIONE CRITICA PER CACHE-BUSTING REVISIONATA ---
                     let timestampForCache;
-                    // Controlla prima il campo che sospettiamo essere usato (es. da comments.js)
                     if (userProfile.profilePublicUpdatedAt) {
                         timestampForCache = userProfile.profilePublicUpdatedAt;
                     } else if (userProfile.profileUpdatedAt) {
-                        // Poi il campo canonico/standard
                         timestampForCache = userProfile.profileUpdatedAt;
                     }
 
                     if (timestampForCache) {
                         if (timestampForCache.seconds !== undefined && typeof timestampForCache.seconds === 'number') {
-                            // Timestamp Firestore
                             avatarSrcToUse += `?ts=${timestampForCache.seconds}`;
                         } else if (typeof timestampForCache === 'number') {
-                            // Timestamp numerico (es. millisecondi)
-                            // Se è in millisecondi e il server/CDN non lo gestisce, potresti voler dividere per 1000
                             avatarSrcToUse += `?ts=${timestampForCache}`;
                         } else if (timestampForCache instanceof Date) {
-                            // Oggetto Date JavaScript
                             avatarSrcToUse += `?ts=${Math.floor(timestampForCache.getTime() / 1000)}`;
                         } else {
                             console.warn(
@@ -671,7 +530,6 @@ async function loadHomeMiniLeaderboard() {
                             `[main.js] Nessun timestamp (profilePublicUpdatedAt o profileUpdatedAt) trovato per cache-busting avatar per ${entry.userId}`
                         );
                     }
-                    // --- FINE SEZIONE CRITICA PER CACHE-BUSTING REVISIONATA ---
                 }
             }
 
@@ -699,7 +557,7 @@ async function loadHomeMiniLeaderboard() {
             ) {
                 const flagIconSpan = document.createElement('span');
                 flagIconSpan.classList.add('fi', `fi-${userNationalityCode.toLowerCase()}`);
-                flagIconSpan.title = userNationalityCode; // Aggiungi tooltip per accessibilità
+                flagIconSpan.title = userNationalityCode;
                 flagIconSpan.style.marginRight = '5px';
                 flagIconSpan.style.verticalAlign = 'middle';
                 nameElementContainer.appendChild(flagIconSpan);
@@ -739,7 +597,6 @@ async function loadHomeMiniLeaderboard() {
 }
 
 async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser) {
-    // ... (codice invariato, già usa Material Symbols)
     if (!buttonElement || !articleId) return;
     const likeCountSpan = buttonElement.nextElementSibling;
     if (!likeCountSpan || !likeCountSpan.classList.contains('homepage-like-count')) {
@@ -793,7 +650,6 @@ async function updateHomepageLikeButtonUI(buttonElement, articleId, currentUser)
 }
 
 async function handleHomepageArticleLike(event) {
-    // ... (codice invariato)
     const button = event.currentTarget;
     const articleId = button.dataset.articleId;
     const currentUser = auth.currentUser;
@@ -809,7 +665,6 @@ async function handleHomepageArticleLike(event) {
 }
 
 async function updateHomepageCommentCountUI(countSpanElement, articleId) {
-    // ... (codice invariato)
     if (!countSpanElement || !articleId) return;
     try {
         const articleRef = doc(db, 'articles', articleId);
@@ -828,7 +683,6 @@ async function updateHomepageCommentCountUI(countSpanElement, articleId) {
 }
 
 export async function initializeHomepageArticleInteractions(currentUser) {
-    // ... (codice invariato)
     const articlesGrid = document.getElementById('articlesGrid');
     if (!articlesGrid) return;
     const articleCards = articlesGrid.querySelectorAll('.article-card');
@@ -851,7 +705,6 @@ export async function initializeHomepageArticleInteractions(currentUser) {
 }
 
 function traduireErroreFirebase(codiceErrore) {
-    // ... (codice invariato)
     const errors = {
         'auth/invalid-email': "L'indirizzo email non è valido.",
         'auth/user-disabled': 'Questo account utente è stato disabilitato.',
@@ -874,8 +727,7 @@ function setupNotificationBellListener(userId) {
         return;
     }
     if (notificationListener) {
-        // Rimuovi listener precedente se esiste
-        clearNotificationBellListener(); // clearNotificationBellListener si occuperà anche di nascondere il bell
+        clearNotificationBellListener();
     }
 
     const bellContainer = document.getElementById('notificationBellContainer');
@@ -883,22 +735,20 @@ function setupNotificationBellListener(userId) {
     const bellLink = document.getElementById('notificationBellLink');
 
     if (bellContainer) {
-        bellContainer.style.display = 'flex'; // o 'inline-flex' o come preferisci per visualizzarlo
-        // Assicurati che il click listener sia aggiunto una sola volta
+        bellContainer.style.display = 'flex';
         if (bellLink && !bellLink.getAttribute('data-listener-attached')) {
             bellLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                // TODO: (A.5.4) Mostra il pannello/dropdown delle notifiche qui
                 console.log('Notification bell clicked! Future: show notifications panel.');
             });
             bellLink.setAttribute('data-listener-attached', 'true');
         }
     } else {
         console.warn('setupNotificationBellListener: notificationBellContainer non trovato nel DOM.');
-        return; // Non procedere se il contenitore non c'è
+        return;
     }
 
-    const notificationsRef = collection(db, 'userProfiles', userId, 'notifications'); // Uso corretto di collection()
+    const notificationsRef = collection(db, 'userProfiles', userId, 'notifications');
     const unreadNotificationsQuery = query(notificationsRef, where('read', '==', false));
 
     notificationListener = onSnapshot(
@@ -920,7 +770,7 @@ function setupNotificationBellListener(userId) {
         },
         (error) => {
             console.error('Errore nel listener delle notifiche: ', error);
-            if (counterElement) counterElement.style.display = 'none'; // Nascondi in caso di errore
+            if (counterElement) counterElement.style.display = 'none';
         }
     );
     console.log('[Main.js setupNotificationBellListener] Notification listener attached for user:', userId);
@@ -931,13 +781,13 @@ function setupNotificationBellListener(userId) {
  */
 function clearNotificationBellListener() {
     if (notificationListener) {
-        notificationListener(); // Chiama la funzione di unsubscribe ritornata da onSnapshot
+        notificationListener();
         notificationListener = null;
         console.log('[Main.js clearNotificationBellListener] Notification listener detached.');
     }
     const bellContainer = document.getElementById('notificationBellContainer');
     if (bellContainer) {
-        bellContainer.style.display = 'none'; // Nascondi sempre la campanella al clear
+        bellContainer.style.display = 'none';
     }
     const counterElement = document.getElementById('notificationCounter');
     if (counterElement) {
@@ -946,87 +796,29 @@ function clearNotificationBellListener() {
     }
     const bellLink = document.getElementById('notificationBellLink');
     if (bellLink) {
-        // Rimuovi l'attributo per permettere al listener di essere riattaccato
         bellLink.removeAttribute('data-listener-attached');
     }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('[Main.js DOMContentLoaded] DOM completamente caricato e parsato.'); // Log di conferma
+    console.log('[Main.js DOMContentLoaded] DOM completamente caricato e parsato.');
 
     // Inizializzazioni principali
-    // initializeNewNavbar(); // Commentato: Pulsante menu mobile (navbarToggler) NON TROVATO.
-    // setupThemeSwitcher(); // Commentato: Pulsante themeToggleBtn NON TROVATO nel DOM.
-    initLeaderboard(); // <-- AGGIUNGI QUESTA RIGA
+    // initializeNewNavbar();
+    // setupThemeSwitcher();
+    initLeaderboard();
 
-
-    // Setup dei nuovi controlli UI
-    const loginModal = document.getElementById('loginModal');
+    // Solo l'event listener per aprire la modale, il resto è gestito da auth.js
     const showLoginModalBtn = document.getElementById('show-login-modal-btn');
-    const closeLoginModalBtn = document.getElementById('closeLoginModal');
-
-    // Riferimenti per l'autenticazione email/password
-    const authEmailInput = document.getElementById('authEmail');
-    const authPasswordInput = document.getElementById('authPassword');
-    const authDisplayNameInput = document.getElementById('authDisplayName');
-    const registerBtn = document.getElementById('registerBtn');
-    const loginBtn = document.getElementById('loginBtn');
-
-
     if (showLoginModalBtn) {
         showLoginModalBtn.addEventListener('click', (e) => {
             e.preventDefault();
             console.log("Click sull'icona di login registrato!");
-            if (loginModal) {
-                loginModal.style.display = 'flex';
-                // Resetta i campi al click per un nuovo tentativo
-                authEmailInput.value = '';
-                authPasswordInput.value = '';
-                if (authDisplayNameInput) authDisplayNameInput.value = '';
-            } else {
-                console.error("La modale di login non è stata trovata nel DOM!");
-            }
+            showAuthModal('login'); // Chiama la funzione esposta da auth.js
         });
     }
 
-    if (closeLoginModalBtn) {
-        closeLoginModalBtn.addEventListener('click', () => {
-            if (loginModal) loginModal.style.display = 'none';
-        });
-    }
-
-    // Event listeners per registrazione e login Email/Password
-    if (registerBtn) {
-        registerBtn.addEventListener('click', async () => {
-            const email = authEmailInput.value.trim();
-            const password = authPasswordInput.value.trim();
-            const displayName = authDisplayNameInput ? authDisplayNameInput.value.trim() : null;
-            try {
-                await registerWithEmailPassword(email, password, displayName);
-                // La modale verrà chiusa dalla funzione in auth.js in caso di successo
-            } catch (error) {
-                // Error handling già nel toast, qui possiamo fare log aggiuntivi se necessario
-                console.error("Errore durante la registrazione nel main.js:", error);
-            }
-        });
-    }
-
-    if (loginBtn) {
-        loginBtn.addEventListener('click', async () => {
-            const email = authEmailInput.value.trim();
-            const password = authPasswordInput.value.trim();
-            try {
-                await signInWithEmailPassword(email, password);
-                // La modale verrà chiusa dalla funzione in auth.js in caso di successo
-            } catch (error) {
-                // Error handling già nel toast, qui possiamo fare log aggiuntivi se necessario
-                console.error("Errore durante il login nel main.js:", error);
-            }
-        });
-    }
-
-
-    const userAvatarIcon = document.getElementById('user-avatar-icon'); // Mantenuto se vuoi ancora l'avatar
+    const userAvatarIcon = document.getElementById('user-avatar-icon');
     if (userAvatarIcon) {
         userAvatarIcon.addEventListener('click', () => {
             openProfileModal(loggedInUser);
@@ -1047,13 +839,11 @@ document.addEventListener('DOMContentLoaded', function () {
         displayGlitchzillaBanner();
     }
 
-
     // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
     onAuthStateChanged(auth, async (user) => {
         console.log('[Main.js] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
         loggedInUser = user;
 
-        // Gestione della visibilità delle icone
         const loginIcon = document.getElementById('show-login-modal-btn');
         const avatarIcon = document.getElementById('user-avatar-icon');
 
@@ -1061,33 +851,65 @@ document.addEventListener('DOMContentLoaded', function () {
             // Utente LOGGATO
             if (loginIcon) loginIcon.style.display = 'none';
             if (avatarIcon) {
-                avatarIcon.src = user.photoURL || generateBlockieAvatar(user.uid, 32); // Fallback a blockie se non c'è foto
-                avatarIcon.style.display = 'block';
-                // Aggiorna anche il nickname se disponibile
-                const userProfileDoc = await getDoc(doc(db, "appUsers", user.uid));
+                // 1. Inizializza sempre con un avatar Blockie di default.
+                let photoURLToUse = generateBlockieAvatar(user.uid, 32);
+
+                // 2. Tenta di recuperare i dati del profilo da Firestore (appUsers).
+                const userProfileDoc = await getDoc(doc(db, 'appUsers', user.uid));
+
                 if (userProfileDoc.exists()) {
                     const profileData = userProfileDoc.data();
-                    if (profileData.displayName) {
-                        // Potrebbe essere necessario un elemento per il nickname qui
-                        // console.log("Nickname utente loggato:", profileData.displayName);
+
+                    // 3. Se esiste una photoURL valida nel documento Firestore, usala.
+                    if (profileData.photoURL && profileData.photoURL !== '') {
+                        photoURLToUse = profileData.photoURL;
+                    }
+                    // 4. ALTRIMENTI, se non c'è in Firestore, controlla la photoURL da Firebase Auth.
+                    // Questo è utile se l'utente ha fatto login con un provider come Google e ha una foto.
+                    else if (user.photoURL && user.photoURL !== '') {
+                        photoURLToUse = user.photoURL;
+                    }
+                    if (profileData.nickname) {
+                        // console.log("Nickname utente loggato:", profileData.nickname);
+                    }
+                    // Inizializza il pulsante beta tester se le condizioni sono soddisfatte
+                    initializeTesterRequestButton(user, profileData);
+                } else {
+                    // Se il documento 'appUsers' per l'utente non esiste per qualche motivo,
+                    // il 'photoURLToUse' rimane il Blockie generato all'inizio.
+                    // Potresti anche qui voler controllare `user.photoURL` come fallback aggiuntivo se preferisci.
+                    if (user.photoURL && user.photoURL !== '') {
+                        photoURLToUse = user.photoURL;
                     }
                 }
+
+                // 5. Aggiungi cache-busting per l'avatar solo se è un URL HTTP/HTTPS (non un data URL del Blockie)
+                if (photoURLToUse && photoURLToUse.startsWith('http')) {
+                    photoURLToUse += `?v=${new Date().getTime()}`; // Aggiungi timestamp attuale per forzare il reload
+                }
+
+                // Imposta la sorgente dell'immagine e rendila visibile
+                avatarIcon.src = photoURLToUse;
+                avatarIcon.style.display = 'block';
             }
 
-            // Manteniamo le altre logiche per utenti loggati
             initializeHomepageArticleInteractions(user);
-            // setupNotificationBellListener(user.uid); // Commentato: notificationBellContainer non trovato.
+            setupNotificationBellListener(user.uid);
             loadContentSpecificFeatures(user);
-
         } else {
             // Utente NON LOGGATO
             if (loginIcon) loginIcon.style.display = 'block';
             if (avatarIcon) avatarIcon.style.display = 'none';
 
-            // Manteniamo le altre logiche per utenti non loggati
             initializeHomepageArticleInteractions(null);
             clearNotificationBellListener();
             loadContentSpecificFeatures(null);
+
+            // Nascondi la sezione beta tester se l'utente non è loggato
+            const requestSection = document.getElementById('beta-tester-request-section');
+            if (requestSection) {
+                requestSection.style.display = 'none';
+            }
         }
     });
 }); // Fine dell'UNICO DOMContentLoaded

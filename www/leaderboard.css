@@ -10,7 +10,7 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.85); /* Sfondo più scuro per effetto schermo */
+    background-color: rgba(0, 0, 0, 0.85); /* Sfondo più scuro per effetto schermo */
     align-items: center;
     justify-content: center;
 }
@@ -105,16 +105,24 @@
     text-align: left;
     padding: 0 5px;
 }
-.leaderboard-header span:first-child { flex: 0.15; text-align: center; } /* Rank */
-.leaderboard-header span:nth-child(2) { flex: 1.5; text-align: left; } /* Giocatore */
-.leaderboard-header span:nth-child(3) { flex: 0.6; text-align: right; } /* Punteggio */
+.leaderboard-header span:first-child {
+    flex: 0.15;
+    text-align: center;
+} /* Rank */
+.leaderboard-header span:nth-child(2) {
+    flex: 1.5;
+    text-align: left;
+} /* Giocatore */
+.leaderboard-header span:nth-child(3) {
+    flex: 0.6;
+    text-align: right;
+} /* Punteggio */
 /* Aggiusta l'ultimo span nell'header se necessario per i dettagli */
-.leaderboard-header span:last-child { 
-    flex: 1.2; 
-    text-align: right; 
+.leaderboard-header span:last-child {
+    flex: 1.2;
+    text-align: right;
     padding-right: 15px; /* Spazio per dettagli */
 }
-
 
 /* Lista dei punteggi */
 #leaderboard-list {
@@ -267,17 +275,39 @@
 
 /* Effetto glitch/sfarfallio (opzionale) */
 @keyframes flicker {
-    0% { opacity: 1; }
-    5% { opacity: 0.9; }
-    10% { opacity: 1; }
-    15% { opacity: 0.9; }
-    20% { opacity: 1; }
-    25% { opacity: 0.9; }
-    30% { opacity: 1; }
-    35% { opacity: 0.9; }
-    40% { opacity: 1; }
-    99% { opacity: 1; }
-    100% { opacity: 0.9; }
+    0% {
+        opacity: 1;
+    }
+    5% {
+        opacity: 0.9;
+    }
+    10% {
+        opacity: 1;
+    }
+    15% {
+        opacity: 0.9;
+    }
+    20% {
+        opacity: 1;
+    }
+    25% {
+        opacity: 0.9;
+    }
+    30% {
+        opacity: 1;
+    }
+    35% {
+        opacity: 0.9;
+    }
+    40% {
+        opacity: 1;
+    }
+    99% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.9;
+    }
 }
 
 .modal-content.landscape-modal {

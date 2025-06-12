@@ -6,7 +6,7 @@
     --terminal-text: #e0e0e0; /* Bianco brillante ma non affaticante */
     --terminal-highlight: #5ab9a8; /* Il tuo verde/azzurro per parole chiave */
     --terminal-error-bright: #f14e52; /* Rosso acceso per il flash */
-    --terminal-error-dark: #9b222b;   /* Rosso scuro per il flash */
+    --terminal-error-dark: #9b222b; /* Rosso scuro per il flash */
     --terminal-comment: #6272a4; /* Dracula comment */
     --terminal-red: #ff5555; /* Dracula red */
     --terminal-orange: #ffb86c; /* Dracula orange */
@@ -34,9 +34,10 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-body, html {
+body,
+html {
     font-family: 'Source Code Pro', monospace;
-    overflow: hidden;
+    /* overflow: hidden; */
     background-color: var(--terminal-bg);
     color: var(--terminal-text);
     margin: 0;
@@ -98,7 +99,8 @@ body, html {
 }
 
 @keyframes flash-error {
-    0%, 100% {
+    0%,
+    100% {
         color: var(--terminal-error-bright);
         text-shadow: 0 0 7px var(--terminal-error-bright);
     }
@@ -121,8 +123,13 @@ body, html {
 }
 
 @keyframes blink-caret {
-    from, to { opacity: 0; }
-    50% { opacity: 1; }
+    from,
+    to {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 
 /* Contenitore per la nuova barra di progresso ASCII */
@@ -165,7 +172,9 @@ body, html {
     font-size: 3em;
     margin-top: 10vh; /* Spostato più in basso con vh per responsività */
     margin-bottom: 50px;
-    text-shadow: 0 0 15px var(--bright-green-teal), 0 0 30px rgba(0,255,0,0.6);
+    text-shadow:
+        0 0 15px var(--bright-green-teal),
+        0 0 30px rgba(0, 255, 0, 0.6);
     text-align: center;
 }
 
@@ -179,8 +188,13 @@ body, html {
     padding: 10px 20px;
     margin: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.6), 0 0 10px var(--bright-teal);
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.6),
+        0 0 10px var(--bright-teal);
     text-transform: uppercase;
     min-width: 180px;
     max-width: 280px;
@@ -192,7 +206,9 @@ body, html {
     background-color: var(--bright-teal);
     border-color: var(--bright-green-teal);
     color: var(--terminal-bg);
-    box-shadow: 0 5px 20px rgba(0,255,0,0.8), 0 0 15px var(--bright-green-teal);
+    box-shadow:
+        0 5px 20px rgba(0, 255, 0, 0.8),
+        0 0 15px var(--bright-green-teal);
     outline: none;
 }
 
@@ -216,8 +232,11 @@ body, html {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     z-index: 950;
 }
 
@@ -225,7 +244,7 @@ body, html {
     background-color: var(--medium-teal);
     border-color: var(--bright-green-teal);
     color: var(--bright-green-teal);
-    box-shadow: 0 2px 15px rgba(0,255,0,0.7);
+    box-shadow: 0 2px 15px rgba(0, 255, 0, 0.7);
 }
 
 .menu-icon-btn .material-symbols-rounded {
@@ -242,7 +261,6 @@ body, html {
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
-
 
 /* Game Container Wrapper */
 #game-container-wrapper {
@@ -292,7 +310,9 @@ body, html {
     justify-content: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    transition: background-color 0.2s ease, border-radius 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        border-radius 0.2s ease;
     flex-shrink: 0;
 }
 
@@ -304,7 +324,6 @@ body, html {
 #mobileControls .control-button .material-symbols-rounded {
     font-size: 3em; /* Rendi le icone più grandi per i pulsanti di gioco */
 }
-
 
 /* Nuovo stile per l'icona dell'account - Spostata in alto a destra */
 .menu-icon-btn {
@@ -323,8 +342,11 @@ body, html {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     z-index: 950;
 }
 
@@ -332,7 +354,7 @@ body, html {
     background-color: var(--medium-teal);
     border-color: var(--bright-green-teal);
     color: var(--bright-green-teal);
-    box-shadow: 0 2px 15px rgba(0,255,0,0.7);
+    box-shadow: 0 2px 15px rgba(0, 255, 0, 0.7);
 }
 
 .menu-icon-btn .material-symbols-rounded {
@@ -375,11 +397,13 @@ body, html {
     font-family: 'Press Start 2P', cursive; /* Keep pixel font for score */
     color: var(--terminal-yellow); /* Highlight score */
     font-size: 1.8em; /* Larger score font */
-    text-shadow: 0 0 10px var(--terminal-yellow), 0 0 20px rgba(241, 250, 140, 0.5);
+    text-shadow:
+        0 0 10px var(--terminal-yellow),
+        0 0 20px rgba(241, 250, 140, 0.5);
     margin-top: 5px; /* Space from "Game Over" */
 }
 
-#scoreInputContainerDonkey input[type="text"] {
+#scoreInputContainerDonkey input[type='text'] {
     background-color: var(--terminal-darker-bg);
     border: 2px solid var(--terminal-green);
     color: var(--terminal-text);
@@ -392,10 +416,12 @@ body, html {
     width: calc(100% - 30px); /* Full width minus padding */
     box-sizing: border-box;
     outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
-#scoreInputContainerDonkey input[type="text"]:focus {
+#scoreInputContainerDonkey input[type='text']:focus {
     border-color: var(--bright-green-teal);
     box-shadow: 0 0 10px rgba(48, 225, 185, 0.7);
 }
@@ -410,7 +436,8 @@ body, html {
 }
 
 /* New classes for specific game over buttons */
-.game-over-button { /* Base style for all game over buttons */
+.game-over-button {
+    /* Base style for all game over buttons */
     background-color: var(--medium-teal);
     color: var(--terminal-text);
     border: 2px solid var(--bright-teal);
@@ -418,8 +445,13 @@ body, html {
     font-family: 'Source Code Pro', monospace;
     font-size: 1em; /* Consistent font size */
     cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.6), 0 0 10px var(--bright-teal);
+    transition:
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.6),
+        0 0 10px var(--bright-teal);
     text-transform: uppercase;
     border-radius: 5px;
     display: flex;
@@ -434,7 +466,9 @@ body, html {
     background-color: var(--bright-teal);
     border-color: var(--bright-green-teal);
     color: var(--terminal-bg);
-    box-shadow: 0 5px 20px rgba(0,255,0,0.8), 0 0 15px var(--bright-green-teal);
+    box-shadow:
+        0 5px 20px rgba(0, 255, 0, 0.8),
+        0 0 15px var(--bright-green-teal);
 }
 
 .game-over-button .material-symbols-rounded {
@@ -472,7 +506,8 @@ body, html {
     border-color: var(--terminal-red);
 }
 
-.game-over-main-menu-btn { /* New button style */
+.game-over-main-menu-btn {
+    /* New button style */
     background-color: var(--terminal-purple);
     border-color: var(--terminal-purple);
     color: var(--terminal-bg);
@@ -481,7 +516,6 @@ body, html {
     background-color: var(--terminal-pink);
     border-color: var(--terminal-pink);
 }
-
 
 /* Fullscreen adjustments for score input container */
 body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
@@ -516,7 +550,7 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
     #scoreInputContainerDonkey #finalScoreDisplayDonkey {
         font-size: 1.4em;
     }
-    #scoreInputContainerDonkey input[type="text"] {
+    #scoreInputContainerDonkey input[type='text'] {
         width: 100%; /* Full width in column layout */
         font-size: 1em;
         padding: 8px 10px;
@@ -532,7 +566,6 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
         min-width: 100%; /* Take full width */
     }
 }
-
 
 /* Credits Icon Button - REMOVED (will be deleted from HTML) */
 /* .credits-icon-btn { ... } */
@@ -570,12 +603,14 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
     font-family: 'Press Start 2P', cursive;
     font-size: 1.5em;
     cursor: pointer;
-    box-shadow: 0 0 20px rgba(0,255,0,0.7);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
     display: none;
     align-items: center;
     justify-content: center;
     text-transform: uppercase;
-    transition: background-color 0.3s, transform 0.3s;
+    transition:
+        background-color 0.3s,
+        transform 0.3s;
     z-index: 810; /* Ensure it's above the canvas but below score input */
 }
 
@@ -627,33 +662,27 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
     cursor: pointer;
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 200;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.8);
-    padding-top: 60px;
-}
-
 .modal-content {
-    background-color: var(--terminal-darker-bg);
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid var(--terminal-border);
-    width: 80%;
-    max-width: 700px;
+    background-color: var(--terminal-darker-bg); /* O #282a36 come fallback */
+    color: var(--terminal-text); /* O #f8f8f2 come fallback */
+    /* La riga 'margin: auto;' è stata rimossa per evitare conflitti */
+    padding: 25px; /* Mantieni o aumenta il padding interno */
+    border: 1px solid var(--terminal-border); /* O #44475a come fallback */
     border-radius: 8px;
-    position: relative;
-    box-shadow: 0 0 20px rgba(0,255,0,0.5);
-    color: var(--terminal-text);
+    width: 90%;
+    max-width: 700px; /* Mantieni un max-width ragionevole */
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+
+    /* REGOLE CRITICHE PER LO SCROLL: */
+    max-height: 95vh; /* Aumentiamo leggermente, o prova 'calc(100vh - 40px)' */
+    overflow-y: auto; /* Abilita lo scroll verticale */
+    -webkit-overflow-scrolling: touch; /* Migliora lo scroll su iOS */
+    box-sizing: border-box; /* Assicura che padding e border siano inclusi nella width/height */
 }
 
-.modal-content h2, .modal-content h3 {
+.modal-content h2,
+.modal-content h3 {
     color: var(--bright-green-teal);
     text-align: center;
     font-family: 'Press Start 2P', cursive;
@@ -749,7 +778,8 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
     border-top: 1px solid var(--terminal-border);
 }
 
-.accordion-panel p, .accordion-panel ul {
+.accordion-panel p,
+.accordion-panel ul {
     margin: 10px 0;
 }
 
@@ -795,52 +825,62 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
     font-family: 'Source Code Pro', monospace;
     font-size: 0.9em;
 }
-.toast.success { background-color: var(--terminal-green); }
-.toast.error { background-color: var(--terminal-red); }
-.toast.info { background-color: var(--terminal-blue); }
-.toast.warning { background-color: var(--terminal-orange); }
+.toast.success {
+    background-color: var(--terminal-green);
+}
+.toast.error {
+    background-color: var(--terminal-red);
+}
+.toast.info {
+    background-color: var(--terminal-blue);
+}
+.toast.warning {
+    background-color: var(--terminal-orange);
+}
 
 /* Stili di base per le nuove modali */
 .modal {
-  display: none; /* Nascosta di default, JS imposta 'flex' per mostrarla */
-  position: fixed; 
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.6);
-  
-  /* Queste tre righe sono la chiave per la centratura perfetta */
-  align-items: center;
-  justify-content: center;
+    display: none; /* Nascosta di default, JS imposta 'flex' per mostrarla */
+    position: fixed;
+    z-index: 1000; /* Z-index elevato per stare sopra tutto */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    /* Rimuovi: overflow: auto; */ /* <-- Rimuovi questa riga */
+    background-color: rgba(0, 0, 0, 0.6);
+
+    /* Queste tre righe sono la chiave per la centratura perfetta */
+    align-items: center;
+    justify-content: center;
+    /* Rimuovi: padding-top: 60px; */ /* <-- Rimuovi questa riga */
 }
 
 .modal-content.landscape-modal {
-  background-color: #282a36;
-  color: #f8f8f2;
-  /* La riga 'margin: auto;' è stata rimossa per evitare conflitti */
-  padding: 25px;
-  border: 1px solid #44475a;
-  border-radius: 8px;
-  width: 90%; /* Un po' più largo per il landscape */
-  max-width: 650px; 
-  text-align: center;
-  font-family: 'Source Code Pro', monospace;
-  max-height: 90vh; /* Sicurezza per schermi piccoli */
-  overflow-y: auto; /* Abilita lo scroll se il contenuto è troppo alto */
+    background-color: #282a36;
+    color: #f8f8f2;
+    /* La riga 'margin: auto;' è stata rimossa per evitare conflitti */
+    padding: 25px;
+    border: 1px solid #44475a;
+    border-radius: 8px;
+    width: 90%; /* Un po' più largo per il landscape */
+    max-width: 650px;
+    text-align: center;
+    font-family: 'Source Code Pro', monospace;
+    max-height: 90vh; /* Sicurezza per schermi piccoli */
+    overflow-y: auto; /* Abilita lo scroll se il contenuto è troppo alto */
 }
 
 /* Lo stile del bottone di chiusura rimane invariato */
 .modal-content .close-button {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
 }
 .google-btn {
-    background-color: #4285F4;
+    background-color: #4285f4;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -890,27 +930,30 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
 
 /* 1. Keyframes per l'animazione lampeggiante */
 @keyframes arcade-flash {
-  0%, 48%, 100% {
-    opacity: 1;
-    /* Usiamo una variabile di colore che già esiste per il "glow" */
-    text-shadow: 0 0 8px var(--terminal-highlight, #5ab9a8);
-  }
-  50%, 98% {
-    opacity: 0.6;
-    text-shadow: none;
-  }
+    0%,
+    48%,
+    100% {
+        opacity: 1;
+        /* Usiamo una variabile di colore che già esiste per il "glow" */
+        text-shadow: 0 0 8px var(--terminal-highlight, #5ab9a8);
+    }
+    50%,
+    98% {
+        opacity: 0.6;
+        text-shadow: none;
+    }
 }
 
 /* 2. Applichiamo l'animazione solo sull'hover per non essere troppo invadenti */
 .game-over-button:hover i,
 .menu-icon-btn:hover i {
-  animation: arcade-flash 1.2s infinite;
+    animation: arcade-flash 1.2s infinite;
 }
 
 /* 3. Aumentiamo leggermente la dimensione delle icone dentro ai pulsanti */
 .game-over-button i {
-  font-size: 1.3em; /* Puoi aggiustare questo valore */
-  vertical-align: middle;
+    font-size: 1.3em; /* Puoi aggiustare questo valore */
+    vertical-align: middle;
 }
 
 /* 4. Aumentiamo la dimensione dell'icona del profilo */
@@ -922,4 +965,18 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
 .game-over-button {
     gap: 12px; /* Aumenta lo spazio se necessario */
 }
+/* Questa classe verrà aggiunta al <body> quando una modale è aperta */
+body.modal-open {
+    overflow: hidden; /* Questo impedirà lo scroll dello sfondo */
+}
 
+/* Per i campi input specifici della modale di login/registrazione */
+#loginModal .auth-form input[type='email'],
+#loginModal .auth-form input[type='password'],
+#loginModal .auth-form input[type='text'],
+#loginModal .auth-form input[type='tel'],
+#loginModal .auth-form select {
+    width: 100%; /* Forza la larghezza al 100% per adattarsi meglio allo scroll */
+    box-sizing: border-box; /* Cruciale: include padding e bordo nella larghezza totale */
+    /* Rimuovi width: calc(100% - 22px); se presente nel login-register.css */
+}

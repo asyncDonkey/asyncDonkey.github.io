@@ -201,7 +201,7 @@ async function handleViewEditArticleClick(e) {
 
     const articleId = button.dataset.id;
     if (!articleId) {
-        console.error("ID articolo non trovato sul bottone di modifica!");
+        console.error('ID articolo non trovato sul bottone di modifica!');
         return;
     }
     await openEditArticleModal(articleId);
@@ -934,46 +934,46 @@ async function handleEditPublishedArticleClick(e) {
     const button = e.target.closest('.edit-published-btn');
     if (!button) return;
     const articleId = button.dataset.id;
- await openEditArticleModal(articleId);
+    await openEditArticleModal(articleId);
 }
 
 async function handleUnpublishArticleClick(e) {
     const button = e.target.closest('.unpublish-btn');
     if (!button) return;
- const articleId = button.dataset.id;
- const newStatus = 'draft';
- if (!confirm(`Rimuovere dalla pubblicazione l'articolo ID: ${articleId}? (Status diventerà: '${newStatus}')`))
-  return;
- try {
-  const articleRef = doc(db, 'articles', articleId);
-  await updateDoc(articleRef, {
-   status: newStatus,
-   publishedAt: null,
-   updatedAt: serverTimestamp(),
-  });
-  showToast(`Articolo ${articleId} rimosso dalla pubblicazione. Status: ${newStatus}.`);
-  loadPublishedArticlesForAdmin();
-  loadDraftArticlesForAdmin();
- } catch (error) {
-  console.error('Errore rimozione pubblicazione:', error);
-  showToast('Errore durante la rimozione dalla pubblicazione.', 'error');
- }
+    const articleId = button.dataset.id;
+    const newStatus = 'draft';
+    if (!confirm(`Rimuovere dalla pubblicazione l'articolo ID: ${articleId}? (Status diventerà: '${newStatus}')`))
+        return;
+    try {
+        const articleRef = doc(db, 'articles', articleId);
+        await updateDoc(articleRef, {
+            status: newStatus,
+            publishedAt: null,
+            updatedAt: serverTimestamp(),
+        });
+        showToast(`Articolo ${articleId} rimosso dalla pubblicazione. Status: ${newStatus}.`);
+        loadPublishedArticlesForAdmin();
+        loadDraftArticlesForAdmin();
+    } catch (error) {
+        console.error('Errore rimozione pubblicazione:', error);
+        showToast('Errore durante la rimozione dalla pubblicazione.', 'error');
+    }
 }
 
 async function handleDeletePublishedArticleClick(e) {
     const button = e.target.closest('.delete-published-btn');
     if (!button) return;
- const articleId = button.dataset.id;
- if (!confirm(`ELIMINARE PERMANENTEMENTE l'articolo ID: ${articleId}? Azione IRREVERSIBILE.`)) return;
- try {
-  const articleRef = doc(db, 'articles', articleId);
-  await deleteDoc(articleRef);
-  showToast(`Articolo ID: ${articleId} eliminato con successo.`);
-  loadPublishedArticlesForAdmin();
- } catch (error) {
-  console.error('Errore eliminazione articolo:', error);
-  showToast("Errore durante l'eliminazione dell'articolo.", 'error');
- }
+    const articleId = button.dataset.id;
+    if (!confirm(`ELIMINARE PERMANENTEMENTE l'articolo ID: ${articleId}? Azione IRREVERSIBILE.`)) return;
+    try {
+        const articleRef = doc(db, 'articles', articleId);
+        await deleteDoc(articleRef);
+        showToast(`Articolo ID: ${articleId} eliminato con successo.`);
+        loadPublishedArticlesForAdmin();
+    } catch (error) {
+        console.error('Errore eliminazione articolo:', error);
+        showToast("Errore durante l'eliminazione dell'articolo.", 'error');
+    }
 }
 
 function initializeGuidelineToggles() {

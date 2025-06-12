@@ -66,7 +66,7 @@ let mainMenuBtn = null; // Pulsante per tornare al menu
 let accountIconContainer = null; // Riferimento al contenitore dell'icona profilo
 
 let isTouchDevice = false; // Will be set in setupGameEngine
-let isIPhone = false;     // Will be set in setupGameEngine
+let isIPhone = false; // Will be set in setupGameEngine
 
 let activeMiniboss = null;
 
@@ -254,8 +254,10 @@ const MISSING_NUMBER_PROJECTILE_SPRITE_SRC = 'images/missingNumberProjectile.png
 const MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH = 12;
 const MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT = 12;
 const MISSING_NUMBER_PROJECTILE_NUM_FRAMES = 4; // Assumendo 4 frame per animazione
-const MISSING_NUMBER_PROJECTILE_TARGET_WIDTH = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
-const MISSING_NUMBER_PROJECTILE_TARGET_HEIGHT = MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
+const MISSING_NUMBER_PROJECTILE_TARGET_WIDTH =
+    MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
+const MISSING_NUMBER_PROJECTILE_TARGET_HEIGHT =
+    MISSING_NUMBER_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const MISSING_NUMBER_PROJECTILE_SPEED = 300; // Velocità proiettili più piccoli
 
 // --- SLAYER_SUBROUTINE (Power-Up Permanente) Constants ---
@@ -273,9 +275,9 @@ const CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH = 24;
 const CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT = 8;
 const CODE_INJECTOR_PROJECTILE_NUM_FRAMES = 4;
 const CODE_INJECTOR_PROJECTILE_TARGET_WIDTH = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
-const CODE_INJECTOR_PROJECTILE_TARGET_HEIGHT = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
+const CODE_INJECTOR_PROJECTILE_TARGET_HEIGHT =
+    CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const CODE_INJECTOR_PROJECTILE_DAMAGE = 3; // Danno del proiettile injector
-
 
 const ENEMY_PROJECTILE_SPEED = 250;
 
@@ -412,7 +414,7 @@ let lastTime = 0;
 let gameStats = {
     jumps: 0,
     shotsFired: 0,
-    powerUpsCollected: 0
+    powerUpsCollected: 0,
 };
 
 function formatScoreTimestamp(firebaseTimestamp) {
@@ -439,20 +441,18 @@ function getUrlParameter(name) {
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
-
-
 async function handleShareScore() {
-    console.log("handleShareScore attivato!");
+    console.log('handleShareScore attivato!');
 
     if (typeof finalScore === 'undefined' || finalScore < 0) {
-        showToast("Nessun punteggio valido da condividere.", "warning");
-        console.warn("handleShareScore: finalScore non definito o non valido:", finalScore);
+        showToast('Nessun punteggio valido da condividere.', 'warning');
+        console.warn('handleShareScore: finalScore non definito o non valido:', finalScore);
         return;
     }
 
     // TODO: [Future Task] Rivedere la logica di condivisione del punteggio per renderla più robusta o per aggiungere opzioni.
 
-    let challengerName = "Un Asinello Pixelato";
+    let challengerName = 'Un Asinello Pixelato';
     const currentUser = auth.currentUser;
 
     if (currentUser) {
@@ -462,26 +462,26 @@ async function handleShareScore() {
             if (docSnap.exists() && docSnap.data().nickname) {
                 challengerName = docSnap.data().nickname;
             } else {
-                challengerName = currentUser.displayName || currentUser.email.split('@')[0] || "Giocatore Misterioso";
+                challengerName = currentUser.displayName || currentUser.email.split('@')[0] || 'Giocatore Misterioso';
             }
         } catch (error) {
-            console.warn("Errore nel recuperare il nome del profilo per la condivisione:", error);
-            challengerName = currentUser.displayName || currentUser.email.split('@')[0] || "Giocatore Connesso";
+            console.warn('Errore nel recuperare il nome del profilo per la condivisione:', error);
+            challengerName = currentUser.displayName || currentUser.email.split('@')[0] || 'Giocatore Connesso';
         }
     } else {
         const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
-        if (playerInitialsDonkeyInput && playerInitialsDonkeyInput.value.trim() !== "") {
+        if (playerInitialsDonkeyInput && playerInitialsDonkeyInput.value.trim() !== '') {
             challengerName = playerInitialsDonkeyInput.value.trim().toUpperCase();
         }
     }
-    console.log("Sfidante:", challengerName, "Punteggio:", finalScore);
+    console.log('Sfidante:', challengerName, 'Punteggio:', finalScore);
 
     const siteBaseUrl = window.location.origin;
-    const gamePath = "/donkeyRunner.html"; // Nota: questo dovrebbe puntare a www/game.html se usato esternamente
+    const gamePath = '/donkeyRunner.html'; // Nota: questo dovrebbe puntare a www/game.html se usato esternamente
 
     const challengeUrl = `${siteBaseUrl}${gamePath}?challengeScore=${finalScore}&challengerName=${encodeURIComponent(challengerName)}&utm_source=donkey_runner_share&utm_medium=social_share`;
 
-    const shareTitle = "SYSTEM_ALERT: codeDash Challenge!";
+    const shareTitle = 'SYSTEM_ALERT: codeDash Challenge!';
     const fullShareText = `WARNING! ${challengerName} (Score: ${finalScore}) ti sfida su codeDash! Accetta il protocollo: ${challengeUrl} 👾`;
     const shortShareText = `// --- INCOMING_CHALLENGE_TRANSMISSION --- //
 SYSTEM_ID: asyncDonkey_Runner_Core
@@ -495,8 +495,8 @@ Sei chiamato/a a superare questo benchmark. Il sistema conta su di te!
 Esegui routine di risposta: ${challengeUrl}
 // --- END_OF_TRANSMISSION --- //`;
 
-    console.log("URL Sfida:", challengeUrl);
-    console.log("Testo completo:", fullShareText);
+    console.log('URL Sfida:', challengeUrl);
+    console.log('Testo completo:', fullShareText);
 
     if (navigator.share) {
         try {
@@ -505,32 +505,33 @@ Esegui routine di risposta: ${challengeUrl}
                 text: shortShareText,
                 url: challengeUrl,
             });
-            showToast("Sfida condivisa con successo!", "success");
-            console.log("Condivisione nativa riuscita.");
+            showToast('Sfida condivisa con successo!', 'success');
+            console.log('Condivisione nativa riuscita.');
         } catch (error) {
-            console.error("Errore durante navigator.share:", error);
+            console.error('Errore durante navigator.share:', error);
             if (error.name !== 'AbortError') {
-                showToast("Condivisione annullata o fallita.", "info");
+                showToast('Condivisione annullata o fallita.', 'info');
             }
         }
     } else {
-        console.log("navigator.share non supportato, uso fallback.");
+        console.log('navigator.share non supportato, uso fallback.');
         fallbackShare(fullShareText, challengeUrl);
     }
 }
 
 function fallbackShare(textToShare, urlToShare) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(textToShare)
+        navigator.clipboard
+            .writeText(textToShare)
             .then(() => {
-                showToast("Testo della sfida copiato negli appunti!", "info");
+                showToast('Testo della sfida copiato negli appunti!', 'info');
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error('Fallback: Impossibile copiare negli appunti:', err);
-                alert("Copia questo testo per condividere la tua sfida:\n\n" + textToShare);
+                alert('Copia questo testo per condividere la tua sfida:\n\n' + textToShare);
             });
     } else {
-        alert("Copia questo testo per condividere la tua sfida:\n\n" + textToShare);
+        alert('Copia questo testo per condividere la tua sfida:\n\n' + textToShare);
     }
 }
 
@@ -774,9 +775,8 @@ function prepareAssetsToLoad() {
         { name: 'missingNumberDmg3', src: MISSING_NUMBER_DMG3_SRC },
         { name: 'missingNumberProjectile', src: MISSING_NUMBER_PROJECTILE_SPRITE_SRC },
         { name: 'slayerProjectile', src: SLAYER_PROJECTILE_SPRITE_SRC },
-        { name: 'codeInjectorProjectile', src: CODE_INJECTOR_PROJECTILE_SPRITE_SRC },
+        { name: 'codeInjectorProjectile', src: CODE_INJECTOR_PROJECTILE_SPRITE_SRC }
     );
-    
 
     // Add power-up sprites dynamically
     for (const type in POWERUP_CONFIGS) {
@@ -832,12 +832,12 @@ function loadImage(name, src) {
  * e attacca tutti gli event listener necessari. Va chiamata una sola volta.
  */
 export function setupGameEngine() {
-    console.log("⚙️ setupGameEngine: Inizializzazione motore di gioco...");
+    console.log('⚙️ setupGameEngine: Inizializzazione motore di gioco...');
 
     // Get DOM references and assign them to the global 'let' variables
     canvas = document.getElementById('gameCanvas');
     if (!canvas) {
-        console.error("CRITICO: Elemento Canvas non trovato! Impossibile avviare il gioco.");
+        console.error('CRITICO: Elemento Canvas non trovato! Impossibile avviare il gioco.');
         return;
     }
     ctx = canvas.getContext('2d');
@@ -886,15 +886,13 @@ export function setupGameEngine() {
     }
     if (jumpButton) jumpButton.innerHTML = '<i class="ph-bold ph-arrow-circle-up"></i>';
     if (shootButton) shootButton.innerHTML = '<i class="ph-bold ph-code"></i>';
-    
+
     prepareAssetsToLoad();
     setupRenderingContext(ctx);
     attachEventListeners();
 
-    console.log("✅ setupGameEngine: Completato.");
+    console.log('✅ setupGameEngine: Completato.');
 }
-
-
 
 /**
  * Esegue il caricamento di tutte le immagini e suoni necessari per il gioco.
@@ -903,7 +901,7 @@ export function setupGameEngine() {
 export async function preloadGameAssets() {
     console.log('⏳ preloadGameAssets: Avvio caricamento assets...');
     if (resourcesInitialized) {
-        console.log("Assets già caricati.");
+        console.log('Assets già caricati.');
         return;
     }
 
@@ -920,20 +918,19 @@ export async function preloadGameAssets() {
     //checkAndDisplayOrientationPrompt();
 }
 
-
 /**
  * Fa partire la logica di gioco. Imposta lo stato su PLAYING,
  * resetta le variabili di gioco e avvia la musica e il game loop.
  */
 export function launchGame() {
-    console.log("🚀 launchGame: Avvio del gioco!");
+    console.log('🚀 launchGame: Avvio del gioco!');
     if (!resourcesInitialized) {
-        console.error("Impossibile avviare il gioco, le risorse non sono state caricate.");
+        console.error('Impossibile avviare il gioco, le risorse non sono state caricate.');
         return;
     }
 
     if (AudioManager.audioContext && AudioManager.audioContext.state === 'suspended') {
-        AudioManager.audioContext.resume().catch(err => console.error('Errore nel riprendere AudioContext:', err));
+        AudioManager.audioContext.resume().catch((err) => console.error('Errore nel riprendere AudioContext:', err));
     }
 
     currentGameState = 'PLAYING';
@@ -1074,7 +1071,10 @@ class Player {
         }
 
         // Solo i power-up temporanei hanno un timer
-        if (this.activePowerUp && ![POWERUP_TYPE.SLAYER_SUBROUTINE, POWERUP_TYPE.CODE_INJECTOR].includes(this.activePowerUp)) {
+        if (
+            this.activePowerUp &&
+            ![POWERUP_TYPE.SLAYER_SUBROUTINE, POWERUP_TYPE.CODE_INJECTOR].includes(this.activePowerUp)
+        ) {
             this.powerUpTimer -= dt;
             if (this.powerUpTimer <= 0) {
                 this.deactivatePowerUp();
@@ -1095,7 +1095,7 @@ class Player {
         if (canShoot) {
             const projectileYBase = this.y + this.displayHeight / 2 - PLAYER_PROJECTILE_TARGET_HEIGHT / 2;
             let projectileType = 'normal'; // Default
-            
+
             if (this.hasSlayerSubroutine) {
                 projectileType = 'slayer';
             } else if (this.hasCodeInjector) {
@@ -1106,14 +1106,26 @@ class Player {
 
             if (this.activePowerUp === POWERUP_TYPE.TRIPLE_SHOT) {
                 // Se Triple Shot è attivo, spara 3 proiettili del tipo potenziato più forte disponibile
-                projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase - PROJECTILE_VERTICAL_OFFSET, projectileType));
+                projectiles.push(
+                    new Projectile(
+                        this.x + this.displayWidth,
+                        projectileYBase - PROJECTILE_VERTICAL_OFFSET,
+                        projectileType
+                    )
+                );
                 projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase, projectileType));
-                projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase + PROJECTILE_VERTICAL_OFFSET, projectileType));
+                projectiles.push(
+                    new Projectile(
+                        this.x + this.displayWidth,
+                        projectileYBase + PROJECTILE_VERTICAL_OFFSET,
+                        projectileType
+                    )
+                );
             } else {
                 // Altrimenti, spara un singolo proiettile del tipo potenziato più forte disponibile
                 projectiles.push(new Projectile(this.x + this.displayWidth, projectileYBase, projectileType));
             }
-            
+
             AudioManager.playSound('shoot', false, 0.8);
             canShoot = false;
             shootTimer = 0;
@@ -1122,8 +1134,15 @@ class Player {
     }
 
     activatePowerUp(type) {
-        const exclusiveTypes = [POWERUP_TYPE.TRIPLE_SHOT, POWERUP_TYPE.SHIELD, POWERUP_TYPE.SMART_BOMB, POWERUP_TYPE.DEBUG_MODE, POWERUP_TYPE.FIREWALL, POWERUP_TYPE.BLOCK_BREAKER];
-        
+        const exclusiveTypes = [
+            POWERUP_TYPE.TRIPLE_SHOT,
+            POWERUP_TYPE.SHIELD,
+            POWERUP_TYPE.SMART_BOMB,
+            POWERUP_TYPE.DEBUG_MODE,
+            POWERUP_TYPE.FIREWALL,
+            POWERUP_TYPE.BLOCK_BREAKER,
+        ];
+
         // Gestione dei power-up permanenti (upgrade)
         if (type === POWERUP_TYPE.SLAYER_SUBROUTINE) {
             if (!this.hasSlayerSubroutine) {
@@ -1131,9 +1150,9 @@ class Player {
                 this.hasCodeInjector = false; // Slayer sovrascrive Code Injector
                 // Disattiva DEBUG_MODE se attivo, dato che Slayer lo rende obsoleto.
                 if (this.activePowerUp === POWERUP_TYPE.DEBUG_MODE) {
-                    this.deactivatePowerUp(); 
+                    this.deactivatePowerUp();
                 }
-                showToast("Slayer Subroutine ATTIVATO!", "success");
+                showToast('Slayer Subroutine ATTIVATO!', 'success');
                 AudioManager.playSound('powerUpCollect');
                 gameStats.powerUpsCollected++;
             }
@@ -1144,17 +1163,16 @@ class Player {
             // Code Injector può essere attivato solo se Slayer Subroutine NON è già attivo
             if (!this.hasSlayerSubroutine && !this.hasCodeInjector) {
                 this.hasCodeInjector = true;
-                 // Disattiva DEBUG_MODE se attivo, dato che Code Injector lo rende obsoleto.
+                // Disattiva DEBUG_MODE se attivo, dato che Code Injector lo rende obsoleto.
                 if (this.activePowerUp === POWERUP_TYPE.DEBUG_MODE) {
-                    this.deactivatePowerUp(); 
+                    this.deactivatePowerUp();
                 }
-                showToast("Code Injector ATTIVATO!", "success");
+                showToast('Code Injector ATTIVATO!', 'success');
                 AudioManager.playSound('powerUpCollect');
                 gameStats.powerUpsCollected++;
             }
             return; // Non è un power-up a tempo gestito da activePowerUp/powerUpTimer
         }
-
 
         // Logica per power-up temporanei (esistente)
         // Se un power-up temporaneo di tipo esclusivo è già attivo e ne attivi un altro diverso, disattiva il precedente.
@@ -1209,8 +1227,12 @@ class Player {
                 break;
         }
         // Riproduci suono per i power-up temporanei (Smart Bomb già gestisce il suo suono)
-        if (type !== POWERUP_TYPE.SMART_BOMB && type !== POWERUP_TYPE.SLAYER_SUBROUTINE && type !== POWERUP_TYPE.CODE_INJECTOR) {
-             AudioManager.playSound('powerUpCollect');
+        if (
+            type !== POWERUP_TYPE.SMART_BOMB &&
+            type !== POWERUP_TYPE.SLAYER_SUBROUTINE &&
+            type !== POWERUP_TYPE.CODE_INJECTOR
+        ) {
+            AudioManager.playSound('powerUpCollect');
         }
         // Incrementa contatore solo per power-up effettivamente attivati/raccolti
         if (type !== POWERUP_TYPE.SMART_BOMB) {
@@ -1339,7 +1361,8 @@ class Obstacle {
 
 class Projectile {
     // Il costruttore ora accetta un 'type' per determinare sprite e danno
-    constructor(x, y, type = 'normal') { // type può essere 'normal', 'debug', 'slayer', 'injector'
+    constructor(x, y, type = 'normal') {
+        // type può essere 'normal', 'debug', 'slayer', 'injector'
         this.x = x;
         this.y = y;
         this.type = type;
@@ -1353,7 +1376,12 @@ class Projectile {
                 this.speed = projectileSpeed; // Puoi rendere la velocità specifica se vuoi
                 this.damage = SLAYER_PROJECTILE_DAMAGE;
                 this.sprite = images['slayerProjectile'];
-                if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && SLAYER_PROJECTILE_NUM_FRAMES > 1) {
+                if (
+                    this.sprite &&
+                    this.sprite.complete &&
+                    this.sprite.naturalWidth > 0 &&
+                    SLAYER_PROJECTILE_NUM_FRAMES > 1
+                ) {
                     this.animation = new SpriteAnimation(
                         this.sprite,
                         SLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
@@ -1369,7 +1397,12 @@ class Projectile {
                 this.speed = projectileSpeed; // Puoi rendere la velocità specifica se vuoi
                 this.damage = CODE_INJECTOR_PROJECTILE_DAMAGE;
                 this.sprite = images['codeInjectorProjectile'];
-                if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && CODE_INJECTOR_PROJECTILE_NUM_FRAMES > 1) {
+                if (
+                    this.sprite &&
+                    this.sprite.complete &&
+                    this.sprite.naturalWidth > 0 &&
+                    CODE_INJECTOR_PROJECTILE_NUM_FRAMES > 1
+                ) {
                     this.animation = new SpriteAnimation(
                         this.sprite,
                         CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH,
@@ -1385,7 +1418,12 @@ class Projectile {
                 this.speed = projectileSpeed;
                 this.damage = 2; // Danno potenziato
                 this.sprite = images['playerUpgradedProjectile'];
-                 if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
+                if (
+                    this.sprite &&
+                    this.sprite.complete &&
+                    this.sprite.naturalWidth > 0 &&
+                    PLAYER_PROJECTILE_NUM_FRAMES > 1
+                ) {
                     this.animation = new SpriteAnimation(
                         this.sprite,
                         PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
@@ -1402,7 +1440,12 @@ class Projectile {
                 this.speed = projectileSpeed;
                 this.damage = 1; // Danno normale
                 this.sprite = images['playerProjectile'];
-                if (this.sprite && this.sprite.complete && this.sprite.naturalWidth > 0 && PLAYER_PROJECTILE_NUM_FRAMES > 1) {
+                if (
+                    this.sprite &&
+                    this.sprite.complete &&
+                    this.sprite.naturalWidth > 0 &&
+                    PLAYER_PROJECTILE_NUM_FRAMES > 1
+                ) {
                     this.animation = new SpriteAnimation(
                         this.sprite,
                         PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH,
@@ -1437,21 +1480,27 @@ class Projectile {
             // Fallback per sprite non animato o con un solo frame
             let sourceFrameW = this.animation ? this.animation.frameWidth : this.sprite.naturalWidth;
             let sourceFrameH = this.animation ? this.animation.frameHeight : this.sprite.naturalHeight;
-            if (this.type === 'normal' || this.type === 'debug') { // Per i proiettili standard che hanno un solo frame sprite
+            if (this.type === 'normal' || this.type === 'debug') {
+                // Per i proiettili standard che hanno un solo frame sprite
                 sourceFrameW = PLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH;
                 sourceFrameH = PLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT;
             } else if (this.type === 'slayer') {
-                 sourceFrameW = SLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH;
-                 sourceFrameH = SLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT;
+                sourceFrameW = SLAYER_PROJECTILE_ACTUAL_FRAME_WIDTH;
+                sourceFrameH = SLAYER_PROJECTILE_ACTUAL_FRAME_HEIGHT;
             } else if (this.type === 'injector') {
-                 sourceFrameW = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH;
-                 sourceFrameH = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT;
+                sourceFrameW = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_WIDTH;
+                sourceFrameH = CODE_INJECTOR_PROJECTILE_ACTUAL_FRAME_HEIGHT;
             }
             ctx.drawImage(
                 this.sprite,
-                0, 0, // Assume 0,0 per il primo frame se non c'è animazione
-                sourceFrameW, sourceFrameH,
-                this.x, this.y, this.width, this.height
+                0,
+                0, // Assume 0,0 per il primo frame se non c'è animazione
+                sourceFrameW,
+                sourceFrameH,
+                this.x,
+                this.y,
+                this.width,
+                this.height
             );
         } else {
             // Fallback di disegno per proiettili senza sprite valido
@@ -1970,9 +2019,17 @@ class Glitchzilla extends BaseEnemy {
             isGlitchzillaDefeatedThisGame = true;
 
             // LOGICA DI DROP PER SLAYER_SUBROUTINE (20% di probabilità)
-            if (Math.random() < 0.20) { // 20% chance
+            if (Math.random() < 0.2) {
+                // 20% chance
                 console.log('Glitchzilla ha droppato Slayer Subroutine!');
-                powerUpItems.push(new PowerUpItem(this.x + this.width / 2, this.y + this.height / 2, POWERUP_TYPE.SLAYER_SUBROUTINE, images));
+                powerUpItems.push(
+                    new PowerUpItem(
+                        this.x + this.width / 2,
+                        this.y + this.height / 2,
+                        POWERUP_TYPE.SLAYER_SUBROUTINE,
+                        images
+                    )
+                );
             }
 
             postBossCooldownActive = true;
@@ -2092,12 +2149,22 @@ class TrojanByte extends BaseEnemy {
         );
         this.updateCurrentAnimation();
         this.attackSequence = [
-            'warn_low_1', 'low_1', 'pause_medium',
-            'warn_low_2', 'low_2', 'pause_medium',
+            'warn_low_1',
+            'low_1',
+            'pause_medium',
+            'warn_low_2',
+            'low_2',
+            'pause_medium',
             //'warn_low_3', 'low_3', 'pause_medium', // Tre colpi in basso consecutivi
-            'warn_middle', 'middle', 'pause_medium', // Un colpo in mezzo
-            'warn_low_single', 'low_single', 'pause_short', // Un altro colpo in basso
-            'warn_high_single', 'high_single', 'pause_long_tb' // Un colpo in alto, poi pausa lunga per ricominciare il pattern
+            'warn_middle',
+            'middle',
+            'pause_medium', // Un colpo in mezzo
+            'warn_low_single',
+            'low_single',
+            'pause_short', // Un altro colpo in basso
+            'warn_high_single',
+            'high_single',
+            'pause_long_tb', // Un colpo in alto, poi pausa lunga per ricominciare il pattern
         ];
         this.attackSequenceIndex = 0;
         this.currentAttackPhaseDuration = 0;
@@ -2141,9 +2208,17 @@ class TrojanByte extends BaseEnemy {
             isTrojanByteDefeatedThisGame = true;
 
             // LOGICA DI DROP PER CODE_INJECTOR (20% di probabilità, SOLO SE SLAYER_SUBROUTINE NON È ATTIVO)
-            if (!hasSlayerSubroutineUpgrade && Math.random() < 0.20) { // 20% chance, conditional on Slayer not being active
+            if (!hasSlayerSubroutineUpgrade && Math.random() < 0.2) {
+                // 20% chance, conditional on Slayer not being active
                 console.log('Trojan Byte ha droppato Code Injector!');
-                powerUpItems.push(new PowerUpItem(this.x + this.width / 2, this.y + this.height / 2, POWERUP_TYPE.CODE_INJECTOR, images));
+                powerUpItems.push(
+                    new PowerUpItem(
+                        this.x + this.width / 2,
+                        this.y + this.height / 2,
+                        POWERUP_TYPE.CODE_INJECTOR,
+                        images
+                    )
+                );
             }
 
             postBossCooldownActive = true;
@@ -2178,7 +2253,19 @@ class TrojanByte extends BaseEnemy {
             case 'low_single': // Singolo colpo basso
                 if (!this.shotFiredInPhase) {
                     projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                    enemyProjectiles.push(
+                        new EnemyProjectile(
+                            this.x - this.projectileTargetWidth,
+                            projectileY,
+                            this.projectileSpriteName,
+                            this.projectileFrameWidth,
+                            this.projectileFrameHeight,
+                            this.projectileNumFrames,
+                            this.projectileTargetWidth,
+                            this.projectileTargetHeight,
+                            TROJAN_BYTE_PROJECTILE_SPEED
+                        )
+                    );
                     AudioManager.playSound('enemyShootLight'); // O un suono specifico per Trojan
                     this.shotFiredInPhase = true;
                 }
@@ -2187,7 +2274,19 @@ class TrojanByte extends BaseEnemy {
             case 'middle': // Colpo al centro
                 if (!this.shotFiredInPhase) {
                     projectileY = this.y + this.height * 0.5 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                    enemyProjectiles.push(
+                        new EnemyProjectile(
+                            this.x - this.projectileTargetWidth,
+                            projectileY,
+                            this.projectileSpriteName,
+                            this.projectileFrameWidth,
+                            this.projectileFrameHeight,
+                            this.projectileNumFrames,
+                            this.projectileTargetWidth,
+                            this.projectileTargetHeight,
+                            TROJAN_BYTE_PROJECTILE_SPEED
+                        )
+                    );
                     AudioManager.playSound('enemyShootLight');
                     this.shotFiredInPhase = true;
                 }
@@ -2196,7 +2295,19 @@ class TrojanByte extends BaseEnemy {
             case 'high_single': // Singolo colpo alto
                 if (!this.shotFiredInPhase) {
                     projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                    enemyProjectiles.push(
+                        new EnemyProjectile(
+                            this.x - this.projectileTargetWidth,
+                            projectileY,
+                            this.projectileSpriteName,
+                            this.projectileFrameWidth,
+                            this.projectileFrameHeight,
+                            this.projectileNumFrames,
+                            this.projectileTargetWidth,
+                            this.projectileTargetHeight,
+                            TROJAN_BYTE_PROJECTILE_SPEED
+                        )
+                    );
                     AudioManager.playSound('enemyShootLight');
                     this.shotFiredInPhase = true;
                 }
@@ -2286,38 +2397,49 @@ class MissingNumber extends BaseEnemy {
         this.allAttackPatterns = [
             // Pattern 1: un colpo alto, due bassi, 1 medio, pausa lunga
             [
-                { type: 'warn', pos: 'high' }, { type: 'shot', pos: 'high' },
+                { type: 'warn', pos: 'high' },
+                { type: 'shot', pos: 'high' },
                 { type: 'pause', duration: this.pauseShortDuration },
-                { type: 'warn', pos: 'low' }, { type: 'shot', pos: 'low' },
+                { type: 'warn', pos: 'low' },
+                { type: 'shot', pos: 'low' },
                 { type: 'pause', duration: this.pauseShortDuration },
-                { type: 'warn', pos: 'low' }, { type: 'shot', pos: 'low' },
+                { type: 'warn', pos: 'low' },
+                { type: 'shot', pos: 'low' },
                 { type: 'pause', duration: this.pauseShortDuration },
-                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
-                { type: 'pause', duration: this.pauseLongDuration }
+                { type: 'warn', pos: 'middle' },
+                { type: 'shot', pos: 'middle' },
+                { type: 'pause', duration: this.pauseLongDuration },
             ],
             // Pattern 2: uno alto, uno medio, pausa lunga
             [
-                { type: 'warn', pos: 'high' }, { type: 'shot', pos: 'high' },
+                { type: 'warn', pos: 'high' },
+                { type: 'shot', pos: 'high' },
                 { type: 'pause', duration: this.pauseMediumDuration },
-                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
-                { type: 'pause', duration: this.pauseLongDuration }
+                { type: 'warn', pos: 'middle' },
+                { type: 'shot', pos: 'middle' },
+                { type: 'pause', duration: this.pauseLongDuration },
             ],
             // Pattern 3: medio medio, pausa lunga
             [
-                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
+                { type: 'warn', pos: 'middle' },
+                { type: 'shot', pos: 'middle' },
                 { type: 'pause', duration: this.pauseShortDuration },
-                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
-                { type: 'pause', duration: this.pauseLongDuration }
+                { type: 'warn', pos: 'middle' },
+                { type: 'shot', pos: 'middle' },
+                { type: 'pause', duration: this.pauseLongDuration },
             ],
             // Pattern 4: basso medio basso, pausa lunga
             [
-                { type: 'warn', pos: 'low' }, { type: 'shot', pos: 'low' },
+                { type: 'warn', pos: 'low' },
+                { type: 'shot', pos: 'low' },
                 { type: 'pause', duration: this.pauseShortDuration },
-                { type: 'warn', pos: 'middle' }, { type: 'shot', pos: 'middle' },
+                { type: 'warn', pos: 'middle' },
+                { type: 'shot', pos: 'middle' },
                 { type: 'pause', duration: this.pauseShortDuration },
-                { type: 'warn', pos: 'low' }, { type: 'shot', pos: 'low' },
-                { type: 'pause', duration: this.pauseLongDuration }
-            ]
+                { type: 'warn', pos: 'low' },
+                { type: 'shot', pos: 'low' },
+                { type: 'pause', duration: this.pauseLongDuration },
+            ],
         ];
 
         this.selectNewAttackPattern(); // Seleziona il primo pattern all'inizializzazione
@@ -2664,14 +2786,14 @@ function spawnPowerUpAmbientIfNeeded(dt) {
     powerUpSpawnTimer += dt;
     if (powerUpSpawnTimer >= nextPowerUpSpawnTime) {
         // Filtra i power-up che non dovrebbero più spawnare
-        const availablePowerUpTypes = Object.values(POWERUP_TYPE).filter(type => {
+        const availablePowerUpTypes = Object.values(POWERUP_TYPE).filter((type) => {
             if (type === POWERUP_TYPE.DEBUG_MODE && (hasSlayerSubroutineUpgrade || hasCodeInjectorUpgrade)) {
                 return false; // Non spawnare DEBUG_MODE se un upgrade di sparo permanente è attivo
             }
             // Non spawnare i power-up permanenti tramite spawn ambientale;
             // vengono droppati solo dai boss.
             if (type === POWERUP_TYPE.SLAYER_SUBROUTINE || type === POWERUP_TYPE.CODE_INJECTOR) {
-                return false; 
+                return false;
             }
             return true;
         });
@@ -2684,7 +2806,7 @@ function spawnPowerUpAmbientIfNeeded(dt) {
             powerUpSpawnTimer = 0;
             nextPowerUpSpawnTime = calculateNextPowerUpAmbientSpawnTime();
         } else {
-            console.warn("Nessun power-up ambientale disponibile da spawnare dopo aver filtrato.");
+            console.warn('Nessun power-up ambientale disponibile da spawnare dopo aver filtrato.');
             // Potrebbe essere necessario un meccanismo per farli spawnare più tardi o con maggiore frequenza
             // se tutti i power-up sono stati bloccati. Per ora, semplicemente non spawniamo.
             powerUpSpawnTimer = 0; // Reset del timer anche se non si spawna nulla per evitare spam di warning.
@@ -2736,8 +2858,6 @@ function shouldShowDonkeyScoreInput(currentScore) {
 
 // In www/donkeyRunner.js
 
-
-
 /**
  * Gestisce la logica e la visualizzazione della schermata di Game Over.
  * NUOVO: Chiama la Cloud Function per registrare automaticamente le statistiche.
@@ -2760,26 +2880,27 @@ function processGameOver() {
     // --- NUOVA LOGICA DI SALVATAGGIO AUTOMATICO ---
     const currentUser = auth.currentUser;
     if (currentUser) {
-        const bossesDefeatedCount = (isGlitchzillaDefeatedThisGame ? 1 : 0) + 
-                                  (isTrojanByteDefeatedThisGame ? 1 : 0) + 
-                                  (isMissingNumberDefeatedThisGame ? 1 : 0);
-        
+        const bossesDefeatedCount =
+            (isGlitchzillaDefeatedThisGame ? 1 : 0) +
+            (isTrojanByteDefeatedThisGame ? 1 : 0) +
+            (isMissingNumberDefeatedThisGame ? 1 : 0);
+
         const gameData = {
             score: finalScore,
             bossesDefeated: bossesDefeatedCount,
             // In futuro potremmo aggiungere altre statistiche qui
         };
 
-        showToast("Registrazione statistiche...", "info");
+        showToast('Registrazione statistiche...', 'info');
         const submitGameResult = httpsCallable(functions, 'submitGameResult');
         submitGameResult(gameData)
             .then((result) => {
                 console.log('Cloud function response:', result.data);
-                showToast("Statistiche salvate!", "success");
+                showToast('Statistiche salvate!', 'success');
             })
             .catch((error) => {
-                console.error("Errore chiamata a submitGameResult:", error);
-                showToast(`Errore salvataggio: ${error.message}`, "error");
+                console.error('Errore chiamata a submitGameResult:', error);
+                showToast(`Errore salvataggio: ${error.message}`, 'error');
             });
     }
     // --- FINE NUOVA LOGICA ---
@@ -2791,12 +2912,11 @@ function processGameOver() {
             finalScoreDisplay.textContent = finalScore;
         }
         scoreInputContainerDonkey.style.display = 'flex';
-        
+
         // La logica per mostrare/nascondere l'input delle iniziali è rimossa
         // perché ora gestiamo solo utenti loggati. La UI verrà semplificata nella Fase 3.
     }
 }
-
 
 function checkCollisions() {
     if (!asyncDonkey) return;
@@ -3056,7 +3176,7 @@ function resetGame() {
     gameStats = {
         jumps: 0,
         shotsFired: 0,
-        powerUpsCollected: 0
+        powerUpsCollected: 0,
     };
 
     // Nascondi il contenitore dei punteggi
@@ -3065,10 +3185,10 @@ function resetGame() {
     }
 
     // **BUG FIX**: Ripristina lo stato iniziale dei pulsanti
-    
+
     if (shareScoreBtnDonkey) {
-    shareScoreBtnDonkey.style.display = 'inline-block'; // o 'flex' a seconda dello stile del tuo container
-}
+        shareScoreBtnDonkey.style.display = 'inline-block'; // o 'flex' a seconda dello stile del tuo container
+    }
 
     // Ripristina anche gli elementi per l'input dell'ospite
     const playerInitialsDonkeyInput = document.getElementById('playerInitialsDonkey');
@@ -3082,7 +3202,6 @@ function resetGame() {
 
     console.log('Gioco resettato.');
 }
-
 
 function drawTerminalBackgroundEffects() {
     const lines = 30;
@@ -3147,7 +3266,11 @@ function drawMenuScreen() {
         canvas.width / 2,
         canvas.height / 2 - 100,
         48,
-        PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE, 5, 3
+        PALETTE.BRIGHT_GREEN_TEAL,
+        PALETTE.MEDIUM_TEAL,
+        PALETTE.DARK_TEAL_BLUE,
+        5,
+        3
     );
 
     if (incomingChallengerName && !isNaN(numericalChallengeScore) && numericalChallengeScore > 0) {
@@ -3156,14 +3279,22 @@ function drawMenuScreen() {
             canvas.width / 2,
             canvas.height / 2 - 20,
             28,
-            PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 3, 2
+            PALETTE.BRIGHT_TEAL,
+            PALETTE.MEDIUM_PURPLE,
+            PALETTE.DARK_TEAL_BLUE,
+            3,
+            2
         );
         drawGlitchText(
             `TARGET SCORE: ${numericalChallengeScore}. Routine di superamento richiesta!`,
             canvas.width / 2,
             canvas.height / 2 + 20,
             22,
-            PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 2, 1
+            PALETTE.BRIGHT_TEAL,
+            PALETTE.MEDIUM_PURPLE,
+            PALETTE.DARK_TEAL_BLUE,
+            2,
+            1
         );
 
         if (isTouchDevice && mobileStartButton) {
@@ -3175,12 +3306,17 @@ function drawMenuScreen() {
                 canvas.width / 2,
                 canvas.height / 2 + 70,
                 26,
-                PALETTE.BRIGHT_GREEN_TEAL, PALETTE.MEDIUM_TEAL, PALETTE.DARK_TEAL_BLUE, 3, 1
+                PALETTE.BRIGHT_GREEN_TEAL,
+                PALETTE.MEDIUM_TEAL,
+                PALETTE.DARK_TEAL_BLUE,
+                3,
+                1
             );
         }
     } else {
         if (isTouchDevice && mobileStartButton) {
-            mobileStartButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span><span class="visually-hidden">Start Game</span>';
+            mobileStartButton.innerHTML =
+                '<span class="material-symbols-rounded">play_arrow</span><span class="visually-hidden">Start Game</span>';
             mobileStartButton.style.display = 'block';
         } else {
             drawGlitchText(
@@ -3188,7 +3324,11 @@ function drawMenuScreen() {
                 canvas.width / 2,
                 canvas.height / 2 + 20,
                 28,
-                PALETTE.BRIGHT_TEAL, PALETTE.MEDIUM_PURPLE, PALETTE.DARK_TEAL_BLUE, 3, 2
+                PALETTE.BRIGHT_TEAL,
+                PALETTE.MEDIUM_PURPLE,
+                PALETTE.DARK_TEAL_BLUE,
+                3,
+                2
             );
         }
     }
@@ -3223,12 +3363,21 @@ function updatePlaying(dt) {
             bossFightImminent = true;
             bossWarningTimer = 2.0;
             hasGlitchzillaSpawnedThisGame = true; // Marchia che la fase di questo boss è stata triggerata
-        } else if (isGlitchzillaDefeatedThisGame && !isTrojanByteDefeatedThisGame && score >= TROJAN_BYTE_SPAWN_SCORE_THRESHOLD) {
+        } else if (
+            isGlitchzillaDefeatedThisGame &&
+            !isTrojanByteDefeatedThisGame &&
+            score >= TROJAN_BYTE_SPAWN_SCORE_THRESHOLD
+        ) {
             console.log('Soglia punteggio per Trojan_Byte raggiunta. Avvio sequenza di spawn (2s warning).');
             bossFightImminent = true;
             bossWarningTimer = 2.0;
             hasTrojanByteSpawnedThisGame = true; // Marchia che la fase di questo boss è stata triggerata
-        } else if (isGlitchzillaDefeatedThisGame && isTrojanByteDefeatedThisGame && !isMissingNumberDefeatedThisGame && score >= MISSING_NUMBER_SPAWN_SCORE_THRESHOLD) {
+        } else if (
+            isGlitchzillaDefeatedThisGame &&
+            isTrojanByteDefeatedThisGame &&
+            !isMissingNumberDefeatedThisGame &&
+            score >= MISSING_NUMBER_SPAWN_SCORE_THRESHOLD
+        ) {
             console.log('Soglia punteggio per Missing_Number raggiunta. Avvio sequenza di spawn (2s warning).');
             bossFightImminent = true;
             bossWarningTimer = 2.0;
@@ -3431,7 +3580,9 @@ let isFullscreenActive = false;
 
 async function toggleFullscreen() {
     if (isIPhone) {
-        console.log('toggleFullscreen chiamato su iPhone, ma il pulsante dovrebbe essere nascosto. Nessuna azione intrapresa.');
+        console.log(
+            'toggleFullscreen chiamato su iPhone, ma il pulsante dovrebbe essere nascosto. Nessuna azione intrapresa.'
+        );
         return;
     }
 
@@ -3465,7 +3616,6 @@ async function toggleFullscreen() {
         }
     }
 }
-
 
 function handleFullscreenChange() {
     isFullscreenActive = !!(
@@ -3553,7 +3703,7 @@ function attachEventListeners() {
             console.log('Event listener per fullscreenButton NON aggiunto (è un iPhone).');
         }
     }
-    
+
     if (restartGameBtnDonkey) {
         restartGameBtnDonkey.addEventListener('click', () => {
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
@@ -3565,7 +3715,8 @@ function attachEventListeners() {
     }
 
     // Nuovo: Event Listener per il pulsante "Torna al Menu Principale"
-    if (mainMenuBtn) { // **CORRETTO** usa la variabile corretta
+    if (mainMenuBtn) {
+        // **CORRETTO** usa la variabile corretta
         mainMenuBtn.addEventListener('click', () => {
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
             currentGameState = GAME_STATE.MENU; // Imposta lo stato su MENU

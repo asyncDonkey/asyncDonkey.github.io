@@ -1,7 +1,12 @@
 // functions/index.js (Versione Corretta e Refattorizzata)
 
 // Firebase Functions v2 imports
-const { onDocumentUpdated, onDocumentCreated, onDocumentDeleted, onDocumentWritten } = require('firebase-functions/v2/firestore');
+const {
+    onDocumentUpdated,
+    onDocumentCreated,
+    onDocumentDeleted,
+    onDocumentWritten,
+} = require('firebase-functions/v2/firestore');
 const { onObjectFinalized } = require('firebase-functions/v2/storage');
 const { HttpsError, onCall } = require('firebase-functions/v2/https');
 const { logger } = require('firebase-functions');
@@ -329,9 +334,9 @@ exports.updateNickname = onCall({ region: 'us-central1' }, async (request) => {
     try {
         const userDoc = await userDocRef.get();
         if (!userDoc.exists) {
-             throw new HttpsError('not-found', "Documento utente non trovato.");
+            throw new HttpsError('not-found', 'Documento utente non trovato.');
         }
-        
+
         const userData = userDoc.data();
 
         // --- NUOVA LOGICA: CONTROLLO COOLDOWN ---
@@ -343,7 +348,10 @@ exports.updateNickname = onCall({ region: 'us-central1' }, async (request) => {
 
             if (timeSinceLastUpdate < fourteenDaysInMillis) {
                 const daysRemaining = Math.ceil((fourteenDaysInMillis - timeSinceLastUpdate) / (1000 * 60 * 60 * 24));
-                throw new HttpsError('failed-precondition', `Puoi modificare il nickname di nuovo tra ${daysRemaining} giorni.`);
+                throw new HttpsError(
+                    'failed-precondition',
+                    `Puoi modificare il nickname di nuovo tra ${daysRemaining} giorni.`
+                );
             }
         }
         // --- FINE NUOVA LOGICA ---
@@ -355,7 +363,6 @@ exports.updateNickname = onCall({ region: 'us-central1' }, async (request) => {
 
         logger.info(`[CF:${functionName}] Nickname per l'utente ${userId} aggiornato a "${validatedNickname}".`);
         return { success: true, message: 'Nickname aggiornato con successo!' };
-
     } catch (error) {
         logger.error(`[CF:${functionName}] Errore durante l'aggiornamento del nickname per l'utente ${userId}:`, error);
         // Se l'errore è già un HttpsError (come il nostro errore di cooldown), rilancialo
@@ -365,7 +372,6 @@ exports.updateNickname = onCall({ region: 'us-central1' }, async (request) => {
         throw new HttpsError('internal', 'Si è verificato un errore interno. Riprova più tardi.');
     }
 });
-
 
 exports.grantVerificationBadge = onCall({ region: 'us-central1' }, async (request) => {
     const functionName = 'grantVerificationBadge';
@@ -946,7 +952,9 @@ exports.awardBetaTesterBadgeOnRoleChange = onDocumentUpdated('userProfiles/{user
 
     // Condizione di attivazione: isTestUser è diventato 'true'
     if (dataBefore.isTestUser !== true && dataAfter.isTestUser === true) {
-        logger.info(`[CF:${functionName}] L'utente ${userId} è stato promosso a Beta Tester. Controllo per assegnazione badge.`);
+        logger.info(
+            `[CF:${functionName}] L'utente ${userId} è stato promosso a Beta Tester. Controllo per assegnazione badge.`
+        );
 
         const userProfileRef = db.collection('userProfiles').doc(userId);
         const badgeId = BADGE_ID_BETA_TESTER;
@@ -954,7 +962,9 @@ exports.awardBetaTesterBadgeOnRoleChange = onDocumentUpdated('userProfiles/{user
         try {
             const userProfileSnap = await userProfileRef.get();
             if (!userProfileSnap.exists) {
-                logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato durante il tentativo di assegnare il badge.`);
+                logger.warn(
+                    `[CF:${functionName}] Profilo utente ${userId} non trovato durante il tentativo di assegnare il badge.`
+                );
                 return;
             }
 
@@ -962,17 +972,24 @@ exports.awardBetaTesterBadgeOnRoleChange = onDocumentUpdated('userProfiles/{user
             const earnedBadges = userProfile.earnedBadges || [];
 
             if (!earnedBadges.includes(badgeId)) {
-                logger.info(`[CF:<span class="math-inline">{functionName}] Assegnazione del badge '</span>{badgeId}' all'utente ${userId}.`);
+                logger.info(
+                    `[CF:<span class="math-inline">{functionName}] Assegnazione del badge '</span>{badgeId}' all'utente ${userId}.`
+                );
                 await userProfileRef.update({
                     earnedBadges: FieldValue.arrayUnion(badgeId),
                     updatedAt: FieldValue.serverTimestamp(),
                 });
                 await sendNewBadgeNotification(userId, badgeId);
             } else {
-                logger.info(`[CF:${functionName}] L'utente <span class="math-inline">{userId} possiede già il badge '</span>{badgeId}'.`);
+                logger.info(
+                    `[CF:${functionName}] L'utente <span class="math-inline">{userId} possiede già il badge '</span>{badgeId}'.`
+                );
             }
         } catch (error) {
-            logger.error(`[CF:<span class="math-inline">{functionName}] Errore durante l'assegnazione del badge '</span>{badgeId}' a ${userId}:`, error);
+            logger.error(
+                `[CF:<span class="math-inline">{functionName}] Errore durante l'assegnazione del badge '</span>{badgeId}' a ${userId}:`,
+                error
+            );
         }
     }
 });
@@ -982,79 +999,87 @@ exports.awardBetaTesterBadgeOnRoleChange = onDocumentUpdated('userProfiles/{user
  * assegna il badge "Beta Tester Certificato".
  * Si attiva alla creazione o aggiornamento di un documento in 'testResults'.
  */
-exports.checkAndAwardCertifiedTesterBadge = onDocumentWritten('userProfiles/{userId}/testResults/{taskId}', async (event) => {
-    const functionName = 'checkAndAwardCertifiedTesterBadge';
-    const userId = event.params.userId;
+exports.checkAndAwardCertifiedTesterBadge = onDocumentWritten(
+    'userProfiles/{userId}/testResults/{taskId}',
+    async (event) => {
+        const functionName = 'checkAndAwardCertifiedTesterBadge';
+        const userId = event.params.userId;
 
-    // L'evento di scrittura stesso è il nostro trigger, non abbiamo bisogno dei dati specifici del documento.
-    logger.info(`[CF:${functionName}] Trigger attivato per utente ${userId}. Avvio controllo completamento test.`);
+        // L'evento di scrittura stesso è il nostro trigger, non abbiamo bisogno dei dati specifici del documento.
+        logger.info(`[CF:${functionName}] Trigger attivato per utente ${userId}. Avvio controllo completamento test.`);
 
-    const userProfileRef = db.collection('userProfiles').doc(userId);
+        const userProfileRef = db.collection('userProfiles').doc(userId);
 
-    try {
-        const userProfileSnap = await userProfileRef.get();
-        if (!userProfileSnap.exists) {
-            logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato.`);
-            return null;
-        }
-
-        const userProfile = userProfileSnap.data();
-        const earnedBadges = userProfile.earnedBadges || [];
-
-        // Se l'utente ha già il badge, non facciamo nulla.
-        if (earnedBadges.includes(BADGE_ID_BETA_TESTER_CERTIFIED)) {
-            logger.info(`[CF:${functionName}] Utente ${userId} ha già il badge certificato.`);
-            return null;
-        }
-
-        // 1. Conta tutti i task di test ATTIVI
-        const activeTasksQuery = db.collection('testTasksDefinition').where('status', '==', 'active');
-        const activeTasksSnap = await activeTasksQuery.get();
-        const totalActiveTasks = activeTasksSnap.size;
-
-        if (totalActiveTasks === 0) {
-            logger.info(`[CF:${functionName}] Nessun task di test attivo trovato. Impossibile assegnare il badge.`);
-            return null;
-        }
-
-        // 2. Conta tutti i risultati di test SOTTOMESSI da questo utente
-        const userResultsQuery = userProfileRef.collection('testResults');
-        const userResultsSnap = await userResultsQuery.get();
-        const totalUserCompletedTasks = userResultsSnap.size;
-        
-        logger.info(`[CF:${functionName}] Controllo per utente ${userId}: ${totalUserCompletedTasks} test completati su ${totalActiveTasks} totali richiesti.`);
-
-        // 3. Confronta i conteggi
-        if (totalUserCompletedTasks >= totalActiveTasks) {
-            logger.info(`[CF:${functionName}] CONGRATULAZIONI! L'utente ${userId} ha completato tutti i test! Assegnazione badge e animazione.`);
-
-            const badgeDetails = await getBadgeDetails(BADGE_ID_BETA_TESTER_CERTIFIED);
-            if (!badgeDetails) {
-                 logger.error(`[CF:${functionName}] Dettagli per il badge ${BADGE_ID_BETA_TESTER_CERTIFIED} non trovati!`);
-                 return null;
+        try {
+            const userProfileSnap = await userProfileRef.get();
+            if (!userProfileSnap.exists) {
+                logger.warn(`[CF:${functionName}] Profilo utente ${userId} non trovato.`);
+                return null;
             }
 
-            const updates = {
-                earnedBadges: FieldValue.arrayUnion(BADGE_ID_BETA_TESTER_CERTIFIED),
-                updatedAt: FieldValue.serverTimestamp(),
-            };
+            const userProfile = userProfileSnap.data();
+            const earnedBadges = userProfile.earnedBadges || [];
 
-            // Applica l'animazione del nickname se definita nel badge
-            if (badgeDetails.nicknameAnimationClass) {
-                updates.activeNicknameAnimation = badgeDetails.nicknameAnimationClass;
+            // Se l'utente ha già il badge, non facciamo nulla.
+            if (earnedBadges.includes(BADGE_ID_BETA_TESTER_CERTIFIED)) {
+                logger.info(`[CF:${functionName}] Utente ${userId} ha già il badge certificato.`);
+                return null;
             }
-            
-            await userProfileRef.update(updates);
-            await sendNewBadgeNotification(userId, BADGE_ID_BETA_TESTER_CERTIFIED);
+
+            // 1. Conta tutti i task di test ATTIVI
+            const activeTasksQuery = db.collection('testTasksDefinition').where('status', '==', 'active');
+            const activeTasksSnap = await activeTasksQuery.get();
+            const totalActiveTasks = activeTasksSnap.size;
+
+            if (totalActiveTasks === 0) {
+                logger.info(`[CF:${functionName}] Nessun task di test attivo trovato. Impossibile assegnare il badge.`);
+                return null;
+            }
+
+            // 2. Conta tutti i risultati di test SOTTOMESSI da questo utente
+            const userResultsQuery = userProfileRef.collection('testResults');
+            const userResultsSnap = await userResultsQuery.get();
+            const totalUserCompletedTasks = userResultsSnap.size;
+
+            logger.info(
+                `[CF:${functionName}] Controllo per utente ${userId}: ${totalUserCompletedTasks} test completati su ${totalActiveTasks} totali richiesti.`
+            );
+
+            // 3. Confronta i conteggi
+            if (totalUserCompletedTasks >= totalActiveTasks) {
+                logger.info(
+                    `[CF:${functionName}] CONGRATULAZIONI! L'utente ${userId} ha completato tutti i test! Assegnazione badge e animazione.`
+                );
+
+                const badgeDetails = await getBadgeDetails(BADGE_ID_BETA_TESTER_CERTIFIED);
+                if (!badgeDetails) {
+                    logger.error(
+                        `[CF:${functionName}] Dettagli per il badge ${BADGE_ID_BETA_TESTER_CERTIFIED} non trovati!`
+                    );
+                    return null;
+                }
+
+                const updates = {
+                    earnedBadges: FieldValue.arrayUnion(BADGE_ID_BETA_TESTER_CERTIFIED),
+                    updatedAt: FieldValue.serverTimestamp(),
+                };
+
+                // Applica l'animazione del nickname se definita nel badge
+                if (badgeDetails.nicknameAnimationClass) {
+                    updates.activeNicknameAnimation = badgeDetails.nicknameAnimationClass;
+                }
+
+                await userProfileRef.update(updates);
+                await sendNewBadgeNotification(userId, BADGE_ID_BETA_TESTER_CERTIFIED);
+            }
+
+            return null;
+        } catch (error) {
+            logger.error(`[CF:${functionName}] Errore durante il controllo del badge per l'utente ${userId}:`, error);
+            return null;
         }
-
-        return null;
-
-    } catch (error) {
-        logger.error(`[CF:${functionName}] Errore durante il controllo del badge per l'utente ${userId}:`, error);
-        return null;
     }
-});
+);
 // ==================================================================
 // --- NUOVA FUNZIONE PER GESTIRE LE SPUNTE DEI TEST STEPS ---
 // ==================================================================
@@ -1071,8 +1096,13 @@ exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request)
     // 2. Validazione Input: Verifica che i parametri essenziali siano presenti e validi
     const { taskId, stepId, isCompleted } = request.data;
     if (!taskId || !stepId || typeof isCompleted !== 'boolean') {
-        logger.warn(`[CF:${functionName}] Parametri mancanti o non validi: taskId=${taskId}, stepId=${stepId}, isCompleted=${isCompleted}`);
-        throw new HttpsError('invalid-argument', 'Parametri necessari mancanti o non validi (taskId, stepId, isCompleted).');
+        logger.warn(
+            `[CF:${functionName}] Parametri mancanti o non validi: taskId=${taskId}, stepId=${stepId}, isCompleted=${isCompleted}`
+        );
+        throw new HttpsError(
+            'invalid-argument',
+            'Parametri necessari mancanti o non validi (taskId, stepId, isCompleted).'
+        );
     }
 
     const userProfileRef = db.collection('userProfiles').doc(userId);
@@ -1082,14 +1112,20 @@ exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request)
         // Usa una transazione per assicurare l'integrità dei dati
         await db.runTransaction(async (transaction) => {
             // Log di debug per db e transaction (lasciali, sono utili)
-            logger.debug(`[CF:${functionName}] Inside transaction - typeof db: ${typeof db}, db.constructor.name: ${db.constructor.name}`);
-            logger.debug(`[CF:${functionName}] Inside transaction - typeof transaction: ${typeof transaction}, transaction.constructor.name: ${transaction.constructor.name}`);
+            logger.debug(
+                `[CF:${functionName}] Inside transaction - typeof db: ${typeof db}, db.constructor.name: ${db.constructor.name}`
+            );
+            logger.debug(
+                `[CF:${functionName}] Inside transaction - typeof transaction: ${typeof transaction}, transaction.constructor.name: ${transaction.constructor.name}`
+            );
 
             const docSnap = await transaction.get(testResultDocRef);
 
             // Log di debug per docSnap (lascialo, è fondamentale)
-            logger.debug(`[CF:${functionName}] Debug docSnap - Type: ${typeof docSnap}, Value: ${JSON.stringify(docSnap)}`);
-            
+            logger.debug(
+                `[CF:${functionName}] Debug docSnap - Type: ${typeof docSnap}, Value: ${JSON.stringify(docSnap)}`
+            );
+
             // --- MODIFICA CRUCIALE QUI ---
             // Tentativo di accedere ai dati del documento, assumendo che docSnap sia
             // un DocumentSnapshot valido, o che docSnap.data() si comporti come previsto
@@ -1104,14 +1140,17 @@ exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request)
             // sta restituendo un oggetto completamente sbagliato.
             if (docSnap && typeof docSnap.data === 'function') {
                 const data = docSnap.data(); // Tenta di accedere ai dati
-                if (data !== undefined && data !== null) { // Se i dati sono presenti, il documento esiste
+                if (data !== undefined && data !== null) {
+                    // Se i dati sono presenti, il documento esiste
                     documentExists = true;
                     currentCompletedSteps = data.completedSteps || [];
                     currentOutcome = data.outcome || null;
                 }
             } else {
                 // Se docSnap non è un oggetto o non ha .data(), è un problema grave
-                logger.error(`[CF:${functionName}] Unexpected object type from transaction.get: ${typeof docSnap}. Full object: ${JSON.stringify(docSnap)}`);
+                logger.error(
+                    `[CF:${functionName}] Unexpected object type from transaction.get: ${typeof docSnap}. Full object: ${JSON.stringify(docSnap)}`
+                );
                 throw new HttpsError('internal', 'Errore critico: il database non ha restituito lo snapshot atteso.');
             }
             // --- FINE MODIFICA CRUCIALE ---
@@ -1120,7 +1159,7 @@ exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request)
             if (isCompleted) {
                 updatedSteps = [...new Set([...currentCompletedSteps, stepId])];
             } else {
-                updatedSteps = currentCompletedSteps.filter(id => id !== stepId);
+                updatedSteps = currentCompletedSteps.filter((id) => id !== stepId);
             }
 
             const updatePayload = {
@@ -1129,7 +1168,8 @@ exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request)
             };
 
             // Adatta il controllo dell'esistenza al nuovo flag
-            if (!documentExists) { // Se il documento non esiste, crealo
+            if (!documentExists) {
+                // Se il documento non esiste, crealo
                 if (!currentOutcome) {
                     updatePayload.status = 'in_progress';
                 }
@@ -1137,7 +1177,8 @@ exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request)
                 updatePayload.testerId = userId;
                 updatePayload.createdAt = FieldValue.serverTimestamp();
                 transaction.set(testResultDocRef, updatePayload);
-            } else { // Se il documento esiste, aggiornalo
+            } else {
+                // Se il documento esiste, aggiornalo
                 if (currentOutcome !== 'success' && currentOutcome !== 'failure') {
                     updatePayload.status = 'in_progress';
                 }
@@ -1145,15 +1186,22 @@ exports.updateTestStepStatus = onCall({ region: 'us-central1' }, async (request)
             }
         });
 
-        logger.info(`[CF:${functionName}] Stato step '${stepId}' per task '${taskId}' di utente '${userId}' aggiornato a 'isCompleted: ${isCompleted}'.`);
+        logger.info(
+            `[CF:${functionName}] Stato step '${stepId}' per task '${taskId}' di utente '${userId}' aggiornato a 'isCompleted: ${isCompleted}'.`
+        );
         return { success: true, message: 'Stato dello step aggiornato con successo!' };
-
     } catch (error) {
-        logger.error(`[CF:${functionName}] Errore durante l'aggiornamento dello step '${stepId}' per task '${taskId}' di utente '${userId}':`, error);
+        logger.error(
+            `[CF:${functionName}] Errore durante l'aggiornamento dello step '${stepId}' per task '${taskId}' di utente '${userId}':`,
+            error
+        );
         if (error instanceof HttpsError) {
             throw error;
         }
-        throw new HttpsError('internal', 'Si è verificato un errore interno durante l_aggiornamento dello step. Riprova.');
+        throw new HttpsError(
+            'internal',
+            'Si è verificato un errore interno durante l_aggiornamento dello step. Riprova.'
+        );
     }
 });
 
@@ -1174,10 +1222,13 @@ exports.requestTesterRole = onCall({ region: 'us-central1' }, async (request) =>
         if (adminsSnapshot.empty) {
             logger.warn(`[CF:${functionName}] Nessun admin trovato a cui inviare la notifica.`);
             // Non considerarlo un errore per l'utente, la richiesta è comunque "valida"
-            return { success: true, message: 'La tua richiesta è stata registrata, ma non ci sono admin da notificare.' };
+            return {
+                success: true,
+                message: 'La tua richiesta è stata registrata, ma non ci sono admin da notificare.',
+            };
         }
 
-        const adminIds = adminsSnapshot.docs.map(doc => doc.id);
+        const adminIds = adminsSnapshot.docs.map((doc) => doc.id);
 
         // 3. Prepara e invia le notifiche
         const notificationPayload = {
@@ -1186,20 +1237,22 @@ exports.requestTesterRole = onCall({ region: 'us-central1' }, async (request) =>
             message: `L'utente "${userNickname}" (ID: ${userId}) ha richiesto di diventare un Beta Tester.`,
             link: `/admin-dashboard.html#users-management-section`, // Link diretto alla sezione admin
             icon: 'science',
-            relatedItemId: userId
+            relatedItemId: userId,
         };
 
-        const notificationPromises = adminIds.map(adminId => 
-            createNotification(adminId, notificationPayload)
-        );
-        
+        const notificationPromises = adminIds.map((adminId) => createNotification(adminId, notificationPayload));
+
         await Promise.all(notificationPromises);
 
-        logger.info(`[CF:${functionName}] Notifiche inviate a ${adminIds.length} admin per la richiesta da parte di ${userId}.`);
+        logger.info(
+            `[CF:${functionName}] Notifiche inviate a ${adminIds.length} admin per la richiesta da parte di ${userId}.`
+        );
         return { success: true, message: 'Notifiche inviate agli amministratori.' };
-
     } catch (error) {
-        logger.error(`[CF:${functionName}] Errore durante l'invio delle notifiche per la richiesta di ruolo tester da ${userId}:`, error);
+        logger.error(
+            `[CF:${functionName}] Errore durante l'invio delle notifiche per la richiesta di ruolo tester da ${userId}:`,
+            error
+        );
         throw new HttpsError('internal', 'Impossibile inviare la richiesta agli admin. Riprova più tardi.');
     }
 });
@@ -1236,7 +1289,7 @@ exports.handleGameStatsAndAwardBadges = onDocumentCreated('leaderboardScores/{sc
             const userProfile = userProfileSnap.data();
             const earnedBadges = userProfile.earnedBadges || [];
             const newBadgesToAward = [];
-            
+
             // 1. Inizializza o aggiorna le statistiche cumulative del profilo
             const cumulativeStats = userProfile.gameStats || {
                 totalJumps: 0,
@@ -1245,9 +1298,9 @@ exports.handleGameStatsAndAwardBadges = onDocumentCreated('leaderboardScores/{sc
                 totalGamesPlayed: 0,
             };
 
-            cumulativeStats.totalJumps += (gameStatsFromScore.jumps || 0);
-            cumulativeStats.totalShotsFired += (gameStatsFromScore.shotsFired || 0);
-            cumulativeStats.totalPowerUpsCollected += (gameStatsFromScore.powerUpsCollected || 0);
+            cumulativeStats.totalJumps += gameStatsFromScore.jumps || 0;
+            cumulativeStats.totalShotsFired += gameStatsFromScore.shotsFired || 0;
+            cumulativeStats.totalPowerUpsCollected += gameStatsFromScore.powerUpsCollected || 0;
             cumulativeStats.totalGamesPlayed += 1; // Ogni punteggio salvato è una partita giocata
 
             // 2. Controlla ogni badge basato sulle statistiche
@@ -1260,12 +1313,12 @@ exports.handleGameStatsAndAwardBadges = onDocumentCreated('leaderboardScores/{sc
             if (cumulativeStats.totalPowerUpsCollected >= 25 && !earnedBadges.includes(BADGE_ID_COLLECTOR_BRONZE)) {
                 newBadgesToAward.push(BADGE_ID_COLLECTOR_BRONZE);
             }
-            
+
             // Badge Artigliere (pronto per quando aggiungeremo il contatore shotsFired)
             if (cumulativeStats.totalShotsFired >= 500 && !earnedBadges.includes(BADGE_ID_SHOOTER_BRONZE)) {
                 newBadgesToAward.push(BADGE_ID_SHOOTER_BRONZE);
             }
-            
+
             // Badge Veterano (pronto per quando aggiungeremo il contatore partite)
             if (cumulativeStats.totalGamesPlayed >= 50 && !earnedBadges.includes(BADGE_ID_VETERAN_BRONZE)) {
                 newBadgesToAward.push(BADGE_ID_VETERAN_BRONZE);
@@ -1283,7 +1336,7 @@ exports.handleGameStatsAndAwardBadges = onDocumentCreated('leaderboardScores/{sc
 
             // 4. Esegui l'aggiornamento del profilo
             transaction.update(userProfileRef, profileUpdates);
-            
+
             // 5. Prepara le notifiche da inviare dopo la transazione
             // (La logica di invio è fuori dalla transazione per prassi migliore)
             for (const badgeId of newBadgesToAward) {
@@ -1292,8 +1345,10 @@ exports.handleGameStatsAndAwardBadges = onDocumentCreated('leaderboardScores/{sc
         });
 
         logger.info(`[CF:${functionName}] Statistiche e badge per l'utente ${userId} processati con successo.`);
-
     } catch (error) {
-        logger.error(`[CF:${functionName}] Errore nella transazione delle statistiche di gioco per l'utente ${userId}:`, error);
+        logger.error(
+            `[CF:${functionName}] Errore nella transazione delle statistiche di gioco per l'utente ${userId}:`,
+            error
+        );
     }
 });

@@ -284,18 +284,18 @@ async function loadComments() {
             const escapedCommenterName = escapeHTML(commenterNameDisplay);
 
             if (commentData.userId) {
-    const userProfileLink = document.createElement('a');
-    userProfileLink.href = `profile.html?userId=${commentData.userId}`;
-    userProfileLink.classList.add('comment-author-link');
+                const userProfileLink = document.createElement('a');
+                userProfileLink.href = `profile.html?userId=${commentData.userId}`;
+                userProfileLink.classList.add('comment-author-link');
 
-    // ✨ AGGIUNTA CHIAVE: Applica l'animazione al link del commento ✨
-    if (commenterPublicProfile && commenterPublicProfile.activeNicknameAnimation) {
-        userProfileLink.classList.add(commenterPublicProfile.activeNicknameAnimation);
-    }
+                // ✨ AGGIUNTA CHIAVE: Applica l'animazione al link del commento ✨
+                if (commenterPublicProfile && commenterPublicProfile.activeNicknameAnimation) {
+                    userProfileLink.classList.add(commenterPublicProfile.activeNicknameAnimation);
+                }
 
-    userProfileLink.innerHTML = escapedCommenterName + authorIconHTML;
-    nameStrong.appendChild(userProfileLink);
-} else {
+                userProfileLink.innerHTML = escapedCommenterName + authorIconHTML;
+                nameStrong.appendChild(userProfileLink);
+            } else {
                 nameStrong.innerHTML = escapedCommenterName + authorIconHTML; // Nome + Icona (senza link se utente non registrato)
             }
 
