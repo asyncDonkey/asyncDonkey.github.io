@@ -9,94 +9,219 @@
     margin-bottom: 8px;
 }
 
-/* Stile per il pulsante di modifica nickname */
-#edit-nickname-btn {
-    background-color: transparent;
-    border: 1px solid var(--terminal-green-bright, #4dbfd9);
-    color: var(--terminal-green-bright, #4dbfd9);
-    border-radius: 50%; /* Lo rende perfettamente rotondo */
+/* Stile per i pulsanti di modifica (nickname, avatar, genera, salva) */
+/* Rimuovi il bordo e rendi l'icona brillante */
+.icon-button { /* Seleziona tutti i bottoni con questa classe */
+    background-color: transparent; /* Sfondo trasparente */
+    border: none; /* Rimuovi il bordo */
+    color: var(--terminal-highlight, #5ab9a8); /* Colore brillante di base per le icone */
+    border-radius: 50%; 
     width: 32px;
     height: 32px;
-    display: inline-flex; /* Necessario per centrare l'icona */
+    display: inline-flex; 
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     padding: 0;
+    /* Aggiungi ombra per effetto "brillante" */
+    box-shadow: 0 0 5px rgba(90, 185, 168, 0.5); 
 }
 
-#edit-nickname-btn:hover:not(:disabled) {
-    background-color: var(--terminal-green-bright, #4dbfd9);
-    color: var(--terminal-bg, #1e1e1e); /* Colore del testo al passaggio del mouse */
-    transform: scale(1.1); /* Leggero ingrandimento */
+.icon-button:hover:not(:disabled) {
+    background-color: rgba(90, 185, 168, 0.2); /* Leggero sfondo al passaggio del mouse */
+    color: var(--bright-green-teal, #30e1b9); /* Colore più brillante al passaggio del mouse */
+    transform: scale(1.1); 
+    box-shadow: 0 0 10px var(--bright-green-teal), 0 0 20px rgba(48, 225, 185, 0.5); /* Effetto glow più intenso */
 }
 
-#edit-nickname-btn:disabled {
-    border-color: var(--terminal-secondary-text, #6272a4);
-    color: var(--terminal-secondary-text, #6272a4);
+.icon-button:disabled {
+    border-color: var(--terminal-comment, #6272a4); /* Colore bordo per disabled */
+    color: var(--terminal-comment, #6272a4); /* Colore icona per disabled */
     cursor: not-allowed;
     opacity: 0.5;
+    box-shadow: none; /* Nessuna ombra per disabled */
 }
 
 /* Dimensione dell'icona Phosphor all'interno del pulsante */
-#edit-nickname-btn i {
+.icon-button i {
     font-size: 18px; 
+    /* Le ombre per il testo non sono sempre necessarie se il box-shadow sul bottone è sufficiente */
+    /* text-shadow: 0 0 5px var(--terminal-highlight); */
 }
 
 /* Assicuriamoci che il nome del profilo abbia un aspetto coerente */
 #profile-modal-name {
-    color: var(--terminal-text, #f8f8f2);
-    margin: 0; /* Rimuove margini predefiniti dall'h2 */
+    color: var(--terminal-green, #50fa7b); /* Rendi il nickname più visibile e brillante */
+    margin: 0; 
+    font-family: 'Press Start 2P', cursive; /* Aggiungi un font più "pixel" per il nickname */
+    font-size: 1.5em;
+    text-shadow: 0 0 5px var(--terminal-green);
 }
 
-/* Aggiungi queste regole al tuo file www/terminal-profile.css */
-
+/* Header del profilo (avatar e informazioni) */
 .profile-header {
     display: flex;
+    flex-direction: column; /* Impila verticalmente su schermi piccoli */
     align-items: center;
     gap: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed var(--terminal-comment, #6272a4); /* Separatore elegante */
+}
+/* Media query per schermi più larghi */
+@media (min-width: 600px) {
+    .profile-header {
+        flex-direction: row; /* Torna all'orizzontale su schermi più larghi */
+        justify-content: flex-start; /* Allinea a sinistra */
+    }
 }
 
-/* Nuovo contenitore per avatar + pulsante */
+
+/* Nuovo contenitore per avatar + pulsanti di modifica */
 .profile-avatar-container {
     position: relative;
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0; /* Impedisce al contenitore di restringersi */
+    width: 100px; /* Aumenta leggermente le dimensioni dell'avatar nell'UI del profilo */
+    height: 100px;
+    flex-shrink: 0; 
+    margin-bottom: 10px; /* Spazio sotto l'avatar quando è impilato */
 }
+@media (min-width: 600px) {
+    .profile-avatar-container {
+        margin-bottom: 0; /* Rimuovi margine quando allineato orizzontalmente */
+    }
+}
+
 
 /* Stile per l'avatar all'interno del nuovo contenitore */
 .profile-avatar-container #profile-modal-avatar {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 3px solid var(--terminal-cyan, #8be9fd);
-    object-fit: cover; /* Assicura che l'immagine copra lo spazio senza distorsioni */
+    border: 3px solid var(--terminal-cyan, #8be9fd); /* Bordo luminoso per l'avatar */
+    object-fit: cover; 
+    box-shadow: 0 0 10px var(--terminal-cyan); /* Piccolo glow per l'avatar */
 }
 
-/* Stile per il pulsante di modifica dell'avatar */
-.profile-avatar-container #edit-avatar-btn {
+/* Posizionamento dei pulsanti di modifica sull'avatar */
+.profile-avatar-buttons {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 32px;
-    height: 32px;
-    background-color: var(--terminal-purple, #bd93f9);
-    color: var(--terminal-bg, #282a36);
-    border-radius: 50%;
-    border: 2px solid var(--terminal-bg, #282a36);
+    bottom: -5px; /* Spostato più in basso */
+    right: -5px; /* Spostato più a destra */
     display: flex;
+    gap: 5px; /* Spazio tra i pulsanti di modifica dell'avatar */
+    z-index: 1; /* Assicurati che siano sopra l'avatar */
+}
+
+/* Stile per il pulsante di modifica dell'avatar (riutilizzo icon-button) */
+.profile-avatar-buttons .icon-button {
+    width: 36px; /* Leggermente più grandi per una migliore interazione */
+    height: 36px;
+    background-color: var(--terminal-purple, #bd93f9); /* Colore specifico per edit avatar */
+    color: var(--terminal-bg, #282a36);
+    border: 2px solid var(--terminal-bg, #282a36); /* Bordo di contrasto */
+}
+.profile-avatar-buttons .icon-button:hover:not(:disabled) {
+    background-color: var(--terminal-pink, #ff79c6); /* Hover color for edit avatar */
+    color: var(--terminal-bg, #282a36);
+    box-shadow: 0 0 15px var(--terminal-pink);
+}
+.profile-avatar-buttons .icon-button i {
+    font-size: 20px; /* Icona più grande per i pulsanti sull'avatar */
+}
+
+
+/* Stili per le informazioni del profilo (email, stats) */
+.profile-info {
+    text-align: center; /* Centrato di default */
+    width: 100%; /* Occupa tutta la larghezza disponibile */
+}
+@media (min-width: 600px) {
+    .profile-info {
+        text-align: left; /* Allinea a sinistra su schermi più larghi */
+    }
+}
+
+.profile-info p {
+    color: var(--terminal-comment, #6272a4); /* Colore per email */
+    font-size: 0.9em;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+/* Sezione statistiche */
+.profile-stats {
+    background-color: var(--terminal-darker-bg, #1a1b22);
+    border: 1px solid var(--terminal-border, #6272a4);
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 20px;
+    text-align: left; /* ALLINEAMENTO A SINISTRA PER LE STATISTICHE */
+}
+
+.profile-stats h3 {
+    color: var(--terminal-highlight, #5ab9a8);
+    font-size: 1.1em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px dotted var(--terminal-comment, rgba(98, 114, 164, 0.5));
+    padding-bottom: 8px;
+    text-align: center; /* Titolo della sezione centrato */
+}
+
+.profile-stats p {
+    color: var(--terminal-text, #f8f8f2);
+    margin-bottom: 8px;
+    line-height: 1.4;
+    font-size: 0.95em;
+}
+
+.profile-stats strong {
+    color: var(--terminal-yellow, #f1fa8c); /* Colore brillante per i valori delle statistiche */
+    font-weight: bold;
+}
+
+/* Animazione cursore lampeggiante */
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.blinking-cursor {
+    animation: blink-cursor 1s step-end infinite;
+    font-weight: bold;
+    color: var(--terminal-yellow, #f1fa8c); /* Deve essere visibile */
+    margin-left: 2px; /* Spazio dal numero */
+}
+
+/* Stili per la sezione badge (già esistente) */
+.profile-badges {
+    margin-top: 20px;
+}
+
+.profile-badges h3 {
+    color: var(--terminal-highlight, #5ab9a8);
+    font-size: 1.1em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px dotted var(--terminal-comment, rgba(98, 114, 164, 0.5));
+    padding-bottom: 8px;
+    text-align: center;
+}
+
+#profile-modal-badges-container {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
+    gap: 10px;
+    min-height: 50px; /* Placeholder se non ci sono badge */
     align-items: center;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    font-size: 0.9em;
+    color: var(--terminal-comment);
 }
 
-.profile-avatar-container #edit-avatar-btn:hover {
-    background-color: var(--terminal-pink, #ff79c6);
-}
-
-.profile-avatar-container #edit-avatar-btn i {
-    font-size: 18px;
+/* Stile per il footer della modale (logout) */
+.profile-footer {
+    margin-top: 30px;
+    text-align: center;
 }

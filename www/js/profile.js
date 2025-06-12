@@ -1,10 +1,10 @@
-import { doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'; // Aggiunto serverTimestamp
+import { doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 import { db, auth, functions, storage } from './firebase-config.js'; 
 import { signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
-import { generateBlockieAvatar } from './main.js'; // Assicurati che generateBlockieAvatar sia esportata e importata correttamente
+import { generateBlockieAvatar } from './main.js'; 
 
 
 const Camera = Capacitor.Plugins.Camera; 
@@ -35,10 +35,11 @@ export async function openProfileModal(user) {
     const profileModal = document.getElementById('profileModal');
     const editNicknameBtn = document.getElementById('edit-nickname-btn');
     const editAvatarBtn = document.getElementById('edit-avatar-btn'); 
-    const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); // Nuovo riferimento
+    const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); 
+    const generateAvatarBtn = document.getElementById('generate-avatar-btn'); // Riferimento al pulsante genera
 
 
-    if (!profileModal || !editNicknameBtn || !editAvatarBtn || !saveGeneratedAvatarBtn) { 
+    if (!profileModal || !editNicknameBtn || !editAvatarBtn || !saveGeneratedAvatarBtn || !generateAvatarBtn) { 
         console.warn("Elementi della modale profilo non trovati nel DOM.");
         return;
     }
@@ -50,8 +51,6 @@ export async function openProfileModal(user) {
             const data = userDoc.data();
             const gameStats = data.gameStats || {};
             
-            // MODIFICA QUI: Genera Blockie se photoURL non è presente o è vuota.
-            // Utilizza data.avatarSeed se presente, altrimenti user.uid come seed iniziale.
             const avatarSeed = data.avatarSeed || user.uid;
             const avatarSrc = (data.photoURL && data.photoURL.trim() !== '') 
                 ? data.photoURL 
@@ -63,7 +62,11 @@ export async function openProfileModal(user) {
             document.getElementById('profile-modal-highest-score').textContent = gameStats.highestScore || 0;
             document.getElementById('profile-modal-total-score').textContent = gameStats.totalScore || 0;
             document.getElementById('profile-modal-games-played').textContent = gameStats.gamesPlayed || 0;
-            document.getElementById('profile-modal-bosses-defeated').textContent = gameStats.bossesDefeated || 0;
+            
+            // MODIFICA QUI: Aggiungi il cursore lampeggiante ai boss sconfitti
+            document.getElementById('profile-modal-bosses-defeated').innerHTML = 
+                `${gameStats.bossesDefeated || 0}<span class="blinking-cursor">_</span>`;
+
             const cooldown = getCooldownInfo(data.nicknameLastUpdatedAt);
             if (cooldown.onCooldown) {
                 editNicknameBtn.disabled = true;
@@ -74,7 +77,7 @@ export async function openProfileModal(user) {
             }
 
             // Nascondi il pulsante Salva all'apertura se non c'è un avatar generato in attesa di salvataggio
-            saveGeneratedAvatarBtn.style.display = 'none'; // Assicurati che sia nascosto all'apertura
+            saveGeneratedAvatarBtn.style.display = 'none'; 
         }
         profileModal.style.display = 'flex';
     } catch (error) {
@@ -217,9 +220,9 @@ async function handleAvatarEdit() {
 
         const user = auth.currentUser;
         const editAvatarBtn = document.getElementById('edit-avatar-btn'); 
-        const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); // Riferimento al pulsante Salva
+        const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); 
         editAvatarBtn.disabled = true; 
-        if (saveGeneratedAvatarBtn) saveGeneratedAvatarBtn.style.display = 'none'; // Nascondi il pulsante Salva dopo aver scelto un'immagine da galleria.
+        if (saveGeneratedAvatarBtn) saveGeneratedAvatarBtn.style.display = 'none'; 
         showToast('Caricamento immagine...', 'info'); 
 
         const response = await fetch(image.webPath); 
@@ -240,7 +243,7 @@ async function handleAvatarEdit() {
         await updateDoc(userDocRef, { 
             photoURL: downloadURL,
             profileUpdatedAt: serverTimestamp(), 
-            avatarSeed: null // Rimuovi il seed se l'utente carica un'immagine personalizzata
+            avatarSeed: null 
         });
 
         document.getElementById('profile-modal-avatar').src = downloadURL; 
@@ -260,7 +263,7 @@ async function handleAvatarEdit() {
             showToast('Errore durante il caricamento. Riprova.', 'error'); 
         }
         document.getElementById('edit-avatar-btn').disabled = false; 
-        document.getElementById('save-generated-avatar-btn').style.display = 'none'; // Assicurati che sia nascosto in caso di errore
+        document.getElementById('save-generated-avatar-btn').style.display = 'none'; 
     }
 }
 
@@ -275,7 +278,7 @@ export function initProfileControls() {
     const editNicknameBtn = document.getElementById('edit-nickname-btn');
     const editAvatarBtn = document.getElementById('edit-avatar-btn'); 
     const generateAvatarBtn = document.getElementById('generate-avatar-btn'); 
-    const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); // Nuovo riferimento
+    const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); 
 
 
     if (closeProfileModal) {
@@ -314,7 +317,6 @@ export function initProfileControls() {
         generateAvatarBtn.addEventListener('click', handleGenerateRandomAvatar);
     }
 
-    // NUOVO: Event listener per il pulsante Salva Avatar Generato
     if (saveGeneratedAvatarBtn) {
         saveGeneratedAvatarBtn.addEventListener('click', handleSaveGeneratedAvatar);
     }
@@ -335,12 +337,11 @@ async function handleGenerateRandomAvatar() {
     const newBlockieUrl = generateBlockieAvatar(newSeed, 80); 
 
     const profileModalAvatar = document.getElementById('profile-modal-avatar');
-    const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); // Riferimento al pulsante Salva
+    const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); 
 
     if (profileModalAvatar) {
         profileModalAvatar.src = newBlockieUrl;
     }
-    // Non aggiorniamo userAvatarIcon qui, lo faremo solo al salvataggio nel database
 
     // Memorizza il nuovo seed e URL in un attributo data, in attesa di salvataggio
     if (profileModalAvatar) {
@@ -350,7 +351,8 @@ async function handleGenerateRandomAvatar() {
 
     // Mostra il pulsante "Salva Avatar"
     if (saveGeneratedAvatarBtn) {
-        saveGeneratedAvatarBtn.style.display = 'inline-block'; // o 'flex' a seconda del tuo layout
+        saveGeneratedAvatarBtn.style.display = 'inline-flex'; // Modificato a inline-flex per icon-button
+        saveGeneratedAvatarBtn.disabled = false; // Assicurati che sia abilitato
         showToast('Nuovo avatar generato. Clicca "Salva" per confermare.', 'info');
     }
 }
@@ -366,7 +368,7 @@ async function handleSaveGeneratedAvatar() {
     }
 
     const profileModalAvatar = document.getElementById('profile-modal-avatar');
-    const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); // Riferimento al pulsante Salva
+    const saveGeneratedAvatarBtn = document.getElementById('save-generated-avatar-btn'); 
 
     const pendingBlockieUrl = profileModalAvatar.dataset.pendingBlockieUrl;
     const pendingAvatarSeed = profileModalAvatar.dataset.pendingAvatarSeed;
@@ -378,18 +380,17 @@ async function handleSaveGeneratedAvatar() {
 
     if (saveGeneratedAvatarBtn) {
         saveGeneratedAvatarBtn.disabled = true;
-        saveGeneratedAvatarBtn.textContent = 'Salvataggio...';
+        saveGeneratedAvatarBtn.textContent = 'Salvataggio...'; // Testo cambiato
     }
     
     try {
         const userDocRef = doc(db, 'appUsers', user.uid);
         await updateDoc(userDocRef, {
-            photoURL: pendingBlockieUrl, // Salva il data URL del Blockie
-            profileUpdatedAt: serverTimestamp(), // Aggiorna il timestamp per forzare la cache
-            avatarSeed: pendingAvatarSeed // Salva il seed usato per generare questo Blockie
+            photoURL: pendingBlockieUrl, 
+            profileUpdatedAt: serverTimestamp(), 
+            avatarSeed: pendingAvatarSeed 
         });
 
-        // Aggiorna anche l'icona del profilo nella navbar/header
         const userAvatarIcon = document.getElementById('user-avatar-icon');
         if (userAvatarIcon) {
             userAvatarIcon.src = pendingBlockieUrl;
@@ -402,8 +403,8 @@ async function handleSaveGeneratedAvatar() {
         profileModalAvatar.removeAttribute('data-pending-avatar-seed');
         if (saveGeneratedAvatarBtn) {
             saveGeneratedAvatarBtn.style.display = 'none';
-            saveGeneratedAvatarBtn.disabled = false; // Riabilita per uso futuro
-            saveGeneratedAvatarBtn.textContent = 'Salva Avatar Generato'; // Ripristina testo
+            saveGeneratedAvatarBtn.disabled = false; 
+            saveGeneratedAvatarBtn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i>'; // Ripristina l'icona
         }
 
     } catch (error) {
@@ -411,7 +412,7 @@ async function handleSaveGeneratedAvatar() {
         showToast("Errore durante il salvataggio dell'avatar Blockie.", "error");
         if (saveGeneratedAvatarBtn) {
             saveGeneratedAvatarBtn.disabled = false;
-            saveGeneratedAvatarBtn.textContent = 'Salva';
+            saveGeneratedAvatarBtn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i>'; // Ripristina l'icona
         }
     }
 }
