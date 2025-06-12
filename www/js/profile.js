@@ -4,9 +4,12 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstati
 import { db, auth, functions, storage } from './firebase-config.js'; // Aggiunto 'storage'
 import { signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { showToast } from './toastNotifications.js';
-
+import { generateBlockieAvatar } from './main.js'; // Assicurati che generateBlockieAvatar sia esportata e importata correttamente
 // Import Capacitor Camera plugin
-const { Camera, CameraResultType, CameraSource } = Capacitor.Plugins;
+// MODIFICA QUI: Accedi direttamente ai moduli e alle enumerazioni dall'oggetto globale Capacitor.
+const Camera = Capacitor.Plugins.Camera; 
+const CameraResultType = Capacitor.CameraResultType; 
+const CameraSource = Capacitor.CameraSource; 
 
 // Funzione helper per calcolare i giorni rimanenti per il cooldown del nickname
 function getCooldownInfo(lastUpdateTimestamp) {
@@ -31,7 +34,12 @@ export async function openProfileModal(user) {
     if (!user) return;
     const profileModal = document.getElementById('profileModal');
     const editNicknameBtn = document.getElementById('edit-nickname-btn');
-    if (!profileModal || !editNicknameBtn) return;
+    const editAvatarBtn = document.getElementById('edit-avatar-btn'); 
+
+    if (!profileModal || !editNicknameBtn || !editAvatarBtn) { 
+        console.warn("Elementi della modale profilo non trovati nel DOM.");
+        return;
+    }
 
     try {
         const userRef = doc(db, "appUsers", user.uid);
@@ -39,7 +47,13 @@ export async function openProfileModal(user) {
         if (userDoc.exists()) {
             const data = userDoc.data();
             const gameStats = data.gameStats || {};
-            document.getElementById('profile-modal-avatar').src = data.photoURL || 'data:,';
+            
+            // MODIFICA QUI: Genera Blockie se photoURL non è presente o è vuota.
+            const avatarSrc = data.photoURL && data.photoURL.trim() !== '' 
+                ? data.photoURL 
+                : generateBlockieAvatar(user.uid, 80); // Usa user.uid come seed per l'avatar di default
+
+            document.getElementById('profile-modal-avatar').src = avatarSrc;
             document.getElementById('profile-modal-name').textContent = data.nickname || data.displayName || 'Utente';
             document.getElementById('profile-modal-email').textContent = data.email || '';
             document.getElementById('profile-modal-highest-score').textContent = gameStats.highestScore || 0;
@@ -63,105 +77,184 @@ export async function openProfileModal(user) {
 }
 
 /**
- * Gestisce la logica per la modifica del nickname.
+ * Gestisce la logica per la modifica del nickname utilizzando una modale.
  */
 async function handleNicknameEdit() {
-    const currentNickname = document.getElementById('profile-modal-name').textContent;
-    const newNickname = prompt("Inserisci il tuo nuovo nickname:", currentNickname);
-    if (newNickname === null || newNickname.trim() === "") {
-        showToast("Modifica annullata.", "info");
+    const user = auth.currentUser;
+    if (!user) {
+        showToast("Devi essere loggato per modificare il nickname.", "error");
         return;
     }
-    if (newNickname.trim() === currentNickname) {
-        showToast("Il nuovo nickname è uguale al precedente.", "info");
+
+    const editNicknameModal = document.getElementById('editNicknameModal');
+    const newNicknameInput = document.getElementById('newNicknameInput');
+    const nicknameCooldownMessage = document.getElementById('nicknameCooldownMessage');
+    const saveNewNicknameBtn = document.getElementById('saveNewNicknameBtn');
+    const closeEditNicknameModal = document.getElementById('closeEditNicknameModal');
+    const profileModalName = document.getElementById('profile-modal-name'); // Riferimento al nickname visualizzato nella modale principale
+
+    if (!editNicknameModal || !newNicknameInput || !nicknameCooldownMessage || !saveNewNicknameBtn || !closeEditNicknameModal || !profileModalName) {
+        console.error("Elementi della modale di modifica nickname non trovati.");
+        showToast("Errore UI: Impossibile aprire la modale modifica nickname.", "error");
         return;
     }
-    const editBtn = document.getElementById('edit-nickname-btn');
-    editBtn.disabled = true;
+
+    // Carica il nickname attuale e lo stato del cooldown
     try {
-        const updateNickname = httpsCallable(functions, 'updateNickname');
-        const result = await updateNickname({ nickname: newNickname.trim() });
-        if (result.data.success) {
-            document.getElementById('profile-modal-name').textContent = newNickname.trim();
-            showToast("Nickname aggiornato con successo!", 'success');
-            editBtn.title = `Puoi modificare il nickname di nuovo tra 14 giorni.`;
-        } else {
-            throw new Error(result.data.message || 'Si è verificato un errore sconosciuto.');
+        const userRef = doc(db, "appUsers", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            const currentNickname = data.nickname || data.displayName || '';
+            newNicknameInput.value = currentNickname;
+
+            const cooldown = getCooldownInfo(data.nicknameLastUpdatedAt);
+            if (cooldown.onCooldown) {
+                nicknameCooldownMessage.textContent = `Puoi modificare il nickname di nuovo tra ${cooldown.daysRemaining} giorni.`;
+                newNicknameInput.disabled = true;
+                saveNewNicknameBtn.disabled = true;
+                saveNewNicknameBtn.textContent = 'In cooldown';
+            } else {
+                nicknameCooldownMessage.textContent = 'Puoi modificare il tuo nickname in qualsiasi momento.';
+                newNicknameInput.disabled = false;
+                saveNewNicknameBtn.disabled = false;
+                saveNewNicknameBtn.textContent = 'Salva';
+            }
         }
     } catch (error) {
-        console.error("Errore durante l'aggiornamento del nickname:", error);
-        showToast(`Errore: ${error.message}`, 'error');
-        editBtn.disabled = false; 
+        console.error("Errore caricamento dati nickname per modale:", error);
+        nicknameCooldownMessage.textContent = "Errore caricamento cooldown.";
+        newNicknameInput.disabled = true;
+        saveNewNicknameBtn.disabled = true;
+    }
+    
+    editNicknameModal.style.display = 'flex';
+
+    // Rimuovi listener precedenti per evitare duplicati
+    saveNewNicknameBtn.removeEventListener('click', saveNicknameHandler);
+    closeEditNicknameModal.removeEventListener('click', closeNicknameModalHandler);
+
+    // Aggiungi nuovi listener
+    saveNewNicknameBtn.addEventListener('click', saveNicknameHandler);
+    closeEditNicknameModal.addEventListener('click', closeNicknameModalHandler);
+
+    async function saveNicknameHandler() {
+        const newNickname = newNicknameInput.value.trim();
+        const currentNicknameOnModal = profileModalName.textContent; // Prende il nickname corrente dalla UI della modale principale
+        
+        if (newNickname === "") {
+            showToast("Il nickname non può essere vuoto.", "warning");
+            return;
+        }
+        if (newNickname === currentNicknameOnModal) { // Confronta con il nickname mostrato
+            showToast("Il nuovo nickname è uguale al precedente.", "info");
+            editNicknameModal.style.display = 'none'; // Chiudi la modale
+            return;
+        }
+
+        saveNewNicknameBtn.disabled = true;
+        saveNewNicknameBtn.textContent = 'Salvataggio...';
+
+        try {
+            const updateNickname = httpsCallable(functions, 'updateNickname');
+            const result = await updateNickname({ nickname: newNickname });
+            if (result.data.success) {
+                profileModalName.textContent = newNickname; // Aggiorna il nickname nella modale principale
+                showToast("Nickname aggiornato con successo!", 'success');
+                // Ricarica lo stato del cooldown dopo un aggiornamento riuscito
+                const updatedUserDoc = await getDoc(doc(db, "appUsers", user.uid));
+                if (updatedUserDoc.exists()) {
+                    const updatedData = updatedUserDoc.data();
+                    const updatedCooldown = getCooldownInfo(updatedData.nicknameLastUpdatedAt);
+                    if (updatedCooldown.onCooldown) {
+                        document.getElementById('edit-nickname-btn').disabled = true;
+                        document.getElementById('edit-nickname-btn').title = `Puoi modificare il nickname di nuovo tra ${updatedCooldown.daysRemaining} giorni.`;
+                    }
+                }
+                editNicknameModal.style.display = 'none';
+            } else {
+                throw new Error(result.data.message || 'Si è verificato un errore sconosciuto.');
+            }
+        } catch (error) {
+            console.error("Errore durante l'aggiornamento del nickname:", error);
+            showToast(`Errore: ${error.message}`, 'error');
+            saveNewNicknameBtn.disabled = false;
+            saveNewNicknameBtn.textContent = 'Salva';
+        }
+    }
+
+    function closeNicknameModalHandler() {
+        editNicknameModal.style.display = 'none';
     }
 }
 
 /**
- * NUOVO: Gestisce la logica per la modifica dell'avatar.
+ * Gestisce la logica per la modifica dell'avatar.
  */
 async function handleAvatarEdit() {
     if (!auth.currentUser) return;
 
+    if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins || !Capacitor.Plugins.Camera) {
+        showToast("La modifica dell'avatar è disponibile solo su dispositivi mobili.", "info");
+        console.warn("Capacitor Camera plugin non disponibile o non su piattaforma nativa.");
+        document.getElementById('edit-avatar-btn').disabled = false; 
+        return;
+    }
+
     try {
-        // 1. Usa il plugin Camera per ottenere una foto
-        const image = await Camera.getPhoto({
+        const image = await Camera.getPhoto({ 
             quality: 90,
             allowEditing: true,
-            resultType: CameraResultType.Uri, // Otteniamo l'URI per convertirlo in Blob
-            source: CameraSource.Photos // Apri la galleria
+            resultType: CameraResultType.Uri, 
+            source: CameraSource.Photos
         });
 
         const user = auth.currentUser;
-        const editAvatarBtn = document.getElementById('edit-avatar-btn');
-        editAvatarBtn.disabled = true;
-        showToast('Caricamento immagine...', 'info');
+        const editAvatarBtn = document.getElementById('edit-avatar-btn'); 
+        editAvatarBtn.disabled = true; 
+        showToast('Caricamento immagine...', 'info'); 
 
-        // 2. Converti l'immagine da URI a Blob
-        const response = await fetch(image.webPath);
-        const blob = await response.blob();
+        const response = await fetch(image.webPath); 
+        const blob = await response.blob(); 
         
-        // 3. Carica il file su Firebase Storage
-        const filePath = `profile-images/${user.uid}/avatar_original.png`;
-        const storageRef = ref(storage, filePath);
-        await uploadBytes(storageRef, blob);
+        const filePath = `user-avatars/${user.uid}/avatar_original.png`; // Modificato il percorso per allinearsi alla Cloud Function
+        const storageRef = ref(storage, filePath); 
+        await uploadBytes(storageRef, blob); 
 
-        // 4. Attendi che l'estensione Resize Images faccia il suo lavoro
-        // Diamo qualche secondo all'estensione per creare la thumbnail.
-        // In un'app di produzione, si userebbe una Cloud Function per notificare il completamento.
-        // Per ora, un timeout è una soluzione semplice ed efficace.
-        showToast('Elaborazione immagine...', 'info');
+        showToast('Elaborazione immagine...', 'info'); 
         await new Promise(resolve => setTimeout(resolve, 5000)); 
 
-        // 5. Ottieni l'URL della nuova immagine ridimensionata
-        const resizedImagePath = `profile-images/${user.uid}/avatar_original_200x200.png`;
-        const resizedImageRef = ref(storage, resizedImagePath);
-        const downloadURL = await getDownloadURL(resizedImageRef);
+        const resizedImagePath = `user-avatars/${user.uid}/processed/avatar_profile.webp`; 
+        const resizedImageRef = ref(storage, resizedImagePath); 
+        const downloadURL = await getDownloadURL(resizedImageRef); 
 
-        // 6. Aggiorna il documento utente su Firestore
-        const userDocRef = doc(db, 'appUsers', user.uid);
-        await updateDoc(userDocRef, {
-            photoURL: downloadURL
+        const userDocRef = doc(db, 'appUsers', user.uid); 
+        await updateDoc(userDocRef, { 
+            photoURL: downloadURL,
+            // Aggiungi un timestamp di aggiornamento per forzare il ricaricamento dell'immagine
+            profileUpdatedAt: serverTimestamp() 
         });
 
-        // 7. Aggiorna l'UI
-        document.getElementById('profile-modal-avatar').src = downloadURL;
-        const userAvatarIcon = document.getElementById('user-avatar-icon');
-        if (userAvatarIcon) {
-            userAvatarIcon.src = downloadURL;
+        document.getElementById('profile-modal-avatar').src = downloadURL; 
+        const userAvatarIcon = document.getElementById('user-avatar-icon'); 
+        if (userAvatarIcon) { 
+            userAvatarIcon.src = downloadURL; 
         }
 
-        showToast('Immagine del profilo aggiornata!', 'success');
-        editAvatarBtn.disabled = false;
+        showToast('Immagine del profilo aggiornata!', 'success'); 
+        editAvatarBtn.disabled = false; 
 
     } catch (error) {
         if (error.message.includes('User cancelled photos app')) {
-            showToast('Selezione annullata.', 'info');
+            showToast('Selezione annullata.', 'info'); 
         } else {
-            console.error("Errore durante la modifica dell'avatar:", error);
-            showToast('Errore durante il caricamento. Riprova.', 'error');
+            console.error("Errore durante la modifica dell'avatar:", error); 
+            showToast('Errore durante il caricamento. Riprova.', 'error'); 
         }
-        document.getElementById('edit-avatar-btn').disabled = false;
+        document.getElementById('edit-avatar-btn').disabled = false; 
     }
 }
+
 
 
 /**
@@ -172,7 +265,8 @@ export function initProfileControls() {
     const closeProfileModal = document.getElementById('closeProfileModal');
     const logoutBtn = document.getElementById('logout-btn');
     const editNicknameBtn = document.getElementById('edit-nickname-btn');
-    const editAvatarBtn = document.getElementById('edit-avatar-btn'); // NUOVO
+    const editAvatarBtn = document.getElementById('edit-avatar-btn'); 
+    const generateAvatarBtn = document.getElementById('generate-avatar-btn'); // NUOVO: Riferimento al pulsante
 
     if (closeProfileModal) {
         closeProfileModal.addEventListener('click', () => {
@@ -202,8 +296,49 @@ export function initProfileControls() {
         editNicknameBtn.addEventListener('click', handleNicknameEdit);
     }
 
-    // NUOVO: Aggiungi l'event listener per il pulsante di modifica avatar
-    if (editAvatarBtn) {
-        editAvatarBtn.addEventListener('click', handleAvatarEdit);
+    if (editAvatarBtn) { 
+        editAvatarBtn.addEventListener('click', handleAvatarEdit); 
+    }
+
+    // NUOVO: Aggiungi l'event listener per il pulsante di generazione avatar casuale
+    if (generateAvatarBtn) {
+        generateAvatarBtn.addEventListener('click', handleGenerateRandomAvatar);
+    }
+}
+
+/**
+ * NUOVO: Gestisce la generazione di un avatar casuale.
+ */
+async function handleGenerateRandomAvatar() {
+    const user = auth.currentUser;
+    if (!user) {
+        showToast("Devi essere loggato per generare un avatar.", "error");
+        return;
+    }
+
+    const newSeed = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const newBlockieUrl = generateBlockieAvatar(newSeed, 80); // Genera un nuovo Blockie con il nuovo seed
+
+    const profileModalAvatar = document.getElementById('profile-modal-avatar');
+    if (profileModalAvatar) {
+        profileModalAvatar.src = newBlockieUrl;
+    }
+
+    const userAvatarIcon = document.getElementById('user-avatar-icon');
+    if (userAvatarIcon) {
+        userAvatarIcon.src = newBlockieUrl;
+    }
+
+    try {
+        const userDocRef = doc(db, 'appUsers', user.uid);
+        await updateDoc(userDocRef, {
+            photoURL: newBlockieUrl, // Salva il data URL del Blockie nel campo photoURL
+            profileUpdatedAt: serverTimestamp(), // Aggiorna il timestamp per forzare la cache
+            avatarSeed: newSeed // Salva il seed per riutilizzarlo in futuro se necessario
+        });
+        showToast('Avatar casuale generato e salvato!', 'success');
+    } catch (error) {
+        console.error("Errore durante il salvataggio dell'avatar casuale:", error);
+        showToast("Errore durante il salvataggio dell'avatar casuale.", "error");
     }
 }

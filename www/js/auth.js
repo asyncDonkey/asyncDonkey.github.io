@@ -1,4 +1,3 @@
-// js/auth.js
 import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { db, auth } from './firebase-config.js'; 
 import { showToast } from './toastNotifications.js';
@@ -8,7 +7,6 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword 
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'; 
-
 
 
 // Rimuoviamo o commentiamo le variabili globali non più necessarie
@@ -52,11 +50,13 @@ export async function registerWithEmailPassword(email, password, displayName = n
             uid: user.uid,
             displayName: displayName || email, // Usa displayName se fornito, altrimenti l'email
             email: user.email,
-            photoURL: user.photoURL || null, // Firebase non fornisce photoURL per email/password
+            photoURL: user.photoURL || '', // MODIFICA QUI: Assicurati che photoURL sia una stringa vuota se null
             createdAt: serverTimestamp(),
             lastLoginAt: serverTimestamp(),
             gameStats: { totalScore: 0, gamesPlayed: 0, bossesDefeated: 0 },
-            earnedBadges: []
+            earnedBadges: [],
+            nickname: displayName || email, // AGGIUNTA QUESTA RIGA: Inizializza il nickname con displayName o email
+            nicknameLastUpdatedAt: serverTimestamp() // AGGIUNTA QUESTA RIGA: Inizializza il timestamp del nickname
         });
 
         showToast(`Account creato con successo per ${user.email}!`, 'success');
@@ -112,6 +112,9 @@ export async function signInWithEmailPassword(email, password) {
                 break;
             case 'auth/invalid-email':
                 errorMessage = "Formato email non valido.";
+                break;
+            case 'auth/weak-password':
+                errorMessage = "La password è troppo debole (minimo 6 caratteri).";
                 break;
             default:
                 errorMessage = `Errore: ${error.message}`;

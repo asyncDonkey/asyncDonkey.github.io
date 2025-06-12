@@ -439,31 +439,7 @@ function getUrlParameter(name) {
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
-// --- Logica per il Prompt di Orientamento Mobile ---
-let orientationPromptDismissedSession = false;
 
-function checkAndDisplayOrientationPrompt() {
-    if (!orientationPromptEl || !isTouchDevice || orientationPromptDismissedSession) {
-        if (orientationPromptEl && orientationPromptEl.style.display !== 'none') {
-            orientationPromptEl.style.display = 'none';
-        }
-        return;
-    }
-
-    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-    const isGameFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-
-    if (isPortrait && !isGameFullscreen) {
-        if (orientationPromptEl.style.display !== 'flex') {
-            orientationPromptEl.style.display = 'flex';
-        }
-    } else {
-        if (orientationPromptEl.style.display !== 'none') {
-            orientationPromptEl.style.display = 'none';
-        }
-    }
-}
-// --- Fine Logica Prompt Orientamento ---
 
 async function handleShareScore() {
     console.log("handleShareScore attivato!");
@@ -941,7 +917,7 @@ export async function preloadGameAssets() {
     resourcesInitialized = true;
 
     // REMOVED: loadDonkeyLeaderboard() from here. It should be triggered when needed (e.g., in leaderboard.html or on Game Over screen display).
-    checkAndDisplayOrientationPrompt();
+    //checkAndDisplayOrientationPrompt();
 }
 
 
@@ -3581,11 +3557,6 @@ function attachEventListeners() {
     if (restartGameBtnDonkey) {
         restartGameBtnDonkey.addEventListener('click', () => {
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-            // currentGameState = GAME_STATE.PLAYING; // launchGame() will handle this
-            // resetGame(); // launchGame() will call resetGame()
-            // AudioManager.playMusic(false); // launchGame() will handle this
-            // if (mobileStartButton) mobileBobileStartButton.style.display = 'none'; // launchGame() will handle this
-            // if (accountIconBtn) accountIconBtn.style.display = 'none'; // launchGame() will handle this
             launchGame(); // Call launchGame to properly restart and show controls
         });
     }
@@ -3704,11 +3675,11 @@ function attachEventListeners() {
         });
     }
 
-    if (window.matchMedia('(orientation: portrait)').addEventListener) {
-        window.matchMedia('(orientation: portrait)').addEventListener('change', checkAndDisplayOrientationPrompt);
-    } else if (window.addEventListener) {
-        window.addEventListener('orientationchange', checkAndDisplayOrientationPrompt);
-    }
+    // if (window.matchMedia('(orientation: portrait)').addEventListener) { // Rimuovi o commenta questa riga
+    //     window.matchMedia('(orientation: portrait)').addEventListener('change', checkAndDisplayOrientationPrompt); // Rimuovi o commenta questa riga
+    // } else if (window.addEventListener) { // Rimuovi o commenta questa riga
+    //     window.addEventListener('orientationchange', checkAndDisplayOrientationPrompt); // Rimuovi o commenta questa riga
+    // }
 
     window.addEventListener('keydown', (e) => {
         // Questa logica è ora più semplice

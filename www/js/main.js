@@ -955,140 +955,139 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('[Main.js DOMContentLoaded] DOM completamente caricato e parsato.'); // Log di conferma
 
     // Inizializzazioni principali
-    initializeNewNavbar(); // Chiama setupDesktopCommunityDropdown e populateMobileMenu
-    setupThemeSwitcher(); // Inizializza il theme switcher
+    // initializeNewNavbar(); // Commentato: Pulsante menu mobile (navbarToggler) NON TROVATO.
+    // setupThemeSwitcher(); // Commentato: Pulsante themeToggleBtn NON TROVATO nel DOM.
     initLeaderboard(); // <-- AGGIUNGI QUESTA RIGA
-    
+
 
     // Setup dei nuovi controlli UI
-const loginModal = document.getElementById('loginModal');
-const showLoginModalBtn = document.getElementById('show-login-modal-btn');
-const closeLoginModalBtn = document.getElementById('closeLoginModal');
+    const loginModal = document.getElementById('loginModal');
+    const showLoginModalBtn = document.getElementById('show-login-modal-btn');
+    const closeLoginModalBtn = document.getElementById('closeLoginModal');
 
-// Riferimenti per l'autenticazione email/password
-const authEmailInput = document.getElementById('authEmail');
-const authPasswordInput = document.getElementById('authPassword');
-const authDisplayNameInput = document.getElementById('authDisplayName');
-const registerBtn = document.getElementById('registerBtn');
-const loginBtn = document.getElementById('loginBtn');
-
-
-if (showLoginModalBtn) {
-    showLoginModalBtn.addEventListener('click', (e) => {
-        e.preventDefault(); 
-        console.log("Click sull'icona di login registrato!");
-        if (loginModal) {
-            loginModal.style.display = 'flex';
-            // Resetta i campi al click per un nuovo tentativo
-            authEmailInput.value = '';
-            authPasswordInput.value = '';
-            if (authDisplayNameInput) authDisplayNameInput.value = '';
-        } else {
-            console.error("La modale di login non è stata trovata nel DOM!");
-        }
-    });
-}
-
-if (closeLoginModalBtn) {
-    closeLoginModalBtn.addEventListener('click', () => {
-        if (loginModal) loginModal.style.display = 'none';
-    });
-}
-
-// Event listeners per registrazione e login Email/Password
-if (registerBtn) {
-    registerBtn.addEventListener('click', async () => {
-        const email = authEmailInput.value.trim();
-        const password = authPasswordInput.value.trim();
-        const displayName = authDisplayNameInput ? authDisplayNameInput.value.trim() : null;
-        try {
-            await registerWithEmailPassword(email, password, displayName);
-            // La modale verrà chiusa dalla funzione in auth.js in caso di successo
-        } catch (error) {
-            // Error handling già nel toast, qui possiamo fare log aggiuntivi se necessario
-            console.error("Errore durante la registrazione nel main.js:", error);
-        }
-    });
-}
-
-if (loginBtn) {
-    loginBtn.addEventListener('click', async () => {
-        const email = authEmailInput.value.trim();
-        const password = authPasswordInput.value.trim();
-        try {
-            await signInWithEmailPassword(email, password);
-            // La modale verrà chiusa dalla funzione in auth.js in caso di successo
-        } catch (error) {
-            // Error handling già nel toast, qui possiamo fare log aggiuntivi se necessario
-            console.error("Errore durante il login nel main.js:", error);
-        }
-    });
-}
+    // Riferimenti per l'autenticazione email/password
+    const authEmailInput = document.getElementById('authEmail');
+    const authPasswordInput = document.getElementById('authPassword');
+    const authDisplayNameInput = document.getElementById('authDisplayName');
+    const registerBtn = document.getElementById('registerBtn');
+    const loginBtn = document.getElementById('loginBtn');
 
 
-const userAvatarIcon = document.getElementById('user-avatar-icon'); // Mantenuto se vuoi ancora l'avatar
-if (userAvatarIcon) {
-    userAvatarIcon.addEventListener('click', () => {
-        openProfileModal(loggedInUser);
-    });
-}
+    if (showLoginModalBtn) {
+        showLoginModalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log("Click sull'icona di login registrato!");
+            if (loginModal) {
+                loginModal.style.display = 'flex';
+                // Resetta i campi al click per un nuovo tentativo
+                authEmailInput.value = '';
+                authPasswordInput.value = '';
+                if (authDisplayNameInput) authDisplayNameInput.value = '';
+            } else {
+                console.error("La modale di login non è stata trovata nel DOM!");
+            }
+        });
+    }
 
-// Inizializza i controlli della modale del profilo (logout, etc)
-initProfileControls();
+    if (closeLoginModalBtn) {
+        closeLoginModalBtn.addEventListener('click', () => {
+            if (loginModal) loginModal.style.display = 'none';
+        });
+    }
 
-// Manteniamo le altre inizializzazioni importanti!
-if (document.getElementById('homeMiniLeaderboardList')) {
-    loadHomeMiniLeaderboard();
-}
-if (document.getElementById('articlesSection')) {
-    displayArticlesSection();
-}
-if (document.getElementById('glitchzillaDefeatedBanner')) {
-    displayGlitchzillaBanner();
-}
+    // Event listeners per registrazione e login Email/Password
+    if (registerBtn) {
+        registerBtn.addEventListener('click', async () => {
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value.trim();
+            const displayName = authDisplayNameInput ? authDisplayNameInput.value.trim() : null;
+            try {
+                await registerWithEmailPassword(email, password, displayName);
+                // La modale verrà chiusa dalla funzione in auth.js in caso di successo
+            } catch (error) {
+                // Error handling già nel toast, qui possiamo fare log aggiuntivi se necessario
+                console.error("Errore durante la registrazione nel main.js:", error);
+            }
+        });
+    }
+
+    if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value.trim();
+            try {
+                await signInWithEmailPassword(email, password);
+                // La modale verrà chiusa dalla funzione in auth.js in caso di successo
+            } catch (error) {
+                // Error handling già nel toast, qui possiamo fare log aggiuntivi se necessario
+                console.error("Errore durante il login nel main.js:", error);
+            }
+        });
+    }
 
 
-    
+    const userAvatarIcon = document.getElementById('user-avatar-icon'); // Mantenuto se vuoi ancora l'avatar
+    if (userAvatarIcon) {
+        userAvatarIcon.addEventListener('click', () => {
+            openProfileModal(loggedInUser);
+        });
+    }
+
+    // Inizializza i controlli della modale del profilo (logout, etc)
+    initProfileControls();
+
+    // Manteniamo le altre inizializzazioni importanti!
+    if (document.getElementById('homeMiniLeaderboardList')) {
+        loadHomeMiniLeaderboard();
+    }
+    if (document.getElementById('articlesSection')) {
+        displayArticlesSection();
+    }
+    if (document.getElementById('glitchzillaDefeatedBanner')) {
+        displayGlitchzillaBanner();
+    }
+
+
     // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
-onAuthStateChanged(auth, async (user) => {
-    console.log('[Main.js] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
-    loggedInUser = user;
+    onAuthStateChanged(auth, async (user) => {
+        console.log('[Main.js] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
+        loggedInUser = user;
 
-    // Gestione della visibilità delle icone
-    const loginIcon = document.getElementById('show-login-modal-btn');
-    const avatarIcon = document.getElementById('user-avatar-icon');
+        // Gestione della visibilità delle icone
+        const loginIcon = document.getElementById('show-login-modal-btn');
+        const avatarIcon = document.getElementById('user-avatar-icon');
 
-    if (user) {
-        // Utente LOGGATO
-        if (loginIcon) loginIcon.style.display = 'none';
-        if (avatarIcon) {
-            avatarIcon.src = user.photoURL || generateBlockieAvatar(user.uid, 32); // Fallback a blockie se non c'è foto
-            avatarIcon.style.display = 'block';
-            // Aggiorna anche il nickname se disponibile
-            const userProfileDoc = await getDoc(doc(db, "appUsers", user.uid));
-            if (userProfileDoc.exists()) {
-                const profileData = userProfileDoc.data();
-                if (profileData.displayName) {
-                    // Potrebbe essere necessario un elemento per il nickname qui
-                    // console.log("Nickname utente loggato:", profileData.displayName);
+        if (user) {
+            // Utente LOGGATO
+            if (loginIcon) loginIcon.style.display = 'none';
+            if (avatarIcon) {
+                avatarIcon.src = user.photoURL || generateBlockieAvatar(user.uid, 32); // Fallback a blockie se non c'è foto
+                avatarIcon.style.display = 'block';
+                // Aggiorna anche il nickname se disponibile
+                const userProfileDoc = await getDoc(doc(db, "appUsers", user.uid));
+                if (userProfileDoc.exists()) {
+                    const profileData = userProfileDoc.data();
+                    if (profileData.displayName) {
+                        // Potrebbe essere necessario un elemento per il nickname qui
+                        // console.log("Nickname utente loggato:", profileData.displayName);
+                    }
                 }
             }
+
+            // Manteniamo le altre logiche per utenti loggati
+            initializeHomepageArticleInteractions(user);
+            // setupNotificationBellListener(user.uid); // Commentato: notificationBellContainer non trovato.
+            loadContentSpecificFeatures(user);
+
+        } else {
+            // Utente NON LOGGATO
+            if (loginIcon) loginIcon.style.display = 'block';
+            if (avatarIcon) avatarIcon.style.display = 'none';
+
+            // Manteniamo le altre logiche per utenti non loggati
+            initializeHomepageArticleInteractions(null);
+            clearNotificationBellListener();
+            loadContentSpecificFeatures(null);
         }
-
-        // Manteniamo le altre logiche per utenti loggati
-        initializeHomepageArticleInteractions(user);
-        setupNotificationBellListener(user.uid);
-        loadContentSpecificFeatures(user);
-
-    } else {
-        // Utente NON LOGGATO
-        if (loginIcon) loginIcon.style.display = 'block';
-        if (avatarIcon) avatarIcon.style.display = 'none';
-
-        // Manteniamo le altre logiche per utenti non loggati
-        initializeHomepageArticleInteractions(null);
-        clearNotificationBellListener();
-        loadContentSpecificFeatures(null);
-    }
-});
+    });
 }); // Fine dell'UNICO DOMContentLoaded
