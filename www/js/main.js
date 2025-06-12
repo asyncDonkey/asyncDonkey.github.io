@@ -839,6 +839,8 @@ document.addEventListener('DOMContentLoaded', function () {
         displayGlitchzillaBanner();
     }
 
+    
+
     // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
     onAuthStateChanged(auth, async (user) => {
         console.log('[Main.js] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
