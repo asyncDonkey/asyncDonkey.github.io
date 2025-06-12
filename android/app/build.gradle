@@ -11,8 +11,8 @@ android {
         applicationId "io.asynced.codedash"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion // Assicurati di usare la variabile dal rootProject.ext
-        versionCode 2 // Ho impostato a 1, puoi cambiarlo al valore che desideri.
-        versionName "1.1" // Ho impostato a 1.0, puoi cambiarlo al valore che desideri.
+        versionCode 3 // Ho impostato a 1, puoi cambiarlo al valore che desideri.
+        versionName "1.5" // Ho impostato a 1.0, puoi cambiarlo al valore che desideri.
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
@@ -55,8 +55,18 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:${rootProject.ext.androidxEspressoCoreVersion}"
     implementation project(':capacitor-cordova-android-plugins')
 
-    implementation platform('com.google.firebase:firebase-bom:33.1.1')
-    implementation 'com.google.firebase:firebase-analytics'
+    // Firebase BoM - Importante per la compatibilità delle versioni Firebase
+    implementation platform('com.google.firebase:firebase-bom:33.1.1') // O una versione più recente (controlla la doc Firebase)
+    
+    // DIPENDENZE FONDAMENTALI PER AUTENTICAZIONE E SERVIZI GOOGLE PLAY
+    implementation 'com.google.firebase:firebase-auth' // Firebase Authentication SDK
+    implementation 'com.google.firebase:firebase-analytics' // Hai già questa
+    implementation 'com.google.android.gms:play-services-auth:21.2.0' // Per Google Play Services Auth (include le API necessarie per login Google/Telefono)
+    
+    // Dipendenze per Firebase App Check (se abilitato nel tuo progetto Firebase, altrimenti commentale)
+    // Se usi App Check, queste sono essenziali per l'autenticazione telefonica nativa
+    // implementation 'com.google.firebase:firebase-appcheck-playintegrity' // Per i nuovi dispositivi
+    // implementation 'com.google.firebase:firebase-appcheck-safetynet' // Per i dispositivi più vecchi
 }
 
 apply from: 'capacitor.build.gradle'

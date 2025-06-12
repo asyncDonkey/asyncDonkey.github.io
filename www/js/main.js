@@ -2,7 +2,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 
 import { initLeaderboard } from './leaderboardManager.js';
-
+import { registerWithEmailPassword, signInWithEmailPassword } from './auth.js';
 import { openProfileModal, initProfileControls } from './profile.js';
 
 import {
@@ -28,7 +28,7 @@ import {
     onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { auth } from './firebase-config.js'; // Importa l'istanza auth
-import { handleGoogleSignIn } from './auth.js';
+
 
 
 // IMPORT PER EMULATORE STORAGE
@@ -42,7 +42,6 @@ import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeat
 import { showToast } from './toastNotifications.js';
 
 // --- Firebase Config ---
-
 
 
 
@@ -965,16 +964,25 @@ document.addEventListener('DOMContentLoaded', function () {
 const loginModal = document.getElementById('loginModal');
 const showLoginModalBtn = document.getElementById('show-login-modal-btn');
 const closeLoginModalBtn = document.getElementById('closeLoginModal');
-const googleSignInBtn = document.getElementById('google-signin-btn');
-const userAvatarIcon = document.getElementById('user-avatar-icon');
+
+// Riferimenti per l'autenticazione email/password
+const authEmailInput = document.getElementById('authEmail');
+const authPasswordInput = document.getElementById('authPassword');
+const authDisplayNameInput = document.getElementById('authDisplayName');
+const registerBtn = document.getElementById('registerBtn');
+const loginBtn = document.getElementById('loginBtn');
+
 
 if (showLoginModalBtn) {
-    showLoginModalBtn.addEventListener('click', (e) => { // 1. Aggiungi (e) qui
-        e.preventDefault(); // 2. Aggiungi questa riga per fermare il browser
-
-        console.log("Click sull'icona di login registrato!"); // Aggiunto per debug
+    showLoginModalBtn.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        console.log("Click sull'icona di login registrato!");
         if (loginModal) {
             loginModal.style.display = 'flex';
+            // Resetta i campi al click per un nuovo tentativo
+            authEmailInput.value = '';
+            authPasswordInput.value = '';
+            if (authDisplayNameInput) authDisplayNameInput.value = '';
         } else {
             console.error("La modale di login non è stata trovata nel DOM!");
         }
@@ -987,10 +995,38 @@ if (closeLoginModalBtn) {
     });
 }
 
-if (googleSignInBtn) {
-    googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+// Event listeners per registrazione e login Email/Password
+if (registerBtn) {
+    registerBtn.addEventListener('click', async () => {
+        const email = authEmailInput.value.trim();
+        const password = authPasswordInput.value.trim();
+        const displayName = authDisplayNameInput ? authDisplayNameInput.value.trim() : null;
+        try {
+            await registerWithEmailPassword(email, password, displayName);
+            // La modale verrà chiusa dalla funzione in auth.js in caso di successo
+        } catch (error) {
+            // Error handling già nel toast, qui possiamo fare log aggiuntivi se necessario
+            console.error("Errore durante la registrazione nel main.js:", error);
+        }
+    });
 }
 
+if (loginBtn) {
+    loginBtn.addEventListener('click', async () => {
+        const email = authEmailInput.value.trim();
+        const password = authPasswordInput.value.trim();
+        try {
+            await signInWithEmailPassword(email, password);
+            // La modale verrà chiusa dalla funzione in auth.js in caso di successo
+        } catch (error) {
+            // Error handling già nel toast, qui possiamo fare log aggiuntivi se necessario
+            console.error("Errore durante il login nel main.js:", error);
+        }
+    });
+}
+
+
+const userAvatarIcon = document.getElementById('user-avatar-icon'); // Mantenuto se vuoi ancora l'avatar
 if (userAvatarIcon) {
     userAvatarIcon.addEventListener('click', () => {
         openProfileModal(loggedInUser);
@@ -1012,12 +1048,7 @@ if (document.getElementById('glitchzillaDefeatedBanner')) {
 }
 
 
-
     
-
-
-    
-    // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
     // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
 onAuthStateChanged(auth, async (user) => {
     console.log('[Main.js] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
@@ -1033,10 +1064,18 @@ onAuthStateChanged(auth, async (user) => {
         if (avatarIcon) {
             avatarIcon.src = user.photoURL || generateBlockieAvatar(user.uid, 32); // Fallback a blockie se non c'è foto
             avatarIcon.style.display = 'block';
+            // Aggiorna anche il nickname se disponibile
+            const userProfileDoc = await getDoc(doc(db, "appUsers", user.uid));
+            if (userProfileDoc.exists()) {
+                const profileData = userProfileDoc.data();
+                if (profileData.displayName) {
+                    // Potrebbe essere necessario un elemento per il nickname qui
+                    // console.log("Nickname utente loggato:", profileData.displayName);
+                }
+            }
         }
 
         // Manteniamo le altre logiche per utenti loggati
-        // NOTA: initializeHomepageArticleInteractions va chiamato qui
         initializeHomepageArticleInteractions(user);
         setupNotificationBellListener(user.uid);
         loadContentSpecificFeatures(user);

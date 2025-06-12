@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@6.0.0/dist/capacitor.js"></script>
     <style>
         /* Basic styling for main containers */
         body {
@@ -82,116 +83,113 @@
                  <span class="visually-hidden">Start Game</span>
              </div>
              <div id="creditsModal" class="modal">
-                 <div class="modal-content">
-                     <span class="close-button" id="closeCreditsModalBtn">&times;</span>
-                     <h2>Crediti</h2>
-                     <div class="accordion-container" id="gameInfoAccordion">
-                         <div class="accordion-item">
-                             <button class="accordion-header">
-                                 <h3>Come Giocare (Tutorial)</h3>
-                                 <span class="accordion-icon"></span>
-                             </button>
-                             <div class="accordion-panel">
-                                 <p><strong>Obiettivo:</strong> Corri, salta e spara per sopravvivere il più a lungo possibile, distruggendo nemici e ostacoli per accumulare punti.</p>
-                                 <p><strong>Controlli:</strong></p>
-                                 <ul>
-                                     <li><strong>Salto:</strong> Tasto SPAZIO o Freccia SU (tocco singolo sul lato sinistro dello schermo per mobile).</li>
-                                     <li><strong>Sparo:</strong> Tasto CTRL o X (tocco singolo sul lato destro dello schermo per mobile).</li>
-                                 </ul>
-                                 <p><strong>Nemici:</strong> Evita o distruggi i blocchi di codice, i bug e i glitch che cercano di fermarti!</p>
-                                 <p><strong>Power-Up:</strong> Raccogli i power-up per ottenere vantaggi temporanei, come il "Multi-Thread" (triplo sparo), lo "Scudo Attivo" (immunità ai danni), o il "Debug Payload" (proiettili potenziati).</p>
-                                 <p><strong>Glitchzilla:</strong> Attenzione al potente boss "Glitchzilla" che apparirà dopo aver raggiunto un certo punteggio! Sconfiggilo per ottenere un bonus massiccio.</p>
-                             </div>
-                         </div>
-                         <div class="accordion-item">
-                             <button class="accordion-header">
-                                 <h3>About</h3>
-                                 <span class="accordion-icon"></span>
-                             </button>
-                             <div class="accordion-panel">
-                                 <p><strong>codeDash!</strong> è un classico endless runner reinventato con un tocco cyberpunk e temi legati alla programmazione. Progettato e sviluppato da <strong>Umberto "Async_Donkey" M.</strong>, questo gioco è un omaggio ai platform arcade a scorrimento laterale.</p>
-                                 <p><strong>Tecnologie Utilizzate:</strong></p>
-                                 <ul>
-                                     <li>HTML5 Canvas: Per la grafica del gioco.</li>
-                                     <li>JavaScript: Per la logica di gioco.</li>
-                                     <li>Firebase: Per l'autenticazione, il database dei punteggi e la gestione degli utenti.</li>
-                                     <li>Capacitor: Per il packaging come app nativa Android/iOS.</li>
-                                 </ul>
-                                 <p>Un ringraziamento speciale ai contributor e alla community di Async_Donkey!</p>
-                             </div>
-                         </div>
-                         <div class="accordion-item">
-                             <button class="accordion-header">
-                                 <h3>Crediti Art & Sound</h3>
-                                 <span class="accordion-icon"></span>
-                             </button>
-                             <div class="accordion-panel">
-                                 <ul>
-                                     <li>Sprite Giocatore: Creato da <strong>Umberto M.</strong>.</li>
-                                     <li>Sprite Nemici & Ostacoli: Resi unici da <strong>Umberto M.</strong> (basati su asset open source).</li>
-                                     <li>Effetti Sonori & Musica: Ottenuti da librerie open source (es. Kenney.nl, Freesound.org) e adattati per il gioco.</li>
-                                     <li>Font Pixel: "Press Start 2P" by CodeMan38.</li>
-                                     <li>Font Terminale: "Source Code Pro" by Adobe.</li>
-                                 </ul>
-                             </div>
-                         </div>
-                     </div>
-                     <a href="#gameInfoAccordion" id="scrollToTutorialLink" class="scroll-to-tutorial-link">Torna al Tutorial</a>
-                 </div>
-             </div>
-             <div id="orientationPrompt" class="orientation-prompt">
-                 <p>Per una migliore esperienza di gioco, ruota il tuo dispositivo in orizzontale e metti a schermo intero!</p>
-                 <button id="dismissOrientationPrompt">Capito!</button>
-             </div>
+                <div class="modal-content">
+                    <span class="close-button" id="closeCreditsModalBtn">&times;</span>
+                    <h2>Crediti</h2>
+                    <div class="accordion-container" id="gameInfoAccordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <h3>Come Giocare (Tutorial)</h3>
+                                <span class="accordion-icon"></span>
+                            </button>
+                            <div class="accordion-panel">
+                                <p><strong>Obiettivo:</strong> Corri, salta e spara per sopravvivere il più a lungo possibile, distruggendo nemici e ostacoli per accumulare punti.</p>
+                                <p><strong>Controlli:</strong></p>
+                                <ul>
+                                    <li><strong>Salto:</strong> Tasto SPAZIO o Freccia SU (tocco singolo sul lato sinistro dello schermo per mobile).</li>
+                                    <li><strong>Sparo:</strong> Tasto CTRL o X (tocco singolo sul lato destro dello schermo per mobile).</li>
+                                </ul>
+                                <p><strong>Nemici:</strong> Evita o distruggi i blocchi di codice, i bug e i glitch che cercano di fermarti!</p>
+                                <p><strong>Power-Up:</strong> Raccogli i power-up per ottenere vantaggi temporanei, come il "Multi-Thread" (triplo sparo), lo "Scudo Attivo" (immunità ai danni), o il "Debug Payload" (proiettili potenziati).</p>
+                                <p><strong>Glitchzilla:</strong> Attenzione al potente boss "Glitchzilla" che apparirà dopo aver raggiunto un certo punteggio! Sconfiggilo per ottenere un bonus massiccio.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <h3>About</h3>
+                                <span class="accordion-icon"></span>
+                            </button>
+                            <div class="accordion-panel">
+                                <p><strong>codeDash!</strong> è un classico endless runner reinventato con un tocco cyberpunk e temi legati alla programmazione. Progettato e sviluppato da <strong>Umberto "Async_Donkey" M.</strong>, questo gioco è un omaggio ai platform arcade a scorrimento laterale.</p>
+                                <p><strong>Tecnologie Utilizzate:</strong></p>
+                                <ul>
+                                    <li>HTML5 Canvas: Per la grafica del gioco.</li>
+                                    <li>JavaScript: Per la logica di gioco.</li>
+                                    <li>Firebase: Per l'autenticazione, il database dei punteggi e la gestione degli utenti.</li>
+                                    <li>Capacitor: Per il packaging come app nativa Android/iOS.</li>
+                                </ul>
+                                <p>Un ringraziamento speciale ai contributor e alla community di Async_Donkey!</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <h3>Crediti Art & Sound</h3>
+                                <span class="accordion-icon"></span>
+                            </button>
+                            <div class="accordion-panel">
+                                <ul>
+                                    <li>Sprite Giocatore: Creato da <strong>Umberto M.</strong>.</li>
+                                    <li>Sprite Nemici & Ostacoli: Resi unici da <strong>Umberto M.</strong> (basati su asset open source).</li>
+                                    <li>Effetti Sonori & Musica: Ottenuti da librerie open source (es. Kenney.nl, Freesound.org) e adattati per il gioco.</li>
+                                    <li>Font Pixel: "Press Start 2P" by CodeMan38.</li>
+                                    <li>Font Terminale: "Source Code Pro" by Adobe.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#gameInfoAccordion" id="scrollToTutorialLink" class="scroll-to-tutorial-link">Torna al Tutorial</a>
+                </div>
+            </div>
+            <div id="orientationPrompt" class="orientation-prompt">
+                <p>Per una migliore esperienza di gioco, ruota il tuo dispositivo in orizzontale e metti a schermo intero!</p>
+                <button id="dismissOrientationPrompt">Capito!</button>
+            </div>
         </div>
     </div>
     <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
     
     <div id="loginModal" class="modal">
-  <div class="modal-content landscape-modal">
-    <span class="close-button" id="closeLoginModal">&times;</span>
-    <h2>Entra nel mondo di codeDash!</h2>
-    <p>Usa il tuo account Google per un accesso rapido e sicuro. Salva i tuoi punteggi, sblocca badge e scala la classifica!</p>
-    <button id="google-signin-btn" class="google-btn">
-      <span>Accedi con Google</span>
-    </button>
-  </div>
-</div>
+        <div class="modal-content landscape-modal">
+            <span class="close-button" id="closeLoginModal">&times;</span>
+            <h2>Accedi o Registrati</h2>
+            
+            <div id="email-password-auth-section">
+                <input type="email" id="authEmail" placeholder="Email" required>
+                <input type="password" id="authPassword" placeholder="Password" required>
+                <input type="text" id="authDisplayName" placeholder="Nome utente (solo per registrazione)">
+
+                <button id="registerBtn">Registrati</button>
+                <button id="loginBtn">Accedi</button>
+            </div>
+
+            </div>
+    </div>
 
 <div id="profileModal" class="modal">
   <div class="modal-content landscape-modal profile-view">
     <span class="close-button" id="closeProfileModal">&times;</span>
     <div class="profile-header">
-      <!-- NUOVO: Contenitore per l'avatar per posizionare il pulsante di modifica -->
-      <div class="profile-avatar-container">
-          <img id="profile-modal-avatar" src="data:," alt="Avatar Utente" />
-          <button id="edit-avatar-btn" class="icon-button" title="Modifica Immagine Profilo">
-              <i class="ph-bold ph-camera"></i>
-          </button>
-      </div>
+      <img id="profile-modal-avatar" src="data:," alt="User Avatar" />
       <div class="profile-info">
          <div class="profile-name-container">
-            <h2 id="profile-modal-name"></h2>
-            <button id="edit-nickname-btn" class="icon-button" title="Modifica Nickname">
-                <i class="ph-bold ph-pencil-simple"></i>
-            </button>
-        </div>
+    <h2 id="profile-modal-name"></h2>
+    <button id="edit-nickname-btn" class="icon-button" title="Modifica Nickname">
+        <i class="ph-bold ph-pencil-simple"></i>
+    </button>
+</div>
          <p id="profile-modal-email"></p>
       </div>
     </div>
     <div class="profile-body">
         <div class="profile-stats">
             <h3>Le tue Statistiche</h3>
-            <p>Punteggio migliore: <strong id="profile-modal-highest-score">0</strong></p>
             <p>Punteggio totale: <strong id="profile-modal-total-score">0</strong></p>
             <p>Partite giocate: <strong id="profile-modal-games-played">0</strong></p>
-            <p>Boss sconfitti: <strong id="profile-modal-bosses-defeated">0</strong></p>
         </div>
         <div class="profile-badges">
             <h3>I tuoi Badge</h3>
             <div id="profile-modal-badges-container">
-                <!-- I badge verranno caricati qui dinamicamente -->
-            </div>
+                </div>
         </div>
     </div>
     <div class="profile-footer">
@@ -214,8 +212,7 @@
                 <span>Punteggio</span>
             </div>
             <ul id="leaderboard-list">
-                <!-- La lista verrà popolata dinamicamente -->
-            </ul>
+                </ul>
             <div id="leaderboard-loader" class="loader-dots" style="display: none;">
                 <span></span><span></span><span></span>
             </div>
@@ -235,7 +232,7 @@
     <script type="module" src="js/donkeyRunner.js"></script>
     <script type="module" src="js/loader.js"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/@capacitor/core@6.0.0/dist/capacitor.js"></script>
+
     <script type="module" src="js/blockies.mjs"></script>
 </body>
 </html>
