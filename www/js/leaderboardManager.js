@@ -6,6 +6,10 @@ import { collection, query, orderBy, limit, getDocs } from "https://www.gstatic.
 import { db } from './firebase-config.js';
 import { createIcon } from './blockies.mjs';
 
+// Aggiungi questi import all'inizio del file
+import { auth } from './firebase-config.js';
+import { showToast } from './toastNotifications.js';
+
 // Riferimenti agli elementi del DOM
 const leaderboardModal = document.getElementById('leaderboardModal');
 const closeLeaderboardModalBtn = document.getElementById('closeLeaderboardModal');
@@ -31,6 +35,17 @@ function generateBlockieAvatar(seed, imgSize = 40) {
 }
 
 async function openLeaderboard() {
+    // --- INIZIO MODIFICA ---
+    // Controlla se l'utente è loggato prima di procedere
+    if (!auth.currentUser) {
+        showToast("Devi effettuare il login per vedere la classifica!", "error");
+        // Opzionale: apri direttamente la modale di login
+        // const loginModal = document.getElementById('loginModal');
+        // if (loginModal) loginModal.style.display = 'flex';
+        return; // Interrompe l'esecuzione della funzione
+    }
+    // --- FINE MODIFICA ---
+
     leaderboardModal.style.display = 'flex';
     if (isLeaderboardPopulated) return;
 
@@ -49,7 +64,15 @@ async function openLeaderboard() {
     } catch (error) {
         console.error("Errore nel recuperare la leaderboard:", error);
         leaderboardList.innerHTML = '<li><span class="player">Errore nel caricare la classifica.</span></li>';
-        if (error.code === 'failed-precondition') {
+        
+        // --- INIZIO MODIFICA CONSIGLIATA ---
+        // Aggiungi un controllo specifico per il permesso negato per dare un feedback più chiaro
+        if (error.code === 'permission-denied') {
+             leaderboardList.innerHTML += '<li><span class="player" style="font-size: 0.8em; color: var(--terminal-error-bright);">(Errore: Permessi insufficienti.)</span></li>';
+        } 
+        // --- FINE MODIFICA CONSIGLIATA ---
+
+        else if (error.code === 'failed-precondition') {
              leaderboardList.innerHTML += '<li><span class="player" style="font-size: 0.8em; color: var(--terminal-error-bright);">(Causa: Indice Firestore mancante. Controlla la console per il link di creazione.)</span></li>';
              console.error("INDICE MANCANTE: Firebase richiede un indice composito per questa query. Clicca sul link che Firebase dovrebbe aver fornito in un log di errore precedente per crearlo automaticamente nella tua console Firebase.");
         }
@@ -57,6 +80,7 @@ async function openLeaderboard() {
         leaderboardLoader.style.display = 'none';
     }
 }
+
 
 function populateLeaderboard(userDocs) {
     if (userDocs.length === 0) {
