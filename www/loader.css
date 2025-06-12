@@ -913,35 +913,3 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
     gap: 12px; /* Aumenta lo spazio se necessario */
 }
 
-/* Stili per lo splash screen animato */
-#custom-splash-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #282a36; /* Colore di sfondo Dracula */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999; /* Assicura che sia sopra tutto */
-    transition: opacity 0.5s ease-out; /* Animazione di dissolvenza */
-}
-
-#custom-splash-screen.hidden {
-    opacity: 0;
-    pointer-events: none; /* Rende non cliccabile quando nascosto */
-}
-
-#custom-splash-screen .splash-title {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 2.5rem;
-    color: #ff79c6; /* Rosa Dracula */
-    text-shadow: 0 0 5px #ff79c6, 0 0 10px #ff79c6;
-    animation: blink-caret 1.5s step-end infinite;
-}
-
-@keyframes blink-caret {
-    from, to { text-shadow: 0 0 5px #ff79c6, 0 0 10px #ff79c6; color: #ff79c6; }
-    50% { text-shadow: none; color: #a45a8d; }
-}

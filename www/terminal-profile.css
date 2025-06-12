@@ -48,3 +48,55 @@
     color: var(--terminal-text, #f8f8f2);
     margin: 0; /* Rimuove margini predefiniti dall'h2 */
 }
+
+/* Aggiungi queste regole al tuo file www/terminal-profile.css */
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Nuovo contenitore per avatar + pulsante */
+.profile-avatar-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0; /* Impedisce al contenitore di restringersi */
+}
+
+/* Stile per l'avatar all'interno del nuovo contenitore */
+.profile-avatar-container #profile-modal-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid var(--terminal-cyan, #8be9fd);
+    object-fit: cover; /* Assicura che l'immagine copra lo spazio senza distorsioni */
+}
+
+/* Stile per il pulsante di modifica dell'avatar */
+.profile-avatar-container #edit-avatar-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background-color: var(--terminal-purple, #bd93f9);
+    color: var(--terminal-bg, #282a36);
+    border-radius: 50%;
+    border: 2px solid var(--terminal-bg, #282a36);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.profile-avatar-container #edit-avatar-btn:hover {
+    background-color: var(--terminal-pink, #ff79c6);
+}
+
+.profile-avatar-container #edit-avatar-btn i {
+    font-size: 18px;
+}

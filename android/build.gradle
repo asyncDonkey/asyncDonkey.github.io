@@ -10,14 +10,15 @@ buildscript {
     }
 }
 
+// *** IMPORTANTE: Applica variables.gradle qui, al livello del progetto root. ***
+apply from: "$rootDir/variables.gradle"
+
 allprojects {
     repositories {
         google()
         mavenCentral()
     }
 }
-
-apply from: "variables.gradle"
 
 task clean(type: Delete) {
     delete rootProject.buildDir
