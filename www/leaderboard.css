@@ -1,43 +1,122 @@
-/* www/leaderboard.css */
+/* Importa le variabili di stile dal loader.css per coerenza */
+/* Non è un import CSS diretto, ma queste variabili sono nel :root di loader.css che è già caricato */
 
-.leaderboard-game-title {
-    color: var(--terminal-yellow, #f1fa8c);
-    font-family: 'Source Code Pro', monospace;
-    font-size: 1.2em;
-    margin-top: 0;
-    margin-bottom: 20px;
-    text-shadow: 0 0 5px var(--terminal-yellow, #f1fa8c);
+/* Stili di base per la modale (pre-esistenti ma rivisti per coerenza) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.85); /* Sfondo più scuro per effetto schermo */
+    align-items: center;
+    justify-content: center;
 }
 
+.modal-content.landscape-modal {
+    background-color: var(--terminal-bg, #0d0d0d); /* Sfondo terminale scuro */
+    color: var(--terminal-text, #e0e0e0); /* Testo chiaro del terminale */
+    padding: 25px;
+    border: 3px solid var(--terminal-highlight, #5ab9a8); /* Bordo luminoso stile monitor */
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px; /* Aumentato il max-width per contenere più info */
+    text-align: center;
+    font-family: 'Source Code Pro', monospace; /* Font in stile codice */
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 30px var(--glow-color, rgba(90, 185, 168, 0.4)); /* Effetto glow attorno al "monitor" */
+    position: relative; /* Necessario per posizionare il pulsante di chiusura */
+}
+
+/* Pulsante di chiusura della modale */
+.close-button {
+    color: var(--terminal-comment, #6272a4);
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--terminal-red, #f14e52); /* Rosso vivace al passaggio del mouse */
+}
+
+/* Titolo della Leaderboard */
+.modal-content h2 {
+    color: var(--bright-green-teal, #30e1b9); /* Colore brillante per il titolo */
+    font-family: 'Press Start 2P', cursive; /* Font pixel per il titolo */
+    font-size: 2.2em; /* Dimensione aumentata */
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px var(--bright-green-teal); /* Lieve bagliore */
+    display: flex; /* Per allineare l'icona */
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Spazio tra icona e testo */
+}
+
+.modal-content h2 i {
+    font-size: 1.2em; /* Dimensione dell'icona del trofeo */
+    color: var(--terminal-yellow, #f1fa8c); /* Colore oro per il trofeo */
+}
+
+/* Titolo del gioco specifico nella leaderboard */
+.leaderboard-game-title {
+    font-family: 'Source Code Pro', monospace;
+    color: var(--terminal-cyan, #8be9fd); /* Colore diverso per il sottotitolo */
+    font-size: 1.2em;
+    margin-top: -10px; /* Avvicina al titolo principale */
+    margin-bottom: 25px;
+    text-transform: uppercase;
+}
+
+/* Contenitore della lista della leaderboard */
 .leaderboard-list-container {
-    margin-top: 15px;
-    border: 1px solid var(--terminal-border, #44475a);
+    width: 100%;
+    background-color: var(--terminal-darker-bg, #1a1b22); /* Sfondo leggermente più scuro per la lista */
+    border: 1px solid var(--terminal-comment, #6272a4);
     border-radius: 5px;
     padding: 10px;
-    background-color: rgba(0,0,0,0.2);
-    min-height: 200px; /* Altezza minima per dare spazio al loader */
-    max-height: 50vh; /* Limita l'altezza su schermi grandi */
+    box-sizing: border-box;
+    max-height: 50vh; /* Limita l'altezza e abilita lo scroll */
     overflow-y: auto;
 }
 
+/* Header della tabella della leaderboard */
 .leaderboard-header {
-    display: grid;
-    grid-template-columns: 60px 1fr 100px;
-    padding: 0 10px 10px 10px;
-    border-bottom: 1px solid var(--terminal-border, #44475a);
-    color: var(--terminal-comment, #6272a4);
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 5px;
+    border-bottom: 1px dashed var(--terminal-comment, #6272a4); /* Linea tratteggiata */
     font-weight: bold;
+    color: var(--terminal-green, #50fa7b); /* Verde brillante per le intestazioni */
     text-transform: uppercase;
-    font-size: 0.8em;
+    font-size: 0.9em;
+    margin-bottom: 5px;
 }
-
-.leaderboard-header span:nth-child(2) {
+.leaderboard-header span {
+    flex: 1; /* Distribuisce lo spazio */
     text-align: left;
+    padding: 0 5px;
 }
-.leaderboard-header span:last-child {
-    text-align: right;
+.leaderboard-header span:first-child { flex: 0.15; text-align: center; } /* Rank */
+.leaderboard-header span:nth-child(2) { flex: 1.5; text-align: left; } /* Giocatore */
+.leaderboard-header span:nth-child(3) { flex: 0.6; text-align: right; } /* Punteggio */
+/* Aggiusta l'ultimo span nell'header se necessario per i dettagli */
+.leaderboard-header span:last-child { 
+    flex: 1.2; 
+    text-align: right; 
+    padding-right: 15px; /* Spazio per dettagli */
 }
 
+
+/* Lista dei punteggi */
 #leaderboard-list {
     list-style: none;
     padding: 0;
@@ -45,69 +124,81 @@
 }
 
 #leaderboard-list li {
-    display: grid;
-    grid-template-columns: 60px 1fr 100px; /* Rank, Player, Score */
+    display: flex;
     align-items: center;
-    padding: 8px 10px;
-    border-bottom: 1px dashed rgba(68, 71, 90, 0.5); /* --terminal-border con opacità */
-    transition: background-color 0.2s ease;
+    justify-content: space-between;
+    padding: 8px 5px;
+    border-bottom: 1px dotted rgba(98, 114, 164, 0.3); /* Linea puntinata tra le voci */
+    font-size: 0.9em;
 }
 
 #leaderboard-list li:last-child {
-    border-bottom: none;
+    border-bottom: none; /* Rimuovi il bordo dall'ultimo elemento */
 }
 
-#leaderboard-list li:hover {
-    background-color: var(--dark-teal-blue, #32535f);
+/* Stili per le singole colonne della riga */
+#leaderboard-list li .rank {
+    flex: 0.15;
+    text-align: center;
+    color: var(--terminal-orange, #ffb86c); /* Colore per il rank */
+    font-weight: bold;
 }
 
-#leaderboard-list .rank {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 1.1em;
-    color: var(--terminal-highlight, #5ab9a8);
-}
-
-#leaderboard-list .player {
+.player-info-container {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-weight: bold;
-    color: var(--terminal-text, #f8f8f2);
-    overflow: hidden; /* Per nomi lunghi */
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    flex: 1.5;
+    text-align: left;
 }
 
-#leaderboard-list .player .avatar {
-    width: 32px;
+.player-info-container .avatar {
+    width: 32px; /* Dimensione fissa per l'avatar */
     height: 32px;
-    border-radius: 50%;
-    border: 2px solid var(--terminal-comment, #6272a4);
-    background-color: var(--terminal-bg);
+    border-radius: 50%; /* Rendi l'avatar circolare */
+    margin-right: 10px;
+    border: 1px solid var(--terminal-blue, #66d9ef); /* Bordo sottile all'avatar */
+    object-fit: cover; /* Assicura che l'immagine copra l'area */
 }
 
-#leaderboard-list .score {
-    font-family: 'Source Code Pro', monospace;
-    font-weight: bold;
-    font-size: 1.2em;
-    color: var(--terminal-green, #50fa7b);
+.player-info-container .nickname {
+    color: var(--terminal-text, #f8f8f2); /* Nickname in colore principale */
+    font-weight: normal;
+    white-space: nowrap; /* Evita che il nickname vada a capo */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Aggiunge "..." se il testo è troppo lungo */
+    max-width: calc(100% - 42px); /* Spazio per avatar + margine */
+}
+
+#leaderboard-list li .score {
+    flex: 0.6;
     text-align: right;
-    text-shadow: 0 0 5px var(--terminal-green, #50fa7b);
+    color: var(--terminal-yellow, #f1fa8c); /* Colore per il punteggio */
+    font-weight: bold;
+    font-size: 1.1em; /* Punteggio leggermente più grande */
 }
 
-/* Stile per il loader */
+#leaderboard-list li .details {
+    flex: 1.2;
+    text-align: right;
+    color: var(--terminal-comment, #6272a4); /* Dettagli in colore commento */
+    font-size: 0.8em;
+    padding-right: 15px; /* Spazio per dettagli */
+}
+
+/* Stili per il loader (punti lampeggianti) */
 .loader-dots {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 20px;
 }
 .loader-dots span {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+    width: 10px;
+    height: 10px;
     background-color: var(--terminal-highlight, #5ab9a8);
+    border-radius: 50%;
     margin: 0 5px;
-    animation: loader-blink 1.4s infinite both;
+    animation: bounce 0.6s infinite alternate;
 }
 .loader-dots span:nth-child(2) {
     animation-delay: 0.2s;
@@ -115,7 +206,80 @@
 .loader-dots span:nth-child(3) {
     animation-delay: 0.4s;
 }
-@keyframes loader-blink {
-    0%, 80%, 100% { opacity: 0; }
+
+@keyframes bounce {
+    from {
+        transform: translateY(0);
+        opacity: 0.7;
+    }
+    to {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+/* Media query per schermi più piccoli, se necessario */
+@media (max-width: 600px) {
+    .modal-content.landscape-modal {
+        width: 95%;
+        padding: 15px;
+    }
+    .modal-content h2 {
+        font-size: 1.5em;
+    }
+    .leaderboard-header,
+    #leaderboard-list li {
+        font-size: 0.8em;
+        padding: 5px 2px;
+    }
+    .player-info-container .avatar {
+        width: 24px;
+        height: 24px;
+        margin-right: 5px;
+    }
+    .leaderboard-header span:last-child,
+    #leaderboard-list li .details {
+        flex: 1; /* Meno spazio per i dettagli su schermi piccoli */
+        padding-right: 5px;
+        font-size: 0.7em;
+    }
+}
+
+/* Effetti di linea stile CRT/terminale (opzionale, può essere aggiunto a body o #app-root in loader.css) */
+/* Se vuoi un effetto scanline visibile solo sulla modale, puoi fare così: */
+.modal-content.landscape-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 1px,
+        rgba(0, 0, 0, 0.1) 1px,
+        rgba(0, 0, 0, 0.1) 2px
+    );
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Effetto glitch/sfarfallio (opzionale) */
+@keyframes flicker {
+    0% { opacity: 1; }
+    5% { opacity: 0.9; }
+    10% { opacity: 1; }
+    15% { opacity: 0.9; }
+    20% { opacity: 1; }
+    25% { opacity: 0.9; }
+    30% { opacity: 1; }
+    35% { opacity: 0.9; }
     40% { opacity: 1; }
+    99% { opacity: 1; }
+    100% { opacity: 0.9; }
+}
+
+.modal-content.landscape-modal {
+    animation: flicker 1s infinite alternate; /* Applica l'animazione alla modale */
 }
