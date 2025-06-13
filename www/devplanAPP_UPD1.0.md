@@ -1,95 +1,94 @@
-# DevPlan: codeDash - Fase 2 (Rifinitura e Funzionalità Avanzate)
+# DevPlan: Aggiornamento App "codeDash!" - Versione 1.3 (Build Stabile e Prossimi Passi)
 
-_Stato: Base di autenticazione ibrida (Web/Nativa) completata e funzionante. L'architettura è ora modulare e robusta. Pronti per la fase successiva!_
-
----
-
-## 🎯 Priorità #1: Rifinitura dell'Esperienza di Gioco (Quality of Life)
-
-_Obiettivo: Perfezionare il flusso di gioco per renderlo più intuitivo e professionale._
-
-- [ ] **UI - Posizione Pulsante "Replay"**:
-
-    - Analizzare la schermata del salvataggio punteggio.
-    - Spostare il pulsante "Replay" in una posizione più prominente e meno invasiva, probabilmente sotto il riepilogo del punteggio o accanto al pulsante per tornare al menu.
-
-- [ ] **Logica - Pulsante "Condividi"**:
-
-    - Rimuovere il pulsante "Condividi" dal menu di Game Over iniziale.
-    - Implementare una nuova logica: dopo che l'utente ha salvato con successo il punteggio, mostrare un messaggio di successo ("Punteggio Salvato!") insieme a un nuovo pulsante "Condividi il tuo risultato!".
-
-- [ ] **UI - Visibilità Icona Profilo**:
-    - Identificare l'inizio del gameplay attivo (es. `game.start()`).
-    - Nascondere l'icona del profilo (`#user-avatar-icon`) quando il gioco inizia.
-    - Identificare l'evento di "Game Over".
-    - Mostrare nuovamente l'icona del profilo quando appare la schermata di Game Over.
+## Stato Attuale:
+La build è generalmente stabile e le funzionalità principali sono implementate. L'autenticazione è pienamente operativa. Le funzionalità del profilo utente e della leaderboard sono state notevolmente migliorate a livello UI/UX. La modale di registrazione/login è stata completamente ridisegnata e ora supporta lo scroll, oltre a mostrare correttamente l'avatar dell'utente nel menu.
+Ci sono ancora alcune problematiche di log nativo Android e di interazione con la fotocamera su emulatori che necessitano di debugging su dispositivi fisici.
 
 ---
 
-## 👤 Priorità #2: Profilo Utente Avanzato
+## ✅ Obiettivi Completati (Versione 1.2.x - Aggiornamenti UI/UX e Fix)
+**Priorità #1: Rifinitura dell'Esperienza di Gioco**
+* [x] Logica - Pulsante "Condividi": Rimosso dalla schermata iniziale, ora visibile solo al Game Over per una migliore coerenza del flusso di gioco.
+* [x] UI - Posizione Pulsante "Replay": Spostato per coerenza nel pannello di Game Over.
+* [x] UI - Visibilità Icona Profilo: Gestita correttamente durante gioco e menu, per apparire solo quando l'utente non è in partita.
 
-_Obiettivo: Dare agli utenti maggior controllo e personalizzazione sul proprio profilo per aumentare il coinvolgimento._
+**Priorità #2: Nickname Utente Personalizzato**
+* [x] UI & Logica - Modifica Nickname: Implementata la modifica del nickname tramite una nuova modale dedicata (non più il prompt() nativo), offrendo un'esperienza utente più raffinata.
+* [x] UI - Cooldown Nickname: La modale di modifica del nickname ora visualizza il tempo rimanente (in giorni) prima che l'utente possa modificare nuovamente il nickname, migliorando la trasparenza.
+* [x] Backend & Sicurezza: Cloud Function e regole Firestore sono operative per la gestione del nickname, inclusa la logica di cooldown.
 
-- [ ] **Nickname Personalizzato**:
+**Priorità #3: Redesign Interfaccia e Schermata di Caricamento**
+* [x] UI/UX - Schermata di Caricamento: Completato il redesign della schermata di caricamento, ora in stile terminale.
+* [x] Stile - Phosphor Icons: Applicata la migrazione a Phosphor Icons per tutte le icone dell'app, garantendo un'estetica moderna e pulita.
+* [x] Stile - Leaderboard: Redesign completo della modale leaderboard per un aspetto da "monitor terminale", con layout a colonne, icone, avatar, e dettagli di gioco (partite giocate, boss sconfitti). La visualizzazione è ora molto più armoniosa!
 
-    - **Firestore**: Aggiungere un campo `nickname` al documento utente in `appUsers`.
-    - **UI**: Nella modale del profilo, aggiungere un'icona "modifica" accanto al `displayName`.
-    - **Logica**: Al click sull'icona, mostrare un `prompt` o un campo di input per inserire il nuovo nickname. Salvare il nickname in Firestore.
-    - **Regole di Sicurezza**: Aggiornare le regole di Firestore per permettere la modifica del campo `nickname` solo dal proprietario dell'account.
+**Priorità #4: Debugging e Stabilizzazione Iniziale**
+* [x] FIX - Configurazione Gradle: Risolti i problemi iniziali di sintassi e dipendenze nei file build.gradle (problema "Value is null" risolto).
+* [x] FIX - Permessi Leaderboard: Aggiunto controllo auth.currentUser per prevenire errori di permesso negato nel caricamento della leaderboard.
+* [x] FIX - Manifest Android: Pulito il file AndroidManifest.xml per rimuovere errori di build iniziali e forzato l'orientamento in landscape per un'esperienza di gioco coerente.
+* [x] FIX - MainActivity.java: Ripristinato il file al suo contenuto originale e standard di Capacitor per eliminare errori di compilazione.
+* [x] Build Stabile: La build assembleDebug ora ha successo.
+* [x] FIX - Profilo: Elementi UI Mancanti: Risolto TypeError: Cannot set properties of null (setting 'textContent') nella modale del profilo, assicurando che tutti gli elementi UI siano correttamente referenziati.
+* [x] FIX - Registrazione: Permessi Firestore: Risolto FirebaseError: Missing or insufficient permissions. durante la registrazione, aggiornando le regole di sicurezza di Firestore per la collezione appUsers.
+* [x] FIX - Avatar: Errore Plugin Camera (Mitigazione): Aggiunta una verifica Capacitor.isNativePlatform() e corretto l'accesso alle enumerazioni del plugin Camera (Capacitor.CameraResultType, Capacitor.CameraSource) per prevenire TypeError in ambienti non nativi (emulatori/web).
 
-- [ ] **Cooldown Modifica Nickname**:
-    - **Firestore**: Aggiungere un campo `nicknameLastUpdatedAt` (tipo Timestamp) al documento utente.
-    - **Cloud Function (Consigliato)**: Creare una Cloud Function che gestisca la richiesta di cambio nickname. La funzione controllerà se sono passati almeno 14 giorni da `nicknameLastUpdatedAt` prima di approvare la modifica. Questo è più sicuro rispetto a gestire la logica solo sul client.
-    - **UI**: Se non sono passati 14 giorni, il pulsante di modifica nickname deve essere disabilitato o mostrare un tooltip con il tempo rimanente.
+**Funzionalità Profilo Utente (Estensione)**
+* [x] Avatar di Default: Implementato l'uso di Blockies come avatar di fallback se l'utente non ha caricato un'immagine personalizzata, eliminando l'icona "rotta".
+* [x] Generazione Avatar Casuale: Aggiunto un pulsante che permette all'utente di generare un nuovo avatar Blockie casuale.
+* [x] Salvataggio Avatar Separato: Separata la logica di generazione dell'avatar dalla logica di salvataggio. Un nuovo pulsante "Salva" appare dopo la generazione, permettendo all'utente di scegliere quando salvare.
+* [x] Stile Profilo: Le icone del profilo sono ora brillanti e senza bordo, e le stringhe delle statistiche sono allineate a sinistra con uno stile terminale coerente.
+* [x] Animazione Boss Sconfitti: Aggiunto un cursore lampeggiante accanto al conteggio dei "Boss Sconfitti" nella modale del profilo per un tocco estetico.
 
----
-
-## 🏆 Priorità #3: Leaderboard Globale
-
-_Obiettivo: Creare una leaderboard dinamica e visivamente accattivante per stimolare la competizione._
-
-- [ ] **UI - Modale Leaderboard**:
-
-    - Progettare una nuova modale (`#leaderboardModal`) che si apra al click su un'icona "Leaderboard" nella UI principale.
-    - La modale mostrerà una lista di giocatori con posizione, avatar, nickname e punteggio.
-
-- [ ] **Logica - Recupero Dati**:
-    - Creare una funzione in un nuovo file `leaderboard.js` che recuperi i punteggi dalla collezione `leaderboardScores` (o `appUsers`, a seconda della strategia).
-    - La query dovrà ordinare per `score` in modo decrescente (`orderBy('score', 'desc')`).
-    - **Architettura Chiave**: I punteggi devono fare riferimento allo `userId`. Quando si visualizza la leaderboard, si usa lo `userId` per recuperare i dati del profilo (avatar e nickname aggiornati) dalla collezione `appUsers` in tempo reale. L'uso di `onSnapshot` qui è un'ottima idea per avere una leaderboard che si aggiorna da sola.
-
----
-
-## ✨ Priorità #4: Ricerca e Sviluppo Grafico (Badges & Icone)
-
-_Obiettivo: Sviluppare un'identità visiva unica e memorabile per i riconoscimenti del gioco._
-
-- [ ] **Ricerca Icone Open Source**:
-
-    - Esplorare librerie di icone alternative a Material Symbols.
-    - **Suggerimenti**:
-        - **Tabler Icons**: Stile outline pulito e molto vasto.
-        - **Feather Icons**: Minimaliste ed eleganti.
-        - **Phosphor Icons**: Stile "duotone" molto moderno e flessibile.
-        - **Iconoir**: Una delle librerie open-source più grandi e variegate.
-        - **Game-Icons.net**: Libreria immensa di icone a tema fantasy/gioco, perfette per badge "strani" e unici.
-
-- [ ] **Valutazione Badge Personalizzati (Aseprite)**:
-    - **Proposta**: Creare badge unici e animati in Aseprite è un'idea **fantastica** per dare un tocco speciale!
-    - **Complessità**: Non è eccessivamente complesso. Puoi esportare le animazioni come un singolo file immagine (`spritesheet`).
-    - **Implementazione**: In CSS, si applica lo spritesheet come `background-image` a un `<div>` e si usa un'animazione con `steps()` per scorrere i fotogrammi. Questo darebbe un'identità visiva fortissima al gioco. Si può partire con 2-3 badge speciali per testare il flusso.
+**Priorità #5: Ristrutturazione Salvataggio Punteggi (Testing Finale)**
+* [x] Stato: Funzionalità verificata e funzionante per gli utenti che riescono a loggarsi (o per utenti già esistenti/loggati). La Cloud Function per il salvataggio automatico delle statistiche è attiva.
 
 ---
 
-## 💡 Suggerimenti Proposti (Visione a Lungo Termine)
-
-_Obiettivo: Identificare aree di miglioramento futuro per rendere l'app ancora più solida._
-
-- [ ] **UI/UX - Consistenza Modali**: Creare un gestore di modali centralizzato in `uiUtils.js` per garantire che tutte le modali (Profilo, Leaderboard, Impostazioni) abbiano lo stesso comportamento di apertura/chiusura e le stesse animazioni.
-- [ ] **Performance - Ottimizzazione Immagini**: Per quando implementerai l'upload di avatar personalizzati, valutare un'estensione Firebase come **"Resize Images"** che crea automaticamente miniature ottimizzate per non rallentare il caricamento di leaderboard e profili.
-- [ ] **Gamification - Sfide Giornaliere/Settimanali**: Introdurre un sistema di sfide (es. "Raccogli 50 monete in una partita") che si resettano periodicamente, per mantenere gli utenti attivi e premiarli con piccoli bonus.
-- [ ] **Accessibilità (a11y)**: Rivedere tutti gli elementi interattivi (pulsanti, link, modali) per assicurarsi che siano accessibili tramite tastiera e screen reader, usando attributi ARIA appropriati.
+## ✅ Obiettivi Completati (Versione 1.3 - Rifinitura Login)
+**Nuovo Task: Redesign e Funzionalità Modale Registrazione/Login**
+* [x] Obiettivo: Modernizzare e arricchire l'esperienza utente di registrazione e login.
+* [x] Redesign UI: Riprogettata la modale per allinearla agli stili terminale del profilo e della leaderboard (colori, font, bordi, animazioni).
+* [x] Campo "Conferma Password": Aggiunto un campo per la conferma della password durante la registrazione.
+* [x] Descrizione Requisiti Nickname: Inclusa una breve descrizione dei requisiti per il nickname.
+* [x] Descrizione Requisiti Password: Aggiunta una breve descrizione sui requisiti della password.
+* [x] Checkbox Informativa Privacy: Inclusa una checkbox per il consenso all'informativa sulla privacy, obbligatoria.
+* [x] Link Informativa Privacy: Predisposti link a `privacy.html` e `terms.html` (contenuti da scrivere a parte).
+* [x] Opt-in Test Nuove Funzionalità: Aggiunta sezione opzionale per test nuove funzionalità con campo telefono.
+* [x] "Who Am I?" Selezione: Aggiunta selezione per "Who Am I?" con opzioni predefinite.
+* [x] **FIX:** Risolto problema di scroll della modale su dispositivi mobili.
+* [x] **FIX:** Risolto problema dell'avatar "rotto" nel menu dopo il login.
+* [x] Backend & Sicurezza: Regole Firestore aggiornate per supportare i nuovi campi di registrazione.
 
 ---
 
-Ancora complimenti per il traguardo raggiunto. Questo piano ci guiderà verso una versione ancora più incredibile di `codeDash!`.
+## 🚀 Prossimi Task / Massimo Priorità (Versione 1.3 - Introduzione Glitchpedia)
+**Nuovo Task: Creazione Glitchpedia**
+* [ ] Obiettivo: Fornire una risorsa in-app per informazioni su gioco, lore, nemici e power-up.
+* [ ] Implementazione Modale: Utilizzare la modale `glitchpediaModal` (ex `creditsModal`) come base, con HTML aggiornato.
+
+**Generazione Build di Release per Test Interni:**
+* [ ] Azione: Una volta risolti i problemi critici e implementate le nuove funzionalità, generare un nuovo Android App Bundle (.aab) firmato tramite Android Studio.
+* [ ] Azione: Caricare il nuovo .aab sulla traccia di Test Interno in Google Play Console.
+
+---
+
+## 🕹️ Priorità Future (DIPENDENTI dalla stabilità generale)
+**Priorità #6: Profilo Utente Avanzato (Statistiche in Modale)**
+* [ ] Obiettivo: Mostrare all'utente tutte le statistiche di gioco che ora vengono salvate (punteggio migliore, partite giocate, boss sconfitti).
+* [ ] Azione: (Già parzialmente coperto e stilizzato nell'ultima sessione).
+
+**Priorità #7: Sistema di Badge**
+* [ ] Obiettivo: Aumentare il coinvolgimento degli utenti con un sistema di riconoscimenti.
+* [ ] Azione: Verificare che la collezione `badgeDefinitions` su Firestore sia completa.
+* [ ] Azione: Verificare che la Cloud Function che assegna i badge (`handleGameStatsAndAwardBadges` o simile) funzioni correttamente con le nuove statistiche.
+* [ ] Azione: Implementare la logica per recuperare i badge guadagnati dall'utente e visualizzarli graficamente all'interno della `#profileModal`.
+
+---
+
+## 💡 Visione a Lungo Termine (DIPENDENTI dalla stabilità generale)
+* [ ] Performance - Ottimizzazione Immagini: Valutare un'estensione Firebase come "Resize Images" (già in uso per avatar, estenderne l'uso).
+* [ ] Gamification - Sfide Giornaliere/Settimanali: Introdurre un sistema di sfide periodiche per aumentare il retention.
+
+---
+
+Nota personale: Ottimo lavoro fino ad ora! Abbiamo fatto passi da gigante nel migliorare l'esperienza utente e la stabilità. Proseguiamo con l'implementazione della Glitchpedia. Forza! 💪

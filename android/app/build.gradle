@@ -11,8 +11,8 @@ android {
         applicationId "io.asynced.codedash"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion // Assicurati di usare la variabile dal rootProject.ext
-        versionCode 3 // Ho impostato a 1, puoi cambiarlo al valore che desideri.
-        versionName "1.5" // Ho impostato a 1.0, puoi cambiarlo al valore che desideri.
+        versionCode 5 // Ho impostato a 1, puoi cambiarlo al valore che desideri.
+        versionName "1.7" // Ho impostato a 1.0, puoi cambiarlo al valore che desideri.
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
