@@ -67,12 +67,12 @@ const soundsToLoad = [
 ];
 
 const PALETTE = {
-    DARK_BACKGROUND: '#411d31',
-    MEDIUM_PURPLE: '#631b34',
-    DARK_TEAL_BLUE: '#32535f',
-    MEDIUM_TEAL: '#0b8a8f',
-    BRIGHT_TEAL: '#0eaf9b',
-    BRIGHT_GREEN_TEAL: '#30e1b9',
+   DARK_BACKGROUND: '#111827', // Grigio-blu notte scuro
+   MEDIUM_PURPLE: '#631b34',
+   DARK_TEAL_BLUE: '#32535f',
+   MEDIUM_TEAL: '#0b8a8f',
+   BRIGHT_TEAL: '#0eaf9b',
+   BRIGHT_GREEN_TEAL: '#30e1b9',
 };
 
 // Declare global DOM element variables with 'let' and no initial assignment
@@ -104,6 +104,9 @@ let backToMenuBtn = null; // Nuovo: Riferimento al pulsante "Torna al Menu"
 let accountIconBtn = null; // Nuovo: Riferimento all'icona account/login
 let mainMenuBtn = null; // Pulsante per tornare al menu
 let accountIconContainer = null; // Riferimento al contenitore dell'icona profilo
+
+let backgroundParticles = [];
+
 
 let isTouchDevice = false; // Will be set in setupGameEngine
 let isIPhone = false; // Will be set in setupGameEngine
@@ -3164,6 +3167,45 @@ function checkCollisions() {
     }
 }
 
+// NUOVO: Funzione per inizializzare le particelle del background
+function initializeBackgroundParticles() {
+    backgroundParticles = [];
+    const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ<>!@#$%^&*()_+{}|[]?';
+    
+    // Creiamo 3 livelli di particelle per l'effetto parallasse
+    const layers = [
+        { count: 100, speed: 15, size: 10, alpha: 0.15 }, // Livello più lontano
+        { count: 60, speed: 30, size: 14, alpha: 0.3 },   // Livello intermedio
+        { count: 30, speed: 50, size: 18, alpha: 0.45 }   // Livello più vicino
+    ];
+
+    layers.forEach(layer => {
+        for (let i = 0; i < layer.count; i++) {
+            backgroundParticles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                char: chars[Math.floor(Math.random() * chars.length)],
+                speed: layer.speed,
+                size: layer.size,
+                alpha: layer.alpha
+            });
+        }
+    });
+}
+
+// NUOVO: Funzione per aggiornare la logica del background (chiamata nel game loop)
+function updateBackground(dt) {
+    backgroundParticles.forEach(p => {
+        p.y += p.speed * dt;
+        if (p.y > canvas.height) {
+            p.y = 0;
+            p.x = Math.random() * canvas.width;
+        }
+    });
+}
+
+
+
 function resetGame() {
     asyncDonkey = new Player(playerInitialX, playerInitialY, PLAYER_TARGET_WIDTH, PLAYER_TARGET_HEIGHT);
     obstacles = [];
@@ -3250,31 +3292,32 @@ function resetGame() {
         playerInitialsLabel.style.display = 'block';
     }
 
+    // NUOVO: Inizializziamo le particelle del background a ogni reset
+    if (canvas) {
+        initializeBackgroundParticles();
+    }
+    
     console.log('Gioco resettato.');
 }
 
+// MODIFICATO: La funzione `drawTerminalBackgroundEffects` è stata completamente riscritta
 function drawTerminalBackgroundEffects() {
-    const lines = 30;
-    const chars = '01';
-    ctx.font = '12px "Source Code Pro", monospace';
-    for (let i = 0; i < lines; i++) {
-        if (Math.random() < 0.3) {
-            ctx.fillStyle = `rgba(0, 255, 0, ${Math.random() * 0.03})`;
-            ctx.fillRect(0, (canvas.height / lines) * i, canvas.width, 1);
-        }
-        if (Math.random() < 0.05) {
-            let randomText = '';
-            for (let j = 0; j < 20; j++) {
-                randomText += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            ctx.fillStyle = `rgba(0, 100, 0, ${0.1 + Math.random() * 0.2})`;
-            if (Math.random() < 0.5) {
-                ctx.fillText(randomText, 10 + Math.random() * 20, Math.random() * canvas.height);
-            } else {
-                ctx.fillText(randomText, canvas.width - 150 - Math.random() * 20, Math.random() * canvas.height);
-            }
-        }
+    // 1. Disegna le particelle del background dinamico
+    ctx.save();
+    backgroundParticles.forEach(p => {
+        ctx.fillStyle = `rgba(14, 175, 155, ${p.alpha})`; // Usa un colore teal semi-trasparente
+        ctx.font = `${p.size}px "Source Code Pro", monospace`;
+        ctx.fillText(p.char, p.x, p.y);
+    });
+    ctx.restore();
+
+    // 2. Disegna l'effetto Scanlines sopra a tutto
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    for (let i = 0; i < canvas.height; i += 3) { // Righe più sottili e vicine
+        ctx.fillRect(0, i, canvas.width, 1);
     }
+    ctx.restore();
 }
 
 function drawGlitchText(
@@ -3394,6 +3437,8 @@ function drawMenuScreen() {
 
 function updatePlaying(dt) {
     if (!asyncDonkey) return;
+
+    updateBackground(dt);
 
     // Gestione del cooldown post-boss
     if (postBossCooldownActive) {
@@ -3549,6 +3594,7 @@ function drawPlayingScreen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = PALETTE.DARK_BACKGROUND;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
     drawTerminalBackgroundEffects();
     drawGround();
     if (asyncDonkey) asyncDonkey.draw();
