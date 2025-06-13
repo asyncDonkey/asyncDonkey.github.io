@@ -5,7 +5,7 @@ import { initLeaderboard } from './leaderboardManager.js';
 // Importa solo la funzione di apertura della modale di auth da auth.js
 import { showAuthModal } from './auth.js';
 import { openProfileModal, initProfileControls } from './profile.js';
-
+import { openGlitchpediaModal } from './glitchpedia.js'; // Nuovo import
 import {
     getFirestore,
     // connectFirestoreEmulator, // IMPORT PER EMULATORE FIRESTORE - Commentato se non usato
@@ -818,6 +818,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Event listener per il pulsante Glitchpedia
+            const glitchpediaBtn = document.getElementById('glitchpedia-btn');
+            if (glitchpediaBtn) {
+            glitchpediaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log("Click sul pulsante Glitchpedia!");
+            
+            openGlitchpediaModal();
+            });
+        }
+
     const userAvatarIcon = document.getElementById('user-avatar-icon');
     if (userAvatarIcon) {
         userAvatarIcon.addEventListener('click', () => {
@@ -838,8 +849,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('glitchzillaDefeatedBanner')) {
         displayGlitchzillaBanner();
     }
-
-    
 
     // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
     onAuthStateChanged(auth, async (user) => {

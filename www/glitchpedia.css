@@ -1,54 +1,191 @@
 /* www/glitchpedia.css */
 
-/* Stili specifici per la modale Glitchpedia */
-#glitchpediaModal .modal-content.glitchpedia-view {
-    /* Puoi aggiungere qui stili specifici per il look della Glitchpedia,
-       ad esempio bordi, colori, o ombre leggermente diversi dal profilo */
-    border: 2px solid var(--terminal-purple, #bd93f9); /* Esempio di bordo a tema */
-    box-shadow: 0 0 25px rgba(189, 147, 249, 0.6); /* Esempio di glow */
+/* Base modal styles (ensure consistency with other modals) */
+#glitchpediaModal .modal-content {
+    background-color: var(--terminal-bg, #282a36); /* Dracula background */
+    border: 2px solid var(--terminal-border, #6272a4); /* Terminal-like border */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.7); /* Darker shadow */
+    color: var(--terminal-text, #f8f8f2); /* Dracula text color */
+    font-family: 'Source Code Pro', monospace; /* Terminal font */
+    border-radius: 8px; /* Slightly rounded corners */
+    padding: 30px;
+    position: relative;
+    max-width: 800px; /* Max width for readability */
+    width: 90%; /* Responsive width */
+    max-height: 90vh; /* Allow scrolling for content */
+    overflow-y: auto; /* Enable vertical scrolling */
+    display: flex;
+    flex-direction: column;
 }
 
 #glitchpediaModal h2 {
-    color: var(--terminal-purple, #bd93f9); /* Colore del titolo Glitchpedia */
-    font-size: 1.8em; /* Rendi il titolo leggermente più grande */
-    text-shadow: 0 0 10px var(--terminal-purple);
+    color: var(--terminal-green, #50fa7b); /* Bright green for titles */
+    text-align: center;
+    margin-bottom: 25px;
+    font-family: 'Press Start 2P', cursive; /* Pixel font for main title */
+    font-size: 1.8em;
+    text-shadow: 0 0 10px var(--terminal-green), 0 0 20px rgba(80, 250, 123, 0.3);
 }
 
-/* Stili per gli header dell'accordion nella Glitchpedia */
-#glitchpediaAccordion .accordion-header {
-    background-color: var(--medium-purple, #631b34); /* Sfondo specifico per header accordion */
-    color: var(--terminal-text, #f8f8f2);
+#glitchpediaModal .close-button {
+    color: var(--terminal-red, #ff5555); /* Red for close button */
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    line-height: 1; /* Adjust line-height to center X */
+}
+
+#glitchpediaModal .close-button:hover,
+#glitchpediaModal .close-button:focus {
+    color: var(--bright-red, #ff0000); /* Brighter red on hover */
+    transform: scale(1.2);
+}
+
+/* Accordion Container */
+#glitchpediaModal .accordion-container {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Accordion Item */
+#glitchpediaModal .accordion-item {
+    border: 1px solid var(--terminal-comment, #6272a4);
+    margin-bottom: 10px;
+    border-radius: 5px;
+    overflow: hidden; /* Hide overflow when collapsed */
+}
+
+/* Accordion Header Button */
+#glitchpediaModal .accordion-header {
+    background-color: var(--terminal-darker-bg, #1a1b22);
+    color: var(--terminal-cyan, #8be9fd); /* Cyan for headers */
+    cursor: pointer;
+    padding: 15px 20px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 1.1em;
     font-family: 'Source Code Pro', monospace;
-    font-size: 1em;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--terminal-border, #6272a4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-shadow: 0 0 5px rgba(139, 233, 253, 0.3);
 }
 
-#glitchpediaAccordion .accordion-header:hover {
-    background-color: var(--terminal-pink, #ff79c6); /* Colore hover */
-    color: var(--terminal-bg, #282a36);
+#glitchpediaModal .accordion-header h3 {
+    margin: 0;
+    font-size: 1em; /* Ensure consistent font size for titles */
+    color: inherit; /* Inherit color from parent button */
 }
 
-#glitchpediaAccordion .accordion-header.active {
-    background-color: var(--terminal-pink, #ff79c6); /* Colore attivo */
-    color: var(--terminal-bg, #282a36);
+#glitchpediaModal .accordion-header:hover {
+    background-color: var(--terminal-selection, rgba(68, 71, 90, 0.5));
+    color: var(--bright-cyan, #61dafb);
 }
 
-#glitchpediaAccordion .accordion-panel {
-    background-color: var(--terminal-darker-bg, #1a1b22); /* Sfondo del pannello */
-    border-top: none; /* Rimuovi bordo superiore se c'è */
-    padding: 15px 20px; /* Padding interno */
+/* Accordion Icon (+/-) */
+#glitchpediaModal .accordion-icon {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-left: 10px;
+    transition: transform 0.3s ease;
 }
 
-#glitchpediaAccordion .accordion-panel p {
+/* Accordion Panel (Content) */
+#glitchpediaModal .accordion-panel {
+    padding: 0 20px; /* Padding for content */
+    background-color: var(--terminal-bg, #282a36);
+    color: var(--terminal-text, #f8f8f2);
+    max-height: 0; /* Initially hidden */
+    overflow: hidden;
+    transition: max-height 0.3s ease-out; /* Smooth collapse/expand */
+}
+
+#glitchpediaModal .accordion-panel p {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+#glitchpediaModal .accordion-panel ul {
+    list-style: none; /* Remove default list style */
+    padding-left: 20px; /* Indent lists */
+    margin-top: 10px;
     margin-bottom: 10px;
 }
 
-#glitchpediaAccordion .accordion-panel ul {
-    margin-top: 5px;
-    margin-bottom: 10px;
+#glitchpediaModal .accordion-panel li {
+    margin-bottom: 8px;
+    position: relative;
 }
 
-#glitchpediaAccordion .accordion-panel strong {
-    color: var(--terminal-orange, #ffb86c); /* Colore per i testi in grassetto */
+#glitchpediaModal .accordion-panel li::before {
+    content: '>>'; /* Custom bullet point */
+    color: var(--terminal-yellow, #f1fa8c);
+    position: absolute;
+    left: -20px;
+    top: 0;
+}
+
+#glitchpediaModal .accordion-panel strong {
+    color: var(--terminal-orange, #ffb86c); /* Orange for strong text */
+}
+
+/* Specific link style within Glitchpedia content */
+#glitchpediaModal .accordion-panel a {
+    color: var(--terminal-purple, #bd93f9); /* Purple for links */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+#glitchpediaModal .accordion-panel a:hover {
+    color: var(--bright-purple, #e1a6f2);
+    text-decoration: underline;
+}
+
+/* Scroll to tutorial link at the bottom */
+#glitchpediaModal .scroll-to-tutorial-link {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    padding: 10px 15px;
+    background-color: var(--terminal-green, #50fa7b);
+    color: var(--terminal-bg, #282a36);
+    text-decoration: none;
+    border-radius: 5px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 0 10px rgba(80, 250, 123, 0.5);
+}
+
+#glitchpediaModal .scroll-to-tutorial-link:hover {
+    background-color: var(--bright-green-teal, #30e1b9);
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px var(--bright-green-teal), 0 0 25px rgba(48, 225, 185, 0.3);
+}
+
+/* Optional: Scrollbar styling for terminal look */
+#glitchpediaModal .modal-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+#glitchpediaModal .modal-content::-webkit-scrollbar-track {
+    background: var(--terminal-darker-bg, #1a1b22);
+    border-radius: 10px;
+}
+
+#glitchpediaModal .modal-content::-webkit-scrollbar-thumb {
+    background-color: var(--terminal-orange, #ffb86c);
+    border-radius: 10px;
+    border: 2px solid var(--terminal-darker-bg, #1a1b22);
+}
+
+#glitchpediaModal .modal-content::-webkit-scrollbar-thumb:hover {
+    background-color: var(--bright-orange, #ff7f41);
 }
