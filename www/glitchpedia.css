@@ -1,7 +1,7 @@
 /* www/glitchpedia.css */
 
 /* Base modal styles (ensure consistency with other modals) */
-#glitchpediaModal .modal-content {
+.modal-content.glitchpedia-view { /* HO CAMBIATO IL SELETTORE */
     background-color: var(--terminal-bg, #282a36); /* Dracula background */
     border: 2px solid var(--terminal-border, #6272a4); /* Terminal-like border */
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.7); /* Darker shadow */
@@ -9,15 +9,15 @@
     font-family: 'Source Code Pro', monospace; /* Terminal font */
     border-radius: 8px; /* Slightly rounded corners */
     padding: 30px;
-    position: relative;
+    position: relative; /* LASCIA O RIAGGIUNGI QUESTA RIGA. Serve per il posizionamento del pulsante di chiusura e coerenza. */
     max-width: 800px; /* Max width for readability */
     width: 90%; /* Responsive width */
     max-height: 90vh; /* Allow scrolling for content */
     overflow-y: auto; /* Enable vertical scrolling */
-    display: flex;
-    flex-direction: column;
+    /* ASSICURATI CHE QUESTE RIGHE NON SIANO QUI: */
+    /* display: flex; */
+    /* flex-direction: column; */
 }
-
 #glitchpediaModal h2 {
     color: var(--terminal-green, #50fa7b); /* Bright green for titles */
     text-align: center;
@@ -188,4 +188,48 @@
 
 #glitchpediaModal .modal-content::-webkit-scrollbar-thumb:hover {
     background-color: var(--bright-orange, #ff7f41);
+}
+/* Stile per il messaggio animato */
+/* Stile per il messaggio animato - VERSIONE AGGIORNATA per cursore fisso */
+#glitchpediaAnimatedMessage {
+    text-align: center;
+    margin-top: 40px;
+    padding: 2px 0; /* Mantiene un minimo padding verticale */
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--terminal-text, #f8f8f2);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1.1em;
+    white-space: nowrap; /* Mantiene il testo su una singola riga */
+    overflow: hidden; /* Nasconde il testo che eccede la larghezza man mano che viene "digitato" */
+    position: relative;
+    box-shadow: none;
+
+    /* ANIMAZIONE TYPING: Esegui solo una volta e mantieni lo stato finale */
+    animation: typing 4s steps(40, end) forwards; /* 'forwards' mantiene lo stato finale dell'animazione */
+    
+    text-shadow: 0 0 5px var(--terminal-text);
+}
+
+
+
+
+/* NUOVA ANIMAZIONE PER IL CURSORE LAMPEGGIANTE (solo opacità) */
+@keyframes blink-underscore {
+    from, to {
+        opacity: 1; /* Il cursore è visibile */
+    }
+    50% {
+        opacity: 0; /* Il cursore è invisibile */
+    }
+}
+
+/* Creiamo un pseudo-elemento per il cursore '_' che appare dopo la digitazione */
+#glitchpediaAnimatedMessage.typed::after {
+    content: '_'; /* Il carattere underscore */
+    display: inline-block; /* Per applicare l'animazione di opacità */
+    color: var(--terminal-text, #f8f8f2); /* Colore del cursore */
+    animation: blink-underscore 0.75s step-end infinite; /* Applica l'animazione di lampeggio */
+    margin-left: 2px; /* Piccolo spazio dal testo digitato */
 }

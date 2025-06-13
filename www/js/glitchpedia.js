@@ -6,7 +6,7 @@ const closeGlitchpediaModalBtn = document.getElementById('closeGlitchpediaModalB
 // Function to open the Glitchpedia modal
 export function openGlitchpediaModal() {
     if (glitchpediaModal) {
-        glitchpediaModal.style.display = 'block';
+        glitchpediaModal.style.display = 'flex'; // 'block';
         glitchpediaModal.setAttribute('aria-hidden', 'false');
         console.log('[glitchpedia.js] Glitchpedia modal opened.');
         // Optionally, focus on the first interactive element for accessibility
@@ -82,23 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Smooth scroll for "Torna al Tutorial" link
-    const scrollToTutorialLink = document.getElementById('scrollToTutorialLink');
-    if (scrollToTutorialLink) {
-        scrollToTutorialLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href').substring(1);
-            const targetElement = document.getElementById(targetId);
-            if (targetElement) {
-                targetElement.scrollIntoView({ behavior: 'smooth' });
-                // Optional: expand the first accordion item after scrolling
-                const firstAccordionHeader = targetElement.querySelector('.accordion-header');
-                if (firstAccordionHeader && firstAccordionHeader.getAttribute('aria-expanded') === 'false') {
-                     // Simulate a click to expand it if it's not already
-                    firstAccordionHeader.click();
-                }
-            }
-        });
-    }
+    
 });
 
 // Initial accordion state: close all by default on load
