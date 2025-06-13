@@ -42,15 +42,15 @@ async function preloadLoaderSounds() {
     console.log('Pre-caricamento suoni del loader...');
     try {
         const soundAssetsToLoad = [
-            loadSound('loading_hum', 'audio/loading_hum.mp3'),
-            loadSound('typing_loop', 'audio/typing_loop.mp3'),
-            loadSound('success_bleep', 'audio/success_bleep.mp3'),
+            loadSound('loading_hum', 'audio/loading_hum.ogg'),
+            loadSound('typing_loop', 'audio/typing_loop.ogg'),
+            loadSound('success_bleep', 'audio/success_bleep.ogg'),
         ];
         
         // Carica SOLO i file voce necessari
         messagesWithVoice.forEach(index => {
             const soundName = `log_${index + 1}`;
-            const soundPath = `audio/${soundName}.mp3`;
+            const soundPath = `audio/${soundName}.ogg`;
             console.log(`Aggiunto al caricamento: ${soundName}`);
             soundAssetsToLoad.push(loadSound(soundName, soundPath));
         });

@@ -27,9 +27,9 @@ import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/
 import { functions } from './firebase-config.js'; // Assicurati di esportare 'functions' da firebase-config
 
 // --- GESTIONE AUDIO V1.4 ---
-const BGM_PLAYLIST = Array.from({ length: 20 }, (_, i) => `track_${String(i + 1).padStart(2, '0')}.mp3`);
-const BOSS_MUSIC_PATH = 'audio/boss/boss_music.mp3';
-const GAME_OVER_MUSIC_PATH = 'audio/game_over_music.mp3';
+const BGM_PLAYLIST = Array.from({ length: 20 }, (_, i) => `track_${String(i + 1).padStart(2, '0')}.ogg`);
+const BOSS_MUSIC_PATH = 'audio/boss/boss_music.ogg';
+const GAME_OVER_MUSIC_PATH = 'audio/game_over_music.ogg';
 
 const POWERUP_SOUND_MAP = {
     [POWERUP_TYPE.TRIPLE_SHOT]: { sfx: 'sfx_triple_shot', voice: 'voice_multithread' },
@@ -44,21 +44,21 @@ const POWERUP_SOUND_MAP = {
 
 const soundsToLoad = [
     // Suoni Esistenti
-    { name: 'jump', path: 'audio/jump.mp3' },
-    { name: 'shoot', path: 'audio/shoot.mp3' },
-    { name: 'enemyHit', path: 'audio/enemy_hit.mp3' },
-    { name: 'enemyExplode', path: 'audio/enemy_explode.mp3' },
-    { name: 'playerHit', path: 'audio/player_hit.mp3' },
-    { name: 'shieldBlock', path: 'audio/shield_block.mp3' },
-    { name: 'blockBreak', path: 'audio/block_break.mp3' },
-    { name: 'enemyShootLight', path: 'audio/enemy_shoot_light.mp3' },
-    { name: 'enemyShootHeavy', path: 'audio/enemy_shoot_heavy.mp3' },
-    { name: 'glitchzillaSpawn', path: 'audio/glitchzilla_spawn.mp3' },
-    { name: 'glitchzillaHit', path: 'audio/glitchzilla_hit.mp3' },
-    { name: 'glitchzillaAttack', path: 'audio/glitchzilla_attack.mp3' },
+    { name: 'jump', path: 'audio/jump.ogg' },
+    { name: 'shoot', path: 'audio/shoot.ogg' },
+    { name: 'enemyHit', path: 'audio/enemy_hit.ogg' },
+    { name: 'enemyExplode', path: 'audio/enemy_explode.ogg' },
+    { name: 'playerHit', path: 'audio/player_hit.ogg' },
+    { name: 'shieldBlock', path: 'audio/shield_block.ogg' },
+    { name: 'blockBreak', path: 'audio/block_break.ogg' },
+    { name: 'enemyShootLight', path: 'audio/enemy_shoot_light.ogg' },
+    { name: 'enemyShootHeavy', path: 'audio/enemy_shoot_heavy.ogg' },
+    { name: 'glitchzillaSpawn', path: 'audio/glitchzilla_spawn.ogg' },
+    { name: 'glitchzillaHit', path: 'audio/glitchzilla_hit.ogg' },
+    { name: 'glitchzillaAttack', path: 'audio/glitchzilla_attack.ogg' },
     // Nuovi Suoni v1.4
-    { name: 'gameOverImpact', path: 'audio/game_over_impact.mp3' },
-    { name: 'bossDefeat', path: 'audio/boss/boss_defeat.mp3' },
+    { name: 'gameOverImpact', path: 'audio/game_over_impact.ogg' },
+    { name: 'bossDefeat', path: 'audio/boss/boss_defeat.ogg' },
     // Caricamento suoni Power-Up
     ...Object.values(POWERUP_SOUND_MAP).flatMap(sounds => [
         { name: sounds.sfx, path: `audio/powerups/sfx/${sounds.sfx}.mp3` },
@@ -181,7 +181,7 @@ const ENEMY_FOUR_IDLE_NUM_FRAMES = 4;
 const ENEMY_FOUR_TARGET_WIDTH = ENEMY_FOUR_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCALE_FACTOR;
 const ENEMY_FOUR_TARGET_HEIGHT = ENEMY_FOUR_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const SHOOTING_ENEMY_SHOOT_INTERVAL = 2.5;
-const SHOOTING_ENEMY_PROJECTILE_SOUND = 'audio/enemy_shoot_light.mp3';
+const SHOOTING_ENEMY_PROJECTILE_SOUND = 'audio/enemy_shoot_light.ogg';
 
 const ENEMY_FOUR_PROJECTILE_SPRITE_SRC = 'images/enemyFourProjectile.png';
 const ENEMY_FOUR_PROJECTILE_ACTUAL_FRAME_WIDTH = 16;
@@ -208,7 +208,7 @@ const ENEMY_SIX_TARGET_WIDTH = ENEMY_SIX_ACTUAL_FRAME_WIDTH * GLOBAL_SPRITE_SCAL
 const ENEMY_SIX_TARGET_HEIGHT = ENEMY_SIX_ACTUAL_FRAME_HEIGHT * GLOBAL_SPRITE_SCALE_FACTOR;
 const ARMORED_SHOOTING_ENEMY_HEALTH = 4;
 const ARMORED_SHOOTING_ENEMY_SHOOT_INTERVAL = 3.0;
-const ARMORED_SHOOTING_ENEMY_PROJECTILE_SOUND = 'audio/enemy_shoot_heavy.mp3';
+const ARMORED_SHOOTING_ENEMY_PROJECTILE_SOUND = 'audio/enemy_shoot_heavy.ogg';
 
 const ENEMY_SIX_PROJECTILE_SPRITE_SRC = 'images/enemySixProjectile.png';
 const ENEMY_SIX_PROJECTILE_ACTUAL_FRAME_WIDTH = 20;
