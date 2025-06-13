@@ -819,15 +819,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Event listener per il pulsante Glitchpedia
-            const glitchpediaBtn = document.getElementById('glitchpedia-btn');
-            if (glitchpediaBtn) {
-            glitchpediaBtn.addEventListener('click', (e) => {
+    const glitchpediaBtn = document.getElementById('glitchpedia-btn');
+    if (glitchpediaBtn) {
+        glitchpediaBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log("Click sul pulsante Glitchpedia!");
-            
+            console.log('Click sul pulsante Glitchpedia!');
+
             openGlitchpediaModal();
-            });
-        }
+        });
+    }
 
     const userAvatarIcon = document.getElementById('user-avatar-icon');
     if (userAvatarIcon) {

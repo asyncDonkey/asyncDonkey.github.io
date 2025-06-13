@@ -10,7 +10,9 @@ export function openGlitchpediaModal() {
         glitchpediaModal.setAttribute('aria-hidden', 'false');
         console.log('[glitchpedia.js] Glitchpedia modal opened.');
         // Optionally, focus on the first interactive element for accessibility
-        const firstFocusable = glitchpediaModal.querySelector('button, a, input, select, [tabindex]:not([tabindex="-1"])');
+        const firstFocusable = glitchpediaModal.querySelector(
+            'button, a, input, select, [tabindex]:not([tabindex="-1"])'
+        );
         if (firstFocusable) {
             // setTimeout is often needed to ensure the modal is fully visible before focusing
             setTimeout(() => firstFocusable.focus(), 50);
@@ -43,14 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const accordionHeaders = document.querySelectorAll('#gameInfoAccordion .accordion-header');
 
-    accordionHeaders.forEach(header => {
-        header.addEventListener('click', function() {
+    accordionHeaders.forEach((header) => {
+        header.addEventListener('click', function () {
             const panel = this.nextElementSibling;
             const icon = this.querySelector('.accordion-icon');
             const isExpanded = this.getAttribute('aria-expanded') === 'true';
 
             // Close all other open panels
-            accordionHeaders.forEach(otherHeader => {
+            accordionHeaders.forEach((otherHeader) => {
                 if (otherHeader !== this) {
                     const otherPanel = otherHeader.nextElementSibling;
                     const otherIcon = otherHeader.querySelector('.accordion-icon');
@@ -74,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize all panels as closed and set icons
-    accordionHeaders.forEach(header => {
+    accordionHeaders.forEach((header) => {
         header.setAttribute('aria-expanded', 'false');
         header.nextElementSibling.style.maxHeight = null;
         const icon = header.querySelector('.accordion-icon');
@@ -82,15 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Smooth scroll for "Torna al Tutorial" link
-    
 });
 
 // Initial accordion state: close all by default on load
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('#gameInfoAccordion .accordion-panel').forEach(panel => {
+    document.querySelectorAll('#gameInfoAccordion .accordion-panel').forEach((panel) => {
         panel.style.maxHeight = null;
     });
-    document.querySelectorAll('#gameInfoAccordion .accordion-header').forEach(header => {
+    document.querySelectorAll('#gameInfoAccordion .accordion-header').forEach((header) => {
         header.setAttribute('aria-expanded', 'false');
         const icon = header.querySelector('.accordion-icon');
         if (icon) icon.textContent = '+';

@@ -1,7 +1,8 @@
 /* www/glitchpedia.css */
 
 /* Base modal styles (ensure consistency with other modals) */
-.modal-content.glitchpedia-view { /* HO CAMBIATO IL SELETTORE */
+.modal-content.glitchpedia-view {
+    /* HO CAMBIATO IL SELETTORE */
     background-color: var(--terminal-bg, #282a36); /* Dracula background */
     border: 2px solid var(--terminal-border, #6272a4); /* Terminal-like border */
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.7); /* Darker shadow */
@@ -24,7 +25,9 @@
     margin-bottom: 25px;
     font-family: 'Press Start 2P', cursive; /* Pixel font for main title */
     font-size: 1.8em;
-    text-shadow: 0 0 10px var(--terminal-green), 0 0 20px rgba(80, 250, 123, 0.3);
+    text-shadow:
+        0 0 10px var(--terminal-green),
+        0 0 20px rgba(80, 250, 123, 0.3);
 }
 
 #glitchpediaModal .close-button {
@@ -34,7 +37,9 @@
     right: 20px;
     font-size: 30px;
     cursor: pointer;
-    transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    transition:
+        color 0.2s ease-in-out,
+        transform 0.2s ease-in-out;
     line-height: 1; /* Adjust line-height to center X */
 }
 
@@ -73,7 +78,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
     text-shadow: 0 0 5px rgba(139, 233, 253, 0.3);
 }
 
@@ -160,14 +167,18 @@
     border-radius: 5px;
     font-family: 'Press Start 2P', cursive;
     font-size: 0.9em;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
     box-shadow: 0 0 10px rgba(80, 250, 123, 0.5);
 }
 
 #glitchpediaModal .scroll-to-tutorial-link:hover {
     background-color: var(--bright-green-teal, #30e1b9);
     transform: translateY(-2px);
-    box-shadow: 0 0 15px var(--bright-green-teal), 0 0 25px rgba(48, 225, 185, 0.3);
+    box-shadow:
+        0 0 15px var(--bright-green-teal),
+        0 0 25px rgba(48, 225, 185, 0.3);
 }
 
 /* Optional: Scrollbar styling for terminal look */
@@ -208,16 +219,14 @@
 
     /* ANIMAZIONE TYPING: Esegui solo una volta e mantieni lo stato finale */
     animation: typing 4s steps(40, end) forwards; /* 'forwards' mantiene lo stato finale dell'animazione */
-    
+
     text-shadow: 0 0 5px var(--terminal-text);
 }
 
-
-
-
 /* NUOVA ANIMAZIONE PER IL CURSORE LAMPEGGIANTE (solo opacità) */
 @keyframes blink-underscore {
-    from, to {
+    from,
+    to {
         opacity: 1; /* Il cursore è visibile */
     }
     50% {
@@ -232,4 +241,55 @@
     color: var(--terminal-text, #f8f8f2); /* Colore del cursore */
     animation: blink-underscore 0.75s step-end infinite; /* Applica l'animazione di lampeggio */
     margin-left: 2px; /* Piccolo spazio dal testo digitato */
+}
+
+/* Stili per le voci della Glitchpedia */
+.glitchpedia-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px; /* Spazio tra gif e testo */
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--terminal-secondary, #44475a);
+}
+
+.glitchpedia-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.glitchpedia-gif {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    flex-shrink: 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--terminal-glow, #50fa7b);
+    image-rendering: pixelated; /* Mantiene l'aspetto pixel-art delle gif */
+}
+
+.glitchpedia-entry-content h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: var(--terminal-highlight, #8be9fd);
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.9em;
+}
+
+.glitchpedia-entry-content p {
+    margin-bottom: 5px;
+    line-height: 1.6;
+}
+
+.glitchpedia-entry-content p strong {
+    color: var(--terminal-text-strong, #f1fa8c);
+    font-weight: normal; /* Il font è già bold di suo */
+}
+
+/* Icone negli header dell'accordion */
+.accordion-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }

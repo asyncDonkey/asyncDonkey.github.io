@@ -705,7 +705,6 @@ body.game-fullscreen-active #scoreInputContainerDonkey[style*='display: flex'] {
     cursor: pointer;
 }
 
-
 .scroll-to-tutorial-link {
     display: block;
     text-align: center;
