@@ -41,13 +41,24 @@
     </head>
     <body>
         <div id="app-root">
-            <div id="terminal-container">
-                <pre id="terminal-log"></pre>
+           <div id="terminal-container">
+               <pre id="terminal-log"></pre>
 
-                <div id="progress-container">
-                    <pre id="ascii-progress-bar"></pre>
-                </div>
-            </div>
+                                  <div id="multi-progress-container">
+                     <div class="progress-bar-wrapper">
+                      <span class="progress-label">DECRYPTING DATA...</span>
+                      <pre class="ascii-progress-bar" id="progress-bar-1"></pre>
+                     </div>
+                     <div class="progress-bar-wrapper">
+                      <span class="progress-label">LOADING ASSETS...</span>
+                      <pre class="ascii-progress-bar" id="progress-bar-2"></pre>
+                     </div>
+                     <div class="progress-bar-wrapper">
+                      <span class="progress-label">VERIFYING INTEGRITY...</span>
+                      <pre class="ascii-progress-bar" id="progress-bar-3"></pre>
+                     </div>
+               </div>
+           </div>
 
             <div id="main-menu">
                 <h1>codeDash!</h1>

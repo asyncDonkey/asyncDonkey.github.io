@@ -132,21 +132,40 @@ html {
     }
 }
 
-/* Contenitore per la nuova barra di progresso ASCII */
-#progress-container {
+/* NUOVI STILI PER BARRE MULTIPLE */
+#multi-progress-container {
     width: 95%;
     max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Spazio tra le barre */
+    margin-top: 20px;
+}
+.progress-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Allinea etichetta a sinistra */
 }
 
-/* Stile per la barra di progresso ASCII */
-#ascii-progress-bar {
+.progress-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8em;
+    color: var(--terminal-text);
+    text-shadow: 0 0 3px rgba(224, 224, 224, 0.2);
+    margin-bottom: 3px;
+    text-transform: uppercase;
+}
+
+.ascii-progress-bar {
     font-family: 'Source Code Pro', monospace;
     font-size: 1.1em;
     color: var(--terminal-highlight);
     text-shadow: 0 0 5px var(--terminal-highlight);
     margin: 0;
     padding: 0;
-    text-align: center;
+    text-align: left;
+    width: 100%;
+    white-space: pre; /* Mantiene la formattazione della barra */
 }
 
 #main-menu {

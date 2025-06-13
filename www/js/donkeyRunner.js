@@ -26,6 +26,46 @@ import { showToast } from './toastNotifications.js';
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 import { functions } from './firebase-config.js'; // Assicurati di esportare 'functions' da firebase-config
 
+// --- GESTIONE AUDIO V1.4 ---
+const BGM_PLAYLIST = Array.from({ length: 20 }, (_, i) => `track_${String(i + 1).padStart(2, '0')}.mp3`);
+const BOSS_MUSIC_PATH = 'audio/boss/boss_music.mp3';
+const GAME_OVER_MUSIC_PATH = 'audio/game_over_music.mp3';
+
+const POWERUP_SOUND_MAP = {
+    [POWERUP_TYPE.TRIPLE_SHOT]: { sfx: 'sfx_triple_shot', voice: 'voice_multithread' },
+    [POWERUP_TYPE.SHIELD]: { sfx: 'sfx_shield', voice: 'voice_shield' },
+    [POWERUP_TYPE.SMART_BOMB]: { sfx: 'sfx_smart_bomb', voice: 'voice_cleanup' },
+    [POWERUP_TYPE.DEBUG_MODE]: { sfx: 'sfx_debug_mode', voice: 'voice_debug' },
+    [POWERUP_TYPE.FIREWALL]: { sfx: 'sfx_firewall', voice: 'voice_firewall' },
+    [POWERUP_TYPE.BLOCK_BREAKER]: { sfx: 'sfx_block_breaker', voice: 'voice_decompiler' },
+    [POWERUP_TYPE.SLAYER_SUBROUTINE]: { sfx: 'sfx_legendary', voice: 'voice_slayer' },
+    [POWERUP_TYPE.CODE_INJECTOR]: { sfx: 'sfx_legendary', voice: 'voice_injector' },
+};
+
+const soundsToLoad = [
+    // Suoni Esistenti
+    { name: 'jump', path: 'audio/jump.mp3' },
+    { name: 'shoot', path: 'audio/shoot.mp3' },
+    { name: 'enemyHit', path: 'audio/enemy_hit.mp3' },
+    { name: 'enemyExplode', path: 'audio/enemy_explode.mp3' },
+    { name: 'playerHit', path: 'audio/player_hit.mp3' },
+    { name: 'shieldBlock', path: 'audio/shield_block.mp3' },
+    { name: 'blockBreak', path: 'audio/block_break.mp3' },
+    { name: 'enemyShootLight', path: 'audio/enemy_shoot_light.mp3' },
+    { name: 'enemyShootHeavy', path: 'audio/enemy_shoot_heavy.mp3' },
+    { name: 'glitchzillaSpawn', path: 'audio/glitchzilla_spawn.mp3' },
+    { name: 'glitchzillaHit', path: 'audio/glitchzilla_hit.mp3' },
+    { name: 'glitchzillaAttack', path: 'audio/glitchzilla_attack.mp3' },
+    // Nuovi Suoni v1.4
+    { name: 'gameOverImpact', path: 'audio/game_over_impact.mp3' },
+    { name: 'bossDefeat', path: 'audio/boss/boss_defeat.mp3' },
+    // Caricamento suoni Power-Up
+    ...Object.values(POWERUP_SOUND_MAP).flatMap(sounds => [
+        { name: sounds.sfx, path: `audio/powerups/sfx/${sounds.sfx}.mp3` },
+        { name: sounds.voice, path: `audio/powerups/voice/${sounds.voice}.mp3` }
+    ])
+];
+
 const PALETTE = {
     DARK_BACKGROUND: '#411d31',
     MEDIUM_PURPLE: '#631b34',
@@ -292,24 +332,6 @@ const POWERUP_THEMATIC_NAMES = {
     [POWERUP_TYPE.CODE_INJECTOR]: 'Code Injector', // Nuovo nome tematico
 };
 
-const soundsToLoad = [
-    { name: 'jump', path: 'audio/jump.mp3' },
-    { name: 'shoot', path: 'audio/shoot.mp3' },
-    { name: 'enemyHit', path: 'audio/enemy_hit.mp3' },
-    { name: 'enemyExplode', path: 'audio/enemy_explode.mp3' },
-    { name: 'playerHit', path: 'audio/player_hit.mp3' },
-    { name: 'gameOverSound', path: 'audio/game_over.mp3' },
-    { name: 'powerUpCollect', path: 'audio/powerup_collect.mp3' },
-    { name: 'shieldBlock', path: 'audio/shield_block.mp3' },
-    { name: 'blockBreak', path: 'audio/block_break.mp3' },
-    { name: 'enemyShootLight', path: SHOOTING_ENEMY_PROJECTILE_SOUND },
-    { name: 'enemyShootHeavy', path: ARMORED_SHOOTING_ENEMY_PROJECTILE_SOUND },
-    { name: 'glitchzillaSpawn', path: 'audio/glitchzilla_spawn.mp3' },
-    { name: 'glitchzillaHit', path: 'audio/glitchzilla_hit.mp3' },
-    { name: 'glitchzillaAttack', path: 'audio/glitchzilla_attack.mp3' },
-    { name: 'glitchzillaDefeat', path: 'audio/glitchzilla_defeat.mp3' },
-];
-const backgroundMusicPath = 'audio/background_music.mp3';
 
 function setupRenderingContext(context) {
     context.imageSmoothingEnabled = false;
@@ -894,34 +916,58 @@ export function setupGameEngine() {
     console.log('✅ setupGameEngine: Completato.');
 }
 
+// Aggiunta funzione per gestire BGM
+let currentBGMPath = '';
+async function playRandomBGM() {
+    AudioManager.stopMusic();
+    const availableTracks = BGM_PLAYLIST.filter(track => `audio/bgm/${track}` !== currentBGMPath);
+    const trackName = availableTracks[Math.floor(Math.random() * availableTracks.length)];
+    currentBGMPath = `audio/bgm/${trackName}`;
+    console.log(`🎵 Playing BGM: ${currentBGMPath}`);
+    await AudioManager.loadBackgroundMusic(currentBGMPath);
+    AudioManager.playMusic(true); // Loop BGM
+}
+
+async function playBossMusic() {
+    AudioManager.stopMusic();
+    console.log(`⚔️ Playing Boss Music: ${BOSS_MUSIC_PATH}`);
+    await AudioManager.loadBackgroundMusic(BOSS_MUSIC_PATH);
+    AudioManager.playMusic(true);
+}
+
+async function playGameOverMusic() {
+    AudioManager.stopMusic();
+    console.log(`💀 Playing Game Over Music: ${GAME_OVER_MUSIC_PATH}`);
+    await AudioManager.loadBackgroundMusic(GAME_OVER_MUSIC_PATH);
+    AudioManager.playMusic(false); // Non loopare la musica di game over
+}
+
 /**
  * Esegue il caricamento di tutte le immagini e suoni necessari per il gioco.
  * Restituisce una Promise che si risolve quando tutto è caricato.
  */
 export async function preloadGameAssets() {
-    console.log('⏳ preloadGameAssets: Avvio caricamento assets...');
-    if (resourcesInitialized) {
-        console.log('Assets già caricati.');
-        return;
-    }
+   console.log('⏳ preloadGameAssets: Avvio caricamento assets...');
+   if (resourcesInitialized) {
+   console.log('Assets già caricati.');
+   return; // Esce se le risorse sono già state inizializzate
+   }
 
-    const imagePromises = imagesToLoad.map((d) => loadImage(d.name, d.src));
-    const soundPromises = soundsToLoad.map((s) => AudioManager.loadSound(s.name, s.path));
-    const backgroundMusicPromise = AudioManager.loadBackgroundMusic(backgroundMusicPath);
+   const imagePromises = imagesToLoad.map((d) => loadImage(d.name, d.src));
+   const soundPromises = soundsToLoad.map((s) => AudioManager.loadSound(s.name, s.path));
 
-    await Promise.allSettled([...imagePromises, ...soundPromises, backgroundMusicPromise]);
+    // La vecchia riga che causava l'errore è stata rimossa qui.
+   await Promise.allSettled([...imagePromises, ...soundPromises]);
 
-    console.log('✅ preloadGameAssets: Processo di caricamento assets completato.');
-    resourcesInitialized = true;
-
-    // REMOVED: loadDonkeyLeaderboard() from here. It should be triggered when needed (e.g., in leaderboard.html or on Game Over screen display).
-    //checkAndDisplayOrientationPrompt();
+   console.log('✅ preloadGameAssets: Processo di caricamento assets completato.');
+   resourcesInitialized = true;
 }
 
 /**
  * Fa partire la logica di gioco. Imposta lo stato su PLAYING,
  * resetta le variabili di gioco e avvia la musica e il game loop.
  */
+// La funzione launchGame viene modificata per avviare la BGM casuale
 export function launchGame() {
     console.log('🚀 launchGame: Avvio del gioco!');
     if (!resourcesInitialized) {
@@ -935,16 +981,13 @@ export function launchGame() {
 
     currentGameState = 'PLAYING';
     resetGame();
-    AudioManager.playMusic(false);
+    playRandomBGM(); // NUOVA CHIAMATA per la musica casuale
 
     if (mobileStartButton) mobileStartButton.style.display = 'none';
     if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-
-    // **NUOVO**: Nascondi l'icona del profilo quando il gioco inizia
     if (accountIconContainer) {
         accountIconContainer.style.display = 'none';
     }
-
     if (mobileControlsDiv) {
         mobileControlsDiv.style.setProperty('display', isTouchDevice ? 'flex' : 'none', 'important');
     }
@@ -953,7 +996,6 @@ export function launchGame() {
         startGameLoop();
     }
 }
-
 // --- Classi di Gioco ---
 class Player {
     constructor(x, y, dw, dh) {
@@ -1134,6 +1176,16 @@ class Player {
     }
 
     activatePowerUp(type) {
+        const soundInfo = POWERUP_SOUND_MAP[type];
+        if (soundInfo) {
+            AudioManager.playSound(soundInfo.sfx);
+            setTimeout(() => AudioManager.playSound(soundInfo.voice), 150);
+        } else {
+            // Fallback per power-up senza suono specifico (non dovrebbe succedere)
+            AudioManager.playSound('powerUpCollect');
+        }
+
+        gameStats.powerUpsCollected++;
         const exclusiveTypes = [
             POWERUP_TYPE.TRIPLE_SHOT,
             POWERUP_TYPE.SHIELD,
@@ -1143,36 +1195,28 @@ class Player {
             POWERUP_TYPE.BLOCK_BREAKER,
         ];
 
-        // Gestione dei power-up permanenti (upgrade)
-        if (type === POWERUP_TYPE.SLAYER_SUBROUTINE) {
-            if (!this.hasSlayerSubroutine) {
+         // Gestione dei power-up permanenti (upgrade)
+         if (type === POWERUP_TYPE.SLAYER_SUBROUTINE) {
+                if (!this.hasSlayerSubroutine) {
                 this.hasSlayerSubroutine = true;
-                this.hasCodeInjector = false; // Slayer sovrascrive Code Injector
-                // Disattiva DEBUG_MODE se attivo, dato che Slayer lo rende obsoleto.
+                this.hasCodeInjector = false;
                 if (this.activePowerUp === POWERUP_TYPE.DEBUG_MODE) {
-                    this.deactivatePowerUp();
+                this.deactivatePowerUp();
                 }
                 showToast('Slayer Subroutine ATTIVATO!', 'success');
-                AudioManager.playSound('powerUpCollect');
-                gameStats.powerUpsCollected++;
-            }
-            return; // Non è un power-up a tempo gestito da activePowerUp/powerUpTimer
-        }
-
-        if (type === POWERUP_TYPE.CODE_INJECTOR) {
-            // Code Injector può essere attivato solo se Slayer Subroutine NON è già attivo
-            if (!this.hasSlayerSubroutine && !this.hasCodeInjector) {
+                }
+                return;
+         }
+         if (type === POWERUP_TYPE.CODE_INJECTOR) {
+                if (!this.hasSlayerSubroutine && !this.hasCodeInjector) {
                 this.hasCodeInjector = true;
-                // Disattiva DEBUG_MODE se attivo, dato che Code Injector lo rende obsoleto.
                 if (this.activePowerUp === POWERUP_TYPE.DEBUG_MODE) {
-                    this.deactivatePowerUp();
+                this.deactivatePowerUp();
                 }
                 showToast('Code Injector ATTIVATO!', 'success');
-                AudioManager.playSound('powerUpCollect');
-                gameStats.powerUpsCollected++;
-            }
-            return; // Non è un power-up a tempo gestito da activePowerUp/powerUpTimer
-        }
+                }
+                return;
+         }
 
         // Logica per power-up temporanei (esistente)
         // Se un power-up temporaneo di tipo esclusivo è già attivo e ne attivi un altro diverso, disattiva il precedente.
@@ -2012,7 +2056,8 @@ class Glitchzilla extends BaseEnemy {
 
         if (this.health <= 0) {
             console.log('Glitchzilla SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            AudioManager.playSound('glitchzillaDefeat');
+            AudioManager.playSound('bossDefeat');
+            playRandomBGM(); // Riparte la musica normale
 
             score += this.scoreValue;
             activeMiniboss = null;
@@ -2202,6 +2247,8 @@ class TrojanByte extends BaseEnemy {
 
         if (this.health <= 0) {
             console.log('TROJAN_BYTE SCONFITTO! Assegno punteggio: ' + this.scoreValue);
+            AudioManager.playSound('bossDefeat');
+            playRandomBGM(); // Riparte la musica normale
 
             score += this.scoreValue;
             activeMiniboss = null;
@@ -2486,7 +2533,8 @@ class MissingNumber extends BaseEnemy {
 
         if (this.health <= 0) {
             console.log('MISSING_NUMBER SCONFITTO! Assegno punteggio: ' + this.scoreValue);
-            // AudioManager.playSound('missingNumberDefeat');
+            AudioManager.playSound('bossDefeat');
+            playRandomBGM(); // Riparte la musica normale
 
             score += this.scoreValue; // Corretto da scoreData a scoreValue
             activeMiniboss = null;
@@ -2867,8 +2915,10 @@ function processGameOver() {
     currentGameState = 'GAME_OVER';
     finalScore = Math.floor(score);
 
+    // NUOVA SEQUENZA AUDIO GAME OVER
     AudioManager.stopMusic();
-    AudioManager.playSound('gameOverSound');
+    AudioManager.playSound('gameOverImpact'); // Suono secco
+    setTimeout(() => playGameOverMusic(), 500); // Parte la musica di game over dopo 0.5s
 
     if (accountIconContainer) {
         accountIconContainer.style.display = 'flex';
@@ -3358,8 +3408,10 @@ function updatePlaying(dt) {
     // Avvia la fase di warning di un boss solo se nessun boss è attivo, nessuna battaglia è imminente,
     // e non c'è un cooldown post-boss attivo.
     if (!activeMiniboss && !bossFightImminent && !postBossCooldownActive) {
+        let willSpawnBoss = false;
         if (!isGlitchzillaDefeatedThisGame && score >= GLITCHZILLA_SPAWN_SCORE_THRESHOLD) {
             console.log('Soglia punteggio per Glitchzilla raggiunta. Avvio sequenza di spawn (2s warning).');
+            willSpawnBoss = true;
             bossFightImminent = true;
             bossWarningTimer = 2.0;
             hasGlitchzillaSpawnedThisGame = true; // Marchia che la fase di questo boss è stata triggerata
@@ -3369,6 +3421,7 @@ function updatePlaying(dt) {
             score >= TROJAN_BYTE_SPAWN_SCORE_THRESHOLD
         ) {
             console.log('Soglia punteggio per Trojan_Byte raggiunta. Avvio sequenza di spawn (2s warning).');
+            willSpawnBoss = true;
             bossFightImminent = true;
             bossWarningTimer = 2.0;
             hasTrojanByteSpawnedThisGame = true; // Marchia che la fase di questo boss è stata triggerata
@@ -3379,11 +3432,20 @@ function updatePlaying(dt) {
             score >= MISSING_NUMBER_SPAWN_SCORE_THRESHOLD
         ) {
             console.log('Soglia punteggio per Missing_Number raggiunta. Avvio sequenza di spawn (2s warning).');
+            willSpawnBoss = true;
             bossFightImminent = true;
             bossWarningTimer = 2.0;
             hasMissingNumberSpawnedThisGame = true; // Marchia che la fase di questo boss è stata triggerata
         }
-    }
+    if (willSpawnBoss) {
+            console.log('Soglia boss raggiunta. Avvio sequenza di spawn (2s warning).');
+            bossFightImminent = true;
+            bossWarningTimer = 2.0;
+            playBossMusic(); // CAMBIO MUSICA!
+        }
+  }
+
+    
 
     // --- Logica di Spawn Effettivo del Boss (Crea l'oggetto boss dopo il warning) ---
     // Questo avviene DOPO che il timer del warning è scaduto, ma solo se nessun boss è attualmente attivo.
