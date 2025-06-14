@@ -75,6 +75,23 @@ const PALETTE = {
    BRIGHT_GREEN_TEAL: '#30e1b9',
 };
 
+// NUOVO: Oggetto per definire i temi visivi di ogni boss
+const BOSS_THEMES = {
+    'Glitchzilla': {
+        backgroundColor: PALETTE.MEDIUM_PURPLE, // Sfondo viola scuro
+        particleColors: [PALETTE.BRIGHT_GREEN_TEAL, PALETTE.TERMINAL_RED, PALETTE.TERMINAL_YELLOW]
+    },
+    'TrojanByte': {
+        backgroundColor: '#4a0e0e', // Sfondo rosso scuro/ruggine
+        particleColors: [PALETTE.TERMINAL_ORANGE, PALETTE.TERMINAL_YELLOW, '#FFFFFF']
+    },
+    'MissingNumber': {
+        backgroundColor: '#000020', // Sfondo blu notte profondo
+        particleColors: [PALETTE.TERMINAL_PURPLE, PALETTE.TERMINAL_CYAN, PALETTE.TERMINAL_PINK]
+    },
+    // Aggiungi qui i temi per i futuri boss!
+};
+
 // Declare global DOM element variables with 'let' and no initial assignment
 // They will be assigned in setupGameEngine() once the DOM is ready.
 let miniLeaderboardListEl = null;
@@ -2010,6 +2027,7 @@ class Glitchzilla extends BaseEnemy {
             '#FF00FF',
             GLITCHZILLA_SCORE_VALUE
         );
+        this.name = 'Glitchzilla';// Aggiungi questa riga
         this.loadAnimation(
             'glitchzillaDmg1',
             GLITCHZILLA_ACTUAL_FRAME_WIDTH,
@@ -2189,6 +2207,7 @@ class TrojanByte extends BaseEnemy {
             '#FF00FF',
             TROJAN_BYTE_SCORE_VALUE
          );
+         this.name = 'TrojanByte';
          this.loadAnimation('trojanByteDmg1', TROJAN_BYTE_ACTUAL_FRAME_WIDTH, TROJAN_BYTE_ACTUAL_FRAME_HEIGHT, TROJAN_BYTE_NUM_FRAMES, 'dmg1');
          this.loadAnimation('trojanByteDmg2', TROJAN_BYTE_ACTUAL_FRAME_WIDTH, TROJAN_BYTE_ACTUAL_FRAME_HEIGHT, TROJAN_BYTE_NUM_FRAMES, 'dmg2');
          this.loadAnimation('trojanByteDmg3', TROJAN_BYTE_ACTUAL_FRAME_WIDTH, TROJAN_BYTE_ACTUAL_FRAME_HEIGHT, TROJAN_BYTE_NUM_FRAMES, 'dmg3');
@@ -2375,6 +2394,7 @@ class MissingNumber extends BaseEnemy {
             '#8A2BE2', // Colore fallback viola
             MISSING_NUMBER_SCORE_VALUE
         );
+        this.name = 'MissingNumber';
         this.loadAnimation(
             'missingNumberDmg1',
             MISSING_NUMBER_ACTUAL_FRAME_WIDTH,
@@ -3267,11 +3287,26 @@ function resetGame() {
 }
 
 // MODIFICATO: La funzione `drawTerminalBackgroundEffects` è stata completamente riscritta
+// In www/js/donkeyRunner.js
+
 function drawTerminalBackgroundEffects() {
+    // NUOVO: Determina il tema corrente in base al boss attivo
+    const currentTheme = activeMiniboss && activeMiniboss.name ? BOSS_THEMES[activeMiniboss.name] : null;
+
     // 1. Disegna le particelle del background dinamico
     ctx.save();
     backgroundParticles.forEach(p => {
-        ctx.fillStyle = `rgba(14, 175, 155, ${p.alpha})`; // Usa un colore teal semi-trasparente
+        let particleColor;
+        // Se c'è un tema boss e una piccola probabilità, usa un colore "glitch"
+        if (currentTheme && Math.random() < 0.15) { // 15% di probabilità di glitch
+            const glitchColors = currentTheme.particleColors;
+            particleColor = glitchColors[Math.floor(Math.random() * glitchColors.length)];
+        } else {
+            // Altrimenti, usa il colore di default
+            particleColor = `rgba(14, 175, 155, ${p.alpha})`;
+        }
+        
+        ctx.fillStyle = particleColor;
         ctx.font = `${p.size}px "Source Code Pro", monospace`;
         ctx.fillText(p.char, p.x, p.y);
     });
@@ -3280,7 +3315,7 @@ function drawTerminalBackgroundEffects() {
     // 2. Disegna l'effetto Scanlines sopra a tutto
     ctx.save();
     ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-    for (let i = 0; i < canvas.height; i += 3) { // Righe più sottili e vicine
+    for (let i = 0; i < canvas.height; i += 3) {
         ctx.fillRect(0, i, canvas.width, 1);
     }
     ctx.restore();
@@ -3556,29 +3591,39 @@ function updatePlaying(dt) {
     }
 }
 
+// In www/js/donkeyRunner.js
+
 function drawPlayingScreen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = PALETTE.DARK_BACKGROUND;
+
+    // NUOVO: Il colore di sfondo cambia se c'è un boss
+    let bgColor = PALETTE.DARK_BACKGROUND; // Colore di default
+    if (activeMiniboss && activeMiniboss.name && BOSS_THEMES[activeMiniboss.name]) {
+        bgColor = BOSS_THEMES[activeMiniboss.name].backgroundColor;
+    }
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    drawTerminalBackgroundEffects();
+
+    drawTerminalBackgroundEffects(); 
     drawGround();
     if (asyncDonkey) asyncDonkey.draw();
     drawObstacles();
     drawAllEnemyTypes();
     drawProjectiles();
     drawPowerUpItems();
+
+    // ... (il resto della funzione per disegnare lo score rimane invariato) ...
     ctx.fillStyle = PALETTE.BRIGHT_GREEN_TEAL;
-    ctx.font = '24px "Source Code Pro", "Courier New", Courier, monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText('Score: ' + Math.floor(score), 20, 40);
-    if (asyncDonkey && asyncDonkey.activePowerUp) {
-        ctx.fillStyle = PALETTE.BRIGHT_TEAL;
-        ctx.font = '18px "Source Code Pro", monospace';
-        ctx.textAlign = 'right';
-        const powerUpName = POWERUP_THEMATIC_NAMES[asyncDonkey.activePowerUp] || asyncDonkey.activePowerUp;
-        ctx.fillText(`Active: ${powerUpName} (${Math.ceil(asyncDonkey.powerUpTimer)}s)`, canvas.width - 20, 40);
-    }
+     ctx.font = '24px "Source Code Pro", "Courier New", Courier, monospace';
+     ctx.textAlign = 'left';
+     ctx.fillText('Score: ' + Math.floor(score), 20, 40);
+     if (asyncDonkey && asyncDonkey.activePowerUp) {
+     ctx.fillStyle = PALETTE.BRIGHT_TEAL;
+     ctx.font = '18px "Source Code Pro", monospace';
+     ctx.textAlign = 'right';
+     const powerUpName = POWERUP_THEMATIC_NAMES[asyncDonkey.activePowerUp] || asyncDonkey.activePowerUp;
+     ctx.fillText(`Active: ${powerUpName} (${Math.ceil(asyncDonkey.powerUpTimer)}s)`, canvas.width - 20, 40);
+     }
 }
 
 function drawGameOverScreen() {
