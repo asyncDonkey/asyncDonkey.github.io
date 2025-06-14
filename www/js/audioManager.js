@@ -145,11 +145,13 @@ function actuallyPlayMusic(loop) {
  * Ferma la musica di sottofondo.
  */
 function stopMusic() {
-    if (backgroundMusicSource && isMusicPlaying) {
+     if (backgroundMusicSource && isMusicPlaying) {
+        backgroundMusicSource.onended = null; // Previene l'esecuzione di eventi onended
         backgroundMusicSource.stop(0);
+        backgroundMusicSource = null; // Distrugge il riferimento alla sorgente
         isMusicPlaying = false;
         console.log('Musica di sottofondo fermata.');
-    }
+     }
 }
 
 /**

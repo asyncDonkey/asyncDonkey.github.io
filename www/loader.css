@@ -1,7 +1,7 @@
 /* www/loader.css */
 
 :root {
-    --terminal-bg: #0d0d0d; /* Quasi nero per un contrasto elevato */
+    --terminal-bg: #000000; /* MODIFICATO: da #0d0d0d a nero puro */
     --terminal-darker-bg: #1a1b22;
     --terminal-text: #e0e0e0; /* Bianco brillante ma non affaticante */
     --terminal-highlight: #5ab9a8; /* Il tuo verde/azzurro per parole chiave */

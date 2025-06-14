@@ -345,7 +345,7 @@
 /* Variabili CSS (se non sono già nel tuo styles.css principale) */
 /* Aggiungi queste variabili al tuo file styles.css principale o assicurati che siano definite altrove */
 :root {
-    --terminal-bg: #282a36; /* Dracula Background */
+    --terminal-bg: #000000; /* MODIFICATO: da #0d0d0d a nero puro */
     --terminal-darker-bg: #1a1b22; /* Dracula Background più scuro */
     --terminal-darker-bg-light: #21222c; /* Leggermente più chiaro per sezioni */
     --terminal-text: #f8f8f2; /* Dracula Foreground */

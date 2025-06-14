@@ -107,6 +107,8 @@ let accountIconContainer = null; // Riferimento al contenitore dell'icona profil
 
 let backgroundParticles = [];
 
+let currentGameInstance = 0;
+
 
 let isTouchDevice = false; // Will be set in setupGameEngine
 let isIPhone = false; // Will be set in setupGameEngine
@@ -938,11 +940,23 @@ async function playBossMusic() {
     AudioManager.playMusic(true);
 }
 
-async function playGameOverMusic() {
+async function playGameOverMusic(instanceId) {
+    // Se l'ID della partita non corrisponde più a quello corrente, non fare nulla.
+    if (instanceId !== currentGameInstance) {
+        console.log(`Annullamento musica game over per istanza ${instanceId} (scaduta).`);
+        return; 
+    }
+
     AudioManager.stopMusic();
     console.log(`💀 Playing Game Over Music: ${GAME_OVER_MUSIC_PATH}`);
     await AudioManager.loadBackgroundMusic(GAME_OVER_MUSIC_PATH);
-    AudioManager.playMusic(false); // Non loopare la musica di game over
+
+    // Secondo controllo, ancora più sicuro, dopo l'attesa del caricamento
+    if (instanceId !== currentGameInstance) {
+        console.log(`Annullamento musica game over per istanza ${instanceId} (scaduta).`);
+        return;
+    }
+    AudioManager.playMusic(false);
 }
 
 /**
@@ -972,7 +986,9 @@ export async function preloadGameAssets() {
  */
 // La funzione launchGame viene modificata per avviare la BGM casuale
 export function launchGame() {
-    console.log('🚀 launchGame: Avvio del gioco!');
+    currentGameInstance++; // Incrementa a ogni nuova partita
+    console.log(`🚀 launchGame: Avvio del gioco! (Istanza: ${currentGameInstance})`);
+
     if (!resourcesInitialized) {
         console.error('Impossibile avviare il gioco, le risorse non sono state caricate.');
         return;
@@ -2157,10 +2173,9 @@ class Glitchzilla extends BaseEnemy {
     }
 }
 
-// Aggiungi questa classe dopo la classe Glitchzilla
 class TrojanByte extends BaseEnemy {
     constructor(x, y) {
-        super(
+         super(
             x,
             y,
             TROJAN_BYTE_TARGET_WIDTH,
@@ -2169,66 +2184,39 @@ class TrojanByte extends BaseEnemy {
             TROJAN_BYTE_ACTUAL_FRAME_WIDTH,
             TROJAN_BYTE_ACTUAL_FRAME_HEIGHT,
             TROJAN_BYTE_NUM_FRAMES,
-            0.3, // Velocità leggermente più bassa per un boss più "statico" e minaccioso
+            0.3, 
             TROJAN_BYTE_HEALTH,
-            '#FF00FF', // Colore fallback, come Glitchzilla per distinguere
+            '#FF00FF',
             TROJAN_BYTE_SCORE_VALUE
-        );
-        this.loadAnimation(
-            'trojanByteDmg1',
-            TROJAN_BYTE_ACTUAL_FRAME_WIDTH,
-            TROJAN_BYTE_ACTUAL_FRAME_HEIGHT,
-            TROJAN_BYTE_NUM_FRAMES,
-            'dmg1'
-        );
-        this.loadAnimation(
-            'trojanByteDmg2',
-            TROJAN_BYTE_ACTUAL_FRAME_WIDTH,
-            TROJAN_BYTE_ACTUAL_FRAME_HEIGHT,
-            TROJAN_BYTE_NUM_FRAMES,
-            'dmg2'
-        );
-        this.loadAnimation(
-            'trojanByteDmg3',
-            TROJAN_BYTE_ACTUAL_FRAME_WIDTH,
-            TROJAN_BYTE_ACTUAL_FRAME_HEIGHT,
-            TROJAN_BYTE_NUM_FRAMES,
-            'dmg3'
-        );
-        this.updateCurrentAnimation();
-        this.attackSequence = [
-            'warn_low_1',
-            'low_1',
-            'pause_medium',
-            'warn_low_2',
-            'low_2',
-            'pause_medium',
-            //'warn_low_3', 'low_3', 'pause_medium', // Tre colpi in basso consecutivi
-            'warn_middle',
-            'middle',
-            'pause_medium', // Un colpo in mezzo
-            'warn_low_single',
-            'low_single',
-            'pause_short', // Un altro colpo in basso
-            'warn_high_single',
-            'high_single',
-            'pause_long_tb', // Un colpo in alto, poi pausa lunga per ricominciare il pattern
+         );
+         this.loadAnimation('trojanByteDmg1', TROJAN_BYTE_ACTUAL_FRAME_WIDTH, TROJAN_BYTE_ACTUAL_FRAME_HEIGHT, TROJAN_BYTE_NUM_FRAMES, 'dmg1');
+         this.loadAnimation('trojanByteDmg2', TROJAN_BYTE_ACTUAL_FRAME_WIDTH, TROJAN_BYTE_ACTUAL_FRAME_HEIGHT, TROJAN_BYTE_NUM_FRAMES, 'dmg2');
+         this.loadAnimation('trojanByteDmg3', TROJAN_BYTE_ACTUAL_FRAME_WIDTH, TROJAN_BYTE_ACTUAL_FRAME_HEIGHT, TROJAN_BYTE_NUM_FRAMES, 'dmg3');
+         this.updateCurrentAnimation();
+
+        // NUOVO: Aggiungiamo uno stato al boss
+        this.state = 'ENTERING'; 
+
+         this.attackSequence = [
+            'warn_low_1', 'low_1', 'pause_medium',
+            'warn_low_2', 'low_2', 'pause_medium',
+            'warn_middle', 'middle', 'pause_medium',
+            'warn_low_single', 'low_single', 'pause_short',
+            'warn_high_single', 'high_single', 'pause_long_tb',
         ];
-        this.attackSequenceIndex = 0;
-        this.currentAttackPhaseDuration = 0;
-        this.shotFiredInPhase = false;
-        this.pauseShortDuration = 0.5;
-        this.pauseMediumDuration = 1.0;
-        this.pauseLongTbDuration = 2.5; // Pausa più lunga dopo il pattern principale
-        this.projectileSpriteName = 'trojanByteProjectile';
-        this.projectileFrameWidth = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_WIDTH;
-        this.projectileFrameHeight = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_HEIGHT;
-        this.projectileNumFrames = TROJAN_BYTE_PROJECTILE_NUM_FRAMES;
-        this.projectileTargetWidth = TROJAN_BYTE_PROJECTILE_TARGET_WIDTH;
-        this.projectileTargetHeight = TROJAN_BYTE_PROJECTILE_TARGET_HEIGHT;
-        console.log('TROJAN_BYTE SPAWNED! HP: ' + this.health);
-        // Aggiungi un suono di spawn per Trojan_Byte qui, una volta che hai il file audio.
-        // AudioManager.playSound('trojanByteSpawn');
+         this.attackSequenceIndex = 0;
+         this.currentAttackPhaseDuration = 0;
+         this.shotFiredInPhase = false;
+         this.pauseShortDuration = 0.5;
+         this.pauseMediumDuration = 1.0;
+         this.pauseLongTbDuration = 2.5;
+         this.projectileSpriteName = 'trojanByteProjectile';
+         this.projectileFrameWidth = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_WIDTH;
+         this.projectileFrameHeight = TROJAN_BYTE_PROJECTILE_ACTUAL_FRAME_HEIGHT;
+         this.projectileNumFrames = TROJAN_BYTE_PROJECTILE_NUM_FRAMES;
+         this.projectileTargetWidth = TROJAN_BYTE_PROJECTILE_TARGET_WIDTH;
+         this.projectileTargetHeight = TROJAN_BYTE_PROJECTILE_TARGET_HEIGHT;
+         console.log('TROJAN_BYTE SPAWNED! HP: ' + this.health);
     }
 
     updateCurrentAnimation() {
@@ -2243,12 +2231,17 @@ class TrojanByte extends BaseEnemy {
     }
 
     takeDamage(dmg = 1) {
-        super.takeDamage(dmg);
-        console.log(`Trojan_Byte took ${dmg} damage, HP: ${this.health}`);
-        this.updateCurrentAnimation();
-        AudioManager.playSound('enemyHit');
+        // NUOVO: Se il boss sta entrando, non può subire danni.
+        if (this.state === 'ENTERING') {
+            return; 
+        }
 
-        if (this.health <= 0) {
+            super.takeDamage(dmg);
+            console.log(`Trojan_Byte took ${dmg} damage, HP: ${this.health}`);
+            this.updateCurrentAnimation();
+            AudioManager.playSound('enemyHit');
+
+            if (this.health <= 0) {
             console.log('TROJAN_BYTE SCONFITTO! Assegno punteggio: ' + this.scoreValue);
             AudioManager.playSound('bossDefeat');
             playRandomBGM(); // Riparte la musica normale
@@ -2278,118 +2271,90 @@ class TrojanByte extends BaseEnemy {
     }
 
     update(dt) {
-        super.update(dt);
-        this.currentAttackPhaseDuration += dt;
-        const currentPhase = this.attackSequence[this.attackSequenceIndex];
-        let phaseComplete = false;
+        if (this.state === 'ENTERING') {
+            // FASE 1: Il boss si muove fino a raggiungere la sua posizione
+            super.update(dt); // Applica il movimento orizzontale
 
-        let projectileY;
-        switch (currentPhase) {
-            case 'warn_low_1':
-            case 'warn_low_2':
-            //case 'warn_low_3':
-            case 'warn_middle':
-            case 'warn_low_single':
-            case 'warn_high_single':
-                this.isWarning = true;
-                if (this.currentAttackPhaseDuration >= WARNING_DURATION) {
+            if (this.x <= canvas.width / 2) {
+                this.x = canvas.width / 2; // Blocca la posizione
+                this.speed = 0; // Ferma ogni movimento futuro
+                this.state = 'ATTACKING'; // Cambia stato per iniziare ad attaccare
+                console.log('TrojanByte in posizione. Inizio pattern di attacco.');
+            }
+        } else if (this.state === 'ATTACKING') {
+            // FASE 2: Il boss è fermo e attacca
+            this.currentAttackPhaseDuration += dt;
+            const currentPhase = this.attackSequence[this.attackSequenceIndex];
+            let phaseComplete = false;
+
+            let projectileY;
+            switch (currentPhase) {
+                // ... (tutto il blocco switch rimane invariato) ...
+                case 'warn_low_1':
+                case 'warn_low_2':
+                case 'warn_middle':
+                case 'warn_low_single':
+                case 'warn_high_single':
+                    this.isWarning = true;
+                    if (this.currentAttackPhaseDuration >= WARNING_DURATION) {
+                        phaseComplete = true;
+                        this.isWarning = false;
+                    }
+                    break;
+                case 'low_1':
+                case 'low_2':
+                case 'low_single':
+                    if (!this.shotFiredInPhase) {
+                        projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
+                        enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                        AudioManager.playSound('enemyShootLight');
+                        this.shotFiredInPhase = true;
+                    }
                     phaseComplete = true;
+                    break;
+                case 'middle':
+                    if (!this.shotFiredInPhase) {
+                        projectileY = this.y + this.height * 0.5 - this.projectileTargetHeight / 2;
+                        enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                        AudioManager.playSound('enemyShootLight');
+                        this.shotFiredInPhase = true;
+                    }
+                    phaseComplete = true;
+                    break;
+                case 'high_single':
+                    if (!this.shotFiredInPhase) {
+                        projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
+                        enemyProjectiles.push(new EnemyProjectile(this.x - this.projectileTargetWidth, projectileY, this.projectileSpriteName, this.projectileFrameWidth, this.projectileFrameHeight, this.projectileNumFrames, this.projectileTargetWidth, this.projectileTargetHeight, TROJAN_BYTE_PROJECTILE_SPEED));
+                        AudioManager.playSound('enemyShootLight');
+                        this.shotFiredInPhase = true;
+                    }
+                    phaseComplete = true;
+                    break;
+                case 'pause_short':
+                    if (this.currentAttackPhaseDuration >= this.pauseShortDuration) {
+                        phaseComplete = true;
+                    }
+                    break;
+                case 'pause_medium':
+                    if (this.currentAttackPhaseDuration >= this.pauseMediumDuration) {
+                        phaseComplete = true;
+                    }
+                    break;
+                case 'pause_long_tb':
+                    if (this.currentAttackPhaseDuration >= this.pauseLongTbDuration) {
+                        phaseComplete = true;
+                    }
+                    break;
+            }
+
+            if (phaseComplete) {
+                this.attackSequenceIndex = (this.attackSequenceIndex + 1) % this.attackSequence.length;
+                this.currentAttackPhaseDuration = 0;
+                this.shotFiredInPhase = false;
+                if (!this.attackSequence[this.attackSequenceIndex].startsWith('warn_')) {
                     this.isWarning = false;
                 }
-                break;
-            case 'low_1': // Primo colpo basso
-            case 'low_2': // Secondo colpo basso
-            //case 'low_3': // Terzo colpo basso
-            case 'low_single': // Singolo colpo basso
-                if (!this.shotFiredInPhase) {
-                    projectileY = this.y + this.height * 0.8 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(
-                        new EnemyProjectile(
-                            this.x - this.projectileTargetWidth,
-                            projectileY,
-                            this.projectileSpriteName,
-                            this.projectileFrameWidth,
-                            this.projectileFrameHeight,
-                            this.projectileNumFrames,
-                            this.projectileTargetWidth,
-                            this.projectileTargetHeight,
-                            TROJAN_BYTE_PROJECTILE_SPEED
-                        )
-                    );
-                    AudioManager.playSound('enemyShootLight'); // O un suono specifico per Trojan
-                    this.shotFiredInPhase = true;
-                }
-                phaseComplete = true;
-                break;
-            case 'middle': // Colpo al centro
-                if (!this.shotFiredInPhase) {
-                    projectileY = this.y + this.height * 0.5 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(
-                        new EnemyProjectile(
-                            this.x - this.projectileTargetWidth,
-                            projectileY,
-                            this.projectileSpriteName,
-                            this.projectileFrameWidth,
-                            this.projectileFrameHeight,
-                            this.projectileNumFrames,
-                            this.projectileTargetWidth,
-                            this.projectileTargetHeight,
-                            TROJAN_BYTE_PROJECTILE_SPEED
-                        )
-                    );
-                    AudioManager.playSound('enemyShootLight');
-                    this.shotFiredInPhase = true;
-                }
-                phaseComplete = true;
-                break;
-            case 'high_single': // Singolo colpo alto
-                if (!this.shotFiredInPhase) {
-                    projectileY = this.y + this.height * 0.2 - this.projectileTargetHeight / 2;
-                    enemyProjectiles.push(
-                        new EnemyProjectile(
-                            this.x - this.projectileTargetWidth,
-                            projectileY,
-                            this.projectileSpriteName,
-                            this.projectileFrameWidth,
-                            this.projectileFrameHeight,
-                            this.projectileNumFrames,
-                            this.projectileTargetWidth,
-                            this.projectileTargetHeight,
-                            TROJAN_BYTE_PROJECTILE_SPEED
-                        )
-                    );
-                    AudioManager.playSound('enemyShootLight');
-                    this.shotFiredInPhase = true;
-                }
-                phaseComplete = true;
-                break;
-            case 'pause_short':
-                if (this.currentAttackPhaseDuration >= this.pauseShortDuration) {
-                    phaseComplete = true;
-                }
-                break;
-            case 'pause_medium':
-                if (this.currentAttackPhaseDuration >= this.pauseMediumDuration) {
-                    phaseComplete = true;
-                }
-                break;
-            case 'pause_long_tb': // Pausa specifica per Trojan_Byte
-                if (this.currentAttackPhaseDuration >= this.pauseLongTbDuration) {
-                    phaseComplete = true;
-                }
-                break;
-        }
-
-        if (phaseComplete) {
-            this.attackSequenceIndex = (this.attackSequenceIndex + 1) % this.attackSequence.length;
-            this.currentAttackPhaseDuration = 0;
-            this.shotFiredInPhase = false;
-            if (!this.attackSequence[this.attackSequenceIndex].startsWith('warn_')) {
-                this.isWarning = false;
             }
-        }
-        if (this.x < canvas.width / 2) {
-            this.x = canvas.width / 2;
         }
     }
 }
@@ -2917,11 +2882,12 @@ function processGameOver() {
     gameOverTrigger = false;
     currentGameState = 'GAME_OVER';
     finalScore = Math.floor(score);
+    const instanceId = currentGameInstance; // Cattura l'ID di questa partita
 
-    // NUOVA SEQUENZA AUDIO GAME OVER
     AudioManager.stopMusic();
-    AudioManager.playSound('gameOverImpact'); // Suono secco
-    setTimeout(() => playGameOverMusic(), 500); // Parte la musica di game over dopo 0.5s
+    AudioManager.playSound('gameOverImpact');
+    // Passa l'ID alla funzione
+    setTimeout(() => playGameOverMusic(instanceId), 500);
 
     if (accountIconContainer) {
         accountIconContainer.style.display = 'flex';
@@ -3813,11 +3779,13 @@ function attachEventListeners() {
     }
 
     if (restartGameBtnDonkey) {
-        restartGameBtnDonkey.addEventListener('click', () => {
+         restartGameBtnDonkey.addEventListener('click', () => {
             if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-            launchGame(); // Call launchGame to properly restart and show controls
-        });
-    }
+            // NUOVO: Ferma la musica corrente (es. game over music) subito al click
+            AudioManager.stopMusic(); 
+            launchGame();
+         });
+     }
     if (shareScoreBtnDonkey) {
         shareScoreBtnDonkey.addEventListener('click', handleShareScore);
     }
