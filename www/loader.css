@@ -169,9 +169,7 @@ html {
 }
 
 #main-menu {
-    background-color: var(--terminal-bg);
-    color: var(--terminal-text);
-    display: none;
+    display: none; /* Inizialmente nascosto, gestito da JS */
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -183,6 +181,7 @@ html {
     z-index: 900;
     opacity: 0;
     transition: opacity 0.5s ease-in;
+    background-color: #1a1a1a; /* Colore di sfondo di fallback */
 }
 
 #main-menu h1 {
@@ -911,4 +910,75 @@ body.modal-open {
     width: 100%; /* Forza la larghezza al 100% per adattarsi meglio allo scroll */
     box-sizing: border-box; /* Cruciale: include padding e bordo nella larghezza totale */
     /* Rimuovi width: calc(100% - 22px); se presente nel login-register.css */
+}
+/* Stile per il contenitore del canvas per centrarlo */
+.canvas-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+    margin-top: 5vh;
+}
+
+/* Stile per il canvas a schermo intero */
+#menuCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 901; /* Sta sotto i pulsanti */
+}
+
+/* Overlay per contenere i pulsanti */
+.menu-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 902; /* Sta sopra al canvas */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Allinea i pulsanti in alto */
+    padding-top: 5vh; /* Spazio dall'alto */
+}
+
+/* Contenitore dei pulsanti */
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px; /* Spazio tra i pulsanti */
+    background-color: rgba(26, 26, 26, 0.5); /* Sfondo semi-trasparente */
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--terminal-green);
+}
+
+/* Stile dei pulsanti del menu */
+#main-menu .menu-btn {
+    background-color: transparent;
+    color: var(--terminal-green);
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2em;
+    border: 2px solid var(--terminal-green);
+    padding: 15px 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(80, 250, 123, 0.5) inset;
+    text-shadow: 0 0 5px var(--terminal-green);
+    min-width: 280px;
+    text-align: center;
+}
+
+#main-menu .menu-btn:hover,
+#main-menu .menu-btn:focus {
+    background-color: var(--terminal-green);
+    color: var(--terminal-bg);
+    transform: scale(1.05);
+    box-shadow: 0 0 25px var(--terminal-green);
+    outline: none;
 }

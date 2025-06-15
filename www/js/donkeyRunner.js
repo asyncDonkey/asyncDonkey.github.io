@@ -63,8 +63,13 @@ const soundsToLoad = [
     ...Object.values(POWERUP_SOUND_MAP).flatMap(sounds => [
         { name: sounds.sfx, path: `audio/powerups/sfx/${sounds.sfx}.mp3` },
         { name: sounds.voice, path: `audio/powerups/voice/${sounds.voice}.mp3` }
-    ])
+    ]),
+    // AGGIUNGI QUESTE DUE RIGHE ALLA FINE DELLA LISTA
+    { name: 'menuMusic', path: 'assets/audio/music_menu.ogg' }, // Sostituisci con il tuo percorso
+    { name: 'gameStart', path: 'assets/audio/sfx_start_game.ogg' } // Sostituisci con il tuo percorso
 ];
+    
+
 
 const PALETTE = {
    DARK_BACKGROUND: '#111827', // Grigio-blu notte scuro
@@ -3318,97 +3323,7 @@ function drawGlitchText(
     ctx.fillText(text, x, y);
 }
 
-function drawMenuScreen() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = PALETTE.DARK_BACKGROUND;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawTerminalBackgroundEffects();
-    drawGround();
 
-    const incomingChallengeScore = getUrlParameter('challengeScore');
-    const incomingChallengerName = getUrlParameter('challengerName');
-    const numericalChallengeScore = parseInt(incomingChallengeScore, 10);
-
-    drawGlitchText(
-        'codeDash!',
-        canvas.width / 2,
-        canvas.height / 2 - 100,
-        48,
-        PALETTE.BRIGHT_GREEN_TEAL,
-        PALETTE.MEDIUM_TEAL,
-        PALETTE.DARK_TEAL_BLUE,
-        5,
-        3
-    );
-
-    if (incomingChallengerName && !isNaN(numericalChallengeScore) && numericalChallengeScore > 0) {
-        drawGlitchText(
-            `SYSTEM_ALERT: Sfida da ${incomingChallengerName}!`,
-            canvas.width / 2,
-            canvas.height / 2 - 20,
-            28,
-            PALETTE.BRIGHT_TEAL,
-            PALETTE.MEDIUM_PURPLE,
-            PALETTE.DARK_TEAL_BLUE,
-            3,
-            2
-        );
-        drawGlitchText(
-            `TARGET SCORE: ${numericalChallengeScore}. Routine di superamento richiesta!`,
-            canvas.width / 2,
-            canvas.height / 2 + 20,
-            22,
-            PALETTE.BRIGHT_TEAL,
-            PALETTE.MEDIUM_PURPLE,
-            PALETTE.DARK_TEAL_BLUE,
-            2,
-            1
-        );
-
-        if (isTouchDevice && mobileStartButton) {
-            mobileStartButton.textContent = '_RUN';
-            mobileStartButton.style.display = 'block';
-        } else {
-            drawGlitchText(
-                'Premi INVIO per ESEGUIRE!',
-                canvas.width / 2,
-                canvas.height / 2 + 70,
-                26,
-                PALETTE.BRIGHT_GREEN_TEAL,
-                PALETTE.MEDIUM_TEAL,
-                PALETTE.DARK_TEAL_BLUE,
-                3,
-                1
-            );
-        }
-    } else {
-        if (isTouchDevice && mobileStartButton) {
-            mobileStartButton.innerHTML =
-                '<span class="material-symbols-rounded">play_arrow</span><span class="visually-hidden">Start Game</span>';
-            mobileStartButton.style.display = 'block';
-        } else {
-            drawGlitchText(
-                'Premi INVIO per Iniziare',
-                canvas.width / 2,
-                canvas.height / 2 + 20,
-                28,
-                PALETTE.BRIGHT_TEAL,
-                PALETTE.MEDIUM_PURPLE,
-                PALETTE.DARK_TEAL_BLUE,
-                3,
-                2
-            );
-        }
-    }
-    ctx.fillStyle = PALETTE.MEDIUM_TEAL;
-    ctx.font = '16px "Source Code Pro", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(
-        'Controlli: SPAZIO/FRECCIA SU per Saltare, CTRL/X per Sparare',
-        canvas.width / 2,
-        canvas.height - groundHeight - 30
-    );
-}
 
 function updatePlaying(dt) {
     if (!asyncDonkey) return;
@@ -3935,10 +3850,12 @@ function attachEventListeners() {
         }
         switch (currentGameState) {
             case 'MENU':
-                if (e.key === 'Enter') {
-                    launchGame();
-                }
-                break;
+    if (e.key === 'Enter') {
+        // La logica di avvio è ora in main.js, dobbiamo chiamarla da lì.
+        // Per semplicità, simuliamo un click sul pulsante di start.
+        document.getElementById('start-game-btn').click();
+    }
+    break;
             case 'PLAYING':
                 if (asyncDonkey) {
                     if (e.code === 'Space' || e.key === 'ArrowUp') {
