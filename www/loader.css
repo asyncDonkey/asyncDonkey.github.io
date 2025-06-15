@@ -26,6 +26,26 @@
     --glow-color: rgba(90, 185, 168, 0.4); /* Colore per l'effetto di brillantezza */
 }
 
+/* ✅ NUOVI STILI PER LA NUVOLETTA (TASK 1.1) */
+#donkey-speech-bubble {
+	background-color: rgba(240, 240, 240, 0.95);
+	color: #1a1a1a;
+	padding: 5px 12px;
+	border-radius: 8px;
+	border: 2px solid #333;
+	font-family: 'Source Code Pro', monospace;
+	font-weight: bold;
+	white-space: nowrap;
+	opacity: 0;
+	transition: opacity 0.3s ease-in-out;
+	z-index: 100; /* Assicura che sia visibile */
+	pointer-events: none; /* Non deve essere cliccabile */
+}
+#donkey-speech-bubble.visible {
+	display: block !important; /* Forza la visualizzazione */
+	opacity: 1;
+}
+
 body {
     /* ... altre proprietà ... */
     padding-left: env(safe-area-inset-left);
