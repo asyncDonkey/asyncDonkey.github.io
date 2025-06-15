@@ -66,29 +66,39 @@
     <!-- Il canvas ora è separato dai pulsanti per il posizionamento a schermo intero -->
     <canvas id="menuCanvas"></canvas>
     
+    <!-- L'overlay ora contiene solo i pulsanti di navigazione del menu -->
     <div class="menu-overlay">
         <div class="menu-buttons">
-            <button id="start-game-btn" class="menu-btn">START GAME</button>
-            <button id="leaderboard-btn" class="menu-btn">LEADERBOARD</button>
-            <button id="profile-btn" class="menu-btn">PROFILE</button>
-            <button id="glitchpedia-btn" class="menu-btn">GLITCHPEDIA</button>
+            <!-- Pulsanti con icone Phosphor -->
+            <button id="start-game-btn" class="menu-btn icon-btn" aria-label="Start Game">
+                <i class="ph-bold ph-play-circle"></i>
+            </button>
+            <button id="leaderboard-btn" class="menu-btn">
+                <i class="ph-bold ph-trophy"></i>
+                <span>LEADERBOARD</span>
+            </button>
+            <button id="glitchpedia-btn" class="menu-btn">
+                <i class="ph-bold ph-book-open-text"></i>
+                <span>GLITCHPEDIA</span>
+            </button>
         </div>
     </div>
 </div>
 
-            <div id="account-icon-container" class="menu-icon-btn">
-                <a href="#" id="show-login-modal-btn" title="Accedi o Registrati">
-                    <i class="ph-bold ph-user-circle"></i>
-                    <span class="visually-hidden">Account</span>
-                </a>
-                <img
-                    id="user-avatar-icon"
-                    src=""
-                    alt="User Avatar"
-                    title="Vai al profilo"
-                    style="display: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer"
-                />
-            </div>
+<!-- Il pulsante del profilo utente rimane separato in alto a destra -->
+<div id="account-icon-container" class="menu-icon-btn">
+    <a href="#" id="show-login-modal-btn" title="Accedi o Registrati">
+        <i class="ph-bold ph-user-circle"></i>
+        <span class="visually-hidden">Account</span>
+    </a>
+    <img
+        id="user-avatar-icon"
+        src=""
+        alt="User Avatar"
+        title="Vai al profilo"
+        style="display: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer"
+    />
+</div>
 
             <div id="game-container-wrapper">
                 <canvas id="gameCanvas"></canvas>

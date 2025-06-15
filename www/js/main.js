@@ -4,6 +4,7 @@ import { menuAnimation } from './menuAnimation.js';
 import { launchGame, preloadGameAssets, setupGameEngine } from './donkeyRunner.js';
 import * as AudioManager from './audioManager.js';
 import { initLeaderboard } from './leaderboardManager.js';
+
 // Importa solo la funzione di apertura della modale di auth da auth.js
 import { showAuthModal } from './auth.js';
 import { openProfileModal, initProfileControls } from './profile.js';
@@ -183,21 +184,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- LOGICA PULSANTI MENU (SINTASSI CORRETTA E SICURA) ---
     let isGameStarting = false;
-    const startGameSequence = () => {
-        if (isGameStarting) return;
-        isGameStarting = true;
 
-        AudioManager.playSound('gameStart');
-        AudioManager.stopMusic();
+const startGameSequence = async () => { // Trasformata in funzione async
+    if (isGameStarting) return;
+    isGameStarting = true;
 
-        menuAnimation.startExitAnimation().then(() => {
-            const gameContainerWrapper = document.getElementById('game-container-wrapper');
-            if (mainMenu) mainMenu.style.display = 'none';
-            if (gameContainerWrapper) gameContainerWrapper.style.display = 'block';
-            launchGame();
-            isGameStarting = false;
-        });
-    };
+    AudioManager.playSound('gameStart');
+    AudioManager.stopMusic();
+
+    // --- FIX ANIMAZIONE USCITA ---
+    // Ora attendiamo che la Promise di startExitAnimation sia risolta
+    // prima di procedere con l'avvio del gioco.
+    await menuAnimation.startExitAnimation();
+
+    const mainMenu = document.getElementById('main-menu');
+    const gameContainerWrapper = document.getElementById('game-container-wrapper');
+
+    if (mainMenu) mainMenu.style.display = 'none';
+    if (gameContainerWrapper) gameContainerWrapper.style.display = 'block';
+
+    launchGame();
+    isGameStarting = false;
+};
 
     // Collegamento sicuro degli event listener senza optional chaining (`?.`)
     const startGameBtn = document.getElementById('start-game-btn');
