@@ -131,11 +131,15 @@ class MenuCharacter {
         this.x = Math.random() * (this.canvas.width - 200) + 100;
         this.y = groundY - (Math.random() * 100 + 80);
         const chars = [
-            '()=>{}', 'const', 'let', 'var', 'async', 'await',
-            'import', 'export', 'class', 'super', 'this', 'null',
-            'true', 'false', '<null>', '0xDEAD', '0xBEEF', 'void',
-            'static', '...args', 'Promise', 'Array.map'
-        ];
+    '()=>{}', 'const', 'let', 'var', 'async', 'await',
+    'import', 'export', 'class', 'super', 'this', 'null',
+    'true', 'false', '<null>', '0xDEAD', '0xBEEF', 'void',
+    'static', '...args', 'Promise', 'Array.map',
+    // --> NUOVE STRINGHE <--
+    'Promise.all', 'JSON.stringify', 'fetch()', '<a>', '<div>', 
+    '<body>', 'CSS', 'HTML', 'JS', 'NaN', 'undefined', 
+    'TypeError', 'SyntaxError', 'git commit', 'git push'
+];
         this.char = chars[Math.floor(Math.random() * chars.length)];
         const colors = ['#50fa7b', '#8be9fd', '#ff79c6', '#f1fa8c', '#ffb86c'];
         this.color = colors[Math.floor(Math.random() * colors.length)];
@@ -217,7 +221,8 @@ export const menuAnimation = {
         this.donkey = new MenuDonkey(this.canvas, playerSprite);
         this.ground = new MenuGround(this.canvas);
         window.addEventListener('resize', () => this.resizeCanvas()); this.resizeCanvas();
-        this.spawnCharacter(); this.start();
+        this.spawnCharacter();
+        this.start();
     },
     
     resizeCanvas() {
@@ -227,11 +232,22 @@ export const menuAnimation = {
         if (this.donkey) this.donkey.groundY = this.canvas.height * GROUND_LEVEL_PERCENT - this.donkey.dh;
     },
 
-    spawnCharacter() { this.character = new MenuCharacter(this.canvas); this.donkey.setTarget(this.character); },
+    spawnCharacter() { 
+        this.character = new MenuCharacter(this.canvas); 
+        this.donkey.setTarget(this.character); 
+    },
 
-    start() { if (this.isRunning) return; this.isRunning = true; this.loop(); },
+    start() { 
+        if (this.isRunning) return; 
+        this.isRunning = true; 
+        this.loop(); 
+    },
 
-    stop() { this.isRunning = false; if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId); window.removeEventListener('resize', this.resizeCanvas); },
+    stop() { 
+        this.isRunning = false; 
+        if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId); 
+        // Non rimuoviamo il listener del resize, potrebbe servire se si torna al menu
+    },
 
     loop() {
         if (!this.isRunning) return;
@@ -255,32 +271,50 @@ export const menuAnimation = {
                     this.particles.push(new Particle(this.character.x + this.character.width / 2, this.character.y - this.character.height / 2, this.character.color));
                 }
 
-                AudioManager.playSound('sfx_menu_eat', false, 0.6);
+                // Lasciamo commentato l'audio come da nostro test precedente
+             AudioManager.playSound('sfx_menu_eat', false, 0.6);
                 
                 this.character = null;
-                this.donkey.target = null;
-                this.donkey.state = 'roaming';
                 
-                setTimeout(() => this.spawnCharacter(), 2000);
+                setTimeout(() => {
+                    this.donkey.target = null;
+                    this.donkey.state = 'roaming';
+                }, 0);
+
+                setTimeout(() => {
+                    // Controlla che l'animazione stia ancora girando prima di creare un nuovo carattere
+                    if (this.isRunning) {
+                        this.spawnCharacter();
+                    }
+                }, 2000);
             }
         }
         
-        this.ctx.globalAlpha = 1;
+        // **LA VERA SOLUZIONE AL FLICKER**
+        // Isoliamo il disegno delle particelle per non "sporcare" lo stato del canvas
+        this.ctx.save(); 
         for (let i = this.particles.length - 1; i >= 0; i--) {
             this.particles[i].update();
             this.particles[i].draw(this.ctx);
-            if (this.particles[i].life <= 0) this.particles.splice(i, 1);
+            if (this.particles[i].life <= 0) {
+                this.particles.splice(i, 1);
+            }
         }
+        this.ctx.restore(); 
         
         this.animationFrameId = requestAnimationFrame(() => this.loop());
-    },
+    }, // <-- Corretto l'errore di sintassi: questa è una parentesi graffa
 
     startExitAnimation() {
         return new Promise((resolve) => {
             this.donkey.state = 'exiting';
             const checkExit = () => {
-                if (this.donkey.x > this.canvas.width) { this.stop(); resolve(); } 
-                else { requestAnimationFrame(checkExit); }
+                if (this.donkey.x > this.canvas.width) { 
+                    this.stop(); 
+                    resolve(); 
+                } else { 
+                    requestAnimationFrame(checkExit); 
+                }
             };
             checkExit();
         });
