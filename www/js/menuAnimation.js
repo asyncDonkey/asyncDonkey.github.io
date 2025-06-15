@@ -1,3 +1,6 @@
+// AGGIUNGI QUESTA RIGA ALL'INIZIO DEL FILE
+import * as AudioManager from './audioManager.js'; 
+
 // Costanti
 const GRAVITY = 0.6;
 const GROUND_LEVEL_PERCENT = 0.85;
@@ -67,28 +70,56 @@ class MenuDonkey {
     }
 
     update() {
-        if (this.state === 'exiting') {
-            this.direction = 1; this.x += 8;
-        } else if (this.state === 'roaming') {
-            this.x += this.dx * this.direction;
-            if (this.x + this.dw > this.canvas.width || this.x < 0) this.direction *= -1;
-        } else if (this.state === 'targeting' && this.target) {
-            const targetCenter = this.target.x + this.target.width / 2;
-            const selfCenter = this.x + this.dw / 2;
-            if (Math.abs(targetCenter - selfCenter) < 15) this._jump();
-            else { this.direction = (targetCenter > selfCenter) ? 1 : -1; this.x += this.dx * this.direction; }
-        } else this.state = 'roaming';
+        // Gestione degli stati con uno switch, più pulito e robusto
+        switch(this.state) {
+            case 'exiting':
+                this.direction = 1;
+                this.x += 8;
+                break;
 
-        this.dy += GRAVITY; this.y += this.dy;
-        if (this.y >= this.groundY) { this.y = this.groundY; this.dy = 0; this.isJumping = false; }
+            case 'roaming':
+                this.x += this.dx * this.direction;
+                if (this.x + this.dw > this.canvas.width || this.x < 0) {
+                    this.direction *= -1;
+                }
+                break;
 
+            case 'targeting':
+                if (this.target) {
+                    const targetCenter = this.target.x + this.target.width / 2;
+                    const selfCenter = this.x + this.dw / 2;
+                    if (Math.abs(targetCenter - selfCenter) < 15) {
+                        this._jump();
+                    } else {
+                        this.direction = (targetCenter > selfCenter) ? 1 : -1;
+                        this.x += this.dx * this.direction;
+                    }
+                } else {
+                    // Se il target non c'è più, torna a vagare
+                    this.state = 'roaming';
+                }
+                break;
+        }
+
+        // La logica fisica viene eseguita sempre, indipendentemente dallo stato
+        this.dy += GRAVITY;
+        this.y += this.dy;
+        if (this.y >= this.groundY) {
+            this.y = this.groundY;
+            this.dy = 0;
+            this.isJumping = false;
+        }
+
+        // La logica dell'animazione dello sprite viene eseguita sempre
         this.tickCount++;
         if (this.tickCount > this.ticksPerFrame) {
-            this.tickCount = 0; this.frameIndex = this.isJumping ? 1 : (this.frameIndex + 1) % this.frameCount;
+            this.tickCount = 0;
+            this.frameIndex = this.isJumping ? 1 : (this.frameIndex + 1) % this.frameCount;
         }
     }
     
     _jump() { if (!this.isJumping) { this.dy = -15; this.isJumping = true; } }
+
     setTarget(character) { this.target = character; this.state = 'targeting'; }
 }
 
@@ -99,25 +130,81 @@ class MenuCharacter {
         const groundY = this.canvas.height * GROUND_LEVEL_PERCENT;
         this.x = Math.random() * (this.canvas.width - 200) + 100;
         this.y = groundY - (Math.random() * 100 + 80);
-        const chars = ['<VAR>', '{...}', '()=>', '0xFA'];
+        const chars = [
+            '()=>{}', 'const', 'let', 'var', 'async', 'await',
+            'import', 'export', 'class', 'super', 'this', 'null',
+            'true', 'false', '<null>', '0xDEAD', '0xBEEF', 'void',
+            'static', '...args', 'Promise', 'Array.map'
+        ];
         this.char = chars[Math.floor(Math.random() * chars.length)];
-        this.color = '#50fa7b';
+        const colors = ['#50fa7b', '#8be9fd', '#ff79c6', '#f1fa8c', '#ffb86c'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        
+        this.glowColor = this.color;
+        this.glowBlur = 10;
+        this.glowAlpha = 0;
+        this.glowDirection = 1;
+
         this.ctx.font = '22px "Source Code Pro", monospace';
         this.width = this.ctx.measureText(this.char).width; this.height = 22;
     }
+    
+    update() {
+        this.glowAlpha += 0.02 * this.glowDirection;
+        if (this.glowAlpha > 0.75) {
+            this.glowAlpha = 0.75;
+            this.glowDirection = -1;
+        } else if (this.glowAlpha < 0) {
+            this.glowAlpha = 0;
+            this.glowDirection = 1;
+        }
+    }
+
     draw() {
-        this.ctx.fillStyle = this.color; this.ctx.font = '22px "Source Code Pro", monospace';
+        this.ctx.save();
+        this.ctx.globalAlpha = this.glowAlpha;
+        this.ctx.shadowBlur = this.glowBlur;
+        this.ctx.shadowColor = this.glowColor;
+        this.ctx.fillStyle = this.color;
+        this.ctx.font = '22px "Source Code Pro", monospace';
+        this.ctx.fillText(this.char, this.x, this.y);
+        
+        this.ctx.restore();
+        this.ctx.fillStyle = this.color;
+        this.ctx.font = '22px "Source Code Pro", monospace';
         this.ctx.fillText(this.char, this.x, this.y);
     }
 }
 
 class MenuGround {
     constructor(canvas) {
-        this.canvas = canvas; this.ctx = canvas.getContext('2d');
-        this.y = this.canvas.height * GROUND_LEVEL_PERCENT; this.color = '#0eaf9b';
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.y = this.canvas.height * GROUND_LEVEL_PERCENT;
+        
+        this.palette = {
+            DARK_TEAL_BLUE: '#32535f',
+            MEDIUM_TEAL: '#0b8a8f',
+            BRIGHT_TEAL: '#0eaf9b',
+        };
+        this.lineWidth = 2;
     }
-    draw() { this.ctx.fillStyle = this.color; this.ctx.fillRect(0, this.y, this.canvas.width, 2); }
-    resize() { this.y = this.canvas.height * GROUND_LEVEL_PERCENT; }
+
+    draw() {
+        const groundHeight = this.canvas.height - this.y;
+        this.ctx.fillStyle = this.palette.DARK_TEAL_BLUE;
+        this.ctx.fillRect(0, this.y, this.canvas.width, groundHeight);
+
+        this.ctx.fillStyle = this.palette.MEDIUM_TEAL;
+        this.ctx.fillRect(0, this.y, this.canvas.width, this.lineWidth * 3);
+
+        this.ctx.fillStyle = this.palette.BRIGHT_TEAL;
+        this.ctx.fillRect(0, this.y + this.lineWidth * 3, this.canvas.width, this.lineWidth);
+    }
+
+    resize() {
+        this.y = this.canvas.height * GROUND_LEVEL_PERCENT;
+    }
 }
 
 export const menuAnimation = {
@@ -148,23 +235,40 @@ export const menuAnimation = {
 
     loop() {
         if (!this.isRunning) return;
+        
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ground.draw(); this.donkey.update(); this.donkey.draw();
+        
+        this.ground.draw();
+        
+        this.donkey.update();
+        this.donkey.draw();
         
         if (this.character) {
+            this.character.update();
             this.character.draw();
             const donkeyRect = { x: this.donkey.x, y: this.donkey.y, width: this.donkey.dw, height: this.donkey.dh };
             const charRect = { x: this.character.x, y: this.character.y - this.character.height, width: this.character.width, height: this.character.height };
+            
             if (donkeyRect.x < charRect.x + charRect.width && donkeyRect.x + donkeyRect.width > charRect.x && donkeyRect.y < charRect.y + charRect.height && donkeyRect.y + donkeyRect.height > charRect.y) {
-                for (let i = 0; i < 20; i++) { this.particles.push(new Particle(this.character.x + this.character.width / 2, this.character.y - this.character.height / 2, this.character.color)); }
+                
+                for (let i = 0; i < 20; i++) {
+                    this.particles.push(new Particle(this.character.x + this.character.width / 2, this.character.y - this.character.height / 2, this.character.color));
+                }
+
+                AudioManager.playSound('sfx_menu_eat', false, 0.6);
+                
                 this.character = null;
-                setTimeout(() => this.spawnCharacter(), 1000);
+                this.donkey.target = null;
+                this.donkey.state = 'roaming';
+                
+                setTimeout(() => this.spawnCharacter(), 2000);
             }
         }
         
         this.ctx.globalAlpha = 1;
         for (let i = this.particles.length - 1; i >= 0; i--) {
-            this.particles[i].update(); this.particles[i].draw(this.ctx);
+            this.particles[i].update();
+            this.particles[i].draw(this.ctx);
             if (this.particles[i].life <= 0) this.particles.splice(i, 1);
         }
         

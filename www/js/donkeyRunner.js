@@ -23,6 +23,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { showToast } from './toastNotifications.js';
 
+
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
 import { functions } from './firebase-config.js'; // Assicurati di esportare 'functions' da firebase-config
 
@@ -66,8 +67,11 @@ const soundsToLoad = [
     ]),
     // AGGIUNGI QUESTE DUE RIGHE ALLA FINE DELLA LISTA
     { name: 'menuMusic', path: 'audio/music_menu.ogg' }, // Sostituisci con il tuo percorso
-    { name: 'gameStart', path: 'audio/sfx_start_game.ogg' } // Sostituisci con il tuo percorso
+    { name: 'gameStart', path: 'audio/sfx_start_game.ogg' },
+    // Aggiungi questa riga
+    { name: 'sfx_menu_eat', path: 'audio/sfx_menu_eat.ogg' } // Sostituisci con il percorso reale del tuo file audio
 ];
+
     
 
 
@@ -1017,6 +1021,10 @@ export async function preloadGameAssets() {
  */
 // La funzione launchGame viene modificata per avviare la BGM casuale
 export function launchGame() {
+    if (currentGameState === 'PLAYING') {
+        console.warn('launchGame chiamato mentre il gioco è già in esecuzione. Chiamata ignorata.');
+        return;
+    }
     currentGameInstance++; // Incrementa a ogni nuova partita
     console.log(`🚀 launchGame: Avvio del gioco! (Istanza: ${currentGameInstance})`);
 

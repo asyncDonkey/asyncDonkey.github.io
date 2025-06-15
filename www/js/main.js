@@ -39,6 +39,7 @@ import { createIcon } from './blockies.mjs';
 import { displayArticlesSection, displayGlitchzillaBanner } from './homePageFeatures.js';
 import { showToast } from './toastNotifications.js';
 
+let isGameStarting = false;
 let loggedInUser = null; // Mantieni aggiornato lo stato dell'utente loggato
 let currentUserProfileUnsubscribe = null; // Per il listener del profilo utente
 let notificationListener = null; // Per tenere traccia del listener delle notifiche
