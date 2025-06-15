@@ -65,8 +65,8 @@ const soundsToLoad = [
         { name: sounds.voice, path: `audio/powerups/voice/${sounds.voice}.mp3` }
     ]),
     // AGGIUNGI QUESTE DUE RIGHE ALLA FINE DELLA LISTA
-    { name: 'menuMusic', path: 'assets/audio/music_menu.ogg' }, // Sostituisci con il tuo percorso
-    { name: 'gameStart', path: 'assets/audio/sfx_start_game.ogg' } // Sostituisci con il tuo percorso
+    { name: 'menuMusic', path: 'audio/music_menu.ogg' }, // Sostituisci con il tuo percorso
+    { name: 'gameStart', path: 'audio/sfx_start_game.ogg' } // Sostituisci con il tuo percorso
 ];
     
 
@@ -1046,6 +1046,16 @@ export function launchGame() {
         startGameLoop();
     }
 }
+
+// 1. Aggiungi questa funzione di esportazione alla fine del file per fermare il loop
+export function stopGameLoop() {
+    if (gameLoopRequestId) {
+        cancelAnimationFrame(gameLoopRequestId);
+        gameLoopRequestId = null;
+        console.log('Game loop fermato.');
+    }
+}
+
 // --- Classi di Gioco ---
 class Player {
     constructor(x, y, dw, dh) {
@@ -3562,7 +3572,7 @@ function gameLoop(timestamp) {
     lastTime = timestamp;
     switch (currentGameState) {
         case GAME_STATE.MENU:
-            drawMenuScreen();
+            // Non fare NIENTE qui. Il loop continua a girare ma non disegna nulla del gioco.
             break;
         case GAME_STATE.PLAYING:
             updatePlaying(deltaTime);
@@ -3726,26 +3736,14 @@ function attachEventListeners() {
 
     // Nuovo: Event Listener per il pulsante "Torna al Menu Principale"
     if (mainMenuBtn) {
-        // **CORRETTO** usa la variabile corretta
-        mainMenuBtn.addEventListener('click', () => {
-            if (scoreInputContainerDonkey) scoreInputContainerDonkey.style.display = 'none';
-            currentGameState = GAME_STATE.MENU; // Imposta lo stato su MENU
-            resetGame(); // Resetta il gioco, ma non avviare il loop
-            AudioManager.stopMusic(); // Ferma la musica del gioco
-            // Mostra il menu principale
-            const mainMenu = document.getElementById('main-menu');
-            const gameContainerWrapper = document.getElementById('game-container-wrapper');
-            if (mainMenu) {
-                mainMenu.style.display = 'flex';
-                mainMenu.style.opacity = '1';
-                mainMenu.style.zIndex = '900';
-            }
-            if (gameContainerWrapper) {
-                gameContainerWrapper.style.display = 'none'; // Nascondi il contenitore del gioco
-            }
-            if (accountIconBtn) accountIconBtn.style.display = 'flex'; // Mostra l'icona account/login
-        });
-    }
+    mainMenuBtn.addEventListener('click', () => {
+        // Chiama la funzione globale esposta da main.js
+        if (window.returnToMainMenu) {
+            window.returnToMainMenu();
+        }
+    });
+}
+
 
     // Event Listener for the mobile Start/Restart button
     if (mobileStartButton) {

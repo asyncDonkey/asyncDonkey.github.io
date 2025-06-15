@@ -1,7 +1,7 @@
 // js/main.js
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { menuAnimation } from './menuAnimation.js';
-import { launchGame, preloadGameAssets, setupGameEngine } from './donkeyRunner.js';
+import { launchGame, stopGameLoop } from './donkeyRunner.js';
 import * as AudioManager from './audioManager.js';
 import { initLeaderboard } from './leaderboardManager.js';
 
@@ -85,6 +85,30 @@ export function showConfirmationModal(title = 'Conferma Azione', message = 'Sei 
 }
 */
 
+// Funzione centralizzata per avviare il menu (chiamata sia all'inizio sia al ritorno dal gioco)
+function initializeMenu() {
+    console.log("Inizializzazione del menu...");
+    const mainMenu = document.getElementById('main-menu');
+    if (mainMenu) mainMenu.style.display = 'flex';
+    
+    // Carica la musica del menu (con percorso corretto)
+    AudioManager.loadBackgroundMusic('audio/music_menu.ogg')
+        .then(() => {
+            AudioManager.playMusic(true);
+        }).catch(err => console.error("Errore caricamento musica menu:", err));
+
+    // Carica lo sprite per l'asinello e avvia l'animazione
+    const playerSprite = new Image();
+    playerSprite.src = 'images/asyncDonkey_walk.png';
+    playerSprite.onload = () => {
+        menuAnimation.init('menuCanvas', playerSprite);
+    };
+    playerSprite.onerror = () => {
+        console.error("Impossibile caricare lo sprite per l'animazione del menu.");
+        menuAnimation.init('menuCanvas', null); // Avvia comunque senza sprite
+    };
+}
+
 export function generateBlockieAvatar(seed, imgSize = 40, blockieOptions = {}) {
     // ... (codice invariato)
     if (typeof createIcon !== 'function') {
@@ -142,59 +166,14 @@ function traduireErroreFirebase(codiceErrore) {
 }
 
 
-
-
-
-
-// ---- LISTENER PRINCIPALE DELL'APPLICAZIONE ----
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('[Main.js] DOMContentLoaded: Inizializzazione applicazione.');
-
-    const mainMenu = document.getElementById('main-menu');
-
-    // Inizializza le parti dell'UI che non dipendono dallo stato di login
-    initLeaderboard();
-    initProfileControls();
-
-    // --- LOGICA DI TRANSIZIONE E INIZIALIZZAZIONE MENU ---
-    // Poiché loader.js gestisce la visualizzazione del menu, usiamo un
-    // MutationObserver per reagire a quando il menu diventa visibile.
-    if (mainMenu) {
-        const observer = new MutationObserver((mutationsList) => {
-            for (const mutation of mutationsList) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'style' && mainMenu.style.display === 'flex') {
-                    console.log('Main menu visibile. Inizializzo animazione e musica.');
-
-                    AudioManager.loadBackgroundMusic('assets/audio/music_menu.ogg')
-                        .then(() => AudioManager.playMusic(true));
-
-                    const playerSprite = new Image();
-                    playerSprite.src = 'images/asyncDonkey_walk.png';
-                    playerSprite.onload = () => {
-                        menuAnimation.init('menuCanvas', playerSprite);
-                    };
-                    
-                    observer.disconnect(); // Eseguito una volta, non serve più
-                    break;
-                }
-            }
-        });
-        observer.observe(mainMenu, { attributes: true });
-    }
-
-    // --- LOGICA PULSANTI MENU (SINTASSI CORRETTA E SICURA) ---
-    let isGameStarting = false;
-
-const startGameSequence = async () => { // Trasformata in funzione async
+// Funzione centralizzata per avviare il gioco
+const startGameSequence = async () => {
     if (isGameStarting) return;
     isGameStarting = true;
 
     AudioManager.playSound('gameStart');
     AudioManager.stopMusic();
 
-    // --- FIX ANIMAZIONE USCITA ---
-    // Ora attendiamo che la Promise di startExitAnimation sia risolta
-    // prima di procedere con l'avvio del gioco.
     await menuAnimation.startExitAnimation();
 
     const mainMenu = document.getElementById('main-menu');
@@ -207,10 +186,30 @@ const startGameSequence = async () => { // Trasformata in funzione async
     isGameStarting = false;
 };
 
-    // Collegamento sicuro degli event listener senza optional chaining (`?.`)
-    const startGameBtn = document.getElementById('start-game-btn');
-    if (startGameBtn) startGameBtn.addEventListener('click', startGameSequence);
 
+
+// Listener Principale dell'Applicazione
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('[Main.js] DOMContentLoaded: Inizializzazione applicazione.');
+    const mainMenu = document.getElementById('main-menu');
+    initLeaderboard();
+    initProfileControls();
+
+    if (mainMenu) {
+        const observer = new MutationObserver((mutationsList) => {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style' && mainMenu.style.display === 'flex') {
+                    initializeMenu();
+                    observer.disconnect();
+                    break;
+                }
+            }
+        });
+        observer.observe(mainMenu, { attributes: true });
+    }
+
+    // Collegamento degli event listener dei pulsanti
+    document.getElementById('start-game-btn')?.addEventListener('click', startGameSequence);
     const leaderboardBtn = document.getElementById('leaderboard-btn');
     if (leaderboardBtn) {
         leaderboardBtn.addEventListener('click', () => {
@@ -218,13 +217,7 @@ const startGameSequence = async () => { // Trasformata in funzione async
             if (leaderboardModal) leaderboardModal.style.display = 'flex';
         });
     }
-
-    const glitchpediaBtn = document.getElementById('glitchpedia-btn');
-    if (glitchpediaBtn) glitchpediaBtn.addEventListener('click', openGlitchpediaModal);
-
-    const profileBtn = document.getElementById('profile-btn');
-    if (profileBtn) profileBtn.addEventListener('click', () => openProfileModal(loggedInUser));
-
+    document.getElementById('glitchpedia-btn')?.addEventListener('click', openGlitchpediaModal);
     const showLoginModalBtn = document.getElementById('show-login-modal-btn');
     if (showLoginModalBtn) {
         showLoginModalBtn.addEventListener('click', (e) => {
@@ -232,21 +225,19 @@ const startGameSequence = async () => { // Trasformata in funzione async
             showAuthModal('login');
         });
     }
-
     const userAvatarIcon = document.getElementById('user-avatar-icon');
     if (userAvatarIcon) {
         userAvatarIcon.addEventListener('click', () => openProfileModal(loggedInUser));
     }
-
-    // Listener per il tasto Invio per avviare il gioco dal menu
     window.addEventListener('keydown', (e) => {
         if (mainMenu && e.key === 'Enter' && mainMenu.style.display === 'flex') {
-            e.preventDefault(); // Previene comportamenti di default del tasto Invio
+            e.preventDefault();
             startGameSequence();
         }
     });
 
     // --- LOGICA DI AUTENTICAZIONE (onAuthStateChanged) ---
+    // *** FIX: Aggiunto 'async' alla funzione per permettere 'await' ***
     onAuthStateChanged(auth, async (user) => {
         console.log('[Main.js] Stato autenticazione cambiato. Utente:', user ? user.uid : null);
         loggedInUser = user;
@@ -255,11 +246,11 @@ const startGameSequence = async () => { // Trasformata in funzione async
         const avatarIcon = document.getElementById('user-avatar-icon');
 
         if (user) {
-            // Utente LOGGATO
             if (loginIcon) loginIcon.style.display = 'none';
             if (avatarIcon) {
                 let photoURLToUse = generateBlockieAvatar(user.uid, 32);
                 try {
+                    // Ora 'await' è valido qui
                     const userProfileDoc = await getDoc(doc(db, 'appUsers', user.uid));
                     if (userProfileDoc.exists()) {
                         const profileData = userProfileDoc.data();
@@ -271,7 +262,6 @@ const startGameSequence = async () => { // Trasformata in funzione async
                     } else if (user.photoURL) {
                         photoURLToUse = user.photoURL;
                     }
-
                     if (photoURLToUse.startsWith('http')) {
                         photoURLToUse += `?v=${new Date().getTime()}`;
                     }
@@ -279,14 +269,23 @@ const startGameSequence = async () => { // Trasformata in funzione async
                     avatarIcon.style.display = 'block';
                 } catch (error) {
                     console.error("Errore nel recuperare il profilo utente:", error);
-                    avatarIcon.src = photoURLToUse; // Usa il blockie come fallback
+                    avatarIcon.src = generateBlockieAvatar(user.uid, 32); // Fallback
                     avatarIcon.style.display = 'block';
                 }
             }
         } else {
-            // Utente NON LOGGATO
             if (loginIcon) loginIcon.style.display = 'block';
             if (avatarIcon) avatarIcon.style.display = 'none';
         }
     });
+    
+    // Funzione globale per tornare al menu
+    window.returnToMainMenu = () => {
+        stopGameLoop();
+        const gameContainerWrapper = document.getElementById('game-container-wrapper');
+        const scoreInputContainer = document.getElementById('scoreInputContainerDonkey');
+        if (gameContainerWrapper) gameContainerWrapper.style.display = 'none';
+        if (scoreInputContainer) scoreInputContainer.style.display = 'none';
+        initializeMenu();
+    };
 });
