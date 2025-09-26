@@ -24,21 +24,43 @@
             <h2>My Projects</h2>
 
             <div class="project-card">
-                <h3>Real-Time Chat Application <span class="live-badge">Live</span></h3>
+                <h3>Real-Time Raspberry Pi Monitor <i class="fa-solid fa-microchip"></i></h3>
                 <p class="project-description">
-                A full-stack chat application built with a Python (FastAPI) backend and a vanilla JavaScript frontend. 
-                Communication happens in real-time using WebSockets. The application is deployed as a live web service on Render.
+                    A full-stack IoT project where a Raspberry Pi Zero 2 W monitors its own system metrics (CPU temperature, load, RAM usage) in real-time. 
+                    Data is securely sent to a Firebase Realtime Database using a Service Account, and the live dashboard is deployed on GitHub Pages with a secure, automated CI/CD workflow using Vite and GitHub Actions.
                 </p>
                 <div class="project-tech">
                     <span>Python</span>
-                    <span>FastAPI</span>
-                    <span>WebSockets</span>
+                    <span>Raspberry Pi</span>
+                    <span>Firebase</span>
                     <span>JavaScript</span>
-                    <span>Render</span>
+                    <span>Chart.js</span>
+                    <span>Vite</span>
+                    <span>GitHub Actions</span>
                 </div>
                 <div class="project-links">
-                    <a href="https://asynced-realtime-chat-app.onrender.com/" target="_blank" class="btn">Live Demo</a>
-                    <a href="https://github.com/asyncDonkey/realtime-chat-app" target="_blank" class="btn btn-secondary">Source Code</a>
+                    <a href="https://asyncdonkey.github.io/system-report/" target="_blank" class="btn">Live Demo</a>
+                    <a href="https://github.com/asyncDonkey/system-report" target="_blank" class="btn btn-secondary">Source Code</a>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <h3>Nuclear Energy Impact Simulator <i class="fa-solid fa-atom"></i></h3>
+                <p class="project-description">
+                    A data-driven web application that simulates the economic impact of introducing nuclear power into Italy's energy mix. 
+                    The backend, a Python script running on a daily cron job via GitHub Actions, fetches and processes generation/load data from the official ENTSO-E European API, performs a simulation using Pandas, and stores the results in Firebase Firestore.
+                </p>
+                <div class="project-tech">
+                    <span>Python</span>
+                    <span>Pandas</span>
+                    <span>Firebase (Firestore)</span>
+                    <span>REST APIs</span>
+                    <span>GitHub Actions</span>
+                    <span>IaC</span>
+                </div>
+                <div class="project-links">
+                    <a href="https://asyncdonkey.github.io/EnergyMonitorItalia-nuclear/" target="_blank" class="btn">Live Demo</a>
+                    <a href="https://github.com/asyncDonkey/EnergyMonitorItalia-nuclear" target="_blank" class="btn btn-secondary">Source Code</a>
                 </div>
             </div>
 
@@ -58,6 +80,25 @@
                 <div class="project-links">
                     <a href="https://asyncDonkey.github.io/gcp-terraform-server/docs.html" target="_blank" class="btn">View Documentation</a>
                     <a href="https://github.com/asyncDonkey/gcp-terraform-server" target="_blank" class="btn btn-secondary">Source Code</a>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <h3>Real-Time Chat Application <span class="live-badge">Live</span></h3>
+                <p class="project-description">
+                A full-stack chat application built with a Python (FastAPI) backend and a vanilla JavaScript frontend. 
+                Communication happens in real-time using WebSockets. The application is deployed as a live web service on Render.
+                </p>
+                <div class="project-tech">
+                    <span>Python</span>
+                    <span>FastAPI</span>
+                    <span>WebSockets</span>
+                    <span>JavaScript</span>
+                    <span>Render</span>
+                </div>
+                <div class="project-links">
+                    <a href="https://asynced-realtime-chat-app.onrender.com/" target="_blank" class="btn">Live Demo</a>
+                    <a href="https://github.com/asyncDonkey/realtime-chat-app" target="_blank" class="btn btn-secondary">Source Code</a>
                 </div>
             </div>
             
